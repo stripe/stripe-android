@@ -1,16 +1,17 @@
 package com.stripe.android
 
 import android.content.Intent
-import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.core.os.bundleOf
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.view.AuthActivityStarter
-import kotlinx.android.parcel.Parceler
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parceler
+import kotlinx.parcelize.Parcelize
 
 internal interface PaymentController {
     /**
@@ -31,7 +32,8 @@ internal interface PaymentController {
     fun startAuth(
         host: AuthActivityStarter.Host,
         clientSecret: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        type: StripeIntentType
     )
 
     fun startAuthenticateSource(
@@ -102,6 +104,11 @@ internal interface PaymentController {
         callback: ApiResultCallback<PaymentIntentResult>
     )
 
+    enum class StripeIntentType {
+        PaymentIntent,
+        SetupIntent
+    }
+
     /**
      * Represents the result of a [PaymentController] operation.
      *
@@ -121,11 +128,7 @@ internal interface PaymentController {
         internal val stripeAccountId: String? = null
     ) : Parcelable {
         @JvmSynthetic
-        fun toBundle(): Bundle {
-            return Bundle().also {
-                it.putParcelable(EXTRA, this)
-            }
-        }
+        fun toBundle() = bundleOf(EXTRA to this)
 
         internal companion object : Parceler<Result> {
             override fun create(parcel: Parcel): Result {

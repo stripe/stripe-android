@@ -1,10 +1,10 @@
 package com.stripe.android.model
 
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.json.JSONArray
-import org.json.JSONObject
 
 /**
  * Test class for [StripeJsonUtils].
@@ -103,7 +103,8 @@ class StripeJsonUtilsTest {
                     "innermost_key" to 1000,
                     "second_innermost_key" to "second_inner_value"
                 ),
-                "second_inner_key" to "just a value"),
+                "second_inner_key" to "just a value"
+            ),
             "second_outer_key" to mapOf("another_inner_key" to false)
         )
 

@@ -1,19 +1,10 @@
 package com.stripe.android.model
 
-import kotlinx.android.parcel.Parcelize
+import com.stripe.android.cards.Bin
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CardMetadata internal constructor(
-    val binPrefix: String,
+    val bin: Bin,
     val accountRanges: List<AccountRange>
-) : StripeModel {
-
-    @Parcelize
-    internal data class AccountRange internal constructor(
-        val accountRangeHigh: String,
-        val accountRangeLow: String,
-        val panLength: Int,
-        val brand: String,
-        val country: String
-    ) : StripeModel
-}
+) : StripeModel

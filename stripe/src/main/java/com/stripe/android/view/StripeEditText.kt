@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.text.Editable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -12,15 +11,16 @@ import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -33,10 +33,9 @@ open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
-    workDispatcher: CoroutineContext = Dispatchers.IO
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : TextInputEditText(context, attrs, defStyleAttr) {
     internal val job = Job()
-    private val workScope: CoroutineScope = CoroutineScope(workDispatcher + job)
 
     protected var isLastKeyDelete: Boolean = false
 
@@ -167,7 +166,7 @@ open class StripeEditText @JvmOverloads constructor(
      * @param delayMilliseconds a delay period, measured in milliseconds
      */
     fun setHintDelayed(hint: CharSequence, delayMilliseconds: Long) {
-        workScope.launch {
+        CoroutineScope(workContext).launch {
             delay(delayMilliseconds)
 
             withContext(Dispatchers.Main) {
@@ -183,8 +182,6 @@ open class StripeEditText @JvmOverloads constructor(
     private fun setHintSafely(hint: CharSequence) {
         runCatching {
             setHint(hint)
-        }.recover {
-            it
         }
     }
 
@@ -215,11 +212,9 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : StripeTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                afterTextChangedListener?.onTextChanged(s?.toString().orEmpty())
-            }
-        })
+        doAfterTextChanged { editable ->
+            afterTextChangedListener?.onTextChanged(editable?.toString().orEmpty())
+        }
     }
 
     private fun listenForDeleteEmpty() {
@@ -237,15 +232,15 @@ open class StripeEditText @JvmOverloads constructor(
         return keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN
     }
 
-    interface DeleteEmptyListener {
+    fun interface DeleteEmptyListener {
         fun onDeleteEmpty()
     }
 
-    interface AfterTextChangedListener {
+    fun interface AfterTextChangedListener {
         fun onTextChanged(text: String)
     }
 
-    interface ErrorMessageListener {
+    fun interface ErrorMessageListener {
         fun displayErrorMessage(message: String?)
     }
 

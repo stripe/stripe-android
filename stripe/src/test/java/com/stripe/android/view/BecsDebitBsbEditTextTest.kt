@@ -1,15 +1,22 @@
 package com.stripe.android.view
 
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Test
+import com.stripe.android.R
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class BecsDebitBsbEditTextTest {
 
-    private val bsbEditText = BecsDebitBsbEditText(ApplicationProvider.getApplicationContext())
+    private val bsbEditText = BecsDebitBsbEditText(
+        ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext(),
+            R.style.StripeDefaultTheme
+        )
+    )
 
     @Test
     fun onCompletedCallback_isCalled() {
@@ -39,6 +46,13 @@ class BecsDebitBsbEditTextTest {
         bsbEditText.setText("212121")
         assertThat(bsbEditText.bsb)
             .isEqualTo("212121")
+    }
+
+    @Test
+    fun `field should remove non-digits from input`() {
+        bsbEditText.setText("212.121")
+        assertThat(bsbEditText.fieldText)
+            .isEqualTo("212-121")
     }
 
     @Test

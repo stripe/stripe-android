@@ -41,14 +41,17 @@ class StripeTextUtilsTest {
 
     @Test
     fun removeSpacesAndHyphens_withHyphenatedCardNumber_returnsCardNumber() {
-        assertThat(StripeTextUtils.removeSpacesAndHyphens("4242-4242-4242-4242")
+        assertThat(
+            StripeTextUtils.removeSpacesAndHyphens("4242-4242-4242-4242")
         ).isEqualTo(CardNumberFixtures.VISA_NO_SPACES)
     }
 
     @Test
     fun removeSpacesAndHyphens_removesMultipleSpacesAndHyphens() {
-        assertThat(StripeTextUtils
-            .removeSpacesAndHyphens(" -    1-  --- 2   3- - - -------- "))
+        assertThat(
+            StripeTextUtils
+                .removeSpacesAndHyphens(" -    1-  --- 2   3- - - -------- ")
+        )
             .isEqualTo("123")
     }
 }

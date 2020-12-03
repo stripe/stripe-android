@@ -4,8 +4,8 @@ import androidx.annotation.StringDef
 import com.stripe.android.model.Source.Flow
 import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.parsers.SourceJsonParser
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import org.json.JSONObject
 
 /**
@@ -66,7 +66,10 @@ data class Source internal constructor(
     /**
      * Set of key-value pairs that you can attach to an object. This can be useful for storing
      * additional information about the object in a structured format.
+     *
+     * @deprecated Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.
      */
+    @Deprecated("Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.")
     val metaData: Map<String, String>? = null,
 
     /**
@@ -157,10 +160,12 @@ data class Source internal constructor(
         }
 
     @Retention(AnnotationRetention.SOURCE)
-    @StringDef(SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE, SourceType.GIROPAY,
+    @StringDef(
+        SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE, SourceType.GIROPAY,
         SourceType.SEPA_DEBIT, SourceType.IDEAL, SourceType.SOFORT, SourceType.BANCONTACT,
         SourceType.P24, SourceType.EPS, SourceType.MULTIBANCO, SourceType.WECHAT, SourceType.KLARNA,
-        SourceType.UNKNOWN)
+        SourceType.UNKNOWN
+    )
     annotation class SourceType {
         companion object {
             const val ALIPAY: String = "alipay"

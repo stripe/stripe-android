@@ -6,7 +6,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
@@ -72,7 +71,7 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         viewModel.paymentSessionDataResult.observe(
             this,
-            Observer { result ->
+            { result ->
                 result.fold(
                     onSuccess = {
                         onPaymentSessionDataChanged(it)
@@ -85,7 +84,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         )
         viewModel.customerResult.observe(
             this,
-            Observer { result ->
+            { result ->
                 result.fold(
                     onSuccess = {
                         onCustomerRetrieved()
@@ -99,7 +98,7 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         viewModel.isProcessing.observe(
             this,
-            Observer { isCommunicating ->
+            { isCommunicating ->
                 when (isCommunicating) {
                     true -> disableUi()
                     false -> enableUi()
@@ -120,6 +119,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         return PaymentSession(
             activity = this,
             config = PaymentSessionConfig.Builder()
+                .setPaymentMethodsFooter(R.layout.add_payment_method_footer)
                 .setAddPaymentMethodFooter(R.layout.add_payment_method_footer)
                 .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
                 .setHiddenShippingInfoFields()
@@ -247,16 +247,24 @@ class PaymentSessionActivity : AppCompatActivity() {
 
     private class ShippingInformationValidator : PaymentSessionConfig.ShippingInformationValidator {
         override fun isValid(shippingInformation: ShippingInformation): Boolean {
-            return shippingInformation.address?.country == Locale.US.country
+            return setOf(Locale.US.country, Locale.CANADA.country)
+                .contains(shippingInformation.address?.country.orEmpty())
         }
 
         override fun getErrorMessage(shippingInformation: ShippingInformation): String {
-            return "The country must be US."
+            return "The country must be US or Canada."
         }
     }
 
     private class ShippingMethodsFactory : PaymentSessionConfig.ShippingMethodsFactory {
-        override fun create(shippingInformation: ShippingInformation) = SHIPPING_METHODS
+        override fun create(
+            shippingInformation: ShippingInformation
+        ): List<ShippingMethod> {
+            return when (shippingInformation.address?.country) {
+                "CA" -> SHIPPING_METHODS_CA
+                else -> SHIPPING_METHODS_US
+            }
+        }
     }
 
     private fun hideProgressBar() {
@@ -328,14 +336,30 @@ class PaymentSessionActivity : AppCompatActivity() {
             "(555) 555-5555"
         )
 
-        private val SHIPPING_METHODS = listOf(
+        private val SHIPPING_METHODS_CA = listOf(
             ShippingMethod(
-                "UPS Ground", "ups-ground",
-                599, "USD", "Arrives in 3-5 days"
+                "Canada Post",
+                "canada-post",
+                599,
+                "CAD",
+                "Arrives in 3-5 days"
+            )
+        )
+
+        private val SHIPPING_METHODS_US = listOf(
+            ShippingMethod(
+                "UPS Ground",
+                "ups-ground",
+                599,
+                "USD",
+                "Arrives in 3-5 days"
             ),
             ShippingMethod(
-                "FedEx Overnight", "fedex",
-                1499, "USD", "Arrives tomorrow"
+                "FedEx Overnight",
+                "fedex",
+                1499,
+                "USD",
+                "Arrives tomorrow"
             )
         )
     }

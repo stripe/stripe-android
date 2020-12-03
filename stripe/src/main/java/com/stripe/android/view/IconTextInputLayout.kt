@@ -14,7 +14,7 @@ import java.lang.reflect.Method
  * a DrawableLeft, instead of just straight up beside it. If the Material Components library ever
  * officially support this behavior, this class should be removed to avoid Reflection.
  */
-class IconTextInputLayout @JvmOverloads constructor(
+open class IconTextInputLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.textInputStyle
@@ -24,23 +24,28 @@ class IconTextInputLayout @JvmOverloads constructor(
     private val recalculateMethod: Method?
 
     init {
-        /*
+        /**
          * Note: this method will break if we upgrade our version of the library
          * and the variable and method names change. We should remove usage of reflection
          * at the first opportunity.
          */
         collapsingTextHelper = ClassUtils.getInternalObject(
-            TextInputLayout::class.java, TEXT_FIELD_NAMES, this
+            TextInputLayout::class.java,
+            TEXT_FIELD_NAMES,
+            this
         )
         if (collapsingTextHelper == null) {
             bounds = null
             recalculateMethod = null
         } else {
             bounds = ClassUtils.getInternalObject(
-                collapsingTextHelper.javaClass, BOUNDS_FIELD_NAMES, collapsingTextHelper
+                collapsingTextHelper.javaClass,
+                BOUNDS_FIELD_NAMES,
+                collapsingTextHelper
             ) as Rect?
             recalculateMethod = ClassUtils.findMethod(
-                collapsingTextHelper.javaClass, RECALCULATE_METHOD_NAMES
+                collapsingTextHelper.javaClass,
+                RECALCULATE_METHOD_NAMES
             )
         }
     }
@@ -53,7 +58,8 @@ class IconTextInputLayout @JvmOverloads constructor(
     private fun adjustBounds() {
         val editText = editText
         if (collapsingTextHelper == null || bounds == null || recalculateMethod == null ||
-            editText == null) {
+            editText == null
+        ) {
             return
         }
 

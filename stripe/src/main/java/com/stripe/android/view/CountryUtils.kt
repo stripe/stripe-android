@@ -18,6 +18,12 @@ internal object CountryUtils {
         }
 
     @JvmSynthetic
+    fun getDisplayCountry(
+        countryCode: String
+    ): String = getCountryByCode(countryCode)?.name
+        ?: Locale("", countryCode).displayCountry
+
+    @JvmSynthetic
     internal fun getCountryByName(countryName: String): Country? {
         return COUNTRIES.firstOrNull { it.name == countryName }
     }

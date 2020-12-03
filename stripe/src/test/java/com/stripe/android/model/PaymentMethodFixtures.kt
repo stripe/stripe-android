@@ -1,9 +1,9 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
-import org.json.JSONObject
 
 internal object PaymentMethodFixtures {
     val CARD = PaymentMethod.Card(
@@ -45,8 +45,7 @@ internal object PaymentMethodFixtures {
         type = PaymentMethod.Type.Card,
         customerId = "cus_AQsHpvKfKwJDrF",
         billingDetails = BILLING_DETAILS,
-        card = CARD,
-        metadata = mapOf("order_id" to "123456789")
+        card = CARD
     )
 
     val FPX_PAYMENT_METHOD = PaymentMethod(
@@ -75,8 +74,7 @@ internal object PaymentMethodFixtures {
             bsbNumber = "000000",
             fingerprint = "lm7qI5V7PUkWUM7E",
             last4 = "3456"
-        ),
-        metadata = emptyMap()
+        )
     )
 
     val BACS_DEBIT_PAYMENT_METHOD = PaymentMethod(
@@ -89,8 +87,7 @@ internal object PaymentMethodFixtures {
             fingerprint = "UkSG0Hf",
             last4 = "2345",
             sortCode = "108800"
-        ),
-        metadata = emptyMap()
+        )
     )
 
     val SEPA_DEBIT_JSON = JSONObject(
@@ -136,9 +133,7 @@ internal object PaymentMethodFixtures {
                 "created": 1550757934255,
                 "customer": "cus_AQsHpvKfKwJDrF",
                 "livemode": true,
-                "metadata": {
-                    "order_id": "123456789"
-                },
+                "metadata": null,
                 "type": "card",
                 "billing_details": {
                     "address": {
@@ -168,7 +163,7 @@ internal object PaymentMethodFixtures {
                     }
                 }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
     internal val CARD_WITH_NETWORKS_JSON = JSONObject(
@@ -249,7 +244,7 @@ internal object PaymentMethodFixtures {
                     "bic": "bank id"
                 }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
     val FPX_JSON = JSONObject(
@@ -280,7 +275,7 @@ internal object PaymentMethodFixtures {
                 "metadata": null,
                 "type": "fpx"
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
     val AU_BECS_DEBIT_JSON = JSONObject(
@@ -309,7 +304,7 @@ internal object PaymentMethodFixtures {
             "created": 1583356750,
             "customer": null,
             "livemode": false,
-            "metadata": {},
+            "metadata": null,
             "type": "au_becs_debit"
         }
         """.trimIndent()
@@ -341,7 +336,7 @@ internal object PaymentMethodFixtures {
             "created": 1585588648,
             "customer": null,
             "livemode": false,
-            "metadata": {},
+            "metadata": null,
             "type": "bacs_debit"
         }
         """.trimIndent()
@@ -410,5 +405,14 @@ internal object PaymentMethodFixtures {
             origin = paymentMethod.created!!
             paymentMethod
         }
+    }
+
+    fun createPaymentMethod(type: PaymentMethod.Type): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_123",
+            type = type,
+            created = ThreadLocalRandom.current().nextLong(1L, 10000000L),
+            liveMode = false
+        )
     }
 }

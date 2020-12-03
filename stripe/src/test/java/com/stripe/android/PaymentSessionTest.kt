@@ -20,7 +20,11 @@ import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.BillingAddressFields
@@ -28,25 +32,25 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
-/**
- * Test class for [PaymentSession]
- */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val ephemeralKeyProvider = TestEphemeralKeyProvider()
 
-    private val paymentSessionListener: PaymentSession.PaymentSessionListener = mock()
-    private val customerSession: CustomerSession = mock()
+    private val paymentSessionListener = mock<PaymentSession.PaymentSessionListener>()
+    private val customerSession = mock<CustomerSession>()
     private val paymentMethodsActivityStarter:
         ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> = mock()
     private val paymentFlowActivityStarter:
@@ -69,10 +73,14 @@ class PaymentSessionTest {
     fun init_addsPaymentSessionToken_andFetchesCustomer() {
         CustomerSession.instance = customerSession
         createActivity { activity ->
-            val paymentSession = PaymentSession(activity, DEFAULT_CONFIG.copy(
-                shouldPrefetchCustomer = true
-            ))
+            val paymentSession = PaymentSession(
+                activity,
+                DEFAULT_CONFIG.copy(
+                    shouldPrefetchCustomer = true
+                )
+            )
             paymentSession.init(paymentSessionListener)
+            idleLooper()
 
             verify(customerSession).retrieveCurrentCustomer(
                 productUsageArgumentCaptor.capture(),
@@ -94,6 +102,8 @@ class PaymentSessionTest {
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
+            idleLooper()
+
             verify(paymentSessionListener)
                 .onCommunicatingStateChanged(true)
             verify(paymentSessionListener)
@@ -114,8 +124,10 @@ class PaymentSessionTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
             val handled = paymentSession.handlePaymentData(
-                PaymentMethodsActivityStarter.REQUEST_CODE, RESULT_OK,
-                Intent().putExtras(result.toBundle()))
+                PaymentMethodsActivityStarter.REQUEST_CODE,
+                RESULT_OK,
+                Intent().putExtras(result.toBundle())
+            )
             assertThat(handled).isTrue()
 
             verify(paymentSessionListener)
@@ -139,8 +151,10 @@ class PaymentSessionTest {
                 useGooglePay = true
             )
             val handled = paymentSession.handlePaymentData(
-                PaymentMethodsActivityStarter.REQUEST_CODE, RESULT_OK,
-                Intent().putExtras(result.toBundle()))
+                PaymentMethodsActivityStarter.REQUEST_CODE,
+                RESULT_OK,
+                Intent().putExtras(result.toBundle())
+            )
             assertThat(handled).isTrue()
 
             verify(paymentSessionListener)
@@ -273,11 +287,13 @@ class PaymentSessionTest {
     fun handlePaymentData_withPaymentMethodsActivityRequestCodeAndCanceledResult_doesNotRetrieveCustomer() {
         createActivity {
             val paymentSession = createPaymentSession(it)
-            assertThat(paymentSession.handlePaymentData(
-                PaymentMethodsActivityStarter.REQUEST_CODE,
-                RESULT_CANCELED,
-                Intent()
-            )).isFalse()
+            assertThat(
+                paymentSession.handlePaymentData(
+                    PaymentMethodsActivityStarter.REQUEST_CODE,
+                    RESULT_CANCELED,
+                    Intent()
+                )
+            ).isFalse()
             verify(customerSession, never()).retrieveCurrentCustomer(any())
         }
     }
@@ -286,8 +302,13 @@ class PaymentSessionTest {
     fun handlePaymentData_withPaymentFlowActivityRequestCodeAndCanceledResult_retrievesCustomer() {
         createActivity {
             val paymentSession = createPaymentSession(it)
-            assertThat(paymentSession.handlePaymentData(PaymentFlowActivityStarter.REQUEST_CODE,
-                RESULT_CANCELED, Intent())).isFalse()
+            assertThat(
+                paymentSession.handlePaymentData(
+                    PaymentFlowActivityStarter.REQUEST_CODE,
+                    RESULT_CANCELED,
+                    Intent()
+                )
+            ).isFalse()
             verify(customerSession).retrieveCurrentCustomer(
                 eq(setOf(PaymentSession.PRODUCT_TOKEN)),
                 any()
@@ -322,7 +343,7 @@ class PaymentSessionTest {
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
-            workDispatcher = Dispatchers.Main,
+            workContext = testDispatcher,
             ephemeralKeyManagerFactory = EphemeralKeyManager.Factory.Default(
                 keyProvider = ephemeralKeyProvider,
                 shouldPrefetchEphemeralKey = true
@@ -344,14 +365,14 @@ class PaymentSessionTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override fun createPaymentMethod(
+        override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): PaymentMethod {
             return PaymentMethodFixtures.CARD_PAYMENT_METHOD
         }
 
-        override fun setDefaultCustomerSource(
+        override suspend fun setDefaultCustomerSource(
             customerId: String,
             publishableKey: String,
             productUsageTokens: Set<String>,
@@ -362,7 +383,7 @@ class PaymentSessionTest {
             return SECOND_CUSTOMER
         }
 
-        override fun retrieveCustomer(
+        override suspend fun retrieveCustomer(
             customerId: String,
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options

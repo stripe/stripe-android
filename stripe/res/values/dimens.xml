@@ -47,4 +47,22 @@
     <dimen name="card_brand_spinner_image_height">21dp</dimen>
     <dimen name="card_brand_spinner_dropdown_padding">20dp</dimen>
     <dimen name="card_brand_spinner_dropdown_drawable_padding">5dp</dimen>
+
+    <dimen name="stripe_card_widget_progress_size">12dp</dimen>
+
+    <!-- PaymentSheet -->
+    <dimen name="stripe_paymentsheet_padding_top">12dp</dimen>
+    <dimen name="stripe_paymentsheet_paymentmethod_icon_height">59dp</dimen>
+    <dimen name="stripe_paymentsheet_paymentmethod_icon_width">88dp</dimen>
+    <dimen name="stripe_paymentsheet_paymentmethod_icon_radius">6dp</dimen>
+    <dimen name="stripe_paymentsheet_outer_spacing">10dp</dimen>
+    <dimen name="stripe_paymentsheet_buybutton_corner_radius">6dp</dimen>
+    <dimen name="stripe_paymentsheet_buybutton_icon_size">20dp</dimen>
+    <dimen name="stripe_paymentsheet_buybutton_check_padding">5dp</dimen>
+    <dimen name="stripe_paymentsheet_buybutton_icon_padding">8dp</dimen>
+    <dimen name="stripe_paymentsheet_form_border_width">1dp</dimen>
+    <dimen name="stripe_paymentsheet_form_corner_radius">6dp</dimen>
+
+    <dimen name="stripe_card_number_text_input_layout_progress_start_margin">25dp</dimen>
+    <dimen name="stripe_card_number_text_input_layout_progress_top_margin">10dp</dimen>
 </resources>

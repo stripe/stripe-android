@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.os.Build
-import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.method.DigitsKeyListener
@@ -10,6 +9,7 @@ import android.text.method.TextKeyListener
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import java.util.regex.Pattern
@@ -45,11 +45,9 @@ open class PostalCodeEditText @JvmOverloads constructor(
         setErrorMessage(resources.getString(R.string.invalid_zip))
         maxLines = 1
 
-        addTextChangedListener(object : StripeTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                shouldShowError = false
-            }
-        })
+        doAfterTextChanged {
+            shouldShowError = false
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE)

@@ -7,7 +7,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
@@ -46,7 +45,7 @@ class CustomerSessionActivity : AppCompatActivity() {
         viewBinding.progressBar.visibility = View.VISIBLE
         viewModel.retrieveCustomer().observe(
             this,
-            Observer {
+            {
                 viewBinding.progressBar.visibility = View.INVISIBLE
                 viewBinding.selectPaymentMethodButton.isEnabled = it.isSuccess
 
@@ -86,7 +85,7 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun buildCardString(data: PaymentMethod.Card): String {
-        return getString(R.string.ending_in, data.brand, data.last4)
+        return getString(R.string.card_ending_in, data.brand, data.last4)
     }
 
     internal class ActivityViewModel : ViewModel() {

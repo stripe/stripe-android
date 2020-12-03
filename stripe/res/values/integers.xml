@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="stripe_card_widget_progress_fade_in_duration">600</integer>
+    <integer name="stripe_card_widget_progress_fade_out_duration">300</integer>
+</resources>

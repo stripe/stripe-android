@@ -24,17 +24,19 @@ internal class ViewWidthAnimator(
                     }
                 }
 
-                it.addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        super.onAnimationEnd(animation)
+                it.addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            super.onAnimationEnd(animation)
 
-                        view.layoutParams = view.layoutParams.also { layoutParams ->
-                            layoutParams.width = endWidth
+                            view.layoutParams = view.layoutParams.also { layoutParams ->
+                                layoutParams.width = endWidth
+                            }
+
+                            onAnimationEnd()
                         }
-
-                        onAnimationEnd()
                     }
-                })
+                )
             }.start()
     }
 }

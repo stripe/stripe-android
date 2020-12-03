@@ -484,8 +484,10 @@ class PaymentAuthConfig private constructor(
                 buttonCustomization: Stripe3ds2ButtonCustomization,
                 buttonType: ButtonType
             ): Builder = apply {
-                uiCustomization.setButtonCustomization(buttonCustomization.buttonCustomization,
-                    getUiButtonType(buttonType))
+                uiCustomization.setButtonCustomization(
+                    buttonCustomization.buttonCustomization,
+                    getUiButtonType(buttonType)
+                )
             }
 
             /**

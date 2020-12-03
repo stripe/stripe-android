@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
+import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.junit.Test
 
 class SourceJsonParserTest {
 

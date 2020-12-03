@@ -72,15 +72,15 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 address = json.optJSONObject(FIELD_ADDRESS)?.let {
                     AddressJsonParser().parse(it)
                 },
-                email = StripeJsonUtils.optString(json, FIELD_EMAIL),
-                name = StripeJsonUtils.optString(json, FIELD_NAME),
-                phone = StripeJsonUtils.optString(json, FIELD_PHONE),
+                email = optString(json, FIELD_EMAIL),
+                name = optString(json, FIELD_NAME),
+                phone = optString(json, FIELD_PHONE),
                 verifiedAddress = json.optJSONObject(FIELD_VERIFIED_ADDRESS)?.let {
                     AddressJsonParser().parse(it)
                 },
-                verifiedEmail = StripeJsonUtils.optString(json, FIELD_VERIFIED_EMAIL),
-                verifiedName = StripeJsonUtils.optString(json, FIELD_VERIFIED_NAME),
-                verifiedPhone = StripeJsonUtils.optString(json, FIELD_VERIFIED_PHONE)
+                verifiedEmail = optString(json, FIELD_VERIFIED_EMAIL),
+                verifiedName = optString(json, FIELD_VERIFIED_NAME),
+                verifiedPhone = optString(json, FIELD_VERIFIED_PHONE)
             )
         }
 
@@ -151,7 +151,8 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
         private const val VALUE_CARD = "card"
 
         private val MODELED_TYPES = setOf(
-            Source.SourceType.CARD, Source.SourceType.SEPA_DEBIT
+            Source.SourceType.CARD,
+            Source.SourceType.SEPA_DEBIT
         )
 
         private const val FIELD_ID: String = "id"
@@ -163,7 +164,6 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
         private const val FIELD_CURRENCY: String = "currency"
         private const val FIELD_FLOW: String = "flow"
         private const val FIELD_LIVEMODE: String = "livemode"
-        private const val FIELD_METADATA: String = "metadata"
         private const val FIELD_OWNER: String = "owner"
         private const val FIELD_RECEIVER: String = "receiver"
         private const val FIELD_REDIRECT: String = "redirect"
@@ -213,9 +213,6 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 currency = optString(jsonObject, FIELD_CURRENCY),
                 flow = Source.Flow.fromCode(optString(jsonObject, FIELD_FLOW)),
                 isLiveMode = jsonObject.optBoolean(FIELD_LIVEMODE),
-                metaData = StripeJsonUtils.jsonObjectToStringMap(
-                    jsonObject.optJSONObject(FIELD_METADATA)
-                ),
                 owner = optStripeJsonModel(jsonObject, FIELD_OWNER),
                 receiver = optStripeJsonModel(jsonObject, FIELD_RECEIVER),
                 redirect = optStripeJsonModel(jsonObject, FIELD_REDIRECT),

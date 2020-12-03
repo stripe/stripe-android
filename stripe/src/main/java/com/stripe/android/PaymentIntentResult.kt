@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.model.PaymentIntent
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A model representing the result of a [PaymentIntent] confirmation via [Stripe.confirmPayment]
@@ -10,5 +10,6 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class PaymentIntentResult internal constructor(
     override val intent: PaymentIntent,
-    @Outcome private val outcomeFromFlow: Int = 0
+    @Outcome private val outcomeFromFlow: Int = 0,
+    val failureMessage: String? = null
 ) : StripeIntentResult<PaymentIntent>(outcomeFromFlow)

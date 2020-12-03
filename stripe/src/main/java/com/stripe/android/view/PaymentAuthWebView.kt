@@ -5,7 +5,6 @@ import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
@@ -46,7 +45,6 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
     ) {
         val webViewClient = PaymentAuthWebViewClient(
             activity,
-            activity.packageManager,
             logger,
             progressBar,
             clientSecret,
@@ -110,7 +108,6 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
 
     internal class PaymentAuthWebViewClient(
         private val activity: Activity,
-        private val packageManager: PackageManager,
         private val logger: Logger,
         private val progressBar: ProgressBar,
         private val clientSecret: String,
@@ -144,12 +141,12 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             progressBar.visibility = View.GONE
         }
 
-        private fun isAuthenticateUrl(url: String) = isWhiteListedUrl(url, AUTHENTICATE_URLS)
+        private fun isAuthenticateUrl(url: String) = isAllowedUrl(url, AUTHENTICATE_URLS)
 
-        private fun isCompletionUrl(url: String) = isWhiteListedUrl(url, COMPLETION_URLS)
+        private fun isCompletionUrl(url: String) = isAllowedUrl(url, COMPLETION_URLS)
 
-        private fun isWhiteListedUrl(url: String, whitelistedUrls: Set<String>): Boolean {
-            for (completionUrl in whitelistedUrls) {
+        private fun isAllowedUrl(url: String, allowedUrls: Set<String>): Boolean {
+            for (completionUrl in allowedUrls) {
                 if (url.startsWith(completionUrl)) {
                     return true
                 }
@@ -184,22 +181,29 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             logger.debug("PaymentAuthWebViewClient#openIntentScheme()")
             runCatching {
                 openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
-            }.recover {
+            }.onFailure {
                 onAuthCompleted()
             }
         }
 
+        /**
+         * See https://developer.android.com/training/basics/intents/package-visibility-use-cases
+         * for more details on app-to-app interaction.
+         */
         private fun openIntent(intent: Intent) {
             logger.debug("PaymentAuthWebViewClient#openIntent()")
-            if (intent.resolveActivity(packageManager) != null) {
+
+            runCatching {
                 activity.startActivity(intent)
-            } else if (intent.scheme != "alipays") {
-                // complete auth if the deep-link can't be opened unless it is Alipay.
-                // The Alipay web view tries to open the Alipay app as soon as it is opened
-                // irrespective of whether or not the app is installed.
-                // If this intent fails to resolve, we should still let the user
-                // continue on the mobile site.
-                onAuthCompleted()
+            }.onFailure {
+                if (intent.scheme != "alipays") {
+                    // complete auth if the deep-link can't be opened unless it is Alipay.
+                    // The Alipay web view tries to open the Alipay app as soon as it is opened
+                    // irrespective of whether or not the app is installed.
+                    // If this intent fails to resolve, we should still let the user
+                    // continue on the mobile site.
+                    onAuthCompleted()
+                }
             }
         }
 

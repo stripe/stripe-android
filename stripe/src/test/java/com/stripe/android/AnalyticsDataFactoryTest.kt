@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -7,13 +8,17 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
+import com.stripe.android.networking.AnalyticsDataFactory
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.RequestId
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [AnalyticsDataFactory].
@@ -21,9 +26,10 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsDataFactoryTest {
     private val packageManager = mock<PackageManager>()
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private val analyticsDataFactory = AnalyticsDataFactory(
-        ApplicationProvider.getApplicationContext(),
+        context,
         API_KEY
     )
 
@@ -34,7 +40,8 @@ class AnalyticsDataFactoryTest {
 
         val params = analyticsDataFactory.createTokenCreationParams(
             ATTRIBUTION,
-            Token.Type.Pii
+            Token.Type.Pii,
+            REQUEST_ID
         )
         // Size is SIZE-1 because tokens don't have a source_type field
         assertThat(params)
@@ -51,7 +58,8 @@ class AnalyticsDataFactoryTest {
 
         val params = analyticsDataFactory.createTokenCreationParams(
             ATTRIBUTION,
-            Token.Type.CvcUpdate
+            Token.Type.CvcUpdate,
+            REQUEST_ID
         )
         // Size is SIZE-1 because tokens don't have a source_type field
         assertThat(params)
@@ -64,58 +72,63 @@ class AnalyticsDataFactoryTest {
     fun getSourceCreationParams_withValidInput_createsCorrectMap() {
         val loggingParams = analyticsDataFactory.createSourceCreationParams(
             Source.SourceType.SEPA_DEBIT,
-            ATTRIBUTION
+            ATTRIBUTION,
+            REQUEST_ID
         )
 
         // Size is SIZE-1 because tokens don't have a token_type field
         assertThat(loggingParams)
             .hasSize(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 1)
 
-        assertEquals(Source.SourceType.SEPA_DEBIT,
-            loggingParams[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
+        assertEquals(
+            Source.SourceType.SEPA_DEBIT,
+            loggingParams[AnalyticsDataFactory.FIELD_SOURCE_TYPE]
+        )
         assertEquals(API_KEY, loggingParams[AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY])
         assertEquals(
             AnalyticsEvent.SourceCreate.toString(),
             loggingParams[AnalyticsDataFactory.FIELD_EVENT]
         )
-        assertEquals(AnalyticsDataFactory.ANALYTICS_UA,
-            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
+        assertEquals(
+            AnalyticsDataFactory.ANALYTICS_UA,
+            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA]
+        )
     }
 
     @Test
     fun getPaymentMethodCreationParams() {
-        val expectedParams = mapOf(
-            "analytics_ua" to "analytics.stripe_android-1.0",
-            "event" to "stripe_android.payment_method_creation",
-            "publishable_key" to "pk_abc123",
-            "os_name" to "REL",
-            "os_release" to "9",
-            "os_version" to 28,
-            "device_type" to "unknown_Android_robolectric",
-            "bindings_version" to BuildConfig.VERSION_NAME,
-            "app_name" to "com.stripe.android.test",
-            "app_version" to 0,
-            "product_usage" to ATTRIBUTION.toList(),
-            "source_type" to "card",
-            "payment_method_id" to "pm_12345"
-        )
-
-        val actualParams = analyticsDataFactory
-            .createPaymentMethodCreationParams(
-                "pm_12345",
-                PaymentMethod.Type.Card,
-                ATTRIBUTION
+        assertThat(
+            analyticsDataFactory
+                .createPaymentMethodCreationParams(
+                    PaymentMethodCreateParams.Type.Card,
+                    ATTRIBUTION,
+                    REQUEST_ID
+                )
+        ).isEqualTo(
+            mapOf(
+                "analytics_ua" to "analytics.stripe_android-1.0",
+                "event" to "stripe_android.payment_method_creation",
+                "publishable_key" to "pk_abc123",
+                "os_name" to "REL",
+                "os_release" to "9",
+                "os_version" to 28,
+                "device_type" to "unknown_Android_robolectric",
+                "bindings_version" to Stripe.VERSION_NAME,
+                "app_name" to "com.stripe.android.test",
+                "app_version" to 0,
+                "product_usage" to ATTRIBUTION.toList(),
+                "source_type" to "card",
+                "request_id" to "req_123"
             )
-
-        assertThat(actualParams)
-            .isEqualTo(expectedParams)
+        )
     }
 
     @Test
     fun createPaymentIntentConfirmationParams_withValidInput_createsCorrectMap() {
         val loggingParams =
             analyticsDataFactory.createPaymentIntentConfirmationParams(
-                PaymentMethod.Type.Card.code
+                PaymentMethod.Type.Card.code,
+                REQUEST_ID
             )
 
         assertThat(loggingParams)
@@ -126,14 +139,17 @@ class AnalyticsDataFactoryTest {
             AnalyticsEvent.PaymentIntentConfirm.toString(),
             loggingParams[AnalyticsDataFactory.FIELD_EVENT]
         )
-        assertEquals(AnalyticsDataFactory.ANALYTICS_UA,
-            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
+        assertEquals(
+            AnalyticsDataFactory.ANALYTICS_UA,
+            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA]
+        )
     }
 
     @Test
     fun getPaymentIntentRetrieveParams_withValidInput_createsCorrectMap() {
         val loggingParams = analyticsDataFactory.createParams(
-            AnalyticsEvent.PaymentIntentRetrieve
+            AnalyticsEvent.PaymentIntentRetrieve,
+            REQUEST_ID
         )
         assertThat(loggingParams)
             .hasSize(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 2)
@@ -142,17 +158,21 @@ class AnalyticsDataFactoryTest {
             AnalyticsEvent.PaymentIntentRetrieve.toString(),
             loggingParams[AnalyticsDataFactory.FIELD_EVENT]
         )
-        assertEquals(AnalyticsDataFactory.ANALYTICS_UA,
-            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
+        assertEquals(
+            AnalyticsDataFactory.ANALYTICS_UA,
+            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA]
+        )
     }
 
     @Test
     fun getSetupIntentConfirmationParams_withValidInput_createsCorrectMap() {
         val params = analyticsDataFactory.createSetupIntentConfirmationParams(
             PaymentMethod.Type.Card.code,
-            "seti_12345"
+            "seti_12345",
+            REQUEST_ID
         )
-        assertEquals("card", params[AnalyticsDataFactory.FIELD_PAYMENT_METHOD_TYPE])
+        assertThat(params[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
+            .isEqualTo("card")
     }
 
     @Test
@@ -169,10 +189,11 @@ class AnalyticsDataFactoryTest {
         }
 
         val params =
-            AnalyticsDataFactory(packageManager, packageInfo, packageName, API_KEY)
+            AnalyticsDataFactory(packageManager, packageInfo, packageName) { API_KEY }
                 .createTokenCreationParams(
                     ATTRIBUTION,
-                    Token.Type.Card
+                    Token.Type.Card,
+                    REQUEST_ID
                 )
         assertThat(params)
             .hasSize(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 1)
@@ -185,12 +206,14 @@ class AnalyticsDataFactoryTest {
         assertEquals(versionCode, params[AnalyticsDataFactory.FIELD_APP_VERSION])
         assertEquals(BuildConfig.LIBRARY_PACKAGE_NAME, params[AnalyticsDataFactory.FIELD_APP_NAME])
 
-        assertEquals(BuildConfig.VERSION_NAME, params[AnalyticsDataFactory.FIELD_BINDINGS_VERSION])
+        assertEquals(Stripe.VERSION_NAME, params[AnalyticsDataFactory.FIELD_BINDINGS_VERSION])
         assertEquals(expectedEventName, params[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals(expectedUaName, params[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
 
-        assertEquals("unknown_Android_robolectric",
-            params[AnalyticsDataFactory.FIELD_DEVICE_TYPE])
+        assertEquals(
+            "unknown_Android_robolectric",
+            params[AnalyticsDataFactory.FIELD_DEVICE_TYPE]
+        )
     }
 
     @Test
@@ -200,7 +223,8 @@ class AnalyticsDataFactoryTest {
         val expectedUaName = AnalyticsDataFactory.ANALYTICS_UA
 
         val params = analyticsDataFactory.createSourceCreationParams(
-            Source.SourceType.SEPA_DEBIT
+            Source.SourceType.SEPA_DEBIT,
+            requestId = REQUEST_ID
         )
         assertThat(params)
             .hasSize(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 2)
@@ -211,7 +235,7 @@ class AnalyticsDataFactoryTest {
         assertNotNull(params[AnalyticsDataFactory.FIELD_OS_RELEASE])
         assertNotNull(params[AnalyticsDataFactory.FIELD_OS_NAME])
 
-        assertEquals(BuildConfig.VERSION_NAME, params[AnalyticsDataFactory.FIELD_BINDINGS_VERSION])
+        assertEquals(Stripe.VERSION_NAME, params[AnalyticsDataFactory.FIELD_BINDINGS_VERSION])
         assertEquals(expectedEventName, params[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals(expectedUaName, params[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
 
@@ -221,7 +245,7 @@ class AnalyticsDataFactoryTest {
     @Test
     fun createAppDataParams_whenPackageNameIsEmpty_returnsEmptyMap() {
         assertThat(
-            AnalyticsDataFactory(null, null, "", API_KEY)
+            AnalyticsDataFactory(null, null, "") { API_KEY }
                 .createAppDataParams()
         ).isEmpty()
     }
@@ -230,7 +254,7 @@ class AnalyticsDataFactoryTest {
     fun createAppDataParams_whenPackageInfoNotFound_returnsEmptyMap() {
         val packageName = "fake_package"
         assertThat(
-            AnalyticsDataFactory(packageManager, null, packageName, API_KEY)
+            AnalyticsDataFactory(packageManager, null, packageName) { API_KEY }
                 .createAppDataParams()
         ).isEmpty()
     }
@@ -272,8 +296,24 @@ class AnalyticsDataFactoryTest {
         ).containsEntry("3ds2_ui_type", "none")
     }
 
+    @Test
+    fun `when publishable key is unavailable, create params with undefined key`() {
+        val params = AnalyticsDataFactory(
+            context
+        ) {
+            throw RuntimeException()
+        }.createSourceRetrieveParams(
+            "src_123",
+            requestId = REQUEST_ID
+        )
+
+        assertThat(params["publishable_key"])
+            .isEqualTo(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
+    }
+
     private companion object {
         private const val API_KEY = "pk_abc123"
         private val ATTRIBUTION = setOf("CardInputView")
+        private val REQUEST_ID = RequestId("req_123")
     }
 }

@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.CustomerJsonParser
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
 /**

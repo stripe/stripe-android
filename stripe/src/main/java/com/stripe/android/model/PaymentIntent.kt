@@ -1,10 +1,10 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
-import java.util.regex.Pattern
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import org.json.JSONObject
+import java.util.regex.Pattern
 
 /**
  * A PaymentIntent tracks the process of collecting a payment from your customer.
@@ -217,6 +217,10 @@ data class PaymentIntent internal constructor(
             internal companion object {
                 fun fromCode(typeCode: String?) = values().firstOrNull { it.code == typeCode }
             }
+        }
+
+        internal companion object {
+            internal const val CODE_AUTHENTICATION_ERROR = "payment_intent_authentication_failure"
         }
     }
 

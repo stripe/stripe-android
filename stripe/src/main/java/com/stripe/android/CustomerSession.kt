@@ -1,23 +1,25 @@
 package com.stripe.android
 
 import android.content.Context
-import android.os.Handler
 import androidx.annotation.IntRange
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe.Companion.appInfo
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.Source.SourceType
+import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.cancelChildren
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Represents a logged-in session of a single Customer.
@@ -29,7 +31,7 @@ class CustomerSession @VisibleForTesting internal constructor(
     stripeRepository: StripeRepository,
     publishableKey: String,
     stripeAccountId: String?,
-    private val workDispatcher: CoroutineDispatcher = createCoroutineDispatcher(),
+    private val workContext: CoroutineContext = createCoroutineDispatcher(),
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
     private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
     ephemeralKeyManagerFactory: EphemeralKeyManager.Factory
@@ -41,80 +43,33 @@ class CustomerSession @VisibleForTesting internal constructor(
     internal var customer: Customer? = null
 
     private val listeners: MutableMap<String, RetrievalListener?> = mutableMapOf()
-    private val ephemeralKeyManager: EphemeralKeyManager = ephemeralKeyManagerFactory.create(
-        CustomerSessionEphemeralKeyManagerListener(
-            CustomerSessionRunnableFactory(
-                stripeRepository,
-                createHandler(),
-                publishableKey,
-                stripeAccountId
-            ),
-            workDispatcher,
-            listeners
-        )
-    )
-
-    private fun createHandler(): Handler {
-        return CustomerSessionHandler(object : CustomerSessionHandler.Listener {
-            override fun onCustomerRetrieved(
-                customer: Customer?,
-                operationId: String
-            ) {
-                this@CustomerSession.customer = customer
-                customerCacheTime = timeSupplier()
-                val listener: CustomerRetrievalListener? = getListener(operationId)
-                if (customer != null) {
-                    listener?.onCustomerRetrieved(customer)
-                }
-            }
-
-            override fun onSourceRetrieved(
-                source: Source?,
-                operationId: String
-            ) {
-                val listener: SourceRetrievalListener? = getListener(operationId)
-                if (source != null) {
-                    listener?.onSourceRetrieved(source)
-                }
-            }
-
-            override fun onPaymentMethodRetrieved(
-                paymentMethod: PaymentMethod?,
-                operationId: String
-            ) {
-                val listener: PaymentMethodRetrievalListener? = getListener(operationId)
-                if (paymentMethod != null) {
-                    listener?.onPaymentMethodRetrieved(paymentMethod)
-                }
-            }
-
-            override fun onPaymentMethodsRetrieved(
-                paymentMethods: List<PaymentMethod>,
-                operationId: String
-            ) {
-                val listener: PaymentMethodsRetrievalListener? = getListener(operationId)
-                listener?.onPaymentMethodsRetrieved(paymentMethods)
-            }
-
-            override fun onCustomerShippingInfoSaved(
-                customer: Customer?,
-                operationId: String
-            ) {
-                this@CustomerSession.customer = customer
-                val listener: CustomerRetrievalListener? = getListener(operationId)
-                if (customer != null) {
-                    listener?.onCustomerRetrieved(customer)
-                }
-            }
-
-            override fun onError(
-                exception: StripeException,
-                operationId: String
-            ) {
-                handleRetrievalError(operationId, exception)
-            }
-        })
+    private val operationExecutor = CustomerSessionOperationExecutor(
+        stripeRepository,
+        publishableKey,
+        stripeAccountId,
+        listeners
+    ) { customer ->
+        this.customer = customer
+        customerCacheTime = timeSupplier()
     }
+
+    private val ephemeralKeyManager: EphemeralKeyManager = ephemeralKeyManagerFactory.create(
+        object : EphemeralKeyManager.KeyManagerListener {
+            override fun onKeyUpdate(ephemeralKey: EphemeralKey, operation: EphemeralOperation) {
+                CoroutineScope(workContext).launch {
+                    operationExecutor.execute(ephemeralKey, operation)
+                }
+            }
+
+            override fun onKeyError(operationId: String, errorCode: Int, errorMessage: String) {
+                listeners.remove(operationId)?.onError(
+                    errorCode,
+                    errorMessage,
+                    null
+                )
+            }
+        }
+    )
 
     /**
      * Retrieve the current [Customer]. If [customer] is not stale, this returns immediately with
@@ -439,24 +394,10 @@ class CustomerSession @VisibleForTesting internal constructor(
                 timeSupplier() - customerCacheTime < CUSTOMER_CACHE_DURATION_MILLISECONDS
         }
 
-    private fun handleRetrievalError(
-        operationId: String,
-        exception: StripeException
-    ) {
-        listeners.remove(operationId)?.let { listener ->
-            val message = exception.localizedMessage.orEmpty()
-            listener.onError(
-                exception.statusCode,
-                message,
-                exception.stripeError
-            )
-        }
-    }
-
     @JvmSynthetic
     internal fun cancel() {
         listeners.clear()
-        workDispatcher.cancelChildren()
+        workContext.cancelChildren()
     }
 
     private fun <L : RetrievalListener?> getListener(operationId: String): L? {
@@ -480,7 +421,11 @@ class CustomerSession @VisibleForTesting internal constructor(
     }
 
     interface RetrievalListener {
-        fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?)
+        fun onError(
+            errorCode: Int,
+            errorMessage: String,
+            stripeError: StripeError?
+        )
     }
 
     companion object {
@@ -585,7 +530,7 @@ class CustomerSession @VisibleForTesting internal constructor(
             instance?.cancel()
         }
 
-        private fun createCoroutineDispatcher(): CoroutineDispatcher {
+        private fun createCoroutineDispatcher(): CoroutineContext {
             return ThreadPoolExecutor(
                 THREAD_POOL_SIZE,
                 THREAD_POOL_SIZE,

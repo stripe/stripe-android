@@ -20,7 +20,6 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             )
             .setCustomerId(StripeJsonUtils.optString(json, FIELD_CUSTOMER))
             .setLiveMode(json.optBoolean(FIELD_LIVEMODE))
-            .setMetadata(StripeJsonUtils.optHash(json, FIELD_METADATA))
 
         when (type) {
             PaymentMethod.Type.Card ->
@@ -65,6 +64,18 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 builder.setSofort(
                     json.optJSONObject(type.code)?.let {
                         SofortJsonParser().parse(it)
+                    }
+                )
+            PaymentMethod.Type.Upi ->
+                builder.setUpi(
+                    json.optJSONObject(type.code)?.let {
+                        UpiJsonParser().parse(it)
+                    }
+                )
+            PaymentMethod.Type.Netbanking ->
+                builder.setNetbanking(
+                    json.optJSONObject(type.code)?.let {
+                        NetbankingJsonParser().parse(it)
                     }
                 )
             else -> {
@@ -124,7 +135,8 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 return PaymentMethod.Card.Checks(
                     addressLine1Check = StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1_CHECK),
                     addressPostalCodeCheck = StripeJsonUtils.optString(
-                        json, FIELD_ADDRESS_POSTAL_CODE_CHECK
+                        json,
+                        FIELD_ADDRESS_POSTAL_CODE_CHECK
                     ),
                     cvcCheck = StripeJsonUtils.optString(json, FIELD_CVC_CHECK)
                 )
@@ -214,6 +226,18 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
     }
 
+    internal class NetbankingJsonParser : ModelJsonParser<PaymentMethod.Netbanking> {
+        override fun parse(json: JSONObject): PaymentMethod.Netbanking {
+            return PaymentMethod.Netbanking(
+                bank = StripeJsonUtils.optString(json, FIELD_BANK)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_BANK = "bank"
+        }
+    }
+
     internal class SepaDebitJsonParser : ModelJsonParser<PaymentMethod.SepaDebit> {
         override fun parse(json: JSONObject): PaymentMethod.SepaDebit {
             return PaymentMethod.SepaDebit(
@@ -278,13 +302,24 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
     }
 
+    internal class UpiJsonParser : ModelJsonParser<PaymentMethod.Upi> {
+        override fun parse(json: JSONObject): PaymentMethod.Upi? {
+            return PaymentMethod.Upi(
+                vpa = StripeJsonUtils.optString(json, FIELD_VPA)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_VPA = "vpa"
+        }
+    }
+
     private companion object {
         private const val FIELD_ID = "id"
         private const val FIELD_BILLING_DETAILS = "billing_details"
         private const val FIELD_CREATED = "created"
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_LIVEMODE = "livemode"
-        private const val FIELD_METADATA = "metadata"
         private const val FIELD_TYPE = "type"
     }
 }

@@ -5,14 +5,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
@@ -55,7 +54,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         viewBinding.createButton.setOnClickListener {
-            viewBinding.cardWidget.card?.let {
+            viewBinding.cardWidget.cardParams?.let {
                 createCardSource(it)
             } ?: showSnackbar("Enter a valid card.")
         }
@@ -91,20 +90,20 @@ class CreateCardSourceActivity : AppCompatActivity() {
     }
 
     /**
-     * To start the 3DS cycle, create a [Source] out of the user-entered [Card].
+     * To start the 3DS cycle, create a [Source] out of the user-entered [CardParams].
      *
-     * @param card the [Card] used to create a source
+     * @param cardParams the [CardParams] used to create a source
      */
-    private fun createCardSource(card: Card) {
+    private fun createCardSource(cardParams: CardParams) {
         keyboardController.hide()
 
         viewBinding.createButton.isEnabled = false
         viewBinding.progressBar.visibility = View.VISIBLE
 
-        val params = SourceParams.createCardParams(card)
+        val params = SourceParams.createCardParams(cardParams)
         viewModel.createSource(params).observe(
             this,
-            Observer { result ->
+            { result ->
                 viewBinding.createButton.isEnabled = true
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
@@ -138,7 +137,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
      * to verify the third-party approval. The only information from the Card source
      * that is used is the ID field.
      *
-     * @param source the [Card]-created [Source].
+     * @param source the [CardParams]-created [Source].
      */
     private fun createThreeDSecureSource(source: Source) {
         // This represents a request for a 3DS purchase of 10.00 euro.
@@ -151,7 +150,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
 
         viewModel.createSource(params).observe(
             this,
-            Observer { result ->
+            { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
                 result.fold(
@@ -183,14 +182,16 @@ class CreateCardSourceActivity : AppCompatActivity() {
             .setTitle(this.getString(R.string.authentication_dialog_title))
             .setMessage(
                 getString(
-                    R.string.authentication_dialog_message, cardBrand.displayName, typeData["last4"]
+                    R.string.authentication_dialog_message,
+                    cardBrand.displayName,
+                    typeData["last4"]
                 )
             )
             .setIcon(cardBrand.icon)
-            .setPositiveButton(android.R.string.yes) { _, _ ->
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 stripe.authenticateSource(this, source)
             }
-            .setNegativeButton(android.R.string.no, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .create()
     }
 

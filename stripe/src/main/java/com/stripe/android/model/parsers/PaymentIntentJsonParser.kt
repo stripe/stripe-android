@@ -17,7 +17,8 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
 
         val id = optString(json, FIELD_ID)
         val paymentMethodTypes = ModelJsonParser.jsonArrayToList(
-            json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES))
+            json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
+        )
         val amount = StripeJsonUtils.optLong(json, FIELD_AMOUNT)
         val canceledAt = json.optLong(FIELD_CANCELED_AT)
         val cancellationReason = PaymentIntent.CancellationReason.fromCode(

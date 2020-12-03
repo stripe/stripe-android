@@ -10,14 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.ApiResultCallback
-import com.stripe.android.model.Card
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.Token
-import com.stripe.android.view.CardValidCallback
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.CreateCardTokenActivityBinding
@@ -51,30 +49,21 @@ class CreateCardTokenActivity : AppCompatActivity() {
         viewBinding.createTokenButton.setOnClickListener {
             BackgroundTaskTracker.onStart()
 
-            val card = viewBinding.cardInputWidget.card
-
-            if (card != null) {
+            viewBinding.cardInputWidget.cardParams?.let { cardParams ->
                 onRequestStart()
-                viewModel.createCardToken(card).observe(
+                viewModel.createCardToken(cardParams).observe(
                     this,
-                    Observer {
+                    {
                         onRequestEnd()
                         adapter.addToken(it)
                     }
                 )
-            } else {
-                snackbarController.show(getString(R.string.invalid_card_details))
-            }
+            } ?: snackbarController.show(getString(R.string.invalid_card_details))
         }
 
-        viewBinding.cardInputWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                // added as an example - no-op
-            }
-        })
+        viewBinding.cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+            // added as an example - no-op
+        }
 
         viewBinding.cardInputWidget.requestFocus()
     }
@@ -132,11 +121,11 @@ class CreateCardTokenActivity : AppCompatActivity() {
     ) : AndroidViewModel(application) {
         private val stripe = StripeFactory(application).create()
 
-        fun createCardToken(card: Card): LiveData<Token> {
+        fun createCardToken(cardParams: CardParams): LiveData<Token> {
             val data = MutableLiveData<Token>()
 
             stripe.createCardToken(
-                card,
+                cardParams,
                 callback = object : ApiResultCallback<Token> {
                     override fun onSuccess(result: Token) {
                         BackgroundTaskTracker.onStop()

@@ -22,20 +22,30 @@ import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.bundleOf
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.widget.doAfterTextChanged
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.cards.CardNumber
+import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
+import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlin.properties.Delegates
 
 /**
- * A card input widget that handles all animation on its own.
+ * A single-line card input widget.
+ *
+ * To enable 19-digit card support, [PaymentConfiguration.init] must be called before
+ * [CardInputWidget] is instantiated.
  *
  * The individual `EditText` views of this widget can be styled by defining a style
  * `Stripe.CardInputWidget.EditText` that extends `Stripe.Base.CardInputWidget.EditText`.
@@ -62,10 +72,13 @@ class CardInputWidget @JvmOverloads constructor(
 
     @JvmSynthetic
     internal val cardNumberEditText = viewBinding.cardNumberEditText
+
     @JvmSynthetic
     internal val expiryDateEditText = viewBinding.expiryDateEditText
+
     @JvmSynthetic
-    internal val cvcNumberEditText = viewBinding.cvcEditText
+    internal val cvcEditText = viewBinding.cvcEditText
+
     @JvmSynthetic
     internal val postalCodeEditText = viewBinding.postalCodeEditText
 
@@ -77,24 +90,18 @@ class CardInputWidget @JvmOverloads constructor(
             cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
         }
     }
-    private val inputChangeTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            shouldShowErrorIcon = false
-        }
-    }
 
     private val invalidFields: Set<CardValidCallback.Fields>
         get() {
             return listOfNotNull(
                 CardValidCallback.Fields.Number.takeIf {
-                    cardNumberEditText.cardNumber == null
+                    cardNumberEditText.validatedCardNumber == null
                 },
                 CardValidCallback.Fields.Expiry.takeIf {
-                    expiryDateEditText.validDateFields == null
+                    expiryDateEditText.validatedDate == null
                 },
                 CardValidCallback.Fields.Cvc.takeIf {
-                    this.cvcValue == null
+                    this.cvc == null
                 }
             ).toSet()
         }
@@ -102,12 +109,8 @@ class CardInputWidget @JvmOverloads constructor(
     @VisibleForTesting
     internal var shouldShowErrorIcon = false
         private set(value) {
-            val isValueChange = field != value
+            cardBrandView.shouldShowErrorIcon = value
             field = value
-
-            if (isValueChange) {
-                updateIcon()
-            }
         }
 
     /**
@@ -122,7 +125,7 @@ class CardInputWidget @JvmOverloads constructor(
     @JvmSynthetic
     internal var layoutWidthCalculator: LayoutWidthCalculator = DefaultLayoutWidthCalculator()
 
-    internal val placementParameters: PlacementParameters = PlacementParameters()
+    internal val placement = CardInputWidgetPlacement()
 
     private val postalCodeValue: String?
         get() {
@@ -133,9 +136,9 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-    private val cvcValue: String?
+    private val cvc: Cvc.Validated?
         get() {
-            return cvcNumberEditText.cvcValue
+            return cvcEditText.cvc
         }
 
     private val brand: CardBrand
@@ -166,7 +169,7 @@ class CardInputWidget @JvmOverloads constructor(
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
-            return card?.let {
+            return cardParams?.let {
                 PaymentMethodCreateParams.Card(
                     number = it.number,
                     cvc = it.cvc,
@@ -203,27 +206,28 @@ class CardInputWidget @JvmOverloads constructor(
      * A [Card] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
+    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
     override val card: Card?
         get() {
             return cardBuilder?.build()
         }
 
     /**
-     * A [Card.Builder] representing the card details and postal code if all fields are valid;
+     * A [CardParams] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
-    override val cardBuilder: Card.Builder?
+    override val cardParams: CardParams?
         get() {
-            val cardNumber = cardNumberEditText.cardNumber
-            val cardDate = expiryDateEditText.validDateFields
-            val cvcValue = this.cvcValue
+            val cardNumber = cardNumberEditText.validatedCardNumber
+            val expirationDate = expiryDateEditText.validatedDate
+            val cvc = this.cvc
 
             cardNumberEditText.shouldShowError = cardNumber == null
-            expiryDateEditText.shouldShowError = cardDate == null
-            cvcNumberEditText.shouldShowError = cvcValue == null
+            expiryDateEditText.shouldShowError = expirationDate == null
+            cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
-                    postalCodeEditText.postalCode.isNullOrBlank()
+                postalCodeEditText.postalCode.isNullOrBlank()
 
             // Announce error messages for accessibility
             currentFields
@@ -238,18 +242,83 @@ class CardInputWidget @JvmOverloads constructor(
                 cardNumber == null -> {
                     cardNumberEditText.requestFocus()
                 }
-                cardDate == null -> {
+                expirationDate == null -> {
                     expiryDateEditText.requestFocus()
                 }
-                cvcValue == null -> {
-                    cvcNumberEditText.requestFocus()
+                cvc == null -> {
+                    cvcEditText.requestFocus()
                 }
                 postalCodeEditText.shouldShowError -> {
                     postalCodeEditText.requestFocus()
                 }
                 else -> {
                     shouldShowErrorIcon = false
-                    return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
+                    return CardParams(
+                        setOf(LOGGING_TOKEN),
+                        number = cardNumber.value,
+                        expMonth = expirationDate.month,
+                        expYear = expirationDate.year,
+                        cvc = cvc.value,
+                        address = Address.Builder()
+                            .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
+                            .build()
+                    )
+                }
+            }
+
+            shouldShowErrorIcon = true
+
+            return null
+        }
+
+    /**
+     * A [Card.Builder] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
+    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
+    override val cardBuilder: Card.Builder?
+        get() {
+            val cardNumber = cardNumberEditText.validatedCardNumber
+            val expirationDate = expiryDateEditText.validatedDate
+            val cvc = this.cvc
+
+            cardNumberEditText.shouldShowError = cardNumber == null
+            expiryDateEditText.shouldShowError = expirationDate == null
+            cvcEditText.shouldShowError = cvc == null
+            postalCodeEditText.shouldShowError =
+                (postalCodeRequired || usZipCodeRequired) &&
+                postalCodeEditText.postalCode.isNullOrBlank()
+
+            // Announce error messages for accessibility
+            currentFields
+                .filter { it.shouldShowError }
+                .forEach { editText ->
+                    editText.errorMessage?.let { errorMessage ->
+                        editText.announceForAccessibility(errorMessage)
+                    }
+                }
+
+            when {
+                cardNumber == null -> {
+                    cardNumberEditText.requestFocus()
+                }
+                expirationDate == null -> {
+                    expiryDateEditText.requestFocus()
+                }
+                cvc == null -> {
+                    cvcEditText.requestFocus()
+                }
+                postalCodeEditText.shouldShowError -> {
+                    postalCodeEditText.requestFocus()
+                }
+                else -> {
+                    shouldShowErrorIcon = false
+                    return Card.Builder(
+                        number = cardNumber.value,
+                        expMonth = expirationDate.month,
+                        expYear = expirationDate.year,
+                        cvc = cvc.value
+                    )
                         .addressZip(postalCodeValue)
                         .loggingTokens(setOf(LOGGING_TOKEN))
                 }
@@ -278,12 +347,12 @@ class CardInputWidget @JvmOverloads constructor(
             postalCodeEditText.isEnabled = true
             postalCodeTextInputLayout.visibility = View.VISIBLE
 
-            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+            cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         } else {
             postalCodeEditText.isEnabled = false
             postalCodeTextInputLayout.visibility = View.GONE
 
-            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_DONE
+            cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
         }
     }
 
@@ -314,6 +383,16 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
+    private val frameStart: Int
+        get() {
+            val isLtr = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
+            return if (isLtr) {
+                containerLayout.left
+            } else {
+                containerLayout.right
+            }
+        }
+
     init {
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -327,7 +406,9 @@ class CardInputWidget @JvmOverloads constructor(
         frameWidthSupplier = { containerLayout.width }
 
         requiredFields = listOf(
-            cardNumberEditText, cvcNumberEditText, expiryDateEditText
+            cardNumberEditText,
+            cvcEditText,
+            expiryDateEditText
         )
         allFields = requiredFields.plus(postalCodeEditText)
 
@@ -391,7 +472,9 @@ class CardInputWidget @JvmOverloads constructor(
         @IntRange(from = 1, to = 12) month: Int,
         @IntRange(from = 0, to = 9999) year: Int
     ) {
-        expiryDateEditText.setText(DateUtils.createDateStringFromIntegerInput(month, year))
+        expiryDateEditText.setText(
+            ExpirationDate.Unvalidated(month, year).getDisplayString()
+        )
     }
 
     /**
@@ -401,7 +484,7 @@ class CardInputWidget @JvmOverloads constructor(
      * @param cvcCode the CVC value to be set
      */
     override fun setCvcCode(cvcCode: String?) {
-        cvcNumberEditText.setText(cvcCode)
+        cvcEditText.setText(cvcCode)
     }
 
     @JvmSynthetic
@@ -447,7 +530,7 @@ class CardInputWidget @JvmOverloads constructor(
      * Set a `TextWatcher` to receive CVC value changes.
      */
     override fun setCvcNumberTextWatcher(cvcNumberTextWatcher: TextWatcher?) {
-        cvcNumberEditText.addTextChangedListener(cvcNumberTextWatcher)
+        cvcEditText.addTextChangedListener(cvcNumberTextWatcher)
     }
 
     /**
@@ -473,18 +556,26 @@ class CardInputWidget @JvmOverloads constructor(
             return super.onInterceptTouchEvent(ev)
         }
 
-        return getFocusRequestOnTouch(ev.x.toInt())?.let {
-            it.requestFocus()
+        return getFocusField(
+            ev.x.toInt(),
+            frameStart
+        )?.let { field ->
+            when (field) {
+                Field.Number -> cardNumberEditText
+                Field.Expiry -> expiryDateEditText
+                Field.Cvc -> cvcEditText
+                Field.PostalCode -> postalCodeEditText
+            }.requestFocus()
             true
         } ?: super.onInterceptTouchEvent(ev)
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        return Bundle().apply {
-            putParcelable(STATE_SUPER_STATE, super.onSaveInstanceState())
-            putBoolean(STATE_CARD_VIEWED, isShowingFullCard)
-            putBoolean(STATE_POSTAL_CODE_ENABLED, postalCodeEnabled)
-        }
+        return bundleOf(
+            STATE_SUPER_STATE to super.onSaveInstanceState(),
+            STATE_CARD_VIEWED to isShowingFullCard,
+            STATE_POSTAL_CODE_ENABLED to postalCodeEnabled
+        )
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
@@ -492,46 +583,46 @@ class CardInputWidget @JvmOverloads constructor(
             postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
             isShowingFullCard = state.getBoolean(STATE_CARD_VIEWED, true)
             updateSpaceSizes(isShowingFullCard)
-            placementParameters.totalLengthInPixels = frameWidth
-            val cardLeftMargin: Int
-            val dateLeftMargin: Int
-            val cvcLeftMargin: Int
-            val postalCodeLeftMargin: Int
+            placement.totalLengthInPixels = frameWidth
+            val cardStartMargin: Int
+            val dateStartMargin: Int
+            val cvcStartMargin: Int
+            val postalCodeStartMargin: Int
             if (isShowingFullCard) {
-                cardLeftMargin = 0
-                dateLeftMargin = placementParameters.getDateLeftMargin(isFullCard = true)
-                cvcLeftMargin = placementParameters.getCvcLeftMargin(isFullCard = true)
-                postalCodeLeftMargin = placementParameters.getPostalCodeLeftMargin(isFullCard = true)
+                cardStartMargin = 0
+                dateStartMargin = placement.getDateStartMargin(isFullCard = true)
+                cvcStartMargin = placement.getCvcStartMargin(isFullCard = true)
+                postalCodeStartMargin = placement.getPostalCodeStartMargin(isFullCard = true)
             } else {
-                cardLeftMargin = -1 * placementParameters.hiddenCardWidth
-                dateLeftMargin = placementParameters.getDateLeftMargin(isFullCard = false)
-                cvcLeftMargin = placementParameters.getCvcLeftMargin(isFullCard = false)
-                postalCodeLeftMargin = if (postalCodeEnabled) {
-                    placementParameters.getPostalCodeLeftMargin(isFullCard = false)
+                cardStartMargin = -1 * placement.hiddenCardWidth
+                dateStartMargin = placement.getDateStartMargin(isFullCard = false)
+                cvcStartMargin = placement.getCvcStartMargin(isFullCard = false)
+                postalCodeStartMargin = if (postalCodeEnabled) {
+                    placement.getPostalCodeStartMargin(isFullCard = false)
                 } else {
-                    placementParameters.totalLengthInPixels
+                    placement.totalLengthInPixels
                 }
             }
 
             updateFieldLayout(
                 view = cardNumberTextInputLayout,
-                width = placementParameters.cardWidth,
-                leftMargin = cardLeftMargin
+                width = placement.cardWidth,
+                marginStart = cardStartMargin
             )
             updateFieldLayout(
                 view = expiryDateTextInputLayout,
-                width = placementParameters.dateWidth,
-                leftMargin = dateLeftMargin
+                width = placement.dateWidth,
+                marginStart = dateStartMargin
             )
             updateFieldLayout(
                 view = cvcNumberTextInputLayout,
-                width = placementParameters.cvcWidth,
-                leftMargin = cvcLeftMargin
+                width = placement.cvcWidth,
+                marginStart = cvcStartMargin
             )
             updateFieldLayout(
                 view = postalCodeTextInputLayout,
-                width = placementParameters.postalCodeWidth,
-                leftMargin = postalCodeLeftMargin
+                width = placement.postalCodeWidth,
+                marginStart = postalCodeStartMargin
             )
 
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
@@ -540,126 +631,68 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    /**
-     * Checks on the horizontal position of a touch event to see if
-     * that event needs to be associated with one of the controls even
-     * without having actually touched it. This essentially gives a larger
-     * touch surface to the controls. We return `null` if the user touches
-     * actually inside the widget because no interception is necessary - the touch will
-     * naturally give focus to that control, and we don't want to interfere with what
-     * Android will naturally do in response to that touch.
-     *
-     * @param touchX distance in pixels from the left side of this control
-     * @return a [StripeEditText] that needs to request focus, or `null`
-     * if no such request is necessary.
-     */
-    @VisibleForTesting
-    internal fun getFocusRequestOnTouch(touchX: Int): View? {
-        val frameStart = containerLayout.left
-
-        return when {
-            isShowingFullCard -> {
-                // Then our view is
-                // |full card||space||date|
-
-                when {
-                    touchX < frameStart + placementParameters.cardWidth -> // Then the card edit view will already handle this touch.
-                        null
-                    touchX < placementParameters.cardTouchBufferLimit -> // Then we want to act like this was a touch on the card view
-                        cardNumberEditText
-                    touchX < placementParameters.dateStartPosition -> // Then we act like this was a touch on the date editor.
-                        expiryDateEditText
-                    else -> // Then the date editor will already handle this touch.
-                        null
-                }
-            }
-            postalCodeEnabled -> {
-                // Our view is
-                // |peek card||space||date||space||cvc||space||postal code|
-                when {
-                    touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
-                        null
-                    touchX < placementParameters.cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
-                        cardNumberEditText
-                    touchX < placementParameters.dateStartPosition -> // Then we need to act like this was a touch on the date editor
-                        expiryDateEditText
-                    touchX < placementParameters.dateStartPosition + placementParameters.dateWidth -> // Just a regular touch on the date editor.
-                        null
-                    touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
-                        expiryDateEditText
-                    touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
-                        cvcNumberEditText
-                    touchX < placementParameters.cvcStartPosition + placementParameters.cvcWidth -> // Just a regular touch on the cvc editor.
-                        null
-                    touchX < placementParameters.cvcRightTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
-                        cvcNumberEditText
-                    touchX < placementParameters.postalCodeStartPosition -> // We need to act like this was a touch on the postal code editor.
-                        postalCodeEditText
-                    else -> null
-                }
-            }
-            else -> {
-                // Our view is
-                // |peek card||space||date||space||cvc|
-                when {
-                    touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
-                        null
-                    touchX < placementParameters.cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
-                        cardNumberEditText
-                    touchX < placementParameters.dateStartPosition -> // Then we need to act like this was a touch on the date editor
-                        expiryDateEditText
-                    touchX < placementParameters.dateStartPosition + placementParameters.dateWidth -> // Just a regular touch on the date editor.
-                        null
-                    touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
-                        expiryDateEditText
-                    touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
-                        cvcNumberEditText
-                    else -> null
-                }
-            }
-        }
-    }
+    private fun getFocusField(
+        touchX: Int,
+        frameStart: Int
+    ) = placement.getFocusField(
+        touchX,
+        frameStart,
+        isShowingFullCard,
+        postalCodeEnabled
+    )
 
     @VisibleForTesting
-    internal fun updateSpaceSizes(isShowingFullCard: Boolean) {
-        val frameWidth = frameWidth
-        val frameStart = containerLayout.left
+    internal fun updateSpaceSizes(
+        isShowingFullCard: Boolean,
+        frameWidth: Int = this.frameWidth,
+        frameStart: Int = this.frameStart
+    ) {
         if (frameWidth == 0) {
             // This is an invalid view state.
             return
         }
 
-        placementParameters.cardWidth = getDesiredWidthInPixels(
-            FULL_SIZING_CARD_TEXT, cardNumberEditText
+        placement.cardWidth = getDesiredWidthInPixels(
+            FULL_SIZING_CARD_TEXT,
+            cardNumberEditText
         )
 
-        placementParameters.dateWidth = getDesiredWidthInPixels(
-            FULL_SIZING_DATE_TEXT, expiryDateEditText
+        placement.dateWidth = getDesiredWidthInPixels(
+            FULL_SIZING_DATE_TEXT,
+            expiryDateEditText
         )
 
-        placementParameters.hiddenCardWidth = getDesiredWidthInPixels(
-            hiddenCardText, cardNumberEditText
+        placement.hiddenCardWidth = getDesiredWidthInPixels(
+            hiddenCardText,
+            cardNumberEditText
         )
 
-        placementParameters.cvcWidth = getDesiredWidthInPixels(
-            cvcPlaceHolder, cvcNumberEditText
+        placement.cvcWidth = getDesiredWidthInPixels(
+            cvcPlaceHolder,
+            cvcEditText
         )
 
-        placementParameters.postalCodeWidth = getDesiredWidthInPixels(
-            FULL_SIZING_POSTAL_CODE_TEXT, postalCodeEditText
+        placement.postalCodeWidth = getDesiredWidthInPixels(
+            FULL_SIZING_POSTAL_CODE_TEXT,
+            postalCodeEditText
         )
 
-        placementParameters.peekCardWidth = getDesiredWidthInPixels(
-            peekCardText, cardNumberEditText
+        placement.peekCardWidth = getDesiredWidthInPixels(
+            peekCardText,
+            cardNumberEditText
         )
 
-        placementParameters.updateSpacing(isShowingFullCard, postalCodeEnabled, frameStart, frameWidth)
+        placement.updateSpacing(isShowingFullCard, postalCodeEnabled, frameStart, frameWidth)
     }
 
-    private fun updateFieldLayout(view: View, width: Int, leftMargin: Int) {
+    private fun updateFieldLayout(
+        view: View,
+        width: Int,
+        marginStart: Int
+    ) {
         view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
             this.width = width
-            this.leftMargin = leftMargin
+            this.marginStart = marginStart
         }
     }
 
@@ -682,7 +715,8 @@ class CardInputWidget @JvmOverloads constructor(
                     // Avoid reading out "1234 1234 1234 1234"
                     info.hintText = null
                 }
-            })
+            }
+        )
 
         isShowingFullCard = true
 
@@ -694,7 +728,9 @@ class CardInputWidget @JvmOverloads constructor(
             val a = context.theme.obtainStyledAttributes(
                 attrs,
                 R.styleable.CardInputView,
-                0, 0)
+                0,
+                0
+            )
 
             try {
                 cardBrandView.tintColorInt = a.getColor(
@@ -719,106 +755,104 @@ class CardInputWidget @JvmOverloads constructor(
 
         cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                scrollLeft()
+                scrollStart()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
 
         expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                scrollRight()
+                scrollEnd()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             }
         }
 
         expiryDateEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cardNumberEditText))
-        cvcNumberEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
-        postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcNumberEditText))
+        cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
+        postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
 
-        cvcNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+            cardBrandView.shouldShowCvc = hasFocus
+
             if (hasFocus) {
-                scrollRight()
+                scrollEnd()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             }
-            updateIconCvc(hasFocus, cvcValue)
         }
 
-        cvcNumberEditText.setAfterTextChangedListener(
-            object : StripeEditText.AfterTextChangedListener {
-                override fun onTextChanged(text: String) {
-                    if (brand.isMaxCvc(text)) {
-                        cardInputListener?.onCvcComplete()
-                    }
-                    updateIconCvc(cvcNumberEditText.hasFocus(), text)
-                }
+        cvcEditText.setAfterTextChangedListener { text ->
+            if (brand.isMaxCvc(text)) {
+                cardInputListener?.onCvcComplete()
             }
-        )
+        }
 
         cardNumberEditText.completionCallback = {
-            scrollRight()
+            scrollEnd()
             cardInputListener?.onCardComplete()
         }
 
         cardNumberEditText.brandChangeCallback = { brand ->
-            hiddenCardText = createHiddenCardText(brand)
-            updateIcon()
-            cvcNumberEditText.updateBrand(brand)
+            cardBrandView.brand = brand
+            hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+            cvcEditText.updateBrand(brand)
         }
 
         expiryDateEditText.completionCallback = {
-            cvcNumberEditText.requestFocus()
+            cvcEditText.requestFocus()
             cardInputListener?.onExpirationComplete()
         }
 
-        cvcNumberEditText.completionCallback = {
+        cvcEditText.completionCallback = {
             if (postalCodeEnabled) {
                 postalCodeEditText.requestFocus()
             }
         }
 
-        allFields.forEach { it.addTextChangedListener(inputChangeTextWatcher) }
+        allFields.forEach { field ->
+            field.doAfterTextChanged {
+                shouldShowErrorIcon = false
+            }
+        }
 
         if (shouldRequestFocus) {
             cardNumberEditText.requestFocus()
         }
+
+        cardNumberEditText.isLoadingCallback = {
+            cardBrandView.isLoading = it
+        }
     }
 
     /**
-     * @return a [String] that is the length of a full card number for the current [brand],
-     * without the last group of digits when the card is formatted with spaces. This is used for
-     * measuring the rendered width of the hidden portion (i.e. when the card number is "peeking")
-     * and does not have to be a valid card number.
+     * @return a [String] that is the length of a full formatted PAN for the given PAN length,
+     * without the last group of digits. This is used for measuring the rendered width of the
+     * hidden portion (i.e. when the card number is "peeking") and does not have to be a valid
+     * card number.
      *
-     * e.g. if [brand] is [CardBrand.Visa], this will generate `"0000 0000 0000 "` (including the
+     * e.g. if [panLength] is `16`, this will generate `"0000 0000 0000 "` (including the
      * trailing space).
      *
      * This should only be called when [brand] changes.
      */
     @VisibleForTesting
     internal fun createHiddenCardText(
-        brand: CardBrand,
-        cardNumber: String = cardNumberEditText.fieldText
+        panLength: Int
     ): String {
-        var lastIndex = 0
-        val digits: MutableList<String> = mutableListOf()
+        val formattedNumber = CardNumber.Unvalidated(
+            "0".repeat(panLength)
+        ).getFormatted(panLength)
 
-        brand.getSpacePositionsForCardNumber(cardNumber)
-            .toList()
-            .sorted()
-            .forEach {
-                repeat(it - lastIndex) {
-                    digits.add("0")
-                }
-                digits.add(" ")
-                lastIndex = it + 1
-            }
-
-        return digits.joinToString(separator = "")
+        return formattedNumber.take(
+            formattedNumber.lastIndexOf(' ') + 1
+        )
     }
 
     private fun applyAttributes(attrs: AttributeSet) {
         val typedArray = context.theme.obtainStyledAttributes(
-            attrs, R.styleable.CardElement, 0, 0
+            attrs,
+            R.styleable.CardElement,
+            0,
+            0
         )
 
         try {
@@ -840,109 +874,113 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     // reveal the full card number field
-    private fun scrollLeft() {
+    private fun scrollStart() {
         if (isShowingFullCard || !isViewInitialized) {
             return
         }
 
-        val dateStartPosition = placementParameters.getDateLeftMargin(isFullCard = false)
-        val cvcStartPosition = placementParameters.getCvcLeftMargin(isFullCard = false)
-        val postalCodeStartPosition = placementParameters.getPostalCodeLeftMargin(isFullCard = false)
+        val dateStartPosition = placement.getDateStartMargin(isFullCard = false)
+        val cvcStartPosition = placement.getCvcStartMargin(isFullCard = false)
+        val postalCodeStartPosition = placement.getPostalCodeStartMargin(isFullCard = false)
 
         updateSpaceSizes(isShowingFullCard = true)
 
-        val slideCardLeftAnimation = CardNumberSlideLeftAnimation(
+        val slideCardStartAnimation = CardNumberSlideStartAnimation(
             view = cardNumberTextInputLayout
         )
 
-        val dateDestination = placementParameters.getDateLeftMargin(isFullCard = true)
-        val slideDateLeftAnimation = ExpiryDateSlideLeftAnimation(
+        val dateDestination = placement.getDateStartMargin(isFullCard = true)
+        val slideDateStartAnimation = ExpiryDateSlideStartAnimation(
             view = expiryDateTextInputLayout,
             startPosition = dateStartPosition,
             destination = dateDestination
         )
 
         val cvcDestination = cvcStartPosition + (dateDestination - dateStartPosition)
-        val slideCvcLeftAnimation = CvcSlideLeftAnimation(
+        val slideCvcStartAnimation = CvcSlideStartAnimation(
             view = cvcNumberTextInputLayout,
             startPosition = cvcStartPosition,
             destination = cvcDestination,
-            newWidth = placementParameters.cvcWidth
+            newWidth = placement.cvcWidth
         )
 
         val postalCodeDestination = postalCodeStartPosition + (cvcDestination - cvcStartPosition)
-        val slidePostalCodeLeftAnimation = if (postalCodeEnabled) {
-            PostalCodeSlideLeftAnimation(
+        val slidePostalCodeStartAnimation = if (postalCodeEnabled) {
+            PostalCodeSlideStartAnimation(
                 view = postalCodeTextInputLayout,
                 startPosition = postalCodeStartPosition,
                 destination = postalCodeDestination,
-                newWidth = placementParameters.postalCodeWidth
+                newWidth = placement.postalCodeWidth
             )
         } else {
             null
         }
 
-        startSlideAnimation(listOfNotNull(
-            slideCardLeftAnimation,
-            slideDateLeftAnimation,
-            slideCvcLeftAnimation,
-            slidePostalCodeLeftAnimation
-        ))
+        startSlideAnimation(
+            listOfNotNull(
+                slideCardStartAnimation,
+                slideDateStartAnimation,
+                slideCvcStartAnimation,
+                slidePostalCodeStartAnimation
+            )
+        )
 
         isShowingFullCard = true
     }
 
     // reveal the secondary fields
-    private fun scrollRight() {
+    private fun scrollEnd() {
         if (!isShowingFullCard || !isViewInitialized) {
             return
         }
 
-        val dateStartMargin = placementParameters.getDateLeftMargin(isFullCard = true)
+        val dateStartMargin = placement.getDateStartMargin(isFullCard = true)
 
         updateSpaceSizes(isShowingFullCard = false)
 
-        val slideCardRightAnimation = CardNumberSlideRightAnimation(
+        val slideCardEndAnimation = CardNumberSlideEndAnimation(
             view = cardNumberTextInputLayout,
-            hiddenCardWidth = placementParameters.hiddenCardWidth,
+            hiddenCardWidth = placement.hiddenCardWidth,
             focusOnEndView = expiryDateEditText
         )
 
-        val dateDestination = placementParameters.getDateLeftMargin(isFullCard = false)
-        val slideDateRightAnimation = ExpiryDateSlideRightAnimation(
+        val dateDestination = placement.getDateStartMargin(isFullCard = false)
+        val slideDateEndAnimation = ExpiryDateSlideEndAnimation(
             view = expiryDateTextInputLayout,
             startMargin = dateStartMargin,
             destination = dateDestination
         )
 
-        val cvcDestination = placementParameters.getCvcLeftMargin(isFullCard = false)
+        val cvcDestination = placement.getCvcStartMargin(isFullCard = false)
         val cvcStartMargin = cvcDestination + (dateStartMargin - dateDestination)
-        val slideCvcRightAnimation = CvcSlideRightAnimation(
+        val slideCvcEndAnimation = CvcSlideEndAnimation(
             view = cvcNumberTextInputLayout,
             startMargin = cvcStartMargin,
             destination = cvcDestination,
-            newWidth = placementParameters.cvcWidth
+            newWidth = placement.cvcWidth
         )
 
-        val postalCodeDestination = placementParameters.getPostalCodeLeftMargin(isFullCard = false)
+        val postalCodeDestination = placement.getPostalCodeStartMargin(isFullCard = false)
         val postalCodeStartMargin = postalCodeDestination + (cvcStartMargin - cvcDestination)
-        val slidePostalCodeRightAnimation = if (postalCodeEnabled) {
-            PostalCodeSlideRightAnimation(
+        val slidePostalCodeEndAnimation = if (postalCodeEnabled) {
+            PostalCodeSlideEndAnimation(
                 view = postalCodeTextInputLayout,
                 startMargin = postalCodeStartMargin,
                 destination = postalCodeDestination,
-                newWidth = placementParameters.postalCodeWidth
+                newWidth = placement.postalCodeWidth
             )
         } else {
             null
         }
 
-        startSlideAnimation(listOfNotNull(
-            slideCardRightAnimation,
-            slideDateRightAnimation,
-            slideCvcRightAnimation,
-            slidePostalCodeRightAnimation
-        ))
+        startSlideAnimation(
+            listOfNotNull(
+                slideCardEndAnimation,
+                slideDateEndAnimation,
+                slideCvcEndAnimation,
+                slidePostalCodeEndAnimation
+            )
+        )
 
         isShowingFullCard = false
     }
@@ -954,52 +992,45 @@ class CardInputWidget @JvmOverloads constructor(
         containerLayout.startAnimation(animationSet)
     }
 
-    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
-        super.onWindowFocusChanged(hasWindowFocus)
-        if (hasWindowFocus && CardBrand.Unknown == brand) {
-            cardBrandView.applyTint()
-        }
-    }
-
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
         if (!isViewInitialized && width != 0) {
             isViewInitialized = true
-            placementParameters.totalLengthInPixels = frameWidth
+            placement.totalLengthInPixels = frameWidth
 
             updateSpaceSizes(isShowingFullCard)
 
             updateFieldLayout(
                 view = cardNumberTextInputLayout,
-                width = placementParameters.cardWidth,
-                leftMargin = if (isShowingFullCard) {
+                width = placement.cardWidth,
+                marginStart = if (isShowingFullCard) {
                     0
                 } else {
-                    -1 * placementParameters.hiddenCardWidth
+                    -1 * placement.hiddenCardWidth
                 }
             )
 
             updateFieldLayout(
                 view = expiryDateTextInputLayout,
-                width = placementParameters.dateWidth,
-                leftMargin = placementParameters.getDateLeftMargin(isShowingFullCard)
+                width = placement.dateWidth,
+                marginStart = placement.getDateStartMargin(isShowingFullCard)
             )
 
             updateFieldLayout(
                 view = cvcNumberTextInputLayout,
-                width = placementParameters.cvcWidth,
-                leftMargin = placementParameters.getCvcLeftMargin(isShowingFullCard)
+                width = placement.cvcWidth,
+                marginStart = placement.getCvcStartMargin(isShowingFullCard)
             )
 
             updateFieldLayout(
                 view = postalCodeTextInputLayout,
-                width = placementParameters.postalCodeWidth,
-                leftMargin = placementParameters.getPostalCodeLeftMargin(isShowingFullCard)
+                width = placement.postalCodeWidth,
+                marginStart = placement.getPostalCodeStartMargin(isShowingFullCard)
             )
         }
     }
 
-    private var hiddenCardText: String = createHiddenCardText(brand)
+    private var hiddenCardText: String = createHiddenCardText(cardNumberEditText.panLength)
 
     private val cvcPlaceHolder: String
         get() {
@@ -1012,179 +1043,15 @@ class CardInputWidget @JvmOverloads constructor(
 
     private val peekCardText: String
         get() {
-            return when (brand) {
-                CardBrand.AmericanExpress -> PEEK_TEXT_AMEX
-                CardBrand.DinersClub -> PEEK_TEXT_DINERS_14
-                else -> PEEK_TEXT_COMMON
+            return when (cardNumberEditText.panLength) {
+                19 -> 3
+                15 -> 5
+                14 -> 2
+                else -> 4
+            }.let { peekSize ->
+                "0".repeat(peekSize)
             }
         }
-
-    private fun updateIcon() {
-        cardBrandView.showBrandIcon(brand, shouldShowErrorIcon)
-    }
-
-    private fun updateIconCvc(
-        hasFocus: Boolean,
-        cvcText: String?
-    ) {
-        when {
-            shouldShowErrorIcon -> {
-                updateIcon()
-            }
-            shouldIconShowBrand(brand, hasFocus, cvcText) -> {
-                updateIcon()
-            }
-            else -> {
-                updateIconForCvcEntry()
-            }
-        }
-    }
-
-    private fun updateIconForCvcEntry() {
-        cardBrandView.showCvcIcon(brand)
-    }
-
-    /**
-     * A class for tracking the placement and layout of fields
-     */
-    internal class PlacementParameters {
-        internal var totalLengthInPixels: Int = 0
-
-        internal var cardWidth: Int = 0
-        internal var hiddenCardWidth: Int = 0
-        internal var peekCardWidth: Int = 0
-        internal var cardDateSeparation: Int = 0
-        internal var dateWidth: Int = 0
-        internal var dateCvcSeparation: Int = 0
-        internal var cvcWidth: Int = 0
-        internal var cvcPostalCodeSeparation: Int = 0
-        internal var postalCodeWidth: Int = 0
-
-        internal var cardTouchBufferLimit: Int = 0
-        internal var dateStartPosition: Int = 0
-        internal var dateRightTouchBufferLimit: Int = 0
-        internal var cvcStartPosition: Int = 0
-        internal var cvcRightTouchBufferLimit: Int = 0
-        internal var postalCodeStartPosition: Int = 0
-
-        private val cardPeekDateLeftMargin: Int
-            @JvmSynthetic
-            get() {
-                return peekCardWidth + cardDateSeparation
-            }
-
-        private val cardPeekCvcLeftMargin: Int
-            @JvmSynthetic
-            get() {
-                return cardPeekDateLeftMargin + dateWidth + dateCvcSeparation
-            }
-
-        internal val cardPeekPostalCodeLeftMargin: Int
-            @JvmSynthetic
-            get() {
-                return cardPeekCvcLeftMargin + postalCodeWidth + cvcPostalCodeSeparation
-            }
-
-        @JvmSynthetic
-        internal fun getDateLeftMargin(isFullCard: Boolean): Int {
-            return if (isFullCard) {
-                cardWidth + cardDateSeparation
-            } else {
-                cardPeekDateLeftMargin
-            }
-        }
-
-        @JvmSynthetic
-        internal fun getCvcLeftMargin(isFullCard: Boolean): Int {
-            return if (isFullCard) {
-                totalLengthInPixels
-            } else {
-                cardPeekCvcLeftMargin
-            }
-        }
-
-        @JvmSynthetic
-        internal fun getPostalCodeLeftMargin(isFullCard: Boolean): Int {
-            return if (isFullCard) {
-                totalLengthInPixels
-            } else {
-                cardPeekPostalCodeLeftMargin
-            }
-        }
-
-        @JvmSynthetic
-        internal fun updateSpacing(
-            isShowingFullCard: Boolean,
-            postalCodeEnabled: Boolean,
-            frameStart: Int,
-            frameWidth: Int
-        ) {
-            when {
-                isShowingFullCard -> {
-                    cardDateSeparation = frameWidth - cardWidth - dateWidth
-                    cardTouchBufferLimit = frameStart + cardWidth + cardDateSeparation / 2
-                    dateStartPosition = frameStart + cardWidth + cardDateSeparation
-                }
-                postalCodeEnabled -> {
-                    this.cardDateSeparation = (frameWidth * 3 / 10) - peekCardWidth - dateWidth / 4
-                    this.dateCvcSeparation = (frameWidth * 3 / 5) - peekCardWidth - cardDateSeparation -
-                        dateWidth - cvcWidth
-                    this.cvcPostalCodeSeparation = (frameWidth * 4 / 5) - peekCardWidth - cardDateSeparation -
-                        dateWidth - cvcWidth - dateCvcSeparation - postalCodeWidth
-
-                    val dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
-                    this.cardTouchBufferLimit = dateStartPosition / 3
-                    this.dateStartPosition = dateStartPosition
-
-                    val cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
-                    this.dateRightTouchBufferLimit = cvcStartPosition / 3
-                    this.cvcStartPosition = cvcStartPosition
-
-                    val postalCodeStartPosition = cvcStartPosition + cvcWidth + cvcPostalCodeSeparation
-                    this.cvcRightTouchBufferLimit = postalCodeStartPosition / 3
-                    this.postalCodeStartPosition = postalCodeStartPosition
-                }
-                else -> {
-                    this.cardDateSeparation = frameWidth / 2 - peekCardWidth - dateWidth / 2
-                    this.dateCvcSeparation = frameWidth - peekCardWidth - cardDateSeparation -
-                        dateWidth - cvcWidth
-
-                    this.cardTouchBufferLimit = frameStart + peekCardWidth + cardDateSeparation / 2
-                    this.dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
-
-                    this.dateRightTouchBufferLimit = dateStartPosition + dateWidth + dateCvcSeparation / 2
-                    this.cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
-                }
-            }
-        }
-
-        override fun toString(): String {
-            val touchBufferData = """
-                Touch Buffer Data:
-                CardTouchBufferLimit = $cardTouchBufferLimit
-                DateStartPosition = $dateStartPosition
-                DateRightTouchBufferLimit = $dateRightTouchBufferLimit
-                CvcStartPosition = $cvcStartPosition
-                CvcRightTouchBufferLimit = $cvcRightTouchBufferLimit
-                PostalCodeStartPosition = $postalCodeStartPosition
-                """
-
-            val elementSizeData = """
-                TotalLengthInPixels = $totalLengthInPixels
-                CardWidth = $cardWidth
-                HiddenCardWidth = $hiddenCardWidth
-                PeekCardWidth = $peekCardWidth
-                CardDateSeparation = $cardDateSeparation
-                DateWidth = $dateWidth
-                DateCvcSeparation = $dateCvcSeparation
-                CvcWidth = $cvcWidth
-                CvcPostalCodeSeparation = $cvcPostalCodeSeparation
-                PostalCodeWidth: $postalCodeWidth
-                """
-
-            return elementSizeData + touchBufferData
-        }
-    }
 
     private abstract class CardFieldAnimation : Animation() {
         init {
@@ -1196,26 +1063,28 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    private class CardNumberSlideLeftAnimation(
+    private class CardNumberSlideStartAnimation(
         private val view: View
     ) : CardFieldAnimation() {
         init {
-            setAnimationListener(object : AnimationEndListener() {
-                override fun onAnimationEnd(animation: Animation) {
-                    view.requestFocus()
+            setAnimationListener(
+                object : AnimationEndListener() {
+                    override fun onAnimationEnd(animation: Animation) {
+                        view.requestFocus()
+                    }
                 }
-            })
+            )
         }
 
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-                leftMargin = (leftMargin * (1 - interpolatedTime)).toInt()
+                marginStart = (marginStart * (1 - interpolatedTime)).toInt()
             }
         }
     }
 
-    private class ExpiryDateSlideLeftAnimation(
+    private class ExpiryDateSlideStartAnimation(
         private val view: View,
         private val startPosition: Int,
         private val destination: Int
@@ -1223,13 +1092,13 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-                leftMargin =
+                marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
             }
         }
     }
 
-    private class CvcSlideLeftAnimation(
+    private class CvcSlideStartAnimation(
         private val view: View,
         private val startPosition: Int,
         private val destination: Int,
@@ -1238,14 +1107,14 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-                this.leftMargin = (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
-                this.rightMargin = 0
+                this.marginStart = (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
+                this.marginEnd = 0
                 this.width = newWidth
             }
         }
     }
 
-    private class PostalCodeSlideLeftAnimation(
+    private class PostalCodeSlideStartAnimation(
         private val view: View,
         private val startPosition: Int,
         private val destination: Int,
@@ -1254,36 +1123,38 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
             super.applyTransformation(interpolatedTime, t)
             view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-                this.leftMargin =
+                this.marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
-                this.rightMargin = 0
+                this.marginEnd = 0
                 this.width = newWidth
             }
         }
     }
 
-    private class CardNumberSlideRightAnimation(
+    private class CardNumberSlideEndAnimation(
         private val view: View,
         private val hiddenCardWidth: Int,
         private val focusOnEndView: View
     ) : CardFieldAnimation() {
         init {
-            setAnimationListener(object : AnimationEndListener() {
-                override fun onAnimationEnd(animation: Animation) {
-                    focusOnEndView.requestFocus()
+            setAnimationListener(
+                object : AnimationEndListener() {
+                    override fun onAnimationEnd(animation: Animation) {
+                        focusOnEndView.requestFocus()
+                    }
                 }
-            })
+            )
         }
 
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-                leftMargin = (-1f * hiddenCardWidth.toFloat() * interpolatedTime).toInt()
+                marginStart = (-1f * hiddenCardWidth.toFloat() * interpolatedTime).toInt()
             }
         }
     }
 
-    private class ExpiryDateSlideRightAnimation(
+    private class ExpiryDateSlideEndAnimation(
         private val view: View,
         private val startMargin: Int,
         private val destination: Int
@@ -1291,13 +1162,13 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-                leftMargin =
+                marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startMargin).toInt()
             }
         }
     }
 
-    private class CvcSlideRightAnimation(
+    private class CvcSlideEndAnimation(
         private val view: View,
         private val startMargin: Int,
         private val destination: Int,
@@ -1306,15 +1177,15 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-                leftMargin =
+                marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startMargin).toInt()
-                rightMargin = 0
+                marginEnd = 0
                 width = newWidth
             }
         }
     }
 
-    private class PostalCodeSlideRightAnimation(
+    private class PostalCodeSlideEndAnimation(
         private val view: View,
         private val startMargin: Int,
         private val destination: Int,
@@ -1323,9 +1194,9 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-                this.leftMargin =
+                this.marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startMargin).toInt()
-                this.rightMargin = 0
+                this.marginEnd = 0
                 this.width = newWidth
             }
         }
@@ -1344,7 +1215,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    internal interface LayoutWidthCalculator {
+    internal fun interface LayoutWidthCalculator {
         fun calculate(text: String, paint: TextPaint): Int
     }
 
@@ -1354,17 +1225,20 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
+    internal enum class Field {
+        Number,
+        Expiry,
+        Cvc,
+        PostalCode
+    }
+
     internal companion object {
         internal const val LOGGING_TOKEN = "CardInputView"
-
-        private const val PEEK_TEXT_COMMON = "4242"
-        private const val PEEK_TEXT_DINERS_14 = "88"
-        private const val PEEK_TEXT_AMEX = "34343"
 
         private const val CVC_PLACEHOLDER_COMMON = "CVC"
         private const val CVC_PLACEHOLDER_AMEX = "2345"
 
-        private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242"
+        private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242 424"
         private const val FULL_SIZING_DATE_TEXT = "MM/MM"
         private const val FULL_SIZING_POSTAL_CODE_TEXT = "1234567890"
 
@@ -1383,7 +1257,7 @@ class CardInputWidget @JvmOverloads constructor(
          *
          * @param brand the [CardBrand] of the card number
          * @param cvcHasFocus `true` if the CVC entry field has focus, `false` otherwise
-         * @param cvcText the current content of [cvcNumberEditText]
+         * @param cvcText the current content of [cvcEditText]
          *
          * @return `true` if we should show the brand of the card, or `false` if we
          * should show the CVC helper icon instead

@@ -5,13 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.view.CardValidCallback
 import com.stripe.example.databinding.CreateCardPaymentMethodActivityBinding
 import com.stripe.example.databinding.PaymentMethodItemBinding
 
@@ -43,14 +41,9 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         viewBinding.paymentMethods.layoutManager = LinearLayoutManager(this)
         viewBinding.paymentMethods.adapter = adapter
 
-        viewBinding.cardMultilineWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                // added as an example - no-op
-            }
-        })
+        viewBinding.cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+            // added as an example - no-op
+        }
 
         viewBinding.createButton.setOnClickListener {
             keyboardController.hide()
@@ -65,7 +58,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         onCreatePaymentMethodStart()
         viewModel.createPaymentMethod(params).observe(
             this,
-            Observer { result ->
+            { result ->
                 onCreatePaymentMethodCompleted()
                 result.fold(
                     onSuccess = ::onCreatedPaymentMethod,
@@ -102,7 +95,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
 
     private class PaymentMethodsAdapter :
         RecyclerView.Adapter<PaymentMethodsAdapter.PaymentMethodViewHolder>() {
-        internal val paymentMethods: MutableList<PaymentMethod> = mutableListOf()
+        val paymentMethods: MutableList<PaymentMethod> = mutableListOf()
 
         init {
             setHasStableIds(true)
@@ -130,7 +123,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             return requireNotNull(paymentMethods[position].id).hashCode().toLong()
         }
 
-        internal class PaymentMethodViewHolder internal constructor(
+        class PaymentMethodViewHolder internal constructor(
             private val viewBinding: PaymentMethodItemBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             internal fun setPaymentMethod(paymentMethod: PaymentMethod) {

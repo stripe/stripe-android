@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
@@ -19,42 +17,30 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.view.i18n.ErrorMessageTranslator
 import com.stripe.android.view.i18n.TranslatorManager
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class AddPaymentMethodViewModelTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val stripe = Stripe(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
     private val customerSession: CustomerSession = mock()
     private val paymentMethodRetrievalCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()
-    private val paymentMethodCreateParamsCaptor: KArgumentCaptor<PaymentMethodCreateParams> = argumentCaptor()
 
     @Test
-    fun createPaymentMethod_shouldIncludeProductUsageTokens() {
-        val stripe: Stripe = mock()
-        createViewModel(
-            stripe = stripe
-        ).createPaymentMethod(
-            PaymentMethodCreateParams.create(
-                PaymentMethodCreateParamsFixtures.CARD.copy(
-                    attribution = setOf("CardMultilineWidget")
-                )
+    fun `updatedPaymentMethodCreateParams should include expected attribution`() {
+        val params = PaymentMethodCreateParams.create(
+            PaymentMethodCreateParamsFixtures.CARD.copy(
+                attribution = setOf("CardMultilineWidget")
             )
         )
-
-        verify(stripe).createPaymentMethod(
-            paymentMethodCreateParamsCaptor.capture(),
-            anyOrNull(),
-            anyOrNull(),
-            any()
-        )
-
-        assertEquals(
-            setOf("CardMultilineWidget", AddPaymentMethodActivity.PRODUCT_TOKEN),
-            paymentMethodCreateParamsCaptor.firstValue.attribution
+        assertThat(
+            createViewModel().updatedPaymentMethodCreateParams(params).attribution
+        ).containsExactly(
+            "CardMultilineWidget",
+            AddPaymentMethodActivity.PRODUCT_TOKEN
         )
     }
 
@@ -125,7 +111,6 @@ class AddPaymentMethodViewModelTest {
     }
 
     private fun createViewModel(
-        stripe: Stripe = Stripe(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         translator: ErrorMessageTranslator = TranslatorManager.getErrorMessageTranslator()
     ): AddPaymentMethodViewModel {
         return AddPaymentMethodViewModel(

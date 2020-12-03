@@ -1,12 +1,12 @@
 package com.stripe.android.view
 
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.Currency
 import java.util.Locale
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [PaymentUtils]
@@ -24,8 +24,10 @@ class PaymentUtilsTest {
             PaymentUtils.formatPriceStringUsingFree(
                 0,
                 Currency.getInstance("USD"),
-                "Free"),
-            "Free")
+                "Free"
+            ),
+            "Free"
+        )
     }
 
     @Test

@@ -1,9 +1,9 @@
 package com.stripe.android
 
 import com.stripe.android.model.StripeModel
-import java.util.concurrent.TimeUnit
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 @Parcelize
 internal data class FingerprintData(

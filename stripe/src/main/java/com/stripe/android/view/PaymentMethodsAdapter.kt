@@ -17,6 +17,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A [RecyclerView.Adapter] that holds a set of [MaskedCardView] items for a given set
@@ -29,7 +31,7 @@ internal class PaymentMethodsAdapter constructor(
     private val shouldShowGooglePay: Boolean = false,
     private val useGooglePay: Boolean = false,
     private val canDeletePaymentMethods: Boolean = true,
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main)
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = mutableListOf<PaymentMethod>()
@@ -78,7 +80,8 @@ internal class PaymentMethodsAdapter constructor(
                     PaymentMethod.Type.Fpx -> ViewType.AddFpx.ordinal
                     else ->
                         throw IllegalArgumentException(
-                            "Unsupported PaymentMethod type: ${paymentMethodType.code}")
+                            "Unsupported PaymentMethod type: ${paymentMethodType.code}"
+                        )
                 }
             }
         }
@@ -128,9 +131,12 @@ internal class PaymentMethodsAdapter constructor(
     @JvmSynthetic
     internal fun onPositionClicked(position: Int) {
         updateSelectedPaymentMethod(position)
-        scope.launch {
+        CoroutineScope(workContext).launch {
             delay(0)
-            listener?.onPaymentMethodClick(getPaymentMethodAtPosition(position))
+
+            withContext(Dispatchers.Main) {
+                listener?.onPaymentMethodClick(getPaymentMethodAtPosition(position))
+            }
         }
     }
 

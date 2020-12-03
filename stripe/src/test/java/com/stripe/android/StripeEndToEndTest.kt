@@ -9,27 +9,35 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.AddressFixtures
+import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
+import com.stripe.android.model.CardParamsFixtures
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.SourceParams
+import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.Token
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class StripeEndToEndTest {
+internal class StripeEndToEndTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val defaultStripe = Stripe(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+    private val testDispatcher = TestCoroutineDispatcher()
 
     @Test
     fun testCreateAccountToken() {
@@ -39,11 +47,13 @@ class StripeEndToEndTest {
                 individual = AccountParams.BusinessTypeParams.Individual(
                     firstName = "Jenny",
                     lastName = "Rosen",
-                    address = AddressFixtures.ADDRESS
+                    address = AddressFixtures.ADDRESS,
+                    dateOfBirth = DateOfBirth(1, 1, 1990)
                 )
             )
         )
-        assertEquals(Token.Type.Account, token?.type)
+        assertThat(requireNotNull(token).type)
+            .isEqualTo(Token.Type.Account)
     }
 
     @Test
@@ -65,6 +75,7 @@ class StripeEndToEndTest {
             clientSecret = "pi_abc_secret_invalid",
             callback = paymentIntentCallback
         )
+        idleLooper()
 
         verify(paymentIntentCallback).onError(
             argWhere {
@@ -74,13 +85,14 @@ class StripeEndToEndTest {
     }
 
     @Test
-    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() {
+    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() = testDispatcher.runBlockingTest {
         val setupIntentCallback: ApiResultCallback<SetupIntent> = mock()
 
         createStripeWithTestScope().retrieveSetupIntent(
             clientSecret = "seti_abc_secret_invalid",
             callback = setupIntentCallback
         )
+        idleLooper()
 
         verify(setupIntentCallback).onError(
             argWhere {
@@ -124,6 +136,82 @@ class StripeEndToEndTest {
             )
     }
 
+    @Test
+    fun `create Source using CardParams should return object with expected data`() {
+        val source = defaultStripe.createSourceSynchronous(
+            SourceParams.createCardParams(CardParamsFixtures.DEFAULT)
+        )
+        assertThat(source?.sourceTypeModel)
+            .isEqualTo(
+                SourceTypeModel.Card(
+                    addressLine1Check = "unchecked",
+                    addressZipCheck = "unchecked",
+                    brand = CardBrand.Visa,
+                    country = "US",
+                    cvcCheck = "unchecked",
+                    expiryMonth = 12,
+                    expiryYear = 2025,
+                    last4 = "4242",
+                    funding = CardFunding.Credit,
+                    threeDSecureStatus = SourceTypeModel.Card.ThreeDSecureStatus.Optional
+                )
+            )
+    }
+
+    @Test
+    fun `create card token using CardParams should return object with expected data`() {
+        val token = defaultStripe.createCardTokenSynchronous(
+            CardParamsFixtures.DEFAULT
+        )
+        val card = requireNotNull(token?.card)
+
+        assertThat(card)
+            .isEqualTo(
+                Card(
+                    expMonth = 12,
+                    expYear = 2025,
+                    id = card.id,
+                    name = "Jenny Rosen",
+                    last4 = "4242",
+                    addressLine1 = "123 Market St",
+                    addressLine1Check = "unchecked",
+                    addressLine2 = "#345",
+                    addressCity = "San Francisco",
+                    addressState = "CA",
+                    addressZip = "94107",
+                    addressZipCheck = "unchecked",
+                    addressCountry = "US",
+                    brand = CardBrand.Visa,
+                    funding = CardFunding.Credit,
+                    country = "US",
+                    currency = "usd",
+                    cvcCheck = "unchecked"
+                )
+            )
+    }
+
+    @Test
+    fun `Card objects should be populated with the expected CardBrand value`() {
+        assertThat(
+            listOf(
+                CardNumberFixtures.AMEX_NO_SPACES to CardBrand.AmericanExpress,
+                CardNumberFixtures.VISA_NO_SPACES to CardBrand.Visa,
+                CardNumberFixtures.MASTERCARD_NO_SPACES to CardBrand.MasterCard,
+                CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
+                CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
+                CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
+            ).all { (cardNumber, cardBrand) ->
+                val token = defaultStripe.createCardTokenSynchronous(
+                    CardParamsFixtures.DEFAULT.copy(
+                        number = cardNumber
+                    )
+                )
+                token?.card?.brand == cardBrand
+            }
+        ).isTrue()
+    }
+
     private fun createStripeWithTestScope(
         publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     ): Stripe {
@@ -136,7 +224,7 @@ class StripeEndToEndTest {
                 stripeRepository
             ),
             publishableKey = publishableKey,
-            workScope = testScope
+            workContext = testDispatcher
         )
     }
 }

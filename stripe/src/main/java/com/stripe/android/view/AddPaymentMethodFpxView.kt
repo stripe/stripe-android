@@ -31,7 +31,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     private val viewModel: FpxViewModel by lazy {
         ViewModelProvider(
             activity,
-            ViewModelProvider.AndroidViewModelFactory(activity.application)
+            FpxViewModel.Factory(activity.application)
         ).get(FpxViewModel::class.java)
     }
 

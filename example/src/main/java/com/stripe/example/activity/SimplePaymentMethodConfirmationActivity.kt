@@ -43,7 +43,10 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
         viewBinding.nameLayout.visibility = viewVisibility(dropdownItem.requiresName)
         viewBinding.emailLayout.visibility = viewVisibility(dropdownItem.requiresEmail)
         viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-            dropdownItem.icon, 0, 0, 0
+            dropdownItem.icon,
+            0,
+            0,
+            0
         )
     }
 
@@ -59,7 +62,7 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        viewModel.inProgress.observe(this, Observer { enableUi(!it) })
+        viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         val adapter = DropdownItemAdapter(this)
@@ -116,19 +119,28 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
                 "pl",
                 R.drawable.ic_brandicon__p24,
                 PaymentMethodCreateParams.Companion::createP24,
-                requiresName = false, requiresEmail = true
+                requiresName = false,
+                requiresEmail = true
             ),
             Bancontact(
-                "be", R.drawable.ic_brandicon__bancontact,
+                "be",
+                R.drawable.ic_brandicon__bancontact,
                 PaymentMethodCreateParams.Companion::createBancontact
             ),
             EPS(
-                "at", R.drawable.ic_brandicon__eps,
+                "at",
+                R.drawable.ic_brandicon__eps,
                 PaymentMethodCreateParams.Companion::createEps
             ),
             Giropay(
-                "de", R.drawable.ic_brandicon__giropay,
+                "de",
+                R.drawable.ic_brandicon__giropay,
                 PaymentMethodCreateParams.Companion::createGiropay
+            ),
+            GrabPay(
+                "sg",
+                R.drawable.ic_brandicon_grabpay,
+                PaymentMethodCreateParams.Companion::createGrabPay
             );
         }
 
@@ -162,7 +174,10 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
                 val dropdownItem = requireNotNull(getItem(position))
                 viewBinding.text.text = dropdownItem.name
                 viewBinding.text.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    dropdownItem.icon, 0, 0, 0
+                    dropdownItem.icon,
+                    0,
+                    0,
+                    0
                 )
 
                 return viewBinding.root

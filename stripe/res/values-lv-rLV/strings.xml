@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Kartes numurs</string>
+    <string name="acc_label_card_number_node">%s, kartes numurs</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Derīguma termiņš</string>
+    <string name="acc_label_expiry_date_node">%s, derīguma termiņš</string>
+    <string name="acc_label_zip">Pasta indekss</string>
+    <string name="acc_label_zip_short">Pasta indekss</string>
+    <string name="add_card">Lai varētu veikt iegādi ar šo lietotni, pievienojiet jaunu debetkarti vai kredītkarti.</string>
+    <string name="added">%s pievienots</string>
+    <string name="address_city_required">Ievadiet pilsētu</string>
+    <string name="address_country_invalid">Ievadītā valsts nav derīga</string>
+    <string name="address_county_required">Ievadiet apriņķi</string>
+    <string name="address_label_address">Adrese</string>
+    <string name="address_label_address_line1">1. adreses rindiņa</string>
+    <string name="address_label_address_line1_optional">1. adreses rindiņa (nav obligāti)</string>
+    <string name="address_label_address_line2">2. adreses rindiņa</string>
+    <string name="address_label_address_line2_optional">2. adreses rindiņa (nav obligāti)</string>
+    <string name="address_label_address_optional">Adrese (nav obligāti) </string>
+    <string name="address_label_apt">Dzīv. </string>
+    <string name="address_label_apt_optional">Dzīv. (nav obligāti)</string>
+    <string name="address_label_city">Pilsēta</string>
+    <string name="address_label_city_optional">Pilsēta (nav obligāti)</string>
+    <string name="address_label_country">Valsts</string>
+    <string name="address_label_county">Apriņķis</string>
+    <string name="address_label_county_optional">Apriņķis (nav obligāti)</string>
+    <string name="address_label_name">Vārds, uzvārds</string>
+    <string name="address_label_name_optional">Vārds un uzvārds (nav obligāti)</string>
+    <string name="address_label_phone_number">Tālruņa numurs</string>
+    <string name="address_label_phone_number_optional">Tālruņa numurs (nav obligāti)</string>
+    <string name="address_label_postal_code">Pasta indekss</string>
+    <string name="address_label_postal_code_optional">Pasta indekss (nav obligāti)</string>
+    <string name="address_label_postcode">Pasta indekss</string>
+    <string name="address_label_postcode_optional">Pasta indekss (nav obligāti)</string>
+    <string name="address_label_province">Province</string>
+    <string name="address_label_province_optional">Province (nav obligāti)</string>
+    <string name="address_label_region_generic"> Novads/štats/province/reģions</string>
+    <string name="address_label_region_generic_optional">Novads/štats/province/reģions (nav obligāti)</string>
+    <string name="address_label_state">Novads/štats</string>
+    <string name="address_label_state_optional">Novads/štats (nav obligāti)</string>
+    <string name="address_label_zip_code">Pasta indekss</string>
+    <string name="address_label_zip_code_optional">Pasta indekss (nav obligāti)</string>
+    <string name="address_label_zip_postal_code">Pasta indekss</string>
+    <string name="address_label_zip_postal_code_optional">Pasta indekss (neobligāts)</string>
+    <string name="address_name_required">Ievadiet vārdu un uzvārdu</string>
+    <string name="address_phone_number_required">Ievadiet tālruņa numuru</string>
+    <string name="address_postal_code_invalid">Pasta indekss nav derīgs</string>
+    <string name="address_postcode_invalid">Pasta indekss nav derīgs</string>
+    <string name="address_province_required">Ievadiet provinci</string>
+    <string name="address_region_generic_required">Ievadiet novadu/štatu/provinci/reģionu</string>
+    <string name="address_required">Ievadiet adresi</string>
+    <string name="address_shipping_address">Piegādes adrese</string>
+    <string name="address_state_required">Ievadiet novadu/štatu</string>
+    <string name="address_zip_invalid">Pasta indekss nav derīgs.</string>
+    <string name="address_zip_postal_invalid">Pasta indekss nav derīgs</string>
+    <string name="becs_mandate_acceptance">
+    Sniedzot savu bankas konta informāciju un apstiprinot šo maksājumu, jūs
+    piekrītat šim tiešā debeta pieprasījumam un pakalpojuma līgumam, kā arī pilnvarojat uzņēmumu
+    Stripe Payments Australia Pty Ltd ACN 160 180 343, tiešā debeta lietotāja ID numurs 507156
+    (turpmāk — “Stripe”) izmantot lielapjoma elektronisko klīringa sistēmu (BECS),
+    lai uzņēmuma %1$s (turpmāk — “Tirgotājs”) vārdā debitētu jūsu kontu par jebkādām summām,
+    par kurām Tirgotājs jums ir atsevišķi ziņojis. Jūs apliecināt, ka esat vai nu
+    iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.
+    </string>
+    <string name="becs_widget_account_number">Konta numurs</string>
+    <string name="becs_widget_account_number_required">Jānorāda konta numurs.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">Ievadītais BSB ir nepilnīgs.</string>
+    <string name="becs_widget_bsb_invalid">Ievadītais BSB nav derīgs.</string>
+    <string name="becs_widget_email">E-pasta adrese</string>
+    <string name="becs_widget_email_required">Jānorāda e-pasta adrese.</string>
+    <string name="becs_widget_name">Vārds, uzvārds</string>
+    <string name="becs_widget_name_required">Jānorāda vārds/nosaukums.</string>
+    <string name="close">Aizvērt</string>
+    <string name="delete_payment_method">Vai dzēst maksājuma metodi?</string>
+    <string name="delete_payment_method_prompt_title">Vai dzēst maksājuma metodi?</string>
+    <string name="expiry_date_hint">MM/GG</string>
+    <string name="expiry_label_short">Derīguma termiņš</string>
+    <string name="fpx_bank_offline">%s — bezsaistē</string>
+    <string name="google_pay">Google Pay</string>
+    <string name="invalid_card_number">Kartes numurs nav derīgs.</string>
+    <string name="invalid_cvc">Kartes drošības kods nav derīgs.</string>
+    <string name="invalid_expiry_month">Kartes derīguma termiņa mēnesis nav derīgs.</string>
+    <string name="invalid_expiry_year">Kartes derīguma termiņa gads nav derīgs.</string>
+    <string name="invalid_shipping_information">Nederīga piegādes adrese</string>
+    <string name="invalid_zip">Pasta indekss nav pilnīgs.</string>
+    <string name="no_payment_methods">Nav maksājuma metožu.</string>
+    <string name="payment_method_add_new_card">Pievienot jaunu karti…</string>
+    <string name="payment_method_add_new_fpx">Atlasīt bankas kontu (FPX)…</string>
+    <string name="price_free">Bezmaksas</string>
+    <string name="removed">%s noņemts</string>
+    <string name="secure_checkout">Droša norēķināšanās</string>
+    <string name="title_add_a_card">Pievienojiet karti</string>
+    <string name="title_add_an_address">Iestatiet adresi</string>
+    <string name="title_bank_account">Bankas konts</string>
+    <string name="title_payment_method">Maksājuma metode</string>
+    <string name="title_select_shipping_method">Atlasiet piegādes metodi</string>
+</resources>

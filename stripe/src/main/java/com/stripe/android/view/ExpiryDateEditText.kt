@@ -3,11 +3,14 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Build
 import android.text.Editable
+import android.text.InputFilter
+import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import android.widget.EditText
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
+import com.stripe.android.model.ExpirationDate
 import kotlin.math.min
 
 /**
@@ -20,6 +23,13 @@ open class ExpiryDateEditText @JvmOverloads constructor(
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     init {
+        inputType = InputType.TYPE_CLASS_NUMBER
+        filters = listOf(
+            InputFilter.LengthFilter(
+                context.resources.getInteger(R.integer.stripe_date_length)
+            )
+        ).toTypedArray()
+
         setErrorMessage(resources.getString(R.string.invalid_expiry_year))
         listenForTextChanges()
 
@@ -44,21 +54,17 @@ open class ExpiryDateEditText @JvmOverloads constructor(
      * The return value is given as a [Pair], where the first entry is the two-digit month
      * (from 01-12) and the second entry is the four-digit year (2017, not 17).
      */
+    @Deprecated("Use validatedDate")
     val validDateFields: Pair<Int, Int>?
-        get() {
-            val rawInput = text?.toString().takeIf { isDateValid } ?: return null
-            val rawNumericInput = rawInput.replace("/".toRegex(), "")
-            val dateFields = DateUtils.separateDateStringParts(rawNumericInput)
+        get() = validatedDate?.let {
+            Pair(it.month, it.year)
+        }
 
-            return try {
-                Pair(
-                    dateFields[0].toInt(),
-                    DateUtils.convertTwoDigitYearToFour(dateFields[1].toInt())
-                )
-            } catch (numEx: NumberFormatException) {
-                // Given that the date should already be valid when getting to this method, we
-                // should not hit this exception. Returning null to indicate error if we do.
-                null
+    val validatedDate: ExpirationDate.Validated?
+        get() {
+            return when (isDateValid) {
+                true -> ExpirationDate.Unvalidated.create(fieldText).validate()
+                false -> null
             }
         }
 
@@ -68,135 +74,138 @@ open class ExpiryDateEditText @JvmOverloads constructor(
         }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : StripeTextWatcher() {
-            private var ignoreChanges = false
-            private var latestChangeStart: Int = 0
-            private var latestInsertionSize: Int = 0
-            private var parts: Array<String> = arrayOf("", "")
+        addTextChangedListener(
+            object : StripeTextWatcher() {
+                private var ignoreChanges = false
+                private var latestChangeStart: Int = 0
+                private var latestInsertionSize: Int = 0
+                private var expirationDate = ExpirationDate.Unvalidated(
+                    month = "",
+                    year = ""
+                )
 
-            private var newCursorPosition: Int? = null
-            private var formattedDate: String? = null
+                private var newCursorPosition: Int? = null
+                private var formattedDate: String? = null
 
-            // two-digit month
-            val month: String
-                get() {
-                    return parts[0]
-                }
-
-            // two-digit year
-            val year: String
-                get() {
-                    return parts[1]
-                }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                if (ignoreChanges) {
-                    return
-                }
-                latestChangeStart = start
-                latestInsertionSize = after
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (ignoreChanges) {
-                    return
-                }
-
-                var inErrorState = false
-
-                val inputText = s?.toString().orEmpty()
-                var rawNumericInput = inputText.replace("/".toRegex(), "")
-
-                if (rawNumericInput.length == 1 && latestChangeStart == 0 &&
-                    latestInsertionSize == 1) {
-                    val first = rawNumericInput[0]
-                    if (!(first == '0' || first == '1')) {
-                        // If the first digit typed isn't 0 or 1, then it can't be a valid
-                        // two-digit month. Hence, we assume the user is inputting a one-digit
-                        // month. We bump it to the preferred input, so "4" becomes "04", which
-                        // later in this method goes to "04/".
-                        rawNumericInput = "0$rawNumericInput"
-                        latestInsertionSize++
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                    if (ignoreChanges) {
+                        return
                     }
-                } else if (rawNumericInput.length == 2 &&
-                    latestChangeStart == 2 &&
-                    latestInsertionSize == 0) {
-                    // This allows us to delete past the separator, so that if a user presses
-                    // delete when the current string is "12/", the resulting string is "1," since
-                    // we pretend that the "/" isn't really there. The case that we also want,
-                    // where "12/3" + DEL => "12" is handled elsewhere.
-                    rawNumericInput = rawNumericInput.substring(0, 1)
+                    latestChangeStart = start
+                    latestInsertionSize = after
                 }
 
-                // Date input is MM/YY, so the separated parts will be {MM, YY}
-                parts = DateUtils.separateDateStringParts(rawNumericInput)
-
-                if (!DateUtils.isValidMonth(month)) {
-                    inErrorState = true
-                }
-
-                val formattedDateBuilder = StringBuilder()
-                    .append(month)
-
-                if (month.length == 2 && latestInsertionSize > 0 &&
-                    !inErrorState || rawNumericInput.length > 2) {
-                    formattedDateBuilder.append("/")
-                }
-
-                formattedDateBuilder.append(year)
-
-                val formattedDate = formattedDateBuilder.toString()
-                this.newCursorPosition = updateSelectionIndex(formattedDate.length,
-                    latestChangeStart, latestInsertionSize, MAX_INPUT_LENGTH)
-                this.formattedDate = formattedDate
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                if (ignoreChanges) {
-                    return
-                }
-
-                ignoreChanges = true
-                if (!isLastKeyDelete && formattedDate != null) {
-                    setText(formattedDate)
-                    newCursorPosition?.let {
-                        setSelection(it.coerceIn(0, fieldText.length))
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    if (ignoreChanges) {
+                        return
                     }
-                }
 
-                ignoreChanges = false
+                    var inErrorState = false
 
-                // Note: we want to show an error state if the month is invalid or the
-                // final, complete date is in the past. We don't want to show an error state for
-                // incomplete entries.
+                    val inputText = s?.toString().orEmpty()
+                    var rawNumericInput = inputText.replace("/".toRegex(), "")
 
-                // This covers the case where the user has entered a month of 15, for instance.
-                var shouldShowError = month.length == 2 &&
-                    !DateUtils.isValidMonth(month)
-
-                // Note that we have to check the parts array because afterTextChanged has odd
-                // behavior when it comes to pasting, where a paste of "1212" triggers this
-                // function for the strings "12/12" (what it actually becomes) and "1212",
-                // so we might not be properly catching an error state.
-                if (month.length == 2 && year.length == 2) {
-                    val wasComplete = isDateValid
-                    updateInputValues(month, year)
-                    // Here, we have a complete date, so if we've made an invalid one, we want
-                    // to show an error.
-                    shouldShowError = !isDateValid
-                    if (!wasComplete && isDateValid) {
-                        completionCallback()
+                    if (rawNumericInput.length == 1 && latestChangeStart == 0 &&
+                        latestInsertionSize == 1
+                    ) {
+                        val first = rawNumericInput[0]
+                        if (!(first == '0' || first == '1')) {
+                            // If the first digit typed isn't 0 or 1, then it can't be a valid
+                            // two-digit month. Hence, we assume the user is inputting a one-digit
+                            // month. We bump it to the preferred input, so "4" becomes "04", which
+                            // later in this method goes to "04/".
+                            rawNumericInput = "0$rawNumericInput"
+                            latestInsertionSize++
+                        }
+                    } else if (rawNumericInput.length == 2 &&
+                        latestChangeStart == 2 &&
+                        latestInsertionSize == 0
+                    ) {
+                        // This allows us to delete past the separator, so that if a user presses
+                        // delete when the current string is "12/", the resulting string is "1," since
+                        // we pretend that the "/" isn't really there. The case that we also want,
+                        // where "12/3" + DEL => "12" is handled elsewhere.
+                        rawNumericInput = rawNumericInput.substring(0, 1)
                     }
-                } else {
-                    isDateValid = false
+
+                    val expirationDate =
+                        ExpirationDate.Unvalidated.create(rawNumericInput).also {
+                            this.expirationDate = it
+                        }
+
+                    if (!expirationDate.isMonthValid) {
+                        inErrorState = true
+                    }
+
+                    val formattedDateBuilder = StringBuilder()
+                        .append(expirationDate.month)
+
+                    if (expirationDate.month.length == 2 && latestInsertionSize > 0 &&
+                        !inErrorState || rawNumericInput.length > 2
+                    ) {
+                        formattedDateBuilder.append("/")
+                    }
+
+                    formattedDateBuilder.append(expirationDate.year)
+
+                    val formattedDate = formattedDateBuilder.toString()
+                    this.newCursorPosition = updateSelectionIndex(
+                        formattedDate.length,
+                        latestChangeStart,
+                        latestInsertionSize,
+                        MAX_INPUT_LENGTH
+                    )
+                    this.formattedDate = formattedDate
                 }
 
-                this@ExpiryDateEditText.shouldShowError = shouldShowError
+                override fun afterTextChanged(s: Editable?) {
+                    if (ignoreChanges) {
+                        return
+                    }
 
-                formattedDate = null
-                newCursorPosition = null
+                    ignoreChanges = true
+                    if (!isLastKeyDelete && formattedDate != null) {
+                        setText(formattedDate)
+                        newCursorPosition?.let {
+                            setSelection(it.coerceIn(0, fieldText.length))
+                        }
+                    }
+
+                    ignoreChanges = false
+
+                    // Note: we want to show an error state if the month is invalid or the
+                    // final, complete date is in the past. We don't want to show an error state for
+                    // incomplete entries.
+
+                    // This covers the case where the user has entered a month of 15, for instance.
+                    val month = expirationDate.month
+                    val year = expirationDate.year
+                    var shouldShowError = month.length == 2 && !expirationDate.isMonthValid
+
+                    // Note that we have to check the parts array because afterTextChanged has odd
+                    // behavior when it comes to pasting, where a paste of "1212" triggers this
+                    // function for the strings "12/12" (what it actually becomes) and "1212",
+                    // so we might not be properly catching an error state.
+                    if (month.length == 2 && year.length == 2) {
+                        val wasComplete = isDateValid
+                        updateInputValues(month, year)
+                        // Here, we have a complete date, so if we've made an invalid one, we want
+                        // to show an error.
+                        shouldShowError = !isDateValid
+                        if (!wasComplete && isDateValid) {
+                            completionCallback()
+                        }
+                    } else {
+                        isDateValid = false
+                    }
+
+                    this@ExpiryDateEditText.shouldShowError = shouldShowError
+
+                    formattedDate = null
+                    newCursorPosition = null
+                }
             }
-        })
+        )
     }
 
     /**

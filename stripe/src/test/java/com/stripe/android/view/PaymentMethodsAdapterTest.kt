@@ -9,14 +9,17 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Test class for [PaymentMethodsAdapter]
@@ -27,14 +30,23 @@ class PaymentMethodsAdapterTest {
     private val adapterDataObserver: RecyclerView.AdapterDataObserver = mock()
     private val listener: PaymentMethodsAdapter.Listener = mock()
 
-    private val paymentMethodsAdapter: PaymentMethodsAdapter = PaymentMethodsAdapter(ARGS)
-
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+    private val testDispatcher = TestCoroutineDispatcher()
+
+    private val paymentMethodsAdapter: PaymentMethodsAdapter = PaymentMethodsAdapter(
+        ARGS,
+        workContext = testDispatcher
+    )
 
     @BeforeTest
     fun setup() {
+        Dispatchers.setMain(testDispatcher)
         paymentMethodsAdapter.registerAdapterDataObserver(adapterDataObserver)
+    }
+
+    @AfterTest
+    fun cleanup() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -108,7 +120,8 @@ class PaymentMethodsAdapterTest {
         val adapter = PaymentMethodsAdapter(
             intentArgs = PaymentMethodsActivityStarter.Args.Builder()
                 .build(),
-            initiallySelectedPaymentMethodId = "pm_1000"
+            initiallySelectedPaymentMethodId = "pm_1000",
+            workContext = testDispatcher
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         assertThat(adapter.selectedPaymentMethod?.id)
@@ -120,7 +133,8 @@ class PaymentMethodsAdapterTest {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             addableTypes = listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx),
-            shouldShowGooglePay = true
+            shouldShowGooglePay = true,
+            workContext = testDispatcher
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
@@ -146,7 +160,8 @@ class PaymentMethodsAdapterTest {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             addableTypes = listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx),
-            shouldShowGooglePay = true
+            shouldShowGooglePay = true,
+            workContext = testDispatcher
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
@@ -168,7 +183,8 @@ class PaymentMethodsAdapterTest {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             addableTypes = listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx),
-            shouldShowGooglePay = false
+            shouldShowGooglePay = false,
+            workContext = testDispatcher
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
@@ -186,12 +202,17 @@ class PaymentMethodsAdapterTest {
 
     @Test
     fun testGooglePayRowClick_shouldCallListener() {
-        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+        val adapter = PaymentMethodsAdapter(
+            ARGS,
+            shouldShowGooglePay = true,
+            workContext = testDispatcher
+        )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         adapter.listener = listener
 
         val viewHolder = PaymentMethodsAdapter.ViewHolder.GooglePayViewHolder(
-            context, FrameLayout(context)
+            context,
+            FrameLayout(context)
         )
         adapter.onBindViewHolder(viewHolder, 0)
 
@@ -203,7 +224,7 @@ class PaymentMethodsAdapterTest {
     fun `onPositionClicked() should call listener's onPaymentMethodClick()`() {
         val adapter = PaymentMethodsAdapter(
             ARGS,
-            scope = testScope
+            workContext = testDispatcher
         )
 
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
@@ -215,7 +236,11 @@ class PaymentMethodsAdapterTest {
 
     @Test
     fun getPosition_withValidPaymentMethod_returnsPosition() {
-        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+        val adapter = PaymentMethodsAdapter(
+            ARGS,
+            shouldShowGooglePay = true,
+            workContext = testDispatcher
+        )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
         assertThat(adapter.getPosition(PaymentMethodFixtures.CARD_PAYMENT_METHODS.last()))
@@ -224,7 +249,11 @@ class PaymentMethodsAdapterTest {
 
     @Test
     fun getPosition_withInvalidPaymentMethod_returnsNull() {
-        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+        val adapter = PaymentMethodsAdapter(
+            ARGS,
+            shouldShowGooglePay = true,
+            workContext = testDispatcher
+        )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
         assertThat(adapter.getPosition(PaymentMethodFixtures.FPX_PAYMENT_METHOD))

@@ -6,11 +6,11 @@ import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -50,7 +50,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
             disableUi()
             createKlarnaSource().observe(
                 this,
-                Observer { result ->
+                { result ->
                     result.fold(
                         onSuccess = { source ->
                             logSource(source)
@@ -66,7 +66,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
             disableUi()
             viewModel.fetchSource(viewModel.source).observe(
                 this,
-                Observer { result ->
+                { result ->
                     enableUi()
                     result.fold(::logSource, ::logException)
                 }
@@ -145,7 +145,8 @@ class KlarnaSourceActivity : AppCompatActivity() {
                         .setPostalCode("N1 7BE")
                         .build(),
                     billingEmail = "test@example.com",
-                    billingPhone = "02012267709"
+                    billingPhone = "02012267709",
+                    billingDob = DateOfBirth(1, 1, 1990)
                 )
             )
         )

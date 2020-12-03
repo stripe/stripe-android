@@ -15,9 +15,11 @@ class TranslatorManagerTest {
 
     @Test
     fun testDefaultErrorMessageTranslator() {
-        assertEquals("error!",
+        assertEquals(
+            "error!",
             TranslatorManager.getErrorMessageTranslator()
-                .translate(0, "error!", STRIPE_ERROR))
+                .translate(0, "error!", STRIPE_ERROR)
+        )
     }
 
     @Test
@@ -33,9 +35,11 @@ class TranslatorManagerTest {
                 }
             }
         )
-        assertEquals("custom message",
+        assertEquals(
+            "custom message",
             TranslatorManager.getErrorMessageTranslator()
-                .translate(0, "original message", STRIPE_ERROR))
+                .translate(0, "original message", STRIPE_ERROR)
+        )
     }
 
     private companion object {

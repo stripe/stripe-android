@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.BankAccount
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerSource
-import kotlin.test.Test
 import org.json.JSONObject
+import kotlin.test.Test
 
 class CustomerJsonParserTest {
 

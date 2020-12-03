@@ -3,7 +3,6 @@ package com.stripe.android
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -17,10 +16,10 @@ import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionViewModelTest {
@@ -28,13 +27,17 @@ class PaymentSessionViewModelTest {
     private val paymentSessionPrefs: PaymentSessionPrefs = mock()
     private val savedStateHandle: SavedStateHandle = mock()
 
-    private val paymentMethodsListenerCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
-    private val customerRetrievalListenerCaptor: KArgumentCaptor<CustomerSession.CustomerRetrievalListener> = argumentCaptor()
+    private val paymentMethodsListenerCaptor =
+        argumentCaptor<CustomerSession.PaymentMethodsRetrievalListener>()
+    private val customerRetrievalListenerCaptor =
+        argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
-    private val viewModel: PaymentSessionViewModel by lazy { createViewModel() }
+    private val paymentSessionDatas =
+        mutableListOf<PaymentSessionData>()
+    private val networkStates =
+        mutableListOf<PaymentSessionViewModel.NetworkState>()
 
-    private val paymentSessionDatas: MutableList<PaymentSessionData> = mutableListOf()
-    private val networkStates: MutableList<PaymentSessionViewModel.NetworkState> = mutableListOf()
+    private val viewModel: PaymentSessionViewModel = createViewModel()
 
     @BeforeTest
     fun before() {
@@ -62,12 +65,13 @@ class PaymentSessionViewModelTest {
 
     @Test
     fun init_whenSavedStateHasData_shouldUpdatePaymentSessionData() {
-        whenever(savedStateHandle.get<PaymentSessionData>(
-            PaymentSessionViewModel.KEY_PAYMENT_SESSION_DATA
-        )).thenReturn(UPDATED_DATA)
+        whenever(
+            savedStateHandle.get<PaymentSessionData>(
+                PaymentSessionViewModel.KEY_PAYMENT_SESSION_DATA
+            )
+        ).thenReturn(UPDATED_DATA)
 
-        val viewModel = createViewModel()
-        viewModel.paymentSessionDataLiveData.observeForever {
+        createViewModel().paymentSessionDataLiveData.observeForever {
             paymentSessionDatas.add(it)
         }
 
@@ -121,9 +125,11 @@ class PaymentSessionViewModelTest {
 
     @Test
     fun onPaymentMethodResult_withGooglePay_shouldUpdateLiveData() {
-        viewModel.onPaymentMethodResult(PaymentMethodsActivityStarter.Result(
-            useGooglePay = true
-        ))
+        viewModel.onPaymentMethodResult(
+            PaymentMethodsActivityStarter.Result(
+                useGooglePay = true
+            )
+        )
         assertThat(paymentSessionDatas.last().useGooglePay)
             .isTrue()
     }

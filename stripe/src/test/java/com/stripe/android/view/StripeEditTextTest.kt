@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import androidx.annotation.ColorInt
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -9,26 +10,29 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.R
 import com.stripe.android.testharness.ViewTestUtils
-import kotlin.test.Test
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
-import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class StripeEditTextTest {
-
-    private val context: Context = ApplicationProvider.getApplicationContext()
+internal class StripeEditTextTest {
+    private val context: Context = ContextThemeWrapper(
+        ApplicationProvider.getApplicationContext(),
+        R.style.StripeDefaultTheme
+    )
     private val afterTextChangedListener: StripeEditText.AfterTextChangedListener = mock()
     private val deleteEmptyListener: StripeEditText.DeleteEmptyListener = mock()
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val editText = StripeEditText(
         context,
-        workDispatcher = testDispatcher
+        workContext = testDispatcher
     ).also {
         it.setDeleteEmptyListener(deleteEmptyListener)
         it.setAfterTextChangedListener(afterTextChangedListener)
@@ -52,7 +56,6 @@ class StripeEditTextTest {
     @Test
     fun deleteText_whenNonZeroLength_callsAppropriateListeners() {
         editText.append("1")
-        reset(afterTextChangedListener)
 
         ViewTestUtils.sendDeleteKeyEvent(editText)
         verifyNoMoreInteractions(deleteEmptyListener)
@@ -135,11 +138,14 @@ class StripeEditTextTest {
     }
 
     @Test
-    fun `setHintDelayed should set hint after delay`() {
+    fun `setHintDelayed should set hint after delay`() = testDispatcher.runBlockingTest {
         assertThat(editText.hint)
             .isNull()
+
         editText.setHintDelayed("Here's a hint", DELAY)
         testDispatcher.advanceTimeBy(DELAY + 10)
+        idleLooper()
+
         assertThat(editText.hint)
             .isEqualTo("Here's a hint")
     }

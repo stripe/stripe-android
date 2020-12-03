@@ -1,11 +1,13 @@
 package com.stripe.android
 
 import android.content.Context
-import java.util.Calendar
-import kotlinx.coroutines.CoroutineDispatcher
+import com.stripe.android.networking.FingerprintRequestExecutor
+import com.stripe.android.networking.FingerprintRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Calendar
+import kotlin.coroutines.CoroutineContext
 
 internal interface FingerprintDataRepository {
     fun refresh()
@@ -17,7 +19,7 @@ internal interface FingerprintDataRepository {
         private val fingerprintRequestFactory: FingerprintRequestFactory,
         private val fingerprintRequestExecutor: FingerprintRequestExecutor =
             FingerprintRequestExecutor.Default(),
-        dispatcher: CoroutineDispatcher = Dispatchers.IO
+        private val workContext: CoroutineContext
     ) : FingerprintDataRepository {
         private var cachedFingerprintData: FingerprintData? = null
 
@@ -25,21 +27,21 @@ internal interface FingerprintDataRepository {
             Calendar.getInstance().timeInMillis
         }
 
-        private val scope = CoroutineScope(dispatcher)
-
         constructor(
             context: Context
         ) : this(
             localStore = FingerprintDataStore.Default(context),
-            fingerprintRequestFactory = FingerprintRequestFactory(context)
+            fingerprintRequestFactory = FingerprintRequestFactory.Default(context),
+            workContext = Dispatchers.IO
         )
 
         override fun refresh() {
             if (Stripe.advancedFraudSignalsEnabled) {
-                scope.launch {
+                CoroutineScope(workContext).launch {
                     localStore.get().let { localFingerprintData ->
                         if (localFingerprintData == null ||
-                            localFingerprintData.isExpired(timestampSupplier())) {
+                            localFingerprintData.isExpired(timestampSupplier())
+                        ) {
                             fingerprintRequestExecutor.execute(
                                 request = fingerprintRequestFactory.create(
                                     localFingerprintData

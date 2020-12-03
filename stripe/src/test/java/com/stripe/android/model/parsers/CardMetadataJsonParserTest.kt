@@ -1,32 +1,39 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.AccountRange
+import com.stripe.android.model.BinFixtures
+import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
 import org.json.JSONObject
-import org.junit.Test
+import kotlin.test.Test
 
 class CardMetadataJsonParserTest {
 
     @Test
     fun `parse should create expected object`() {
-        assertThat(CardMetadataJsonParser(BIN_PREFIX).parse(DEFAULT))
+        assertThat(CardMetadataJsonParser(BinFixtures.VISA).parse(DEFAULT))
             .isEqualTo(
                 CardMetadata(
-                    BIN_PREFIX,
+                    BinFixtures.VISA,
                     listOf(
-                        CardMetadata.AccountRange(
-                            "4242424239999999",
-                            "4242420000000000",
-                            16,
-                            "VISA",
-                            "GB"
+                        AccountRange(
+                            binRange = BinRange(
+                                low = "4242420000000000",
+                                high = "4242424239999999"
+                            ),
+                            panLength = 16,
+                            brandInfo = AccountRange.BrandInfo.Visa,
+                            country = "GB"
                         ),
-                        CardMetadata.AccountRange(
-                            "4242429999999999",
-                            "4242424250000000",
-                            16,
-                            "VISA",
-                            "GB"
+                        AccountRange(
+                            binRange = BinRange(
+                                low = "4242424250000000",
+                                high = "4242429999999999"
+                            ),
+                            panLength = 16,
+                            brandInfo = AccountRange.BrandInfo.Visa,
+                            country = "GB"
                         )
                     )
                 )
@@ -35,17 +42,19 @@ class CardMetadataJsonParserTest {
 
     @Test
     fun `parse should drop objects with missing fields`() {
-        assertThat(CardMetadataJsonParser(BIN_PREFIX).parse(MISSING_FIELD))
+        assertThat(CardMetadataJsonParser(BinFixtures.VISA).parse(MISSING_FIELD))
             .isEqualTo(
                 CardMetadata(
-                    BIN_PREFIX,
+                    BinFixtures.VISA,
                     listOf(
-                        CardMetadata.AccountRange(
-                            "4242424239999999",
-                            "4242420000000000",
-                            16,
-                            "VISA",
-                            "GB"
+                        AccountRange(
+                            binRange = BinRange(
+                                low = "4242420000000000",
+                                high = "4242424239999999"
+                            ),
+                            panLength = 16,
+                            brandInfo = AccountRange.BrandInfo.Visa,
+                            country = "GB"
                         )
                     )
                 )
@@ -54,18 +63,16 @@ class CardMetadataJsonParserTest {
 
     @Test
     fun `parse should handle empty result`() {
-        assertThat(CardMetadataJsonParser(BIN_PREFIX).parse(EMPTY))
+        assertThat(CardMetadataJsonParser(BinFixtures.VISA).parse(EMPTY))
             .isEqualTo(
                 CardMetadata(
-                    BIN_PREFIX,
+                    BinFixtures.VISA,
                     emptyList()
                 )
             )
     }
 
     private companion object {
-        private val BIN_PREFIX = "424242"
-
         private val DEFAULT = JSONObject(
             """
                 {

@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
@@ -14,36 +13,30 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class PaymentFlowViewModelTest {
     private val customerSession: CustomerSession = mock()
+    private val customerRetrievalListener = argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
-    private val customerRetrievalListener: KArgumentCaptor<CustomerSession.CustomerRetrievalListener> = argumentCaptor()
-
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
-
-    private val viewModel: PaymentFlowViewModel by lazy {
-        PaymentFlowViewModel(
-            customerSession = customerSession,
-            paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG),
-            workScope = testScope
-        )
-    }
+    private val testDispatcher = TestCoroutineDispatcher()
+    private val viewModel = PaymentFlowViewModel(
+        customerSession = customerSession,
+        paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG),
+        workContext = testDispatcher
+    )
 
     @Test
     fun saveCustomerShippingInformation_onSuccess_returnsExpectedData() {
-        assertFalse(viewModel.isShippingInfoSubmitted)
+        assertThat(viewModel.isShippingInfoSubmitted)
+            .isFalse()
 
         val result =
             viewModel.saveCustomerShippingInformation(ShippingInfoFixtures.DEFAULT)
@@ -59,8 +52,10 @@ class PaymentFlowViewModelTest {
         }
         customerRetrievalListener.firstValue.onCustomerRetrieved(CustomerFixtures.CUSTOMER)
 
-        assertNotNull(customer)
-        assertTrue(viewModel.isShippingInfoSubmitted)
+        assertThat(customer)
+            .isNotNull()
+        assertThat(viewModel.isShippingInfoSubmitted)
+            .isTrue()
     }
 
     @Test
@@ -75,6 +70,7 @@ class PaymentFlowViewModelTest {
         result.observeForever {
             shippingMethods = it.getOrThrow()
         }
+        idleLooper()
 
         assertThat(shippingMethods)
             .isEqualTo(SHIPPING_METHODS)
@@ -95,6 +91,7 @@ class PaymentFlowViewModelTest {
         result.observeForever {
             shippingMethods = it.getOrThrow()
         }
+        idleLooper()
 
         assertThat(shippingMethods)
             .isEmpty()
@@ -114,6 +111,7 @@ class PaymentFlowViewModelTest {
         result.observeForever {
             throwable = it.exceptionOrNull()
         }
+        idleLooper()
 
         assertThat(throwable?.message)
             .isEqualTo(SHIPPING_ERROR_MESSAGE)
@@ -154,10 +152,20 @@ class PaymentFlowViewModelTest {
     private companion object {
         private const val SHIPPING_ERROR_MESSAGE = "Shipping info was invalid"
         private val SHIPPING_METHODS = listOf(
-            ShippingMethod("UPS Ground", "ups-ground",
-                0, "USD", "Arrives in 3-5 days"),
-            ShippingMethod("FedEx", "fedex",
-                599, "USD", "Arrives tomorrow")
+            ShippingMethod(
+                "UPS Ground",
+                "ups-ground",
+                0,
+                "USD",
+                "Arrives in 3-5 days"
+            ),
+            ShippingMethod(
+                "FedEx",
+                "fedex",
+                599,
+                "USD",
+                "Arrives tomorrow"
+            )
         )
     }
 }

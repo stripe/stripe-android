@@ -42,7 +42,7 @@ Add `stripe-android` to your `build.gradle` dependencies.
 
 ```
 dependencies {
-    implementation 'com.stripe:stripe-android:15.0.1'
+    implementation 'com.stripe:stripe-android:16.1.1'
 }
 ```
 
@@ -60,11 +60,11 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 **Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
 
-**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html) that correspond to objects and methods in the Stripe API. You can build your own entirely custom UI on top of this layer.
+**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build your own entirely custom UI on top of this layer.
 
 **SCA-Ready**: The SDK automatically performs native [3D Secure authentication](https://stripe.com/docs/payments/3d-secure) to comply with [Strong Customer Authentication](https://stripe.com/docs/strong-customer-authentication) regulation in Europe.
 
-**Native UI**: We provide native screens and elements to collect payment and shipping details. For example, [CardInputWidget](https://stripe.dev/stripe-android/com/stripe/android/view/CardInputWidget.html) is a view that collects and validates card details. You can use these individually, or take all of the prebuilt UI in one flow by following the [Basic Integration guide](https://stripe.com/docs/mobile/android/basic).
+**Native UI**: We provide native screens and elements to collect payment and shipping details. For example, [CardInputWidget](https://stripe.dev/stripe-android/stripe/com.stripe.android.view/-card-input-widget/index.html) is a view that collects and validates card details. You can use these individually, or take all of the prebuilt UI in one flow by following the [Basic Integration guide](https://stripe.com/docs/mobile/android/basic).
 
 <img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_input.gif"/>
 

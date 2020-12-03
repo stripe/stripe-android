@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.app.Activity
 import android.content.Context
 import android.view.View
 import android.widget.LinearLayout
@@ -8,6 +9,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
@@ -18,32 +20,49 @@ import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.cards.AccountRangeFixtures
+import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
+import com.stripe.android.model.BinFixtures
+import com.stripe.android.model.Card
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.mockito.Mockito.reset
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [CardMultilineWidget].
  */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CardMultilineWidgetTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
-    private lateinit var cardMultilineWidget: CardMultilineWidget
-    private lateinit var noZipCardMultilineWidget: CardMultilineWidget
-    private lateinit var fullGroup: WidgetControlGroup
-    private lateinit var noZipGroup: WidgetControlGroup
+    private val cardMultilineWidget: CardMultilineWidget by lazy {
+        activityScenarioFactory.createView {
+            createWidget(it, shouldShowPostalCode = true)
+        }
+    }
+    private val noZipCardMultilineWidget: CardMultilineWidget by lazy {
+        activityScenarioFactory.createView {
+            createWidget(it, shouldShowPostalCode = false)
+        }
+    }
+    private val fullGroup: WidgetControlGroup by lazy {
+        WidgetControlGroup(cardMultilineWidget, testDispatcher)
+    }
+    private val noZipGroup: WidgetControlGroup by lazy {
+        WidgetControlGroup(noZipCardMultilineWidget, testDispatcher)
+    }
 
     private val fullCardListener: CardInputListener = mock()
     private val noZipCardListener: CardInputListener = mock()
@@ -51,66 +70,72 @@ internal class CardMultilineWidgetTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
+    private val accountRangeStore = DefaultCardAccountRangeStore(context)
+
     @BeforeTest
     fun setup() {
         // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+            .isTrue()
 
         CustomerSession.instance = mock()
 
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.PostalCode)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity { activity ->
-                cardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                fullGroup = WidgetControlGroup(cardMultilineWidget)
+        // populate store with data to circumvent network requests that cause flakiness
+        accountRangeStore.save(
+            BinFixtures.VISA,
+            listOf(AccountRangeFixtures.VISA)
+        )
+        accountRangeStore.save(
+            BinFixtures.AMEX,
+            listOf(AccountRangeFixtures.AMERICANEXPRESS)
+        )
+        accountRangeStore.save(
+            BinFixtures.DINERSCLUB14,
+            listOf(AccountRangeFixtures.DINERSCLUB14)
+        )
+    }
 
-                fullGroup.cardNumberEditText.setText("")
-
-                cardMultilineWidget.setCardNumberTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setExpiryDateTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setCvcNumberTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setPostalCodeTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.paymentMethodBillingDetailsBuilder
-            }
-        }
-
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.None)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
-                noZipCardMultilineWidget.setShouldShowPostalCode(false)
-                noZipGroup = WidgetControlGroup(noZipCardMultilineWidget)
-            }
+    private fun createWidget(
+        activity: Activity,
+        shouldShowPostalCode: Boolean
+    ): CardMultilineWidget {
+        return CardMultilineWidget(
+            activity,
+            shouldShowPostalCode = shouldShowPostalCode
+        ).also {
+            it.cardNumberEditText.workContext = testDispatcher
         }
     }
 
     @Test
     fun testExistence() {
-        assertNotNull(cardMultilineWidget)
-        assertNotNull(fullGroup.cardNumberEditText)
-        assertNotNull(fullGroup.expiryDateEditText)
-        assertNotNull(fullGroup.cvcEditText)
-        assertNotNull(fullGroup.postalCodeEditText)
-        assertNotNull(fullGroup.secondRowLayout)
+        assertThat(cardMultilineWidget)
+            .isNotNull()
+        assertThat(fullGroup.cardNumberEditText)
+            .isNotNull()
+        assertThat(fullGroup.expiryDateEditText)
+            .isNotNull()
+        assertThat(fullGroup.cvcEditText)
+            .isNotNull()
+        assertThat(fullGroup.postalCodeEditText)
+            .isNotNull()
+        assertThat(fullGroup.secondRowLayout)
+            .isNotNull()
 
-        assertNotNull(noZipCardMultilineWidget)
-        assertNotNull(noZipGroup.cardNumberEditText)
-        assertNotNull(noZipGroup.expiryDateEditText)
-        assertNotNull(noZipGroup.cvcEditText)
-        assertNotNull(noZipGroup.postalCodeEditText)
-        assertNotNull(noZipGroup.secondRowLayout)
+        assertThat(noZipCardMultilineWidget)
+            .isNotNull()
+        assertThat(noZipGroup.cardNumberEditText)
+            .isNotNull()
+        assertThat(noZipGroup.expiryDateEditText)
+            .isNotNull()
+        assertThat(noZipGroup.cvcEditText)
+            .isNotNull()
+        assertThat(noZipGroup.postalCodeEditText)
+            .isNotNull()
+        assertThat(noZipGroup.secondRowLayout)
+            .isNotNull()
     }
 
     @Test
@@ -126,10 +151,10 @@ internal class CardMultilineWidgetTest {
         val longExpiryHint = cardMultilineWidget
             .resources.getString(R.string.acc_label_expiry_date)
 
-        assertNotNull(shortExpiryContainer.hint)
-        assertEquals(shortExpiryHint, shortExpiryContainer.hint?.toString())
-        assertNotNull(longExpiryContainer.hint)
-        assertEquals(longExpiryHint, longExpiryContainer.hint?.toString())
+        assertThat(shortExpiryContainer.hint)
+            .isEqualTo(shortExpiryHint)
+        assertThat(longExpiryContainer.hint)
+            .isEqualTo(longExpiryHint)
     }
 
     @Test
@@ -137,19 +162,29 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
-        fullGroup.postalCodeEditText.append("12345")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
-        val card = requireNotNull(cardMultilineWidget.card)
-        assertEquals(VISA_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals("123", card.cvc)
-        assertEquals("12345", card.addressZip)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
+        assertThat(cardMultilineWidget.card)
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
+        assertThat(cardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -157,10 +192,26 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        val card = cardMultilineWidget.card
-        assertNotNull(card)
+        assertThat(cardMultilineWidget.card)
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
+        assertThat(cardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -168,18 +219,26 @@ internal class CardMultilineWidgetTest {
         noZipGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append("123")
-        val card = noZipCardMultilineWidget.card
-        assertNotNull(card)
-        assertEquals(VISA_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals("123", card.cvc)
-        assertNull(card.addressZip)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
+        noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
+
+        assertThat(noZipCardMultilineWidget.card)
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
+        assertThat(noZipCardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -188,17 +247,25 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
         noZipGroup.cvcEditText.append("1234")
-        val card = noZipCardMultilineWidget.card
-        assertNotNull(card)
-        assertEquals(AMEX_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals("1234", card.cvc)
-        assertNull(card.addressZip)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
+
+        assertThat(noZipCardMultilineWidget.card)
+            .isEqualTo(
+                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_AMEX)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
+        assertThat(noZipCardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_AMEX,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -206,18 +273,26 @@ internal class CardMultilineWidgetTest {
         noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append("123")
-        val card = noZipCardMultilineWidget.card
-        assertNotNull(card)
-        assertEquals(AMEX_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals("123", card.cvc)
-        assertNull(card.addressZip)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
+        noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
+
+        assertThat(noZipCardMultilineWidget.card)
+            .isEqualTo(
+                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
+        assertThat(noZipCardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -225,28 +300,28 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
-        fullGroup.postalCodeEditText.append("12345")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
-        val params = cardMultilineWidget.paymentMethodCreateParams
-        assertNotNull(params)
-
-        val expectedParams = PaymentMethodCreateParams.create(
-            PaymentMethodCreateParams.Card(
-                number = VISA_NO_SPACES,
-                cvc = "123",
-                expiryMonth = 12,
-                expiryYear = 2050,
-                attribution = ATTRIBUTION
-            ),
-            PaymentMethod.BillingDetails.Builder()
-                .setAddress(Address.Builder()
-                    .setPostalCode("12345")
-                    .build()
+        assertThat(cardMultilineWidget.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParams.Card(
+                        number = VISA_NO_SPACES,
+                        cvc = CVC_VALUE_COMMON,
+                        expiryMonth = 12,
+                        expiryYear = 2050,
+                        attribution = ATTRIBUTION
+                    ),
+                    PaymentMethod.BillingDetails.Builder()
+                        .setAddress(
+                            Address.Builder()
+                                .setPostalCode(POSTAL_CODE_VALUE)
+                                .build()
+                        )
+                        .build()
                 )
-                .build()
-        )
-        assertEquals(expectedParams, params)
+            )
     }
 
     @Test
@@ -254,25 +329,22 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
-        fullGroup.postalCodeEditText.append("12345")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
-        val card = cardMultilineWidget.paymentMethodCard
-        assertNotNull(card)
+        assertThat(cardMultilineWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = VISA_NO_SPACES,
+                    cvc = CVC_VALUE_COMMON,
+                    expiryMonth = 12,
+                    expiryYear = 2050,
+                    attribution = ATTRIBUTION
+                )
+            )
 
-        val inputCard = PaymentMethodCreateParams.Card(
-            number = VISA_NO_SPACES,
-            cvc = "123",
-            expiryMonth = 12,
-            expiryYear = 2050,
-            attribution = ATTRIBUTION
-        )
-        assertEquals(inputCard, card)
-
-        assertEquals(
-            "12345",
-            cardMultilineWidget.paymentMethodBillingDetails?.address?.postalCode
-        )
+        assertThat(cardMultilineWidget.paymentMethodBillingDetails?.address?.postalCode)
+            .isEqualTo(POSTAL_CODE_VALUE)
     }
 
     @Test
@@ -283,9 +355,10 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertNull(cardMultilineWidget.paymentMethodCreateParams)
+        assertThat(cardMultilineWidget.paymentMethodCreateParams)
+            .isNull()
     }
 
     @Test
@@ -296,9 +369,10 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertNotNull(cardMultilineWidget.paymentMethodCreateParams)
+        assertThat(cardMultilineWidget.paymentMethodCreateParams)
+            .isNotNull()
     }
 
     @Test
@@ -309,9 +383,10 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertNotNull(cardMultilineWidget.paymentMethodCreateParams)
+        assertThat(cardMultilineWidget.paymentMethodCreateParams)
+            .isNotNull()
     }
 
     @Test
@@ -319,20 +394,21 @@ internal class CardMultilineWidgetTest {
         noZipGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append("123")
-        val card = noZipCardMultilineWidget.paymentMethodCard
-        assertNotNull(card)
+        noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        val inputCard = PaymentMethodCreateParams.Card(
-            number = VISA_NO_SPACES,
-            cvc = "123",
-            expiryMonth = 12,
-            expiryYear = 2050,
-            attribution = ATTRIBUTION
-        )
-        assertEquals(inputCard, card)
+        assertThat(noZipCardMultilineWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = VISA_NO_SPACES,
+                    cvc = CVC_VALUE_COMMON,
+                    expiryMonth = 12,
+                    expiryYear = 2050,
+                    attribution = ATTRIBUTION
+                )
+            )
 
-        assertNull(noZipCardMultilineWidget.paymentMethodBillingDetails)
+        assertThat(noZipCardMultilineWidget.paymentMethodBillingDetails)
+            .isNull()
     }
 
     @Test
@@ -342,20 +418,19 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("50")
         noZipGroup.cvcEditText.append("1234")
 
-        val card = noZipCardMultilineWidget.paymentMethodCard
+        assertThat(noZipCardMultilineWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = AMEX_NO_SPACES,
+                    cvc = "1234",
+                    expiryMonth = 12,
+                    expiryYear = 2050,
+                    attribution = ATTRIBUTION
+                )
+            )
 
-        assertNotNull(card)
-
-        val inputCard = PaymentMethodCreateParams.Card(
-            number = AMEX_NO_SPACES,
-            cvc = "1234",
-            expiryMonth = 12,
-            expiryYear = 2050,
-            attribution = ATTRIBUTION
-        )
-        assertEquals(inputCard, card)
-
-        assertNull(noZipCardMultilineWidget.paymentMethodBillingDetails)
+        assertThat(noZipCardMultilineWidget.paymentMethodBillingDetails)
+            .isNull()
     }
 
     @Test
@@ -363,28 +438,33 @@ internal class CardMultilineWidgetTest {
         noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append("123")
-        val card = noZipCardMultilineWidget.paymentMethodCard
+        noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertNotNull(card)
-        val inputCard = PaymentMethodCreateParams.Card(
-            number = AMEX_NO_SPACES,
-            cvc = "123",
-            expiryMonth = 12,
-            expiryYear = 2050,
-            attribution = ATTRIBUTION
-        )
-        assertEquals(inputCard, card)
+        assertThat(noZipCardMultilineWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = AMEX_NO_SPACES,
+                    cvc = CVC_VALUE_COMMON,
+                    expiryMonth = 12,
+                    expiryYear = 2050,
+                    attribution = ATTRIBUTION
+                )
+            )
 
-        assertNull(noZipCardMultilineWidget.paymentMethodBillingDetails)
+        assertThat(noZipCardMultilineWidget.paymentMethodBillingDetails)
+            .isNull()
     }
 
     @Test
     fun initView_whenZipRequired_secondRowContainsThreeVisibleElements() {
-        assertEquals(View.VISIBLE, fullGroup.expiryDateEditText.visibility)
-        assertEquals(View.VISIBLE, fullGroup.cvcEditText.visibility)
-        assertEquals(View.VISIBLE, fullGroup.postalCodeEditText.visibility)
-        assertEquals(View.VISIBLE, fullGroup.postalCodeInputLayout.visibility)
+        assertThat(fullGroup.expiryDateEditText.visibility)
+            .isEqualTo(View.VISIBLE)
+        assertThat(fullGroup.cvcEditText.visibility)
+            .isEqualTo(View.VISIBLE)
+        assertThat(fullGroup.postalCodeEditText.visibility)
+            .isEqualTo(View.VISIBLE)
+        assertThat(fullGroup.postalCodeInputLayout.visibility)
+            .isEqualTo(View.VISIBLE)
     }
 
     @Test
@@ -392,22 +472,25 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
-        fullGroup.postalCodeEditText.append("12345")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
         cardMultilineWidget.clear()
 
-        assertEquals("", fullGroup.cardNumberEditText.text?.toString())
-        assertEquals("", fullGroup.expiryDateEditText.text?.toString())
-        assertEquals("", fullGroup.cvcEditText.text?.toString())
-        assertEquals("", fullGroup.postalCodeEditText.text?.toString())
+        assertThat(fullGroup.cardNumberEditText.text?.toString())
+            .isEmpty()
+        assertThat(fullGroup.expiryDateEditText.text?.toString())
+            .isEmpty()
+        assertThat(fullGroup.cvcEditText.text?.toString())
+            .isEmpty()
+        assertThat(fullGroup.postalCodeEditText.text?.toString())
+            .isEmpty()
     }
 
     @Test
     fun clear_whenFieldsInErrorState_clearsFieldsAndHidesErrors() {
         // Makes this 4242 4242 4242 4243
-        val badVisa = VISA_WITH_SPACES
-            .substring(VISA_WITH_SPACES.length - 1) + "3"
+        val badVisa = VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1) + "3"
         fullGroup.cardNumberEditText.setText(badVisa)
 
         fullGroup.expiryDateEditText.append("01")
@@ -417,57 +500,79 @@ internal class CardMultilineWidgetTest {
 
         cardMultilineWidget.validateAllFields()
 
-        assertTrue(fullGroup.cardNumberEditText.shouldShowError)
-        assertTrue(fullGroup.expiryDateEditText.shouldShowError)
-        assertTrue(fullGroup.cvcEditText.shouldShowError)
-        assertFalse(fullGroup.postalCodeEditText.shouldShowError)
+        assertThat(fullGroup.cardNumberEditText.shouldShowError)
+            .isTrue()
+        assertThat(fullGroup.expiryDateEditText.shouldShowError)
+            .isTrue()
+        assertThat(fullGroup.cvcEditText.shouldShowError)
+            .isTrue()
+        assertThat(fullGroup.postalCodeEditText.shouldShowError)
+            .isFalse()
 
         cardMultilineWidget.clear()
 
-        assertFalse(fullGroup.cardNumberEditText.shouldShowError)
-        assertFalse(fullGroup.expiryDateEditText.shouldShowError)
-        assertFalse(fullGroup.cvcEditText.shouldShowError)
-        assertFalse(fullGroup.postalCodeEditText.shouldShowError)
+        assertThat(fullGroup.cardNumberEditText.shouldShowError)
+            .isFalse()
+        assertThat(fullGroup.expiryDateEditText.shouldShowError)
+            .isFalse()
+        assertThat(fullGroup.cvcEditText.shouldShowError)
+            .isFalse()
+        assertThat(fullGroup.postalCodeEditText.shouldShowError)
+            .isFalse()
     }
 
     @Test
     fun setCvcLabel_shouldShowCustomLabelIfPresent() {
         cardMultilineWidget.setCvcLabel("my cool cvc")
-        assertEquals("my cool cvc", fullGroup.cvcInputLayout.hint)
+        assertThat(fullGroup.cvcInputLayout.hint)
+            .isEqualTo("my cool cvc")
 
         cardMultilineWidget.setCvcLabel(null)
-        assertEquals("CVC", fullGroup.cvcInputLayout.hint)
+        assertThat(fullGroup.cvcInputLayout.hint)
+            .isEqualTo("CVC")
     }
 
     @Test
     fun initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() {
-        assertEquals(View.VISIBLE, fullGroup.postalCodeInputLayout.visibility)
+        assertThat(fullGroup.postalCodeInputLayout.visibility)
+            .isEqualTo(View.VISIBLE)
         cardMultilineWidget.setShouldShowPostalCode(false)
-        assertEquals(View.GONE, fullGroup.postalCodeInputLayout.visibility)
+        assertThat(fullGroup.postalCodeInputLayout.visibility)
+            .isEqualTo(View.GONE)
+
         val params = fullGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
-        assertEquals(0, params.rightMargin)
-        assertEquals(0, params.marginEnd)
+        assertThat(params.marginEnd)
+            .isEqualTo(0)
+        assertThat(params.marginEnd)
+            .isEqualTo(0)
     }
 
     @Test
     fun initView_whenNoZipRequired_secondRowContainsTwoVisibleElements() {
-        assertEquals(View.VISIBLE, noZipGroup.expiryDateEditText.visibility)
-        assertEquals(View.VISIBLE, noZipGroup.cvcEditText.visibility)
-        assertEquals(View.GONE, noZipGroup.postalCodeInputLayout.visibility)
+        assertThat(noZipGroup.expiryDateEditText.visibility)
+            .isEqualTo(View.VISIBLE)
+        assertThat(noZipGroup.cvcEditText.visibility)
+            .isEqualTo(View.VISIBLE)
+        assertThat(noZipGroup.postalCodeInputLayout.visibility)
+            .isEqualTo(View.GONE)
     }
 
     @Test
     fun initView_whenZipHiddenThenSetToRequired_secondRowAddsPostalCodeAndAdjustsMargin() {
-        assertEquals(View.GONE, noZipGroup.postalCodeInputLayout.visibility)
+        assertThat(noZipGroup.postalCodeInputLayout.visibility)
+            .isEqualTo(View.GONE)
         noZipCardMultilineWidget.setShouldShowPostalCode(true)
-        assertEquals(View.VISIBLE, noZipGroup.postalCodeInputLayout.visibility)
+        assertThat(noZipGroup.postalCodeInputLayout.visibility)
+            .isEqualTo(View.VISIBLE)
 
         val expectedMargin = noZipCardMultilineWidget.resources
             .getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
 
         val params = noZipGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
-        assertEquals(expectedMargin, params.rightMargin)
-        assertEquals(expectedMargin, params.marginEnd)
+        assertThat(params.marginEnd)
+            .isEqualTo(expectedMargin)
+        assertThat(params.marginEnd)
+            .isEqualTo(expectedMargin)
     }
 
     @Test
@@ -476,14 +581,20 @@ internal class CardMultilineWidgetTest {
         noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
+        idleLooper()
+
         verify(fullCardListener).onCardComplete()
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
-        assertTrue(fullGroup.expiryDateEditText.hasFocus())
+        assertThat(fullGroup.expiryDateEditText.hasFocus())
+            .isTrue()
 
         noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
+        idleLooper()
+
         verify(noZipCardListener).onCardComplete()
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
-        assertTrue(noZipGroup.expiryDateEditText.hasFocus())
+        assertThat(noZipGroup.expiryDateEditText.hasFocus())
+            .isTrue()
     }
 
     @Test
@@ -495,13 +606,15 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("50")
         verify(fullCardListener).onExpirationComplete()
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
-        assertTrue(fullGroup.cvcEditText.hasFocus())
+        assertThat(fullGroup.cvcEditText.hasFocus())
+            .isTrue()
 
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
         verify(noZipCardListener).onExpirationComplete()
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
-        assertTrue(noZipGroup.cvcEditText.hasFocus())
+        assertThat(noZipGroup.cvcEditText.hasFocus())
+            .isTrue()
     }
 
     @Test
@@ -512,46 +625,52 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
         verify(fullCardListener).onCvcComplete()
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.PostalCode)
-        assertTrue(fullGroup.postalCodeEditText.hasFocus())
+        assertThat(fullGroup.postalCodeEditText.hasFocus())
+            .isTrue()
 
         noZipGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append("123")
+        noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
         verify(noZipCardListener).onCvcComplete()
         verify(noZipCardListener, never()).onFocusChange(CardInputListener.FocusField.PostalCode)
-        assertTrue(noZipGroup.cvcEditText.hasFocus())
+        assertThat(noZipGroup.cvcEditText.hasFocus())
+            .isTrue()
     }
 
     @Test
-    fun deleteWhenEmpty_fromExpiry_shiftsToCardNumber() {
+    fun deleteWhenEmpty_fromExpiry_withPostalCode_shiftsToCardNumber() {
         cardMultilineWidget.setCardInputListener(fullCardListener)
-        noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
-
-        val deleteOneCharacterString = VISA_WITH_SPACES
-            .substring(0, VISA_WITH_SPACES.length - 1)
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
 
-        reset(fullCardListener)
-        assertTrue(fullGroup.expiryDateEditText.hasFocus())
+        assertThat(fullGroup.expiryDateEditText.hasFocus())
+            .isTrue()
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.expiryDateEditText)
 
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.CardNumber)
-        assertTrue(fullGroup.cardNumberEditText.hasFocus())
-        assertEquals(deleteOneCharacterString, fullGroup.cardNumberEditText.text?.toString())
+        assertThat(fullGroup.cardNumberEditText.hasFocus())
+            .isTrue()
+        assertThat(fullGroup.cardNumberEditText.text?.toString())
+            .isEqualTo(VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1))
+    }
 
+    @Test
+    fun deleteWhenEmpty_fromExpiry_withoutPostalCode_shiftsToCardNumber() {
+        noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
         noZipGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
 
-        reset(noZipCardListener)
-        assertTrue(noZipGroup.expiryDateEditText.hasFocus())
+        assertThat(noZipGroup.expiryDateEditText.hasFocus())
+            .isTrue()
         ViewTestUtils.sendDeleteKeyEvent(noZipGroup.expiryDateEditText)
 
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.CardNumber)
-        assertTrue(noZipGroup.cardNumberEditText.hasFocus())
-        assertEquals(deleteOneCharacterString, noZipGroup.cardNumberEditText.text?.toString())
+        assertThat(noZipGroup.cardNumberEditText.hasFocus())
+            .isTrue()
+        assertThat(noZipGroup.cardNumberEditText.text?.toString())
+            .isEqualTo(VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1))
     }
 
     @Test
@@ -562,24 +681,28 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
 
-        reset(fullCardListener)
-        assertTrue(fullGroup.cvcEditText.hasFocus())
+        assertThat(fullGroup.cvcEditText.hasFocus())
+            .isTrue()
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.cvcEditText)
 
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
-        assertTrue(fullGroup.expiryDateEditText.hasFocus())
-        assertEquals("12/5", fullGroup.expiryDateEditText.text?.toString())
+        assertThat(fullGroup.expiryDateEditText.hasFocus())
+            .isTrue()
+        assertThat(fullGroup.expiryDateEditText.text?.toString())
+            .isEqualTo("12/5")
 
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
 
-        reset(noZipCardListener)
-        assertTrue(noZipGroup.cvcEditText.hasFocus())
+        assertThat(noZipGroup.cvcEditText.hasFocus())
+            .isTrue()
         ViewTestUtils.sendDeleteKeyEvent(noZipGroup.cvcEditText)
 
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
-        assertTrue(noZipGroup.expiryDateEditText.hasFocus())
-        assertEquals("12/5", noZipGroup.expiryDateEditText.text.toString())
+        assertThat(noZipGroup.expiryDateEditText.hasFocus())
+            .isTrue()
+        assertThat(noZipGroup.expiryDateEditText.fieldText)
+            .isEqualTo("12/5")
     }
 
     @Test
@@ -589,13 +712,14 @@ internal class CardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
         reset(fullCardListener)
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.postalCodeEditText)
 
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
-        assertEquals("12", fullGroup.cvcEditText.text?.toString())
+        assertThat(fullGroup.cvcEditText.text?.toString())
+            .isEqualTo("12")
     }
 
     @Test
@@ -603,11 +727,29 @@ internal class CardMultilineWidgetTest {
         cardMultilineWidget.setCardNumber(VISA_NO_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
-        fullGroup.postalCodeEditText.append("12345")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
-        val card = cardMultilineWidget.card
-        assertEquals(VISA_NO_SPACES, card?.number)
+        assertThat(cardMultilineWidget.card)
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
+        assertThat(cardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -615,11 +757,29 @@ internal class CardMultilineWidgetTest {
         cardMultilineWidget.setCardNumber(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
-        fullGroup.postalCodeEditText.append("12345")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
-        val card = cardMultilineWidget.card
-        assertEquals(VISA_NO_SPACES, card?.number)
+        assertThat(cardMultilineWidget.card)
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
+        assertThat(cardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -629,8 +789,10 @@ internal class CardMultilineWidgetTest {
         val isValid = cardMultilineWidget.validateCardNumber()
         val shouldShowError = fullGroup.cardNumberEditText.shouldShowError
 
-        assertTrue(isValid)
-        assertFalse(shouldShowError)
+        assertThat(isValid)
+            .isTrue()
+        assertThat(shouldShowError)
+            .isFalse()
     }
 
     @Test
@@ -641,13 +803,23 @@ internal class CardMultilineWidgetTest {
         val isValid = cardMultilineWidget.validateCardNumber()
         val shouldShowError = fullGroup.cardNumberEditText.shouldShowError
 
-        assertFalse(isValid)
-        assertTrue(shouldShowError)
+        assertThat(isValid)
+            .isFalse()
+        assertThat(shouldShowError)
+            .isTrue()
     }
 
     @Test
     fun onFinishInflate_shouldSetPostalCodeInputLayoutHint() {
-        assertThat(cardMultilineWidget.postalInputLayout.hint)
+        var inflatedCardMultilineWidget: CardMultilineWidget? = null
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    inflatedCardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
+                }
+            }
+        assertThat(requireNotNull(inflatedCardMultilineWidget).postalInputLayout.hint)
             .isEqualTo("Postal code")
     }
 
@@ -660,10 +832,26 @@ internal class CardMultilineWidgetTest {
         cardMultilineWidget.setCardNumber(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
         assertThat(cardMultilineWidget.card)
-            .isNotNull()
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
+        assertThat(cardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -675,11 +863,13 @@ internal class CardMultilineWidgetTest {
         cardMultilineWidget.setCardNumber(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
         // invalid zipcode
         fullGroup.postalCodeEditText.setText("1234")
         assertThat(cardMultilineWidget.card)
+            .isNull()
+        assertThat(cardMultilineWidget.cardParams)
             .isNull()
     }
 
@@ -692,138 +882,193 @@ internal class CardMultilineWidgetTest {
         cardMultilineWidget.setCardNumber(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append("123")
+        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
         // valid zipcode
-        fullGroup.postalCodeEditText.setText("12345")
+        fullGroup.postalCodeEditText.setText(POSTAL_CODE_VALUE)
         assertThat(cardMultilineWidget.card)
-            .isNotNull()
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
+        assertThat(cardMultilineWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    loggingTokens = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
     }
 
     @Test
     fun setEnabled_setsEnabledPropertyOnAllChildWidgets() {
-        assertTrue(cardMultilineWidget.isEnabled)
-        assertTrue(fullGroup.cardInputLayout.isEnabled)
-        assertTrue(fullGroup.expiryInputLayout.isEnabled)
-        assertTrue(fullGroup.postalCodeInputLayout.isEnabled)
-        assertTrue(fullGroup.cvcInputLayout.isEnabled)
-        assertTrue(fullGroup.expiryDateEditText.isEnabled)
-        assertTrue(fullGroup.cardNumberEditText.isEnabled)
-        assertTrue(fullGroup.cvcEditText.isEnabled)
-        assertTrue(fullGroup.postalCodeEditText.isEnabled)
+        assertThat(cardMultilineWidget.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.cardInputLayout.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.expiryInputLayout.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.postalCodeInputLayout.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.cvcInputLayout.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.expiryDateEditText.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.cardNumberEditText.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.cvcEditText.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.postalCodeEditText.isEnabled)
+            .isTrue()
 
         cardMultilineWidget.isEnabled = false
 
-        assertFalse(cardMultilineWidget.isEnabled)
-        assertFalse(fullGroup.cardInputLayout.isEnabled)
-        assertFalse(fullGroup.expiryInputLayout.isEnabled)
-        assertFalse(fullGroup.postalCodeInputLayout.isEnabled)
-        assertFalse(fullGroup.cvcInputLayout.isEnabled)
-        assertFalse(fullGroup.expiryDateEditText.isEnabled)
-        assertFalse(fullGroup.cardNumberEditText.isEnabled)
-        assertFalse(fullGroup.cvcEditText.isEnabled)
-        assertFalse(fullGroup.postalCodeEditText.isEnabled)
+        assertThat(cardMultilineWidget.isEnabled)
+            .isFalse()
+        assertThat(fullGroup.cardInputLayout.isEnabled)
+            .isFalse()
+        assertThat(fullGroup.expiryInputLayout.isEnabled)
+            .isFalse()
+        assertThat(fullGroup.postalCodeInputLayout.isEnabled)
+            .isFalse()
+        assertThat(fullGroup.cvcInputLayout.isEnabled)
+            .isFalse()
+        assertThat(fullGroup.expiryDateEditText.isEnabled)
+            .isFalse()
+        assertThat(fullGroup.cardNumberEditText.isEnabled)
+            .isFalse()
+        assertThat(fullGroup.cvcEditText.isEnabled)
+            .isFalse()
+        assertThat(fullGroup.postalCodeEditText.isEnabled)
+            .isFalse()
 
         cardMultilineWidget.isEnabled = true
 
-        assertTrue(cardMultilineWidget.isEnabled)
-        assertTrue(fullGroup.cardInputLayout.isEnabled)
-        assertTrue(fullGroup.expiryInputLayout.isEnabled)
-        assertTrue(fullGroup.postalCodeInputLayout.isEnabled)
-        assertTrue(fullGroup.cvcInputLayout.isEnabled)
-        assertTrue(fullGroup.expiryDateEditText.isEnabled)
-        assertTrue(fullGroup.cardNumberEditText.isEnabled)
-        assertTrue(fullGroup.cvcEditText.isEnabled)
-        assertTrue(fullGroup.postalCodeEditText.isEnabled)
+        assertThat(cardMultilineWidget.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.cardInputLayout.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.expiryInputLayout.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.postalCodeInputLayout.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.cvcInputLayout.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.expiryDateEditText.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.cardNumberEditText.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.cvcEditText.isEnabled)
+            .isTrue()
+        assertThat(fullGroup.postalCodeEditText.isEnabled)
+            .isTrue()
     }
 
     @Test
     fun testCardValidCallback() {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardMultilineWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                currentIsValid = isValid
-                currentInvalidFields = invalidFields
-            }
-        })
+        cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
 
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
                 CardValidCallback.Fields.Number,
                 CardValidCallback.Fields.Expiry,
                 CardValidCallback.Fields.Cvc
-            ),
-            currentInvalidFields
-        )
+            )
 
         cardMultilineWidget.setCardNumber(VISA_NO_SPACES)
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc
+            )
 
         fullGroup.expiryDateEditText.append("12")
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc
+            )
 
         fullGroup.expiryDateEditText.append("50")
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Cvc
+            )
 
         fullGroup.cvcEditText.append("12")
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Cvc)
 
         fullGroup.cvcEditText.append("3")
-        assertTrue(currentIsValid)
-        assertTrue(currentInvalidFields.isEmpty())
+        assertThat(currentIsValid)
+            .isTrue()
+        assertThat(currentInvalidFields)
+            .isEmpty()
 
         fullGroup.cvcEditText.setText("0")
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Cvc)
     }
 
     @Test
     fun shouldShowErrorIcon_shouldBeUpdatedCorrectly() {
         cardMultilineWidget.setExpiryDate(12, 2030)
-        cardMultilineWidget.setCvcCode("123")
+        cardMultilineWidget.setCvcCode(CVC_VALUE_COMMON)
 
         // show error icon when validating fields with invalid card number
         cardMultilineWidget.setCardNumber(VISA_NO_SPACES.take(6))
-        assertNull(cardMultilineWidget.paymentMethodCreateParams)
-        assertTrue(cardMultilineWidget.shouldShowErrorIcon)
+        assertThat(cardMultilineWidget.paymentMethodCreateParams)
+            .isNull()
+        assertThat(cardMultilineWidget.shouldShowErrorIcon)
+            .isTrue()
 
         // don't show error icon after changing input
         cardMultilineWidget.setCardNumber(VISA_NO_SPACES.take(7))
-        assertFalse(cardMultilineWidget.shouldShowErrorIcon)
+        assertThat(cardMultilineWidget.shouldShowErrorIcon)
+            .isFalse()
 
         // don't show error icon when validating fields with invalid card number
-        assertNull(cardMultilineWidget.paymentMethodCreateParams)
+        assertThat(cardMultilineWidget.paymentMethodCreateParams)
+            .isNull()
         cardMultilineWidget.setCardNumber(VISA_NO_SPACES)
-        assertNotNull(cardMultilineWidget.paymentMethodCreateParams)
-        assertFalse(cardMultilineWidget.shouldShowErrorIcon)
+        assertThat(cardMultilineWidget.paymentMethodCreateParams)
+            .isNotNull()
+        assertThat(cardMultilineWidget.shouldShowErrorIcon)
+            .isFalse()
     }
 
-    internal class WidgetControlGroup(widget: CardMultilineWidget) {
-        val cardNumberEditText: CardNumberEditText = widget.findViewById(R.id.et_card_number)
+    internal class WidgetControlGroup(
+        widget: CardMultilineWidget,
+        workContext: CoroutineContext
+    ) {
+        val cardNumberEditText: CardNumberEditText = widget.findViewById<CardNumberEditText>(R.id.et_card_number).also {
+            it.workContext = workContext
+        }
         val cardInputLayout: TextInputLayout = widget.findViewById(R.id.tl_card_number)
         val expiryDateEditText: ExpiryDateEditText = widget.findViewById(R.id.et_expiry)
         val expiryInputLayout: TextInputLayout = widget.findViewById(R.id.tl_expiry)
@@ -839,5 +1084,9 @@ internal class CardMultilineWidgetTest {
         private val ATTRIBUTION = setOf("CardMultilineView")
 
         private val EMPTY_WATCHER = object : StripeTextWatcher() {}
+
+        private const val CVC_VALUE_COMMON = "123"
+        private const val CVC_VALUE_AMEX = "1234"
+        private const val POSTAL_CODE_VALUE = "94103"
     }
 }

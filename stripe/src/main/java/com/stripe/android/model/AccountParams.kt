@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * [Create an account token](https://stripe.com/docs/api/tokens/create_account)

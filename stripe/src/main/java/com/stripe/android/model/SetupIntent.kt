@@ -1,9 +1,9 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.SetupIntentJsonParser
-import java.util.regex.Pattern
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.regex.Pattern
 
 /**
  * A [SetupIntent] guides you through the process of setting up a customer's payment credentials for
@@ -167,6 +167,10 @@ data class SetupIntent internal constructor(
                     return values().firstOrNull { it.code == typeCode }
                 }
             }
+        }
+
+        internal companion object {
+            internal const val CODE_AUTHENTICATION_ERROR = "payment_intent_authentication_failure"
         }
     }
 

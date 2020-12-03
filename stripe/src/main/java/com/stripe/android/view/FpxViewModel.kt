@@ -2,33 +2,42 @@ package com.stripe.android.view
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
-import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.FpxBankStatuses
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 
-internal class FpxViewModel @JvmOverloads internal constructor(
+internal class FpxViewModel internal constructor(
     application: Application,
-    workDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val publishableKey: String,
+    private val stripeRepository: StripeRepository
 ) : AndroidViewModel(application) {
-    private val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
-    private val stripeRepository = StripeApiRepository(
-        application,
-        publishableKey,
-        workDispatcher = workDispatcher
-    )
-
     internal var selectedPosition: Int? = null
 
     @JvmSynthetic
-    internal fun getFpxBankStatues() = liveData<FpxBankStatuses> {
+    internal fun getFpxBankStatues() = liveData {
         emit(
             runCatching {
                 stripeRepository.getFpxBankStatus(ApiRequest.Options(publishableKey))
             }.getOrDefault(FpxBankStatuses())
         )
+    }
+
+    internal class Factory(
+        private val application: Application
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
+            val stripeRepository = StripeApiRepository(
+                application,
+                publishableKey
+            )
+
+            return FpxViewModel(application, publishableKey, stripeRepository) as T
+        }
     }
 }
