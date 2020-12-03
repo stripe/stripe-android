@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
@@ -19,7 +20,8 @@ class PaymentOptionsViewModelTest {
     private val viewModel = PaymentOptionsViewModel(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
-        args = PaymentOptionsActivityStarter.Args.Guest
+        args = PaymentOptionsActivityStarter.Args.Guest,
+        googlePayRepository = mock()
     )
 
     @Test
