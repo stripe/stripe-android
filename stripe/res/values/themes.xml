@@ -20,6 +20,7 @@
         <item name="android:backgroundDimEnabled">true</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowAnimationStyle">@null</item>
+        <item name="colorSurface">@color/stripe_paymentsheet_background</item>
     </style>
 
     <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />

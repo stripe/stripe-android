@@ -8,4 +8,14 @@
     <color name="stripe_toolbar_color_default_dark">#000000</color>
 
     <color name="stripe_text_color_secondary">@android:color/secondary_text_dark</color>
+
+    <!-- PaymentSheet -->
+    <color name="stripe_paymentsheet_background">#1C1C1E</color>
+    <color name="stripe_paymentsheet_title_text">#DEFFFFFF</color>
+    <color name="stripe_paymentsheet_textinput_color">#E61A1A1A</color>
+    <color name="stripe_paymentsheet_payment_method_label_text">#ffffff</color>
+
+    <color name="stripe_paymentsheet_googlepay_divider_line">#38383A</color>
+    <color name="stripe_paymentsheet_googlepay_divider_background">@color/stripe_paymentsheet_background</color>
+    <color name="stripe_paymentsheet_googlepay_divider_text">#99FFFFFF</color>
 </resources>
