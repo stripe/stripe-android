@@ -72,6 +72,13 @@
         <item name="strokeColor">@color/stripe_paymentsheet_card_stroke</item>
     </style>
 
+
+    <style name="StripePaymentOptionItemCardImage">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
     <style name="StripePaymentOptionItemCardCheck">
         <item name="android:visibility">gone</item>
         <item name="android:src">@drawable/stripe_ic_check_circle</item>

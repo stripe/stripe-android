@@ -9,9 +9,7 @@
         style="@style/StripePaymentOptionItemCard"
         android:checkable="false">
         <ImageView
-            android:layout_width="56dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
+            style="@style/StripePaymentOptionItemCardImage"
             android:src="@drawable/stripe_ic_add_circle"
             android:contentDescription="@null" />
     </com.google.android.material.card.MaterialCardView>
