@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.os.ConfigurationCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
@@ -20,6 +21,7 @@ import com.stripe.android.view.Country
 import com.stripe.android.view.CountryAdapter
 import com.stripe.android.view.CountryAutoCompleteTextViewValidator
 import com.stripe.android.view.CountryUtils
+import kotlin.properties.Delegates
 
 internal class BillingAddressView @JvmOverloads constructor(
     context: Context,
@@ -49,7 +51,9 @@ internal class BillingAddressView @JvmOverloads constructor(
         get() {
             return Address(
                 country = selectedCountry?.code,
-                postalCode = postalCodeView.text.toString()
+                postalCode = postalCodeView.text.toString().takeUnless { postalCode ->
+                    postalCode.isBlank()
+                }
             )
         }
 
@@ -59,7 +63,18 @@ internal class BillingAddressView @JvmOverloads constructor(
     @VisibleForTesting
     internal val postalCodeView = viewBinding.postalCode
 
-    private var selectedCountry: Country? = null
+    @VisibleForTesting
+    internal val postalCodeLayout = viewBinding.postalCodeLayout
+
+    @VisibleForTesting
+    internal var selectedCountry: Country? by Delegates.observable(
+        null
+    ) { _, _, newCountry ->
+        val shouldShowPostalCode = newCountry == null ||
+            CountryUtils.doesCountryUsePostalCode(newCountry.code)
+        viewBinding.postalCodeDivider.isVisible = shouldShowPostalCode
+        postalCodeLayout.isVisible = shouldShowPostalCode
+    }
 
     init {
         orientation = VERTICAL
