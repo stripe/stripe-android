@@ -162,11 +162,16 @@ internal class PaymentMethodsAdapter(
         fun setPaymentMethod(method: PaymentMethod) {
             // TODO: Communicate error if card data not present
             method.card?.let { card ->
-                // TODO: Get updated card brand icons
                 binding.brandIcon.setImageResource(
                     when (card.brand) {
                         CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa
-                        else -> R.drawable.stripe_ic_paymentsheet_card_visa
+                        CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex
+                        CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover
+                        CardBrand.JCB -> R.drawable.stripe_ic_paymentsheet_card_jcb
+                        CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
+                        CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
+                        CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
+                        CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
                     }
                 )
                 binding.label.text = itemView.context
