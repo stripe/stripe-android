@@ -197,17 +197,19 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `onActivityResult() should update propagate errors`() {
-        var error: Throwable? = null
-        viewModel.error.observeForever {
-            error = it
+    fun `onActivityResult() should update emit API errors`() {
+        var errorMessage: String? = null
+        viewModel.errorMessage.observeForever {
+            errorMessage = it
         }
         whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
-            callbackCaptor.lastValue.onError(RuntimeException("some exception"))
+            callbackCaptor.lastValue.onError(
+                RuntimeException("Your card was declined.")
+            )
         }
         viewModel.onActivityResult(0, 0, Intent())
-        assertThat(error)
-            .isNotNull()
+        assertThat(errorMessage)
+            .isEqualTo("Your card was declined.")
     }
 
     @Test
