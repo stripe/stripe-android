@@ -30,7 +30,9 @@ class PaymentOptionsActivityTest {
     private val viewModel = PaymentOptionsViewModel(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
-        args = PaymentOptionsActivityStarter.Args.Guest,
+        args = PaymentOptionsActivityStarter.Args.Guest(
+            googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT
+        ),
         googlePayRepository = mock()
     )
 
@@ -41,7 +43,9 @@ class PaymentOptionsActivityTest {
             PaymentOptionsActivity::class.java
         ).putExtra(
             ActivityStarter.Args.EXTRA,
-            PaymentOptionsActivityStarter.Args.Guest
+            PaymentOptionsActivityStarter.Args.Guest(
+                googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT
+            )
         )
 
         val scenario = activityScenario()

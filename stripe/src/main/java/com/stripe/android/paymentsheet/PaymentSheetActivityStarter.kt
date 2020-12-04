@@ -14,17 +14,22 @@ internal class PaymentSheetActivityStarter internal constructor(
 ) {
     sealed class Args : ActivityStarter.Args {
         abstract val clientSecret: String
+        abstract val googlePayConfig: PaymentSheetGooglePayConfig?
+
+        val isGooglePayEnabled: Boolean get() = googlePayConfig != null
 
         @Parcelize
         data class Default(
             override val clientSecret: String,
             val ephemeralKey: String,
-            val customerId: String
+            val customerId: String,
+            override val googlePayConfig: PaymentSheetGooglePayConfig? = null
         ) : Args()
 
         @Parcelize
         data class Guest(
-            override val clientSecret: String
+            override val clientSecret: String,
+            override val googlePayConfig: PaymentSheetGooglePayConfig? = null
         ) : Args()
 
         internal companion object {

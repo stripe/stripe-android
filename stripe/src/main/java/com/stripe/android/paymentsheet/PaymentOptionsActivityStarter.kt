@@ -15,16 +15,22 @@ internal class PaymentOptionsActivityStarter internal constructor(
 ) {
     sealed class Args : ActivityStarter.Args {
         abstract val paymentMethods: List<PaymentMethod>
+        abstract val googlePayConfig: PaymentSheetGooglePayConfig?
+
+        val isGooglePayEnabled: Boolean get() = googlePayConfig != null
 
         @Parcelize
         data class Default(
             override val paymentMethods: List<PaymentMethod>,
             val ephemeralKey: String,
-            val customerId: String
+            val customerId: String,
+            override val googlePayConfig: PaymentSheetGooglePayConfig?
         ) : Args()
 
         @Parcelize
-        object Guest : Args() {
+        data class Guest(
+            override val googlePayConfig: PaymentSheetGooglePayConfig?
+        ) : Args() {
             override val paymentMethods: List<PaymentMethod>
                 get() = emptyList()
         }

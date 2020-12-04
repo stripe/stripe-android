@@ -54,11 +54,17 @@ internal class PaymentSheetFlowControllerFactory(
         clientSecret: String,
         ephemeralKey: String,
         customerId: String,
+        googlePayConfig: PaymentSheetGooglePayConfig? = null,
         onComplete: (PaymentSheetFlowController.Result) -> Unit
     ) {
         CoroutineScope(workContext).launch {
             dispatchResult(
-                createWithDefaultArgs(clientSecret, ephemeralKey, customerId),
+                createWithDefaultArgs(
+                    clientSecret,
+                    ephemeralKey,
+                    customerId,
+                    googlePayConfig
+                ),
                 onComplete
             )
         }
@@ -66,11 +72,15 @@ internal class PaymentSheetFlowControllerFactory(
 
     fun create(
         clientSecret: String,
+        googlePayConfig: PaymentSheetGooglePayConfig? = null,
         onComplete: (PaymentSheetFlowController.Result) -> Unit
     ) {
         CoroutineScope(workContext).launch {
             dispatchResult(
-                createWithGuestArgs(clientSecret),
+                createWithGuestArgs(
+                    clientSecret,
+                    googlePayConfig
+                ),
                 onComplete
             )
         }
@@ -97,7 +107,8 @@ internal class PaymentSheetFlowControllerFactory(
     private suspend fun createWithDefaultArgs(
         clientSecret: String,
         ephemeralKey: String,
-        customerId: String
+        customerId: String,
+        googlePayConfig: PaymentSheetGooglePayConfig? = null
     ): Result {
         // load default payment option
         val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerId)
@@ -126,6 +137,7 @@ internal class PaymentSheetFlowControllerFactory(
                             stripeAccountId = stripeAccountId,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
+                            googlePayConfig = googlePayConfig,
                             defaultPaymentMethodId = defaultPaymentMethodId
                         )
                     )
@@ -138,7 +150,8 @@ internal class PaymentSheetFlowControllerFactory(
     }
 
     private suspend fun createWithGuestArgs(
-        clientSecret: String
+        clientSecret: String,
+        googlePayConfig: PaymentSheetGooglePayConfig? = null
     ): Result {
         return runCatching {
             requireNotNull(retrievePaymentIntent(clientSecret))
@@ -159,6 +172,7 @@ internal class PaymentSheetFlowControllerFactory(
                         ),
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
+                        googlePayConfig = googlePayConfig,
                         defaultPaymentMethodId = null
                     )
                 )

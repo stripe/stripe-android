@@ -21,6 +21,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     internal val isGuestMode: Boolean,
+    private val isGooglePayEnabled: Boolean,
     private val googlePayRepository: GooglePayRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
@@ -57,12 +58,16 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
 
     fun fetchIsGooglePayReady() {
         if (isGooglePayReady.value == null) {
-            viewModelScope.launch {
-                withContext(workContext) {
-                    mutableIsGooglePayReady.postValue(
-                        googlePayRepository.isReady().filterNotNull().first()
-                    )
+            if (isGooglePayEnabled) {
+                viewModelScope.launch {
+                    withContext(workContext) {
+                        mutableIsGooglePayReady.postValue(
+                            googlePayRepository.isReady().filterNotNull().first()
+                        )
+                    }
                 }
+            } else {
+                mutableIsGooglePayReady.value = false
             }
         }
     }

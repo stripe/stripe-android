@@ -22,6 +22,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     internal val paymentMethodTypes: List<PaymentMethod.Type>,
     // the customer's existing payment methods
     internal val paymentMethods: List<PaymentMethod>,
+    private val googlePayConfig: PaymentSheetGooglePayConfig?,
     private val defaultPaymentMethodId: String?
 ) : PaymentSheetFlowController {
     private val confirmParamsFactory = ConfirmParamsFactory()
@@ -40,11 +41,14 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                         PaymentOptionsActivityStarter.Args.Default(
                             paymentMethods = paymentMethods,
                             ephemeralKey = args.ephemeralKey,
-                            customerId = args.customerId
+                            customerId = args.customerId,
+                            googlePayConfig = googlePayConfig
                         )
                     }
                     is Args.Guest -> {
-                        PaymentOptionsActivityStarter.Args.Guest
+                        PaymentOptionsActivityStarter.Args.Guest(
+                            googlePayConfig = googlePayConfig
+                        )
                     }
                 }
             )

@@ -49,6 +49,7 @@ internal class PaymentSheetViewModel internal constructor(
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
     isGuestMode = args is PaymentSheetActivityStarter.Args.Guest,
+    isGooglePayEnabled = args.isGooglePayEnabled,
     googlePayRepository = googlePayRepository,
     workContext = workContext
 ) {
@@ -165,7 +166,7 @@ internal class PaymentSheetViewModel internal constructor(
                 StripeGooglePayLauncher(activity).startForResult(
                     StripeGooglePayLauncher.Args(
                         paymentIntent = paymentIntent,
-                        countryCode = "US" // TODO(mshafrir-stripe): don't hardcode country
+                        countryCode = args.googlePayConfig?.countryCode.orEmpty()
                     )
                 )
             }

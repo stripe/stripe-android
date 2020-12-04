@@ -15,6 +15,7 @@ internal class PaymentOptionsViewModel(
     googlePayRepository: GooglePayRepository
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest,
+    isGooglePayEnabled = args.isGooglePayEnabled,
     googlePayRepository = googlePayRepository
 ) {
     init {
