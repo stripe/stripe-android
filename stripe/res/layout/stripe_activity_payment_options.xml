@@ -34,6 +34,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginVertical="2dp"
+                android:layout_marginHorizontal="10dp"
+                style="@style/StripePaymentSheetErrorMessage"/>
         </LinearLayout>
 
         <com.stripe.android.paymentsheet.AddButton
