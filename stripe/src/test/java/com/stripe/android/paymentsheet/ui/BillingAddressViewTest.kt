@@ -46,8 +46,24 @@ class BillingAddressViewTest {
     }
 
     @Test
-    fun `changing selectedCountry to country with postal code should show postal code view`() {
+    fun `changing selectedCountry to France should show postal code view`() {
         billingAddressView.selectedCountry = Country("FR", "France")
+        idleLooper()
+        assertThat(billingAddressView.postalCodeLayout.isVisible)
+            .isTrue()
+    }
+
+    @Test
+    fun `changing selectedCountry to US should show postal code view`() {
+        billingAddressView.selectedCountry = Country("US", "United States")
+        idleLooper()
+        assertThat(billingAddressView.postalCodeLayout.isVisible)
+            .isTrue()
+    }
+
+    @Test
+    fun `when selectedCountry is null should show postal code view`() {
+        billingAddressView.selectedCountry = null
         idleLooper()
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
