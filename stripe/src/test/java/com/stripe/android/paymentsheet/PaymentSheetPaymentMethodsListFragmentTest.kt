@@ -163,7 +163,8 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         return launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.DEFAULT_ARGS
-            )
+            ),
+            R.style.StripePaymentSheetDefaultTheme
         )
     }
 }

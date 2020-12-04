@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
@@ -46,7 +47,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         ActivityPaymentSheetBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
+    override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
 
     private val fragmentContainerId: Int
         @IdRes
@@ -54,6 +55,10 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     private val starterArgs: PaymentSheetActivityStarter.Args? by lazy {
         PaymentSheetActivityStarter.Args.fromIntent(intent)
+    }
+
+    override val messageView: TextView by lazy {
+        viewBinding.message
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +86,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewBinding.root.setOnClickListener {
             onUserCancel()
         }
-        viewModel.error.observe(this) {
+        viewModel.fatal.observe(this) {
             animateOut(
                 PaymentResult.Failed(
                     it,
@@ -265,7 +270,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     override fun onUserCancel() {
         animateOut(
             PaymentResult.Cancelled(
-                viewModel.error.value,
+                viewModel.fatal.value,
                 paymentIntent = viewModel.paymentIntent.value
             )
         )

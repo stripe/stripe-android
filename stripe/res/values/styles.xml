@@ -52,16 +52,49 @@
     <style name="Stripe.BecsDebitWidget.MandateAcceptanceTextView"
         parent="Stripe.Base.BecsDebitWidget.MandateAcceptanceTextView" />
 
-    <style name="StripePaymentSheetPaymentMethodsIconContainer">
+    <style name="StripePaymentOptionItemContainer">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">4dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
+
+    <style name="StripePaymentOptionItemCard">
         <item name="android:layout_width">@dimen/stripe_paymentsheet_paymentmethod_icon_width</item>
         <item name="android:layout_height">@dimen/stripe_paymentsheet_paymentmethod_icon_height</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="cardElevation">@dimen/stripe_paymentsheet_card_elevation</item>
+        <item name="checkedIcon">@null</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/stripe_paymentsheet_card_stroke</item>
+    </style>
+
+
+    <style name="StripePaymentOptionItemCardImage">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="StripePaymentOptionItemCardCheck">
+        <item name="android:visibility">gone</item>
+        <item name="android:src">@drawable/stripe_ic_check_circle</item>
+
+        <!-- modify the bottom and end layout to correctly position the check -->
+        <item name="android:layout_marginBottom">14dp</item>
+        <item name="android:paddingEnd">-2dp</item>
     </style>
 
     <style name="StripePaymentSheetPaymentMethodsLabel">
         <item name="android:textColor">@color/stripe_paymentsheet_payment_method_label_text</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:lineSpacingExtra">1sp</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:layout_marginEnd">4dp</item>
     </style>
 
     <style name="StripePaymentSheetTitle">
@@ -69,6 +102,7 @@
         <item name="android:textColor">@color/stripe_paymentsheet_title_text</item>
         <item name="android:lineSpacingExtra">9sp</item>
         <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="StripePaymentSheetLabel">
@@ -96,5 +130,12 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
         <item name="android:background">@color/stripe_paymentsheet_form_border</item>
+    </style>
+
+    <style name="StripePaymentSheetErrorMessage">
+        <item name="android:textColor">@color/stripe_paymentsheet_error_text</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:lineSpacingExtra">5sp</item>
     </style>
 </resources>

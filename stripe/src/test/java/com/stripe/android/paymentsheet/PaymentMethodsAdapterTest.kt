@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
 import android.widget.FrameLayout
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.runner.RunWith
@@ -12,8 +13,10 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsAdapterTest {
-
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val context = ContextThemeWrapper(
+        ApplicationProvider.getApplicationContext(),
+        R.style.StripePaymentSheetDefaultTheme
+    )
 
     private val paymentSelections = mutableListOf<PaymentSelection>()
     private var addCardClicks = 0
@@ -79,6 +82,7 @@ class PaymentMethodsAdapterTest {
             FrameLayout(context),
             adapter.getItemViewType(1)
         )
+        adapter.onBindViewHolder(googlePayViewHolder, 1)
         googlePayViewHolder.itemView.performClick()
 
         assertThat(paymentSelections)
