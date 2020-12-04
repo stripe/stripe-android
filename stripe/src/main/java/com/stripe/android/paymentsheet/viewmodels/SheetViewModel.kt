@@ -50,6 +50,9 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
 
     internal var shouldSavePaymentMethod: Boolean = false
 
+    protected val mutableErrorMessage = MutableLiveData<String?>()
+    internal val errorMessage: LiveData<String?> = mutableErrorMessage
+
     fun fetchIsGooglePayReady() {
         if (isGooglePayReady.value == null) {
             viewModelScope.launch {
@@ -67,6 +70,7 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     }
 
     fun transitionTo(target: TransitionTargetType) {
+        mutableErrorMessage.value = null
         mutableTransition.postValue(target)
     }
 
@@ -74,7 +78,16 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
         mutableError.postValue(throwable)
     }
 
+    fun onApiError(errorMessage: String?) {
+        mutableErrorMessage.value = errorMessage
+        mutableProcessing.value = false
+    }
+
     fun updateSelection(selection: PaymentSelection?) {
         mutableSelection.value = selection
+    }
+
+    fun onBackPressed() {
+        mutableErrorMessage.value = null
     }
 }

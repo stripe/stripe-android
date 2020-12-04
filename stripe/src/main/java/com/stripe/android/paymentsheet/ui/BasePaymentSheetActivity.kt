@@ -1,11 +1,28 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.os.Bundle
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
 internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
+    abstract val viewModel: SheetViewModel<*, *>
+
+    abstract val errorView: TextView
+
     abstract fun onUserCancel()
     abstract fun hideSheet()
     abstract fun setActivityResult(result: ResultType)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        viewModel.errorMessage.observe(this) { errorMessage ->
+            errorView.isVisible = errorMessage != null
+            errorView.text = errorMessage
+        }
+    }
 
     override fun finish() {
         super.finish()
@@ -14,6 +31,7 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
 
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
+            viewModel.onBackPressed()
             super.onBackPressed()
         } else {
             onUserCancel()

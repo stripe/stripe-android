@@ -35,6 +35,8 @@
     <color name="stripe_paymentsheet_textinput_color">#E61A1A1A</color>
     <color name="stripe_paymentsheet_toolbar_button_background">#ffffff</color>
 
+    <color name="stripe_paymentsheet_error_text">#DC2727</color>
+
     <color name="stripe_paymentsheet_googlepay_divider_line">#1F000000</color>
     <color name="stripe_paymentsheet_googlepay_divider_background">@android:color/white</color>
     <color name="stripe_paymentsheet_googlepay_divider_text">#99000000</color>
