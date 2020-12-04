@@ -121,7 +121,7 @@ internal class PaymentSheetViewModel internal constructor(
                 onFailure = {
                     mutablePaymentIntent.value = null
 
-                    onError(it)
+                    onFatal(it)
                 }
             )
         }
@@ -132,7 +132,7 @@ internal class PaymentSheetViewModel internal constructor(
             mutablePaymentIntent.value = paymentIntent
             resetViewState(paymentIntent)
         } else {
-            onError(
+            onFatal(
                 IllegalArgumentException(
                     """
                     PaymentIntent with confirmation_method='automatic' is required.
@@ -150,12 +150,12 @@ internal class PaymentSheetViewModel internal constructor(
             mutableViewState.value = ViewState.Ready(amount, currencyCode)
         } else {
             // TODO(mshafrir-stripe): improve error message
-            onError(IllegalStateException("PaymentIntent is invalid."))
+            onFatal(IllegalStateException("PaymentIntent is invalid."))
         }
     }
 
     fun checkout(activity: Activity) {
-        mutableErrorMessage.value = null
+        mutableUserMessage.value = null
         mutableProcessing.value = true
 
         prefsRepository.savePaymentSelection(selection.value)
@@ -191,7 +191,7 @@ internal class PaymentSheetViewModel internal constructor(
                     )
                 }
                 else -> {
-                    onError(
+                    onFatal(
                         IllegalStateException("checkout called when no payment method selected")
                     )
                 }
@@ -273,9 +273,7 @@ internal class PaymentSheetViewModel internal constructor(
                 }
             }.fold(
                 onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
-                onFailure = {
-                    onError(it)
-                }
+                onFailure = ::onFatal
             )
         }
     }

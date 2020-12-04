@@ -57,9 +57,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         @IdRes
         get() = viewBinding.fragmentContainer.id
 
-    override val errorView: TextView by lazy {
-        viewBinding.error
-    }
+    override val messageView: TextView by lazy { viewBinding.message }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +75,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         viewBinding.root.setOnClickListener {
             onUserCancel()
         }
-        viewModel.error.observe(this) {
+        viewModel.fatal.observe(this) {
             animateOut(
                 PaymentOptionResult.Failed(it)
             )
@@ -227,7 +225,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     override fun onUserCancel() {
         animateOut(
             PaymentOptionResult.Cancelled(
-                mostRecentError = viewModel.error.value
+                mostRecentError = viewModel.fatal.value
             )
         )
     }

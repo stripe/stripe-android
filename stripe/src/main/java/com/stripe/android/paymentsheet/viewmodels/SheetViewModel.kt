@@ -24,8 +24,9 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     private val googlePayRepository: GooglePayRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
-    private val mutableError = MutableLiveData<Throwable>()
-    internal val error: LiveData<Throwable> = mutableError
+    // a fatal error
+    private val mutableFatal = MutableLiveData<Throwable>()
+    internal val fatal: LiveData<Throwable> = mutableFatal
 
     private val mutableIsGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = mutableIsGooglePayReady.distinctUntilChanged()
@@ -50,8 +51,9 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
 
     internal var shouldSavePaymentMethod: Boolean = false
 
-    protected val mutableErrorMessage = MutableLiveData<String?>()
-    internal val errorMessage: LiveData<String?> = mutableErrorMessage
+    // a message shown to the user
+    protected val mutableUserMessage = MutableLiveData<UserMessage?>()
+    internal val userMessage: LiveData<UserMessage?> = mutableUserMessage
 
     fun fetchIsGooglePayReady() {
         if (isGooglePayReady.value == null) {
@@ -70,16 +72,16 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     }
 
     fun transitionTo(target: TransitionTargetType) {
-        mutableErrorMessage.value = null
+        mutableUserMessage.value = null
         mutableTransition.postValue(target)
     }
 
-    fun onError(throwable: Throwable) {
-        mutableError.postValue(throwable)
+    fun onFatal(throwable: Throwable) {
+        mutableFatal.postValue(throwable)
     }
 
     fun onApiError(errorMessage: String?) {
-        mutableErrorMessage.value = errorMessage
+        mutableUserMessage.value = errorMessage?.let { UserMessage.Error(it) }
         mutableProcessing.value = false
     }
 
@@ -88,6 +90,14 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     }
 
     fun onBackPressed() {
-        mutableErrorMessage.value = null
+        mutableUserMessage.value = null
+    }
+
+    sealed class UserMessage {
+        abstract val message: String
+
+        data class Error(
+            override val message: String
+        ) : UserMessage()
     }
 }

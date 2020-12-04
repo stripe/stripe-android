@@ -57,8 +57,8 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         PaymentSheetActivityStarter.Args.fromIntent(intent)
     }
 
-    override val errorView: TextView by lazy {
-        viewBinding.error
+    override val messageView: TextView by lazy {
+        viewBinding.message
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +86,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewBinding.root.setOnClickListener {
             onUserCancel()
         }
-        viewModel.error.observe(this) {
+        viewModel.fatal.observe(this) {
             animateOut(
                 PaymentResult.Failed(
                     it,
@@ -270,7 +270,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     override fun onUserCancel() {
         animateOut(
             PaymentResult.Cancelled(
-                viewModel.error.value,
+                viewModel.fatal.value,
                 paymentIntent = viewModel.paymentIntent.value
             )
         )

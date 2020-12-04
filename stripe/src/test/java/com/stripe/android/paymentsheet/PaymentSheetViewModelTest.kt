@@ -27,6 +27,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Rule
@@ -103,7 +104,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `checkout() should call onError() when no payment selection has been mode`() {
         var error: Throwable? = null
-        viewModel.error.observeForever {
+        viewModel.fatal.observeForever {
             error = it
         }
 
@@ -166,7 +167,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `checkout() should call onError when no payment method selected`() {
         var error: Throwable? = null
-        viewModel.error.observeForever {
+        viewModel.fatal.observeForever {
             error = it
         }
         viewModel.checkout(mock())
@@ -198,9 +199,9 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onActivityResult() should update emit API errors`() {
-        var errorMessage: String? = null
-        viewModel.errorMessage.observeForever {
-            errorMessage = it
+        var userMessage: SheetViewModel.UserMessage? = null
+        viewModel.userMessage.observeForever {
+            userMessage = it
         }
         whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
             callbackCaptor.lastValue.onError(
@@ -208,8 +209,10 @@ internal class PaymentSheetViewModelTest {
             )
         }
         viewModel.onActivityResult(0, 0, Intent())
-        assertThat(errorMessage)
-            .isEqualTo("Your card was declined.")
+        assertThat(userMessage)
+            .isEqualTo(
+                SheetViewModel.UserMessage.Error("Your card was declined.")
+            )
     }
 
     @Test
@@ -247,7 +250,7 @@ internal class PaymentSheetViewModelTest {
             workContext = testCoroutineDispatcher
         )
         var error: Throwable? = null
-        viewModel.error.observeForever {
+        viewModel.fatal.observeForever {
             error = it
         }
         viewModel.fetchPaymentIntent()
@@ -276,7 +279,7 @@ internal class PaymentSheetViewModelTest {
             workContext = testCoroutineDispatcher
         )
         var error: Throwable? = null
-        viewModel.error.observeForever {
+        viewModel.fatal.observeForever {
             error = it
         }
         viewModel.fetchPaymentIntent()

@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: SheetViewModel<*, *>
 
-    abstract val errorView: TextView
+    abstract val messageView: TextView
 
     abstract fun onUserCancel()
     abstract fun hideSheet()
@@ -18,9 +18,9 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.errorMessage.observe(this) { errorMessage ->
-            errorView.isVisible = errorMessage != null
-            errorView.text = errorMessage
+        viewModel.userMessage.observe(this) { userMessage ->
+            messageView.isVisible = userMessage != null
+            messageView.text = userMessage?.message
         }
     }
 
