@@ -2,8 +2,8 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
@@ -24,12 +24,7 @@ import org.json.JSONObject
  * in order to display state of the interaction.
  */
 abstract class StripeIntentActivity : AppCompatActivity() {
-    internal val viewModel: StripeIntentViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[StripeIntentViewModel::class.java]
-    }
+    internal val viewModel: StripeIntentViewModel by viewModels()
     private val stripeAccountId: String? by lazy {
         Settings(this).stripeAccountId
     }

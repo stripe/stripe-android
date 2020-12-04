@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.PaymentMethod
@@ -18,12 +18,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         CreateCardPaymentMethodActivityBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: PaymentMethodViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[PaymentMethodViewModel::class.java]
-    }
+    private val viewModel: PaymentMethodViewModel by viewModels()
 
     private val adapter: PaymentMethodsAdapter = PaymentMethodsAdapter()
     private val snackbarController: SnackbarController by lazy {

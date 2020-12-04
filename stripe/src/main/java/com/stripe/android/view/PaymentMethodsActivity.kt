@@ -9,10 +9,10 @@ import android.text.util.Linkify
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
@@ -55,16 +55,13 @@ class PaymentMethodsActivity : AppCompatActivity() {
         PaymentMethodsActivityStarter.Args.create(intent)
     }
 
-    private val viewModel: PaymentMethodsViewModel by lazy {
-        ViewModelProvider(
-            this,
-            PaymentMethodsViewModel.Factory(
-                application,
-                customerSession,
-                args.initialPaymentMethodId,
-                startedFromPaymentSession
-            )
-        )[PaymentMethodsViewModel::class.java]
+    private val viewModel: PaymentMethodsViewModel by viewModels {
+        PaymentMethodsViewModel.Factory(
+            application,
+            customerSession,
+            args.initialPaymentMethodId,
+            startedFromPaymentSession
+        )
     }
 
     private val adapter: PaymentMethodsAdapter by lazy {
