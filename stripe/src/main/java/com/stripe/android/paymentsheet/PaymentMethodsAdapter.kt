@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.databinding.LayoutPaymentsheetAddCardItemBinding
@@ -47,18 +48,27 @@ internal class PaymentMethodsAdapter(
             val paymentSelection = PaymentSelection.Saved(clickedPaymentMethod).also {
                 this.paymentSelection = it
             }
+
+            // unselect Google Pay if Google Pay is enabled
+            if (shouldShowGooglePay) {
+                notifyItemChanged(GOOGLE_PAY_POSITION)
+            }
+
             paymentMethodSelectedListener(paymentSelection)
         }
     }
 
     private fun onGooglePaySelected() {
         if (paymentSelection != PaymentSelection.GooglePay) {
-            // unselect item
-            selectedPaymentMethod?.let {
+            // unselect previous item
+            val previouslySelectedPaymentMethod = selectedPaymentMethod
+            paymentSelection = PaymentSelection.GooglePay
+            previouslySelectedPaymentMethod?.let {
                 notifyItemChanged(getPosition(it))
             }
+
+            // select Google Pay item
             notifyItemChanged(GOOGLE_PAY_POSITION)
-            paymentSelection = PaymentSelection.GooglePay
             paymentMethodSelectedListener(PaymentSelection.GooglePay)
         }
     }
@@ -80,11 +90,7 @@ internal class PaymentMethodsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (ViewType.values()[viewType]) {
-            ViewType.GooglePay -> GooglePayViewHolder(parent).apply {
-                itemView.setOnClickListener {
-                    onGooglePaySelected()
-                }
-            }
+            ViewType.GooglePay -> GooglePayViewHolder(parent)
             ViewType.Card -> CardViewHolder(parent)
             ViewType.AddCard -> AddCardViewHolder(parent).apply {
                 itemView.setOnClickListener(addCardClickListener)
@@ -126,6 +132,11 @@ internal class PaymentMethodsAdapter(
                     getPaymentMethodAtPosition(holder.adapterPosition)
                 )
             }
+        } else if (holder is GooglePayViewHolder) {
+            holder.setSelected(paymentSelection == PaymentSelection.GooglePay)
+            holder.itemView.setOnClickListener {
+                onGooglePaySelected()
+            }
         }
     }
 
@@ -155,9 +166,21 @@ internal class PaymentMethodsAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
         constructor(parent: ViewGroup) : this(
             LayoutPaymentsheetPaymentMethodItemBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
+                LayoutInflater.from(parent.context),
+                parent,
+                false
             )
         )
+
+        init {
+            binding.card.setOnClickListener {
+                // TODO(mshafrir-stripe): Card view was ignoring clicks without this - investigate?
+                itemView.performClick()
+            }
+
+            // ensure that the check icon is above the card
+            binding.checkIcon.elevation = binding.card.elevation + 1
+        }
 
         fun setPaymentMethod(method: PaymentMethod) {
             // TODO: Communicate error if card data not present
@@ -180,7 +203,8 @@ internal class PaymentMethodsAdapter(
         }
 
         fun setSelected(selected: Boolean) {
-            binding.checkIcon.visibility = if (selected) View.VISIBLE else View.GONE
+            binding.card.isChecked = selected
+            binding.checkIcon.isVisible = selected
         }
     }
 
@@ -192,14 +216,33 @@ internal class PaymentMethodsAdapter(
         ).root
     )
 
-    private class GooglePayViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
+    private class GooglePayViewHolder(
+        private val binding: LayoutPaymentsheetGooglePayItemBinding
+    ) : RecyclerView.ViewHolder(
+        binding.root
+    ) {
         // TODO(mshafrir-stripe): add check icon
-        LayoutPaymentsheetGooglePayItemBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        ).root
-    )
+        constructor(parent: ViewGroup) : this(
+            LayoutPaymentsheetGooglePayItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
+        )
+
+        init {
+            binding.card.setOnClickListener {
+                // TODO(mshafrir-stripe): Card view was ignoring clicks without this - investigate?
+                itemView.performClick()
+            }
+
+            // ensure that the check icon is above the card
+            binding.checkIcon.elevation = binding.card.elevation + 1
+        }
+
+        fun setSelected(selected: Boolean) {
+            binding.card.isChecked = selected
+            binding.checkIcon.isVisible = selected
+        }
+    }
 
     internal enum class ViewType {
         Card,
