@@ -52,7 +52,7 @@
 
     <!-- PaymentSheet -->
     <dimen name="stripe_paymentsheet_padding_top">12dp</dimen>
-    <dimen name="stripe_paymentsheet_paymentmethod_icon_height">59dp</dimen>
+    <dimen name="stripe_paymentsheet_paymentmethod_icon_height">63dp</dimen>
     <dimen name="stripe_paymentsheet_paymentmethod_icon_width">88dp</dimen>
     <dimen name="stripe_paymentsheet_paymentmethod_icon_radius">6dp</dimen>
     <dimen name="stripe_paymentsheet_outer_spacing">10dp</dimen>

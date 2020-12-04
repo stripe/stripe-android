@@ -10,16 +10,16 @@
     <FrameLayout
         style="@style/StripePaymentSheetPaymentMethodsIconContainer">
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:src="@drawable/stripe_google_pay_mark"
+            android:src="@drawable/stripe_ic_paymentsheet_googlepay"
             android:contentDescription="@null" />
     </FrameLayout>
 
     <TextView
         style="@style/StripePaymentSheetPaymentMethodsLabel"
-        android:text="Google Pay"
+        android:text="@string/stripe_googlepay_button_content_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
