@@ -19,7 +19,7 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
 
     abstract val shouldShowGooglePay: Boolean
 
-    internal val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
+    private val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
 
     protected val adapter: PaymentMethodsAdapter by lazy {
         PaymentMethodsAdapter(

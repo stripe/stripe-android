@@ -2,51 +2,44 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/StripePaymentOptionItemContainer"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingVertical="4dp"
-    android:paddingStart="0dp"
-    android:paddingEnd="8dp"
-    >
+    android:layout_height="wrap_content">
 
-    <FrameLayout
-        android:id="@+id/brand_icon_container"
-        style="@style/StripePaymentSheetPaymentMethodsIconContainer"
-        android:background="@drawable/stripe_paymentsheet_paymentmethod_item_background"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
+        style="@style/StripePaymentOptionItemCard"
+        android:checkable="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/label">
         <ImageView
             android:id="@+id/brand_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitXY"
+            android:layout_width="56dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
             android:contentDescription="@null"
             />
-    </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         style="@style/StripePaymentSheetPaymentMethodsLabel"
         android:id="@+id/label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lineSpacingExtra="1sp"
-        app:layout_constraintStart_toStartOf="@+id/brand_icon_container"
-        app:layout_constraintTop_toBottomOf="@+id/brand_icon_container"
+        app:layout_constraintStart_toStartOf="@+id/card"
+        app:layout_constraintTop_toBottomOf="@+id/card"
+        app:layout_constraintBottom_toBottomOf="parent"
         />
 
     <ImageView
         android:id="@+id/check_icon"
+        style="@style/StripePaymentOptionItemCardCheck"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/stripe_ic_check_circle"
-        app:layout_constraintEnd_toEndOf="@+id/brand_icon_container"
-        app:layout_constraintTop_toTopOf="@+id/brand_icon_container"
-        android:paddingTop="36dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="-2dp"
-        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:contentDescription="@null"
         />
 

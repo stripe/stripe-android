@@ -3,20 +3,18 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingVertical="4dp"
-    android:paddingStart="0dp"
-    android:paddingEnd="4dp">
+    style="@style/StripePaymentOptionItemContainer">
 
-    <FrameLayout
-        style="@style/StripePaymentSheetPaymentMethodsIconContainer"
-        android:background="@drawable/stripe_paymentsheet_add_card_bg">
+    <com.google.android.material.card.MaterialCardView
+        style="@style/StripePaymentOptionItemCard"
+        android:checkable="false">
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="56dp"
+            android:layout_height="40dp"
             android:layout_gravity="center"
             android:src="@drawable/stripe_ic_add_circle"
             android:contentDescription="@null" />
-    </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         style="@style/StripePaymentSheetPaymentMethodsLabel"
