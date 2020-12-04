@@ -20,7 +20,9 @@ class PaymentOptionsViewModelTest {
     private val viewModel = PaymentOptionsViewModel(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
-        args = PaymentOptionsActivityStarter.Args.Guest,
+        args = PaymentOptionsActivityStarter.Args.Guest(
+            googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT
+        ),
         googlePayRepository = mock()
     )
 

@@ -30,6 +30,7 @@ class DefaultPaymentSheetFlowControllerTest {
         ),
         paymentMethodTypes = listOf(PaymentMethod.Type.Card),
         paymentMethods = emptyList(),
+        googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT,
         defaultPaymentMethodId = null
     )
 

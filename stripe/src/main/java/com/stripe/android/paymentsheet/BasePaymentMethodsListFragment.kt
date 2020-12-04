@@ -17,9 +17,7 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
 ) {
     abstract val sheetViewModel: SheetViewModel<*, *>
 
-    abstract val shouldShowGooglePay: Boolean
-
-    internal val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
+    private val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
 
     protected val adapter: PaymentMethodsAdapter by lazy {
         PaymentMethodsAdapter(
@@ -31,9 +29,7 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
             addCardClickListener = {
                 transitionToAddPaymentMethod()
             }
-        ).also {
-            it.shouldShowGooglePay = shouldShowGooglePay
-        }
+        )
     }
 
     private var _viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
@@ -60,6 +56,10 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
 
         sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
             adapter.paymentMethods = paymentMethods
+        }
+
+        sheetViewModel.isGooglePayReady.observe(viewLifecycleOwner) { isGooglePayReady ->
+            adapter.shouldShowGooglePay = isGooglePayReady
         }
     }
 

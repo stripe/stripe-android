@@ -286,7 +286,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `isGooglePayReady should emit expected value`() {
+    fun `isGooglePayReady when googlePayConfig is not null should emit expected value`() {
         var isReady: Boolean? = null
         viewModel.isGooglePayReady.observeForever {
             isReady = it
@@ -294,6 +294,27 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchIsGooglePayReady()
         assertThat(isReady)
             .isTrue()
+    }
+
+    @Test
+    fun `isGooglePayReady when googlePayConfig is null should emit false`() {
+        val viewModel = PaymentSheetViewModel(
+            "publishable_key",
+            "stripe_account_id",
+            stripeRepository,
+            paymentController,
+            googlePayRepository,
+            prefsRepository,
+            DEFAULT_ARGS.copy(googlePayConfig = null),
+            workContext = testCoroutineDispatcher
+        )
+        var isReady: Boolean? = null
+        viewModel.isGooglePayReady.observeForever {
+            isReady = it
+        }
+        viewModel.fetchIsGooglePayReady()
+        assertThat(isReady)
+            .isFalse()
     }
 
     @Test

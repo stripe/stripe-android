@@ -14,12 +14,12 @@ internal class PaymentSheet internal constructor(
      * Create PaymentSheet with a Customer
      */
     constructor(
-        clientSecret: String,
+        paymentIntentClientSecret: String,
         ephemeralKey: String,
         customerId: String
     ) : this(
         PaymentSheetActivityStarter.Args.Default(
-            clientSecret,
+            paymentIntentClientSecret,
             ephemeralKey,
             customerId
         )
