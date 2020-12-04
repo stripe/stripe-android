@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentIntentResult
@@ -33,12 +33,7 @@ class FragmentExamplesFragment : Fragment() {
         LaunchPaymentSessionFragmentBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: FragmentExamplesViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
-        )[FragmentExamplesViewModel::class.java]
-    }
+    private val viewModel: FragmentExamplesViewModel by viewModels()
 
     private val stripe: Stripe by lazy {
         StripeFactory(requireContext()).create()
@@ -107,9 +102,7 @@ class FragmentExamplesFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return viewBinding.root
-    }
+    ): View = viewBinding.root
 
     override fun onPause() {
         viewBinding.progressBar.visibility = View.INVISIBLE

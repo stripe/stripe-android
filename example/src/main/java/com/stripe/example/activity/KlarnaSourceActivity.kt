@@ -4,9 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
@@ -22,12 +22,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
         KlarnaSourceActivityBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: SourceViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[SourceViewModel::class.java]
-    }
+    private val viewModel: SourceViewModel by viewModels()
 
     private val stripe: Stripe by lazy {
         StripeFactory(this).create()

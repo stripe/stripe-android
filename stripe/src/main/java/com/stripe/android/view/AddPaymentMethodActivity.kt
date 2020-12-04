@@ -9,10 +9,10 @@ import android.text.util.Linkify
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -59,14 +59,11 @@ class AddPaymentMethodActivity : StripeActivity() {
         }
     }
 
-    private val viewModel: AddPaymentMethodViewModel by lazy {
-        ViewModelProvider(
-            this,
-            AddPaymentMethodViewModel.Factory(
-                stripe,
-                args
-            )
-        )[AddPaymentMethodViewModel::class.java]
+    private val viewModel: AddPaymentMethodViewModel by viewModels {
+        AddPaymentMethodViewModel.Factory(
+            stripe,
+            args
+        )
     }
 
     private val titleStringRes: Int

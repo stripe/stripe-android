@@ -4,11 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
@@ -26,12 +26,7 @@ class CustomerSessionActivity : AppCompatActivity() {
         CustomerSessionActivityBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: ActivityViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.NewInstanceFactory()
-        )[ActivityViewModel::class.java]
-    }
+    private val viewModel: ActivityViewModel by viewModels()
 
     private val snackbarController: SnackbarController by lazy {
         SnackbarController(viewBinding.coordinator)

@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.example.databinding.ActivityPaymentSheetCustomBinding
 import com.stripe.example.paymentsheet.EphemeralKey
 import com.stripe.example.paymentsheet.PaymentSheetViewModel
@@ -15,14 +15,11 @@ class LaunchPaymentSheetCustomActivity : AppCompatActivity() {
         ActivityPaymentSheetCustomBinding.inflate(layoutInflater)
     }
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            PaymentSheetViewModel.Factory(
-                application,
-                getPreferences(Context.MODE_PRIVATE)
-            )
-        )[PaymentSheetViewModel::class.java]
+    private val viewModel: PaymentSheetViewModel by viewModels {
+        PaymentSheetViewModel.Factory(
+            application,
+            getPreferences(Context.MODE_PRIVATE)
+        )
     }
 
     private lateinit var ephemeralKey: EphemeralKey
