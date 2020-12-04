@@ -21,9 +21,13 @@
             android:paddingHorizontal="12dp" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <View style="@style/StripePaymentSheetFormDivider" />
+    <View
+        android:id="@+id/postal_code_divider"
+        style="@style/StripePaymentSheetFormDivider"
+        />
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/postal_code_layout"
         style="@style/StripePaymentSheetTextInputLayout"
         android:hint="@string/address_label_zip_code"
         android:layout_width="match_parent"
