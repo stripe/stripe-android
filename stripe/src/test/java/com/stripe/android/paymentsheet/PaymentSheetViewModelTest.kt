@@ -14,6 +14,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -141,7 +142,10 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm new payment methods`() {
-        val paymentSelection = PaymentSelection.New(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+        val paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa
+        )
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(mock())
 

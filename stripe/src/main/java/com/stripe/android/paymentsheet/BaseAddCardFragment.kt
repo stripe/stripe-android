@@ -79,8 +79,11 @@ internal abstract class BaseAddCardFragment : Fragment() {
 
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
             val selection = if (isValid) {
-                paymentMethodParams?.let {
-                    PaymentSelection.New(it)
+                paymentMethodParams?.let { params ->
+                    PaymentSelection.New.Card(
+                        params,
+                        cardMultilineWidget.brand
+                    )
                 }
             } else {
                 null
