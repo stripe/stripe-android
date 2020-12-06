@@ -19,6 +19,7 @@ internal class PaymentOptionsViewModel(
     googlePayRepository = googlePayRepository
 ) {
     init {
+        mutablePaymentIntent.value = args.paymentIntent
         mutablePaymentMethods.value = args.paymentMethods
     }
 

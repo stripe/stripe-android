@@ -76,7 +76,6 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             return
         }
 
-        viewModel.fetchIsGooglePayReady()
         viewModel.updatePaymentMethods()
         viewModel.fetchPaymentIntent()
 

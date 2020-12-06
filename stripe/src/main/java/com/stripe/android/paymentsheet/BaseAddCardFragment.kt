@@ -9,10 +9,12 @@ import android.widget.CheckBox
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.ui.SheetMode
@@ -50,6 +52,11 @@ internal abstract class BaseAddCardFragment : Fragment() {
                 PaymentMethodCreateParams.createCard(it)
             }
         }
+
+    @VisibleForTesting
+    internal val googlePayButton: View by lazy { viewBinding.googlePayButton }
+
+    abstract fun onGooglePaySelected()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,6 +123,18 @@ internal abstract class BaseAddCardFragment : Fragment() {
         }
 
         setupSaveCardCheckbox(saveCardCheckbox)
+
+        sheetViewModel.fetchAddPaymentMethodConfig().observe(viewLifecycleOwner) { config ->
+            if (config != null) {
+                onConfigReady(config)
+            }
+        }
+
+        sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
+            if (paymentSelection == PaymentSelection.GooglePay) {
+                onGooglePaySelected()
+            }
+        }
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
@@ -133,5 +152,16 @@ internal abstract class BaseAddCardFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _viewBinding = null
+    }
+
+    @VisibleForTesting
+    fun onConfigReady(config: AddPaymentMethodConfig) {
+        val shouldShowGooglePayButton = config.shouldShowGooglePayButton
+        googlePayButton.setOnClickListener {
+            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
+        }
+        googlePayButton.isVisible = shouldShowGooglePayButton
+        viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
+        viewBinding.addCardHeader.isVisible = !shouldShowGooglePayButton
     }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Activity
 import android.content.Intent
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -14,6 +15,7 @@ internal class PaymentOptionsActivityStarter internal constructor(
     REQUEST_CODE
 ) {
     sealed class Args : ActivityStarter.Args {
+        abstract val paymentIntent: PaymentIntent
         abstract val paymentMethods: List<PaymentMethod>
         abstract val googlePayConfig: PaymentSheetGooglePayConfig?
 
@@ -21,6 +23,7 @@ internal class PaymentOptionsActivityStarter internal constructor(
 
         @Parcelize
         data class Default(
+            override val paymentIntent: PaymentIntent,
             override val paymentMethods: List<PaymentMethod>,
             val ephemeralKey: String,
             val customerId: String,
@@ -29,6 +32,7 @@ internal class PaymentOptionsActivityStarter internal constructor(
 
         @Parcelize
         data class Guest(
+            override val paymentIntent: PaymentIntent,
             override val googlePayConfig: PaymentSheetGooglePayConfig?
         ) : Args() {
             override val paymentMethods: List<PaymentMethod>
