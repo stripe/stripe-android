@@ -44,13 +44,13 @@ internal data class StripeResponse internal constructor(
                 } catch (e: JSONException) {
                     throw APIException(
                         message =
-                            """
+                        """
                             Exception while parsing response body.
                               Status code: $code
                               Request-Id: $requestId
                               Content-Type: $contentType
                               Body: "$it"
-                            """.trimIndent(),
+                        """.trimIndent(),
                         cause = e
                     )
                 }
