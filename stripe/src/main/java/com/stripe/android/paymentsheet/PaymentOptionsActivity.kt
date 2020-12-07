@@ -151,7 +151,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
 
         viewModel.selection.observe(this) { paymentSelection ->
-            // TODO(smaskell): show Google Pay button when GooglePay selected
             addButton.isEnabled = paymentSelection != null
         }
         addButton.setOnClickListener {

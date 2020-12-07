@@ -3,15 +3,12 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
 internal class PaymentOptionsViewModel(
-    private val publishableKey: String,
-    private val stripeAccountId: String?,
-    private val args: PaymentOptionsActivityStarter.Args,
+    args: PaymentOptionsActivityStarter.Args,
     googlePayRepository: GooglePayRepository
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     customerConfig = args.config?.customer,
@@ -48,15 +45,9 @@ internal class PaymentOptionsViewModel(
     ) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val application = applicationSupplier()
-            val config = PaymentConfiguration.getInstance(application)
-            val publishableKey = config.publishableKey
-            val stripeAccountId = config.stripeAccountId
-            val googlePayRepository = DefaultGooglePayRepository(application)
+            val googlePayRepository = DefaultGooglePayRepository(applicationSupplier())
 
             return PaymentOptionsViewModel(
-                publishableKey,
-                stripeAccountId,
                 starterArgsSupplier(),
                 googlePayRepository
             ) as T
