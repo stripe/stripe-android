@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
+import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.R
@@ -44,12 +44,12 @@ internal class AddButton @JvmOverloads constructor(
     }
 
     fun onReadyState() {
-        viewBinding.confirmingIcon.visibility = View.GONE
+        viewBinding.confirmingIcon.isVisible = false
     }
 
     fun onCompletedState(state: PaymentOptionViewState.Completed) {
-        viewBinding.lockIcon.visibility = View.GONE
-        viewBinding.confirmingIcon.visibility = View.VISIBLE
+        viewBinding.lockIcon.isVisible = false
+        viewBinding.confirmingIcon.isVisible = true
 
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
@@ -74,11 +74,7 @@ internal class AddButton @JvmOverloads constructor(
             ALPHA_DISABLED
         }
 
-        viewBinding.lockIcon.visibility = if (enabled) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+        viewBinding.lockIcon.isVisible = enabled
     }
 
     override fun updateState(viewState: PaymentOptionViewState) {

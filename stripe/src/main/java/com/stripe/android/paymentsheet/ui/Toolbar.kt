@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.FrameLayout
+import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.databinding.StripePaymentSheetToolbarBinding
@@ -31,13 +31,13 @@ internal class Toolbar @JvmOverloads constructor(
     }
 
     fun showClose() {
-        closeButton.visibility = View.VISIBLE
-        backButton.visibility = View.GONE
+        closeButton.isVisible = true
+        backButton.isVisible = false
     }
 
     fun showBack() {
-        closeButton.visibility = View.GONE
-        backButton.visibility = View.VISIBLE
+        closeButton.isVisible = false
+        backButton.isVisible = true
     }
 
     fun updateProcessing(isProcessing: Boolean) {
