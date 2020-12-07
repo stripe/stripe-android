@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -31,6 +32,7 @@ class PaymentOptionsActivityTest {
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
         args = PaymentOptionsActivityStarter.Args.Guest(
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT
         ),
         googlePayRepository = mock()
@@ -44,6 +46,7 @@ class PaymentOptionsActivityTest {
         ).putExtra(
             ActivityStarter.Args.EXTRA,
             PaymentOptionsActivityStarter.Args.Guest(
+                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                 googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT
             )
         )

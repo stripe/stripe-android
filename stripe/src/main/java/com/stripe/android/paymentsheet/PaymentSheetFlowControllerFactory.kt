@@ -135,6 +135,7 @@ internal class PaymentSheetFlowControllerFactory(
                             ),
                             publishableKey = publishableKey,
                             stripeAccountId = stripeAccountId,
+                            paymentIntent = paymentIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
                             googlePayConfig = googlePayConfig,
@@ -170,6 +171,7 @@ internal class PaymentSheetFlowControllerFactory(
                         DefaultPaymentSheetFlowController.Args.Guest(
                             clientSecret
                         ),
+                        paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
                         googlePayConfig = googlePayConfig,

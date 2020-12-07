@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import com.stripe.android.PaymentController
+import com.stripe.android.googlepay.StripeGooglePayLauncher
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
@@ -18,11 +20,15 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val args: Args,
+    private val paymentIntent: PaymentIntent,
     // the allowed payment method types
     internal val paymentMethodTypes: List<PaymentMethod.Type>,
     // the customer's existing payment methods
     internal val paymentMethods: List<PaymentMethod>,
     private val googlePayConfig: PaymentSheetGooglePayConfig?,
+    private val googlePayLauncherFactory: (ComponentActivity) -> StripeGooglePayLauncher = {
+        StripeGooglePayLauncher(it)
+    },
     private val defaultPaymentMethodId: String?
 ) : PaymentSheetFlowController {
     private val confirmParamsFactory = ConfirmParamsFactory()
@@ -39,6 +45,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 when (args) {
                     is Args.Default -> {
                         PaymentOptionsActivityStarter.Args.Default(
+                            paymentIntent = paymentIntent,
                             paymentMethods = paymentMethods,
                             ephemeralKey = args.ephemeralKey,
                             customerId = args.customerId,
@@ -47,6 +54,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                     }
                     is Args.Guest -> {
                         PaymentOptionsActivityStarter.Args.Guest(
+                            paymentIntent = paymentIntent,
                             googlePayConfig = googlePayConfig
                         )
                     }
@@ -59,6 +67,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     override fun onPaymentOptionResult(intent: Intent?): PaymentOption? {
         val paymentSelection =
             (PaymentOptionResult.fromIntent(intent) as? PaymentOptionResult.Succeeded)?.paymentSelection
+        this.paymentSelection = paymentSelection
         return paymentSelection?.let(paymentOptionFactory::create)
     }
 
@@ -66,32 +75,40 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         activity: ComponentActivity,
         onComplete: (PaymentResult) -> Unit
     ) {
-
-        val confirmParams = paymentSelection?.let {
-            confirmParamsFactory.create(
-                args.clientSecret,
-                it,
-                // TODO(mshafrir-stripe): set correct value
-                shouldSavePaymentMethod = false
-            )
-        }
-
-        if (confirmParams != null) {
-            paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
-                confirmParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+        if (paymentSelection == PaymentSelection.GooglePay) {
+            googlePayLauncherFactory(activity).startForResult(
+                StripeGooglePayLauncher.Args(
+                    paymentIntent = paymentIntent,
+                    countryCode = googlePayConfig?.countryCode.orEmpty()
                 )
             )
         } else {
-            // TODO(mshafrir-stripe): handle error
-        }
+            val confirmParams = paymentSelection?.let {
+                confirmParamsFactory.create(
+                    args.clientSecret,
+                    it,
+                    // TODO(mshafrir-stripe): set correct value
+                    shouldSavePaymentMethod = false
+                )
+            }
 
-        onComplete(
-            PaymentResult.Cancelled(null, null)
-        )
+            if (confirmParams != null) {
+                paymentController.startConfirmAndAuth(
+                    AuthActivityStarter.Host.create(activity),
+                    confirmParams,
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
+                )
+            } else {
+                // TODO(mshafrir-stripe): handle error
+            }
+
+            onComplete(
+                PaymentResult.Cancelled(null, null)
+            )
+        }
     }
 
     sealed class Args : Parcelable {

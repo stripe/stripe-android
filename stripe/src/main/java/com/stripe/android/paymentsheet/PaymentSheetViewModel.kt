@@ -4,13 +4,8 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
@@ -26,7 +21,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
@@ -54,41 +48,6 @@ internal class PaymentSheetViewModel internal constructor(
     workContext = workContext
 ) {
     private val confirmParamsFactory = ConfirmParamsFactory()
-
-    private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
-    internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
-
-    fun fetchAddPaymentMethodConfig() = liveData {
-        emitSource(
-            MediatorLiveData<AddPaymentMethodConfig?>().also { configLiveData ->
-                listOf(paymentIntent, paymentMethods, isGooglePayReady).forEach { source ->
-                    configLiveData.addSource(source) {
-                        configLiveData.value = createAddPaymentMethodConfig()
-                    }
-                }
-            }.distinctUntilChanged()
-        )
-    }
-
-    private fun createAddPaymentMethodConfig(): AddPaymentMethodConfig? {
-        val paymentIntentValue = paymentIntent.value
-        val paymentMethodsValue = paymentMethods.value
-        val isGooglePayReadyValue = isGooglePayReady.value
-
-        return if (
-            paymentIntentValue != null &&
-            paymentMethodsValue != null &&
-            isGooglePayReadyValue != null
-        ) {
-            AddPaymentMethodConfig(
-                paymentIntent = paymentIntentValue,
-                paymentMethods = paymentMethodsValue,
-                isGooglePayReady = isGooglePayReadyValue
-            )
-        } else {
-            null
-        }
-    }
 
     fun updatePaymentMethods() {
         when (args) {

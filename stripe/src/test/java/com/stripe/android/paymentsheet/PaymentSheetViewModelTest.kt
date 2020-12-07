@@ -29,11 +29,15 @@ import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -51,16 +55,18 @@ internal class PaymentSheetViewModelTest {
     private val stripeRepository: StripeRepository = FakeStripeRepository(paymentIntent)
     private val paymentController: PaymentController = mock()
     private val prefsRepository = mock<PrefsRepository>()
-    private val viewModel = PaymentSheetViewModel(
-        "publishable_key",
-        "stripe_account_id",
-        stripeRepository,
-        paymentController,
-        googlePayRepository,
-        prefsRepository,
-        DEFAULT_ARGS,
-        workContext = testCoroutineDispatcher
-    )
+    private val viewModel: PaymentSheetViewModel by lazy {
+        PaymentSheetViewModel(
+            "publishable_key",
+            "stripe_account_id",
+            stripeRepository,
+            paymentController,
+            googlePayRepository,
+            prefsRepository,
+            DEFAULT_ARGS,
+            workContext = testCoroutineDispatcher
+        )
+    }
 
     private val callbackCaptor = argumentCaptor<ApiResultCallback<PaymentIntentResult>>()
 
@@ -68,6 +74,11 @@ internal class PaymentSheetViewModelTest {
     fun before() {
         whenever(paymentController.shouldHandlePaymentResult(any(), any()))
             .thenReturn(true)
+    }
+
+    @AfterTest
+    fun cleanup() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -296,11 +307,11 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `isGooglePayReady when googlePayConfig is not null should emit expected value`() {
+        Dispatchers.setMain(testCoroutineDispatcher)
         var isReady: Boolean? = null
         viewModel.isGooglePayReady.observeForever {
             isReady = it
         }
-        viewModel.fetchIsGooglePayReady()
         assertThat(isReady)
             .isTrue()
     }
