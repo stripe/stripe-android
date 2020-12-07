@@ -91,6 +91,10 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private var cardBrand: CardBrand = CardBrand.Unknown
 
+    internal val brand: CardBrand
+        @JvmSynthetic
+        get() = cardBrand
+
     @ColorInt
     private val tintColorInt: Int
 

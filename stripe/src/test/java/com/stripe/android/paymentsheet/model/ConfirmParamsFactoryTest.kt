@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -14,8 +15,9 @@ class ConfirmParamsFactoryTest {
         assertThat(
             factory.create(
                 clientSecret = CLIENT_SECRET,
-                paymentSelection = PaymentSelection.New(
-                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                paymentSelection = PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CardBrand.Visa
                 ),
                 shouldSavePaymentMethod = true
             )
