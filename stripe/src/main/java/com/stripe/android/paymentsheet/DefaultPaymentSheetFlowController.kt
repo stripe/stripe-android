@@ -25,7 +25,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     internal val paymentMethodTypes: List<PaymentMethod.Type>,
     // the customer's existing payment methods
     internal val paymentMethods: List<PaymentMethod>,
-    private val googlePayConfig: PaymentSheetGooglePayConfig?,
+    private val googlePayConfig: PaymentSheet.GooglePayConfiguration?,
     private val googlePayLauncherFactory: (ComponentActivity) -> StripeGooglePayLauncher = {
         StripeGooglePayLauncher(it)
     },

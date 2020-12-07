@@ -33,7 +33,7 @@ class PaymentOptionsActivityTest {
         stripeAccountId = null,
         args = PaymentOptionsActivityStarter.Args.Guest(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT
+            googlePayConfig = ConfigFixtures.GOOGLE_PAY
         ),
         googlePayRepository = mock()
     )
@@ -47,7 +47,7 @@ class PaymentOptionsActivityTest {
             ActivityStarter.Args.EXTRA,
             PaymentOptionsActivityStarter.Args.Guest(
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT
+                googlePayConfig = ConfigFixtures.GOOGLE_PAY
             )
         )
 

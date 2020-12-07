@@ -35,7 +35,7 @@ class DefaultPaymentSheetFlowControllerTest {
         paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
         paymentMethodTypes = listOf(PaymentMethod.Type.Card),
         paymentMethods = emptyList(),
-        googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT,
+        googlePayConfig = ConfigFixtures.GOOGLE_PAY,
         googlePayLauncherFactory = { googlePayLauncher },
         defaultPaymentMethodId = null
     )
