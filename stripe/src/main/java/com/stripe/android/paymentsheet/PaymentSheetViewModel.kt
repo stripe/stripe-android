@@ -117,7 +117,8 @@ internal class PaymentSheetViewModel internal constructor(
                 StripeGooglePayLauncher(activity).startForResult(
                     StripeGooglePayLauncher.Args(
                         paymentIntent = paymentIntent,
-                        countryCode = args.googlePayConfig?.countryCode.orEmpty()
+                        countryCode = args.googlePayConfig?.countryCode.orEmpty(),
+                        merchantName = args.config?.merchantDisplayName
                     )
                 )
             }

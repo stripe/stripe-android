@@ -66,7 +66,8 @@ internal class DefaultPaymentSheetFlowController internal constructor(
             googlePayLauncherFactory(activity).startForResult(
                 StripeGooglePayLauncher.Args(
                     paymentIntent = paymentIntent,
-                    countryCode = args.config?.googlePay?.countryCode.orEmpty()
+                    countryCode = args.config?.googlePay?.countryCode.orEmpty(),
+                    merchantName = args.config?.merchantDisplayName
                 )
             )
         } else {
