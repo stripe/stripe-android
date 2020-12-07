@@ -17,7 +17,7 @@ internal class PaymentOptionsActivityStarter internal constructor(
     sealed class Args : ActivityStarter.Args {
         abstract val paymentIntent: PaymentIntent
         abstract val paymentMethods: List<PaymentMethod>
-        abstract val googlePayConfig: PaymentSheetGooglePayConfig?
+        abstract val googlePayConfig: PaymentSheet.GooglePayConfiguration?
 
         val isGooglePayEnabled: Boolean get() = googlePayConfig != null
 
@@ -26,13 +26,13 @@ internal class PaymentOptionsActivityStarter internal constructor(
             override val paymentIntent: PaymentIntent,
             override val paymentMethods: List<PaymentMethod>,
             val customerConfiguration: PaymentSheet.CustomerConfiguration,
-            override val googlePayConfig: PaymentSheetGooglePayConfig?
+            override val googlePayConfig: PaymentSheet.GooglePayConfiguration?
         ) : Args()
 
         @Parcelize
         data class Guest(
             override val paymentIntent: PaymentIntent,
-            override val googlePayConfig: PaymentSheetGooglePayConfig?
+            override val googlePayConfig: PaymentSheet.GooglePayConfiguration?
         ) : Args() {
             override val paymentMethods: List<PaymentMethod>
                 get() = emptyList()

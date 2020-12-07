@@ -9,7 +9,7 @@ internal object PaymentSheetFixtures {
             "customer_id",
             "ephemeral_key"
         ),
-        googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT
+        googlePayConfig = ConfigFixtures.GOOGLE_PAY
     )
 
     internal val GUEST_ARGS = PaymentSheetActivityStarter.Args.Guest(

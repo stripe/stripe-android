@@ -6,6 +6,8 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.core.animation.doOnEnd
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import com.stripe.android.R
 
 internal class PrimaryButtonAnimator(
@@ -28,11 +30,11 @@ internal class PrimaryButtonAnimator(
                 animation.setAnimationListener(
                     object : Animation.AnimationListener {
                         override fun onAnimationStart(p0: Animation?) {
-                            view.visibility = View.VISIBLE
+                            view.isVisible = true
                         }
 
                         override fun onAnimationEnd(p0: Animation?) {
-                            view.visibility = View.VISIBLE
+                            view.isVisible = true
 
                             slideToCenter(view, parentWidth, onAnimationEnd)
                         }
@@ -76,11 +78,11 @@ internal class PrimaryButtonAnimator(
                 animation.setAnimationListener(
                     object : Animation.AnimationListener {
                         override fun onAnimationStart(p0: Animation?) {
-                            view.visibility = View.VISIBLE
+                            view.isVisible = true
                         }
 
                         override fun onAnimationEnd(p0: Animation?) {
-                            view.visibility = View.INVISIBLE
+                            view.isInvisible = true
                         }
 
                         override fun onAnimationRepeat(p0: Animation?) {
