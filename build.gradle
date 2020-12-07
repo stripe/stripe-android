@@ -49,7 +49,7 @@ ext {
     kotlinCoroutinesVersion = '1.4.2'
     androidLifecycleVersion = '2.2.0'
     espressoVersion = '3.3.0'
-    ktlintVersion = '0.39.0'
+    ktlintVersion = '0.40.0'
     materialVersion = '1.2.1'
 
     fragmentVersion = '1.2.5'
