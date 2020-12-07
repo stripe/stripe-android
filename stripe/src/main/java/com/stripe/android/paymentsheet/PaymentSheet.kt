@@ -80,6 +80,10 @@ internal class PaymentSheet internal constructor(
 
     @Parcelize
     data class GooglePayConfiguration(
+        /**
+         * The two-letter ISO 3166 code of the country of your business, e.g. "US"
+         * See your account's country value here https://dashboard.stripe.com/settings/account
+         */
         val countryCode: String
     ) : Parcelable
 
