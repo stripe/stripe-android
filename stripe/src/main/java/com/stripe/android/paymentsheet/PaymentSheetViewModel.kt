@@ -52,10 +52,7 @@ internal class PaymentSheetViewModel internal constructor(
     fun updatePaymentMethods() {
         when (args) {
             is PaymentSheetActivityStarter.Args.Default -> {
-                updatePaymentMethods(
-                    args.ephemeralKey,
-                    args.customerId
-                )
+                updatePaymentMethods(args.customerConfiguration)
             }
             is PaymentSheetActivityStarter.Args.Guest -> {
                 mutablePaymentMethods.postValue(emptyList())
@@ -214,8 +211,7 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private fun updatePaymentMethods(
-        ephemeralKey: String,
-        customerId: String,
+        customerConfig: PaymentSheet.CustomerConfiguration,
         stripeAccountId: String? = this.stripeAccountId
     ) {
         viewModelScope.launch {
@@ -223,12 +219,15 @@ internal class PaymentSheetViewModel internal constructor(
                 runCatching {
                     stripeRepository.getPaymentMethods(
                         ListPaymentMethodsParams(
-                            customerId = customerId,
+                            customerId = customerConfig.id,
                             paymentMethodType = PaymentMethod.Type.Card
                         ),
                         publishableKey,
                         PRODUCT_USAGE,
-                        ApiRequest.Options(ephemeralKey, stripeAccountId)
+                        ApiRequest.Options(
+                            customerConfig.ephemeralKeySecret,
+                            stripeAccountId
+                        )
                     )
                 }
             }.fold(
@@ -278,7 +277,7 @@ internal class PaymentSheetViewModel internal constructor(
             val prefsRepository = when (starterArgs) {
                 is PaymentSheetActivityStarter.Args.Default -> {
                     DefaultPrefsRepository(
-                        starterArgs.customerId,
+                        starterArgs.customerConfiguration.id,
                         PaymentSessionPrefs.Default(application)
                     )
                 }

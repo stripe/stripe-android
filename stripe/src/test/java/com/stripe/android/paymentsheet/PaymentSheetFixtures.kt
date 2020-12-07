@@ -5,8 +5,10 @@ internal object PaymentSheetFixtures {
 
     internal val DEFAULT_ARGS = PaymentSheetActivityStarter.Args.Default(
         CLIENT_SECRET,
-        "ephemeral_key",
-        "customer_id",
+        PaymentSheet.CustomerConfiguration(
+            "customer_id",
+            "ephemeral_key"
+        ),
         googlePayConfig = ConfigFixtures.GOOGLE_PAY
     )
 

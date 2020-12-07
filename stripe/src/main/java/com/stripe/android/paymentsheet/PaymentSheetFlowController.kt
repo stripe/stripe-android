@@ -33,15 +33,13 @@ internal interface PaymentSheetFlowController {
         fun create(
             context: Context,
             clientSecret: String,
-            ephemeralKey: String,
-            customerId: String,
+            customerConfiguration: PaymentSheet.CustomerConfiguration,
             googlePayConfig: PaymentSheet.GooglePayConfiguration? = null,
             onComplete: (Result) -> Unit
         ) {
             PaymentSheetFlowControllerFactory(context).create(
                 clientSecret,
-                ephemeralKey,
-                customerId,
+                customerConfiguration,
                 googlePayConfig,
                 onComplete
             )

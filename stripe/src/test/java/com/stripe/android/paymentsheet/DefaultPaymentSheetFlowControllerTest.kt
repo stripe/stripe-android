@@ -29,8 +29,10 @@ class DefaultPaymentSheetFlowControllerTest {
         null,
         DefaultPaymentSheetFlowController.Args.Default(
             "client_secret",
-            "ephkey",
-            "cus_123"
+            PaymentSheet.CustomerConfiguration(
+                id = "cus_123",
+                ephemeralKeySecret = "ephkey"
+            )
         ),
         paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
         paymentMethodTypes = listOf(PaymentMethod.Type.Card),

@@ -21,8 +21,7 @@ internal class PaymentSheetActivityStarter internal constructor(
         @Parcelize
         data class Default(
             override val clientSecret: String,
-            val ephemeralKey: String,
-            val customerId: String,
+            val customerConfiguration: PaymentSheet.CustomerConfiguration,
             override val googlePayConfig: PaymentSheet.GooglePayConfiguration? = null
         ) : Args()
 

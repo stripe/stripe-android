@@ -25,8 +25,7 @@ internal class PaymentOptionsActivityStarter internal constructor(
         data class Default(
             override val paymentIntent: PaymentIntent,
             override val paymentMethods: List<PaymentMethod>,
-            val ephemeralKey: String,
-            val customerId: String,
+            val customerConfiguration: PaymentSheet.CustomerConfiguration,
             override val googlePayConfig: PaymentSheet.GooglePayConfiguration?
         ) : Args()
 

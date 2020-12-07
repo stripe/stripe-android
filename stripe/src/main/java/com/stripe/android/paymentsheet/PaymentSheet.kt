@@ -16,13 +16,11 @@ internal class PaymentSheet internal constructor(
      */
     constructor(
         paymentIntentClientSecret: String,
-        ephemeralKey: String,
-        customerId: String
+        customerConfiguration: CustomerConfiguration
     ) : this(
         PaymentSheetActivityStarter.Args.Default(
             paymentIntentClientSecret,
-            ephemeralKey,
-            customerId
+            customerConfiguration
         )
     )
 
