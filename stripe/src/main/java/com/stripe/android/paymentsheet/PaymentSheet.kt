@@ -33,7 +33,7 @@ internal class PaymentSheet internal constructor(
         PaymentSheetActivityStarter.Args.Guest(clientSecret)
     )
 
-    fun confirm(activity: ComponentActivity, callback: (PaymentResult) -> Unit) {
+    fun present(activity: ComponentActivity, callback: (PaymentResult) -> Unit) {
         // TODO: Use ActivityResultContract and call callback instead of using onActivityResult
         // when androidx.activity:1.2.0 hits GA
         PaymentSheetActivityStarter(activity)
