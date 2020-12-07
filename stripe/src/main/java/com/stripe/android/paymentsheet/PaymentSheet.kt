@@ -16,11 +16,11 @@ internal class PaymentSheet internal constructor(
      */
     constructor(
         paymentIntentClientSecret: String,
-        customerConfiguration: CustomerConfiguration
+        configuration: Configuration
     ) : this(
-        PaymentSheetActivityStarter.Args.Default(
+        PaymentSheetActivityStarter.Args(
             paymentIntentClientSecret,
-            customerConfiguration
+            configuration
         )
     )
 
@@ -28,9 +28,12 @@ internal class PaymentSheet internal constructor(
      * Create PaymentSheet without a Customer
      */
     constructor(
-        clientSecret: String
+        paymentIntentClientSecret: String
     ) : this(
-        PaymentSheetActivityStarter.Args.Guest(clientSecret)
+        PaymentSheetActivityStarter.Args(
+            paymentIntentClientSecret,
+            config = null
+        )
     )
 
     fun present(activity: ComponentActivity, callback: (PaymentResult) -> Unit) {

@@ -33,14 +33,12 @@ internal interface PaymentSheetFlowController {
         fun create(
             context: Context,
             clientSecret: String,
-            customerConfiguration: PaymentSheet.CustomerConfiguration,
-            googlePayConfig: PaymentSheet.GooglePayConfiguration? = null,
+            configuration: PaymentSheet.Configuration,
             onComplete: (Result) -> Unit
         ) {
             PaymentSheetFlowControllerFactory(context).create(
                 clientSecret,
-                customerConfiguration,
-                googlePayConfig,
+                configuration,
                 onComplete
             )
         }
@@ -48,12 +46,10 @@ internal interface PaymentSheetFlowController {
         fun create(
             context: Context,
             clientSecret: String,
-            googlePayConfig: PaymentSheet.GooglePayConfiguration? = null,
             onComplete: (Result) -> Unit
         ) {
             PaymentSheetFlowControllerFactory(context).create(
                 clientSecret,
-                googlePayConfig,
                 onComplete
             )
         }

@@ -31,9 +31,12 @@ class PaymentOptionsActivityTest {
     private val viewModel = PaymentOptionsViewModel(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
-        args = PaymentOptionsActivityStarter.Args.Guest(
+        args = PaymentOptionsActivityStarter.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            googlePayConfig = ConfigFixtures.GOOGLE_PAY
+            paymentMethods = emptyList(),
+            config = PaymentSheet.Configuration(
+                googlePay = ConfigFixtures.GOOGLE_PAY
+            )
         ),
         googlePayRepository = mock()
     )
@@ -45,9 +48,12 @@ class PaymentOptionsActivityTest {
             PaymentOptionsActivity::class.java
         ).putExtra(
             ActivityStarter.Args.EXTRA,
-            PaymentOptionsActivityStarter.Args.Guest(
+            PaymentOptionsActivityStarter.Args(
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                googlePayConfig = ConfigFixtures.GOOGLE_PAY
+                paymentMethods = emptyList(),
+                config = PaymentSheet.Configuration(
+                    googlePay = ConfigFixtures.GOOGLE_PAY
+                )
             )
         )
 

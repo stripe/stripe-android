@@ -150,7 +150,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         return fragment.activityViewModels<PaymentSheetViewModel> {
             PaymentSheetViewModel.Factory(
                 { fragment.requireActivity().application },
-                { PaymentSheetFixtures.DEFAULT_ARGS }
+                { PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY }
             )
         }.value
     }
@@ -162,7 +162,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     private fun createScenario(): FragmentScenario<PaymentSheetPaymentMethodsListFragment> {
         return launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>(
             bundleOf(
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.DEFAULT_ARGS
+                PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
             ),
             R.style.StripePaymentSheetDefaultTheme
         )

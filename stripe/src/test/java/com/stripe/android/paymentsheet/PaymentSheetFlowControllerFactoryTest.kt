@@ -44,13 +44,15 @@ class PaymentSheetFlowControllerFactoryTest {
     }
 
     @Test
-    fun `create() in default mode should create object with expected properties`() {
+    fun `create() with customer config should create object with expected properties`() {
         var result: PaymentSheetFlowController.Result? = null
         factory.create(
             "client_secret",
-            PaymentSheet.CustomerConfiguration(
-                id = "cus_123",
-                ephemeralKeySecret = "eph_key"
+            PaymentSheet.Configuration(
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "eph_key"
+                )
             )
         ) {
             result = it

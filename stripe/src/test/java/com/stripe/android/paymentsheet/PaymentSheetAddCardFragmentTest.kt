@@ -34,11 +34,11 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
-    fun `shouldSavePaymentMethod should default to true when in default mode`() {
+    fun `shouldSavePaymentMethod with customer config should default to true `() {
         createScenario().onFragment { fragment ->
             val activityViewModel = activityViewModel(
                 fragment,
-                PaymentSheetFixtures.DEFAULT_ARGS
+                PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
             )
             assertThat(activityViewModel.shouldSavePaymentMethod)
                 .isTrue()
@@ -50,7 +50,7 @@ class PaymentSheetAddCardFragmentTest {
         createScenario().onFragment { fragment ->
             val activityViewModel = activityViewModel(
                 fragment,
-                PaymentSheetFixtures.DEFAULT_ARGS
+                PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
             )
 
             val checkbox = fragment.requireView().findViewById<CheckBox>(R.id.save_card_checkbox)
@@ -62,11 +62,11 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
-    fun `shouldSavePaymentMethod should default to false when in guest mode`() {
+    fun `shouldSavePaymentMethod without customer config should default to false`() {
         createScenario().onFragment { fragment ->
             val activityViewModel = activityViewModel(
                 fragment,
-                PaymentSheetFixtures.GUEST_ARGS
+                PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
             )
             assertThat(activityViewModel.shouldSavePaymentMethod)
                 .isTrue()
@@ -101,7 +101,7 @@ class PaymentSheetAddCardFragmentTest {
         createScenario().onFragment { fragment ->
             val activityViewModel = activityViewModel(
                 fragment,
-                PaymentSheetFixtures.DEFAULT_ARGS
+                PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
             )
 
             fragment.onConfigReady(
@@ -146,7 +146,7 @@ class PaymentSheetAddCardFragmentTest {
     private fun createScenario(): FragmentScenario<PaymentSheetAddCardFragment> {
         return launchFragmentInContainer<PaymentSheetAddCardFragment>(
             bundleOf(
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.DEFAULT_ARGS
+                PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
             ),
             R.style.StripePaymentSheetDefaultTheme
         )
