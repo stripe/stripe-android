@@ -24,7 +24,7 @@ internal class ConfirmParamsFactory {
                     paymentSelection.paymentMethodCreateParams,
                     clientSecret,
                     setupFutureUsage = when (paymentSelection.shouldSavePaymentMethod) {
-                        true -> ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+                        true -> ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                         false -> null
                     }
                 )

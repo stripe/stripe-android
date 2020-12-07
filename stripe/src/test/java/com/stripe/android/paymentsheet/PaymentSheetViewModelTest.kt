@@ -168,7 +168,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 )
             ),
             eq(
