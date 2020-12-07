@@ -25,7 +25,6 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     internal val paymentMethodTypes: List<PaymentMethod.Type>,
     // the customer's existing payment methods
     internal val paymentMethods: List<PaymentMethod>,
-    private val googlePayConfig: PaymentSheet.GooglePayConfiguration?,
     private val googlePayLauncherFactory: (ComponentActivity) -> StripeGooglePayLauncher = {
         StripeGooglePayLauncher(it)
     },
@@ -42,22 +41,11 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     ) {
         PaymentOptionsActivityStarter(activity)
             .startForResult(
-                when (args) {
-                    is Args.Default -> {
-                        PaymentOptionsActivityStarter.Args.Default(
-                            paymentIntent = paymentIntent,
-                            paymentMethods = paymentMethods,
-                            customerConfiguration = args.customerConfiguration,
-                            googlePayConfig = googlePayConfig
-                        )
-                    }
-                    is Args.Guest -> {
-                        PaymentOptionsActivityStarter.Args.Guest(
-                            paymentIntent = paymentIntent,
-                            googlePayConfig = googlePayConfig
-                        )
-                    }
-                }
+                PaymentOptionsActivityStarter.Args(
+                    paymentIntent = paymentIntent,
+                    paymentMethods = paymentMethods,
+                    config = args.config
+                )
             )
 
         onComplete(null)
@@ -78,7 +66,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
             googlePayLauncherFactory(activity).startForResult(
                 StripeGooglePayLauncher.Args(
                     paymentIntent = paymentIntent,
-                    countryCode = googlePayConfig?.countryCode.orEmpty()
+                    countryCode = args.config?.googlePay?.countryCode.orEmpty()
                 )
             )
         } else {
@@ -110,18 +98,9 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         }
     }
 
-    sealed class Args : Parcelable {
-        abstract val clientSecret: String
-
-        @Parcelize
-        data class Default(
-            override val clientSecret: String,
-            val customerConfiguration: PaymentSheet.CustomerConfiguration
-        ) : Args()
-
-        @Parcelize
-        data class Guest(
-            override val clientSecret: String
-        ) : Args()
-    }
+    @Parcelize
+    data class Args(
+        val clientSecret: String,
+        val config: PaymentSheet.Configuration?
+    ) : Parcelable
 }

@@ -141,10 +141,7 @@ internal abstract class BaseAddCardFragment : Fragment() {
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
-        saveCardCheckbox.visibility = when (sheetViewModel.isGuestMode) {
-            true -> View.GONE
-            false -> View.VISIBLE
-        }
+        saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
 
         sheetViewModel.shouldSavePaymentMethod = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
         saveCardCheckbox.setOnCheckedChangeListener { _, isChecked ->
