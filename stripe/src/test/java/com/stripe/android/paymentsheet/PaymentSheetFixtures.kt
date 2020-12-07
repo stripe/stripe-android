@@ -3,16 +3,29 @@ package com.stripe.android.paymentsheet
 internal object PaymentSheetFixtures {
     internal const val CLIENT_SECRET = "client_secret"
 
-    internal val DEFAULT_ARGS = PaymentSheetActivityStarter.Args.Default(
+    internal val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetActivityStarter.Args(
         CLIENT_SECRET,
-        PaymentSheet.CustomerConfiguration(
-            "customer_id",
-            "ephemeral_key"
-        ),
-        googlePayConfig = ConfigFixtures.GOOGLE_PAY
+        PaymentSheet.Configuration(
+            customer = PaymentSheet.CustomerConfiguration(
+                "customer_id",
+                "ephemeral_key"
+            ),
+            googlePay = ConfigFixtures.GOOGLE_PAY
+        )
     )
 
-    internal val GUEST_ARGS = PaymentSheetActivityStarter.Args.Guest(
-        CLIENT_SECRET
+    internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY = PaymentSheetActivityStarter.Args(
+        CLIENT_SECRET,
+        PaymentSheet.Configuration(
+            customer = PaymentSheet.CustomerConfiguration(
+                "customer_id",
+                "ephemeral_key"
+            )
+        )
+    )
+
+    internal val ARGS_WITHOUT_CUSTOMER = PaymentSheetActivityStarter.Args(
+        CLIENT_SECRET,
+        config = null
     )
 }

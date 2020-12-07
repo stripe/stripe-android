@@ -14,8 +14,8 @@ internal class PaymentOptionsViewModel(
     private val args: PaymentOptionsActivityStarter.Args,
     googlePayRepository: GooglePayRepository
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
-    isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest,
-    isGooglePayEnabled = args.isGooglePayEnabled,
+    customerConfig = args.config?.customer,
+    isGooglePayEnabled = args.config?.googlePay != null,
     googlePayRepository = googlePayRepository
 ) {
     init {

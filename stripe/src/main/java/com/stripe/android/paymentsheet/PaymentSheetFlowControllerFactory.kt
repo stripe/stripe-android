@@ -52,17 +52,18 @@ internal class PaymentSheetFlowControllerFactory(
 
     fun create(
         clientSecret: String,
-        customerConfig: PaymentSheet.CustomerConfiguration,
-        googlePayConfig: PaymentSheet.GooglePayConfiguration? = null,
+        config: PaymentSheet.Configuration,
         onComplete: (PaymentSheetFlowController.Result) -> Unit
     ) {
         CoroutineScope(workContext).launch {
             dispatchResult(
-                createWithDefaultArgs(
-                    clientSecret,
-                    customerConfig,
-                    googlePayConfig
-                ),
+                config.customer?.let { customerConfig ->
+                    createWithCustomer(
+                        clientSecret,
+                        customerConfig,
+                        config
+                    )
+                } ?: createWithoutCustomer(clientSecret, config),
                 onComplete
             )
         }
@@ -70,14 +71,13 @@ internal class PaymentSheetFlowControllerFactory(
 
     fun create(
         clientSecret: String,
-        googlePayConfig: PaymentSheet.GooglePayConfiguration? = null,
         onComplete: (PaymentSheetFlowController.Result) -> Unit
     ) {
         CoroutineScope(workContext).launch {
             dispatchResult(
-                createWithGuestArgs(
+                createWithoutCustomer(
                     clientSecret,
-                    googlePayConfig
+                    config = null
                 ),
                 onComplete
             )
@@ -102,10 +102,10 @@ internal class PaymentSheetFlowControllerFactory(
         }
     }
 
-    private suspend fun createWithDefaultArgs(
+    private suspend fun createWithCustomer(
         clientSecret: String,
         customerConfig: PaymentSheet.CustomerConfiguration,
-        googlePayConfig: PaymentSheet.GooglePayConfiguration? = null
+        config: PaymentSheet.Configuration?
     ): Result {
         // load default payment option
         val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerConfig.id)
@@ -124,16 +124,15 @@ internal class PaymentSheetFlowControllerFactory(
                     Result.Success(
                         DefaultPaymentSheetFlowController(
                             paymentController = createPaymentController(),
-                            args = DefaultPaymentSheetFlowController.Args.Default(
+                            args = DefaultPaymentSheetFlowController.Args(
                                 clientSecret,
-                                customerConfig
+                                config
                             ),
                             publishableKey = publishableKey,
                             stripeAccountId = stripeAccountId,
                             paymentIntent = paymentIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
-                            googlePayConfig = googlePayConfig,
                             defaultPaymentMethodId = defaultPaymentMethodId
                         )
                     )
@@ -145,9 +144,9 @@ internal class PaymentSheetFlowControllerFactory(
         )
     }
 
-    private suspend fun createWithGuestArgs(
+    private suspend fun createWithoutCustomer(
         clientSecret: String,
-        googlePayConfig: PaymentSheet.GooglePayConfiguration? = null
+        config: PaymentSheet.Configuration?
     ): Result {
         return runCatching {
             requireNotNull(retrievePaymentIntent(clientSecret))
@@ -163,13 +162,13 @@ internal class PaymentSheetFlowControllerFactory(
                         createPaymentController(),
                         publishableKey,
                         stripeAccountId,
-                        DefaultPaymentSheetFlowController.Args.Guest(
-                            clientSecret
+                        DefaultPaymentSheetFlowController.Args(
+                            clientSecret,
+                            config = config
                         ),
                         paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
-                        googlePayConfig = googlePayConfig,
                         defaultPaymentMethodId = null
                     )
                 )

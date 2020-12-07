@@ -42,7 +42,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val args: PaymentSheetActivityStarter.Args,
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
-    isGuestMode = args is PaymentSheetActivityStarter.Args.Guest,
+    customerConfig = args.config?.customer,
     isGooglePayEnabled = args.isGooglePayEnabled,
     googlePayRepository = googlePayRepository,
     workContext = workContext
@@ -50,14 +50,9 @@ internal class PaymentSheetViewModel internal constructor(
     private val confirmParamsFactory = ConfirmParamsFactory()
 
     fun updatePaymentMethods() {
-        when (args) {
-            is PaymentSheetActivityStarter.Args.Default -> {
-                updatePaymentMethods(args.customerConfiguration)
-            }
-            is PaymentSheetActivityStarter.Args.Guest -> {
-                mutablePaymentMethods.postValue(emptyList())
-            }
-        }
+        customerConfig?.let {
+            updatePaymentMethods(it)
+        } ?: mutablePaymentMethods.postValue(emptyList())
     }
 
     fun fetchPaymentIntent() {
@@ -274,17 +269,12 @@ internal class PaymentSheetViewModel internal constructor(
 
             val starterArgs = starterArgsSupplier()
 
-            val prefsRepository = when (starterArgs) {
-                is PaymentSheetActivityStarter.Args.Default -> {
-                    DefaultPrefsRepository(
-                        starterArgs.customerConfiguration.id,
-                        PaymentSessionPrefs.Default(application)
-                    )
-                }
-                is PaymentSheetActivityStarter.Args.Guest -> {
-                    PrefsRepository.Noop()
-                }
-            }
+            val prefsRepository = starterArgs.config?.customer?.let { (id) ->
+                DefaultPrefsRepository(
+                    customerId = id,
+                    PaymentSessionPrefs.Default(application)
+                )
+            } ?: PrefsRepository.Noop()
 
             return PaymentSheetViewModel(
                 publishableKey,
