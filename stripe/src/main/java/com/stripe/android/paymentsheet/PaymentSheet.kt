@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.core.os.bundleOf
 import com.stripe.android.view.ActivityStarter
@@ -40,6 +41,47 @@ internal class PaymentSheet internal constructor(
         PaymentSheetActivityStarter(activity)
             .startForResult(args)
     }
+
+    @Parcelize
+    data class Configuration(
+        /**
+         * Your customer-facing business name.
+         *
+         * The default value is the name of your app.
+         */
+        var merchantDisplayName: String? = null,
+
+        /**
+         * Configuration related to the Stripe Customer making a payment.
+         *
+         * If set, PaymentSheet displays Google Pay as a payment option.
+         */
+        var googlePay: GooglePayConfiguration? = null,
+
+        /**
+         * If set, the customer can select a previously saved payment method within PaymentSheet.
+         */
+        var customer: CustomerConfiguration? = null
+    ) : Parcelable
+
+    @Parcelize
+    data class CustomerConfiguration(
+        /**
+         * The identifier of the Stripe Customer object.
+         * See https://stripe.com/docs/api/customers/object#customer_object-id
+         */
+        val id: String,
+
+        /**
+         * A short-lived token that allows the SDK to access a Customer's payment methods.
+         */
+        val ephemeralKeySecret: String
+    ) : Parcelable
+
+    @Parcelize
+    data class GooglePayConfiguration(
+        val countryCode: String
+    ) : Parcelable
 
     @Parcelize
     internal data class Result(val status: PaymentResult) : ActivityStarter.Result {
