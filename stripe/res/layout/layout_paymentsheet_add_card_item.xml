@@ -10,7 +10,7 @@
         android:checkable="false">
         <ImageView
             style="@style/StripePaymentOptionItemCardImage"
-            android:src="@drawable/stripe_ic_add_circle"
+            android:src="@drawable/stripe_ic_paymentsheet_add"
             android:contentDescription="@null" />
     </com.google.android.material.card.MaterialCardView>
 
