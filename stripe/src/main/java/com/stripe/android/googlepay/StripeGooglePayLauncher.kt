@@ -41,7 +41,9 @@ internal class StripeGooglePayLauncher : ActivityStarter<StripeGooglePayActivity
         /**
          * Set to true to request an email address.
          */
-        internal var isEmailRequired: Boolean = false
+        internal var isEmailRequired: Boolean = false,
+
+        internal var merchantName: String? = null
     ) : ActivityStarter.Args {
 
         companion object {
