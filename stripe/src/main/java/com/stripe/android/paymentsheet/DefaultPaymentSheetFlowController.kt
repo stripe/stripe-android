@@ -47,8 +47,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                         PaymentOptionsActivityStarter.Args.Default(
                             paymentIntent = paymentIntent,
                             paymentMethods = paymentMethods,
-                            ephemeralKey = args.ephemeralKey,
-                            customerId = args.customerId,
+                            customerConfiguration = args.customerConfiguration,
                             googlePayConfig = googlePayConfig
                         )
                     }
@@ -117,8 +116,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         @Parcelize
         data class Default(
             override val clientSecret: String,
-            val ephemeralKey: String,
-            val customerId: String
+            val customerConfiguration: PaymentSheet.CustomerConfiguration
         ) : Args()
 
         @Parcelize

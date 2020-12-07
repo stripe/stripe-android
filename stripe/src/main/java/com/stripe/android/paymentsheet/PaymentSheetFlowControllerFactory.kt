@@ -52,8 +52,7 @@ internal class PaymentSheetFlowControllerFactory(
 
     fun create(
         clientSecret: String,
-        ephemeralKey: String,
-        customerId: String,
+        customerConfig: PaymentSheet.CustomerConfiguration,
         googlePayConfig: PaymentSheetGooglePayConfig? = null,
         onComplete: (PaymentSheetFlowController.Result) -> Unit
     ) {
@@ -61,8 +60,7 @@ internal class PaymentSheetFlowControllerFactory(
             dispatchResult(
                 createWithDefaultArgs(
                     clientSecret,
-                    ephemeralKey,
-                    customerId,
+                    customerConfig,
                     googlePayConfig
                 ),
                 onComplete
@@ -106,12 +104,11 @@ internal class PaymentSheetFlowControllerFactory(
 
     private suspend fun createWithDefaultArgs(
         clientSecret: String,
-        ephemeralKey: String,
-        customerId: String,
+        customerConfig: PaymentSheet.CustomerConfiguration,
         googlePayConfig: PaymentSheetGooglePayConfig? = null
     ): Result {
         // load default payment option
-        val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerId)
+        val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerConfig.id)
 
         return runCatching {
             requireNotNull(retrievePaymentIntent(clientSecret))
@@ -122,16 +119,14 @@ internal class PaymentSheetFlowControllerFactory(
                 }
                 retrieveAllPaymentMethods(
                     types = paymentMethodTypes,
-                    customerId = customerId,
-                    ephemeralKey = ephemeralKey
+                    customerConfig
                 ).let { paymentMethods ->
                     Result.Success(
                         DefaultPaymentSheetFlowController(
                             paymentController = createPaymentController(),
                             args = DefaultPaymentSheetFlowController.Args.Default(
                                 clientSecret,
-                                ephemeralKey,
-                                customerId
+                                customerConfig
                             ),
                             publishableKey = publishableKey,
                             stripeAccountId = stripeAccountId,
@@ -187,15 +182,10 @@ internal class PaymentSheetFlowControllerFactory(
 
     private suspend fun retrieveAllPaymentMethods(
         types: List<PaymentMethod.Type>,
-        customerId: String,
-        ephemeralKey: String
+        customerConfig: PaymentSheet.CustomerConfiguration
     ): List<PaymentMethod> {
         return types.flatMap { type ->
-            retrievePaymentMethodsByType(
-                type,
-                customerId,
-                ephemeralKey
-            )
+            retrievePaymentMethodsByType(type, customerConfig)
         }
     }
 
@@ -204,18 +194,17 @@ internal class PaymentSheetFlowControllerFactory(
      */
     private suspend fun retrievePaymentMethodsByType(
         type: PaymentMethod.Type,
-        customerId: String,
-        ephemeralKey: String
+        customerConfig: PaymentSheet.CustomerConfiguration
     ): List<PaymentMethod> {
         return runCatching {
             stripeRepository.getPaymentMethods(
                 ListPaymentMethodsParams(
-                    customerId = customerId,
+                    customerId = customerConfig.id,
                     paymentMethodType = type
                 ),
                 publishableKey,
                 PRODUCT_USAGE,
-                ApiRequest.Options(ephemeralKey, stripeAccountId)
+                ApiRequest.Options(customerConfig.ephemeralKeySecret, stripeAccountId)
             )
         }.getOrDefault(emptyList())
     }
