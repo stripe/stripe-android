@@ -133,8 +133,7 @@ internal class PaymentSheetViewModel internal constructor(
             val confirmParams = selection.value?.let { paymentSelection ->
                 confirmParamsFactory.create(
                     args.clientSecret,
-                    paymentSelection,
-                    shouldSavePaymentMethod
+                    paymentSelection
                 )
             }
 

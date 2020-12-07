@@ -17,9 +17,9 @@ class ConfirmParamsFactoryTest {
                 clientSecret = CLIENT_SECRET,
                 paymentSelection = PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    CardBrand.Visa
-                ),
-                shouldSavePaymentMethod = true
+                    CardBrand.Visa,
+                    shouldSavePaymentMethod = true
+                )
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(

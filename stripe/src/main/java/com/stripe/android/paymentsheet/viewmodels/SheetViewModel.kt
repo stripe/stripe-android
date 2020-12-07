@@ -57,8 +57,6 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     protected val mutableViewState = MutableLiveData<ViewStateType>(null)
     internal val viewState: LiveData<ViewStateType> = mutableViewState.distinctUntilChanged()
 
-    internal var shouldSavePaymentMethod: Boolean = false
-
     // a message shown to the user
     protected val mutableUserMessage = MutableLiveData<UserMessage?>()
     internal val userMessage: LiveData<UserMessage?> = mutableUserMessage

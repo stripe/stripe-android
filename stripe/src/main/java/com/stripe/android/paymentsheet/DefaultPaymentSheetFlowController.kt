@@ -86,9 +86,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
             val confirmParams = paymentSelection?.let {
                 confirmParamsFactory.create(
                     args.clientSecret,
-                    it,
-                    // TODO(mshafrir-stripe): set correct value
-                    shouldSavePaymentMethod = false
+                    it
                 )
             }
 

@@ -52,7 +52,8 @@ class PaymentOptionFactoryTest {
             PaymentOptionFactory().create(
                 PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    brand = CardBrand.Visa
+                    brand = CardBrand.Visa,
+                    shouldSavePaymentMethod = true
                 )
             )
         ).isEqualTo(

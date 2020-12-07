@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.widget.CheckBox
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
@@ -34,46 +33,6 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
-    fun `shouldSavePaymentMethod should default to true when in default mode`() {
-        createScenario().onFragment { fragment ->
-            val activityViewModel = activityViewModel(
-                fragment,
-                PaymentSheetFixtures.DEFAULT_ARGS
-            )
-            assertThat(activityViewModel.shouldSavePaymentMethod)
-                .isTrue()
-        }
-    }
-
-    @Test
-    fun `shouldSavePaymentMethod should be false when checkbox is unchecked`() {
-        createScenario().onFragment { fragment ->
-            val activityViewModel = activityViewModel(
-                fragment,
-                PaymentSheetFixtures.DEFAULT_ARGS
-            )
-
-            val checkbox = fragment.requireView().findViewById<CheckBox>(R.id.save_card_checkbox)
-            checkbox.isChecked = false
-
-            assertThat(activityViewModel.shouldSavePaymentMethod)
-                .isFalse()
-        }
-    }
-
-    @Test
-    fun `shouldSavePaymentMethod should default to false when in guest mode`() {
-        createScenario().onFragment { fragment ->
-            val activityViewModel = activityViewModel(
-                fragment,
-                PaymentSheetFixtures.GUEST_ARGS
-            )
-            assertThat(activityViewModel.shouldSavePaymentMethod)
-                .isTrue()
-        }
-    }
-
-    @Test
     fun `paymentMethodParams with valid input should return object with expected billing details`() {
         createScenario().onFragment { fragment ->
             fragment.cardMultilineWidget.setCardNumber("4242424242424242")
@@ -97,12 +56,96 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
-    fun `when isGooglePayEnabled=true should configure Google Pay button`() {
-        createScenario().onFragment { fragment ->
+    fun `selection when guest mode and valid card entered should create expected PaymentSelection`() {
+        createScenario(PaymentSheetFixtures.GUEST_ARGS).onFragment { fragment ->
+            fragment.saveCardCheckbox.isChecked = false
+
             val activityViewModel = activityViewModel(
                 fragment,
-                PaymentSheetFixtures.DEFAULT_ARGS
+                PaymentSheetFixtures.GUEST_ARGS
             )
+
+            var paymentSelection: PaymentSelection? = null
+            activityViewModel.selection.observeForever {
+                paymentSelection = it
+            }
+
+            fragment.saveCardCheckbox.isChecked = true
+
+            fragment.cardMultilineWidget.setCardNumber("4242424242424242")
+            fragment.cardMultilineWidget.setExpiryDate(1, 2030)
+            fragment.cardMultilineWidget.setCvcCode("123")
+            fragment.billingAddressView.countryView.setText("United States")
+            fragment.billingAddressView.postalCodeView.setText("94107")
+
+            idleLooper()
+
+            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
+            assertThat(newPaymentSelection.shouldSavePaymentMethod)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `selection when save card checkbox enabled and then valid card entered should create expected PaymentSelection`() {
+        createScenario().onFragment { fragment ->
+            fragment.saveCardCheckbox.isChecked = false
+
+            val activityViewModel = activityViewModel(fragment)
+
+            var paymentSelection: PaymentSelection? = null
+            activityViewModel.selection.observeForever {
+                paymentSelection = it
+            }
+
+            fragment.saveCardCheckbox.isChecked = true
+
+            fragment.cardMultilineWidget.setCardNumber("4242424242424242")
+            fragment.cardMultilineWidget.setExpiryDate(1, 2030)
+            fragment.cardMultilineWidget.setCvcCode("123")
+            fragment.billingAddressView.countryView.setText("United States")
+            fragment.billingAddressView.postalCodeView.setText("94107")
+
+            idleLooper()
+
+            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
+            assertThat(newPaymentSelection.shouldSavePaymentMethod)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `selection when valid card entered and then save card checkbox enabled should create expected PaymentSelection`() {
+        createScenario().onFragment { fragment ->
+            fragment.saveCardCheckbox.isChecked = false
+
+            val activityViewModel = activityViewModel(fragment)
+
+            var paymentSelection: PaymentSelection? = null
+            activityViewModel.selection.observeForever {
+                paymentSelection = it
+            }
+
+            fragment.cardMultilineWidget.setCardNumber("4242424242424242")
+            fragment.cardMultilineWidget.setExpiryDate(1, 2030)
+            fragment.cardMultilineWidget.setCvcCode("123")
+            fragment.billingAddressView.countryView.setText("United States")
+            fragment.billingAddressView.postalCodeView.setText("94107")
+
+            idleLooper()
+
+            fragment.saveCardCheckbox.isChecked = true
+
+            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
+            assertThat(newPaymentSelection.shouldSavePaymentMethod)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `when isGooglePayEnabled=true should configure Google Pay button`() {
+        createScenario().onFragment { fragment ->
+            val activityViewModel = activityViewModel(fragment)
 
             fragment.onConfigReady(
                 AddPaymentMethodConfig(
@@ -133,7 +176,7 @@ class PaymentSheetAddCardFragmentTest {
 
     private fun activityViewModel(
         fragment: PaymentSheetAddCardFragment,
-        args: PaymentSheetActivityStarter.Args
+        args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.DEFAULT_ARGS
     ): PaymentSheetViewModel {
         return fragment.activityViewModels<PaymentSheetViewModel> {
             PaymentSheetViewModel.Factory(
@@ -143,10 +186,12 @@ class PaymentSheetAddCardFragmentTest {
         }.value
     }
 
-    private fun createScenario(): FragmentScenario<PaymentSheetAddCardFragment> {
+    private fun createScenario(
+        args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.DEFAULT_ARGS
+    ): FragmentScenario<PaymentSheetAddCardFragment> {
         return launchFragmentInContainer<PaymentSheetAddCardFragment>(
             bundleOf(
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.DEFAULT_ARGS
+                PaymentSheetActivity.EXTRA_STARTER_ARGS to args
             ),
             R.style.StripePaymentSheetDefaultTheme
         )
