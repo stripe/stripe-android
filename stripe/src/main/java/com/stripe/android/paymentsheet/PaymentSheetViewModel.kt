@@ -202,12 +202,11 @@ internal class PaymentSheetViewModel internal constructor(
 
     @VisibleForTesting
     internal fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
-        mutablePaymentMethods.postValue(paymentMethods)
+        mutablePaymentMethods.value = paymentMethods
     }
 
     private fun updatePaymentMethods(
-        customerConfig: PaymentSheet.CustomerConfiguration,
-        stripeAccountId: String? = this.stripeAccountId
+        customerConfig: PaymentSheet.CustomerConfiguration
     ) {
         viewModelScope.launch {
             withContext(workContext) {
@@ -225,10 +224,9 @@ internal class PaymentSheetViewModel internal constructor(
                         )
                     )
                 }
-            }.fold(
-                onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
-                onFailure = ::onFatal
-            )
+            }.getOrDefault(
+                emptyList()
+            ).let(::setPaymentMethods)
         }
     }
 
