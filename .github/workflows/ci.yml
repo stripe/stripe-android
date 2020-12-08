@@ -43,7 +43,3 @@ jobs:
                 key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
             - name: Unit tests
               run: ./gradlew testDebugUnitTest
-            - uses: actions/upload-artifact@v2
-              with:
-                name: unit-test-report
-                path: stripe/build/reports/tests/testDebugUnitTest/
