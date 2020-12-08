@@ -48,17 +48,24 @@
             android:text="@string/stripe_paymentsheet_add_payment_method_card_information"
             style="@style/StripePaymentSheetLabel"
             app:layout_constraintTop_toBottomOf="@+id/top_container"
-            app:layout_constraintBottom_toTopOf="@+id/card_multiline_widget"
+            app:layout_constraintBottom_toTopOf="@+id/card_multiline_widget_container"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <com.stripe.android.view.CardMultilineWidget
-            android:id="@+id/card_multiline_widget"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_multiline_widget_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/StripePaymentAddPaymentMethodMaterialCard"
             app:layout_constraintTop_toBottomOf="@+id/card_info_label"
             app:layout_constraintBottom_toTopOf="@+id/billing_address_label"
-            app:layout_constraintStart_toStartOf="parent"
-            app:shouldShowPostalCode="false" />
+            app:layout_constraintStart_toStartOf="parent">
+            <com.stripe.android.view.CardMultilineWidget
+                android:id="@+id/card_multiline_widget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:shouldShowPostalCode="false" />
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/billing_address_label"
@@ -66,7 +73,7 @@
             android:layout_height="wrap_content"
             android:text="@string/stripe_paymentsheet_add_payment_method_country_or_region"
             style="@style/StripePaymentSheetLabel"
-            app:layout_constraintTop_toBottomOf="@+id/card_multiline_widget"
+            app:layout_constraintTop_toBottomOf="@+id/card_multiline_widget_container"
             app:layout_constraintBottom_toTopOf="@+id/billing_address"
             app:layout_constraintStart_toStartOf="parent" />
 
