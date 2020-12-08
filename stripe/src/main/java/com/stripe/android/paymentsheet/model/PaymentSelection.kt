@@ -17,11 +17,13 @@ internal sealed class PaymentSelection : Parcelable {
 
     sealed class New : PaymentSelection() {
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
+        abstract val shouldSavePaymentMethod: Boolean
 
         @Parcelize
         data class Card(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            val brand: CardBrand
+            val brand: CardBrand,
+            override val shouldSavePaymentMethod: Boolean
         ) : New()
     }
 }
