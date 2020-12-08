@@ -36,6 +36,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.Mockito.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -142,17 +143,10 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should call onError() when no payment selection has been mode`() {
-        var error: Throwable? = null
-        viewModel.fatal.observeForever {
-            error = it
-        }
-
+    fun `checkout() should not attempt to confirm when no payment selection has been mode`() {
+        verifyNoInteractions(paymentController)
         viewModel.checkout(mock())
-
         verify(prefsRepository).savePaymentSelection(null)
-        assertThat(error)
-            .isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
@@ -206,17 +200,6 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
-    }
-
-    @Test
-    fun `checkout() should call onError when no payment method selected`() {
-        var error: Throwable? = null
-        viewModel.fatal.observeForever {
-            error = it
-        }
-        viewModel.checkout(mock())
-        assertThat(error)
-            .isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
