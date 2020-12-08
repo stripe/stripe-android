@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -84,6 +86,23 @@ internal abstract class BaseAddCardFragment : Fragment() {
         }
 
         _viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
+
+        setOf(
+            cardMultilineWidget.cardNumberEditText,
+            cardMultilineWidget.expiryDateEditText,
+            cardMultilineWidget.cvcEditText
+        ).forEach { editText ->
+            editText.setTextSize(
+                TypedValue.COMPLEX_UNIT_PX,
+                resources.getDimension(R.dimen.stripe_paymentsheet_form_textsize)
+            )
+            editText.setTextColor(
+                ContextCompat.getColor(
+                    requireActivity(),
+                    R.color.stripe_paymentsheet_textinput_color
+                )
+            )
+        }
 
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
             val selection = if (isValid) {
