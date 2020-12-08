@@ -6,9 +6,7 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
-        android:checkable="false"
-        app:cardElevation="1dp">
+        style="@style/StripePaymentAddPaymentMethodMaterialCard">
 
         <LinearLayout
             android:layout_width="match_parent"
