@@ -1,6 +1,5 @@
 package com.stripe.android.googlepay
 
-import android.app.Activity
 import android.content.Context
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
@@ -23,10 +22,6 @@ internal class PaymentsClientFactory(
             )
             .build()
 
-        return if (context is Activity) {
-            Wallet.getPaymentsClient(context, options)
-        } else {
-            Wallet.getPaymentsClient(context, options)
-        }
+        return Wallet.getPaymentsClient(context, options)
     }
 }
