@@ -5,8 +5,8 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.databinding.StripePaymentSheetToolbarBinding
 
 internal class Toolbar @JvmOverloads constructor(
@@ -16,7 +16,7 @@ internal class Toolbar @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val mutableAction = MutableLiveData<Action>()
-    internal val action = mutableAction.distinctUntilChanged()
+    internal val action: LiveData<Action> = mutableAction
 
     private val viewBinding = StripePaymentSheetToolbarBinding.inflate(
         LayoutInflater.from(context),
