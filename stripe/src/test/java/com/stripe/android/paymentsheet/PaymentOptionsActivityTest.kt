@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.utils.InjectableActivityScenario
@@ -38,7 +37,7 @@ class PaymentOptionsActivityTest {
                 googlePay = ConfigFixtures.GOOGLE_PAY
             )
         ),
-        googlePayRepository = mock()
+        googlePayRepository = FakeGooglePayRepository(false)
     )
 
     @Test
