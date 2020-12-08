@@ -28,7 +28,7 @@ class CountryAutoCompleteTextViewValidatorTest {
         assertThat(validator.isValid("Hello"))
             .isFalse()
         assertThat(validator.isValid("Canada"))
-            .isFalse()
+            .isTrue()
 
         assertThat(callbackCountries)
             .containsExactly(null, Country("CA", "Canada"))
