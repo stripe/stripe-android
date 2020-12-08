@@ -363,9 +363,10 @@ class CardMultilineWidget @JvmOverloads constructor(
         isEnabled = true
     }
 
-    override fun onFinishInflate() {
-        super.onFinishInflate()
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
         postalCodeEditText.config = PostalCodeEditText.Config.Global
+        cvcEditText.hint = null
     }
 
     /**
