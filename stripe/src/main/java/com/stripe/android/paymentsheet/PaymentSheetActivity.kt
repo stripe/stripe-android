@@ -95,10 +95,10 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         }
         viewModel.sheetMode.observe(this) { mode ->
             when (mode) {
-                SheetMode.Full,
-                SheetMode.FullCollapsed -> {
+                SheetMode.Full -> {
                     viewBinding.toolbar.showBack()
                 }
+                SheetMode.FullCollapsed,
                 SheetMode.Wrapped -> {
                     viewBinding.toolbar.showClose()
                 }
