@@ -14,7 +14,7 @@
             android:orientation="vertical">
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/StripePaymentSheetTextInputLayout"
+                style="@style/StripePaymentSheetAutocompleteTextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:labelFor="@+id/country"
