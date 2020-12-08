@@ -47,7 +47,9 @@ internal class PaymentSheetViewModel internal constructor(
     googlePayRepository = googlePayRepository,
     workContext = workContext
 ) {
-    private val confirmParamsFactory = ConfirmParamsFactory()
+    private val confirmParamsFactory = ConfirmParamsFactory(
+        args.clientSecret
+    )
 
     fun updatePaymentMethods() {
         customerConfig?.let {
@@ -101,8 +103,9 @@ internal class PaymentSheetViewModel internal constructor(
         if (amount != null && currencyCode != null) {
             mutableViewState.value = ViewState.Ready(amount, currencyCode)
         } else {
-            // TODO(mshafrir-stripe): improve error message
-            onFatal(IllegalStateException("PaymentIntent is invalid."))
+            onFatal(
+                IllegalStateException("PaymentIntent could not be parsed correctly.")
+            )
         }
     }
 
@@ -110,9 +113,10 @@ internal class PaymentSheetViewModel internal constructor(
         mutableUserMessage.value = null
         mutableProcessing.value = true
 
-        prefsRepository.savePaymentSelection(selection.value)
+        val paymentSelection = selection.value
+        prefsRepository.savePaymentSelection(paymentSelection)
 
-        if (selection.value == PaymentSelection.GooglePay) {
+        if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
                 StripeGooglePayLauncher(activity).startForResult(
                     StripeGooglePayLauncher.Args(
@@ -123,30 +127,24 @@ internal class PaymentSheetViewModel internal constructor(
                 )
             }
         } else {
-            val confirmParams = selection.value?.let { paymentSelection ->
-                confirmParamsFactory.create(
-                    args.clientSecret,
-                    paymentSelection
+            when (paymentSelection) {
+                is PaymentSelection.Saved -> {
+                    confirmParamsFactory.create(paymentSelection)
+                }
+                is PaymentSelection.New.Card -> {
+                    confirmParamsFactory.create(paymentSelection)
+                }
+                else -> null
+            }?.let { confirmParams ->
+                mutableViewState.value = ViewState.Confirming
+                paymentController.startConfirmAndAuth(
+                    AuthActivityStarter.Host.create(activity),
+                    confirmParams,
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
                 )
-            }
-
-            when {
-                confirmParams != null -> {
-                    mutableViewState.value = ViewState.Confirming
-                    paymentController.startConfirmAndAuth(
-                        AuthActivityStarter.Host.create(activity),
-                        confirmParams,
-                        ApiRequest.Options(
-                            apiKey = publishableKey,
-                            stripeAccount = stripeAccountId
-                        )
-                    )
-                }
-                else -> {
-                    onFatal(
-                        IllegalStateException("checkout called when no payment method selected")
-                    )
-                }
             }
         }
     }

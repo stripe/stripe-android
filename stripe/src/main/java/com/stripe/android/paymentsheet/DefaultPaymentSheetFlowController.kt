@@ -30,7 +30,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     },
     private val defaultPaymentMethodId: String?
 ) : PaymentSheet.FlowController {
-    private val confirmParamsFactory = ConfirmParamsFactory()
+    private val confirmParamsFactory = ConfirmParamsFactory(args.clientSecret)
     private val paymentOptionFactory = PaymentOptionFactory()
 
     private var paymentSelection: PaymentSelection? = null
@@ -62,6 +62,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         activity: ComponentActivity,
         onComplete: (PaymentResult) -> Unit
     ) {
+        val paymentSelection = this.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
             googlePayLauncherFactory(activity).startForResult(
                 StripeGooglePayLauncher.Args(
@@ -71,14 +72,15 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 )
             )
         } else {
-            val confirmParams = paymentSelection?.let {
-                confirmParamsFactory.create(
-                    args.clientSecret,
-                    it
-                )
-            }
-
-            if (confirmParams != null) {
+            when (paymentSelection) {
+                is PaymentSelection.Saved -> {
+                    confirmParamsFactory.create(paymentSelection)
+                }
+                is PaymentSelection.New.Card -> {
+                    confirmParamsFactory.create(paymentSelection)
+                }
+                else -> null
+            }?.let { confirmParams ->
                 paymentController.startConfirmAndAuth(
                     AuthActivityStarter.Host.create(activity),
                     confirmParams,
@@ -87,8 +89,6 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                         stripeAccount = stripeAccountId
                     )
                 )
-            } else {
-                // TODO(mshafrir-stripe): handle error
             }
 
             onComplete(

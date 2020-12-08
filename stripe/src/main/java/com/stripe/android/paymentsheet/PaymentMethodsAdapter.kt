@@ -221,7 +221,6 @@ internal class PaymentMethodsAdapter(
     ) : RecyclerView.ViewHolder(
         binding.root
     ) {
-        // TODO(mshafrir-stripe): add check icon
         constructor(parent: ViewGroup) : this(
             LayoutPaymentsheetGooglePayItemBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
