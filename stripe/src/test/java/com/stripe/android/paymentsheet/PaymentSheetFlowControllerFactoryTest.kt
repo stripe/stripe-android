@@ -45,7 +45,7 @@ class PaymentSheetFlowControllerFactoryTest {
 
     @Test
     fun `create() with customer config should create object with expected properties`() {
-        var result: PaymentSheetFlowController.Result? = null
+        var result: PaymentSheet.FlowController.Result? = null
         factory.create(
             "client_secret",
             PaymentSheet.Configuration(
@@ -59,9 +59,9 @@ class PaymentSheetFlowControllerFactoryTest {
         }
 
         val successResult =
-            result as PaymentSheetFlowController.Result.Success
+            result as PaymentSheet.FlowController.Result.Success
         val flowController =
-            successResult.paymentSheetFlowController as DefaultPaymentSheetFlowController
+            successResult.flowController as DefaultPaymentSheetFlowController
 
         assertThat(flowController.paymentMethodTypes)
             .containsExactly(PaymentMethod.Type.Card)

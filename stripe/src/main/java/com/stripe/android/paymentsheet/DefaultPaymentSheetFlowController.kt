@@ -29,7 +29,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         StripeGooglePayLauncher(it)
     },
     private val defaultPaymentMethodId: String?
-) : PaymentSheetFlowController {
+) : PaymentSheet.FlowController {
     private val confirmParamsFactory = ConfirmParamsFactory()
     private val paymentOptionFactory = PaymentOptionFactory()
 
