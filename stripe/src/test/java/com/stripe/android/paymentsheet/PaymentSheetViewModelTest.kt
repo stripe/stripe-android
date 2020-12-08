@@ -93,6 +93,34 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `updatePaymentMethods() with customer config and failing request should emit empty list`() {
+        val viewModel = PaymentSheetViewModel(
+            "publishable_key",
+            "stripe_account_id",
+            object : AbsFakeStripeRepository() {
+                override suspend fun getPaymentMethods(
+                    listPaymentMethodsParams: ListPaymentMethodsParams,
+                    publishableKey: String,
+                    productUsageTokens: Set<String>,
+                    requestOptions: ApiRequest.Options
+                ): List<PaymentMethod> = error("Request failed.")
+            },
+            paymentController,
+            googlePayRepository,
+            prefsRepository,
+            ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            workContext = testCoroutineDispatcher
+        )
+        var paymentMethods: List<PaymentMethod>? = null
+        viewModel.paymentMethods.observeForever {
+            paymentMethods = it
+        }
+        viewModel.updatePaymentMethods()
+        assertThat(requireNotNull(paymentMethods))
+            .isEmpty()
+    }
+
+    @Test
     fun `updatePaymentMethods() without customer config should emit empty list`() {
         val viewModelWithoutCustomer = PaymentSheetViewModel(
             "publishable_key",
