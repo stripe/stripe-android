@@ -8,6 +8,7 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentController
 import com.stripe.android.R
+import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -104,6 +105,7 @@ class DefaultPaymentSheetFlowControllerTest {
         }
         verify(googlePayLauncher).startForResult(
             StripeGooglePayLauncher.Args(
+                environment = StripeGooglePayEnvironment.Test,
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                 countryCode = "US"
             )

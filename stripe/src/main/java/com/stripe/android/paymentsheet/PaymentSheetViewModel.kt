@@ -14,6 +14,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
+import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -120,6 +121,12 @@ internal class PaymentSheetViewModel internal constructor(
             paymentIntent.value?.let { paymentIntent ->
                 StripeGooglePayLauncher(activity).startForResult(
                     StripeGooglePayLauncher.Args(
+                        environment = when (args.config?.googlePay?.environment) {
+                            PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                                StripeGooglePayEnvironment.Production
+                            else ->
+                                StripeGooglePayEnvironment.Test
+                        },
                         paymentIntent = paymentIntent,
                         countryCode = args.googlePayConfig?.countryCode.orEmpty(),
                         merchantName = args.config?.merchantDisplayName
@@ -261,9 +268,13 @@ internal class PaymentSheetViewModel internal constructor(
                 stripeRepository,
                 true
             )
-            val googlePayRepository = DefaultGooglePayRepository(application)
 
             val starterArgs = starterArgsSupplier()
+            val googlePayRepository = DefaultGooglePayRepository(
+                application,
+                starterArgs.config?.googlePay?.environment
+                    ?: PaymentSheet.GooglePayConfiguration.Environment.Test
+            )
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(

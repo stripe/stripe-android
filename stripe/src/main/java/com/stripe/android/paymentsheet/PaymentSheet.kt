@@ -84,11 +84,22 @@ internal class PaymentSheet internal constructor(
     @Parcelize
     data class GooglePayConfiguration(
         /**
+         * The Google Pay environment to use.
+         *
+         * See https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment for more information.
+         */
+        val environment: Environment,
+        /**
          * The two-letter ISO 3166 code of the country of your business, e.g. "US"
          * See your account's country value here https://dashboard.stripe.com/settings/account
          */
         val countryCode: String
-    ) : Parcelable
+    ) : Parcelable {
+        enum class Environment {
+            Production,
+            Test
+        }
+    }
 
     @Parcelize
     internal data class Result(val status: PaymentResult) : ActivityStarter.Result {

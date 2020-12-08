@@ -31,6 +31,8 @@ internal class StripeGooglePayLauncher : ActivityStarter<StripeGooglePayActivity
 
     @Parcelize
     data class Args(
+        internal var environment: StripeGooglePayEnvironment,
+
         internal var paymentIntent: PaymentIntent,
 
         /**

@@ -45,10 +45,14 @@ internal class PaymentOptionsViewModel(
     ) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val googlePayRepository = DefaultGooglePayRepository(applicationSupplier())
+            val starterArgs = starterArgsSupplier()
+            val googlePayRepository = DefaultGooglePayRepository(
+                applicationSupplier(),
+                starterArgs.config?.googlePay?.environment ?: PaymentSheet.GooglePayConfiguration.Environment.Test
+            )
 
             return PaymentOptionsViewModel(
-                starterArgsSupplier(),
+                starterArgs,
                 googlePayRepository
             ) as T
         }

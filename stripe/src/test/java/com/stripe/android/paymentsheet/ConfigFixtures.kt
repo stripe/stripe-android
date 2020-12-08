@@ -1,5 +1,8 @@
 package com.stripe.android.paymentsheet
 
 internal object ConfigFixtures {
-    val GOOGLE_PAY = PaymentSheet.GooglePayConfiguration(countryCode = "US")
+    val GOOGLE_PAY = PaymentSheet.GooglePayConfiguration(
+        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+        countryCode = "US"
+    )
 }

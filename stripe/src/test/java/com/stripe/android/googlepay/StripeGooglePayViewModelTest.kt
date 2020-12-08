@@ -162,6 +162,7 @@ class StripeGooglePayViewModelTest {
 
     private companion object {
         private val ARGS = StripeGooglePayLauncher.Args(
+            environment = StripeGooglePayEnvironment.Test,
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             countryCode = "US",
             isEmailRequired = true
