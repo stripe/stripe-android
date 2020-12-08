@@ -53,7 +53,7 @@ internal class PaymentSheetFlowControllerFactory(
     fun create(
         clientSecret: String,
         config: PaymentSheet.Configuration,
-        onComplete: (PaymentSheetFlowController.Result) -> Unit
+        onComplete: (PaymentSheet.FlowController.Result) -> Unit
     ) {
         CoroutineScope(workContext).launch {
             dispatchResult(
@@ -71,7 +71,7 @@ internal class PaymentSheetFlowControllerFactory(
 
     fun create(
         clientSecret: String,
-        onComplete: (PaymentSheetFlowController.Result) -> Unit
+        onComplete: (PaymentSheet.FlowController.Result) -> Unit
     ) {
         CoroutineScope(workContext).launch {
             dispatchResult(
@@ -86,17 +86,17 @@ internal class PaymentSheetFlowControllerFactory(
 
     private suspend fun dispatchResult(
         result: Result,
-        onComplete: (PaymentSheetFlowController.Result) -> Unit
+        onComplete: (PaymentSheet.FlowController.Result) -> Unit
     ) = withContext(Dispatchers.Main) {
         when (result) {
             is Result.Success -> {
                 onComplete(
-                    PaymentSheetFlowController.Result.Success(result.flowController)
+                    PaymentSheet.FlowController.Result.Success(result.flowController)
                 )
             }
             is Result.Failure -> {
                 onComplete(
-                    PaymentSheetFlowController.Result.Failure(result.throwable)
+                    PaymentSheet.FlowController.Result.Failure(result.throwable)
                 )
             }
         }
@@ -234,7 +234,7 @@ internal class PaymentSheetFlowControllerFactory(
 
     sealed class Result {
         class Success(
-            val flowController: PaymentSheetFlowController
+            val flowController: PaymentSheet.FlowController
         ) : Result()
 
         class Failure(

@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.core.os.bundleOf
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -98,6 +100,56 @@ internal class PaymentSheet internal constructor(
             @JvmStatic
             fun fromIntent(intent: Intent?): Result? {
                 return intent?.getParcelableExtra(ActivityStarter.Result.EXTRA)
+            }
+        }
+    }
+
+    interface FlowController {
+        fun presentPaymentOptions(
+            activity: ComponentActivity,
+            onComplete: (PaymentOption?) -> Unit
+        )
+
+        fun onPaymentOptionResult(intent: Intent?): PaymentOption?
+
+        fun confirmPayment(
+            activity: ComponentActivity,
+            onComplete: (PaymentResult) -> Unit
+        )
+
+        sealed class Result {
+            class Success(
+                val flowController: FlowController
+            ) : Result()
+
+            class Failure(
+                val error: Throwable
+            ) : Result()
+        }
+
+        companion object {
+            fun create(
+                context: Context,
+                clientSecret: String,
+                configuration: PaymentSheet.Configuration,
+                onComplete: (Result) -> Unit
+            ) {
+                PaymentSheetFlowControllerFactory(context).create(
+                    clientSecret,
+                    configuration,
+                    onComplete
+                )
+            }
+
+            fun create(
+                context: Context,
+                clientSecret: String,
+                onComplete: (Result) -> Unit
+            ) {
+                PaymentSheetFlowControllerFactory(context).create(
+                    clientSecret,
+                    onComplete
+                )
             }
         }
     }
