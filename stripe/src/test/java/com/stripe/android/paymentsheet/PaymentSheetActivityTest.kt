@@ -69,7 +69,7 @@ internal class PaymentSheetActivityTest {
         ),
         googlePayRepository = googlePayRepository,
         prefsRepository = mock(),
-        args = PaymentSheetFixtures.DEFAULT_ARGS,
+        args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         workContext = testCoroutineDispatcher
     )
 
@@ -78,10 +78,14 @@ internal class PaymentSheetActivityTest {
         PaymentSheetActivity::class.java
     ).putExtra(
         ActivityStarter.Args.EXTRA,
-        PaymentSheetActivityStarter.Args.Default(
+        PaymentSheetActivityStarter.Args(
             "client_secret",
-            "ephemeral_key",
-            "customer_id"
+            PaymentSheet.Configuration(
+                customer = PaymentSheet.CustomerConfiguration(
+                    "customer_id",
+                    "ephemeral_key"
+                )
+            )
         )
     )
 
@@ -261,7 +265,7 @@ internal class PaymentSheetActivityTest {
             ),
             googlePayRepository = googlePayRepository,
             prefsRepository = mock(),
-            args = PaymentSheetFixtures.DEFAULT_ARGS,
+            args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
             workContext = testCoroutineDispatcher
         )
 

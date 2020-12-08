@@ -14,31 +14,12 @@ internal class PaymentOptionsActivityStarter internal constructor(
     PaymentOptionsActivity::class.java,
     REQUEST_CODE
 ) {
-    sealed class Args : ActivityStarter.Args {
-        abstract val paymentIntent: PaymentIntent
-        abstract val paymentMethods: List<PaymentMethod>
-        abstract val googlePayConfig: PaymentSheetGooglePayConfig?
-
-        val isGooglePayEnabled: Boolean get() = googlePayConfig != null
-
-        @Parcelize
-        data class Default(
-            override val paymentIntent: PaymentIntent,
-            override val paymentMethods: List<PaymentMethod>,
-            val ephemeralKey: String,
-            val customerId: String,
-            override val googlePayConfig: PaymentSheetGooglePayConfig?
-        ) : Args()
-
-        @Parcelize
-        data class Guest(
-            override val paymentIntent: PaymentIntent,
-            override val googlePayConfig: PaymentSheetGooglePayConfig?
-        ) : Args() {
-            override val paymentMethods: List<PaymentMethod>
-                get() = emptyList()
-        }
-
+    @Parcelize
+    data class Args(
+        val paymentIntent: PaymentIntent,
+        val paymentMethods: List<PaymentMethod>,
+        val config: PaymentSheet.Configuration?
+    ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(ActivityStarter.Args.EXTRA)

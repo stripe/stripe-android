@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.GooglePayRepository
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
@@ -24,7 +25,7 @@ import kotlin.coroutines.CoroutineContext
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
 internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
-    internal val isGuestMode: Boolean,
+    internal val customerConfig: PaymentSheet.CustomerConfiguration?,
     private val isGooglePayEnabled: Boolean,
     private val googlePayRepository: GooglePayRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO

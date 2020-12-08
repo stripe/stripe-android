@@ -9,7 +9,6 @@ import android.widget.CheckBox
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.stripe.android.R
@@ -144,7 +143,7 @@ internal abstract class BaseAddCardFragment : Fragment() {
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
-        saveCardCheckbox.isGone = sheetViewModel.isGuestMode
+        saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
 
         saveCardCheckbox.setOnCheckedChangeListener { _, _ ->
             onSaveCardCheckboxChanged()

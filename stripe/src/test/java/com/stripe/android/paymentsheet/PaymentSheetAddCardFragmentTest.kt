@@ -15,7 +15,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,7 +39,6 @@ class PaymentSheetAddCardFragmentTest {
             fragment.cardMultilineWidget.setCvcCode("123")
             fragment.billingAddressView.countryView.setText("United States")
             fragment.billingAddressView.postalCodeView.setText("94107")
-            idleLooper()
 
             val params = requireNotNull(fragment.paymentMethodParams)
             assertThat(params.billingDetails)
@@ -56,13 +54,13 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
-    fun `selection when guest mode and valid card entered should create expected PaymentSelection`() {
-        createScenario(PaymentSheetFixtures.GUEST_ARGS).onFragment { fragment ->
+    fun `selection without customer config and valid card entered should create expected PaymentSelection`() {
+        createScenario(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER).onFragment { fragment ->
             fragment.saveCardCheckbox.isChecked = false
 
             val activityViewModel = activityViewModel(
                 fragment,
-                PaymentSheetFixtures.GUEST_ARGS
+                PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
             )
 
             var paymentSelection: PaymentSelection? = null
@@ -77,8 +75,6 @@ class PaymentSheetAddCardFragmentTest {
             fragment.cardMultilineWidget.setCvcCode("123")
             fragment.billingAddressView.countryView.setText("United States")
             fragment.billingAddressView.postalCodeView.setText("94107")
-
-            idleLooper()
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
@@ -106,8 +102,6 @@ class PaymentSheetAddCardFragmentTest {
             fragment.billingAddressView.countryView.setText("United States")
             fragment.billingAddressView.postalCodeView.setText("94107")
 
-            idleLooper()
-
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isTrue()
@@ -132,8 +126,6 @@ class PaymentSheetAddCardFragmentTest {
             fragment.billingAddressView.countryView.setText("United States")
             fragment.billingAddressView.postalCodeView.setText("94107")
 
-            idleLooper()
-
             fragment.saveCardCheckbox.isChecked = true
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
@@ -154,8 +146,6 @@ class PaymentSheetAddCardFragmentTest {
                     isGooglePayReady = true
                 )
             )
-            idleLooper()
-
             val paymentSelections = mutableListOf<PaymentSelection>()
             activityViewModel.selection.observeForever { paymentSelection ->
                 if (paymentSelection != null) {
@@ -167,7 +157,6 @@ class PaymentSheetAddCardFragmentTest {
                 .isTrue()
 
             fragment.googlePayButton.performClick()
-            idleLooper()
 
             assertThat(paymentSelections)
                 .containsExactly(PaymentSelection.GooglePay)
@@ -176,7 +165,7 @@ class PaymentSheetAddCardFragmentTest {
 
     private fun activityViewModel(
         fragment: PaymentSheetAddCardFragment,
-        args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.DEFAULT_ARGS
+        args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel {
         return fragment.activityViewModels<PaymentSheetViewModel> {
             PaymentSheetViewModel.Factory(
@@ -187,7 +176,7 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     private fun createScenario(
-        args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.DEFAULT_ARGS
+        args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): FragmentScenario<PaymentSheetAddCardFragment> {
         return launchFragmentInContainer<PaymentSheetAddCardFragment>(
             bundleOf(

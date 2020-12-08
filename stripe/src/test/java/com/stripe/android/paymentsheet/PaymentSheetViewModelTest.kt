@@ -63,7 +63,7 @@ internal class PaymentSheetViewModelTest {
             paymentController,
             googlePayRepository,
             prefsRepository,
-            DEFAULT_ARGS,
+            ARGS_CUSTOMER_WITH_GOOGLEPAY,
             workContext = testCoroutineDispatcher
         )
     }
@@ -82,7 +82,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `updatePaymentMethods() with default args should fetch from API repository`() {
+    fun `updatePaymentMethods() with customer config should fetch from API repository`() {
         var paymentMethods: List<PaymentMethod>? = null
         viewModel.paymentMethods.observeForever {
             paymentMethods = it
@@ -93,22 +93,22 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `updatePaymentMethods() with guest args should emit empty list`() {
-        val guestModeViewModel = PaymentSheetViewModel(
+    fun `updatePaymentMethods() without customer config should emit empty list`() {
+        val viewModelWithoutCustomer = PaymentSheetViewModel(
             "publishable_key",
             "stripe_account_id",
             stripeRepository,
             paymentController,
             googlePayRepository,
             prefsRepository,
-            GUEST_ARGS,
+            ARGS_WITHOUT_CUSTOMER,
             workContext = testCoroutineDispatcher
         )
         var paymentMethods: List<PaymentMethod>? = null
-        guestModeViewModel.paymentMethods.observeForever {
+        viewModelWithoutCustomer.paymentMethods.observeForever {
             paymentMethods = it
         }
-        guestModeViewModel.updatePaymentMethods()
+        viewModelWithoutCustomer.updatePaymentMethods()
         assertThat(paymentMethods)
             .isEmpty()
     }
@@ -262,7 +262,7 @@ internal class PaymentSheetViewModelTest {
             paymentController,
             googlePayRepository,
             prefsRepository,
-            DEFAULT_ARGS,
+            ARGS_CUSTOMER_WITH_GOOGLEPAY,
             workContext = testCoroutineDispatcher
         )
         var error: Throwable? = null
@@ -291,7 +291,7 @@ internal class PaymentSheetViewModelTest {
             paymentController,
             googlePayRepository,
             prefsRepository,
-            DEFAULT_ARGS,
+            ARGS_CUSTOMER_WITH_GOOGLEPAY,
             workContext = testCoroutineDispatcher
         )
         var error: Throwable? = null
@@ -318,7 +318,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `isGooglePayReady when googlePayConfig is null should emit false`() {
+    fun `isGooglePayReady without google pay config should emit false`() {
         val viewModel = PaymentSheetViewModel(
             "publishable_key",
             "stripe_account_id",
@@ -326,7 +326,7 @@ internal class PaymentSheetViewModelTest {
             paymentController,
             googlePayRepository,
             prefsRepository,
-            DEFAULT_ARGS.copy(googlePayConfig = null),
+            PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY,
             workContext = testCoroutineDispatcher
         )
         var isReady: Boolean? = null
@@ -379,7 +379,7 @@ internal class PaymentSheetViewModelTest {
 
     private companion object {
         private const val CLIENT_SECRET = PaymentSheetFixtures.CLIENT_SECRET
-        private val DEFAULT_ARGS = PaymentSheetFixtures.DEFAULT_ARGS
-        private val GUEST_ARGS = PaymentSheetFixtures.GUEST_ARGS
+        private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
     }
 }

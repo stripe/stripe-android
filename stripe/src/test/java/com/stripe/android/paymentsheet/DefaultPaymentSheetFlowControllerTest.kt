@@ -27,15 +27,19 @@ class DefaultPaymentSheetFlowControllerTest {
         paymentController,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         null,
-        DefaultPaymentSheetFlowController.Args.Default(
+        DefaultPaymentSheetFlowController.Args(
             "client_secret",
-            "ephkey",
-            "cus_123"
+            PaymentSheet.Configuration(
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ephkey"
+                ),
+                googlePay = ConfigFixtures.GOOGLE_PAY,
+            )
         ),
         paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
         paymentMethodTypes = listOf(PaymentMethod.Type.Card),
         paymentMethods = emptyList(),
-        googlePayConfig = PaymentSheetGooglePayConfigFixtures.DEFAULT,
         googlePayLauncherFactory = { googlePayLauncher },
         defaultPaymentMethodId = null
     )

@@ -42,7 +42,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val args: PaymentSheetActivityStarter.Args,
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
-    isGuestMode = args is PaymentSheetActivityStarter.Args.Guest,
+    customerConfig = args.config?.customer,
     isGooglePayEnabled = args.isGooglePayEnabled,
     googlePayRepository = googlePayRepository,
     workContext = workContext
@@ -50,17 +50,9 @@ internal class PaymentSheetViewModel internal constructor(
     private val confirmParamsFactory = ConfirmParamsFactory()
 
     fun updatePaymentMethods() {
-        when (args) {
-            is PaymentSheetActivityStarter.Args.Default -> {
-                updatePaymentMethods(
-                    args.ephemeralKey,
-                    args.customerId
-                )
-            }
-            is PaymentSheetActivityStarter.Args.Guest -> {
-                mutablePaymentMethods.postValue(emptyList())
-            }
-        }
+        customerConfig?.let {
+            updatePaymentMethods(it)
+        } ?: mutablePaymentMethods.postValue(emptyList())
     }
 
     fun fetchPaymentIntent() {
@@ -125,7 +117,8 @@ internal class PaymentSheetViewModel internal constructor(
                 StripeGooglePayLauncher(activity).startForResult(
                     StripeGooglePayLauncher.Args(
                         paymentIntent = paymentIntent,
-                        countryCode = args.googlePayConfig?.countryCode.orEmpty()
+                        countryCode = args.googlePayConfig?.countryCode.orEmpty(),
+                        merchantName = args.config?.merchantDisplayName
                     )
                 )
             }
@@ -213,8 +206,7 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private fun updatePaymentMethods(
-        ephemeralKey: String,
-        customerId: String,
+        customerConfig: PaymentSheet.CustomerConfiguration,
         stripeAccountId: String? = this.stripeAccountId
     ) {
         viewModelScope.launch {
@@ -222,12 +214,15 @@ internal class PaymentSheetViewModel internal constructor(
                 runCatching {
                     stripeRepository.getPaymentMethods(
                         ListPaymentMethodsParams(
-                            customerId = customerId,
+                            customerId = customerConfig.id,
                             paymentMethodType = PaymentMethod.Type.Card
                         ),
                         publishableKey,
                         PRODUCT_USAGE,
-                        ApiRequest.Options(ephemeralKey, stripeAccountId)
+                        ApiRequest.Options(
+                            customerConfig.ephemeralKeySecret,
+                            stripeAccountId
+                        )
                     )
                 }
             }.fold(
@@ -274,17 +269,12 @@ internal class PaymentSheetViewModel internal constructor(
 
             val starterArgs = starterArgsSupplier()
 
-            val prefsRepository = when (starterArgs) {
-                is PaymentSheetActivityStarter.Args.Default -> {
-                    DefaultPrefsRepository(
-                        starterArgs.customerId,
-                        PaymentSessionPrefs.Default(application)
-                    )
-                }
-                is PaymentSheetActivityStarter.Args.Guest -> {
-                    PrefsRepository.Noop()
-                }
-            }
+            val prefsRepository = starterArgs.config?.customer?.let { (id) ->
+                DefaultPrefsRepository(
+                    customerId = id,
+                    PaymentSessionPrefs.Default(application)
+                )
+            } ?: PrefsRepository.Noop()
 
             return PaymentSheetViewModel(
                 publishableKey,
