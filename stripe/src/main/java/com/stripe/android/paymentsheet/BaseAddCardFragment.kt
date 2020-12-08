@@ -56,6 +56,9 @@ internal abstract class BaseAddCardFragment : Fragment() {
     @VisibleForTesting
     internal val googlePayButton: View by lazy { viewBinding.googlePayButton }
 
+    @VisibleForTesting
+    internal val saveCardCheckbox: CheckBox by lazy { viewBinding.saveCardCheckbox }
+
     abstract fun onGooglePaySelected()
 
     override fun onCreateView(
@@ -82,14 +85,13 @@ internal abstract class BaseAddCardFragment : Fragment() {
 
         _viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
 
-        val saveCardCheckbox = viewBinding.saveCardCheckbox
-
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
             val selection = if (isValid) {
                 paymentMethodParams?.let { params ->
                     PaymentSelection.New.Card(
                         params,
-                        cardMultilineWidget.brand
+                        cardMultilineWidget.brand,
+                        shouldSavePaymentMethod = shouldSaveCard()
                     )
                 }
             } else {
@@ -143,9 +145,17 @@ internal abstract class BaseAddCardFragment : Fragment() {
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
         saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
 
-        sheetViewModel.shouldSavePaymentMethod = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
-        saveCardCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            sheetViewModel.shouldSavePaymentMethod = isChecked
+        saveCardCheckbox.setOnCheckedChangeListener { _, _ ->
+            onSaveCardCheckboxChanged()
+        }
+    }
+
+    private fun onSaveCardCheckboxChanged() {
+        val selection = sheetViewModel.selection.value
+        if (selection is PaymentSelection.New.Card) {
+            sheetViewModel.updateSelection(
+                selection.copy(shouldSavePaymentMethod = shouldSaveCard())
+            )
         }
     }
 
@@ -164,4 +174,6 @@ internal abstract class BaseAddCardFragment : Fragment() {
         viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
         viewBinding.addCardHeader.isVisible = !shouldShowGooglePayButton
     }
+
+    private fun shouldSaveCard() = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
 }

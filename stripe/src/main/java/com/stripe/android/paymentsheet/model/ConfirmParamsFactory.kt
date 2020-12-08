@@ -6,8 +6,7 @@ internal class ConfirmParamsFactory {
 
     internal fun create(
         clientSecret: String,
-        paymentSelection: PaymentSelection,
-        shouldSavePaymentMethod: Boolean
+        paymentSelection: PaymentSelection
     ): ConfirmPaymentIntentParams {
         return when (paymentSelection) {
             PaymentSelection.GooglePay -> TODO("smaskell: handle Google Pay confirmation")
@@ -24,8 +23,8 @@ internal class ConfirmParamsFactory {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     paymentSelection.paymentMethodCreateParams,
                     clientSecret,
-                    setupFutureUsage = when (shouldSavePaymentMethod) {
-                        true -> ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+                    setupFutureUsage = when (paymentSelection.shouldSavePaymentMethod) {
+                        true -> ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                         false -> null
                     }
                 )

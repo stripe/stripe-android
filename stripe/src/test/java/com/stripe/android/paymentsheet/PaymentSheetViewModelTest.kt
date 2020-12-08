@@ -155,7 +155,8 @@ internal class PaymentSheetViewModelTest {
     fun `checkout() should confirm new payment methods`() {
         val paymentSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            CardBrand.Visa
+            CardBrand.Visa,
+            shouldSavePaymentMethod = true
         )
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(mock())
@@ -167,7 +168,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,
-                    setupFutureUsage = null
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 )
             ),
             eq(
