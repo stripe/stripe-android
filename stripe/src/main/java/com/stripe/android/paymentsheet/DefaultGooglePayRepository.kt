@@ -10,17 +10,24 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class DefaultGooglePayRepository(
-    private val context: Context
+    private val context: Context,
+    private val environment: PaymentSheet.GooglePayConfiguration.Environment
 ) : GooglePayRepository {
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
 
     private val paymentsClient: PaymentsClient by lazy {
-        Wallet.getPaymentsClient(
-            context,
-            Wallet.WalletOptions.Builder()
-                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
-                .build()
-        )
+        val options = Wallet.WalletOptions.Builder()
+            .setEnvironment(
+                when (environment) {
+                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                        WalletConstants.ENVIRONMENT_PRODUCTION
+                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                        WalletConstants.ENVIRONMENT_TEST
+                }
+            )
+            .build()
+
+        Wallet.getPaymentsClient(context, options)
     }
 
     override fun isReady(): Flow<Boolean?> {

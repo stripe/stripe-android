@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import com.stripe.android.PaymentController
+import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -66,6 +67,12 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         if (paymentSelection == PaymentSelection.GooglePay) {
             googlePayLauncherFactory(activity).startForResult(
                 StripeGooglePayLauncher.Args(
+                    environment = when (args.config?.googlePay?.environment) {
+                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                            StripeGooglePayEnvironment.Production
+                        else ->
+                            StripeGooglePayEnvironment.Test
+                    },
                     paymentIntent = paymentIntent,
                     countryCode = args.config?.googlePay?.countryCode.orEmpty(),
                     merchantName = args.config?.merchantDisplayName

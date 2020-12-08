@@ -8,8 +8,6 @@ import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
-import com.google.android.gms.wallet.Wallet
-import com.google.android.gms.wallet.WalletConstants
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
@@ -31,12 +29,7 @@ import org.json.JSONObject
  */
 internal class StripeGooglePayActivity : AppCompatActivity() {
     private val paymentsClient: PaymentsClient by lazy {
-        Wallet.getPaymentsClient(
-            this,
-            Wallet.WalletOptions.Builder()
-                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
-                .build()
-        )
+        PaymentsClientFactory(this).create(args.environment)
     }
     private val publishableKey: String by lazy {
         PaymentConfiguration.getInstance(this).publishableKey
