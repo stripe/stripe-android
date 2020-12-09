@@ -17,6 +17,7 @@ import com.stripe.android.view.Country
 import com.stripe.android.view.CountryAdapter
 import com.stripe.android.view.CountryAutoCompleteTextViewValidator
 import com.stripe.android.view.CountryUtils
+import com.stripe.android.view.PostalCodeValidator
 import kotlin.properties.Delegates
 
 internal class BillingAddressView @JvmOverloads constructor(
@@ -43,14 +44,25 @@ internal class BillingAddressView @JvmOverloads constructor(
         ).root
     }
 
-    internal val address: Address
+    private val postalCodeValidator = PostalCodeValidator()
+
+    internal val address: Address?
         get() {
-            return Address(
-                country = selectedCountry?.code,
-                postalCode = postalCodeView.text.toString().takeUnless { postalCode ->
-                    postalCode.isBlank()
+            return selectedCountry?.code?.let { countryCode ->
+                val postalCode = postalCodeView.text.toString()
+                val isPostalCodeValid = postalCodeValidator.isValid(
+                    postalCode = postalCode,
+                    countryCode = countryCode
+                )
+                if (isPostalCodeValid) {
+                    Address(
+                        country = countryCode,
+                        postalCode = postalCode.takeUnless { it.isBlank() }
+                    )
+                } else {
+                    null
                 }
-            )
+            }
         }
 
     @VisibleForTesting

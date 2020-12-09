@@ -8,6 +8,19 @@ import java.util.regex.Pattern
  */
 internal class PostalCodeValidator {
 
+    /**
+     * 1. if there is a regex for the country code, validate the postal code against it
+     * 2. if the country does not use a postal code, treat postal code as valid
+     * 3. otherwise, postal code must be not-blank
+     */
+    fun isValid(
+        postalCode: String,
+        countryCode: String
+    ): Boolean {
+        return POSTAL_CODE_PATTERNS[countryCode]?.matcher(postalCode)?.matches()
+            ?: (!CountryUtils.doesCountryUsePostalCode(countryCode) || postalCode.isNotBlank())
+    }
+
     fun isValid(
         postalCode: String,
         countryCode: String?,

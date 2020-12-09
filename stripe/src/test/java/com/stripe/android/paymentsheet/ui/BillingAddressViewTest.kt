@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.Address
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.Country
@@ -39,7 +40,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing selectedCountry to country without postal code should hide postal code view`() {
-        billingAddressView.selectedCountry = Country("ZW", "Zimbabwe")
+        billingAddressView.selectedCountry = ZIMBABWE
         idleLooper()
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isFalse()
@@ -47,7 +48,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing selectedCountry to France should show postal code view`() {
-        billingAddressView.selectedCountry = Country("FR", "France")
+        billingAddressView.selectedCountry = FRANCE
         idleLooper()
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
@@ -55,7 +56,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing selectedCountry to US should show postal code view`() {
-        billingAddressView.selectedCountry = Country("US", "United States")
+        billingAddressView.selectedCountry = USA
         idleLooper()
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
@@ -67,5 +68,50 @@ class BillingAddressViewTest {
         idleLooper()
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
+    }
+
+    @Test
+    fun `address with no postal code country and no postal code should return expected value`() {
+        billingAddressView.selectedCountry = ZIMBABWE
+        assertThat(billingAddressView.address)
+            .isEqualTo(
+                Address(
+                    country = "ZW"
+                )
+            )
+    }
+
+    @Test
+    fun `address with postal code country and no postal code should return null`() {
+        billingAddressView.selectedCountry = USA
+        assertThat(billingAddressView.address)
+            .isNull()
+    }
+
+    @Test
+    fun `address with postal code country and invalid postal code should return null`() {
+        billingAddressView.selectedCountry = USA
+        billingAddressView.postalCodeView.setText("abc")
+        assertThat(billingAddressView.address)
+            .isNull()
+    }
+
+    @Test
+    fun `address with postal code country and valid postal code should return expected value`() {
+        billingAddressView.selectedCountry = USA
+        billingAddressView.postalCodeView.setText("94107-1234")
+        assertThat(billingAddressView.address)
+            .isEqualTo(
+                Address(
+                    country = "US",
+                    postalCode = "94107-1234"
+                )
+            )
+    }
+
+    private companion object {
+        private val USA = Country("US", "United States")
+        private val FRANCE = Country("FR", "France")
+        private val ZIMBABWE = Country("ZW", "Zimbabwe")
     }
 }

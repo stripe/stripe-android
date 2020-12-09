@@ -47,7 +47,9 @@ internal abstract class BaseAddCardFragment : Fragment() {
     internal val paymentMethodParams: PaymentMethodCreateParams?
         get() {
             val cardParams = cardMultilineWidget.cardParams?.also { cardParams ->
-                cardParams.address = billingAddressView.address
+                billingAddressView.address?.let { billingAddress ->
+                    cardParams.address = billingAddress
+                }
             }
 
             return cardParams?.let {
