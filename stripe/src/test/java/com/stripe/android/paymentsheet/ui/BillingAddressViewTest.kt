@@ -82,14 +82,14 @@ class BillingAddressViewTest {
     }
 
     @Test
-    fun `address with postal code country and no postal code should return null`() {
+    fun `address with validated postal code country and no postal code should return null`() {
         billingAddressView.selectedCountry = USA
         assertThat(billingAddressView.address.value)
             .isNull()
     }
 
     @Test
-    fun `address with postal code country and invalid postal code should return null`() {
+    fun `address with validated postal code country and invalid postal code should return null`() {
         billingAddressView.selectedCountry = USA
         billingAddressView.postalCodeView.setText("abc")
         assertThat(billingAddressView.address.value)
@@ -97,7 +97,7 @@ class BillingAddressViewTest {
     }
 
     @Test
-    fun `address with postal code country and valid postal code should return expected value`() {
+    fun `address with validated postal code country and valid postal code should return expected value`() {
         billingAddressView.selectedCountry = USA
         billingAddressView.postalCodeView.setText("94107-1234")
         assertThat(billingAddressView.address.value)
@@ -109,9 +109,31 @@ class BillingAddressViewTest {
             )
     }
 
+    @Test
+    fun `address with unvalidated postal code country and null postal code should return null`() {
+        billingAddressView.selectedCountry = MEXICO
+        billingAddressView.postalCodeView.setText("    ")
+        assertThat(billingAddressView.address.value)
+            .isNull()
+    }
+
+    @Test
+    fun `address with unvalidated postal code country and non-empty postal code should return expected value`() {
+        billingAddressView.selectedCountry = MEXICO
+        billingAddressView.postalCodeView.setText("12345")
+        assertThat(billingAddressView.address.value)
+            .isEqualTo(
+                Address(
+                    country = "MX",
+                    postalCode = "12345"
+                )
+            )
+    }
+
     private companion object {
         private val USA = Country("US", "United States")
         private val FRANCE = Country("FR", "France")
         private val ZIMBABWE = Country("ZW", "Zimbabwe")
+        private val MEXICO = Country("MX", "Mexico")
     }
 }
