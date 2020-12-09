@@ -2,11 +2,14 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
+import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
@@ -98,6 +101,52 @@ class DefaultPaymentSheetFlowControllerTest {
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                 countryCode = "US"
             )
+        )
+    }
+
+    @Test
+    fun `isPaymentResult with Google Pay request code should return true`() {
+        assertThat(
+            flowController.isPaymentResult(
+                StripeGooglePayLauncher.REQUEST_CODE,
+                Intent()
+            )
+        ).isTrue()
+    }
+
+    @Test
+    fun `onPaymentResult with Google Pay PaymentIntent result should invoke callback's onSuccess()`() {
+        val callback = mock<ApiResultCallback<PaymentIntentResult>>()
+        flowController.onPaymentResult(
+            StripeGooglePayLauncher.REQUEST_CODE,
+            Intent().putExtras(
+                StripeGooglePayLauncher.Result.PaymentIntent(
+                    paymentIntentResult = PAYMENT_INTENT_RESULT
+                ).toBundle()
+            ),
+            callback = callback
+        )
+        verify(callback).onSuccess(PAYMENT_INTENT_RESULT)
+    }
+
+    @Test
+    fun `onPaymentResult with Google Pay Error result should invoke callback's onError()`() {
+        val callback = mock<ApiResultCallback<PaymentIntentResult>>()
+        flowController.onPaymentResult(
+            StripeGooglePayLauncher.REQUEST_CODE,
+            Intent().putExtras(
+                StripeGooglePayLauncher.Result.Error(
+                    exception = RuntimeException()
+                ).toBundle()
+            ),
+            callback = callback
+        )
+        verify(callback).onError(isA<RuntimeException>())
+    }
+
+    private companion object {
+        private val PAYMENT_INTENT_RESULT = PaymentIntentResult(
+            intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         )
     }
 }
