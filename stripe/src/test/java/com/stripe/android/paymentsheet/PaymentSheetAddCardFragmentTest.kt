@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -101,9 +102,10 @@ class PaymentSheetAddCardFragmentTest {
             fragment.cardMultilineWidget.setCvcCode("123")
             fragment.billingAddressView.countryView.setText("United States")
             fragment.billingAddressView.postalCodeView.setText("94107")
+            idleLooper()
 
-            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
-            assertThat(newPaymentSelection.shouldSavePaymentMethod)
+            val newPaymentSelection = paymentSelection as? PaymentSelection.New.Card
+            assertThat(newPaymentSelection?.shouldSavePaymentMethod)
                 .isTrue()
         }
     }

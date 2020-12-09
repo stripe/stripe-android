@@ -9,6 +9,9 @@ import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.ConfigurationCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.databinding.StripeCountryDropdownItemBinding
@@ -46,24 +49,26 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     private val postalCodeValidator = PostalCodeValidator()
 
-    internal val address: Address?
-        get() {
-            return selectedCountry?.code?.let { countryCode ->
-                val postalCode = postalCodeView.text.toString()
-                val isPostalCodeValid = postalCodeValidator.isValid(
-                    postalCode = postalCode,
-                    countryCode = countryCode
+    private fun createAddress(): Address? {
+        return selectedCountry?.code?.let { countryCode ->
+            val postalCode = postalCodeView.text.toString()
+            val isPostalCodeValid = postalCodeValidator.isValid(
+                postalCode = postalCode,
+                countryCode = countryCode
+            )
+            if (isPostalCodeValid) {
+                Address(
+                    country = countryCode,
+                    postalCode = postalCode.takeUnless { it.isBlank() }
                 )
-                if (isPostalCodeValid) {
-                    Address(
-                        country = countryCode,
-                        postalCode = postalCode.takeUnless { it.isBlank() }
-                    )
-                } else {
-                    null
-                }
+            } else {
+                null
             }
         }
+    }
+
+    private val _address = MutableLiveData<Address?>(null)
+    internal val address: LiveData<Address?> = _address
 
     @VisibleForTesting
     internal val countryView = viewBinding.country
@@ -82,10 +87,16 @@ internal class BillingAddressView @JvmOverloads constructor(
             CountryUtils.doesCountryUsePostalCode(newCountry.code)
         viewBinding.postalCodeDivider.isVisible = shouldShowPostalCode
         postalCodeLayout.isVisible = shouldShowPostalCode
+
+        _address.value = createAddress()
     }
 
     init {
         configureCountryAutoComplete()
+
+        postalCodeView.doAfterTextChanged {
+            _address.value = createAddress()
+        }
     }
 
     private fun configureCountryAutoComplete() {
