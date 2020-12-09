@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -51,6 +53,9 @@ internal class PaymentSheetViewModel internal constructor(
     private val confirmParamsFactory = ConfirmParamsFactory(
         args.clientSecret
     )
+
+    private val mutableGooglePayCompletion = MutableLiveData<PaymentIntentResult>()
+    internal val googlePayCompletion: LiveData<PaymentIntentResult> = mutableGooglePayCompletion
 
     fun updatePaymentMethods() {
         customerConfig?.let {
@@ -197,7 +202,7 @@ internal class PaymentSheetViewModel internal constructor(
         val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data)
         when (googlePayResult) {
             is StripeGooglePayLauncher.Result.PaymentIntent -> {
-                mutableViewState.value = ViewState.Completed(googlePayResult.paymentIntentResult)
+                mutableGooglePayCompletion.value = googlePayResult.paymentIntentResult
             }
             else -> {
                 // TODO(mshafrir-stripe): handle error
