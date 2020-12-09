@@ -45,6 +45,10 @@ internal abstract class BaseAddCardFragment : Fragment() {
         viewBinding.billingAddress
     }
 
+    /**
+     * A [PaymentMethodCreateParams] instance of card and billing address details are valid;
+     * otherwise, `null`.
+     */
     @VisibleForTesting
     internal val paymentMethodParams: PaymentMethodCreateParams?
         get() {
@@ -111,10 +115,12 @@ internal abstract class BaseAddCardFragment : Fragment() {
         }
 
         billingAddressView.address.observe(viewLifecycleOwner) {
+            // update selection whenever billing address changes
             updateSelection()
         }
 
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
+            // update selection whenever card details changes
             addCardViewModel.isCardValid = isValid
             updateSelection()
         }

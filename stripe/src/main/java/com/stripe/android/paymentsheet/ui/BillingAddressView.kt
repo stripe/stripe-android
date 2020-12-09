@@ -49,24 +49,6 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     private val postalCodeValidator = PostalCodeValidator()
 
-    private fun createAddress(): Address? {
-        return selectedCountry?.code?.let { countryCode ->
-            val postalCode = postalCodeView.text.toString()
-            val isPostalCodeValid = postalCodeValidator.isValid(
-                postalCode = postalCode,
-                countryCode = countryCode
-            )
-            if (isPostalCodeValid) {
-                Address(
-                    country = countryCode,
-                    postalCode = postalCode.takeUnless { it.isBlank() }
-                )
-            } else {
-                null
-            }
-        }
-    }
-
     private val _address = MutableLiveData<Address?>(null)
     internal val address: LiveData<Address?> = _address
 
@@ -153,5 +135,26 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     internal fun validateCountry() {
         countryView.performValidation()
+    }
+
+    /**
+     * An [Address] if the country and postal code are valid; otherwise `null`.
+     */
+    private fun createAddress(): Address? {
+        return selectedCountry?.code?.let { countryCode ->
+            val postalCode = postalCodeView.text.toString()
+            val isPostalCodeValid = postalCodeValidator.isValid(
+                postalCode = postalCode,
+                countryCode = countryCode
+            )
+            if (isPostalCodeValid) {
+                Address(
+                    country = countryCode,
+                    postalCode = postalCode.takeUnless { it.isBlank() }
+                )
+            } else {
+                null
+            }
+        }
     }
 }
