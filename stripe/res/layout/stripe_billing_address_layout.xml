@@ -45,6 +45,7 @@
                     style="@style/StripePaymentSheetTextInputEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLength="13"
                     android:inputType="textPostalAddress" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
