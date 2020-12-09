@@ -4,8 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/stripe_paymentsheet_outer_spacing"
-    tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment">
+    android:paddingTop="@dimen/stripe_paymentsheet_outer_spacing"
+    android:paddingHorizontal="@dimen/stripe_paymentsheet_outer_spacing"
+    tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment"
+    android:layout_marginBottom="@dimen/stripe_paymentsheet_form_bottom_margin">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

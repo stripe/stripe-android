@@ -64,6 +64,8 @@
     <dimen name="stripe_paymentsheet_primarybutton_margin">3dp</dimen>
     <dimen name="stripe_paymentsheet_card_elevation">2dp</dimen>
     <dimen name="stripe_paymentsheet_form_textsize">14sp</dimen>
+    <!-- Avoid collisions with CTA button -->
+    <dimen name="stripe_paymentsheet_form_bottom_margin">70dp</dimen>
 
     <dimen name="stripe_card_number_text_input_layout_progress_start_margin">25dp</dimen>
     <dimen name="stripe_card_number_text_input_layout_progress_top_margin">10dp</dimen>
