@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
@@ -14,6 +15,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -204,12 +206,8 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onActivityResult() should update ViewState LiveData`() {
-        val paymentIntentResult = PaymentIntentResult(
-            intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-        )
         whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
-            callbackCaptor.lastValue.onSuccess(paymentIntentResult)
+            callbackCaptor.lastValue.onSuccess(PAYMENT_INTENT_RESULT)
         }
 
         var viewState: ViewState? = null
@@ -220,7 +218,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.onActivityResult(0, 0, Intent())
         assertThat(viewState)
             .isEqualTo(
-                ViewState.Completed(paymentIntentResult)
+                ViewState.Completed(PAYMENT_INTENT_RESULT)
             )
     }
 
@@ -240,6 +238,28 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(
                 SheetViewModel.UserMessage.Error("Your card was declined.")
             )
+    }
+
+    @Test
+    fun `onActivityResult with successful Google Pay result should emit on googlePayCompletion`() {
+        val paymentIntentResults = mutableListOf<PaymentIntentResult>()
+        viewModel.googlePayCompletion.observeForever { paymentIntentResult ->
+            if (paymentIntentResult != null) {
+                paymentIntentResults.add(paymentIntentResult)
+            }
+        }
+        viewModel.onActivityResult(
+            StripeGooglePayLauncher.REQUEST_CODE,
+            Activity.RESULT_OK,
+            Intent().putExtras(
+                StripeGooglePayLauncher.Result.PaymentIntent(
+                    PAYMENT_INTENT_RESULT
+                ).toBundle()
+            )
+        )
+
+        assertThat(paymentIntentResults)
+            .containsExactly(PAYMENT_INTENT_RESULT)
     }
 
     @Test
@@ -392,5 +412,10 @@ internal class PaymentSheetViewModelTest {
         private const val CLIENT_SECRET = PaymentSheetFixtures.CLIENT_SECRET
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
         private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
+
+        val PAYMENT_INTENT_RESULT = PaymentIntentResult(
+            intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
+        )
     }
 }
