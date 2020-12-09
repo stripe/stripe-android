@@ -54,7 +54,7 @@ internal class PaymentSheetViewModel internal constructor(
         args.clientSecret
     )
 
-    private val mutableGooglePayCompletion = MutableLiveData<PaymentIntentResult>(null)
+    private val mutableGooglePayCompletion = MutableLiveData<PaymentIntentResult>()
     internal val googlePayCompletion: LiveData<PaymentIntentResult> = mutableGooglePayCompletion
 
     fun updatePaymentMethods() {
