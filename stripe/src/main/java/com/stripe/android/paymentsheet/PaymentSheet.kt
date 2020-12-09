@@ -38,9 +38,7 @@ internal class PaymentSheet internal constructor(
         )
     )
 
-    fun present(activity: ComponentActivity, callback: (PaymentResult) -> Unit) {
-        // TODO: Use ActivityResultContract and call callback instead of using onActivityResult
-        // when androidx.activity:1.2.0 hits GA
+    fun present(activity: ComponentActivity) {
         PaymentSheetActivityStarter(activity)
             .startForResult(args)
     }
@@ -116,10 +114,7 @@ internal class PaymentSheet internal constructor(
     }
 
     interface FlowController {
-        fun presentPaymentOptions(
-            activity: ComponentActivity,
-            onComplete: (PaymentOption?) -> Unit
-        )
+        fun presentPaymentOptions(activity: ComponentActivity)
 
         fun onPaymentOptionResult(intent: Intent?): PaymentOption?
 

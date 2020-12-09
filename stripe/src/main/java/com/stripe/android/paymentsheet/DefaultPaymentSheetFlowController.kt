@@ -37,8 +37,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     private var paymentSelection: PaymentSelection? = null
 
     override fun presentPaymentOptions(
-        activity: ComponentActivity,
-        onComplete: (PaymentOption?) -> Unit
+        activity: ComponentActivity
     ) {
         PaymentOptionsActivityStarter(activity)
             .startForResult(
@@ -48,8 +47,6 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                     config = args.config
                 )
             )
-
-        onComplete(null)
     }
 
     override fun onPaymentOptionResult(intent: Intent?): PaymentOption? {
