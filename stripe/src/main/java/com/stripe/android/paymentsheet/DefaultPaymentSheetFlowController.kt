@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
+import com.stripe.android.PaymentIntentResult
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.PaymentIntent
@@ -15,6 +17,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.parcelize.Parcelize
+import java.lang.Exception
 
 internal class DefaultPaymentSheetFlowController internal constructor(
     private val paymentController: PaymentController,
@@ -98,6 +101,44 @@ internal class DefaultPaymentSheetFlowController internal constructor(
             onComplete(
                 PaymentResult.Cancelled(null, null)
             )
+        }
+    }
+
+    override fun isPaymentResult(requestCode: Int, data: Intent?): Boolean {
+        return requestCode == StripeGooglePayLauncher.REQUEST_CODE ||
+            paymentController.shouldHandlePaymentResult(requestCode, data)
+    }
+
+    /**
+     * Handles results from both the standard confirmation flow via [PaymentController] and the
+     * [StripeGooglePayLauncher] flow.
+     */
+    override fun onPaymentResult(
+        requestCode: Int,
+        data: Intent?,
+        callback: ApiResultCallback<PaymentIntentResult>
+    ) {
+        if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
+            paymentController.handlePaymentResult(data, callback)
+        } else if (data != null && requestCode == StripeGooglePayLauncher.REQUEST_CODE) {
+            val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data) ?: return
+            when (googlePayResult) {
+                is StripeGooglePayLauncher.Result.PaymentIntent -> {
+                    callback.onSuccess(googlePayResult.paymentIntentResult)
+                }
+                is StripeGooglePayLauncher.Result.Error -> {
+                    val exception = googlePayResult.exception
+                    callback.onError(
+                        when (exception) {
+                            is Exception -> exception
+                            else -> RuntimeException(exception)
+                        }
+                    )
+                }
+                else -> {
+                    // TODO(mshafrir-stripe): handle other outcomes
+                }
+            }
         }
     }
 

@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.core.os.bundleOf
+import com.stripe.android.ApiResultCallback
+import com.stripe.android.PaymentIntentResult
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -121,6 +123,17 @@ internal class PaymentSheet internal constructor(
         fun confirmPayment(
             activity: ComponentActivity,
             onComplete: (PaymentResult) -> Unit
+        )
+
+        fun isPaymentResult(
+            requestCode: Int,
+            data: Intent?
+        ): Boolean
+
+        fun onPaymentResult(
+            requestCode: Int,
+            data: Intent?,
+            callback: ApiResultCallback<PaymentIntentResult>
         )
 
         sealed class Result {
