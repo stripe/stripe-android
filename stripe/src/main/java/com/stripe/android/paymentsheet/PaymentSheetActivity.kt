@@ -121,6 +121,12 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         }
         bottomSheetController.setup()
 
+        viewModel.googlePayCompletion.observe(this) { paymentIntentResult ->
+            if (paymentIntentResult != null) {
+                onActionCompleted(paymentIntentResult)
+            }
+        }
+
         setupBuyButton()
         supportFragmentManager.commit {
             replace(
