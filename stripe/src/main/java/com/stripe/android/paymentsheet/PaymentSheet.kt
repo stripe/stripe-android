@@ -114,10 +114,7 @@ internal class PaymentSheet internal constructor(
     }
 
     interface FlowController {
-        fun presentPaymentOptions(
-            activity: ComponentActivity,
-            onComplete: (PaymentOption?) -> Unit
-        )
+        fun presentPaymentOptions(activity: ComponentActivity)
 
         fun onPaymentOptionResult(intent: Intent?): PaymentOption?
 

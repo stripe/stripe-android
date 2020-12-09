@@ -46,17 +46,6 @@ class DefaultPaymentSheetFlowControllerTest {
     )
 
     @Test
-    fun `presentPaymentOptions() should call onComplete() with null`() {
-        var paymentOption: PaymentOption? = null
-        flowController.presentPaymentOptions(mock()) {
-            paymentOption = it
-        }
-
-        assertThat(paymentOption)
-            .isNull()
-    }
-
-    @Test
     fun `onPaymentOptionResult() with saved payment method selection result should return payment option`() {
         val paymentOption = flowController.onPaymentOptionResult(
             Intent().putExtras(
