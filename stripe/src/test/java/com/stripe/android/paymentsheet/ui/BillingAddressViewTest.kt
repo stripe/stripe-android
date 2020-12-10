@@ -99,12 +99,12 @@ class BillingAddressViewTest {
     @Test
     fun `address with validated postal code country and valid postal code should return expected value`() {
         billingAddressView.selectedCountry = USA
-        billingAddressView.postalCodeView.setText("94107-1234")
+        billingAddressView.postalCodeView.setText("94107")
         assertThat(billingAddressView.address.value)
             .isEqualTo(
                 Address(
                     country = "US",
-                    postalCode = "94107-1234"
+                    postalCode = "94107"
                 )
             )
     }
@@ -128,6 +128,17 @@ class BillingAddressViewTest {
                     postalCode = "12345"
                 )
             )
+    }
+
+    @Test
+    fun `changing country should update postalCodeView inputType`() {
+        billingAddressView.selectedCountry = MEXICO
+        assertThat(billingAddressView.postalCodeView.inputType)
+            .isEqualTo(BillingAddressView.PostalCodeConfig.Global.inputType)
+
+        billingAddressView.selectedCountry = USA
+        assertThat(billingAddressView.postalCodeView.inputType)
+            .isEqualTo(BillingAddressView.PostalCodeConfig.UnitedStates.inputType)
     }
 
     private companion object {

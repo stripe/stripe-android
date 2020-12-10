@@ -44,9 +44,7 @@
                     android:id="@+id/postal_code"
                     style="@style/StripePaymentSheetTextInputEditText"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:maxLength="13"
-                    android:inputType="textPostalAddress" />
+                    android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
