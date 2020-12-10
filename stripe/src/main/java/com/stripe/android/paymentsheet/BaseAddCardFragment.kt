@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -43,11 +45,17 @@ internal abstract class BaseAddCardFragment : Fragment() {
         viewBinding.billingAddress
     }
 
+    /**
+     * A [PaymentMethodCreateParams] instance of card and billing address details are valid;
+     * otherwise, `null`.
+     */
     @VisibleForTesting
     internal val paymentMethodParams: PaymentMethodCreateParams?
         get() {
-            val cardParams = cardMultilineWidget.cardParams?.also { cardParams ->
-                cardParams.address = billingAddressView.address
+            val cardParams = billingAddressView.address.value?.let { billingAddress ->
+                cardMultilineWidget.cardParams?.also { cardParams ->
+                    cardParams.address = billingAddress
+                }
             }
 
             return cardParams?.let {
@@ -60,6 +68,8 @@ internal abstract class BaseAddCardFragment : Fragment() {
 
     @VisibleForTesting
     internal val saveCardCheckbox: CheckBox by lazy { viewBinding.saveCardCheckbox }
+
+    private val addCardViewModel: AddCardViewModel by viewModels()
 
     abstract fun onGooglePaySelected()
 
@@ -104,19 +114,15 @@ internal abstract class BaseAddCardFragment : Fragment() {
             )
         }
 
+        billingAddressView.address.observe(viewLifecycleOwner) {
+            // update selection whenever billing address changes
+            updateSelection()
+        }
+
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
-            val selection = if (isValid) {
-                paymentMethodParams?.let { params ->
-                    PaymentSelection.New.Card(
-                        params,
-                        cardMultilineWidget.brand,
-                        shouldSavePaymentMethod = shouldSaveCard()
-                    )
-                }
-            } else {
-                null
-            }
-            sheetViewModel.updateSelection(selection)
+            // update selection whenever card details changes
+            addCardViewModel.isCardValid = isValid
+            updateSelection()
         }
 
         cardMultilineWidget.setCardInputListener(object : CardInputListener {
@@ -161,6 +167,22 @@ internal abstract class BaseAddCardFragment : Fragment() {
         }
     }
 
+    private fun updateSelection() {
+        sheetViewModel.updateSelection(
+            if (addCardViewModel.isCardValid) {
+                paymentMethodParams?.let { params ->
+                    PaymentSelection.New.Card(
+                        params,
+                        cardMultilineWidget.brand,
+                        shouldSavePaymentMethod = shouldSaveCard()
+                    )
+                }
+            } else {
+                null
+            }
+        )
+    }
+
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
         saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
 
@@ -195,4 +217,8 @@ internal abstract class BaseAddCardFragment : Fragment() {
     }
 
     private fun shouldSaveCard() = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
+
+    internal class AddCardViewModel : ViewModel() {
+        var isCardValid: Boolean = false
+    }
 }

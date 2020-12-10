@@ -9,6 +9,9 @@ import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.ConfigurationCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.databinding.StripeCountryDropdownItemBinding
@@ -17,6 +20,7 @@ import com.stripe.android.view.Country
 import com.stripe.android.view.CountryAdapter
 import com.stripe.android.view.CountryAutoCompleteTextViewValidator
 import com.stripe.android.view.CountryUtils
+import com.stripe.android.view.PostalCodeValidator
 import kotlin.properties.Delegates
 
 internal class BillingAddressView @JvmOverloads constructor(
@@ -43,15 +47,10 @@ internal class BillingAddressView @JvmOverloads constructor(
         ).root
     }
 
-    internal val address: Address
-        get() {
-            return Address(
-                country = selectedCountry?.code,
-                postalCode = postalCodeView.text.toString().takeUnless { postalCode ->
-                    postalCode.isBlank()
-                }
-            )
-        }
+    private val postalCodeValidator = PostalCodeValidator()
+
+    private val _address = MutableLiveData<Address?>(null)
+    internal val address: LiveData<Address?> = _address
 
     @VisibleForTesting
     internal val countryView = viewBinding.country
@@ -70,10 +69,16 @@ internal class BillingAddressView @JvmOverloads constructor(
             CountryUtils.doesCountryUsePostalCode(newCountry.code)
         viewBinding.postalCodeDivider.isVisible = shouldShowPostalCode
         postalCodeLayout.isVisible = shouldShowPostalCode
+
+        _address.value = createAddress()
     }
 
     init {
         configureCountryAutoComplete()
+
+        postalCodeView.doAfterTextChanged {
+            _address.value = createAddress()
+        }
     }
 
     private fun configureCountryAutoComplete() {
@@ -130,5 +135,26 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     internal fun validateCountry() {
         countryView.performValidation()
+    }
+
+    /**
+     * An [Address] if the country and postal code are valid; otherwise `null`.
+     */
+    private fun createAddress(): Address? {
+        return selectedCountry?.code?.let { countryCode ->
+            val postalCode = postalCodeView.text.toString()
+            val isPostalCodeValid = postalCodeValidator.isValid(
+                postalCode = postalCode,
+                countryCode = countryCode
+            )
+            if (isPostalCodeValid) {
+                Address(
+                    country = countryCode,
+                    postalCode = postalCode.takeUnless { it.isBlank() }
+                )
+            } else {
+                null
+            }
+        }
     }
 }
