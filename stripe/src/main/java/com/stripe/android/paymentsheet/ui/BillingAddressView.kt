@@ -1,6 +1,11 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
+import android.text.InputFilter
+import android.text.InputType
+import android.text.method.DigitsKeyListener
+import android.text.method.KeyListener
+import android.text.method.TextKeyListener
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View.OnFocusChangeListener
@@ -65,12 +70,16 @@ internal class BillingAddressView @JvmOverloads constructor(
     internal var selectedCountry: Country? by Delegates.observable(
         null
     ) { _, _, newCountry ->
-        val shouldShowPostalCode = newCountry == null ||
-            CountryUtils.doesCountryUsePostalCode(newCountry.code)
-        viewBinding.postalCodeDivider.isVisible = shouldShowPostalCode
-        postalCodeLayout.isVisible = shouldShowPostalCode
-
+        updatePostalCodeView(newCountry)
         _address.value = createAddress()
+    }
+
+    private var postalCodeConfig: PostalCodeConfig by Delegates.observable(
+        PostalCodeConfig.Global
+    ) { _, _, config ->
+        postalCodeView.filters = arrayOf(InputFilter.LengthFilter(config.maxLength))
+        postalCodeView.keyListener = config.getKeyListener()
+        postalCodeView.inputType = config.inputType
     }
 
     init {
@@ -154,6 +163,42 @@ internal class BillingAddressView @JvmOverloads constructor(
                 )
             } else {
                 null
+            }
+        }
+    }
+
+    private fun updatePostalCodeView(country: Country?) {
+        val shouldShowPostalCode = country == null ||
+            CountryUtils.doesCountryUsePostalCode(country.code)
+        viewBinding.postalCodeDivider.isVisible = shouldShowPostalCode
+        postalCodeLayout.isVisible = shouldShowPostalCode
+
+        postalCodeConfig = if (country?.code == "US") {
+            PostalCodeConfig.UnitedStates
+        } else {
+            PostalCodeConfig.Global
+        }
+    }
+
+    internal sealed class PostalCodeConfig {
+        abstract val maxLength: Int
+        abstract val inputType: Int
+
+        abstract fun getKeyListener(): KeyListener
+
+        object UnitedStates : PostalCodeConfig() {
+            override val maxLength = 5
+            override val inputType = InputType.TYPE_CLASS_NUMBER
+            override fun getKeyListener(): KeyListener {
+                return DigitsKeyListener.getInstance(false, true)
+            }
+        }
+
+        object Global : PostalCodeConfig() {
+            override val maxLength = 13
+            override val inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
+            override fun getKeyListener(): KeyListener {
+                return TextKeyListener.getInstance()
             }
         }
     }

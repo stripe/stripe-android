@@ -130,6 +130,17 @@ class BillingAddressViewTest {
             )
     }
 
+    @Test
+    fun `changing country should update postalCodeView inputType`() {
+        billingAddressView.selectedCountry = MEXICO
+        assertThat(billingAddressView.postalCodeView.inputType)
+            .isEqualTo(BillingAddressView.PostalCodeConfig.Global.inputType)
+
+        billingAddressView.selectedCountry = USA
+        assertThat(billingAddressView.postalCodeView.inputType)
+            .isEqualTo(BillingAddressView.PostalCodeConfig.UnitedStates.inputType)
+    }
+
     private companion object {
         private val USA = Country("US", "United States")
         private val FRANCE = Country("FR", "France")
