@@ -52,7 +52,7 @@ internal class PaymentSheet internal constructor(
          *
          * The default value is the name of your app.
          */
-        var merchantDisplayName: String? = null,
+        var merchantDisplayName: String,
 
         /**
          * Configuration related to the Stripe Customer making a payment.

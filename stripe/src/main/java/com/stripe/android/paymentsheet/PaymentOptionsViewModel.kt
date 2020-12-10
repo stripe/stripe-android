@@ -11,7 +11,7 @@ internal class PaymentOptionsViewModel(
     args: PaymentOptionsActivityStarter.Args,
     googlePayRepository: GooglePayRepository
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
-    customerConfig = args.config?.customer,
+    config = args.config,
     isGooglePayEnabled = args.config?.googlePay != null,
     googlePayRepository = googlePayRepository
 ) {

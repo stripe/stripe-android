@@ -21,9 +21,7 @@ class PaymentOptionsViewModelTest {
         args = PaymentOptionsActivityStarter.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             paymentMethods = emptyList(),
-            config = PaymentSheet.Configuration(
-                googlePay = ConfigFixtures.GOOGLE_PAY
-            )
+            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
         googlePayRepository = mock()
     )

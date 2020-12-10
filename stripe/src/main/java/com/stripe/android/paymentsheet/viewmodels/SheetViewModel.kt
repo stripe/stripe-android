@@ -25,11 +25,13 @@ import kotlin.coroutines.CoroutineContext
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
 internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
-    internal val customerConfig: PaymentSheet.CustomerConfiguration?,
+    internal val config: PaymentSheet.Configuration?,
     private val isGooglePayEnabled: Boolean,
     private val googlePayRepository: GooglePayRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
+    internal val customerConfig = config?.customer
+
     // a fatal error
     private val mutableFatal = MutableLiveData<Throwable>()
     internal val fatal: LiveData<Throwable> = mutableFatal

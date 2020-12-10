@@ -80,12 +80,7 @@ internal class PaymentSheetActivityTest {
         ActivityStarter.Args.EXTRA,
         PaymentSheetActivityStarter.Args(
             "client_secret",
-            PaymentSheet.Configuration(
-                customer = PaymentSheet.CustomerConfiguration(
-                    "customer_id",
-                    "ephemeral_key"
-                )
-            )
+            PaymentSheetFixtures.CONFIG_CUSTOMER
         )
     )
 

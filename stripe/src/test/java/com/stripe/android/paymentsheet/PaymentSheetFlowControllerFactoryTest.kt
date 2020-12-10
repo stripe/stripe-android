@@ -48,12 +48,7 @@ class PaymentSheetFlowControllerFactoryTest {
         var result: PaymentSheet.FlowController.Result? = null
         factory.create(
             "client_secret",
-            PaymentSheet.Configuration(
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "eph_key"
-                )
-            )
+            PaymentSheetFixtures.CONFIG_CUSTOMER
         ) {
             result = it
         }

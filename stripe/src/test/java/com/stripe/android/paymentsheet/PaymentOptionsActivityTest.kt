@@ -30,9 +30,7 @@ class PaymentOptionsActivityTest {
         args = PaymentOptionsActivityStarter.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             paymentMethods = emptyList(),
-            config = PaymentSheet.Configuration(
-                googlePay = ConfigFixtures.GOOGLE_PAY
-            )
+            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
         googlePayRepository = FakeGooglePayRepository(false)
     )
@@ -47,9 +45,7 @@ class PaymentOptionsActivityTest {
             PaymentOptionsActivityStarter.Args(
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                 paymentMethods = emptyList(),
-                config = PaymentSheet.Configuration(
-                    googlePay = ConfigFixtures.GOOGLE_PAY
-                )
+                config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
             )
         )
 
