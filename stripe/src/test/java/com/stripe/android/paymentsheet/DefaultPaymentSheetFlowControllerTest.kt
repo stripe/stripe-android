@@ -33,13 +33,7 @@ class DefaultPaymentSheetFlowControllerTest {
         null,
         DefaultPaymentSheetFlowController.Args(
             "client_secret",
-            PaymentSheet.Configuration(
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "ephkey"
-                ),
-                googlePay = ConfigFixtures.GOOGLE_PAY,
-            )
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ),
         paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
         paymentMethodTypes = listOf(PaymentMethod.Type.Card),
@@ -99,7 +93,8 @@ class DefaultPaymentSheetFlowControllerTest {
             StripeGooglePayLauncher.Args(
                 environment = StripeGooglePayEnvironment.Test,
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                countryCode = "US"
+                countryCode = "US",
+                merchantName = "Widget Store"
             )
         )
     }

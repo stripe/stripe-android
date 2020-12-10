@@ -45,7 +45,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val args: PaymentSheetActivityStarter.Args,
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
-    customerConfig = args.config?.customer,
+    config = args.config,
     isGooglePayEnabled = args.isGooglePayEnabled,
     googlePayRepository = googlePayRepository,
     workContext = workContext

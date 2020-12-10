@@ -190,6 +190,13 @@ internal abstract class BaseAddCardFragment : Fragment() {
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
+        val merchantDisplayName = sheetViewModel.config?.merchantDisplayName.takeUnless {
+            it.isNullOrBlank()
+        }
+        saveCardCheckbox.text = merchantDisplayName?.let {
+            getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name, it)
+        } ?: getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
+
         saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
 
         saveCardCheckbox.setOnCheckedChangeListener { _, _ ->

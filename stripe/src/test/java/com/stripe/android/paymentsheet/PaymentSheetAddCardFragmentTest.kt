@@ -163,6 +163,14 @@ class PaymentSheetAddCardFragmentTest {
         }
     }
 
+    @Test
+    fun `checkbox text should reflect merchant display name`() {
+        createScenario().onFragment { fragment ->
+            assertThat(fragment.saveCardCheckbox.text)
+                .isEqualTo("Save this card for future Widget Store payments")
+        }
+    }
+
     private fun activityViewModel(
         fragment: PaymentSheetAddCardFragment,
         args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY

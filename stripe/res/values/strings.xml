@@ -189,7 +189,8 @@
     <string name="stripe_paymentsheet_add_payment_method_card_information" tools:ignore="MissingTranslation">Card information</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region" tools:ignore="MissingTranslation">Country or region</string>
     <string name="stripe_paymentsheet_add_payment_method_button" tools:ignore="MissingTranslation">+ Add new</string>
-    <string name="stripe_paymentsheet_save_this_card" tools:ignore="MissingTranslation">Save this card</string>
+    <string name="stripe_paymentsheet_save_this_card" tools:ignore="MissingTranslation">Save this card for future payments</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name" tools:ignore="MissingTranslation">Save this card for future %s payments</string>
     <string name="stripe_paymentsheet_or_pay_with" tools:ignore="MissingTranslation">Or pay with</string>
 
     <!-- The payment amount (e.g. "Pay $25.00") -->
