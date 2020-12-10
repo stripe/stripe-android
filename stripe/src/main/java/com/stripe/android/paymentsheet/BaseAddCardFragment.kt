@@ -5,6 +5,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import androidx.annotation.VisibleForTesting
@@ -114,6 +115,8 @@ internal abstract class BaseAddCardFragment : Fragment() {
             )
         }
 
+        cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
             updateSelection()
@@ -135,7 +138,10 @@ internal abstract class BaseAddCardFragment : Fragment() {
 
             override fun onExpirationComplete() {}
 
-            override fun onCvcComplete() {}
+            override fun onCvcComplete() {
+                // move to postal code when CVC is complete
+                billingAddressView.postalCodeLayout.requestFocus()
+            }
         })
 
         // If we're launched in full expanded mode, focus the card number field
