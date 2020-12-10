@@ -52,8 +52,8 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     private val mutableSheetMode = MutableLiveData<SheetMode>()
     val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
 
-    protected val mutableProcessing = MutableLiveData(false)
-    val processing = mutableProcessing.distinctUntilChanged()
+    protected val mutableProcessing = MutableLiveData(true)
+    val processing: LiveData<Boolean> = mutableProcessing
 
     protected val mutableViewState = MutableLiveData<ViewStateType>(null)
     internal val viewState: LiveData<ViewStateType> = mutableViewState.distinctUntilChanged()

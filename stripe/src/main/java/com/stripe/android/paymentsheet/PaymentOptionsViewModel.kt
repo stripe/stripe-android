@@ -18,6 +18,7 @@ internal class PaymentOptionsViewModel(
     init {
         mutablePaymentIntent.value = args.paymentIntent
         mutablePaymentMethods.value = args.paymentMethods
+        mutableProcessing.postValue(false)
     }
 
     fun selectPaymentOption() {

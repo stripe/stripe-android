@@ -108,6 +108,7 @@ internal class PaymentSheetViewModel internal constructor(
         val currencyCode = paymentIntent.currency
         if (amount != null && currencyCode != null) {
             mutableViewState.value = ViewState.Ready(amount, currencyCode)
+            mutableProcessing.value = false
         } else {
             onFatal(
                 IllegalStateException("PaymentIntent could not be parsed correctly.")
