@@ -99,12 +99,12 @@ class BillingAddressViewTest {
     @Test
     fun `address with validated postal code country and valid postal code should return expected value`() {
         billingAddressView.selectedCountry = USA
-        billingAddressView.postalCodeView.setText("94107-1234")
+        billingAddressView.postalCodeView.setText("94107")
         assertThat(billingAddressView.address.value)
             .isEqualTo(
                 Address(
                     country = "US",
-                    postalCode = "94107-1234"
+                    postalCode = "94107"
                 )
             )
     }
