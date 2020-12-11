@@ -65,7 +65,7 @@
                 android:id="@+id/card_multiline_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:padding="8dp"
                 app:shouldShowPostalCode="false" />
         </com.google.android.material.card.MaterialCardView>
 

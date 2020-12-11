@@ -180,6 +180,12 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        viewBinding.countryLayout.isEnabled = enabled
+        postalCodeLayout.isEnabled = enabled
+    }
+
     internal sealed class PostalCodeConfig {
         abstract val maxLength: Int
         abstract val inputType: Int
