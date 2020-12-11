@@ -113,6 +113,8 @@ internal abstract class BaseAddCardFragment : Fragment() {
                     R.color.stripe_paymentsheet_textinput_color
                 )
             )
+
+            editText.setBackgroundResource(android.R.color.transparent)
         }
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
