@@ -118,7 +118,7 @@ internal abstract class BaseAddCardFragment : Fragment() {
         }
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
-        cardMultilineWidget.setBackgroundResource(R.color.stripe_paymentsheet_form_states)
+        cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
 
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
