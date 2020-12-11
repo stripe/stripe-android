@@ -520,6 +520,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
         expiryTextInputLayout.isEnabled = enabled
         cardNumberTextInputLayout.isEnabled = enabled
         cvcInputLayout.isEnabled = enabled

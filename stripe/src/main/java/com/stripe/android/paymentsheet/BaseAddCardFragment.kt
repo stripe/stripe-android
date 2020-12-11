@@ -118,6 +118,7 @@ internal abstract class BaseAddCardFragment : Fragment() {
         }
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+        cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
 
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
@@ -158,6 +159,7 @@ internal abstract class BaseAddCardFragment : Fragment() {
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             saveCardCheckbox.isEnabled = !isProcessing
             cardMultilineWidget.isEnabled = !isProcessing
+            billingAddressView.isEnabled = !isProcessing
         }
 
         setupSaveCardCheckbox(saveCardCheckbox)
