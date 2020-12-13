@@ -13,13 +13,6 @@ class AddButtonTest {
     private val addButton = AddButton(ApplicationProvider.getApplicationContext())
 
     @Test
-    fun `disabling button should update label alpha`() {
-        addButton.isEnabled = false
-        assertThat(addButton.viewBinding.label.alpha)
-            .isEqualTo(0.5f)
-    }
-
-    @Test
     fun `onReadyState() should update label`() {
         addButton.onReadyState()
         assertThat(

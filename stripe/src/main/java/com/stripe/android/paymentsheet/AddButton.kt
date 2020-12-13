@@ -67,13 +67,6 @@ internal class AddButton @JvmOverloads constructor(
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-
-        viewBinding.label.alpha = if (enabled) {
-            ALPHA_ENABLED
-        } else {
-            ALPHA_DISABLED
-        }
-
         viewBinding.lockIcon.isVisible = enabled
     }
 
@@ -86,10 +79,5 @@ internal class AddButton @JvmOverloads constructor(
                 onCompletedState(viewState)
             }
         }
-    }
-
-    private companion object {
-        private const val ALPHA_ENABLED = 1.0f
-        private const val ALPHA_DISABLED = 0.5f
     }
 }
