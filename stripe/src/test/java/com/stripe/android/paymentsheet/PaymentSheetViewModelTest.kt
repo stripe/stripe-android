@@ -204,6 +204,24 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `onActivityResult() with non-success outcome should report failure event`() {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        viewModel.updateSelection(selection)
+
+        whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
+            callbackCaptor.lastValue.onSuccess(
+                PAYMENT_INTENT_RESULT.copy(
+                    outcomeFromFlow = StripeIntentResult.Outcome.FAILED
+                )
+            )
+        }
+
+        viewModel.onActivityResult(0, 0, Intent())
+        verify(eventReporter)
+            .onPaymentFailure(selection)
+    }
+
+    @Test
     fun `onActivityResult() should update emit API errors`() {
         var userMessage: SheetViewModel.UserMessage? = null
         viewModel.userMessage.observeForever {
