@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Rule
@@ -17,14 +19,22 @@ class PaymentOptionsViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
+    private val eventReporter = mock<EventReporter>()
     private val viewModel = PaymentOptionsViewModel(
         args = PaymentOptionsActivityStarter.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             paymentMethods = emptyList(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
-        googlePayRepository = mock()
+        googlePayRepository = mock(),
+        eventReporter = eventReporter
     )
+
+    @Test
+    fun `init should fire analytics event`() {
+        verify(eventReporter)
+            .onInit(PaymentSheetFixtures.CONFIG_GOOGLEPAY)
+    }
 
     @Test
     fun `selectPaymentOption() when selection has been made should emit completion view state`() {

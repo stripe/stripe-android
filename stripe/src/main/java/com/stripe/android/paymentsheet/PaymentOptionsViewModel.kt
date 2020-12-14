@@ -3,13 +3,16 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
 internal class PaymentOptionsViewModel(
     args: PaymentOptionsActivityStarter.Args,
-    googlePayRepository: GooglePayRepository
+    googlePayRepository: GooglePayRepository,
+    eventReporter: EventReporter
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     config = args.config,
     isGooglePayEnabled = args.config?.googlePay != null,
@@ -19,6 +22,8 @@ internal class PaymentOptionsViewModel(
         mutablePaymentIntent.value = args.paymentIntent
         mutablePaymentMethods.value = args.paymentMethods
         mutableProcessing.postValue(false)
+
+        eventReporter.onInit(config)
     }
 
     fun selectPaymentOption() {
@@ -47,14 +52,19 @@ internal class PaymentOptionsViewModel(
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val starterArgs = starterArgsSupplier()
+            val application = applicationSupplier()
             val googlePayRepository = DefaultGooglePayRepository(
-                applicationSupplier(),
+                application,
                 starterArgs.config?.googlePay?.environment ?: PaymentSheet.GooglePayConfiguration.Environment.Test
             )
 
             return PaymentOptionsViewModel(
                 starterArgs,
-                googlePayRepository
+                googlePayRepository,
+                DefaultEventReporter(
+                    mode = EventReporter.Mode.Custom,
+                    application
+                ),
             ) as T
         }
     }
