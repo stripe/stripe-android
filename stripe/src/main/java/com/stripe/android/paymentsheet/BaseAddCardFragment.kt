@@ -117,6 +117,7 @@ internal abstract class BaseAddCardFragment : Fragment() {
             editText.setBackgroundResource(android.R.color.transparent)
         }
 
+        cardMultilineWidget.expiryTextInputLayout.hint = getString(R.string.expiry_date_hint)
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
 
