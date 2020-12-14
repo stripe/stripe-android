@@ -7,9 +7,11 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.Dispatchers
@@ -27,14 +29,7 @@ class PaymentSheetFlowControllerFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val factory = PaymentSheetFlowControllerFactory(
-        context,
-        FakeStripeRepository(),
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-        null,
-        FakePaymentSessionPrefs(),
-        testDispatcher
-    )
+    private val factory = createFactory()
 
     @BeforeTest
     fun before() {
@@ -64,6 +59,55 @@ class PaymentSheetFlowControllerFactoryTest {
             .hasSize(1)
     }
 
+    @Test
+    fun `create() when PaymentIntent has invalid status should return failure result`() {
+        var result: PaymentSheet.FlowController.Result? = null
+        createFactory(
+            paymentIntent = PAYMENT_INTENT.copy(
+                status = StripeIntent.Status.Succeeded
+            )
+        ).create(
+            "client_secret",
+            PaymentSheetFixtures.CONFIG_CUSTOMER
+        ) {
+            result = it
+        }
+
+        assertThat(result)
+            .isInstanceOf(PaymentSheet.FlowController.Result.Failure::class.java)
+    }
+
+    @Test
+    fun `create() when PaymentIntent has invalid confirmationMethod should return failure result`() {
+        var result: PaymentSheet.FlowController.Result? = null
+        createFactory(
+            paymentIntent = PAYMENT_INTENT.copy(
+                confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
+            )
+        ).create(
+            "client_secret",
+            PaymentSheetFixtures.CONFIG_CUSTOMER
+        ) {
+            result = it
+        }
+
+        assertThat(result)
+            .isInstanceOf(PaymentSheet.FlowController.Result.Failure::class.java)
+    }
+
+    private fun createFactory(
+        paymentIntent: PaymentIntent = PAYMENT_INTENT
+    ): PaymentSheetFlowControllerFactory {
+        return PaymentSheetFlowControllerFactory(
+            context,
+            FakeStripeRepository(paymentIntent),
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            null,
+            FakePaymentSessionPrefs(),
+            testDispatcher
+        )
+    }
+
     private class FakePaymentSessionPrefs : PaymentSessionPrefs {
         override fun getPaymentMethodId(customerId: String?): String? = "pm_123"
 
@@ -71,12 +115,14 @@ class PaymentSheetFlowControllerFactoryTest {
         }
     }
 
-    private class FakeStripeRepository : AbsFakeStripeRepository() {
+    private class FakeStripeRepository(
+        private val paymentIntent: PaymentIntent
+    ) : AbsFakeStripeRepository() {
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ) = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
+        ) = paymentIntent
 
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
@@ -90,5 +136,9 @@ class PaymentSheetFlowControllerFactoryTest {
                 )
             )
         }
+    }
+
+    private companion object {
+        private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
     }
 }

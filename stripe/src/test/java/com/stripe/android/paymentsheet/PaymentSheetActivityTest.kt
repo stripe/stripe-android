@@ -49,14 +49,12 @@ internal class PaymentSheetActivityTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
-
     private val paymentMethods = listOf(
         PaymentMethod("payment_method_id", 0, false, PaymentMethod.Type.Card)
     )
 
     private val googlePayRepository = FakeGooglePayRepository(true)
-    private val stripeRepository = FakeStripeRepository(paymentIntent, paymentMethods)
+    private val stripeRepository = FakeStripeRepository(PAYMENT_INTENT, paymentMethods)
     private val eventReporter = mock<EventReporter>()
 
     private val viewModel = PaymentSheetViewModel(
@@ -118,7 +116,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result(
                     PaymentResult.Cancelled(
                         null,
-                        paymentIntent
+                        PAYMENT_INTENT
                     )
                 )
             )
@@ -183,7 +181,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result(
                     PaymentResult.Cancelled(
                         null,
-                        paymentIntent
+                        PAYMENT_INTENT
                     )
                 )
             )
@@ -243,7 +241,7 @@ internal class PaymentSheetActivityTest {
             assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
                 .isEqualTo(
                     PaymentSheet.Result(
-                        PaymentResult.Succeeded(paymentIntent)
+                        PaymentResult.Succeeded(PAYMENT_INTENT)
                     )
                 )
         }
@@ -254,7 +252,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = PaymentSheetViewModel(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = null,
-            stripeRepository = FakeStripeRepository(paymentIntent, listOf()),
+            stripeRepository = FakeStripeRepository(PAYMENT_INTENT, listOf()),
             paymentController = StripePaymentController(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -293,7 +291,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result(
                     PaymentResult.Cancelled(
                         null,
-                        paymentIntent
+                        PAYMENT_INTENT
                     )
                 )
             )
@@ -337,5 +335,9 @@ internal class PaymentSheetActivityTest {
             options: ApiRequest.Options,
             expandFields: List<String>
         ): PaymentIntent = paymentIntent
+    }
+
+    private companion object {
+        private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
     }
 }
