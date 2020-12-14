@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -58,6 +59,8 @@ class PaymentOptionsActivityTest {
             // wait for bottom sheet to animate in
             testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
+
+            viewModel.updateMode(SheetMode.Wrapped)
 
             activity.viewBinding.root.performClick()
             idleLooper()

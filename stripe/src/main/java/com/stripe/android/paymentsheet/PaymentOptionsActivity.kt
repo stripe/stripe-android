@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
@@ -57,6 +58,8 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         @IdRes
         get() = viewBinding.fragmentContainer.id
 
+    override val rootView: View by lazy { viewBinding.root }
+
     override val messageView: TextView by lazy { viewBinding.message }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,10 +74,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
 
         setContentView(viewBinding.root)
 
-        // Handle taps outside of bottom sheet
-        viewBinding.root.setOnClickListener {
-            onUserCancel()
-        }
         viewModel.fatal.observe(this) {
             animateOut(
                 PaymentOptionResult.Failed(it)
@@ -99,6 +98,8 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             }
 
             bottomSheetController.updateState(mode)
+
+            updateRootViewClickHandling(mode.isDraggable)
         }
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
             if (shouldFinish) {
