@@ -16,8 +16,10 @@ internal interface EventReporter {
 
     fun onPaymentFailure(paymentSelection: PaymentSelection)
 
-    enum class Mode {
-        Complete,
-        Custom
+    enum class Mode(val code: String) {
+        Complete("complete"),
+        Custom("custom");
+
+        override fun toString(): String = code
     }
 }
