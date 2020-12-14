@@ -10,6 +10,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
 import com.stripe.android.utils.ContextUtils.packageInfo
@@ -290,7 +291,35 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createParams(
+        event: PaymentSheetEvent,
+    ): Map<String, Any> {
+        return createParams(
+            event.toString(),
+            requestId = null
+        )
+    }
+
+    @JvmSynthetic
+    internal fun createParams(
         event: AnalyticsEvent,
+        requestId: RequestId?,
+        productUsageTokens: Set<String>? = null,
+        @Source.SourceType sourceType: String? = null,
+        tokenType: Token.Type? = null,
+        extraParams: Map<String, Any>? = null
+    ): Map<String, Any> {
+        return createParams(
+            event.toString(),
+            requestId,
+            productUsageTokens,
+            sourceType,
+            tokenType,
+            extraParams,
+        )
+    }
+
+    private fun createParams(
+        event: String,
         requestId: RequestId?,
         productUsageTokens: Set<String>? = null,
         @Source.SourceType sourceType: String? = null,
@@ -332,11 +361,11 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     }
 
     private fun createStandardParams(
-        event: AnalyticsEvent
+        event: String
     ): Map<String, Any> {
         return mapOf(
             FIELD_ANALYTICS_UA to ANALYTICS_UA,
-            FIELD_EVENT to event.toString(),
+            FIELD_EVENT to event,
             FIELD_PUBLISHABLE_KEY to runCatching {
                 publishableKeySupplier()
             }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),

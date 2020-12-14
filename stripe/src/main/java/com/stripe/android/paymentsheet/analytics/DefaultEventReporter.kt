@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
@@ -30,33 +29,62 @@ internal class DefaultEventReporter internal constructor(
     )
 
     override fun onInit(configuration: PaymentSheet.Configuration?) {
-        // TODO(mshafrir-stripe): implement
+        fireEvent(
+            PaymentSheetEvent.Init(
+                mode = mode,
+                configuration = configuration
+            )
+        )
     }
 
     override fun onDismiss() {
-        // TODO(mshafrir-stripe): implement
+        fireEvent(
+            PaymentSheetEvent.Dismiss(
+                mode = mode
+            )
+        )
     }
 
     override fun onShowExistingPaymentOptions() {
-        // TODO(mshafrir-stripe): implement
+        fireEvent(
+            PaymentSheetEvent.ShowExistingPaymentOptions(
+                mode = mode
+            )
+        )
     }
 
     override fun onShowNewPaymentOptionForm() {
-        // TODO(mshafrir-stripe): implement
+        fireEvent(
+            PaymentSheetEvent.ShowNewPaymentOptionForm(
+                mode = mode
+            )
+        )
     }
 
     override fun onPaymentSuccess(paymentSelection: PaymentSelection) {
-        // TODO(mshafrir-stripe): implement
+        fireEvent(
+            PaymentSheetEvent.Payment(
+                mode = mode,
+                paymentSelection = paymentSelection,
+                result = PaymentSheetEvent.Payment.Result.Success
+            )
+        )
     }
 
     override fun onPaymentFailure(paymentSelection: PaymentSelection) {
-        // TODO(mshafrir-stripe): implement
+        fireEvent(
+            PaymentSheetEvent.Payment(
+                mode = mode,
+                paymentSelection = paymentSelection,
+                result = PaymentSheetEvent.Payment.Result.Failure
+            )
+        )
     }
 
-    private fun fireEvent(analyticsEvent: AnalyticsEvent) {
+    private fun fireEvent(event: PaymentSheetEvent) {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
-                analyticsDataFactory.createParams(analyticsEvent)
+                analyticsDataFactory.createParams(event)
             )
         )
     }

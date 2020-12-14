@@ -4,6 +4,10 @@ internal object PaymentSheetFixtures {
     private const val MERCHANT_DISPLAY_NAME = "Widget Store"
     internal const val CLIENT_SECRET = "client_secret"
 
+    internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
+        merchantDisplayName = MERCHANT_DISPLAY_NAME
+    )
+
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         customer = PaymentSheet.CustomerConfiguration(
