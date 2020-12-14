@@ -4,7 +4,9 @@ import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -27,13 +29,15 @@ class PaymentOptionsActivityTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
+    private val eventReporter = mock<EventReporter>()
     private val viewModel = PaymentOptionsViewModel(
         args = PaymentOptionsActivityStarter.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             paymentMethods = emptyList(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
-        googlePayRepository = FakeGooglePayRepository(false)
+        googlePayRepository = FakeGooglePayRepository(false),
+        eventReporter = eventReporter
     )
 
     @Test
