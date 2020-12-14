@@ -44,6 +44,7 @@ internal class BottomSheetController(
     }
 
     fun updateState(sheetMode: SheetMode) {
+        bottomSheetBehavior.isDraggable = sheetMode.isDraggable
         if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
             bottomSheetBehavior.state = sheetMode.behaviourState
         }

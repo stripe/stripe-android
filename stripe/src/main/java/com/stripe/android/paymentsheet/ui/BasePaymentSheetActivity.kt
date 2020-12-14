@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -9,6 +10,7 @@ import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: SheetViewModel<*, *>
 
+    abstract val rootView: View
     abstract val messageView: TextView
 
     abstract fun onUserCancel()
@@ -43,6 +45,18 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
     ) {
         setActivityResult(result)
         hideSheet()
+    }
+
+    protected fun updateRootViewClickHandling(isDraggable: Boolean) {
+        if (isDraggable) {
+            // Handle taps outside of bottom sheet
+            rootView.setOnClickListener {
+                onUserCancel()
+            }
+        } else {
+            rootView.setOnClickListener(null)
+            rootView.isClickable = false
+        }
     }
 
     protected companion object {
