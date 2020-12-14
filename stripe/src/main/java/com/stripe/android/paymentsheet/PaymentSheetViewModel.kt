@@ -210,7 +210,7 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> {
                 selection.value?.let {
-                    eventReporter.onPaymentSuccess(it)
+                    eventReporter.onPaymentFailure(it)
                 }
 
                 val paymentIntent = paymentIntentResult.intent
