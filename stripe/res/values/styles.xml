@@ -54,7 +54,7 @@
 
     <style name="StripePaymentOptionItemContainer">
         <item name="android:paddingStart">0dp</item>
-        <item name="android:paddingEnd">4dp</item>
+        <item name="android:paddingEnd">0dp</item>
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
     </style>
@@ -62,7 +62,10 @@
     <style name="StripePaymentOptionItemCard">
         <item name="android:layout_width">@dimen/stripe_paymentsheet_paymentmethod_icon_width</item>
         <item name="android:layout_height">@dimen/stripe_paymentsheet_paymentmethod_icon_height</item>
-        <item name="android:layout_margin">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
         <item name="android:padding">4dp</item>
         <item name="android:clickable">false</item>
         <item name="android:focusable">false</item>
