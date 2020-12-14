@@ -43,4 +43,16 @@ class PaymentSheetEventTest {
             "mc_complete_payment_googlepay_success"
         )
     }
+
+    @Test
+    fun `SelectPaymentOption event should return expected toString()`() {
+        assertThat(
+            PaymentSheetEvent.SelectPaymentOption(
+                mode = EventReporter.Mode.Custom,
+                paymentSelection = PaymentSelection.GooglePay
+            ).toString()
+        ).isEqualTo(
+            "mc_custom_paymentoption_googlepay_select"
+        )
+    }
 }

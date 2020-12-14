@@ -24,16 +24,21 @@ class DefaultEventReporterTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    private val eventReporter = DefaultEventReporter(
-        mode = EventReporter.Mode.Complete,
-        analyticsRequestExecutor,
-        analyticsRequestFactory,
-        analyticsDataFactory
-    )
+    private val eventReporterFactory: (EventReporter.Mode) -> EventReporter = { mode ->
+        DefaultEventReporter(
+            mode,
+            analyticsRequestExecutor,
+            analyticsRequestFactory,
+            analyticsDataFactory
+        )
+    }
+
+    private val completeEventReporter = eventReporterFactory(EventReporter.Mode.Complete)
+    private val customEventReporter = eventReporterFactory(EventReporter.Mode.Custom)
 
     @Test
     fun `onInit() should fire analytics request with expected event value`() {
-        eventReporter.onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+        completeEventReporter.onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.compactParams?.get("event") == "mc_complete_init_customer_googlepay"
@@ -43,12 +48,24 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onPaymentSuccess() should fire analytics request with expected event value`() {
-        eventReporter.onPaymentSuccess(
+        completeEventReporter.onPaymentSuccess(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.compactParams?.get("event") == "mc_complete_payment_savedpm_success"
+            }
+        )
+    }
+
+    @Test
+    fun `onSelectPaymentOption() should fire analytics request with expected event value`() {
+        customEventReporter.onSelectPaymentOption(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.compactParams?.get("event") == "mc_custom_paymentoption_savedpm_select"
             }
         )
     }
