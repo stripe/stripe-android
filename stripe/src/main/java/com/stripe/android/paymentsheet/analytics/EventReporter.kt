@@ -12,6 +12,8 @@ internal interface EventReporter {
 
     fun onShowNewPaymentOptionForm()
 
+    fun onSelectPaymentOption(paymentSelection: PaymentSelection)
+
     fun onPaymentSuccess(paymentSelection: PaymentSelection)
 
     fun onPaymentFailure(paymentSelection: PaymentSelection)
