@@ -24,6 +24,8 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
             messageView.isVisible = userMessage != null
             messageView.text = userMessage?.message
         }
+
+        updateRootViewClickHandling(true)
     }
 
     override fun finish() {
