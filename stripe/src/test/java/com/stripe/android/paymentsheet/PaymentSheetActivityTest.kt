@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -56,6 +57,7 @@ internal class PaymentSheetActivityTest {
 
     private val googlePayRepository = FakeGooglePayRepository(true)
     private val stripeRepository = FakeStripeRepository(paymentIntent, paymentMethods)
+    private val eventReporter = mock<EventReporter>()
 
     private val viewModel = PaymentSheetViewModel(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -69,6 +71,7 @@ internal class PaymentSheetActivityTest {
         ),
         googlePayRepository = googlePayRepository,
         prefsRepository = mock(),
+        eventReporter = eventReporter,
         args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         workContext = testCoroutineDispatcher
     )
@@ -260,6 +263,7 @@ internal class PaymentSheetActivityTest {
             ),
             googlePayRepository = googlePayRepository,
             prefsRepository = mock(),
+            eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
             workContext = testCoroutineDispatcher
         )

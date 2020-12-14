@@ -24,6 +24,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
@@ -42,6 +44,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val paymentController: PaymentController,
     googlePayRepository: GooglePayRepository,
     private val prefsRepository: PrefsRepository,
+    private val eventReporter: EventReporter,
     internal val args: PaymentSheetActivityStarter.Args,
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
@@ -56,6 +59,10 @@ internal class PaymentSheetViewModel internal constructor(
 
     private val mutableGooglePayCompletion = MutableLiveData<PaymentIntentResult>()
     internal val googlePayCompletion: LiveData<PaymentIntentResult> = mutableGooglePayCompletion
+
+    init {
+        eventReporter.onInit(config)
+    }
 
     fun updatePaymentMethods() {
         customerConfig?.let {
@@ -163,15 +170,21 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        data?.takeIf { paymentController.shouldHandlePaymentResult(requestCode, it) }?.let {
+        data?.takeIf {
+            paymentController.shouldHandlePaymentResult(requestCode, it)
+        }?.let { intent ->
             paymentController.handlePaymentResult(
-                it,
+                intent,
                 object : ApiResultCallback<PaymentIntentResult> {
                     override fun onSuccess(result: PaymentIntentResult) {
                         onPaymentIntentResult(result)
                     }
 
                     override fun onError(e: Exception) {
+                        selection.value?.let {
+                            eventReporter.onPaymentFailure(it)
+                        }
+
                         onApiError(e.message)
                         paymentIntent.value?.let(::resetViewState)
                     }
@@ -189,9 +202,17 @@ internal class PaymentSheetViewModel internal constructor(
     private fun onPaymentIntentResult(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
+                selection.value?.let {
+                    eventReporter.onPaymentSuccess(it)
+                }
+
                 mutableViewState.value = ViewState.Completed(paymentIntentResult)
             }
             else -> {
+                selection.value?.let {
+                    eventReporter.onPaymentSuccess(it)
+                }
+
                 val paymentIntent = paymentIntentResult.intent
                 onApiError(paymentIntent.lastPaymentError?.message)
                 onPaymentIntentResponse(paymentIntentResult.intent)
@@ -203,9 +224,12 @@ internal class PaymentSheetViewModel internal constructor(
         val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data)
         when (googlePayResult) {
             is StripeGooglePayLauncher.Result.PaymentIntent -> {
+                eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
                 mutableGooglePayCompletion.value = googlePayResult.paymentIntentResult
             }
             else -> {
+                eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+
                 // TODO(mshafrir-stripe): handle error
             }
         }
@@ -296,6 +320,10 @@ internal class PaymentSheetViewModel internal constructor(
                 paymentController,
                 googlePayRepository,
                 prefsRepository,
+                DefaultEventReporter(
+                    mode = EventReporter.Mode.Complete,
+                    application
+                ),
                 starterArgs,
                 Dispatchers.IO
             ) as T
