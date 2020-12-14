@@ -11,6 +11,7 @@ import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -21,6 +22,7 @@ import java.lang.Exception
 
 internal class DefaultPaymentSheetFlowController internal constructor(
     private val paymentController: PaymentController,
+    private val eventReporter: EventReporter,
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val args: Args,
@@ -119,14 +121,17 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
         if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
+            // TODO(mshafrir-stripe): fire payment result analytics
             paymentController.handlePaymentResult(data, callback)
         } else if (data != null && requestCode == StripeGooglePayLauncher.REQUEST_CODE) {
             val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data) ?: return
             when (googlePayResult) {
                 is StripeGooglePayLauncher.Result.PaymentIntent -> {
+                    eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
                     callback.onSuccess(googlePayResult.paymentIntentResult)
                 }
                 is StripeGooglePayLauncher.Result.Error -> {
+                    eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                     val exception = googlePayResult.exception
                     callback.onError(
                         when (exception) {
@@ -136,7 +141,8 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                     )
                 }
                 else -> {
-                    // TODO(mshafrir-stripe): handle other outcomes
+                    eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                    // TODO(mshafrir-stripe): handle other outcomes; for now, treat these as payment failures
                 }
             }
         }

@@ -17,6 +17,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.runner.RunWith
@@ -27,8 +28,10 @@ import kotlin.test.Test
 class DefaultPaymentSheetFlowControllerTest {
     private val googlePayLauncher = mock<StripeGooglePayLauncher>()
     private val paymentController = mock<PaymentController>()
+    private val eventReporter = mock<EventReporter>()
     private val flowController = DefaultPaymentSheetFlowController(
         paymentController,
+        eventReporter,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         null,
         DefaultPaymentSheetFlowController.Args(
@@ -122,6 +125,7 @@ class DefaultPaymentSheetFlowControllerTest {
             callback = callback
         )
         verify(callback).onSuccess(PAYMENT_INTENT_RESULT)
+        verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
     }
 
     @Test
@@ -137,6 +141,7 @@ class DefaultPaymentSheetFlowControllerTest {
             callback = callback
         )
         verify(callback).onError(isA<RuntimeException>())
+        verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
     }
 
     private companion object {
