@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 internal class PaymentOptionsViewModel(
     args: PaymentOptionsActivityStarter.Args,
     googlePayRepository: GooglePayRepository,
-    private val eventReporter: EventReporter
+    eventReporter: EventReporter
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     config = args.config,
     isGooglePayEnabled = args.config?.googlePay != null,
@@ -62,7 +62,7 @@ internal class PaymentOptionsViewModel(
                 starterArgs,
                 googlePayRepository,
                 DefaultEventReporter(
-                    mode = EventReporter.Mode.Complete,
+                    mode = EventReporter.Mode.Custom,
                     application
                 ),
             ) as T
