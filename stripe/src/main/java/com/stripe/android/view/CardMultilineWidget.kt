@@ -58,7 +58,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     internal val postalCodeEditText = viewBinding.etPostalCode
 
     private val cardNumberTextInputLayout = viewBinding.tlCardNumber
-    private val expiryTextInputLayout = viewBinding.tlExpiry
+    internal val expiryTextInputLayout = viewBinding.tlExpiry
     private val cvcInputLayout = viewBinding.tlCvc
     internal val postalInputLayout = viewBinding.tlPostalCode
 
