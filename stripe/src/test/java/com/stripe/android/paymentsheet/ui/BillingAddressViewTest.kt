@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.Address
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.Country
@@ -139,6 +140,35 @@ class BillingAddressViewTest {
         billingAddressView.selectedCountry = USA
         assertThat(billingAddressView.postalCodeView.inputType)
             .isEqualTo(BillingAddressView.PostalCodeConfig.UnitedStates.inputType)
+    }
+
+    @Test
+    fun `address value should react to level`() {
+        billingAddressView.selectedCountry = USA
+        billingAddressView.postalCodeView.setText("94107")
+
+        billingAddressView.address1View.setText("123 Main St")
+        billingAddressView.address2View.setText("Apt 4")
+
+        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
+        assertThat(billingAddressView.address.value)
+            .isEqualTo(
+                Address(
+                    line1 = "123 Main St",
+                    line2 = "Apt 4",
+                    country = "US",
+                    postalCode = "94107"
+                )
+            )
+
+        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Automatic
+        assertThat(billingAddressView.address.value)
+            .isEqualTo(
+                Address(
+                    country = "US",
+                    postalCode = "94107"
+                )
+            )
     }
 
     private companion object {
