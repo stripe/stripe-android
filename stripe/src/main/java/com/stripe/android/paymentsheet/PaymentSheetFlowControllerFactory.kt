@@ -13,6 +13,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,6 +28,8 @@ internal class PaymentSheetFlowControllerFactory(
     private val paymentSessionPrefs: PaymentSessionPrefs,
     private val workContext: CoroutineContext
 ) {
+    private val paymentIntentValidator = PaymentIntentValidator()
+
     constructor(
         context: Context,
         workContext: CoroutineContext = Dispatchers.IO
@@ -113,7 +116,7 @@ internal class PaymentSheetFlowControllerFactory(
         val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerConfig.id)
 
         return runCatching {
-            requireNotNull(retrievePaymentIntent(clientSecret))
+            retrievePaymentIntent(clientSecret)
         }.fold(
             onSuccess = { paymentIntent ->
                 val paymentMethodTypes = paymentIntent.paymentMethodTypes.mapNotNull {
@@ -155,7 +158,7 @@ internal class PaymentSheetFlowControllerFactory(
         config: PaymentSheet.Configuration?
     ): Result {
         return runCatching {
-            requireNotNull(retrievePaymentIntent(clientSecret))
+            retrievePaymentIntent(clientSecret)
         }.fold(
             onSuccess = { paymentIntent ->
                 val paymentMethodTypes = paymentIntent.paymentMethodTypes
@@ -220,12 +223,16 @@ internal class PaymentSheetFlowControllerFactory(
 
     private suspend fun retrievePaymentIntent(
         clientSecret: String
-    ): PaymentIntent? {
-        return stripeRepository.retrievePaymentIntent(
-            clientSecret,
-            ApiRequest.Options(
-                publishableKey,
-                stripeAccountId
+    ): PaymentIntent {
+        return paymentIntentValidator.requireValid(
+            requireNotNull(
+                stripeRepository.retrievePaymentIntent(
+                    clientSecret,
+                    ApiRequest.Options(
+                        publishableKey,
+                        stripeAccountId
+                    )
+                )
             )
         )
     }

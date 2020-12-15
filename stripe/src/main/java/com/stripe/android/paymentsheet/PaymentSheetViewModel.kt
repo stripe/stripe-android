@@ -27,6 +27,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
+import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
@@ -59,6 +60,8 @@ internal class PaymentSheetViewModel internal constructor(
 
     private val mutableGooglePayCompletion = MutableLiveData<PaymentIntentResult>()
     internal val googlePayCompletion: LiveData<PaymentIntentResult> = mutableGooglePayCompletion
+
+    private val paymentIntentValidator = PaymentIntentValidator()
 
     init {
         eventReporter.onInit(config)
@@ -95,19 +98,15 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
-        if (paymentIntent.confirmationMethod == PaymentIntent.ConfirmationMethod.Automatic) {
-            mutablePaymentIntent.value = paymentIntent
-            resetViewState(paymentIntent)
-        } else {
-            onFatal(
-                IllegalArgumentException(
-                    """
-                    PaymentIntent with confirmation_method='automatic' is required.
-                    See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method.
-                    """.trimIndent()
-                )
-            )
-        }
+        runCatching {
+            paymentIntentValidator.requireValid(paymentIntent)
+        }.fold(
+            onSuccess = {
+                mutablePaymentIntent.value = paymentIntent
+                resetViewState(paymentIntent)
+            },
+            onFailure = ::onFatal
+        )
     }
 
     private fun resetViewState(paymentIntent: PaymentIntent) {

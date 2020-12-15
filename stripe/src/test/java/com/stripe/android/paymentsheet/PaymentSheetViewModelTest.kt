@@ -53,10 +53,8 @@ internal class PaymentSheetViewModelTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
-
     private val googlePayRepository = FakeGooglePayRepository(true)
-    private val stripeRepository: StripeRepository = FakeStripeRepository(paymentIntent)
+    private val stripeRepository: StripeRepository = FakeStripeRepository(PAYMENT_INTENT)
     private val paymentController: PaymentController = mock()
     private val prefsRepository = mock<PrefsRepository>()
     private val eventReporter = mock<EventReporter>()
@@ -299,9 +297,32 @@ internal class PaymentSheetViewModelTest {
                     clientSecret: String,
                     options: ApiRequest.Options,
                     expandFields: List<String>
-                ): PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
+                ): PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
                 )
+            }
+        )
+        var error: Throwable? = null
+        viewModel.fatal.observeForever {
+            error = it
+        }
+        viewModel.fetchPaymentIntent()
+        assertThat(error?.message)
+            .isEqualTo(
+                "PaymentIntent with confirmation_method='automatic' is required.\n" +
+                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
+            )
+    }
+
+    @Test
+    fun `fetchPaymentIntent() should fail if status != requires_payment_method`() {
+        val viewModel = createViewModel(
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun retrievePaymentIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
             }
         )
         var error: Throwable? = null
@@ -409,8 +430,9 @@ internal class PaymentSheetViewModelTest {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
         private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
 
+        val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_RESULT = PaymentIntentResult(
-            intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            intent = PAYMENT_INTENT,
             outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
         )
     }
