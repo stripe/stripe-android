@@ -22,10 +22,27 @@ internal class PaymentMethodsAdapter(
     var shouldShowGooglePay: Boolean by Delegates.observable(false) { _, _, _ ->
         notifyDataSetChanged()
     }
-    var paymentMethods: List<PaymentMethod> by Delegates.observable(
-        emptyList()
-    ) { _, _, _ ->
-        notifyDataSetChanged()
+
+    var paymentMethods: List<PaymentMethod> = emptyList()
+        set(value) {
+            val sortedPaymentMethods = sortPaymentMethods(value)
+
+            if (sortedPaymentMethods != field) {
+                field = sortedPaymentMethods
+                notifyDataSetChanged()
+                updatePaymentSelection(defaultPaymentMethodId)
+            }
+        }
+
+    var defaultPaymentMethodId: String? by Delegates.observable(
+        null
+    ) { _, oldDefaultPaymentMethodId, newDefaultPaymentMethodId ->
+        updatePaymentSelection(newDefaultPaymentMethodId)
+
+        paymentMethods = sortPaymentMethods(paymentMethods)
+        if (newDefaultPaymentMethodId != oldDefaultPaymentMethodId) {
+            notifyDataSetChanged()
+        }
     }
 
     private val selectedPaymentMethod: PaymentMethod? get() = (paymentSelection as? PaymentSelection.Saved)?.paymentMethod
@@ -158,6 +175,35 @@ internal class PaymentMethodsAdapter(
     private fun getPosition(paymentMethod: PaymentMethod): Int {
         return paymentMethods.indexOf(paymentMethod).let {
             it + googlePayCount + 1
+        }
+    }
+
+    private fun updatePaymentSelection(
+        paymentMethodId: String?
+    ) {
+        paymentSelection = paymentMethods.firstOrNull { it.id == paymentMethodId }?.let {
+            PaymentSelection.Saved(it)
+        }
+        paymentSelection?.let {
+            paymentMethodSelectedListener(it)
+        }
+    }
+
+    private fun sortPaymentMethods(
+        paymentMethods: List<PaymentMethod>
+    ): List<PaymentMethod> {
+        val primaryPaymentMethodIndex = paymentMethods.indexOfFirst {
+            it.id == defaultPaymentMethodId
+        }
+        return if (primaryPaymentMethodIndex != -1) {
+            val mutablePaymentMethods = paymentMethods.toMutableList()
+            mutablePaymentMethods.removeAt(primaryPaymentMethodIndex)
+                .also { primaryPaymentMethod ->
+                    mutablePaymentMethods.add(0, primaryPaymentMethod)
+                }
+            mutablePaymentMethods
+        } else {
+            paymentMethods
         }
     }
 

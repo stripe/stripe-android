@@ -37,6 +37,7 @@ class PaymentOptionsActivityTest {
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
         googlePayRepository = FakeGooglePayRepository(false),
+        prefsRepository = mock(),
         eventReporter = eventReporter
     )
 

@@ -27,6 +27,7 @@ class PaymentOptionsViewModelTest {
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
         googlePayRepository = mock(),
+        prefsRepository = mock(),
         eventReporter = eventReporter
     )
 
