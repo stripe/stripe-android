@@ -164,6 +164,22 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
+    fun `onConfigReady() should update header text`() {
+        createScenario().onFragment { fragment ->
+            fragment.onConfigReady(
+                AddPaymentMethodConfig(
+                    paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                    paymentMethods = emptyList(),
+                    isGooglePayReady = true
+                )
+            )
+
+            assertThat(fragment.addCardHeader.text.toString())
+                .isEqualTo("Pay $20.00 using")
+        }
+    }
+
+    @Test
     fun `checkbox text should reflect merchant display name`() {
         createScenario().onFragment { fragment ->
             assertThat(fragment.saveCardCheckbox.text)

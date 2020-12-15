@@ -4,14 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingVertical="@dimen/stripe_paymentsheet_outer_spacing"
+    android:layout_marginTop="@dimen/stripe_paymentsheet_paymentoptions_margin_top"
+    android:layout_marginBottom="@dimen/stripe_paymentsheet_paymentoptions_margin_bottom"
     tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment">
 
     <TextView
         android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing"
+        android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
         style="@style/StripePaymentSheetTitle"
         />
 
