@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -65,6 +66,16 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     // a message shown to the user
     protected val mutableUserMessage = MutableLiveData<UserMessage?>()
     internal val userMessage: LiveData<UserMessage?> = mutableUserMessage
+
+    val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
+        transition.switchMap { transitionTarget ->
+            selection.switchMap { paymentSelection ->
+                MutableLiveData(
+                    !isProcessing && transitionTarget != null && paymentSelection != null
+                )
+            }
+        }
+    }
 
     init {
         fetchIsGooglePayReady()

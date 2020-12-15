@@ -298,6 +298,27 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `buyButton is only enabled when not processing, transition target, and a selection has been made`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isFalse()
+            // wait for bottom sheet to animate in
+            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isFalse()
+
+            viewModel.updateSelection(PaymentSelection.GooglePay)
+            idleLooper()
+
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isTrue()
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
