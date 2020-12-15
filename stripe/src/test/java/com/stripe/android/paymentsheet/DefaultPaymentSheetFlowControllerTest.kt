@@ -29,21 +29,15 @@ class DefaultPaymentSheetFlowControllerTest {
     private val googlePayLauncher = mock<StripeGooglePayLauncher>()
     private val paymentController = mock<PaymentController>()
     private val eventReporter = mock<EventReporter>()
-    private val flowController = DefaultPaymentSheetFlowController(
-        paymentController,
-        eventReporter,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-        null,
-        DefaultPaymentSheetFlowController.Args(
-            "client_secret",
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ),
-        paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-        paymentMethodTypes = listOf(PaymentMethod.Type.Card),
-        paymentMethods = emptyList(),
-        googlePayLauncherFactory = { googlePayLauncher },
-        defaultPaymentMethodId = null
-    )
+    private val flowController: PaymentSheet.FlowController by lazy {
+        createFlowController()
+    }
+
+    @Test
+    fun `init should fire analytics event`() {
+        createFlowController()
+        verify(eventReporter).onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
+    }
 
     @Test
     fun `onPaymentOptionResult() with saved payment method selection result should return payment option`() {
@@ -95,7 +89,7 @@ class DefaultPaymentSheetFlowControllerTest {
         verify(googlePayLauncher).startForResult(
             StripeGooglePayLauncher.Args(
                 environment = StripeGooglePayEnvironment.Test,
-                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 countryCode = "US",
                 merchantName = "Widget Store"
             )
@@ -144,9 +138,27 @@ class DefaultPaymentSheetFlowControllerTest {
         verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
     }
 
+    private fun createFlowController(): PaymentSheet.FlowController {
+        return DefaultPaymentSheetFlowController(
+            paymentController,
+            eventReporter,
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            null,
+            DefaultPaymentSheetFlowController.Args(
+                "client_secret",
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            ),
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            paymentMethodTypes = listOf(PaymentMethod.Type.Card),
+            paymentMethods = emptyList(),
+            googlePayLauncherFactory = { googlePayLauncher },
+            defaultPaymentMethodId = null
+        )
+    }
+
     private companion object {
         private val PAYMENT_INTENT_RESULT = PaymentIntentResult(
-            intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         )
     }
 }

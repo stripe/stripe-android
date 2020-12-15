@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 internal class PaymentOptionsViewModel(
     args: PaymentOptionsActivityStarter.Args,
     googlePayRepository: GooglePayRepository,
-    eventReporter: EventReporter
+    private val eventReporter: EventReporter
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     config = args.config,
     isGooglePayEnabled = args.config?.googlePay != null,
@@ -22,12 +22,11 @@ internal class PaymentOptionsViewModel(
         mutablePaymentIntent.value = args.paymentIntent
         mutablePaymentMethods.value = args.paymentMethods
         mutableProcessing.postValue(false)
-
-        eventReporter.onInit(config)
     }
 
     fun selectPaymentOption() {
         selection.value?.let { paymentSelection ->
+            eventReporter.onSelectPaymentOption(paymentSelection)
             mutableViewState.value = PaymentOptionViewState.Completed(paymentSelection)
         }
     }

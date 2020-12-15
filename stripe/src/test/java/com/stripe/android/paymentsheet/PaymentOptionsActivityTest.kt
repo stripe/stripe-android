@@ -32,7 +32,7 @@ class PaymentOptionsActivityTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel = PaymentOptionsViewModel(
         args = PaymentOptionsActivityStarter.Args(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
@@ -48,7 +48,7 @@ class PaymentOptionsActivityTest {
         ).putExtra(
             ActivityStarter.Args.EXTRA,
             PaymentOptionsActivityStarter.Args(
-                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 paymentMethods = emptyList(),
                 config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
             )
