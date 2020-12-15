@@ -61,7 +61,7 @@ internal class DefaultEventReporter internal constructor(
         )
     }
 
-    override fun onSelectPaymentOption(paymentSelection: PaymentSelection?) {
+    override fun onSelectPaymentOption(paymentSelection: PaymentSelection) {
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
