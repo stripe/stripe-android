@@ -62,10 +62,29 @@ internal class PaymentSheet internal constructor(
         var googlePay: GooglePayConfiguration? = null,
 
         /**
+         * The amount of billing address details to collect.
+         *
+         * See [BillingAddressCollectionLevel]
+         */
+        var billingAddressCollection: BillingAddressCollectionLevel = BillingAddressCollectionLevel.Automatic,
+
+        /**
          * If set, the customer can select a previously saved payment method within PaymentSheet.
          */
         var customer: CustomerConfiguration? = null
     ) : Parcelable
+
+    enum class BillingAddressCollectionLevel {
+        /**
+         * (Default) PaymentSheet will only collect the necessary billing address information.
+         */
+        Automatic,
+
+        /**
+         * PaymentSheet will always collect full billing address details.
+         */
+        Required
+    }
 
     @Parcelize
     data class CustomerConfiguration(
