@@ -147,9 +147,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                     onUserCancel()
                 }
                 Toolbar.Action.Back -> {
-                    viewModel.transitionTo(
-                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod
-                    )
+                    onUserBack()
                 }
             }
         }
