@@ -2,7 +2,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
     <ImageView
         android:id="@+id/close"
-        android:src="@drawable/stripe_ic_paymentsheet_close"
+        android:src="@drawable/stripe_paymentsheet_toolbar_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/stripe_paymentsheet_close"
@@ -10,7 +10,7 @@
 
     <ImageView
         android:id="@+id/back"
-        android:src="@drawable/stripe_ic_paymentsheet_back"
+        android:src="@drawable/stripe_paymentsheet_toolbar_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/stripe_paymentsheet_back"

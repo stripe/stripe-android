@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
+import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
@@ -69,6 +70,9 @@ internal abstract class BaseAddCardFragment : Fragment() {
 
     @VisibleForTesting
     internal val saveCardCheckbox: CheckBox by lazy { viewBinding.saveCardCheckbox }
+
+    @VisibleForTesting
+    internal val addCardHeader: TextView by lazy { viewBinding.addCardHeader }
 
     private val addCardViewModel: AddCardViewModel by viewModels()
 
@@ -223,15 +227,14 @@ internal abstract class BaseAddCardFragment : Fragment() {
         _viewBinding = null
     }
 
-    @VisibleForTesting
-    fun onConfigReady(config: AddPaymentMethodConfig) {
+    open fun onConfigReady(config: AddPaymentMethodConfig) {
         val shouldShowGooglePayButton = config.shouldShowGooglePayButton
         googlePayButton.setOnClickListener {
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }
         googlePayButton.isVisible = shouldShowGooglePayButton
         viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
-        viewBinding.addCardHeader.isVisible = !shouldShowGooglePayButton
+        addCardHeader.isVisible = !shouldShowGooglePayButton
     }
 
     private fun shouldSaveCard() = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
