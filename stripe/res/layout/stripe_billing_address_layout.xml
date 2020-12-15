@@ -31,6 +31,45 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <View
+                android:id="@+id/address1_divider"
+                android:visibility="gone"
+                style="@style/StripePaymentSheetFormDivider" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/address1_layout"
+                style="@style/StripePaymentSheetTextInputLayout"
+                android:hint="@string/address_label_address_line1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/address1"
+                    style="@style/StripePaymentSheetTextInputEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:id="@+id/address2_divider"
+                android:visibility="gone"
+                style="@style/StripePaymentSheetFormDivider" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/address2_layout"
+                android:visibility="gone"
+                style="@style/StripePaymentSheetTextInputLayout"
+                android:hint="@string/address_label_address_line2_optional"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/address2"
+                    style="@style/StripePaymentSheetTextInputEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
                 android:id="@+id/postal_code_divider"
                 style="@style/StripePaymentSheetFormDivider" />
 

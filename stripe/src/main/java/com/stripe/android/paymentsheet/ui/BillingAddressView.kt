@@ -21,6 +21,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.databinding.StripeCountryDropdownItemBinding
 import com.stripe.android.model.Address
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
 import com.stripe.android.view.CountryAdapter
 import com.stripe.android.view.CountryAutoCompleteTextViewValidator
@@ -33,6 +34,15 @@ internal class BillingAddressView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+    @VisibleForTesting
+    internal var level: PaymentSheet.BillingAddressCollectionLevel by Delegates.observable(
+        PaymentSheet.BillingAddressCollectionLevel.Automatic
+    ) { _, oldLevel, newLevel ->
+        if (oldLevel != newLevel) {
+            configureForLevel()
+        }
+    }
+
     private val viewBinding = StripeBillingAddressLayoutBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -67,6 +77,24 @@ internal class BillingAddressView @JvmOverloads constructor(
     internal val postalCodeLayout = viewBinding.postalCodeLayout
 
     @VisibleForTesting
+    internal val address1View = viewBinding.address1
+    private val address1Value: String?
+        get() {
+            return address1View.takeIf { it.isVisible }?.text?.toString().takeUnless {
+                it.isNullOrBlank()
+            }
+        }
+
+    @VisibleForTesting
+    internal val address2View = viewBinding.address2
+    private val address2Value: String?
+        get() {
+            return address2View.takeIf { it.isVisible }?.text?.toString().takeUnless {
+                it.isNullOrBlank()
+            }
+        }
+
+    @VisibleForTesting
     internal var selectedCountry: Country? by Delegates.observable(
         null
     ) { _, _, newCountry ->
@@ -82,11 +110,24 @@ internal class BillingAddressView @JvmOverloads constructor(
         postalCodeView.inputType = config.inputType
     }
 
+    private val requiredViews = setOf(
+        viewBinding.address1Divider,
+        viewBinding.address1Layout,
+        address1View,
+
+        viewBinding.address2Divider,
+        viewBinding.address2Layout,
+        address2View
+    )
+
     init {
         configureCountryAutoComplete()
+        configureForLevel()
 
-        postalCodeView.doAfterTextChanged {
-            _address.value = createAddress()
+        setOf(postalCodeView, address1View, address2View).forEach { editText ->
+            editText.doAfterTextChanged {
+                _address.value = createAddress()
+            }
         }
     }
 
@@ -159,7 +200,9 @@ internal class BillingAddressView @JvmOverloads constructor(
             if (isPostalCodeValid) {
                 Address(
                     country = countryCode,
-                    postalCode = postalCode.takeUnless { it.isBlank() }
+                    postalCode = postalCode.takeUnless { it.isBlank() },
+                    line1 = address1Value,
+                    line2 = address2Value
                 )
             } else {
                 null
@@ -184,6 +227,18 @@ internal class BillingAddressView @JvmOverloads constructor(
         super.setEnabled(enabled)
         viewBinding.countryLayout.isEnabled = enabled
         postalCodeLayout.isEnabled = enabled
+    }
+
+    private fun configureForLevel() {
+        when (level) {
+            PaymentSheet.BillingAddressCollectionLevel.Automatic -> {
+                requiredViews.forEach { it.isVisible = false }
+            }
+            PaymentSheet.BillingAddressCollectionLevel.Required -> {
+                requiredViews.forEach { it.isVisible = true }
+            }
+        }
+        _address.value = createAddress()
     }
 
     internal sealed class PostalCodeConfig {
