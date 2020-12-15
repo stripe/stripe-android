@@ -42,7 +42,7 @@ internal sealed class PaymentSheetEvent(
 
     class SelectPaymentOption(
         mode: EventReporter.Mode,
-        paymentSelection: PaymentSelection
+        paymentSelection: PaymentSelection?
     ) : PaymentSheetEvent(mode) {
         override val event: String = "paymentoption_${analyticsValue(paymentSelection)}_select"
     }
@@ -50,7 +50,7 @@ internal sealed class PaymentSheetEvent(
     class Payment(
         mode: EventReporter.Mode,
         result: Result,
-        paymentSelection: PaymentSelection
+        paymentSelection: PaymentSelection?
     ) : PaymentSheetEvent(mode) {
         override val event: String = "payment_${analyticsValue(paymentSelection)}_$result"
 
@@ -68,11 +68,12 @@ internal sealed class PaymentSheetEvent(
 
     private companion object {
         private fun analyticsValue(
-            paymentSelection: PaymentSelection
+            paymentSelection: PaymentSelection?
         ) = when (paymentSelection) {
             PaymentSelection.GooglePay -> "googlepay"
             is PaymentSelection.Saved -> "savedpm"
             is PaymentSelection.New -> "newpm"
+            else -> "unknown"
         }
     }
 }

@@ -12,11 +12,11 @@ internal interface EventReporter {
 
     fun onShowNewPaymentOptionForm()
 
-    fun onSelectPaymentOption(paymentSelection: PaymentSelection)
+    fun onSelectPaymentOption(paymentSelection: PaymentSelection?)
 
-    fun onPaymentSuccess(paymentSelection: PaymentSelection)
+    fun onPaymentSuccess(paymentSelection: PaymentSelection?)
 
-    fun onPaymentFailure(paymentSelection: PaymentSelection)
+    fun onPaymentFailure(paymentSelection: PaymentSelection?)
 
     enum class Mode(val code: String) {
         Complete("complete"),

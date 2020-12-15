@@ -22,19 +22,13 @@ class PaymentOptionsViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel = PaymentOptionsViewModel(
         args = PaymentOptionsActivityStarter.Args(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
         googlePayRepository = mock(),
         eventReporter = eventReporter
     )
-
-    @Test
-    fun `init should fire analytics event`() {
-        verify(eventReporter)
-            .onInit(PaymentSheetFixtures.CONFIG_GOOGLEPAY)
-    }
 
     @Test
     fun `selectPaymentOption() when selection has been made should emit completion view state`() {
@@ -48,6 +42,7 @@ class PaymentOptionsViewModelTest {
 
         assertThat(viewState)
             .isEqualTo(PaymentOptionViewState.Completed(SELECTION_SAVED_PAYMENT_METHOD))
+        verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
     @Test
