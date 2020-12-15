@@ -149,17 +149,16 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             }
         }
 
-        viewModel.selection.observe(this) { paymentSelection ->
-            addButton.isEnabled = paymentSelection != null
-        }
         addButton.setOnClickListener {
             viewModel.selectPaymentOption()
         }
 
         viewModel.processing.observe(this) { isProcessing ->
             viewBinding.toolbar.updateProcessing(isProcessing)
+        }
 
-            addButton.isEnabled = !isProcessing
+        viewModel.ctaEnabled.observe(this) { isEnabled ->
+            addButton.isEnabled = isEnabled
         }
     }
 

@@ -378,6 +378,31 @@ internal class PaymentSheetViewModelTest {
             .hasSize(1)
     }
 
+    @Test
+    fun `buyButton is only enabled when not processing, transition target, and a selection has been made`() {
+        var isEnabled = false
+        viewModel.ctaEnabled.observeForever {
+            isEnabled = it
+        }
+
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.transitionTo(
+            PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod
+        )
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.updateSelection(PaymentSelection.GooglePay)
+        assertThat(isEnabled)
+            .isFalse()
+
+        viewModel.fetchPaymentIntent()
+        assertThat(isEnabled)
+            .isTrue()
+    }
+
     private fun createViewModel(
         args: PaymentSheetActivityStarter.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeRepository: StripeRepository = this.stripeRepository

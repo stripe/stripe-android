@@ -228,7 +228,6 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
             viewBinding.googlePayButton.isVisible = shouldShowGooglePay
             viewBinding.buyButton.isVisible = !shouldShowGooglePay
-            viewBinding.buyButton.isEnabled = paymentSelection != null
         }
 
         viewBinding.googlePayButton.setOnClickListener {
@@ -241,8 +240,10 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
         viewModel.processing.observe(this) { isProcessing ->
             viewBinding.toolbar.updateProcessing(isProcessing)
+        }
 
-            viewBinding.buyButton.isEnabled = !isProcessing
+        viewModel.ctaEnabled.observe(this) { isEnabled ->
+            viewBinding.buyButton.isEnabled = isEnabled
         }
     }
 
