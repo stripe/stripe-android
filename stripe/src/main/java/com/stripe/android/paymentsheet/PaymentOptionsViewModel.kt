@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
@@ -12,11 +13,13 @@ import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 internal class PaymentOptionsViewModel(
     args: PaymentOptionsActivityStarter.Args,
     googlePayRepository: GooglePayRepository,
+    prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     config = args.config,
     isGooglePayEnabled = args.config?.googlePay != null,
-    googlePayRepository = googlePayRepository
+    googlePayRepository = googlePayRepository,
+    prefsRepository = prefsRepository
 ) {
     init {
         mutablePaymentIntent.value = args.paymentIntent
@@ -27,6 +30,7 @@ internal class PaymentOptionsViewModel(
     fun selectPaymentOption() {
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
+            prefsRepository.savePaymentSelection(paymentSelection)
             mutableViewState.value = PaymentOptionViewState.Completed(paymentSelection)
         }
     }
@@ -57,13 +61,21 @@ internal class PaymentOptionsViewModel(
                 starterArgs.config?.googlePay?.environment ?: PaymentSheet.GooglePayConfiguration.Environment.Test
             )
 
+            val prefsRepository = starterArgs.config?.customer?.let { (id) ->
+                DefaultPrefsRepository(
+                    customerId = id,
+                    PaymentSessionPrefs.Default(application)
+                )
+            } ?: PrefsRepository.Noop()
+
             return PaymentOptionsViewModel(
                 starterArgs,
                 googlePayRepository,
+                prefsRepository,
                 DefaultEventReporter(
                     mode = EventReporter.Mode.Custom,
                     application
-                ),
+                )
             ) as T
         }
     }

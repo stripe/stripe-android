@@ -44,7 +44,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
     googlePayRepository: GooglePayRepository,
-    private val prefsRepository: PrefsRepository,
+    prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetActivityStarter.Args,
     workContext: CoroutineContext
@@ -52,6 +52,7 @@ internal class PaymentSheetViewModel internal constructor(
     config = args.config,
     isGooglePayEnabled = args.isGooglePayEnabled,
     googlePayRepository = googlePayRepository,
+    prefsRepository = prefsRepository,
     workContext = workContext
 ) {
     private val confirmParamsFactory = ConfirmParamsFactory(

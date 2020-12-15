@@ -54,6 +54,11 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
         )
         viewBinding.recycler.adapter = adapter
 
+        sheetViewModel.getDefaultPaymentMethodId()
+            .observe(viewLifecycleOwner) { defaultPaymentMethodId ->
+                adapter.defaultPaymentMethodId = defaultPaymentMethodId
+            }
+
         sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
             adapter.paymentMethods = paymentMethods
         }

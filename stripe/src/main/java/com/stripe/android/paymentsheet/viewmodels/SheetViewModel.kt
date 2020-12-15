@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.GooglePayRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
@@ -28,6 +29,7 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     internal val config: PaymentSheet.Configuration?,
     private val isGooglePayEnabled: Boolean,
     private val googlePayRepository: GooglePayRepository,
+    protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
     internal val customerConfig = config?.customer
@@ -140,6 +142,14 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
 
     fun onBackPressed() {
         mutableUserMessage.value = null
+    }
+
+    fun getDefaultPaymentMethodId() = liveData {
+        emit(
+            withContext(workContext) {
+                prefsRepository.getDefaultPaymentMethodId()
+            }
+        )
     }
 
     sealed class UserMessage {
