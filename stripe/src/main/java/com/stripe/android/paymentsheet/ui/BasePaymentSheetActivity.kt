@@ -5,7 +5,11 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.view.KeyboardController
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: SheetViewModel<*, *>
@@ -16,6 +20,10 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
     abstract fun onUserCancel()
     abstract fun hideSheet()
     abstract fun setActivityResult(result: ResultType)
+
+    private val keyboardController: KeyboardController by lazy {
+        KeyboardController(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +66,18 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         } else {
             rootView.setOnClickListener(null)
             rootView.isClickable = false
+        }
+    }
+
+    protected fun onUserBack() {
+        keyboardController.hide()
+        lifecycleScope.launch {
+            // add the smallest possible delay before invoking `onBackPressed()` to prevent
+            // layout issues
+            delay(1)
+            rootView.post {
+                onBackPressed()
+            }
         }
     }
 
