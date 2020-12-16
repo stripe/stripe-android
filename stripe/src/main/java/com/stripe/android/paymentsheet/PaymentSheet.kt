@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -166,12 +165,12 @@ internal class PaymentSheet internal constructor(
 
         companion object {
             fun create(
-                context: Context,
+                activity: ComponentActivity,
                 clientSecret: String,
                 configuration: PaymentSheet.Configuration,
                 onComplete: (Result) -> Unit
             ) {
-                PaymentSheetFlowControllerFactory(context).create(
+                PaymentSheetFlowControllerFactory(activity).create(
                     clientSecret,
                     configuration,
                     onComplete
@@ -179,11 +178,11 @@ internal class PaymentSheet internal constructor(
             }
 
             fun create(
-                context: Context,
+                activity: ComponentActivity,
                 clientSecret: String,
                 onComplete: (Result) -> Unit
             ) {
-                PaymentSheetFlowControllerFactory(context).create(
+                PaymentSheetFlowControllerFactory(activity).create(
                     clientSecret,
                     onComplete
                 )

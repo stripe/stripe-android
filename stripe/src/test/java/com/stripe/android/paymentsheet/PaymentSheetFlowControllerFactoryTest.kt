@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -14,8 +17,11 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
@@ -29,13 +35,28 @@ class PaymentSheetFlowControllerFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val factory = createFactory()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
+    private val factory: PaymentSheetFlowControllerFactory by lazy {
+        createFactory(PAYMENT_INTENT)
+    }
+
+    private lateinit var activityScenario: ActivityScenario<*>
+    private lateinit var activity: ComponentActivity
 
     @BeforeTest
     fun before() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         Dispatchers.setMain(testDispatcher)
+
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                this.activityScenario = activityScenario
+                activityScenario.onActivity { activity ->
+                    this.activity = activity
+                }
+            }
     }
 
     @Test
@@ -95,12 +116,59 @@ class PaymentSheetFlowControllerFactoryTest {
             .isInstanceOf(PaymentSheet.FlowController.Result.Failure::class.java)
     }
 
+    @Test
+    fun `result should not be dispatched if activity is destroyed first`() {
+        val factory = createFactory(
+            object : AbsFakeStripeRepository() {
+                override suspend fun retrievePaymentIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): PaymentIntent {
+                    delay(1000)
+                    error("Failure")
+                }
+
+                override suspend fun getPaymentMethods(
+                    listPaymentMethodsParams: ListPaymentMethodsParams,
+                    publishableKey: String,
+                    productUsageTokens: Set<String>,
+                    requestOptions: ApiRequest.Options
+                ): List<PaymentMethod> {
+                    delay(1000)
+                    error("Failure")
+                }
+            }
+        )
+
+        testDispatcher.advanceTimeBy(500)
+
+        var result: PaymentSheet.FlowController.Result? = null
+        factory.create(
+            "client_secret",
+            PaymentSheetFixtures.CONFIG_CUSTOMER
+        ) {
+            result = it
+        }
+
+        activityScenario.moveToState(Lifecycle.State.DESTROYED)
+
+        assertThat(result)
+            .isNull()
+    }
+
     private fun createFactory(
         paymentIntent: PaymentIntent = PAYMENT_INTENT
+    ) = createFactory(
+        FakeStripeRepository(paymentIntent)
+    )
+
+    private fun createFactory(
+        stripeRepository: StripeRepository = FakeStripeRepository(PAYMENT_INTENT)
     ): PaymentSheetFlowControllerFactory {
         return PaymentSheetFlowControllerFactory(
-            context,
-            FakeStripeRepository(paymentIntent),
+            activity,
+            stripeRepository,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             null,
             FakePaymentSessionPrefs(),
