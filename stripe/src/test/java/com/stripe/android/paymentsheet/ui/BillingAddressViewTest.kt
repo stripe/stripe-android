@@ -159,6 +159,17 @@ class BillingAddressViewTest {
     }
 
     @Test
+    fun `changing country should update state hint text`() {
+        billingAddressView.selectedCountry = MEXICO
+        assertThat(billingAddressView.stateLayout.hint)
+            .isEqualTo("State / Province / Region")
+
+        billingAddressView.selectedCountry = USA
+        assertThat(billingAddressView.stateLayout.hint)
+            .isEqualTo("State")
+    }
+
+    @Test
     fun `address value should react to level`() {
         billingAddressView.selectedCountry = USA
         billingAddressView.postalCodeView.setText("94107")
@@ -166,6 +177,7 @@ class BillingAddressViewTest {
         billingAddressView.address1View.setText("123 Main St")
         billingAddressView.address2View.setText("Apt 4")
         billingAddressView.cityView.setText("San Francisco")
+        billingAddressView.stateView.setText("California")
 
         billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
         assertThat(billingAddressView.address.value)
@@ -175,7 +187,8 @@ class BillingAddressViewTest {
                     line2 = "Apt 4",
                     city = "San Francisco",
                     country = "US",
-                    postalCode = "94107"
+                    postalCode = "94107",
+                    state = "California"
                 )
             )
 

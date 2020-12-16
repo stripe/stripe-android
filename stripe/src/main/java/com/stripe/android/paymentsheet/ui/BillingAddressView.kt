@@ -94,9 +94,16 @@ internal class BillingAddressView @JvmOverloads constructor(
     internal val cityView = viewBinding.city
 
     @VisibleForTesting
+    internal val stateView = viewBinding.state
+
+    @VisibleForTesting
+    internal val stateLayout = viewBinding.stateLayout
+
+    @VisibleForTesting
     internal var selectedCountry: Country? by Delegates.observable(
         null
     ) { _, _, newCountry ->
+        updateStateView(newCountry)
         updatePostalCodeView(newCountry)
         _address.value = createAddress()
     }
@@ -121,14 +128,20 @@ internal class BillingAddressView @JvmOverloads constructor(
         address2View,
 
         viewBinding.cityLayout,
-        cityView
+        cityView,
+
+        viewBinding.stateDivider,
+        stateLayout,
+        stateView,
     )
 
     init {
         configureCountryAutoComplete()
         configureForLevel()
 
-        setOf(postalCodeView, address1View, address2View, cityView).forEach { editText ->
+        setOf(
+            postalCodeView, address1View, address2View, cityView, stateView
+        ).forEach { editText ->
             editText.doAfterTextChanged {
                 _address.value = createAddress()
             }
@@ -226,6 +239,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         val line1 = address1View.value
         val line2 = address2View.value
         val city = cityView.value
+        val state = stateView.value
 
         return if (line1 != null && city != null) {
             if (!isUnitedStates) {
@@ -236,19 +250,39 @@ internal class BillingAddressView @JvmOverloads constructor(
                     line2 = line2,
                     city = city
                 )
-            } else {
-                // TODO(mshafrir-stripe): handle state field
-
+            } else if (state != null) {
                 Address(
                     country = countryCode,
                     postalCode = postalCode,
                     line1 = line1,
                     line2 = line2,
-                    city = city
+                    city = city,
+                    state = state
                 )
+            } else {
+                null
             }
         } else {
             null
+        }
+    }
+
+    private fun updateStateView(country: Country?) {
+        when (country?.code?.toUpperCase(Locale.ROOT)) {
+            "US" -> {
+                R.string.address_label_state
+            }
+            "CA" -> {
+                R.string.address_label_province
+            }
+            "GB" -> {
+                R.string.address_label_county
+            }
+            else -> {
+                R.string.address_label_region_generic
+            }
+        }.let {
+            stateLayout.hint = resources.getString(it)
         }
     }
 
@@ -276,7 +310,8 @@ internal class BillingAddressView @JvmOverloads constructor(
             viewBinding.address1Layout,
             viewBinding.address2Layout,
             viewBinding.cityLayout,
-            postalCodeLayout
+            postalCodeLayout,
+            stateLayout
         ).forEach {
             it.isEnabled = enabled
         }
