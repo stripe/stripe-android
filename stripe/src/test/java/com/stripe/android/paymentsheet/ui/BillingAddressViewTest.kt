@@ -143,12 +143,53 @@ class BillingAddressViewTest {
     }
 
     @Test
+    fun `changing country to US when level=Automatic should hide state view`() {
+        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Automatic
+        billingAddressView.selectedCountry = USA
+        assertThat(billingAddressView.stateView.isVisible)
+            .isFalse()
+    }
+
+    @Test
+    fun `changing country to US when level=Required should show state view`() {
+        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
+        billingAddressView.selectedCountry = USA
+        assertThat(billingAddressView.stateView.isVisible)
+            .isTrue()
+    }
+
+    @Test
+    fun `changing country to Mexico when level=Required should hide state view`() {
+        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
+        billingAddressView.selectedCountry = MEXICO
+        assertThat(billingAddressView.stateView.isVisible)
+            .isFalse()
+    }
+
+    @Test
+    fun `address with level=Required and country=US should require a valid state`() {
+        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
+
+        billingAddressView.selectedCountry = USA
+        billingAddressView.postalCodeView.setText("94107")
+
+        billingAddressView.address1View.setText("123 Main St")
+        billingAddressView.address2View.setText("Apt 4")
+        billingAddressView.cityView.setText("San Francisco")
+
+        assertThat(billingAddressView.address.value)
+            .isNull()
+    }
+
+    @Test
     fun `address value should react to level`() {
         billingAddressView.selectedCountry = USA
         billingAddressView.postalCodeView.setText("94107")
 
         billingAddressView.address1View.setText("123 Main St")
         billingAddressView.address2View.setText("Apt 4")
+        billingAddressView.cityView.setText("San Francisco")
+        billingAddressView.selectedState = StateAdapter.STATES.first { it.code == "CA" }
 
         billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
         assertThat(billingAddressView.address.value)
@@ -156,6 +197,8 @@ class BillingAddressViewTest {
                 Address(
                     line1 = "123 Main St",
                     line2 = "Apt 4",
+                    city = "San Francisco",
+                    state = "CA",
                     country = "US",
                     postalCode = "94107"
                 )
