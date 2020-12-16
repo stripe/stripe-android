@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentSessionPrefs
@@ -16,12 +19,13 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetFlowControllerFactory(
-    private val context: Context,
+    private val activity: ComponentActivity,
     private val stripeRepository: StripeRepository,
     private val publishableKey: String,
     private val stripeAccountId: String?,
@@ -31,27 +35,27 @@ internal class PaymentSheetFlowControllerFactory(
     private val paymentIntentValidator = PaymentIntentValidator()
 
     constructor(
-        context: Context,
+        activity: ComponentActivity,
         workContext: CoroutineContext = Dispatchers.IO
     ) : this(
-        context,
-        PaymentConfiguration.getInstance(context),
+        activity,
+        PaymentConfiguration.getInstance(activity),
         workContext
     )
 
     private constructor(
-        context: Context,
+        activity: ComponentActivity,
         config: PaymentConfiguration,
         workContext: CoroutineContext
     ) : this(
-        context,
+        activity,
         StripeApiRepository(
-            context,
+            activity,
             config.publishableKey
         ),
         config.publishableKey,
         config.stripeAccountId,
-        PaymentSessionPrefs.Default(context),
+        PaymentSessionPrefs.Default(activity),
         workContext
     )
 
@@ -60,7 +64,7 @@ internal class PaymentSheetFlowControllerFactory(
         config: PaymentSheet.Configuration,
         onComplete: (PaymentSheet.FlowController.Result) -> Unit
     ) {
-        CoroutineScope(workContext).launch {
+        val job = CoroutineScope(workContext).launch {
             dispatchResult(
                 config.customer?.let { customerConfig ->
                     createWithCustomer(
@@ -72,13 +76,14 @@ internal class PaymentSheetFlowControllerFactory(
                 onComplete
             )
         }
+        registerJob(job)
     }
 
     fun create(
         clientSecret: String,
         onComplete: (PaymentSheet.FlowController.Result) -> Unit
     ) {
-        CoroutineScope(workContext).launch {
+        val job = CoroutineScope(workContext).launch {
             dispatchResult(
                 createWithoutCustomer(
                     clientSecret,
@@ -87,6 +92,7 @@ internal class PaymentSheetFlowControllerFactory(
                 onComplete
             )
         }
+        registerJob(job)
     }
 
     private suspend fun dispatchResult(
@@ -131,7 +137,7 @@ internal class PaymentSheetFlowControllerFactory(
                             paymentController = createPaymentController(),
                             eventReporter = DefaultEventReporter(
                                 mode = EventReporter.Mode.Custom,
-                                context
+                                activity
                             ),
                             args = DefaultPaymentSheetFlowController.Args(
                                 clientSecret,
@@ -171,7 +177,7 @@ internal class PaymentSheetFlowControllerFactory(
                         paymentController = createPaymentController(),
                         eventReporter = DefaultEventReporter(
                             mode = EventReporter.Mode.Custom,
-                            context
+                            activity
                         ),
                         publishableKey = publishableKey,
                         stripeAccountId = stripeAccountId,
@@ -238,14 +244,25 @@ internal class PaymentSheetFlowControllerFactory(
     }
 
     private fun createPaymentController(): PaymentController {
-        val config = PaymentConfiguration.getInstance(context)
+        val config = PaymentConfiguration.getInstance(activity)
         val publishableKey = config.publishableKey
         val stripeAccountId = config.stripeAccountId
         return StripePaymentController(
-            context,
+            activity,
             publishableKey,
             stripeRepository,
             true
+        )
+    }
+
+    private fun registerJob(job: Job) {
+        activity.lifecycle.addObserver(
+            object : LifecycleObserver {
+                @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                fun onDestroy() {
+                    job.cancel()
+                }
+            }
         )
     }
 
