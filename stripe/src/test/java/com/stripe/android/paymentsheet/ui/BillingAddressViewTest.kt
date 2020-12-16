@@ -48,6 +48,22 @@ class BillingAddressViewTest {
     }
 
     @Test
+    fun `changing selectedCountry to country without postal code when level=Required should hide postal code view but show city view`() {
+        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
+        billingAddressView.selectedCountry = ZIMBABWE
+        idleLooper()
+        assertThat(billingAddressView.postalCodeLayout.isVisible)
+            .isFalse()
+
+        assertThat(billingAddressView.cityPostalContainer.isVisible)
+            .isTrue()
+        assertThat(billingAddressView.cityView.isVisible)
+            .isTrue()
+        assertThat(billingAddressView.cityLayout.isVisible)
+            .isTrue()
+    }
+
+    @Test
     fun `changing selectedCountry to France should show postal code view`() {
         billingAddressView.selectedCountry = FRANCE
         idleLooper()
@@ -149,6 +165,7 @@ class BillingAddressViewTest {
 
         billingAddressView.address1View.setText("123 Main St")
         billingAddressView.address2View.setText("Apt 4")
+        billingAddressView.cityView.setText("San Francisco")
 
         billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
         assertThat(billingAddressView.address.value)
@@ -156,6 +173,7 @@ class BillingAddressViewTest {
                 Address(
                     line1 = "123 Main St",
                     line2 = "Apt 4",
+                    city = "San Francisco",
                     country = "US",
                     postalCode = "94107"
                 )

@@ -102,6 +102,9 @@ internal abstract class BaseAddCardFragment : Fragment() {
 
         _viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
 
+        billingAddressView.level = sheetViewModel.config?.billingAddressCollection
+            ?: PaymentSheet.BillingAddressCollectionLevel.Automatic
+
         setOf(
             cardMultilineWidget.cardNumberEditText,
             cardMultilineWidget.expiryDateEditText,
