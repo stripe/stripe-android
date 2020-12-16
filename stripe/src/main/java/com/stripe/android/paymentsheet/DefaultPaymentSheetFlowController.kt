@@ -43,6 +43,17 @@ internal class DefaultPaymentSheetFlowController internal constructor(
 
     init {
         eventReporter.onInit(args.config)
+
+        val defaultPaymentMethod = paymentMethods.firstOrNull { it.id == defaultPaymentMethodId }
+        paymentSelection = defaultPaymentMethod?.let {
+            PaymentSelection.Saved(it)
+        }
+    }
+
+    override fun getPaymentOption(): PaymentOption? {
+        return paymentSelection?.let {
+            paymentOptionFactory.create(it)
+        }
     }
 
     override fun presentPaymentOptions(
@@ -66,8 +77,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     }
 
     override fun confirmPayment(
-        activity: ComponentActivity,
-        onComplete: (PaymentResult) -> Unit
+        activity: ComponentActivity
     ) {
         val paymentSelection = this.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
@@ -103,10 +113,6 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                     )
                 )
             }
-
-            onComplete(
-                PaymentResult.Cancelled(null, null)
-            )
         }
     }
 

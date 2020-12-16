@@ -40,21 +40,44 @@ class DefaultPaymentSheetFlowControllerTest {
     }
 
     @Test
-    fun `onPaymentOptionResult() with saved payment method selection result should return payment option`() {
-        val paymentOption = flowController.onPaymentOptionResult(
-            Intent().putExtras(
-                PaymentOptionResult.Succeeded(
-                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                ).toBundle()
-            )
+    fun `getPaymentOption() when defaultPaymentMethodId is null should be null`() {
+        assertThat(flowController.getPaymentOption())
+            .isNull()
+    }
+
+    @Test
+    fun `getPaymentOption() when defaultPaymentMethodId is not null should return expected value`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(5)
+        val flowController = createFlowController(
+            paymentMethods = paymentMethods,
+            defaultPaymentMethodId = paymentMethods.first().id
         )
-        assertThat(paymentOption)
+        assertThat(flowController.getPaymentOption())
             .isEqualTo(
                 PaymentOption(
-                    drawableResourceId = R.drawable.stripe_ic_visa,
-                    label = CardBrand.Visa.displayName
+                    drawableResourceId = CardBrand.Visa.icon,
+                    label = "Visa"
                 )
             )
+    }
+
+    @Test
+    fun `onPaymentOptionResult() with saved payment method selection result should return payment option`() {
+        val paymentOption = flowController.onPaymentOptionResult(
+            createPaymentOptionIntent(
+                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+        )
+
+        val expectedPaymentOption = PaymentOption(
+            drawableResourceId = R.drawable.stripe_ic_visa,
+            label = CardBrand.Visa.displayName
+        )
+
+        assertThat(paymentOption)
+            .isEqualTo(expectedPaymentOption)
+        assertThat(flowController.getPaymentOption())
+            .isEqualTo(expectedPaymentOption)
     }
 
     @Test
@@ -71,21 +94,15 @@ class DefaultPaymentSheetFlowControllerTest {
     @Test
     fun `confirmPayment() without paymentSelection should not call paymentController`() {
         verifyNoMoreInteractions(paymentController)
-        flowController.confirmPayment(mock()) {
-        }
+        flowController.confirmPayment(mock())
     }
 
     @Test
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
         flowController.onPaymentOptionResult(
-            Intent().putExtras(
-                PaymentOptionResult.Succeeded(
-                    PaymentSelection.GooglePay
-                ).toBundle()
-            )
+            createPaymentOptionIntent(PaymentSelection.GooglePay)
         )
-        flowController.confirmPayment(mock()) {
-        }
+        flowController.confirmPayment(mock())
         verify(googlePayLauncher).startForResult(
             StripeGooglePayLauncher.Args(
                 environment = StripeGooglePayEnvironment.Test,
@@ -138,7 +155,10 @@ class DefaultPaymentSheetFlowControllerTest {
         verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
     }
 
-    private fun createFlowController(): PaymentSheet.FlowController {
+    private fun createFlowController(
+        paymentMethods: List<PaymentMethod> = emptyList(),
+        defaultPaymentMethodId: String? = null
+    ): PaymentSheet.FlowController {
         return DefaultPaymentSheetFlowController(
             paymentController,
             eventReporter,
@@ -150,13 +170,22 @@ class DefaultPaymentSheetFlowControllerTest {
             ),
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethodTypes = listOf(PaymentMethod.Type.Card),
-            paymentMethods = emptyList(),
+            paymentMethods = paymentMethods,
             googlePayLauncherFactory = { googlePayLauncher },
-            defaultPaymentMethodId = null
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
     }
 
     private companion object {
+        private fun createPaymentOptionIntent(
+            paymentSelection: PaymentSelection
+        ): Intent {
+            return Intent()
+                .putExtras(
+                    PaymentOptionResult.Succeeded(paymentSelection).toBundle()
+                )
+        }
+
         private val PAYMENT_INTENT_RESULT = PaymentIntentResult(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         )

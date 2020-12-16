@@ -411,6 +411,9 @@ internal object PaymentMethodFixtures {
         return PaymentMethod(
             id = "pm_123",
             type = type,
+            card = PaymentMethod.Card(
+                brand = CardBrand.Visa
+            ),
             created = ThreadLocalRandom.current().nextLong(1L, 10000000L),
             liveMode = false
         )
