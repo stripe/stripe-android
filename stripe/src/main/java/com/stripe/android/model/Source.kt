@@ -212,6 +212,8 @@ data class Source internal constructor(
         Reusable("reusable"),
         SingleUse("single_use");
 
+        override fun toString(): String = code
+
         internal companion object {
             fun fromCode(code: String?) = values().firstOrNull { it.code == code }
         }
@@ -226,6 +228,8 @@ data class Source internal constructor(
         CodeVerification("code_verification"),
         None("none");
 
+        override fun toString(): String = code
+        
         internal companion object {
             fun fromCode(code: String?) = values().firstOrNull { it.code == code }
         }
@@ -298,6 +302,8 @@ data class Source internal constructor(
             Succeeded("succeeded"),
             Failed("failed");
 
+            override fun toString(): String = code
+            
             internal companion object {
                 fun fromCode(code: String?) = values().firstOrNull { it.code == code }
             }
