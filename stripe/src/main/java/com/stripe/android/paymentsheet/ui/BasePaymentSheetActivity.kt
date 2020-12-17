@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import com.stripe.android.view.KeyboardController
 import kotlinx.coroutines.delay
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: SheetViewModel<*, *>
+    abstract val bottomSheetController: BottomSheetController
 
     abstract val rootView: View
     abstract val messageView: TextView
@@ -33,7 +35,10 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
             messageView.text = userMessage?.message
         }
 
-        updateRootViewClickHandling(true)
+        viewModel.processing.observe(this) { isProcessing ->
+            bottomSheetController.setDraggable(!isProcessing)
+            updateRootViewClickHandling(isProcessing)
+        }
     }
 
     override fun finish() {
@@ -57,8 +62,8 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         hideSheet()
     }
 
-    protected fun updateRootViewClickHandling(isDraggable: Boolean) {
-        if (isDraggable) {
+    private fun updateRootViewClickHandling(isProcessing: Boolean) {
+        if (!isProcessing) {
             // Handle taps outside of bottom sheet
             rootView.setOnClickListener {
                 onUserCancel()

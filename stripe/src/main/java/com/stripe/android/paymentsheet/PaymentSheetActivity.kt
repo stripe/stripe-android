@@ -35,7 +35,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         BottomSheetBehavior.from(viewBinding.bottomSheet)
     }
 
-    private val bottomSheetController: BottomSheetController by lazy {
+    override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(
             bottomSheetBehavior = bottomSheetBehavior,
             sheetModeLiveData = viewModel.sheetMode,
@@ -111,8 +111,6 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             }
 
             bottomSheetController.updateState(mode)
-
-            updateRootViewClickHandling(mode.isDraggable)
         }
 
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
