@@ -97,6 +97,8 @@ data class BankAccount internal constructor(
         Company("company"),
         Individual("individual");
 
+        override fun toString(): String = code
+
         internal companion object {
             internal fun fromCode(code: String?) = values().firstOrNull { it.code == code }
         }
@@ -108,6 +110,8 @@ data class BankAccount internal constructor(
         Verified("verified"),
         VerificationFailed("verification_failed"),
         Errored("errored");
+
+        override fun toString(): String = code
 
         internal companion object {
             internal fun fromCode(code: String?): Status? {
