@@ -229,7 +229,7 @@ data class Source internal constructor(
         None("none");
 
         override fun toString(): String = code
-        
+
         internal companion object {
             fun fromCode(code: String?) = values().firstOrNull { it.code == code }
         }
@@ -303,7 +303,7 @@ data class Source internal constructor(
             Failed("failed");
 
             override fun toString(): String = code
-            
+
             internal companion object {
                 fun fromCode(code: String?) = values().firstOrNull { it.code == code }
             }
