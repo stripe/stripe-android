@@ -1,17 +1,20 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class DefaultGooglePayRepository(
     private val context: Context,
-    private val environment: PaymentSheet.GooglePayConfiguration.Environment
+    private val environment: PaymentSheet.GooglePayConfiguration.Environment,
+    private val logger: Logger = Logger.noop()
 ) : GooglePayRepository {
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
 
@@ -34,14 +37,18 @@ internal class DefaultGooglePayRepository(
         val isReadyState = MutableStateFlow<Boolean?>(null)
 
         val request = IsReadyToPayRequest.fromJson(
-            googlePayJsonFactory.createIsReadyToPayRequest().toString()
+            googlePayJsonFactory.createIsReadyToPayRequest(
+                existingPaymentMethodRequired = true
+            ).toString()
         )
 
         paymentsClient.isReadyToPay(request)
             .addOnCompleteListener { task ->
-                isReadyState.value = runCatching {
-                    task.isSuccessful
+                val isReady = runCatching {
+                    task.getResult(ApiException::class.java)
                 }.getOrDefault(false)
+                logger.info("Google Pay ready? $isReady")
+                isReadyState.value = isReady
             }
 
         return isReadyState
