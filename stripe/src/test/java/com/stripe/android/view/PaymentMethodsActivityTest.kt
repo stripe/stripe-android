@@ -1,9 +1,7 @@
 package com.stripe.android.view
 
 import android.app.Activity.RESULT_CANCELED
-import android.app.Activity.RESULT_OK
 import android.content.Context
-import android.content.Intent
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -145,6 +143,7 @@ class PaymentMethodsActivityTest {
                 val addCardView: View = activity
                     .findViewById(R.id.stripe_payment_methods_add_card)
                 addCardView.performClick()
+
                 val intentForResult = shadowOf(activity).nextStartedActivityForResult
                 val component = intentForResult.intent.component
                 assertEquals(AddPaymentMethodActivity::class.java.name, component?.className)
@@ -170,16 +169,10 @@ class PaymentMethodsActivityTest {
                 val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHODS[2]
                 assertNotNull(paymentMethod)
 
-                val resultIntent = Intent()
-                    .putExtras(
-                        AddPaymentMethodActivityStarter.Result.Success(paymentMethod)
-                            .toBundle()
-                    )
-                activity.onActivityResult(
-                    AddPaymentMethodActivityStarter.REQUEST_CODE,
-                    RESULT_OK,
-                    resultIntent
+                activity.onAddPaymentMethodResult(
+                    AddPaymentMethodActivityStarter.Result.Success(paymentMethod)
                 )
+
                 assertEquals(View.VISIBLE, progressBar.visibility)
                 verify(customerSession, times(2))
                     .getPaymentMethods(
