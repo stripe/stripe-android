@@ -79,7 +79,7 @@ internal class PaymentSheetActivityTest {
         PaymentSheetActivity::class.java
     ).putExtra(
         ActivityStarter.Args.EXTRA,
-        PaymentSheetActivityStarter.Args(
+        PaymentSheetContract.Args(
             "client_secret",
             PaymentSheetFixtures.CONFIG_CUSTOMER
         )

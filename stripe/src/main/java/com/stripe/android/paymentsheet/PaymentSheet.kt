@@ -12,7 +12,7 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentSheet internal constructor(
-    private val args: PaymentSheetActivityStarter.Args
+    private val args: PaymentSheetContract.Args
 ) {
     /**
      * Create PaymentSheet with a Customer
@@ -21,7 +21,7 @@ internal class PaymentSheet internal constructor(
         paymentIntentClientSecret: String,
         configuration: Configuration
     ) : this(
-        PaymentSheetActivityStarter.Args(
+        PaymentSheetContract.Args(
             paymentIntentClientSecret,
             configuration
         )
@@ -33,7 +33,7 @@ internal class PaymentSheet internal constructor(
     constructor(
         paymentIntentClientSecret: String
     ) : this(
-        PaymentSheetActivityStarter.Args(
+        PaymentSheetContract.Args(
             paymentIntentClientSecret,
             config = null
         )

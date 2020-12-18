@@ -404,7 +404,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private fun createViewModel(
-        args: PaymentSheetActivityStarter.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeRepository: StripeRepository = this.stripeRepository
     ): PaymentSheetViewModel {
         return PaymentSheetViewModel(

@@ -54,8 +54,8 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         @IdRes
         get() = viewBinding.fragmentContainer.id
 
-    private val starterArgs: PaymentSheetActivityStarter.Args? by lazy {
-        PaymentSheetActivityStarter.Args.fromIntent(intent)
+    private val starterArgs: PaymentSheetContract.Args? by lazy {
+        PaymentSheetContract.Args.fromIntent(intent)
     }
 
     override val rootView: View by lazy { viewBinding.root }

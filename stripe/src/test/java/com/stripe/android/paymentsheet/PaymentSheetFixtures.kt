@@ -25,17 +25,17 @@ internal object PaymentSheetFixtures {
         googlePay = ConfigFixtures.GOOGLE_PAY
     )
 
-    internal val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetActivityStarter.Args(
+    internal val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetContract.Args(
         CLIENT_SECRET,
         CONFIG_CUSTOMER_WITH_GOOGLEPAY
     )
 
-    internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY = PaymentSheetActivityStarter.Args(
+    internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY = PaymentSheetContract.Args(
         CLIENT_SECRET,
         CONFIG_CUSTOMER
     )
 
-    internal val ARGS_WITHOUT_CUSTOMER = PaymentSheetActivityStarter.Args(
+    internal val ARGS_WITHOUT_CUSTOMER = PaymentSheetContract.Args(
         CLIENT_SECRET,
         config = null
     )
