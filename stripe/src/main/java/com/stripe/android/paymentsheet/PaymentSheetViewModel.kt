@@ -46,7 +46,7 @@ internal class PaymentSheetViewModel internal constructor(
     googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
-    internal val args: PaymentSheetActivityStarter.Args,
+    internal val args: PaymentSheetContract.Args,
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
     config = args.config,
@@ -276,7 +276,7 @@ internal class PaymentSheetViewModel internal constructor(
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentSheetActivityStarter.Args
+        private val starterArgsSupplier: () -> PaymentSheetContract.Args
     ) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
