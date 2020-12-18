@@ -202,7 +202,7 @@ class PaymentSheetAddCardFragmentTest {
     private fun createScenario(
         args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): FragmentScenario<PaymentSheetAddCardFragment> {
-        return launchFragmentInContainer<PaymentSheetAddCardFragment>(
+        return launchFragmentInContainer(
             bundleOf(
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args
             ),

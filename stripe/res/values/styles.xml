@@ -161,9 +161,9 @@
     </style>
 
     <style name="StripePaymentSheetToolbar">
-        <item name="android:layout_marginTop">4dp</item>
-        <item name="android:layout_marginStart">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
-        <item name="android:layout_marginEnd">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingStart">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
+        <item name="android:paddingEnd">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
         <item name="android:layout_marginBottom">12dp</item>
     </style>
 </resources>
