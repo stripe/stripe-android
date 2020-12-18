@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
@@ -91,26 +92,30 @@ class PaymentMethodsActivity : AppCompatActivity() {
             window.addFlags(it)
         }
 
-        viewModel.snackbarData.observe(
-            this,
-            { snackbarText ->
-                snackbarText?.let {
-                    Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
-                }
+        viewModel.snackbarData.observe(this) { snackbarText ->
+            snackbarText?.let {
+                Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
             }
-        )
-        viewModel.progressData.observe(
-            this,
-            {
-                viewBinding.progressBar.visibility = if (it) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
+        }
+        viewModel.progressData.observe(this) {
+            viewBinding.progressBar.visibility = if (it) {
+                View.VISIBLE
+            } else {
+                View.GONE
             }
-        )
+        }
 
         setupRecyclerView()
+
+        val addPaymentMethodLauncher = registerForActivityResult(
+            AddPaymentMethodContract(),
+            ::onAddPaymentMethodResult
+        )
+        adapter.addPaymentMethodArgs.observe(this) { args ->
+            if (args != null) {
+                addPaymentMethodLauncher.launch(args)
+            }
+        }
 
         setSupportActionBar(viewBinding.toolbar)
 
@@ -171,36 +176,24 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AddPaymentMethodActivityStarter.REQUEST_CODE &&
-            resultCode == Activity.RESULT_OK
-        ) {
-            onPaymentMethodCreated(data)
-        }
-    }
-
     override fun onSupportNavigateUp(): Boolean {
         finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
         return true
     }
 
-    private fun onPaymentMethodCreated(data: Intent?) {
-        data?.let {
-            val result =
-                AddPaymentMethodActivityStarter.Result.fromIntent(data)
-            when (result) {
-                is AddPaymentMethodActivityStarter.Result.Success -> {
-                    onAddedPaymentMethod(result.paymentMethod)
-                }
-                is AddPaymentMethodActivityStarter.Result.Failure -> {
-                    // TODO(mshafrir-stripe): notify user that payment method can not be added at this time
-                }
-                else -> {
-                    // no-op
-                }
+    @VisibleForTesting
+    internal fun onAddPaymentMethodResult(result: AddPaymentMethodActivityStarter.Result) {
+        when (result) {
+            is AddPaymentMethodActivityStarter.Result.Success -> {
+                onAddedPaymentMethod(result.paymentMethod)
             }
-        } ?: fetchCustomerPaymentMethods()
+            is AddPaymentMethodActivityStarter.Result.Failure -> {
+                // TODO(mshafrir-stripe): notify user that payment method can not be added at this time
+            }
+            else -> {
+                // no-op
+            }
+        }
     }
 
     private fun onAddedPaymentMethod(paymentMethod: PaymentMethod) {
@@ -221,27 +214,24 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun fetchCustomerPaymentMethods() {
-        viewModel.getPaymentMethods().observe(
-            this,
-            { result ->
-                result.fold(
-                    onSuccess = { adapter.setPaymentMethods(it) },
-                    onFailure = {
-                        alertDisplayer.show(
-                            when (it) {
-                                is StripeException -> {
-                                    TranslatorManager.getErrorMessageTranslator()
-                                        .translate(it.statusCode, it.message, it.stripeError)
-                                }
-                                else -> {
-                                    it.message.orEmpty()
-                                }
+        viewModel.getPaymentMethods().observe(this) { result ->
+            result.fold(
+                onSuccess = { adapter.setPaymentMethods(it) },
+                onFailure = {
+                    alertDisplayer.show(
+                        when (it) {
+                            is StripeException -> {
+                                TranslatorManager.getErrorMessageTranslator()
+                                    .translate(it.statusCode, it.message, it.stripeError)
                             }
-                        )
-                    }
-                )
-            }
-        )
+                            else -> {
+                                it.message.orEmpty()
+                            }
+                        }
+                    )
+                }
+            )
+        }
     }
 
     private fun finishWithGooglePay() {

@@ -48,8 +48,8 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     protected val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
 
-    private val mutableTransition = MutableLiveData<TransitionTargetType>()
-    internal val transition: LiveData<TransitionTargetType> = mutableTransition
+    private val mutableTransition = MutableLiveData<TransitionTargetType?>(null)
+    internal val transition: LiveData<TransitionTargetType?> = mutableTransition
 
     private val mutableSelection = MutableLiveData<PaymentSelection?>()
     internal val selection: LiveData<PaymentSelection?> = mutableSelection
