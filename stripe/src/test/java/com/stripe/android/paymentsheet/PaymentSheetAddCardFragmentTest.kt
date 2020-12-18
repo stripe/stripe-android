@@ -189,7 +189,7 @@ class PaymentSheetAddCardFragmentTest {
 
     private fun activityViewModel(
         fragment: PaymentSheetAddCardFragment,
-        args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel {
         return fragment.activityViewModels<PaymentSheetViewModel> {
             PaymentSheetViewModel.Factory(
@@ -200,7 +200,7 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     private fun createScenario(
-        args: PaymentSheetActivityStarter.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): FragmentScenario<PaymentSheetAddCardFragment> {
         return launchFragmentInContainer(
             bundleOf(
