@@ -44,7 +44,6 @@ internal class BottomSheetController(
     }
 
     fun updateState(sheetMode: SheetMode) {
-        bottomSheetBehavior.isDraggable = sheetMode.isDraggable
         if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
             bottomSheetBehavior.state = sheetMode.behaviourState
         }
@@ -54,6 +53,10 @@ internal class BottomSheetController(
         // When the bottom sheet finishes animating to its new state,
         // the callback will finish the activity
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+    }
+
+    fun setDraggable(isDraggable: Boolean) {
+        bottomSheetBehavior.isDraggable = isDraggable
     }
 
     internal companion object {
