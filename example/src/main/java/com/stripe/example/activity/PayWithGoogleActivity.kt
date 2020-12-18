@@ -73,17 +73,22 @@ class PayWithGoogleActivity : AppCompatActivity() {
             .addOnCompleteListener { task ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
-                try {
-                    if (task.isSuccessful) {
-                        showSnackbar("Google Pay is ready")
-                        viewBinding.googlePayButton.isEnabled = true
-                    } else {
-                        showSnackbar("Google Pay is unavailable")
+                runCatching {
+                    task.getResult(ApiException::class.java) == true
+                }.fold(
+                    onSuccess = { isReady ->
+                        if (isReady) {
+                            showSnackbar("Google Pay is ready")
+                            viewBinding.googlePayButton.isEnabled = true
+                        } else {
+                            showSnackbar("Google Pay is unavailable")
+                        }
+                    },
+                    onFailure = {
+                        Log.e("StripeExample", "Exception in isReadyToPay", it)
+                        showSnackbar("Exception: ${it.message}")
                     }
-                } catch (exception: ApiException) {
-                    Log.e("StripeExample", "Exception in isReadyToPay", exception)
-                    showSnackbar("Exception: ${exception.localizedMessage}")
-                }
+                )
             }
     }
 

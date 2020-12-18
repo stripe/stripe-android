@@ -45,7 +45,7 @@ internal class DefaultGooglePayRepository(
         paymentsClient.isReadyToPay(request)
             .addOnCompleteListener { task ->
                 val isReady = runCatching {
-                    task.getResult(ApiException::class.java)
+                    task.getResult(ApiException::class.java) == true
                 }.getOrDefault(false)
                 logger.info("Google Pay ready? $isReady")
                 isReadyState.value = isReady
