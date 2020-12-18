@@ -8,6 +8,7 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.GooglePayRepository
@@ -41,6 +42,9 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
 
     private val mutableIsGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = mutableIsGooglePayReady.distinctUntilChanged()
+
+    protected val mutableLaunchGooglePay = MutableLiveData<StripeGooglePayLauncher.Args>()
+    internal val launchGooglePay: LiveData<StripeGooglePayLauncher.Args> = mutableLaunchGooglePay
 
     protected val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
     internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent

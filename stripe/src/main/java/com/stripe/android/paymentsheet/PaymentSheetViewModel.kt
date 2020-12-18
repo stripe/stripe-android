@@ -132,18 +132,16 @@ internal class PaymentSheetViewModel internal constructor(
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
-                StripeGooglePayLauncher(activity).startForResult(
-                    StripeGooglePayLauncher.Args(
-                        environment = when (args.config?.googlePay?.environment) {
-                            PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                                StripeGooglePayEnvironment.Production
-                            else ->
-                                StripeGooglePayEnvironment.Test
-                        },
-                        paymentIntent = paymentIntent,
-                        countryCode = args.googlePayConfig?.countryCode.orEmpty(),
-                        merchantName = args.config?.merchantDisplayName
-                    )
+                mutableLaunchGooglePay.value = StripeGooglePayLauncher.Args(
+                    environment = when (args.config?.googlePay?.environment) {
+                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                            StripeGooglePayEnvironment.Production
+                        else ->
+                            StripeGooglePayEnvironment.Test
+                    },
+                    paymentIntent = paymentIntent,
+                    countryCode = args.googlePayConfig?.countryCode.orEmpty(),
+                    merchantName = args.config?.merchantDisplayName
                 )
             }
         } else {
@@ -169,7 +167,7 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    fun onActivityResult(requestCode: Int, data: Intent?) {
         data?.takeIf {
             paymentController.shouldHandlePaymentResult(requestCode, it)
         }?.let { intent ->
@@ -191,12 +189,6 @@ internal class PaymentSheetViewModel internal constructor(
                 }
             )
         }
-
-        if (requestCode == StripeGooglePayLauncher.REQUEST_CODE &&
-            resultCode == Activity.RESULT_OK && data != null
-        ) {
-            onGooglePayResult(data)
-        }
     }
 
     private fun onPaymentIntentResult(paymentIntentResult: PaymentIntentResult) {
@@ -216,8 +208,7 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun onGooglePayResult(data: Intent) {
-        val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data)
+    internal fun onGooglePayResult(googlePayResult: StripeGooglePayLauncher.Result) {
         when (googlePayResult) {
             is StripeGooglePayLauncher.Result.PaymentIntent -> {
                 eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
