@@ -224,7 +224,7 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             viewModel.onActivityResult(
-                StripePaymentController.PAYMENT_REQUEST_CODE, 0,
+                StripePaymentController.PAYMENT_REQUEST_CODE,
                 Intent().apply {
                     putExtras(
                         PaymentController.Result(

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
@@ -191,7 +190,7 @@ internal class PaymentSheetViewModelTest {
             viewState = it
         }
 
-        viewModel.onActivityResult(0, 0, Intent())
+        viewModel.onActivityResult(0, Intent())
         assertThat(viewState)
             .isEqualTo(
                 ViewState.Completed(PAYMENT_INTENT_RESULT)
@@ -214,7 +213,7 @@ internal class PaymentSheetViewModelTest {
             )
         }
 
-        viewModel.onActivityResult(0, 0, Intent())
+        viewModel.onActivityResult(0, Intent())
         verify(eventReporter)
             .onPaymentFailure(selection)
     }
@@ -230,7 +229,7 @@ internal class PaymentSheetViewModelTest {
                 RuntimeException("Your card was declined.")
             )
         }
-        viewModel.onActivityResult(0, 0, Intent())
+        viewModel.onActivityResult(0, Intent())
         assertThat(userMessage)
             .isEqualTo(
                 SheetViewModel.UserMessage.Error("Your card was declined.")
@@ -245,14 +244,8 @@ internal class PaymentSheetViewModelTest {
                 paymentIntentResults.add(paymentIntentResult)
             }
         }
-        viewModel.onActivityResult(
-            StripeGooglePayLauncher.REQUEST_CODE,
-            Activity.RESULT_OK,
-            Intent().putExtras(
-                StripeGooglePayLauncher.Result.PaymentIntent(
-                    PAYMENT_INTENT_RESULT
-                ).toBundle()
-            )
+        viewModel.onGooglePayResult(
+            StripeGooglePayLauncher.Result.PaymentIntent(PAYMENT_INTENT_RESULT)
         )
 
         assertThat(paymentIntentResults)

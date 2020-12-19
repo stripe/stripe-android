@@ -16,6 +16,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
+import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
@@ -77,6 +78,17 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             )
             finish()
             return
+        }
+
+        val googlePayLauncher = registerForActivityResult(
+            StripeGooglePayContract()
+        ) {
+            viewModel.onGooglePayResult(it)
+        }
+        viewModel.launchGooglePay.observe(this) { args ->
+            if (args != null) {
+                googlePayLauncher.launch(args)
+            }
         }
 
         viewModel.updatePaymentMethods()
@@ -207,7 +219,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        viewModel.onActivityResult(requestCode, resultCode, data)
+        viewModel.onActivityResult(requestCode, data)
     }
 
     private fun setupBuyButton() {
