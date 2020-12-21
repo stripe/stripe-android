@@ -16,8 +16,8 @@ internal class BottomSheetController(
     private val sheetModeLiveData: LiveData<SheetMode>,
     private val lifecycleScope: CoroutineScope
 ) {
-    private val mutableShouldFinish = MutableLiveData(false)
-    internal val shouldFinish = mutableShouldFinish.distinctUntilChanged()
+    private val _shouldFinish = MutableLiveData(false)
+    internal val shouldFinish = _shouldFinish.distinctUntilChanged()
 
     fun setup() {
         bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
@@ -35,7 +35,7 @@ internal class BottomSheetController(
 
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                            mutableShouldFinish.value = true
+                            _shouldFinish.value = true
                         }
                     }
                 }

@@ -33,8 +33,8 @@ internal class BuyButton @JvmOverloads constructor(
 
     private val currencyFormatter = CurrencyFormatter()
 
-    private val mutableCompletedAnimation = MutableLiveData<ViewState.Completed>()
-    internal val completedAnimation = mutableCompletedAnimation.distinctUntilChanged()
+    private val _completedAnimation = MutableLiveData<ViewState.Completed>()
+    internal val completedAnimation = _completedAnimation.distinctUntilChanged()
 
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
@@ -75,7 +75,7 @@ internal class BuyButton @JvmOverloads constructor(
 
     private fun animateConfirmedIcon(state: ViewState.Completed) {
         animator.fadeIn(confirmedIcon, width) {
-            mutableCompletedAnimation.value = state
+            _completedAnimation.value = state
         }
     }
 

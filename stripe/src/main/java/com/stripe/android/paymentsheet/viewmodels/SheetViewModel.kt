@@ -37,39 +37,39 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     internal val customerConfig = config?.customer
 
     // a fatal error
-    private val mutableFatal = MutableLiveData<Throwable>()
-    internal val fatal: LiveData<Throwable> = mutableFatal
+    private val _fatal = MutableLiveData<Throwable>()
+    internal val fatal: LiveData<Throwable> = _fatal
 
-    private val mutableIsGooglePayReady = MutableLiveData<Boolean>()
-    internal val isGooglePayReady: LiveData<Boolean> = mutableIsGooglePayReady.distinctUntilChanged()
+    private val _isGooglePayReady = MutableLiveData<Boolean>()
+    internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    protected val mutableLaunchGooglePay = MutableLiveData<StripeGooglePayLauncher.Args>()
-    internal val launchGooglePay: LiveData<StripeGooglePayLauncher.Args> = mutableLaunchGooglePay
+    protected val _launchGooglePay = MutableLiveData<StripeGooglePayLauncher.Args>()
+    internal val launchGooglePay: LiveData<StripeGooglePayLauncher.Args> = _launchGooglePay
 
-    protected val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
-    internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
+    protected val _paymentIntent = MutableLiveData<PaymentIntent?>()
+    internal val paymentIntent: LiveData<PaymentIntent?> = _paymentIntent
 
-    protected val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
-    internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
+    protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+    internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
-    private val mutableTransition = MutableLiveData<TransitionTargetType?>(null)
-    internal val transition: LiveData<TransitionTargetType?> = mutableTransition
+    private val _transition = MutableLiveData<TransitionTargetType?>(null)
+    internal val transition: LiveData<TransitionTargetType?> = _transition
 
-    private val mutableSelection = MutableLiveData<PaymentSelection?>()
-    internal val selection: LiveData<PaymentSelection?> = mutableSelection
+    private val _selection = MutableLiveData<PaymentSelection?>()
+    internal val selection: LiveData<PaymentSelection?> = _selection
 
-    private val mutableSheetMode = MutableLiveData<SheetMode>()
-    val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
+    private val _sheetMode = MutableLiveData<SheetMode>()
+    val sheetMode: LiveData<SheetMode> = _sheetMode.distinctUntilChanged()
 
-    protected val mutableProcessing = MutableLiveData(true)
-    val processing: LiveData<Boolean> = mutableProcessing
+    protected val _processing = MutableLiveData(true)
+    val processing: LiveData<Boolean> = _processing
 
-    protected val mutableViewState = MutableLiveData<ViewStateType>(null)
-    internal val viewState: LiveData<ViewStateType> = mutableViewState.distinctUntilChanged()
+    protected val _viewState = MutableLiveData<ViewStateType>(null)
+    internal val viewState: LiveData<ViewStateType> = _viewState.distinctUntilChanged()
 
     // a message shown to the user
-    protected val mutableUserMessage = MutableLiveData<UserMessage?>()
-    internal val userMessage: LiveData<UserMessage?> = mutableUserMessage
+    protected val _userMessage = MutableLiveData<UserMessage?>()
+    internal val userMessage: LiveData<UserMessage?> = _userMessage
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         transition.switchMap { transitionTarget ->
@@ -122,41 +122,41 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
             if (isGooglePayEnabled) {
                 viewModelScope.launch {
                     withContext(workContext) {
-                        mutableIsGooglePayReady.postValue(
+                        _isGooglePayReady.postValue(
                             googlePayRepository.isReady().filterNotNull().first()
                         )
                     }
                 }
             } else {
-                mutableIsGooglePayReady.value = false
+                _isGooglePayReady.value = false
             }
         }
     }
 
     fun updateMode(mode: SheetMode) {
-        mutableSheetMode.postValue(mode)
+        _sheetMode.postValue(mode)
     }
 
     fun transitionTo(target: TransitionTargetType) {
-        mutableUserMessage.value = null
-        mutableTransition.postValue(target)
+        _userMessage.value = null
+        _transition.postValue(target)
     }
 
     fun onFatal(throwable: Throwable) {
-        mutableFatal.postValue(throwable)
+        _fatal.postValue(throwable)
     }
 
     fun onApiError(errorMessage: String?) {
-        mutableUserMessage.value = errorMessage?.let { UserMessage.Error(it) }
-        mutableProcessing.value = false
+        _userMessage.value = errorMessage?.let { UserMessage.Error(it) }
+        _processing.value = false
     }
 
     fun updateSelection(selection: PaymentSelection?) {
-        mutableSelection.value = selection
+        _selection.value = selection
     }
 
     fun onBackPressed() {
-        mutableUserMessage.value = null
+        _userMessage.value = null
     }
 
     fun getDefaultPaymentMethodId() = liveData {

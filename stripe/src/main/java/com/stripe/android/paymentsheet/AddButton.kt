@@ -29,8 +29,8 @@ internal class AddButton @JvmOverloads constructor(
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
-    private val mutableCompletedAnimation = MutableLiveData<PaymentOptionViewState.Completed>()
-    internal val completedAnimation = mutableCompletedAnimation.distinctUntilChanged()
+    private val _completedAnimation = MutableLiveData<PaymentOptionViewState.Completed>()
+    internal val completedAnimation = _completedAnimation.distinctUntilChanged()
 
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
@@ -61,7 +61,7 @@ internal class AddButton @JvmOverloads constructor(
 
     private fun animateConfirmedIcon(state: PaymentOptionViewState.Completed) {
         animator.fadeIn(confirmedIcon, width) {
-            mutableCompletedAnimation.value = state
+            _completedAnimation.value = state
         }
     }
 
