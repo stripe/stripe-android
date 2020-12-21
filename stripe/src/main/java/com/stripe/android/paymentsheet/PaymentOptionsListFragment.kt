@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
+import com.stripe.android.paymentsheet.analytics.EventReporter
 
-internal class PaymentOptionsListFragment : BasePaymentMethodsListFragment() {
+internal class PaymentOptionsListFragment(
+    eventReporter: EventReporter
+) : BasePaymentMethodsListFragment(eventReporter) {
     private val activityViewModel by activityViewModels<PaymentOptionsViewModel> {
         PaymentOptionsViewModel.Factory(
             { requireActivity().application },

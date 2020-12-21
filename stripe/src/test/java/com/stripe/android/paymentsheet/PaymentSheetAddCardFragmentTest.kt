@@ -7,14 +7,18 @@ import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,6 +26,7 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetAddCardFragmentTest {
+    private val eventReporter = mock<EventReporter>()
 
     @Before
     fun setup() {
@@ -187,6 +192,13 @@ class PaymentSheetAddCardFragmentTest {
         }
     }
 
+    @Test
+    fun `started fragment should report onShowNewPaymentOptionForm() event`() {
+        createScenario().onFragment {
+            verify(eventReporter).onShowNewPaymentOptionForm()
+        }
+    }
+
     private fun activityViewModel(
         fragment: PaymentSheetAddCardFragment,
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
@@ -202,11 +214,12 @@ class PaymentSheetAddCardFragmentTest {
     private fun createScenario(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): FragmentScenario<PaymentSheetAddCardFragment> {
-        return launchFragmentInContainer(
+        return launchFragmentInContainer<PaymentSheetAddCardFragment>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args
             ),
-            R.style.StripePaymentSheetDefaultTheme
+            R.style.StripePaymentSheetDefaultTheme,
+            factory = PaymentSheetFragmentFactory(eventReporter)
         )
     }
 }

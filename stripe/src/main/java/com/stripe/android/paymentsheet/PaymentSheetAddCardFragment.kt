@@ -2,11 +2,14 @@ package com.stripe.android.paymentsheet
 
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import java.util.Currency
 import java.util.Locale
 
-internal class PaymentSheetAddCardFragment : BaseAddCardFragment() {
+internal class PaymentSheetAddCardFragment(
+    eventReporter: EventReporter
+) : BaseAddCardFragment(eventReporter) {
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
