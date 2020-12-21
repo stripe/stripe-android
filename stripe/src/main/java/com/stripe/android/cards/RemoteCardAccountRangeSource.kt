@@ -19,21 +19,21 @@ internal class RemoteCardAccountRangeSource(
     private val analyticsDataFactory: AnalyticsDataFactory
 ) : CardAccountRangeSource {
 
-    private val mutableLoading = MutableStateFlow(false)
+    private val _loading = MutableStateFlow(false)
 
     override val loading: Flow<Boolean>
-        get() = mutableLoading
+        get() = _loading
 
     override suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
     ): AccountRange? {
         return cardNumber.bin?.let { bin ->
-            mutableLoading.value = true
+            _loading.value = true
 
             val accountRanges = stripeRepository.getCardMetadata(bin, requestOptions)?.accountRanges.orEmpty()
             cardAccountRangeStore.save(bin, accountRanges)
 
-            mutableLoading.value = false
+            _loading.value = false
 
             when {
                 accountRanges.isNotEmpty() -> {

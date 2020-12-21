@@ -26,12 +26,12 @@ internal class PaymentSessionViewModel(
             if (value != field) {
                 field = value
                 savedStateHandle.set(KEY_PAYMENT_SESSION_DATA, value)
-                mutablePaymentSessionDataLiveData.value = value
+                _paymentSessionDataLiveData.value = value
             }
         }
 
-    private val mutablePaymentSessionDataLiveData: MutableLiveData<PaymentSessionData> = MutableLiveData()
-    val paymentSessionDataLiveData: LiveData<PaymentSessionData> = mutablePaymentSessionDataLiveData
+    private val _paymentSessionDataLiveData = MutableLiveData<PaymentSessionData>()
+    val paymentSessionDataLiveData: LiveData<PaymentSessionData> = _paymentSessionDataLiveData
 
     init {
         // read from saved state handle
@@ -40,8 +40,8 @@ internal class PaymentSessionViewModel(
         }
     }
 
-    private val mutableNetworkState: MutableLiveData<NetworkState> = MutableLiveData()
-    internal val networkState: LiveData<NetworkState> = mutableNetworkState
+    private val _networkState: MutableLiveData<NetworkState> = MutableLiveData()
+    internal val networkState: LiveData<NetworkState> = _networkState
 
     @JvmSynthetic
     fun updateCartTotal(@IntRange(from = 0) cartTotal: Long) {
@@ -58,7 +58,7 @@ internal class PaymentSessionViewModel(
 
     @JvmSynthetic
     fun fetchCustomer(isInitialFetch: Boolean = false): LiveData<FetchCustomerResult> {
-        mutableNetworkState.value = NetworkState.Active
+        _networkState.value = NetworkState.Active
 
         val resultData: MutableLiveData<FetchCustomerResult> = MutableLiveData()
         customerSession.retrieveCurrentCustomer(
@@ -69,7 +69,7 @@ internal class PaymentSessionViewModel(
                         customer.id,
                         isInitialFetch
                     ) {
-                        mutableNetworkState.value = NetworkState.Inactive
+                        _networkState.value = NetworkState.Inactive
                         resultData.value = FetchCustomerResult.Success
                     }
                 }
@@ -79,7 +79,7 @@ internal class PaymentSessionViewModel(
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
-                    mutableNetworkState.value = NetworkState.Inactive
+                    _networkState.value = NetworkState.Inactive
                     resultData.value = FetchCustomerResult.Error(
                         errorCode,
                         errorMessage,
@@ -192,7 +192,7 @@ internal class PaymentSessionViewModel(
 
     @JvmSynthetic
     fun onListenerAttached() {
-        mutablePaymentSessionDataLiveData.value = paymentSessionData
+        _paymentSessionDataLiveData.value = paymentSessionData
     }
 
     sealed class FetchCustomerResult {

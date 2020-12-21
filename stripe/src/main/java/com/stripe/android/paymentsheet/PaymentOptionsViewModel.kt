@@ -22,16 +22,16 @@ internal class PaymentOptionsViewModel(
     prefsRepository = prefsRepository
 ) {
     init {
-        mutablePaymentIntent.value = args.paymentIntent
-        mutablePaymentMethods.value = args.paymentMethods
-        mutableProcessing.postValue(false)
+        _paymentIntent.value = args.paymentIntent
+        _paymentMethods.value = args.paymentMethods
+        _processing.postValue(false)
     }
 
     fun selectPaymentOption() {
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
-            mutableViewState.value = PaymentOptionViewState.Completed(paymentSelection)
+            _viewState.value = PaymentOptionViewState.Completed(paymentSelection)
         }
     }
 
