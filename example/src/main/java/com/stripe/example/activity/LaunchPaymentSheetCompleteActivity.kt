@@ -1,6 +1,5 @@
 package com.stripe.example.activity
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -29,6 +28,8 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
+        val paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
+
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
             viewBinding.launch.isEnabled = !it
@@ -48,7 +49,7 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
                     onSuccess = { json ->
                         viewModel.inProgress.postValue(false)
                         val secret = json.getString("secret")
-                        val checkout = PaymentSheet(
+                        paymentSheet.present(
                             secret,
                             PaymentSheet.Configuration(
                                 merchantDisplayName = "Widget Store",
@@ -63,7 +64,6 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
                                 billingAddressCollection = PaymentSheet.BillingAddressCollectionLevel.Automatic
                             )
                         )
-                        checkout.present(this)
                     },
                     onFailure = {
                         viewModel.status.postValue(viewModel.status.value + "\nFailed: ${it.message}")
@@ -75,24 +75,21 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
         fetchEphemeralKey()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        val paymentSheetResult = PaymentSheet.Result.fromIntent(data)
-        if (paymentSheetResult != null) {
-            val statusString = when (val status = paymentSheetResult.status) {
-                is PaymentResult.Cancelled -> {
-                    "MC Completed with status: Cancelled"
-                }
-                is PaymentResult.Failed -> {
-                    "MC Completed with status: Failed(${status.error.message}"
-                }
-                is PaymentResult.Succeeded -> {
-                    "MC Completed with status: Succeeded"
-                }
+    private fun onPaymentSheetResult(
+        paymentResult: PaymentResult
+    ) {
+        val statusString = when (paymentResult) {
+            is PaymentResult.Cancelled -> {
+                "MC Completed with status: Cancelled"
             }
-            viewModel.status.value = viewModel.status.value + "\n\n$statusString"
+            is PaymentResult.Failed -> {
+                "MC Completed with status: Failed(${paymentResult.error.message}"
+            }
+            is PaymentResult.Succeeded -> {
+                "MC Completed with status: Succeeded"
+            }
         }
+        viewModel.status.value = viewModel.status.value + "\n\n$statusString"
     }
 
     private fun fetchEphemeralKey() {
