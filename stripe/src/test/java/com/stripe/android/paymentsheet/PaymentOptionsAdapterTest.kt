@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentMethodsAdapterTest {
+class PaymentOptionsAdapterTest {
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
         R.style.StripePaymentSheetDefaultTheme
@@ -39,40 +39,40 @@ class PaymentMethodsAdapterTest {
     fun `getItemId() when Google Pay is enabled should return expected value`() {
         val adapter = createConfiguredAdapter(shouldShowGooglePay = true)
         assertThat(adapter.getItemId(0))
-            .isEqualTo(PaymentMethodsAdapter.ADD_NEW_ID)
+            .isEqualTo(PaymentOptionsAdapter.ADD_NEW_ID)
         assertThat(adapter.getItemId(1))
-            .isEqualTo(PaymentMethodsAdapter.GOOGLE_PAY_ID)
+            .isEqualTo(PaymentOptionsAdapter.GOOGLE_PAY_ID)
     }
 
     @Test
     fun `getItemId() when Google Pay is disabled should return expected value`() {
         val adapter = createConfiguredAdapter(shouldShowGooglePay = false)
         assertThat(adapter.getItemId(0))
-            .isEqualTo(PaymentMethodsAdapter.ADD_NEW_ID)
+            .isEqualTo(PaymentOptionsAdapter.ADD_NEW_ID)
         assertThat(adapter.getItemId(1))
-            .isNotEqualTo(PaymentMethodsAdapter.GOOGLE_PAY_ID)
+            .isNotEqualTo(PaymentOptionsAdapter.GOOGLE_PAY_ID)
     }
 
     @Test
     fun `getItemViewType() when Google Pay is enabled should return expected value`() {
         val adapter = createConfiguredAdapter(shouldShowGooglePay = true)
         assertThat(adapter.getItemViewType(0))
-            .isEqualTo(PaymentMethodsAdapter.ViewType.AddCard.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.AddCard.ordinal)
         assertThat(adapter.getItemViewType(1))
-            .isEqualTo(PaymentMethodsAdapter.ViewType.GooglePay.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.GooglePay.ordinal)
         assertThat(adapter.getItemViewType(2))
-            .isEqualTo(PaymentMethodsAdapter.ViewType.Card.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.Card.ordinal)
     }
 
     @Test
     fun `getItemViewType() when Google Pay is disabled should return expected value`() {
         val adapter = createConfiguredAdapter(shouldShowGooglePay = false)
         assertThat(adapter.getItemViewType(0))
-            .isEqualTo(PaymentMethodsAdapter.ViewType.AddCard.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.AddCard.ordinal)
         assertThat(adapter.getItemViewType(1))
-            .isEqualTo(PaymentMethodsAdapter.ViewType.Card.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.Card.ordinal)
         assertThat(adapter.getItemViewType(2))
-            .isEqualTo(PaymentMethodsAdapter.ViewType.Card.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.Card.ordinal)
     }
 
     @Test
@@ -135,15 +135,15 @@ class PaymentMethodsAdapterTest {
     private fun createConfiguredAdapter(
         shouldShowGooglePay: Boolean,
         paymentMethodsCount: Int = 6
-    ): PaymentMethodsAdapter {
+    ): PaymentOptionsAdapter {
         return createAdapter().also {
             it.shouldShowGooglePay = shouldShowGooglePay
             it.paymentMethods = PaymentMethodFixtures.createCards(paymentMethodsCount)
         }
     }
 
-    private fun createAdapter(): PaymentMethodsAdapter {
-        return PaymentMethodsAdapter(
+    private fun createAdapter(): PaymentOptionsAdapter {
+        return PaymentOptionsAdapter(
             paymentSelection = null,
             paymentMethodSelectedListener = {
                 paymentSelections.add(it)

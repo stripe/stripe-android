@@ -56,7 +56,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     fun `sets up adapter`() {
         createScenario().onFragment {
             val recycler = recyclerView(it)
-            val adapter = recycler.adapter as PaymentMethodsAdapter
+            val adapter = recycler.adapter as PaymentOptionsAdapter
             assertThat(adapter.paymentMethods)
                 .isEmpty()
 
@@ -78,8 +78,8 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             idleLooper()
 
             val recycler = recyclerView(it)
-            assertThat(recycler.adapter).isInstanceOf(PaymentMethodsAdapter::class.java)
-            val adapter = recycler.adapter as PaymentMethodsAdapter
+            assertThat(recycler.adapter).isInstanceOf(PaymentOptionsAdapter::class.java)
+            val adapter = recycler.adapter as PaymentOptionsAdapter
             adapter.paymentMethodSelectedListener(savedPaymentMethod)
             idleLooper()
 
@@ -100,8 +100,8 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             idleLooper()
 
             val recycler = recyclerView(it)
-            assertThat(recycler.adapter).isInstanceOf(PaymentMethodsAdapter::class.java)
-            val adapter = recycler.adapter as PaymentMethodsAdapter
+            assertThat(recycler.adapter).isInstanceOf(PaymentOptionsAdapter::class.java)
+            val adapter = recycler.adapter as PaymentOptionsAdapter
             adapter.addCardClickListener.onClick(it.requireView())
             idleLooper()
 
@@ -118,7 +118,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             idleLooper()
 
             val recycler = recyclerView(fragment)
-            val adapter = recycler.adapter as PaymentMethodsAdapter
+            val adapter = recycler.adapter as PaymentOptionsAdapter
             adapter.shouldShowGooglePay = true
             idleLooper()
 
