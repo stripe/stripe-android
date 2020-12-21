@@ -13,6 +13,7 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
+import java.lang.IllegalStateException
 
 internal class StripeGooglePayLauncher : ActivityStarter<StripeGooglePayActivity, StripeGooglePayLauncher.Args> {
     constructor(activity: Activity) : super(
@@ -101,8 +102,13 @@ internal class StripeGooglePayLauncher : ActivityStarter<StripeGooglePayActivity
              * @return the [Result] object from the given `Intent`
              */
             @JvmStatic
-            fun fromIntent(intent: Intent): Result? {
-                return intent.getParcelableExtra(ActivityStarter.Result.EXTRA)
+            fun fromIntent(intent: Intent?): Result {
+                val result = intent?.getParcelableExtra<Result>(ActivityStarter.Result.EXTRA)
+                return result ?: Error(
+                    exception = IllegalStateException(
+                        "Error while processing result from Google Pay."
+                    )
+                )
             }
         }
     }
