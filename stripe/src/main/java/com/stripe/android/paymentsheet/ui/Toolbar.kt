@@ -15,8 +15,8 @@ internal class Toolbar @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val mutableAction = MutableLiveData<Action>()
-    internal val action: LiveData<Action> = mutableAction
+    private val _action = MutableLiveData<Action>()
+    internal val action: LiveData<Action> = _action
 
     private val viewBinding = StripePaymentSheetToolbarBinding.inflate(
         LayoutInflater.from(context),
@@ -26,8 +26,8 @@ internal class Toolbar @JvmOverloads constructor(
     internal val backButton = viewBinding.back
 
     init {
-        closeButton.setOnClickListener { mutableAction.value = Action.Close }
-        backButton.setOnClickListener { mutableAction.value = Action.Back }
+        closeButton.setOnClickListener { _action.value = Action.Close }
+        backButton.setOnClickListener { _action.value = Action.Back }
     }
 
     fun showClose() {

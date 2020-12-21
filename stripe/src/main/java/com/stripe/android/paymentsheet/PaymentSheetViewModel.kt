@@ -59,8 +59,8 @@ internal class PaymentSheetViewModel internal constructor(
         args.clientSecret
     )
 
-    private val mutableGooglePayCompletion = MutableLiveData<PaymentIntentResult>()
-    internal val googlePayCompletion: LiveData<PaymentIntentResult> = mutableGooglePayCompletion
+    private val _googlePayCompletion = MutableLiveData<PaymentIntentResult>()
+    internal val googlePayCompletion: LiveData<PaymentIntentResult> = _googlePayCompletion
 
     private val paymentIntentValidator = PaymentIntentValidator()
 
@@ -71,7 +71,7 @@ internal class PaymentSheetViewModel internal constructor(
     fun updatePaymentMethods() {
         customerConfig?.let {
             updatePaymentMethods(it)
-        } ?: mutablePaymentMethods.postValue(emptyList())
+        } ?: _paymentMethods.postValue(emptyList())
     }
 
     fun fetchPaymentIntent() {
@@ -90,7 +90,7 @@ internal class PaymentSheetViewModel internal constructor(
             result.fold(
                 onSuccess = ::onPaymentIntentResponse,
                 onFailure = {
-                    mutablePaymentIntent.value = null
+                    _paymentIntent.value = null
 
                     onFatal(it)
                 }
@@ -103,7 +103,7 @@ internal class PaymentSheetViewModel internal constructor(
             paymentIntentValidator.requireValid(paymentIntent)
         }.fold(
             onSuccess = {
-                mutablePaymentIntent.value = paymentIntent
+                _paymentIntent.value = paymentIntent
                 resetViewState(paymentIntent)
             },
             onFailure = ::onFatal
@@ -114,8 +114,8 @@ internal class PaymentSheetViewModel internal constructor(
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
         if (amount != null && currencyCode != null) {
-            mutableViewState.value = ViewState.Ready(amount, currencyCode)
-            mutableProcessing.value = false
+            _viewState.value = ViewState.Ready(amount, currencyCode)
+            _processing.value = false
         } else {
             onFatal(
                 IllegalStateException("PaymentIntent could not be parsed correctly.")
@@ -124,15 +124,15 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun checkout(activity: Activity) {
-        mutableUserMessage.value = null
-        mutableProcessing.value = true
+        _userMessage.value = null
+        _processing.value = true
 
         val paymentSelection = selection.value
         prefsRepository.savePaymentSelection(paymentSelection)
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
-                mutableLaunchGooglePay.value = StripeGooglePayLauncher.Args(
+                _launchGooglePay.value = StripeGooglePayLauncher.Args(
                     environment = when (args.config?.googlePay?.environment) {
                         PaymentSheet.GooglePayConfiguration.Environment.Production ->
                             StripeGooglePayEnvironment.Production
@@ -154,7 +154,7 @@ internal class PaymentSheetViewModel internal constructor(
                 }
                 else -> null
             }?.let { confirmParams ->
-                mutableViewState.value = ViewState.Confirming
+                _viewState.value = ViewState.Confirming
                 paymentController.startConfirmAndAuth(
                     AuthActivityStarter.Host.create(activity),
                     confirmParams,
@@ -196,7 +196,7 @@ internal class PaymentSheetViewModel internal constructor(
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
 
-                mutableViewState.value = ViewState.Completed(paymentIntentResult)
+                _viewState.value = ViewState.Completed(paymentIntentResult)
             }
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
@@ -212,7 +212,7 @@ internal class PaymentSheetViewModel internal constructor(
         when (googlePayResult) {
             is StripeGooglePayLauncher.Result.PaymentIntent -> {
                 eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-                mutableGooglePayCompletion.value = googlePayResult.paymentIntentResult
+                _googlePayCompletion.value = googlePayResult.paymentIntentResult
             }
             else -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
@@ -224,7 +224,7 @@ internal class PaymentSheetViewModel internal constructor(
 
     @VisibleForTesting
     internal fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
-        mutablePaymentMethods.value = paymentMethods
+        _paymentMethods.value = paymentMethods
     }
 
     private fun updatePaymentMethods(
