@@ -281,7 +281,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         setResult(
             result.resultCode,
             Intent()
-                .putExtras(PaymentSheet.Result(result).toBundle())
+                .putExtras(PaymentSheetContract.Result(result).toBundle())
         )
     }
 

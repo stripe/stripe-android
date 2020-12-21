@@ -1,47 +1,40 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Intent
-import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.core.os.bundleOf
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentSheet internal constructor(
-    private val args: PaymentSheetContract.Args
+    private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
+    constructor(
+        activity: ComponentActivity,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, callback)
+    )
+
     /**
      * Create PaymentSheet with a Customer
      */
-    constructor(
+    fun present(
         paymentIntentClientSecret: String,
         configuration: Configuration
-    ) : this(
-        PaymentSheetContract.Args(
-            paymentIntentClientSecret,
-            configuration
-        )
-    )
+    ) {
+        paymentSheetLauncher.present(paymentIntentClientSecret, configuration)
+    }
 
     /**
      * Create PaymentSheet without a Customer
      */
-    constructor(
+    fun present(
         paymentIntentClientSecret: String
-    ) : this(
-        PaymentSheetContract.Args(
-            paymentIntentClientSecret,
-            config = null
-        )
-    )
-
-    fun present(activity: ComponentActivity) {
-        PaymentSheetActivityStarter(activity)
-            .startForResult(args)
+    ) {
+        paymentSheetLauncher.present(paymentIntentClientSecret)
     }
 
     @Parcelize
@@ -119,20 +112,6 @@ internal class PaymentSheet internal constructor(
         }
     }
 
-    @Parcelize
-    internal data class Result(val status: PaymentResult) : ActivityStarter.Result {
-        override fun toBundle(): Bundle {
-            return bundleOf(ActivityStarter.Result.EXTRA to this)
-        }
-
-        companion object {
-            @JvmStatic
-            fun fromIntent(intent: Intent?): Result? {
-                return intent?.getParcelableExtra(ActivityStarter.Result.EXTRA)
-            }
-        }
-    }
-
     interface FlowController {
         fun getPaymentOption(): PaymentOption?
 
@@ -167,7 +146,7 @@ internal class PaymentSheet internal constructor(
             fun create(
                 activity: ComponentActivity,
                 clientSecret: String,
-                configuration: PaymentSheet.Configuration,
+                configuration: Configuration,
                 onComplete: (Result) -> Unit
             ) {
                 PaymentSheetFlowControllerFactory(activity).create(
