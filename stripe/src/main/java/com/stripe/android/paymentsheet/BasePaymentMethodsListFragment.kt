@@ -8,11 +8,14 @@ import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
-internal abstract class BasePaymentMethodsListFragment : Fragment(
+internal abstract class BasePaymentMethodsListFragment(
+    private val eventReporter: EventReporter
+) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
     abstract val sheetViewModel: SheetViewModel<*, *>
@@ -66,6 +69,8 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
         sheetViewModel.isGooglePayReady.observe(viewLifecycleOwner) { isGooglePayReady ->
             adapter.shouldShowGooglePay = isGooglePayReady
         }
+
+        eventReporter.onShowExistingPaymentOptions()
     }
 
     override fun onDestroyView() {

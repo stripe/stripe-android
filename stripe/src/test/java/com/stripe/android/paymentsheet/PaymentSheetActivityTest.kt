@@ -9,6 +9,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
@@ -88,6 +89,11 @@ internal class PaymentSheetActivityTest {
     @BeforeTest
     fun before() {
         Dispatchers.setMain(testCoroutineDispatcher)
+
+        PaymentConfiguration.init(
+            ApplicationProvider.getApplicationContext(),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        )
     }
 
     @AfterTest

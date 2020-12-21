@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BillingAddressView
@@ -31,7 +32,9 @@ import com.stripe.android.view.CardMultilineWidget
 /**
  * A `Fragment` for adding new card payment method.
  */
-internal abstract class BaseAddCardFragment : Fragment() {
+internal abstract class BaseAddCardFragment(
+    private val eventReporter: EventReporter
+) : Fragment() {
     abstract val sheetViewModel: SheetViewModel<*, *>
 
     private var _viewBinding: FragmentPaymentsheetAddCardBinding? = null
@@ -183,6 +186,8 @@ internal abstract class BaseAddCardFragment : Fragment() {
                 onGooglePaySelected()
             }
         }
+
+        eventReporter.onShowNewPaymentOptionForm()
     }
 
     private fun updateSelection() {

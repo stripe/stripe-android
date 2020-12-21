@@ -13,6 +13,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
@@ -61,6 +63,13 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     override val rootView: View by lazy { viewBinding.root }
 
     override val messageView: TextView by lazy { viewBinding.message }
+
+    override val eventReporter: EventReporter by lazy {
+        DefaultEventReporter(
+            mode = EventReporter.Mode.Custom,
+            application
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -177,25 +186,22 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
 
                     replace(
                         fragmentContainerId,
-                        PaymentOptionsAddCardFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentOptionsAddCardFragment::class.java,
+                        fragmentArgs
                     )
                 }
                 PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     replace(
                         fragmentContainerId,
-                        PaymentOptionsListFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentOptionsListFragment::class.java,
+                        fragmentArgs
                     )
                 }
                 PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                     replace(
                         fragmentContainerId,
-                        PaymentOptionsAddCardFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentOptionsAddCardFragment::class.java,
+                        fragmentArgs
                     )
                 }
             }

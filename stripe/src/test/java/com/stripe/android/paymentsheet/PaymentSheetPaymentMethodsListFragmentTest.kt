@@ -9,12 +9,16 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
@@ -23,6 +27,8 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetPaymentMethodsListFragmentTest {
+    private val eventReporter = mock<EventReporter>()
+
     private val paymentMethods = listOf(
         PaymentMethod("one", 0, false, PaymentMethod.Type.Card),
         PaymentMethod("two", 0, false, PaymentMethod.Type.Card)
@@ -141,6 +147,13 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         }
     }
 
+    @Test
+    fun `started fragment should report onShowExistingPaymentOptions() event`() {
+        createScenario().onFragment {
+            verify(eventReporter).onShowExistingPaymentOptions()
+        }
+    }
+
     private fun recyclerView(it: PaymentSheetPaymentMethodsListFragment) =
         it.requireView().findViewById<RecyclerView>(R.id.recycler)
 
@@ -164,7 +177,8 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             bundleOf(
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
             ),
-            R.style.StripePaymentSheetDefaultTheme
+            R.style.StripePaymentSheetDefaultTheme,
+            factory = PaymentSheetFragmentFactory(eventReporter)
         )
     }
 }
