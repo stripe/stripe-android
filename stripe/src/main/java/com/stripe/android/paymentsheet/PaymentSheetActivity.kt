@@ -17,6 +17,8 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.googlepay.StripeGooglePayContract
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
@@ -63,6 +65,13 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     override val messageView: TextView by lazy {
         viewBinding.message
+    }
+
+    override val eventReporter: EventReporter by lazy {
+        DefaultEventReporter(
+            mode = EventReporter.Mode.Complete,
+            application
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,7 +147,8 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         supportFragmentManager.commit {
             replace(
                 fragmentContainerId,
-                PaymentSheetLoadingFragment()
+                PaymentSheetLoadingFragment::class.java,
+                null
             )
         }
 
@@ -190,25 +200,22 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                     addToBackStack(null)
                     replace(
                         fragmentContainerId,
-                        PaymentSheetAddCardFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentSheetAddCardFragment::class.java,
+                        fragmentArgs
                     )
                 }
                 PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     replace(
                         fragmentContainerId,
-                        PaymentSheetPaymentMethodsListFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentSheetPaymentMethodsListFragment::class.java,
+                        fragmentArgs
                     )
                 }
                 PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                     replace(
                         fragmentContainerId,
-                        PaymentSheetAddCardFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentSheetAddCardFragment::class.java,
+                        fragmentArgs
                     )
                 }
             }

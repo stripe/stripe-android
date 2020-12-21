@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.BottomSheetController
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import com.stripe.android.view.KeyboardController
 import kotlinx.coroutines.delay
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: SheetViewModel<*, *>
     abstract val bottomSheetController: BottomSheetController
+    abstract val eventReporter: EventReporter
 
     abstract val rootView: View
     abstract val messageView: TextView
@@ -28,6 +30,8 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        supportFragmentManager.fragmentFactory = PaymentSheetFragmentFactory(eventReporter)
+
         super.onCreate(savedInstanceState)
 
         viewModel.userMessage.observe(this) { userMessage ->
