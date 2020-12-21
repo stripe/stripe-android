@@ -19,8 +19,8 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
 
     private val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
 
-    protected val adapter: PaymentMethodsAdapter by lazy {
-        PaymentMethodsAdapter(
+    protected val adapter: PaymentOptionsAdapter by lazy {
+        PaymentOptionsAdapter(
             fragmentViewModel.currentPaymentSelection,
             paymentMethodSelectedListener = {
                 fragmentViewModel.currentPaymentSelection = it
