@@ -310,4 +310,43 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.validatedDate)
             .isNull()
     }
+
+    @Test
+    fun `input with includeSeparatorGaps=true should have expected fieldText and validatedDate values`() {
+        expiryDateEditText.includeSeparatorGaps = true
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
+
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 / 50")
+
+        assertThat(expiryDateEditText.validatedDate)
+            .isEqualTo(ExpirationDate.Validated(12, 2050))
+    }
+
+    @Test
+    fun `input with includeSeparatorGaps=true should correctly handle delete key`() {
+        expiryDateEditText.includeSeparatorGaps = true
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
+
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 / 50")
+
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 / 5")
+
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 / ")
+
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 /")
+
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 ")
+    }
 }

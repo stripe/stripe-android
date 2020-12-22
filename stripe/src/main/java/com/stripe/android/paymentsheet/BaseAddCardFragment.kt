@@ -114,6 +114,8 @@ internal abstract class BaseAddCardFragment(
 
         setupCardWidget()
 
+        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
+
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
             updateSelection()
