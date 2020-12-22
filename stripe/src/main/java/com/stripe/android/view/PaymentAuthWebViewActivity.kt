@@ -11,8 +11,8 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
-import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.R
+import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
@@ -23,8 +23,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         PaymentAuthWebViewActivityBinding.inflate(layoutInflater)
     }
 
-    private val _args: PaymentAuthWebViewStarter.Args? by lazy {
-        intent.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+    private val _args: PaymentAuthWebViewContract.Args? by lazy {
+        PaymentAuthWebViewContract().parseArgs(intent)
     }
 
     private val logger: Logger by lazy {

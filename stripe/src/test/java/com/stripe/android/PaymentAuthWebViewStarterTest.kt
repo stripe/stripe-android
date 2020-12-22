@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
 import org.junit.runner.RunWith
@@ -23,18 +24,19 @@ class PaymentAuthWebViewStarterTest {
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
     private val requestCodeCaptor: KArgumentCaptor<Int> = argumentCaptor()
 
+    private val paymentAuthWebViewContract = PaymentAuthWebViewContract()
     private val host: AuthActivityStarter.Host = AuthActivityStarter.Host.create(activity)
 
     @Test
     fun start_startsWithCorrectIntentAndRequestCode() {
-        PaymentAuthWebViewStarter(host, 50000).start(DATA)
+        PaymentAuthWebViewStarter.Legacy(host).start(DATA)
         verify(activity).startActivityForResult(
             intentArgumentCaptor.capture(),
             requestCodeCaptor.capture()
         )
 
-        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
-            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        val args = requireNotNull(
+            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
         )
         assertNull(args.toolbarCustomization)
         assertEquals(DATA.clientSecret, args.clientSecret)
@@ -42,7 +44,7 @@ class PaymentAuthWebViewStarterTest {
 
     @Test
     fun start_startsWithCorrectIntentAndRequestCodeAndCustomization() {
-        PaymentAuthWebViewStarter(host, 50000).start(
+        PaymentAuthWebViewStarter.Legacy(host).start(
             DATA.copy(
                 toolbarCustomization = StripeToolbarCustomization()
             )
@@ -52,15 +54,16 @@ class PaymentAuthWebViewStarterTest {
             requestCodeCaptor.capture()
         )
 
-        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
-            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        val args = requireNotNull(
+            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
         )
         assertNotNull(args.toolbarCustomization)
         assertEquals(DATA.clientSecret, args.clientSecret)
     }
 
     private companion object {
-        private val DATA = PaymentAuthWebViewStarter.Args(
+        private val DATA = PaymentAuthWebViewContract.Args(
+            requestCode = 50000,
             clientSecret = "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k",
             url = "https://hooks.stripe.com/",
             returnUrl = "stripe://payment-auth"
