@@ -11,12 +11,17 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.R
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -31,11 +36,20 @@ internal class StripeEditTextTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val editText = StripeEditText(
-        context,
-        workContext = testDispatcher
+        context
     ).also {
         it.setDeleteEmptyListener(deleteEmptyListener)
         it.setAfterTextChangedListener(afterTextChangedListener)
+    }
+
+    @BeforeTest
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @AfterTest
+    fun cleanup() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -157,7 +171,7 @@ internal class StripeEditTextTest {
         editText.setHintDelayed("Here's a hint", DELAY)
         testDispatcher.advanceTimeBy(DELAY - 10)
 
-        editText.job.cancel()
+        requireNotNull(editText.hintJob).cancel()
 
         assertThat(editText.hint)
             .isNull()

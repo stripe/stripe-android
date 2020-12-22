@@ -645,7 +645,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                expiryDateEditText.setHintDelayed(R.string.expiry_date_hint, COMMON_HINT_DELAY)
+                expiryDateEditText.setHintDelayed(R.string.expiry_date_hint)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             } else {
                 expiryDateEditText.hint = ""
@@ -655,7 +655,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 flipToCvcIconIfNotFinished()
-                cvcEditText.setHintDelayed(cvcHelperText, COMMON_HINT_DELAY)
+                cvcEditText.setHintDelayed(cvcHelperText)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             } else {
                 updateBrandUi()
@@ -668,7 +668,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                 return@OnFocusChangeListener
             }
             if (hasFocus) {
-                postalCodeEditText.setHintDelayed(R.string.zip_helper, COMMON_HINT_DELAY)
+                postalCodeEditText.setHintDelayed(R.string.zip_helper)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
             } else {
                 postalCodeEditText.hint = ""
@@ -743,6 +743,5 @@ class CardMultilineWidget @JvmOverloads constructor(
     private companion object {
         private const val CARD_MULTILINE_TOKEN = "CardMultilineView"
         private const val CARD_NUMBER_HINT_DELAY = 120L
-        private const val COMMON_HINT_DELAY = 90L
     }
 }

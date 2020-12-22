@@ -1083,8 +1083,6 @@ internal class CardMultilineWidgetTest {
         // Every Card made by the CardInputView should have the card widget token.
         private val ATTRIBUTION = setOf("CardMultilineView")
 
-        private val EMPTY_WATCHER = object : StripeTextWatcher() {}
-
         private const val CVC_VALUE_COMMON = "123"
         private const val CVC_VALUE_AMEX = "1234"
         private const val POSTAL_CODE_VALUE = "94103"

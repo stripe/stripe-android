@@ -14,13 +14,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -32,11 +29,8 @@ import kotlin.coroutines.CoroutineContext
 open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : TextInputEditText(context, attrs, defStyleAttr) {
-    internal val job = Job()
-
     protected var isLastKeyDelete: Boolean = false
 
     private var afterTextChangedListener: AfterTextChangedListener? = null
@@ -96,6 +90,8 @@ open class StripeEditText @JvmOverloads constructor(
             return defaultErrorColor
         }
 
+    internal var hintJob: Job? = null
+
     init {
         maxLines = 1
         listenForTextChanges()
@@ -111,6 +107,11 @@ open class StripeEditText @JvmOverloads constructor(
         return inputConnection?.let {
             SoftDeleteInputConnection(it, true, deleteEmptyListener)
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        cancelHintJob()
     }
 
     /**
@@ -155,7 +156,10 @@ open class StripeEditText @JvmOverloads constructor(
      * @param hintResource the string resource for the hint text
      * @param delayMilliseconds a delay period, measured in milliseconds
      */
-    fun setHintDelayed(@StringRes hintResource: Int, delayMilliseconds: Long) {
+    fun setHintDelayed(
+        @StringRes hintResource: Int,
+        delayMilliseconds: Long = COMMON_HINT_DELAY
+    ) {
         setHintDelayed(resources.getText(hintResource), delayMilliseconds)
     }
 
@@ -165,13 +169,14 @@ open class StripeEditText @JvmOverloads constructor(
      * @param hint the hint text
      * @param delayMilliseconds a delay period, measured in milliseconds
      */
-    fun setHintDelayed(hint: CharSequence, delayMilliseconds: Long) {
-        CoroutineScope(workContext).launch {
+    fun setHintDelayed(
+        hint: CharSequence,
+        delayMilliseconds: Long = COMMON_HINT_DELAY
+    ) {
+        cancelHintJob()
+        hintJob = MainScope().launch {
             delay(delayMilliseconds)
-
-            withContext(Dispatchers.Main) {
-                setHintSafely(hint)
-            }
+            setHintSafely(hint)
         }
     }
 
@@ -190,11 +195,6 @@ open class StripeEditText @JvmOverloads constructor(
         info.isContentInvalid = shouldShowError
         accessibilityText?.let { info.text = it }
         info.error = errorMessage.takeIf { shouldShowError }
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        job.cancel()
     }
 
     private fun determineDefaultErrorColor() {
@@ -232,6 +232,11 @@ open class StripeEditText @JvmOverloads constructor(
         return keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN
     }
 
+    private fun cancelHintJob() {
+        hintJob?.cancel()
+        hintJob = null
+    }
+
     fun interface DeleteEmptyListener {
         fun onDeleteEmpty()
     }
@@ -256,5 +261,9 @@ open class StripeEditText @JvmOverloads constructor(
             }
             return super.deleteSurroundingText(beforeLength, afterLength)
         }
+    }
+
+    private companion object {
+        private const val COMMON_HINT_DELAY = 90L
     }
 }
