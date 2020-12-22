@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Context
 import android.view.ViewGroup
+import androidx.core.view.updateLayoutParams
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
@@ -113,12 +114,10 @@ internal class CardInputWidgetTest {
 
             // Set the width of the icon and its margin so that test calculations have
             // an expected value that is repeatable on all systems.
-            it.cardBrandView.layoutParams =
-                (it.cardBrandView.layoutParams as ViewGroup.MarginLayoutParams)
-                    .also { params ->
-                        params.width = 48
-                        params.marginEnd = 12
-                    }
+            it.cardBrandView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                width = 48
+                marginEnd = 12
+            }
 
             it.viewTreeObserver
                 .addOnGlobalFocusChangeListener(onGlobalFocusChangeListener)

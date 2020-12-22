@@ -26,6 +26,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -606,23 +607,23 @@ class CardInputWidget @JvmOverloads constructor(
 
             updateFieldLayout(
                 view = cardNumberTextInputLayout,
-                width = placement.cardWidth,
-                marginStart = cardStartMargin
+                newWidth = placement.cardWidth,
+                newMarginStart = cardStartMargin
             )
             updateFieldLayout(
                 view = expiryDateTextInputLayout,
-                width = placement.dateWidth,
-                marginStart = dateStartMargin
+                newWidth = placement.dateWidth,
+                newMarginStart = dateStartMargin
             )
             updateFieldLayout(
                 view = cvcNumberTextInputLayout,
-                width = placement.cvcWidth,
-                marginStart = cvcStartMargin
+                newWidth = placement.cvcWidth,
+                newMarginStart = cvcStartMargin
             )
             updateFieldLayout(
                 view = postalCodeTextInputLayout,
-                width = placement.postalCodeWidth,
-                marginStart = postalCodeStartMargin
+                newWidth = placement.postalCodeWidth,
+                newMarginStart = postalCodeStartMargin
             )
 
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
@@ -687,12 +688,12 @@ class CardInputWidget @JvmOverloads constructor(
 
     private fun updateFieldLayout(
         view: View,
-        width: Int,
-        marginStart: Int
+        newWidth: Int,
+        newMarginStart: Int
     ) {
-        view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
-            this.width = width
-            this.marginStart = marginStart
+        view.updateLayoutParams<FrameLayout.LayoutParams> {
+            width = newWidth
+            marginStart = newMarginStart
         }
     }
 
@@ -1002,8 +1003,8 @@ class CardInputWidget @JvmOverloads constructor(
 
             updateFieldLayout(
                 view = cardNumberTextInputLayout,
-                width = placement.cardWidth,
-                marginStart = if (isShowingFullCard) {
+                newWidth = placement.cardWidth,
+                newMarginStart = if (isShowingFullCard) {
                     0
                 } else {
                     -1 * placement.hiddenCardWidth
@@ -1012,20 +1013,20 @@ class CardInputWidget @JvmOverloads constructor(
 
             updateFieldLayout(
                 view = expiryDateTextInputLayout,
-                width = placement.dateWidth,
-                marginStart = placement.getDateStartMargin(isShowingFullCard)
+                newWidth = placement.dateWidth,
+                newMarginStart = placement.getDateStartMargin(isShowingFullCard)
             )
 
             updateFieldLayout(
                 view = cvcNumberTextInputLayout,
-                width = placement.cvcWidth,
-                marginStart = placement.getCvcStartMargin(isShowingFullCard)
+                newWidth = placement.cvcWidth,
+                newMarginStart = placement.getCvcStartMargin(isShowingFullCard)
             )
 
             updateFieldLayout(
                 view = postalCodeTextInputLayout,
-                width = placement.postalCodeWidth,
-                marginStart = placement.getPostalCodeStartMargin(isShowingFullCard)
+                newWidth = placement.postalCodeWidth,
+                newMarginStart = placement.getPostalCodeStartMargin(isShowingFullCard)
             )
         }
     }
@@ -1078,7 +1079,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
-            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
                 marginStart = (marginStart * (1 - interpolatedTime)).toInt()
             }
         }
@@ -1091,7 +1092,7 @@ class CardInputWidget @JvmOverloads constructor(
     ) : CardFieldAnimation() {
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
-            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
                 marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
             }
@@ -1106,7 +1107,7 @@ class CardInputWidget @JvmOverloads constructor(
     ) : CardFieldAnimation() {
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
-            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
                 this.marginStart = (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
                 this.marginEnd = 0
                 this.width = newWidth
@@ -1122,7 +1123,7 @@ class CardInputWidget @JvmOverloads constructor(
     ) : CardFieldAnimation() {
         override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
             super.applyTransformation(interpolatedTime, t)
-            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
                 this.marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
                 this.marginEnd = 0
@@ -1146,9 +1147,12 @@ class CardInputWidget @JvmOverloads constructor(
             )
         }
 
-        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+        override fun applyTransformation(
+            interpolatedTime: Float,
+            t: Transformation
+        ) {
             super.applyTransformation(interpolatedTime, t)
-            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
                 marginStart = (-1f * hiddenCardWidth.toFloat() * interpolatedTime).toInt()
             }
         }
@@ -1161,7 +1165,7 @@ class CardInputWidget @JvmOverloads constructor(
     ) : CardFieldAnimation() {
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
-            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
                 marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startMargin).toInt()
             }
@@ -1176,7 +1180,7 @@ class CardInputWidget @JvmOverloads constructor(
     ) : CardFieldAnimation() {
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
-            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
                 marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startMargin).toInt()
                 marginEnd = 0
@@ -1193,7 +1197,7 @@ class CardInputWidget @JvmOverloads constructor(
     ) : CardFieldAnimation() {
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
-            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
                 this.marginStart =
                     (interpolatedTime * destination + (1 - interpolatedTime) * startMargin).toInt()
                 this.marginEnd = 0

@@ -19,6 +19,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.PaymentConfiguration
@@ -561,16 +562,13 @@ class CardMultilineWidget @JvmOverloads constructor(
             EditorInfo.IME_ACTION_NEXT
         }
 
-        val marginPixels = if (shouldShowPostalCode) {
-            resources.getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
-        } else {
-            0
+        cvcInputLayout.updateLayoutParams<LayoutParams> {
+            marginEnd = if (shouldShowPostalCode) {
+                resources.getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
+            } else {
+                0
+            }
         }
-        val linearParams = cvcInputLayout.layoutParams as LayoutParams
-        linearParams.setMargins(0, 0, marginPixels, 0)
-        linearParams.marginEnd = marginPixels
-
-        cvcInputLayout.layoutParams = linearParams
     }
 
     private fun checkAttributeSet(attrs: AttributeSet) {
