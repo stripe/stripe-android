@@ -297,6 +297,9 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
+    @StringRes
+    internal var expirationDateHintRes = R.string.expiry_date_hint
+
     init {
         orientation = VERTICAL
 
@@ -645,7 +648,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                expiryDateEditText.setHintDelayed(R.string.expiry_date_hint, COMMON_HINT_DELAY)
+                expiryDateEditText.setHintDelayed(expirationDateHintRes, COMMON_HINT_DELAY)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             } else {
                 expiryDateEditText.hint = ""
