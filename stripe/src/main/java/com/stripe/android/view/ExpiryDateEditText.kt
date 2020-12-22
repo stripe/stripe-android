@@ -103,7 +103,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     var inErrorState = false
 
                     val inputText = s?.toString().orEmpty()
-                    var rawNumericInput = inputText.replace("/".toRegex(), "")
+                    var rawNumericInput = inputText.replace(SEPARATOR.toRegex(), "")
 
                     if (rawNumericInput.length == 1 && latestChangeStart == 0 &&
                         latestInsertionSize == 1
@@ -143,7 +143,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     if (expirationDate.month.length == 2 && latestInsertionSize > 0 &&
                         !inErrorState || rawNumericInput.length > 2
                     ) {
-                        formattedDateBuilder.append("/")
+                        formattedDateBuilder.append(SEPARATOR)
                     }
 
                     formattedDateBuilder.append(expirationDate.year)
@@ -188,7 +188,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     // so we might not be properly catching an error state.
                     if (month.length == 2 && year.length == 2) {
                         val wasComplete = isDateValid
-                        updateInputValues(month, year)
+                        isDateValid = isDateValid(month, year)
                         // Here, we have a complete date, so if we've made an invalid one, we want
                         // to show an error.
                         shouldShowError = !isDateValid
@@ -226,26 +226,31 @@ class ExpiryDateEditText @JvmOverloads constructor(
         editActionAddition: Int,
         maxInputLength: Int
     ): Int {
-        val gapsJumped =
-            if (editActionStart <= 2 && editActionStart + editActionAddition >= 2) {
-                1
+        val gapsJumped = if (editActionStart <= 2 && editActionStart + editActionAddition >= 2) {
+            SEPARATOR.length
+        } else {
+            0
+        }
+
+        // `shouldRemoveSeparator` will be true when deleting the character immediately after the
+        // separator. For example, if the input text is currently "01/2" and a character is
+        // deleted, both the '2' and the separator should be deleted.
+        val isDelete = editActionAddition == 0
+        val shouldRemoveSeparator = isDelete && editActionStart == (2 + SEPARATOR.length)
+
+        val newPosition = (editActionStart + editActionAddition + gapsJumped).let { newPosition ->
+            newPosition - if (shouldRemoveSeparator && newPosition > 0) {
+                SEPARATOR.length
             } else {
                 0
             }
-
-        // editActionAddition can only be 0 if we are deleting,
-        // so we need to check whether or not to skip backwards one space
-        val skipBack = editActionAddition == 0 && editActionStart == 3
-
-        var newPosition: Int = editActionStart + editActionAddition + gapsJumped
-        if (skipBack && newPosition > 0) {
-            newPosition--
         }
-        val untruncatedPosition = if (newPosition <= newLength) newPosition else newLength
+
+        val untruncatedPosition = min(newPosition, newLength)
         return min(maxInputLength, untruncatedPosition)
     }
 
-    private fun updateInputValues(month: String, year: String) {
+    private fun isDateValid(month: String, year: String): Boolean {
         val inputMonth = if (month.length != 2) {
             INVALID_INPUT
         } else {
@@ -262,11 +267,12 @@ class ExpiryDateEditText @JvmOverloads constructor(
             }.getOrDefault(INVALID_INPUT)
         }
 
-        isDateValid = DateUtils.isExpiryDataValid(inputMonth, inputYear)
+        return DateUtils.isExpiryDataValid(inputMonth, inputYear)
     }
 
     private companion object {
+        private const val SEPARATOR = "/"
         private const val INVALID_INPUT = -1
-        private const val MAX_INPUT_LENGTH = 5
+        private const val MAX_INPUT_LENGTH = 4 + SEPARATOR.length
     }
 }
