@@ -69,6 +69,8 @@
     <dimen name="stripe_paymentsheet_paymentoptions_margin_bottom">26dp</dimen>
     <dimen name="stripe_paymentsheet_form_textsize">14sp</dimen>
     <dimen name="stripe_paymentsheet_toolbar_button_size">24dp</dimen>
+    <dimen name="stripe_paymentsheet_cardwidget_margin_vertical">8dp</dimen>
+    <dimen name="stripe_paymentsheet_cardwidget_margin_horizontal">12dp</dimen>
     <!-- Avoid collisions with CTA button -->
     <dimen name="stripe_paymentsheet_form_bottom_margin">84dp</dimen>
 

@@ -29,11 +29,11 @@ internal object DateUtils {
     @VisibleForTesting
     @JvmStatic
     fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int, calendar: Calendar): Boolean {
-        if (expiryMonth < 1 || expiryMonth > 12) {
+        if (expiryMonth !in 1..12) {
             return false
         }
 
-        if (expiryYear < 0 || expiryYear > MAX_VALID_YEAR) {
+        if (expiryYear !in 0..MAX_VALID_YEAR) {
             return false
         }
 

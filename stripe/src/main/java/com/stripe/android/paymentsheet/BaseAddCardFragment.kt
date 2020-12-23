@@ -8,17 +8,21 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
+import com.stripe.android.databinding.StripeHorizontalDividerBinding
+import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
@@ -108,29 +112,7 @@ internal abstract class BaseAddCardFragment(
         billingAddressView.level = sheetViewModel.config?.billingAddressCollection
             ?: PaymentSheet.BillingAddressCollectionLevel.Automatic
 
-        setOf(
-            cardMultilineWidget.cardNumberEditText,
-            cardMultilineWidget.expiryDateEditText,
-            cardMultilineWidget.cvcEditText
-        ).forEach { editText ->
-            editText.setTextSize(
-                TypedValue.COMPLEX_UNIT_PX,
-                resources.getDimension(R.dimen.stripe_paymentsheet_form_textsize)
-            )
-            editText.setTextColor(
-                ContextCompat.getColor(
-                    requireActivity(),
-                    R.color.stripe_paymentsheet_textinput_color
-                )
-            )
-
-            editText.setBackgroundResource(android.R.color.transparent)
-        }
-
-        cardMultilineWidget.expirationDateHintRes = R.string.stripe_paymentsheet_expiration_date_hint
-        cardMultilineWidget.expiryTextInputLayout.hint = getString(cardMultilineWidget.expirationDateHintRes)
-        cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
-        cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
+        setupCardWidget()
 
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
@@ -205,6 +187,67 @@ internal abstract class BaseAddCardFragment(
                 null
             }
         )
+    }
+
+    private fun setupCardWidget() {
+        setOf(
+            cardMultilineWidget.cardNumberEditText,
+            cardMultilineWidget.expiryDateEditText,
+            cardMultilineWidget.cvcEditText
+        ).forEach { editText ->
+            editText.setTextSize(
+                TypedValue.COMPLEX_UNIT_PX,
+                resources.getDimension(R.dimen.stripe_paymentsheet_form_textsize)
+            )
+            editText.setTextColor(
+                ContextCompat.getColor(
+                    requireActivity(),
+                    R.color.stripe_paymentsheet_textinput_color
+                )
+            )
+
+            editText.setBackgroundResource(android.R.color.transparent)
+        }
+
+        cardMultilineWidget.expirationDateHintRes = R.string.stripe_paymentsheet_expiration_date_hint
+        cardMultilineWidget.expiryTextInputLayout.hint = getString(cardMultilineWidget.expirationDateHintRes)
+        cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+        cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
+
+        // add vertical divider between expiry date and CVC
+        cardMultilineWidget.secondRowLayout.addView(
+            StripeVerticalDividerBinding.inflate(
+                layoutInflater,
+                cardMultilineWidget.secondRowLayout,
+                false
+            ).root,
+            1
+        )
+
+        // add horizontal divider between card number and other fields
+        cardMultilineWidget.addView(
+            StripeHorizontalDividerBinding.inflate(
+                layoutInflater,
+                cardMultilineWidget,
+                false
+            ).root,
+            1
+        )
+
+        val layoutMarginHorizontal = resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_horizontal)
+        val layoutMarginVertical = resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_vertical)
+        setOf(
+            cardMultilineWidget.cardNumberTextInputLayout,
+            cardMultilineWidget.expiryTextInputLayout,
+            cardMultilineWidget.cvcInputLayout
+        ).forEach { layout ->
+            layout.updateLayoutParams<LinearLayout.LayoutParams> {
+                marginStart = layoutMarginHorizontal
+                marginEnd = layoutMarginHorizontal
+                topMargin = layoutMarginVertical
+                bottomMargin = layoutMarginVertical
+            }
+        }
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {

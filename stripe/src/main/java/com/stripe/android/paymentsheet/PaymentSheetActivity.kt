@@ -9,6 +9,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -127,9 +128,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                 }
             }
 
-            viewBinding.bottomSheet.layoutParams = viewBinding.bottomSheet.layoutParams.apply {
-                height = mode.height
-            }
+            viewBinding.bottomSheet.updateLayoutParams { height = mode.height }
 
             bottomSheetController.updateState(mode)
         }
