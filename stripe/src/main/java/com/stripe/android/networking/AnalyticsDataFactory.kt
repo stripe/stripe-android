@@ -10,6 +10,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
+import com.stripe.android.paymentsheet.analytics.DeviceId
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
@@ -293,11 +294,14 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createParams(
         event: PaymentSheetEvent,
-        sessionId: SessionId?
+        sessionId: SessionId?,
+        deviceId: DeviceId
     ): Map<String, Any> {
         return createParams(
             event.toString(),
             requestId = null
+        ).plus(
+            FIELD_DEVICE_ID to deviceId.value
         ).plus(
             sessionId?.let {
                 mapOf(FIELD_SESSION_ID to sessionId.value)
@@ -430,6 +434,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         internal const val FIELD_APP_NAME = "app_name"
         internal const val FIELD_APP_VERSION = "app_version"
         internal const val FIELD_BINDINGS_VERSION = "bindings_version"
+        internal const val FIELD_DEVICE_ID = "device_id"
         internal const val FIELD_DEVICE_TYPE = "device_type"
         internal const val FIELD_EVENT = "event"
         internal const val FIELD_ERROR_DATA = "error"
