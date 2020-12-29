@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -31,6 +32,7 @@ internal class PaymentSheetContract : ActivityResultContract<PaymentSheetContrac
     @Parcelize
     internal data class Args(
         val clientSecret: String,
+        val sessionId: SessionId,
         val config: PaymentSheet.Configuration?
     ) : ActivityStarter.Args {
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay

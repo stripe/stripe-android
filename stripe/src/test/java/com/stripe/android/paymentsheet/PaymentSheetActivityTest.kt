@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -82,6 +83,7 @@ internal class PaymentSheetActivityTest {
         context,
         PaymentSheetContract.Args(
             "client_secret",
+            sessionId = SessionId(),
             PaymentSheetFixtures.CONFIG_CUSTOMER
         )
     )

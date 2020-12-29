@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.runner.RunWith
@@ -172,6 +173,7 @@ class DefaultPaymentSheetFlowControllerTest {
             paymentMethodTypes = listOf(PaymentMethod.Type.Card),
             paymentMethods = paymentMethods,
             googlePayLauncherFactory = { googlePayLauncher },
+            sessionId = SessionId(),
             defaultPaymentMethodId = defaultPaymentMethodId
         )
     }
