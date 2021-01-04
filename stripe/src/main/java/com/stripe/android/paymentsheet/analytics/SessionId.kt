@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
 @Parcelize
-internal class SessionId private constructor(
+internal data class SessionId internal constructor(
     val value: String
 ) : Parcelable {
     internal constructor() : this(
