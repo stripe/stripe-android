@@ -57,7 +57,8 @@ sealed class ExpirationDate {
         internal companion object {
             /**
              * Converts raw string input of the format MMYY into a [ExpirationDate.Unvalidated].
-             * The month and year fields may be incomplete. This method does not validate the input.
+             * The month and year fields may be incomplete. This method requires the input string
+             * to have allowed characters, but does not validate the value of the string.
              *
              * "123" would result in ExpirationDate.Unvalidated(month = "12", year = "3")
              * "1" would result in ExpirationDate.Unvalidated(month = "1", year = "")
@@ -69,13 +70,19 @@ sealed class ExpirationDate {
             fun create(
                 input: String
             ): Unvalidated {
-                return input.replace("/".toRegex(), "").let {
-                    Unvalidated(
-                        month = it.take(2),
-                        year = it.drop(2)
-                    )
+                return if (!input.all { it.isDigit() || it.isWhitespace() || it == '/' }) {
+                    EMPTY
+                } else {
+                    input.filter { it.isDigit() }.let {
+                        Unvalidated(
+                            month = it.take(2),
+                            year = it.drop(2)
+                        )
+                    }
                 }
             }
+
+            val EMPTY = Unvalidated("", "")
         }
     }
 
