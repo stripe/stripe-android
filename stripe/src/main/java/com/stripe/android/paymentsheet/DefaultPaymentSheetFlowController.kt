@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -31,6 +32,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     internal val paymentMethodTypes: List<PaymentMethod.Type>,
     // the customer's existing payment methods
     internal val paymentMethods: List<PaymentMethod>,
+    private val sessionId: SessionId,
     private val googlePayLauncherFactory: (ComponentActivity) -> StripeGooglePayLauncher = {
         StripeGooglePayLauncher(it)
     },
@@ -64,6 +66,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 PaymentOptionsActivityStarter.Args(
                     paymentIntent = paymentIntent,
                     paymentMethods = paymentMethods,
+                    sessionId = sessionId,
                     config = args.config
                 )
             )

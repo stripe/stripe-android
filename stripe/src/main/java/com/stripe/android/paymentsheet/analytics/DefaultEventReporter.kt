@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class DefaultEventReporter internal constructor(
     private val mode: EventReporter.Mode,
+    private val sessionId: SessionId?,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequest.Factory,
     private val analyticsDataFactory: AnalyticsDataFactory
@@ -17,9 +18,11 @@ internal class DefaultEventReporter internal constructor(
 
     internal constructor(
         mode: EventReporter.Mode,
+        sessionId: SessionId?,
         context: Context
     ) : this(
         mode,
+        sessionId,
         AnalyticsRequestExecutor.Default(),
         AnalyticsRequest.Factory(),
         AnalyticsDataFactory(
@@ -93,7 +96,10 @@ internal class DefaultEventReporter internal constructor(
     private fun fireEvent(event: PaymentSheetEvent) {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
-                analyticsDataFactory.createParams(event)
+                analyticsDataFactory.createParams(
+                    event,
+                    sessionId
+                )
             )
         )
     }

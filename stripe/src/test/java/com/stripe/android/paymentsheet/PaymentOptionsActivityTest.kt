@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -34,6 +35,7 @@ class PaymentOptionsActivityTest {
         args = PaymentOptionsActivityStarter.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
+            sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
         googlePayRepository = FakeGooglePayRepository(false),
@@ -51,6 +53,7 @@ class PaymentOptionsActivityTest {
             PaymentOptionsActivityStarter.Args(
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 paymentMethods = emptyList(),
+                sessionId = SessionId(),
                 config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
             )
         )

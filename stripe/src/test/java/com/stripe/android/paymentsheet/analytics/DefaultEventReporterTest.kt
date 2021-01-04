@@ -24,9 +24,12 @@ class DefaultEventReporterTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
+    private val sessionId = SessionId()
+
     private val eventReporterFactory: (EventReporter.Mode) -> EventReporter = { mode ->
         DefaultEventReporter(
             mode,
+            sessionId,
             analyticsRequestExecutor,
             analyticsRequestFactory,
             analyticsDataFactory
@@ -66,6 +69,18 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.compactParams?.get("event") == "mc_custom_paymentoption_savedpm_select"
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentSuccess() should fire analytics request with session id`() {
+        completeEventReporter.onPaymentSuccess(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.compactParams?.get("session_id") == sessionId.value
             }
         )
     }

@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Rule
@@ -24,6 +25,7 @@ class PaymentOptionsViewModelTest {
         args = PaymentOptionsActivityStarter.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
+            sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
         ),
         googlePayRepository = mock(),

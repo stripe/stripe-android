@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
 import com.stripe.android.utils.ContextUtils.packageInfo
@@ -292,10 +293,15 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createParams(
         event: PaymentSheetEvent,
+        sessionId: SessionId?
     ): Map<String, Any> {
         return createParams(
             event.toString(),
             requestId = null
+        ).plus(
+            sessionId?.let {
+                mapOf(FIELD_SESSION_ID to sessionId.value)
+            }.orEmpty()
         )
     }
 
@@ -433,6 +439,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         internal const val FIELD_OS_VERSION = "os_version"
         internal const val FIELD_PUBLISHABLE_KEY = "publishable_key"
         internal const val FIELD_REQUEST_ID = "request_id"
+        internal const val FIELD_SESSION_ID = "session_id"
         internal const val FIELD_SOURCE_ID = "source_id"
         internal const val FIELD_SOURCE_TYPE = "source_type"
         internal const val FIELD_3DS2_UI_TYPE = "3ds2_ui_type"

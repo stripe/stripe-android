@@ -71,6 +71,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     override val eventReporter: EventReporter by lazy {
         DefaultEventReporter(
             mode = EventReporter.Mode.Complete,
+            starterArgs?.sessionId,
             application
         )
     }

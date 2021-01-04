@@ -16,6 +16,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,7 @@ internal class PaymentSheetFlowControllerFactory(
     private val paymentSessionPrefs: PaymentSessionPrefs,
     private val workContext: CoroutineContext
 ) {
+    private val sessionId = SessionId()
     private val paymentIntentValidator = PaymentIntentValidator()
 
     constructor(
@@ -137,6 +139,7 @@ internal class PaymentSheetFlowControllerFactory(
                             paymentController = createPaymentController(),
                             eventReporter = DefaultEventReporter(
                                 mode = EventReporter.Mode.Custom,
+                                sessionId,
                                 activity
                             ),
                             args = DefaultPaymentSheetFlowController.Args(
@@ -148,7 +151,8 @@ internal class PaymentSheetFlowControllerFactory(
                             paymentIntent = paymentIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
-                            defaultPaymentMethodId = defaultPaymentMethodId
+                            defaultPaymentMethodId = defaultPaymentMethodId,
+                            sessionId = sessionId
                         )
                     )
                 }
@@ -177,6 +181,7 @@ internal class PaymentSheetFlowControllerFactory(
                         paymentController = createPaymentController(),
                         eventReporter = DefaultEventReporter(
                             mode = EventReporter.Mode.Custom,
+                            sessionId,
                             activity
                         ),
                         publishableKey = publishableKey,
@@ -188,6 +193,7 @@ internal class PaymentSheetFlowControllerFactory(
                         paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
+                        sessionId = sessionId,
                         defaultPaymentMethodId = null
                     )
                 )
