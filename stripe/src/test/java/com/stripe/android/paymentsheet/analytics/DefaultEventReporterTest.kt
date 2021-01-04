@@ -15,6 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.UUID
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -88,6 +89,19 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.compactParams?.get("session_id") == sessionId.value
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentSuccess() should fire analytics request with valid device id`() {
+        completeEventReporter.onPaymentSuccess(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                val deviceIdValue = requireNotNull(req.compactParams?.get("device_id")).toString()
+                UUID.fromString(deviceIdValue) != null
             }
         )
     }
