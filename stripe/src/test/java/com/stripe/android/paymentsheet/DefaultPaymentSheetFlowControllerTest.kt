@@ -11,6 +11,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
+import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.CardBrand
@@ -105,7 +106,7 @@ class DefaultPaymentSheetFlowControllerTest {
         )
         flowController.confirmPayment(mock())
         verify(googlePayLauncher).startForResult(
-            StripeGooglePayLauncher.Args(
+            StripeGooglePayContract.Args(
                 environment = StripeGooglePayEnvironment.Test,
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 countryCode = "US",
@@ -130,7 +131,7 @@ class DefaultPaymentSheetFlowControllerTest {
         flowController.onPaymentResult(
             StripeGooglePayLauncher.REQUEST_CODE,
             Intent().putExtras(
-                StripeGooglePayLauncher.Result.PaymentIntent(
+                StripeGooglePayContract.Result.PaymentIntent(
                     paymentIntentResult = PAYMENT_INTENT_RESULT
                 ).toBundle()
             ),
@@ -146,7 +147,7 @@ class DefaultPaymentSheetFlowControllerTest {
         flowController.onPaymentResult(
             StripeGooglePayLauncher.REQUEST_CODE,
             Intent().putExtras(
-                StripeGooglePayLauncher.Result.Error(
+                StripeGooglePayContract.Result.Error(
                     exception = RuntimeException()
                 ).toBundle()
             ),

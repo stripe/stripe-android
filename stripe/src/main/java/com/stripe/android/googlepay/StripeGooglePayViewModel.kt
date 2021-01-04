@@ -22,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
 internal class StripeGooglePayViewModel(
     application: Application,
     private val publishableKey: String,
-    private val args: StripeGooglePayLauncher.Args,
+    private val args: StripeGooglePayContract.Args,
     private val stripeRepository: StripeRepository,
     private val appName: String,
     private val workContext: CoroutineContext
@@ -32,7 +32,7 @@ internal class StripeGooglePayViewModel(
 
     private val googlePayJsonFactory = GooglePayJsonFactory(application)
 
-    private val _googleResult = MutableLiveData<StripeGooglePayLauncher.Result>()
+    private val _googleResult = MutableLiveData<StripeGooglePayContract.Result>()
     internal val googlePayResult = _googleResult.distinctUntilChanged()
 
     fun createIsReadyToPayRequest(): IsReadyToPayRequest {
@@ -41,7 +41,7 @@ internal class StripeGooglePayViewModel(
         )
     }
 
-    fun updateGooglePayResult(result: StripeGooglePayLauncher.Result) {
+    fun updateGooglePayResult(result: StripeGooglePayContract.Result) {
         _googleResult.value = result
     }
 
@@ -88,7 +88,7 @@ internal class StripeGooglePayViewModel(
     internal class Factory(
         private val application: Application,
         private val publishableKey: String,
-        private val args: StripeGooglePayLauncher.Args
+        private val args: StripeGooglePayContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val appName = application.applicationInfo.loadLabel(application.packageManager).toString()
