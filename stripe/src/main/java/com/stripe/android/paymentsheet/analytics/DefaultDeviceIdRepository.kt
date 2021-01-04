@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.analytics
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -14,12 +16,16 @@ internal class DefaultDeviceIdRepository(
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
     }
 
+    private val mutex = Mutex()
+
     override suspend fun get(): DeviceId = withContext(workContext) {
-        val deviceIdValue = prefs.getString(KEY_DEVICE_ID, null)
-        if (deviceIdValue != null) {
-            DeviceId(deviceIdValue)
-        } else {
-            createDeviceId()
+        mutex.withLock {
+            val deviceIdValue = prefs.getString(KEY_DEVICE_ID, null)
+            if (deviceIdValue != null) {
+                DeviceId(deviceIdValue)
+            } else {
+                createDeviceId()
+            }
         }
     }
 
