@@ -25,7 +25,7 @@ internal class DefaultDeviceIdRepository(
 
     private fun createDeviceId(): DeviceId {
         val deviceId = DeviceId()
-        prefs.edit {
+        prefs.edit(commit = true) {
             putString(KEY_DEVICE_ID, deviceId.value)
         }
         return deviceId
