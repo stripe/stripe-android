@@ -79,10 +79,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 private var ignoreChanges = false
                 private var latestChangeStart: Int = 0
                 private var latestInsertionSize: Int = 0
-                private var expirationDate = ExpirationDate.Unvalidated(
-                    month = "",
-                    year = ""
-                )
+                private var expirationDate = ExpirationDate.Unvalidated.EMPTY
 
                 private var newCursorPosition: Int? = null
                 private var formattedDate: String? = null
@@ -103,7 +100,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     var inErrorState = false
 
                     val inputText = s?.toString().orEmpty()
-                    var rawNumericInput = inputText.replace(SEPARATOR.toRegex(), "")
+                    var rawNumericInput = inputText.filter { it.isDigit() }
 
                     if (rawNumericInput.length == 1 && latestChangeStart == 0 &&
                         latestInsertionSize == 1
