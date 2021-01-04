@@ -7,28 +7,37 @@ import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 internal class DefaultEventReporter internal constructor(
     private val mode: EventReporter.Mode,
     private val sessionId: SessionId?,
+    private val deviceIdRepository: DeviceIdRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequest.Factory,
-    private val analyticsDataFactory: AnalyticsDataFactory
+    private val analyticsDataFactory: AnalyticsDataFactory,
+    private val workContext: CoroutineContext
 ) : EventReporter {
 
     internal constructor(
         mode: EventReporter.Mode,
         sessionId: SessionId?,
-        context: Context
+        context: Context,
+        workContext: CoroutineContext = Dispatchers.IO
     ) : this(
         mode,
         sessionId,
+        DefaultDeviceIdRepository(context, workContext),
         AnalyticsRequestExecutor.Default(),
         AnalyticsRequest.Factory(),
         AnalyticsDataFactory(
             context,
             PaymentConfiguration.getInstance(context).publishableKey
-        )
+        ),
+        workContext
     )
 
     override fun onInit(configuration: PaymentSheet.Configuration?) {
@@ -94,13 +103,17 @@ internal class DefaultEventReporter internal constructor(
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createParams(
-                    event,
-                    sessionId
+        CoroutineScope(workContext).launch {
+            val deviceId = deviceIdRepository.get()
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.create(
+                    analyticsDataFactory.createParams(
+                        event,
+                        sessionId,
+                        deviceId
+                    )
                 )
             )
-        )
+        }
     }
 }

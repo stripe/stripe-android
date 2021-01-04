@@ -11,12 +11,18 @@ import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.UUID
 import kotlin.test.Test
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class DefaultEventReporterTest {
+    private val testDispatcher = TestCoroutineDispatcher()
+
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = AnalyticsRequest.Factory()
     private val analyticsDataFactory = AnalyticsDataFactory(
@@ -30,9 +36,11 @@ class DefaultEventReporterTest {
         DefaultEventReporter(
             mode,
             sessionId,
+            FakeDeviceIdRepository(),
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            analyticsDataFactory
+            analyticsDataFactory,
+            testDispatcher
         )
     }
 
@@ -81,6 +89,19 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.compactParams?.get("session_id") == sessionId.value
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentSuccess() should fire analytics request with valid device id`() {
+        completeEventReporter.onPaymentSuccess(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                val deviceIdValue = requireNotNull(req.compactParams?.get("device_id")).toString()
+                UUID.fromString(deviceIdValue) != null
             }
         )
     }
