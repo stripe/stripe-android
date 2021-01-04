@@ -309,6 +309,7 @@ internal class PaymentSheetViewModel internal constructor(
                 prefsRepository,
                 DefaultEventReporter(
                     mode = EventReporter.Mode.Complete,
+                    starterArgs.sessionId,
                     application
                 ),
                 starterArgs,

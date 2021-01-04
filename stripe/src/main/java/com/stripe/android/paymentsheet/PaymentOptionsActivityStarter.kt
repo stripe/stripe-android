@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -18,6 +19,7 @@ internal class PaymentOptionsActivityStarter internal constructor(
     data class Args(
         val paymentIntent: PaymentIntent,
         val paymentMethods: List<PaymentMethod>,
+        val sessionId: SessionId,
         val config: PaymentSheet.Configuration?
     ) : ActivityStarter.Args {
         internal companion object {

@@ -29,7 +29,6 @@
         android:id="@+id/second_row_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
         android:baselineAligned="false"
         android:orientation="horizontal"
         >
@@ -38,6 +37,7 @@
             android:id="@+id/tl_expiry"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
             android:hint="@string/acc_label_expiry_date"
@@ -60,6 +60,7 @@
             android:id="@+id/tl_cvc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
             style="@style/Stripe.CardMultilineWidget.TextInputLayout"
@@ -81,6 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             >
 

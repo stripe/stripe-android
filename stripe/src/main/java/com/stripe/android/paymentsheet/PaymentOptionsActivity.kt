@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -67,6 +68,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     override val eventReporter: EventReporter by lazy {
         DefaultEventReporter(
             mode = EventReporter.Mode.Custom,
+            starterArgs?.sessionId,
             application
         )
     }
@@ -102,9 +104,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                 }
             }
 
-            viewBinding.bottomSheet.layoutParams = viewBinding.bottomSheet.layoutParams.apply {
-                height = mode.height
-            }
+            viewBinding.bottomSheet.updateLayoutParams { height = mode.height }
 
             bottomSheetController.updateState(mode)
         }

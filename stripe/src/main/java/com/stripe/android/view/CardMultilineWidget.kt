@@ -19,6 +19,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.PaymentConfiguration
@@ -57,9 +58,10 @@ class CardMultilineWidget @JvmOverloads constructor(
     internal val cvcEditText = viewBinding.etCvc
     internal val postalCodeEditText = viewBinding.etPostalCode
 
-    private val cardNumberTextInputLayout = viewBinding.tlCardNumber
+    internal val secondRowLayout = viewBinding.secondRowLayout
+    internal val cardNumberTextInputLayout = viewBinding.tlCardNumber
     internal val expiryTextInputLayout = viewBinding.tlExpiry
-    private val cvcInputLayout = viewBinding.tlCvc
+    internal val cvcInputLayout = viewBinding.tlCvc
     internal val postalInputLayout = viewBinding.tlPostalCode
 
     private var cardInputListener: CardInputListener? = null
@@ -296,6 +298,9 @@ class CardMultilineWidget @JvmOverloads constructor(
                 updateBrandUi()
             }
         }
+
+    @StringRes
+    internal var expirationDateHintRes = R.string.expiry_date_hint
 
     init {
         orientation = VERTICAL
@@ -561,16 +566,13 @@ class CardMultilineWidget @JvmOverloads constructor(
             EditorInfo.IME_ACTION_NEXT
         }
 
-        val marginPixels = if (shouldShowPostalCode) {
-            resources.getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
-        } else {
-            0
+        cvcInputLayout.updateLayoutParams<LayoutParams> {
+            marginEnd = if (shouldShowPostalCode) {
+                resources.getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
+            } else {
+                0
+            }
         }
-        val linearParams = cvcInputLayout.layoutParams as LayoutParams
-        linearParams.setMargins(0, 0, marginPixels, 0)
-        linearParams.marginEnd = marginPixels
-
-        cvcInputLayout.layoutParams = linearParams
     }
 
     private fun checkAttributeSet(attrs: AttributeSet) {
@@ -645,7 +647,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                expiryDateEditText.setHintDelayed(R.string.expiry_date_hint, COMMON_HINT_DELAY)
+                expiryDateEditText.setHintDelayed(expirationDateHintRes, COMMON_HINT_DELAY)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             } else {
                 expiryDateEditText.hint = ""
