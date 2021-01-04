@@ -32,7 +32,7 @@ internal class DefaultDeviceIdRepository(
     }
 
     private companion object {
-        private const val PREF_FILE = "pref_file"
+        private const val PREF_FILE = "DefaultDeviceIdRepository"
         private const val KEY_DEVICE_ID = "device_id"
     }
 }
