@@ -16,8 +16,8 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
+import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
-import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -132,7 +132,7 @@ internal class PaymentSheetViewModel internal constructor(
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
-                _launchGooglePay.value = StripeGooglePayLauncher.Args(
+                _launchGooglePay.value = StripeGooglePayContract.Args(
                     environment = when (args.config?.googlePay?.environment) {
                         PaymentSheet.GooglePayConfiguration.Environment.Production ->
                             StripeGooglePayEnvironment.Production
@@ -208,9 +208,9 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    internal fun onGooglePayResult(googlePayResult: StripeGooglePayLauncher.Result) {
+    internal fun onGooglePayResult(googlePayResult: StripeGooglePayContract.Result) {
         when (googlePayResult) {
-            is StripeGooglePayLauncher.Result.PaymentIntent -> {
+            is StripeGooglePayContract.Result.PaymentIntent -> {
                 eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
                 _googlePayCompletion.value = googlePayResult.paymentIntentResult
             }

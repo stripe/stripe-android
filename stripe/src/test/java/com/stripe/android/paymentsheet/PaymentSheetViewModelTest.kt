@@ -14,7 +14,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepay.StripeGooglePayLauncher
+import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -245,7 +245,7 @@ internal class PaymentSheetViewModelTest {
             }
         }
         viewModel.onGooglePayResult(
-            StripeGooglePayLauncher.Result.PaymentIntent(PAYMENT_INTENT_RESULT)
+            StripeGooglePayContract.Result.PaymentIntent(PAYMENT_INTENT_RESULT)
         )
 
         assertThat(paymentIntentResults)

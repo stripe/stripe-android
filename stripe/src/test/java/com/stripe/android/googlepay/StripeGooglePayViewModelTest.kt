@@ -146,7 +146,7 @@ class StripeGooglePayViewModelTest {
     }
 
     private fun createViewModel(
-        args: StripeGooglePayLauncher.Args = ARGS
+        args: StripeGooglePayContract.Args = ARGS
     ): StripeGooglePayViewModel {
         return StripeGooglePayViewModel(
             ApplicationProvider.getApplicationContext(),
@@ -161,7 +161,7 @@ class StripeGooglePayViewModelTest {
     private class FakeStripeRepository : AbsFakeStripeRepository()
 
     private companion object {
-        private val ARGS = StripeGooglePayLauncher.Args(
+        private val ARGS = StripeGooglePayContract.Args(
             environment = StripeGooglePayEnvironment.Test,
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             countryCode = "US",

@@ -7,6 +7,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.PaymentIntent
@@ -85,7 +86,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         val paymentSelection = this.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
             googlePayLauncherFactory(activity).startForResult(
-                StripeGooglePayLauncher.Args(
+                StripeGooglePayContract.Args(
                     environment = when (args.config?.googlePay?.environment) {
                         PaymentSheet.GooglePayConfiguration.Environment.Production ->
                             StripeGooglePayEnvironment.Production
@@ -126,7 +127,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
 
     /**
      * Handles results from both the standard confirmation flow via [PaymentController] and the
-     * [StripeGooglePayLauncher] flow.
+     * [StripeGooglePayContract] flow.
      */
     override fun onPaymentResult(
         requestCode: Int,
@@ -153,12 +154,12 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 }
             )
         } else if (data != null && requestCode == StripeGooglePayLauncher.REQUEST_CODE) {
-            when (val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data)) {
-                is StripeGooglePayLauncher.Result.PaymentIntent -> {
+            when (val googlePayResult = StripeGooglePayContract.Result.fromIntent(data)) {
+                is StripeGooglePayContract.Result.PaymentIntent -> {
                     eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
                     callback.onSuccess(googlePayResult.paymentIntentResult)
                 }
-                is StripeGooglePayLauncher.Result.Error -> {
+                is StripeGooglePayContract.Result.Error -> {
                     eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                     val exception = googlePayResult.exception
                     callback.onError(
