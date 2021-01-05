@@ -100,6 +100,7 @@ internal class CardInputWidgetTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     private fun createCardInputWidget(activity: Activity): CardInputWidget {

@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -36,6 +37,11 @@ internal class StripeEditTextTest {
     ).also {
         it.setDeleteEmptyListener(deleteEmptyListener)
         it.setAfterTextChangedListener(afterTextChangedListener)
+    }
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -157,7 +163,7 @@ internal class StripeEditTextTest {
         editText.setHintDelayed("Here's a hint", DELAY)
         testDispatcher.advanceTimeBy(DELAY - 10)
 
-        editText.job.cancel()
+        requireNotNull(editText.job).cancel()
 
         assertThat(editText.hint)
             .isNull()

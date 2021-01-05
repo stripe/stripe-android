@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -21,6 +22,11 @@ class FingerprintRequestExecutorTest {
     private val fingerprintRequestFactory = FingerprintRequestFactory.Default(
         context = ApplicationProvider.getApplicationContext()
     )
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `execute() when successful should return non-empty values`() {

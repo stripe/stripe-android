@@ -6,6 +6,7 @@ import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -13,6 +14,11 @@ internal class StaticCardAccountRangeSourceTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val source = StaticCardAccountRangeSource()
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {

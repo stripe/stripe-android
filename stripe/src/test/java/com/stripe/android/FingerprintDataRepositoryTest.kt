@@ -30,6 +30,7 @@ class FingerprintDataRepositoryTest {
     @AfterTest
     fun after() {
         Stripe.advancedFraudSignalsEnabled = true
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test

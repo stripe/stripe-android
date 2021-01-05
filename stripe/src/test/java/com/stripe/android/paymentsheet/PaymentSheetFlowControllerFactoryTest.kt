@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -57,6 +58,11 @@ class PaymentSheetFlowControllerFactoryTest {
                     this.activity = activity
                 }
             }
+    }
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -144,7 +150,7 @@ class PaymentSheetFlowControllerFactoryTest {
         testDispatcher.advanceTimeBy(500)
 
         var result: PaymentSheet.FlowController.Result? = null
-        factory.create(
+        val job = factory.create(
             "client_secret",
             PaymentSheetFixtures.CONFIG_CUSTOMER
         ) {
@@ -152,6 +158,7 @@ class PaymentSheetFlowControllerFactoryTest {
         }
 
         activityScenario.moveToState(Lifecycle.State.DESTROYED)
+        job.cancel()
 
         assertThat(result)
             .isNull()
