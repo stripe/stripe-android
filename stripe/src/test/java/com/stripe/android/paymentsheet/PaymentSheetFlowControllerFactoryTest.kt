@@ -150,7 +150,7 @@ class PaymentSheetFlowControllerFactoryTest {
         testDispatcher.advanceTimeBy(500)
 
         var result: PaymentSheet.FlowController.Result? = null
-        factory.create(
+        val job = factory.create(
             "client_secret",
             PaymentSheetFixtures.CONFIG_CUSTOMER
         ) {
@@ -158,6 +158,7 @@ class PaymentSheetFlowControllerFactoryTest {
         }
 
         activityScenario.moveToState(Lifecycle.State.DESTROYED)
+        job.cancel()
 
         assertThat(result)
             .isNull()

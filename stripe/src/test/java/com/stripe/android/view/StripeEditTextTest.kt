@@ -163,7 +163,7 @@ internal class StripeEditTextTest {
         editText.setHintDelayed("Here's a hint", DELAY)
         testDispatcher.advanceTimeBy(DELAY - 10)
 
-        editText.job.cancel()
+        requireNotNull(editText.job).cancel()
 
         assertThat(editText.hint)
             .isNull()

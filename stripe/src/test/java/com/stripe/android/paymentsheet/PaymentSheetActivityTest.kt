@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -141,6 +142,8 @@ internal class PaymentSheetActivityTest {
 
             viewModel.updateSelection(null)
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+
+            scenario.moveToState(Lifecycle.State.DESTROYED)
         }
     }
 
