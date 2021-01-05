@@ -17,7 +17,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawablePadding="@dimen/stripe_card_icon_multiline_padding"
-            android:drawableStart="@drawable/stripe_ic_unknown"
             android:imeOptions="actionNext"
             android:nextFocusDown="@+id/et_expiry"
             android:nextFocusForward="@+id/et_expiry"

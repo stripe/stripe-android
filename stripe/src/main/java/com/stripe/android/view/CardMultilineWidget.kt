@@ -308,6 +308,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateCardBrandDrawableAnchor()
     }
 
+    private val cardNumberIcon: Drawable?
+        get() {
+            // there is at most a single non-null compound drawable
+            return cardNumberEditText.compoundDrawablesRelative.filterNotNull().firstOrNull()
+        }
+
     init {
         orientation = VERTICAL
 
@@ -717,44 +723,36 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun updateCardBrandDrawableAnchor() {
-        // there should be, at most, a single non-null compound drawable
-        cardNumberEditText.compoundDrawables.firstOrNull { it != null }?.let {
-            updateCompoundDrawable(it)
-        }
+        cardNumberIcon?.let { updateCompoundDrawable(it) }
     }
 
     private fun updateCardNumberIcon(
         @DrawableRes iconResourceId: Int,
         shouldTint: Boolean
     ) {
-        val icon = ContextCompat.getDrawable(context, iconResourceId) ?: return
-        val original = cardNumberEditText.compoundDrawablesRelative[
-            iconPosition.compoundDrawablesIndex
-        ] ?: return
-
-        val iconPadding = cardNumberEditText.compoundDrawablePadding
-        icon.bounds = createDrawableBounds(original)
-
-        val compatIcon = DrawableCompat.wrap(icon)
-        if (shouldTint) {
-            DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
+        ContextCompat.getDrawable(context, iconResourceId)?.let { icon ->
+            updateCompoundDrawable(
+                if (shouldTint) {
+                    DrawableCompat.wrap(icon).also {
+                        it.setTint(tintColorInt)
+                    }
+                } else {
+                    icon
+                }
+            )
         }
-
-        cardNumberEditText.compoundDrawablePadding = iconPadding
-
-        updateCompoundDrawable(compatIcon)
     }
 
     private fun updateCompoundDrawable(drawable: Drawable) {
         if (iconPosition == IconPosition.Start) {
-            cardNumberEditText.setCompoundDrawablesRelative(
+            cardNumberEditText.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 drawable,
                 null,
                 null,
                 null
             )
         } else {
-            cardNumberEditText.setCompoundDrawablesRelative(
+            cardNumberEditText.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 null,
                 null,
                 drawable,
