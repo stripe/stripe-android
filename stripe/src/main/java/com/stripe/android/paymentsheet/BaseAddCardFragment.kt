@@ -250,6 +250,8 @@ internal abstract class BaseAddCardFragment(
                 bottomMargin = layoutMarginVertical
             }
         }
+
+        cardMultilineWidget.iconPosition = CardMultilineWidget.IconPosition.End
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
