@@ -191,7 +191,7 @@
     <string name="stripe_paymentsheet_new_card_button_label" tools:ignore="MissingTranslation">+ New card</string>
     <string name="stripe_paymentsheet_save_this_card" tools:ignore="MissingTranslation">Save this card for future payments</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name" tools:ignore="MissingTranslation">Save this card for future %s payments</string>
-    <string name="stripe_paymentsheet_or_pay_with" tools:ignore="MissingTranslation">Or pay with</string>
+    <string name="stripe_paymentsheet_or_pay_with" tools:ignore="MissingTranslation">Or pay with card</string>
     <string name="stripe_paymentsheet_expiration_date_hint" tools:ignore="MissingTranslation">MM / YY</string>
 
     <!-- The payment amount (e.g. "Pay $25.00") -->

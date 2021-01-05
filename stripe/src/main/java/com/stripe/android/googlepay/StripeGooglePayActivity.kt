@@ -22,7 +22,7 @@ import org.json.JSONObject
 /**
  * [StripeGooglePayActivity] is used to confirm a `PaymentIntent` using Google Pay.
  *
- * Use [StripeGooglePayLauncher] to start [StripeGooglePayActivity].
+ * Use [StripeGooglePayContract] to start [StripeGooglePayActivity].
  *
  * See [Troubleshooting](https://developers.google.com/pay/api/android/support/troubleshooting)
  * for a guide to troubleshooting Google Pay issues.
@@ -35,8 +35,8 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         PaymentConfiguration.getInstance(this).publishableKey
     }
     private val stripe: Stripe by lazy { Stripe(this, publishableKey) }
-    private val args: StripeGooglePayLauncher.Args by lazy {
-        StripeGooglePayLauncher.Args.create(intent)
+    private val args: StripeGooglePayContract.Args by lazy {
+        StripeGooglePayContract.Args.create(intent)
     }
     private val viewModel: StripeGooglePayViewModel by viewModels {
         StripeGooglePayViewModel.Factory(
@@ -54,7 +54,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         setResult(
             RESULT_OK,
             Intent().putExtras(
-                StripeGooglePayLauncher.Result.Canceled.toBundle()
+                StripeGooglePayContract.Result.Canceled.toBundle()
             )
         )
 
@@ -76,7 +76,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
     private fun startGooglePay(paymentIntent: PaymentIntent) {
         if (paymentIntent.confirmationMethod == PaymentIntent.ConfirmationMethod.Manual) {
             viewModel.updateGooglePayResult(
-                StripeGooglePayLauncher.Result.Error(
+                StripeGooglePayContract.Result.Error(
                     RuntimeException(
                         "StripeGooglePayActivity requires a PaymentIntent with automatic confirmation."
                     )
@@ -101,12 +101,12 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
                     payWithGoogle(paymentDataRequest)
                 } else {
                     viewModel.updateGooglePayResult(
-                        StripeGooglePayLauncher.Result.Unavailable
+                        StripeGooglePayContract.Result.Unavailable
                     )
                 }
             }.onFailure {
                 viewModel.updateGooglePayResult(
-                    StripeGooglePayLauncher.Result.Error(it)
+                    StripeGooglePayContract.Result.Error(it)
                 )
             }
         }
@@ -131,13 +131,13 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
                 }
                 RESULT_CANCELED -> {
                     viewModel.updateGooglePayResult(
-                        StripeGooglePayLauncher.Result.Canceled
+                        StripeGooglePayContract.Result.Canceled
                     )
                 }
                 AutoResolveHelper.RESULT_ERROR -> {
                     val status = AutoResolveHelper.getStatusFromIntent(data)
                     viewModel.updateGooglePayResult(
-                        StripeGooglePayLauncher.Result.Error(
+                        StripeGooglePayContract.Result.Error(
                             RuntimeException(
                                 "Google Pay returned an error. See googlePayStatus property for more information."
                             ),
@@ -147,7 +147,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
                 }
                 else -> {
                     viewModel.updateGooglePayResult(
-                        StripeGooglePayLauncher.Result.Error(
+                        StripeGooglePayContract.Result.Error(
                             RuntimeException(
                                 "Google Pay returned an expected result code."
                             )
@@ -167,13 +167,13 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
             object : ApiResultCallback<PaymentIntentResult> {
                 override fun onSuccess(result: PaymentIntentResult) {
                     viewModel.updateGooglePayResult(
-                        StripeGooglePayLauncher.Result.PaymentIntent(result)
+                        StripeGooglePayContract.Result.PaymentIntent(result)
                     )
                 }
 
                 override fun onError(e: Exception) {
                     viewModel.updateGooglePayResult(
-                        StripeGooglePayLauncher.Result.Error(
+                        StripeGooglePayContract.Result.Error(
                             e,
                             paymentMethod = viewModel.paymentMethod
                         )
@@ -184,7 +184,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
 
         if (!isPaymentResult) {
             viewModel.updateGooglePayResult(
-                StripeGooglePayLauncher.Result.Error(
+                StripeGooglePayContract.Result.Error(
                     RuntimeException("Unable to confirm the PaymentIntent.")
                 )
             )
@@ -195,7 +195,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         val paymentData = data?.let { PaymentData.getFromIntent(it) }
         if (paymentData == null) {
             viewModel.updateGooglePayResult(
-                StripeGooglePayLauncher.Result.Error(
+                StripeGooglePayContract.Result.Error(
                     IllegalArgumentException("Google Pay data was not available")
                 )
             )
@@ -213,7 +213,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
                 onFailure = {
                     viewModel.paymentMethod = null
                     viewModel.updateGooglePayResult(
-                        StripeGooglePayLauncher.Result.Error(it)
+                        StripeGooglePayContract.Result.Error(it)
                     )
                 }
             )
@@ -238,7 +238,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         )
     }
 
-    private fun finishWithResult(result: StripeGooglePayLauncher.Result) {
+    private fun finishWithResult(result: StripeGooglePayContract.Result) {
         setResult(
             RESULT_OK,
             Intent().putExtras(
