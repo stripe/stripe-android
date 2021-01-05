@@ -18,6 +18,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -32,6 +33,11 @@ class PaymentFlowViewModelTest {
         paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG),
         workContext = testDispatcher
     )
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun saveCustomerShippingInformation_onSuccess_returnsExpectedData() {

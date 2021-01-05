@@ -96,6 +96,7 @@ internal class CardNumberEditTextTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test

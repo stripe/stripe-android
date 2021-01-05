@@ -50,7 +50,7 @@ internal class PaymentSheetActivityTest {
     val rule = InstantTaskExecutorRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testCoroutineDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val paymentMethods = listOf(
         PaymentMethod("payment_method_id", 0, false, PaymentMethod.Type.Card)
@@ -68,13 +68,13 @@ internal class PaymentSheetActivityTest {
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeRepository,
-            workContext = testCoroutineDispatcher
+            workContext = testDispatcher
         ),
         googlePayRepository = googlePayRepository,
         prefsRepository = mock(),
         eventReporter = eventReporter,
         args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        workContext = testCoroutineDispatcher
+        workContext = testDispatcher
     )
 
     private val contract = PaymentSheetContract()
@@ -90,7 +90,7 @@ internal class PaymentSheetActivityTest {
 
     @BeforeTest
     fun before() {
-        Dispatchers.setMain(testCoroutineDispatcher)
+        Dispatchers.setMain(testDispatcher)
 
         PaymentConfiguration.init(
             context,
@@ -101,6 +101,7 @@ internal class PaymentSheetActivityTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -108,7 +109,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
@@ -148,7 +149,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             assertThat(currentFragment(activity))
@@ -198,7 +199,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             viewModel.updateSelection(
@@ -225,7 +226,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(500)
+            testDispatcher.advanceTimeBy(500)
             idleLooper()
 
             viewModel.onActivityResult(
@@ -260,19 +261,19 @@ internal class PaymentSheetActivityTest {
                 context,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeRepository,
-                workContext = testCoroutineDispatcher
+                workContext = testDispatcher
             ),
             googlePayRepository = googlePayRepository,
             prefsRepository = mock(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-            workContext = testCoroutineDispatcher
+            workContext = testDispatcher
         )
 
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             assertThat(currentFragment(activity))
@@ -306,7 +307,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isFalse()
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             assertThat(activity.viewBinding.buyButton.isEnabled)

@@ -49,6 +49,7 @@ import java.net.UnknownHostException
 import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -92,6 +93,11 @@ internal class StripeApiRepositoryTest {
                     emptyMap()
                 )
             )
+    }
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
