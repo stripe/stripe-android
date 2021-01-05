@@ -1062,6 +1062,33 @@ internal class CardMultilineWidgetTest {
             .isFalse()
     }
 
+    @Test
+    fun `changing iconPosition to End updates compound drawables`() {
+        assertThat(
+            cardMultilineWidget.cardNumberEditText.compoundDrawables[
+                CardMultilineWidget.IconPosition.Start.compoundDrawablesIndex
+            ]
+        ).isNotNull()
+        assertThat(
+            cardMultilineWidget.cardNumberEditText.compoundDrawables[
+                CardMultilineWidget.IconPosition.End.compoundDrawablesIndex
+            ]
+        ).isNull()
+
+        cardMultilineWidget.iconPosition = CardMultilineWidget.IconPosition.End
+
+        assertThat(
+            cardMultilineWidget.cardNumberEditText.compoundDrawables[
+                CardMultilineWidget.IconPosition.Start.compoundDrawablesIndex
+            ]
+        ).isNull()
+        assertThat(
+            cardMultilineWidget.cardNumberEditText.compoundDrawables[
+                CardMultilineWidget.IconPosition.End.compoundDrawablesIndex
+            ]
+        ).isNotNull()
+    }
+
     internal class WidgetControlGroup(
         widget: CardMultilineWidget,
         workContext: CoroutineContext
@@ -1082,8 +1109,6 @@ internal class CardMultilineWidgetTest {
     private companion object {
         // Every Card made by the CardInputView should have the card widget token.
         private val ATTRIBUTION = setOf("CardMultilineView")
-
-        private val EMPTY_WATCHER = object : StripeTextWatcher() {}
 
         private const val CVC_VALUE_COMMON = "123"
         private const val CVC_VALUE_AMEX = "1234"

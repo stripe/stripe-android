@@ -302,6 +302,12 @@ class CardMultilineWidget @JvmOverloads constructor(
     @StringRes
     internal var expirationDateHintRes = R.string.expiry_date_hint
 
+    internal var iconPosition: IconPosition by Delegates.observable(
+        IconPosition.Start
+    ) { _, _, _ ->
+        updateCardBrandDrawableAnchor()
+    }
+
     init {
         orientation = VERTICAL
 
@@ -372,6 +378,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         super.onAttachedToWindow()
         postalCodeEditText.config = PostalCodeEditText.Config.Global
         cvcEditText.hint = null
+        updateCardBrandDrawableAnchor()
     }
 
     /**
@@ -607,12 +614,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         if (shouldShowErrorIcon) {
-            updateDrawable(
+            updateCardNumberIcon(
                 iconResourceId = cardBrand.errorIcon,
                 shouldTint = false
             )
         } else {
-            updateDrawable(
+            updateCardNumberIcon(
                 iconResourceId = cardBrand.cvcIcon,
                 shouldTint = true
             )
@@ -693,12 +700,12 @@ class CardMultilineWidget @JvmOverloads constructor(
     private fun updateBrandUi() {
         updateCvc()
         if (shouldShowErrorIcon) {
-            updateDrawable(
+            updateCardNumberIcon(
                 iconResourceId = cardBrand.errorIcon,
                 shouldTint = false
             )
         } else {
-            updateDrawable(
+            updateCardNumberIcon(
                 iconResourceId = cardBrand.icon,
                 shouldTint = CardBrand.Unknown == cardBrand
             )
@@ -709,9 +716,22 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcInputLayout)
     }
 
-    private fun updateDrawable(@DrawableRes iconResourceId: Int, shouldTint: Boolean) {
+    private fun updateCardBrandDrawableAnchor() {
+        // there should be, at most, a single non-null compound drawable
+        cardNumberEditText.compoundDrawables.firstOrNull { it != null }?.let {
+            updateCompoundDrawable(it)
+        }
+    }
+
+    private fun updateCardNumberIcon(
+        @DrawableRes iconResourceId: Int,
+        shouldTint: Boolean
+    ) {
         val icon = ContextCompat.getDrawable(context, iconResourceId) ?: return
-        val original = cardNumberEditText.compoundDrawablesRelative[0] ?: return
+        val original = cardNumberEditText.compoundDrawablesRelative[
+            iconPosition.compoundDrawablesIndex
+        ] ?: return
+
         val iconPadding = cardNumberEditText.compoundDrawablePadding
         icon.bounds = createDrawableBounds(original)
 
@@ -721,12 +741,26 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.compoundDrawablePadding = iconPadding
-        cardNumberEditText.setCompoundDrawablesRelative(
-            compatIcon,
-            null,
-            null,
-            null
-        )
+
+        updateCompoundDrawable(compatIcon)
+    }
+
+    private fun updateCompoundDrawable(drawable: Drawable) {
+        if (iconPosition == IconPosition.Start) {
+            cardNumberEditText.setCompoundDrawablesRelative(
+                drawable,
+                null,
+                null,
+                null
+            )
+        } else {
+            cardNumberEditText.setCompoundDrawablesRelative(
+                null,
+                null,
+                drawable,
+                null
+            )
+        }
     }
 
     private fun createDrawableBounds(drawable: Drawable): Rect {
@@ -740,6 +774,13 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         return newBounds
+    }
+
+    internal enum class IconPosition(
+        internal val compoundDrawablesIndex: Int
+    ) {
+        Start(0),
+        End(2)
     }
 
     private companion object {
