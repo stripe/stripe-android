@@ -64,7 +64,7 @@ internal class BuyButton @JvmOverloads constructor(
         )
     }
 
-    fun onCompletedState(state: ViewState.Completed) {
+    private fun onCompletedState(state: ViewState.Completed) {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
         animator.fadeOut(viewBinding.label)
