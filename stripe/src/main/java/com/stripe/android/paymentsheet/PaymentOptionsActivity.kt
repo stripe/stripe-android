@@ -146,7 +146,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     private fun setupAddButton(addButton: AddButton) {
-        addButton.completedAnimation.observe(this) { completedState ->
+        addButton.completed.observe(this) { completedState ->
             completedState?.paymentSelection?.let(::onActionCompleted)
         }
 

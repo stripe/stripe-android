@@ -24,8 +24,8 @@ internal class AddButton @JvmOverloads constructor(
         this
     )
 
-    private val _completedAnimation = MutableLiveData<PaymentOptionViewState.Completed>()
-    internal val completedAnimation = _completedAnimation.distinctUntilChanged()
+    private val _completed = MutableLiveData<PaymentOptionViewState.Completed>()
+    internal val completed = _completed.distinctUntilChanged()
 
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
@@ -39,7 +39,7 @@ internal class AddButton @JvmOverloads constructor(
 
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
-        _completedAnimation.value = state
+        _completed.value = state
     }
 
     override fun setEnabled(enabled: Boolean) {
