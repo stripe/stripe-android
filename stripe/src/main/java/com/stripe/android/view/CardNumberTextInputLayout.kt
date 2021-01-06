@@ -6,17 +6,18 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.view.children
 import androidx.core.view.updateLayoutParams
+import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import kotlin.properties.Delegates
 
 /**
- * An [IconTextInputLayout] that can show a loading indicator.
+ * An [TextInputLayout] that can show a loading indicator.
  */
 internal class CardNumberTextInputLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.textInputStyle
-) : IconTextInputLayout(context, attrs, defStyleAttr) {
+) : TextInputLayout(context, attrs, defStyleAttr) {
     private val progressView = CardWidgetProgressView(context, attrs, defStyleAttr)
 
     internal var isLoading: Boolean by Delegates.observable(
