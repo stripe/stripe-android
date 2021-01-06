@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
+import kotlin.test.AfterTest
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -28,7 +29,7 @@ class PaymentOptionsActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val testCoroutineDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val viewModel = PaymentOptionsViewModel(
@@ -42,6 +43,11 @@ class PaymentOptionsActivityTest {
         prefsRepository = mock(),
         eventReporter = eventReporter
     )
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `click outside of bottom sheet should return cancel result`() {
@@ -61,7 +67,7 @@ class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             viewModel.updateMode(SheetMode.Wrapped)

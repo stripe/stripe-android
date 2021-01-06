@@ -15,7 +15,6 @@
     <dimen name="stripe_android_pay_button_separation">8dp</dimen>
     <dimen name="stripe_card_icon_multiline_width">24dp</dimen>
     <dimen name="stripe_card_icon_multiline_padding">8dp</dimen>
-    <dimen name="stripe_card_icon_multiline_padding_bottom">1.52380955dp</dimen>
     <dimen name="stripe_masked_card_icon_width">32dp</dimen>
     <dimen name="stripe_masked_card_icon_height">21dp</dimen>
     <dimen name="stripe_list_top_margin">8dp</dimen>
@@ -32,6 +31,8 @@
 
     <!-- Text size of CardInputWidget EditText views -->
     <dimen name="ciw_stripe_edit_text_size">18sp</dimen>
+
+    <dimen name="stripe_cmw_edit_text_minheight">48dp</dimen>
 
     <!-- Text size of BECS Debit Widget EditTexts -->
     <dimen name="stripe_becs_debit_widget_edit_text_size">14sp</dimen>

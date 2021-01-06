@@ -36,6 +36,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -95,6 +96,11 @@ internal class CardMultilineWidgetTest {
             BinFixtures.DINERSCLUB14,
             listOf(AccountRangeFixtures.DINERSCLUB14)
         )
+    }
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
     }
 
     private fun createWidget(
@@ -1063,29 +1069,12 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun `changing iconPosition to End updates compound drawables`() {
+    fun `cardNumberEditText's drawable should be on the end`() {
         assertThat(
-            cardMultilineWidget.cardNumberEditText.compoundDrawables[
-                CardMultilineWidget.IconPosition.Start.compoundDrawablesIndex
-            ]
-        ).isNotNull()
-        assertThat(
-            cardMultilineWidget.cardNumberEditText.compoundDrawables[
-                CardMultilineWidget.IconPosition.End.compoundDrawablesIndex
-            ]
-        ).isNull()
-
-        cardMultilineWidget.iconPosition = CardMultilineWidget.IconPosition.End
-
-        assertThat(
-            cardMultilineWidget.cardNumberEditText.compoundDrawables[
-                CardMultilineWidget.IconPosition.Start.compoundDrawablesIndex
-            ]
+            cardMultilineWidget.cardNumberEditText.compoundDrawables[0]
         ).isNull()
         assertThat(
-            cardMultilineWidget.cardNumberEditText.compoundDrawables[
-                CardMultilineWidget.IconPosition.End.compoundDrawablesIndex
-            ]
+            cardMultilineWidget.cardNumberEditText.compoundDrawables[2]
         ).isNotNull()
     }
 

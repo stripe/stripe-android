@@ -65,7 +65,7 @@ internal class PaymentSheetFlowControllerFactory(
         clientSecret: String,
         config: PaymentSheet.Configuration,
         onComplete: (PaymentSheet.FlowController.Result) -> Unit
-    ) {
+    ): Job {
         val job = CoroutineScope(workContext).launch {
             dispatchResult(
                 config.customer?.let { customerConfig ->
@@ -79,6 +79,8 @@ internal class PaymentSheetFlowControllerFactory(
             )
         }
         registerJob(job)
+
+        return job
     }
 
     fun create(

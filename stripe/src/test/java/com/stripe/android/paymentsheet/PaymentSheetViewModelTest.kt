@@ -50,7 +50,7 @@ internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val testCoroutineDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val googlePayRepository = FakeGooglePayRepository(true)
     private val stripeRepository: StripeRepository = FakeStripeRepository(PAYMENT_INTENT)
@@ -70,6 +70,7 @@ internal class PaymentSheetViewModelTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -332,7 +333,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `isGooglePayReady when googlePayConfig is not null should emit expected value`() {
-        Dispatchers.setMain(testCoroutineDispatcher)
+        Dispatchers.setMain(testDispatcher)
         var isReady: Boolean? = null
         viewModel.isGooglePayReady.observeForever {
             isReady = it
@@ -409,7 +410,7 @@ internal class PaymentSheetViewModelTest {
             prefsRepository,
             eventReporter,
             args,
-            workContext = testCoroutineDispatcher
+            workContext = testDispatcher
         )
     }
 

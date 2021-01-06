@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -20,6 +21,11 @@ internal class DefaultCardAccountRangeStoreTest {
     private val store = DefaultCardAccountRangeStore(
         ApplicationProvider.getApplicationContext()
     )
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `cache hit should return expected results`() = testDispatcher.runBlockingTest {

@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.TextWatcher
@@ -33,8 +32,6 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import java.math.BigDecimal
-import java.math.RoundingMode
 import kotlin.properties.Delegates
 
 /**
@@ -88,7 +85,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
     private var isEnabled: Boolean = false
-    private var hasAdjustedDrawable: Boolean = false
     private var customCvcLabel: String? = null
 
     private var cardBrand: CardBrand = CardBrand.Unknown
@@ -279,15 +275,6 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-    private val pixelsToAdjust: Double =
-        resources
-            .getDimension(R.dimen.stripe_card_icon_multiline_padding_bottom)
-            .toDouble()
-
-    private val dynamicBufferInPixels: Int = BigDecimal(pixelsToAdjust)
-        .setScale(0, RoundingMode.HALF_DOWN)
-        .toInt()
-
     @VisibleForTesting
     internal var shouldShowErrorIcon = false
         private set(value) {
@@ -301,12 +288,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     @StringRes
     internal var expirationDateHintRes = R.string.expiry_date_hint
-
-    internal var iconPosition: IconPosition by Delegates.observable(
-        IconPosition.Start
-    ) { _, _, _ ->
-        updateCardBrandDrawableAnchor()
-    }
 
     init {
         orientation = VERTICAL
@@ -378,7 +359,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         super.onAttachedToWindow()
         postalCodeEditText.config = PostalCodeEditText.Config.Global
         cvcEditText.hint = null
-        updateCardBrandDrawableAnchor()
     }
 
     /**
@@ -716,71 +696,30 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcInputLayout)
     }
 
-    private fun updateCardBrandDrawableAnchor() {
-        // there should be, at most, a single non-null compound drawable
-        cardNumberEditText.compoundDrawables.firstOrNull { it != null }?.let {
-            updateCompoundDrawable(it)
-        }
-    }
-
     private fun updateCardNumberIcon(
         @DrawableRes iconResourceId: Int,
         shouldTint: Boolean
     ) {
-        val icon = ContextCompat.getDrawable(context, iconResourceId) ?: return
-        val original = cardNumberEditText.compoundDrawablesRelative[
-            iconPosition.compoundDrawablesIndex
-        ] ?: return
-
-        val iconPadding = cardNumberEditText.compoundDrawablePadding
-        icon.bounds = createDrawableBounds(original)
-
-        val compatIcon = DrawableCompat.wrap(icon)
-        if (shouldTint) {
-            DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
+        ContextCompat.getDrawable(context, iconResourceId)?.let { icon ->
+            updateCompoundDrawable(
+                if (shouldTint) {
+                    DrawableCompat.wrap(icon).also {
+                        it.setTint(tintColorInt)
+                    }
+                } else {
+                    icon
+                }
+            )
         }
-
-        cardNumberEditText.compoundDrawablePadding = iconPadding
-
-        updateCompoundDrawable(compatIcon)
     }
 
     private fun updateCompoundDrawable(drawable: Drawable) {
-        if (iconPosition == IconPosition.Start) {
-            cardNumberEditText.setCompoundDrawablesRelative(
-                drawable,
-                null,
-                null,
-                null
-            )
-        } else {
-            cardNumberEditText.setCompoundDrawablesRelative(
-                null,
-                null,
-                drawable,
-                null
-            )
-        }
-    }
-
-    private fun createDrawableBounds(drawable: Drawable): Rect {
-        val newBounds = Rect()
-        drawable.copyBounds(newBounds)
-
-        if (!hasAdjustedDrawable) {
-            newBounds.top = newBounds.top - dynamicBufferInPixels
-            newBounds.bottom = newBounds.bottom - dynamicBufferInPixels
-            hasAdjustedDrawable = true
-        }
-
-        return newBounds
-    }
-
-    internal enum class IconPosition(
-        internal val compoundDrawablesIndex: Int
-    ) {
-        Start(0),
-        End(2)
+        cardNumberEditText.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            null,
+            null,
+            drawable,
+            null
+        )
     }
 
     private companion object {

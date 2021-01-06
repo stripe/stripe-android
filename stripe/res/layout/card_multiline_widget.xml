@@ -17,7 +17,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawablePadding="@dimen/stripe_card_icon_multiline_padding"
-            android:drawableStart="@drawable/stripe_ic_unknown"
             android:imeOptions="actionNext"
             android:nextFocusDown="@+id/et_expiry"
             android:nextFocusForward="@+id/et_expiry"
@@ -52,6 +51,7 @@
                 android:digits="@string/stripe_expiration_date_allowlist"
                 android:nextFocusDown="@+id/et_cvc"
                 android:nextFocusForward="@+id/et_cvc"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -73,6 +73,7 @@
                 android:imeOptions="actionNext"
                 android:nextFocusDown="@+id/et_postal_code"
                 android:nextFocusForward="@+id/et_postal_code"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -91,6 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>

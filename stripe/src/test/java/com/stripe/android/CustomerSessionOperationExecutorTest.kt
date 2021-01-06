@@ -36,6 +36,7 @@ internal class CustomerSessionOperationExecutorTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test

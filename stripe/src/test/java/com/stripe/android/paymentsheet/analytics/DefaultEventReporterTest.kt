@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -46,6 +47,11 @@ class DefaultEventReporterTest {
 
     private val completeEventReporter = eventReporterFactory(EventReporter.Mode.Complete)
     private val customEventReporter = eventReporterFactory(EventReporter.Mode.Custom)
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `onInit() should fire analytics request with expected event value`() {

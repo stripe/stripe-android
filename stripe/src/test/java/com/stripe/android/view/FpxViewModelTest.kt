@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -22,6 +23,11 @@ class FpxViewModelTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         FakeStripeRepository()
     )
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     internal fun `getFpxBankStatues should update LiveData`() = testDispatcher.runBlockingTest {
