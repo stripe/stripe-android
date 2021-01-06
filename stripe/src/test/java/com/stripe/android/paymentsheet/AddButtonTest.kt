@@ -13,16 +13,6 @@ class AddButtonTest {
     private val addButton = AddButton(ApplicationProvider.getApplicationContext())
 
     @Test
-    fun `onReadyState() should update label`() {
-        addButton.onReadyState()
-        assertThat(
-            addButton.viewBinding.label.text.toString()
-        ).isEqualTo(
-            "Add"
-        )
-    }
-
-    @Test
     fun `onCompletedState() should update view`() {
         addButton.onCompletedState(
             PaymentOptionViewState.Completed(PaymentSelection.GooglePay)
