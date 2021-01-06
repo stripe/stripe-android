@@ -57,17 +57,10 @@ internal abstract class BasePaymentMethodsListFragment(
         )
         viewBinding.recycler.adapter = adapter
 
-        sheetViewModel.getDefaultPaymentMethodId()
-            .observe(viewLifecycleOwner) { defaultPaymentMethodId ->
-                adapter.defaultPaymentMethodId = defaultPaymentMethodId
-            }
-
-        sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
-            adapter.paymentMethods = paymentMethods
-        }
-
-        sheetViewModel.isGooglePayReady.observe(viewLifecycleOwner) { isGooglePayReady ->
-            adapter.shouldShowGooglePay = isGooglePayReady
+        sheetViewModel.getPaymentOptionsConfig().observe(viewLifecycleOwner) { config ->
+            adapter.paymentMethods = config.paymentMethods
+            adapter.shouldShowGooglePay = config.shouldShowGooglePay
+            adapter.defaultPaymentMethodId = config.defaultPaymentMethodId
         }
 
         eventReporter.onShowExistingPaymentOptions()

@@ -53,7 +53,7 @@ internal class PaymentSheetViewModelTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val googlePayRepository = FakeGooglePayRepository(true)
-    private val stripeRepository: StripeRepository = FakeStripeRepository(PAYMENT_INTENT)
+    private val stripeRepository = FakeStripeRepository(PAYMENT_INTENT)
     private val paymentController: PaymentController = mock()
     private val prefsRepository = mock<PrefsRepository>()
     private val eventReporter = mock<EventReporter>()
@@ -397,6 +397,18 @@ internal class PaymentSheetViewModelTest {
             .isTrue()
     }
 
+    @Test
+    fun `getPaymentOptionsConfig() should set defaultPaymentMethodId with first payment method id by default`() {
+        stripeRepository.paymentMethods = PaymentMethodFixtures.createCards(5)
+        var config: PaymentOptionsAdapter.Config? = null
+        viewModel.getPaymentOptionsConfig().observeForever {
+            config = it
+        }
+        viewModel.updatePaymentMethods()
+        assertThat(config?.defaultPaymentMethodId)
+            .isEqualTo(stripeRepository.paymentMethods.first().id)
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeRepository: StripeRepository = this.stripeRepository
@@ -424,7 +436,8 @@ internal class PaymentSheetViewModelTest {
     }
 
     private class FakeStripeRepository(
-        var paymentIntent: PaymentIntent
+        var paymentIntent: PaymentIntent,
+        var paymentMethods: List<PaymentMethod> = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     ) : AbsFakeStripeRepository() {
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
@@ -440,7 +453,7 @@ internal class PaymentSheetViewModelTest {
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options
         ): List<PaymentMethod> {
-            return listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            return paymentMethods
         }
     }
 

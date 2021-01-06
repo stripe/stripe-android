@@ -289,6 +289,12 @@ internal class PaymentOptionsAdapter(
         }
     }
 
+    internal data class Config(
+        val paymentMethods: List<PaymentMethod>,
+        val shouldShowGooglePay: Boolean,
+        val defaultPaymentMethodId: String?
+    )
+
     internal enum class ViewType {
         Card,
         AddCard,

@@ -12,6 +12,7 @@ import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.GooglePayRepository
+import com.stripe.android.paymentsheet.PaymentOptionsAdapter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
@@ -159,12 +160,26 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
         _userMessage.value = null
     }
 
-    fun getDefaultPaymentMethodId() = liveData {
+    private fun getDefaultPaymentMethodId() = liveData {
         emit(
             withContext(workContext) {
                 prefsRepository.getDefaultPaymentMethodId()
             }
         )
+    }
+
+    fun getPaymentOptionsConfig() = paymentMethods.switchMap { paymentMethods ->
+        isGooglePayReady.switchMap { isGooglePayReady ->
+            getDefaultPaymentMethodId().switchMap { defaultPaymentMethodId ->
+                MutableLiveData(
+                    PaymentOptionsAdapter.Config(
+                        paymentMethods,
+                        isGooglePayReady,
+                        defaultPaymentMethodId ?: paymentMethods.firstOrNull()?.id
+                    )
+                )
+            }
+        }
     }
 
     sealed class UserMessage {
