@@ -291,8 +291,7 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
         }
 
         @Source.SourceType
-        @JvmStatic
-        fun asSourceType(sourceType: String?): String {
+        private fun asSourceType(sourceType: String?): String {
             return when (sourceType) {
                 Source.SourceType.CARD -> Source.SourceType.CARD
                 Source.SourceType.THREE_D_SECURE -> Source.SourceType.THREE_D_SECURE
