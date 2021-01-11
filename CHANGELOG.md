@@ -5,6 +5,7 @@
 * [#3134](https://github.com/stripe/stripe-android/pull/3134) Upgrade Kotlin to `1.4.21`
 * [#3154](https://github.com/stripe/stripe-android/pull/3154) Fix `CvcEditText` layout issues in `CardMultilineWidget`
 * [#3176](https://github.com/stripe/stripe-android/pull/3176) Update `GooglePayConfig` constructor
+* [#3205](https://github.com/stripe/stripe-android/pull/3205) Add `androidx.activity:activity-ktx:1.2.0-rc01` as a dependency
 * [#3232](https://github.com/stripe/stripe-android/pull/3232) Align card number field icon to end in `CardMultilineWidget`
 * [#3237](https://github.com/stripe/stripe-android/pull/3237) Upgrade 3DS2 SDK to `5.0.1`
     * Sources are now included with the 3DS2 SDK
