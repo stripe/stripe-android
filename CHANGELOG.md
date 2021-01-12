@@ -1,10 +1,17 @@
 # CHANGELOG
 
-## 16.1.2 - unreleased
+## 16.2.0 - 2021-01-11
 * [#3088](https://github.com/stripe/stripe-android/pull/3088) Mark some builders in `PaymentMethodCreateParams` as deprecated
 * [#3134](https://github.com/stripe/stripe-android/pull/3134) Upgrade Kotlin to `1.4.21`
 * [#3154](https://github.com/stripe/stripe-android/pull/3154) Fix `CvcEditText` layout issues in `CardMultilineWidget`
 * [#3176](https://github.com/stripe/stripe-android/pull/3176) Update `GooglePayConfig` constructor
+* [#3205](https://github.com/stripe/stripe-android/pull/3205) Add `androidx.activity:activity-ktx:1.2.0-rc01` as a dependency
+* [#3232](https://github.com/stripe/stripe-android/pull/3232) Align card number field icon to end in `CardMultilineWidget`
+* [#3237](https://github.com/stripe/stripe-android/pull/3237) Upgrade 3DS2 SDK to `5.0.1`
+    * Sources are now included with the 3DS2 SDK
+    * Upgrade `bcprov-jdk15to18` to `1.6.8`
+    * Upgrade `nimbus-jose-jwt` to `9.4`
+* [#3241](https://github.com/stripe/stripe-android/pull/3241) Upgrade Gradle to `6.8`
 
 ## 16.1.1 - 2020-11-25
 * [#3028](https://github.com/stripe/stripe-android/pull/3028) Upgrade Android Gradle Plugin to `4.1.1`

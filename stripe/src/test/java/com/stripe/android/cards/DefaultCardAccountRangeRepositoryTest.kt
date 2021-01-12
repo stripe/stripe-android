@@ -104,7 +104,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
             realStore.get(BinFixtures.MASTERCARD)
         ).containsExactly(
             AccountRange(
-                binRange = BinRange(low = "5555550000000000", high = "5555550099999999"),
+                binRange = BinRange(low = "5555550070000000", high = "5555550089999999"),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Mastercard,
                 country = "BR"
