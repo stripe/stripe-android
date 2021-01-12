@@ -1,33 +1,14 @@
 package com.stripe.example.activity
 
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
 import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.example.R
 import com.stripe.example.databinding.ActivityPaymentSheetCompleteBinding
-import com.stripe.example.paymentsheet.PaymentSheetViewModel
 
-class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
+internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
     private val viewBinding by lazy {
         ActivityPaymentSheetCompleteBinding.inflate(layoutInflater)
-    }
-
-    private val viewModel: PaymentSheetViewModel by viewModels {
-        PaymentSheetViewModel.Factory(
-            application,
-            getPreferences(MODE_PRIVATE)
-        )
-    }
-
-    private val prefsManager: SharedPreferences by lazy {
-        PreferenceManager.getDefaultSharedPreferences(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,8 +26,6 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
         }
 
         viewBinding.launch.setOnClickListener {
-            val isCustomerEnabled = prefsManager.getBoolean("enable_customer", true)
-
             if (isCustomerEnabled) {
                 fetchEphemeralKey { customerConfig ->
                     createPaymentIntent(paymentSheet, customerConfig)
@@ -89,51 +68,15 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
     ) {
         viewModel.inProgress.postValue(false)
 
-        val isGooglePayEnabled = prefsManager.getBoolean("enable_googlepay", true)
-        val merchantName = prefsManager.getString("merchant_name", null) ?: "Widget Store"
-        val billingAddressCollection = when (prefsManager.getBoolean("require_billing_address", false)) {
-            true -> PaymentSheet.BillingAddressCollectionLevel.Required
-            false -> PaymentSheet.BillingAddressCollectionLevel.Automatic
-        }
-
         paymentSheet.present(
             paymentIntentClientSecret,
             PaymentSheet.Configuration(
                 merchantDisplayName = merchantName,
                 customer = customerConfig,
-                googlePay = when (isGooglePayEnabled) {
-                    true -> {
-                        PaymentSheet.GooglePayConfiguration(
-                            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                            countryCode = "US"
-                        )
-                    }
-                    false -> null
-                },
-
+                googlePay = googlePayConfig,
                 billingAddressCollection = billingAddressCollection
             )
         )
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.payment_sheet, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.config) {
-            PaymentSheetConfigBottomSheet().show(
-                supportFragmentManager,
-                PaymentSheetConfigBottomSheet.TAG
-            )
-            return true
-        } else if (item.itemId == R.id.refresh_key) {
-            viewModel.clearKeys()
-            fetchEphemeralKey()
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun onPaymentSheetResult(
@@ -153,19 +96,7 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
         viewModel.status.value = viewModel.status.value + "\n\n$statusString"
     }
 
-    private fun fetchEphemeralKey(
-        onSuccess: (PaymentSheet.CustomerConfiguration) -> Unit = {}
-    ) {
-        viewModel.fetchEphemeralKey()
-            .observe(this) { newEphemeralKey ->
-                if (newEphemeralKey != null) {
-                    onSuccess(
-                        PaymentSheet.CustomerConfiguration(
-                            id = newEphemeralKey.customer,
-                            ephemeralKeySecret = newEphemeralKey.key
-                        )
-                    )
-                }
-            }
+    override fun onRefreshEphemeralKey() {
+        fetchEphemeralKey()
     }
 }

@@ -24,12 +24,6 @@
             android:orientation="vertical"
             android:layout_height="wrap_content">
 
-            <Button
-                android:id="@+id/clear"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Reset Secrets"/>
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
