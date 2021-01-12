@@ -112,7 +112,7 @@
     <style name="StripePaymentSheetLabel">
         <item name="android:textSize">13sp</item>
         <item name="android:letterSpacing">-0.01</item>
-        <item name="android:textColor">#565656</item>
+        <item name="android:textColor">@color/stripe_paymentsheet_header_text</item>
         <item name="android:lineSpacingExtra">5sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:layout_marginTop">10dp</item>
