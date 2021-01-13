@@ -1,6 +1,6 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="56dp"
-    android:height="40dp"
+    android:width="@dimen/stripe_paymentsheet_paymentoption_card_width"
+    android:height="@dimen/stripe_paymentsheet_paymentoption_card_height"
     android:viewportWidth="56"
     android:viewportHeight="40">
   <path
