@@ -10,14 +10,11 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.R
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -32,16 +29,10 @@ internal class StripeEditTextTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val editText = StripeEditText(
-        context,
-        workContext = testDispatcher
+        context
     ).also {
         it.setDeleteEmptyListener(deleteEmptyListener)
         it.setAfterTextChangedListener(afterTextChangedListener)
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -141,32 +132,6 @@ internal class StripeEditTextTest {
         editText.shouldShowError = false
         assertThat(editText.currentTextColor)
             .isEqualTo(-570425344)
-    }
-
-    @Test
-    fun `setHintDelayed should set hint after delay`() = testDispatcher.runBlockingTest {
-        assertThat(editText.hint)
-            .isNull()
-
-        editText.setHintDelayed("Here's a hint", DELAY)
-        testDispatcher.advanceTimeBy(DELAY + 10)
-        idleLooper()
-
-        assertThat(editText.hint)
-            .isEqualTo("Here's a hint")
-    }
-
-    @Test
-    fun `setHintDelayed when Job is canceled before delay should not set hint`() {
-        assertThat(editText.hint)
-            .isNull()
-        editText.setHintDelayed("Here's a hint", DELAY)
-        testDispatcher.advanceTimeBy(DELAY - 10)
-
-        requireNotNull(editText.job).cancel()
-
-        assertThat(editText.hint)
-            .isNull()
     }
 
     private companion object {

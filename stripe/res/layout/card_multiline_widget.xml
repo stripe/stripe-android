@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:app="http://schemas.android.com/apk/res-auto"
        android:layout_width="match_parent"
        android:layout_height="wrap_content">
 
@@ -40,6 +41,7 @@
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
             android:hint="@string/acc_label_expiry_date"
+            app:placeholderText="@string/expiry_date_hint"
             style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             >
 
@@ -63,6 +65,7 @@
             android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
+            app:placeholderText="@string/cvc_multiline_helper"
             style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             >
 
@@ -84,6 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
+            app:placeholderText="@string/stripe_postalcode_placeholder"
             style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             >
 

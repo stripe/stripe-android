@@ -96,8 +96,6 @@ class CardMultilineWidget @JvmOverloads constructor(
     @ColorInt
     private val tintColorInt: Int
 
-    private var cardHintText: String = resources.getString(R.string.card_number_hint)
-
     /**
      * If [shouldShowPostalCode] is true and [postalCodeRequired] is true, then postal code is a
      * required field.
@@ -286,8 +284,11 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-    @StringRes
-    internal var expirationDateHintRes = R.string.expiry_date_hint
+    internal var expirationDateHintRes: Int by Delegates.observable(
+        R.string.expiry_date_hint
+    ) { _, _, newValue ->
+        expiryTextInputLayout.placeholderText = resources.getString(newValue)
+    }
 
     private var showCvcIconInCvcField: Boolean = false
 
@@ -407,7 +408,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     override fun setCardHint(cardHint: String) {
-        cardHintText = cardHint
+        cardNumberTextInputLayout.placeholderText = cardHint
     }
 
     /**
@@ -645,19 +646,13 @@ class CardMultilineWidget @JvmOverloads constructor(
     private fun initFocusChangeListeners() {
         cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                cardNumberEditText.setHintDelayed(cardHintText, CARD_NUMBER_HINT_DELAY)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
-            } else {
-                cardNumberEditText.hint = ""
             }
         }
 
         expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                expiryDateEditText.setHintDelayed(expirationDateHintRes, COMMON_HINT_DELAY)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
-            } else {
-                expiryDateEditText.hint = ""
             }
         }
 
@@ -666,23 +661,15 @@ class CardMultilineWidget @JvmOverloads constructor(
                 if (!showCvcIconInCvcField) {
                     flipToCvcIconIfNotFinished()
                 }
-                cvcEditText.setHintDelayed(cvcHelperText, COMMON_HINT_DELAY)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             } else {
                 updateBrandUi()
-                cvcEditText.hint = ""
             }
         }
 
         postalCodeEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
-            if (!shouldShowPostalCode) {
-                return@OnFocusChangeListener
-            }
-            if (hasFocus) {
-                postalCodeEditText.setHintDelayed(R.string.zip_helper, COMMON_HINT_DELAY)
+            if (shouldShowPostalCode && hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
-            } else {
-                postalCodeEditText.hint = ""
             }
         }
     }
