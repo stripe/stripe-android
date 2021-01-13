@@ -7,6 +7,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
+import androidx.core.view.isInvisible
 import androidx.core.view.updateLayoutParams
 import com.stripe.android.R
 import com.stripe.android.databinding.CardWidgetProgressViewBinding
@@ -63,7 +64,7 @@ internal class CardWidgetProgressView @JvmOverloads constructor(
 
         setBackgroundResource(R.drawable.stripe_card_progress_background)
         clipToOutline = true
-        visibility = View.INVISIBLE
+        isInvisible = true
     }
 
     override fun onAttachedToWindow() {
