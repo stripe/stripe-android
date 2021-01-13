@@ -61,6 +61,13 @@ class CardMultilineWidget @JvmOverloads constructor(
     internal val cvcInputLayout = viewBinding.tlCvc
     internal val postalInputLayout = viewBinding.tlPostalCode
 
+    private val textInputLayouts = listOf(
+        cardNumberTextInputLayout,
+        expiryTextInputLayout,
+        cvcInputLayout,
+        postalInputLayout
+    )
+
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
     private val cardValidTextWatcher = object : StripeTextWatcher() {
@@ -324,6 +331,10 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
+        textInputLayouts.forEach {
+            it.placeholderTextColor = it.editText?.hintTextColors
+        }
+
         // This sets the value of shouldShowPostalCode
         attrs?.let { checkAttributeSet(it) }
 
@@ -550,10 +561,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-        expiryTextInputLayout.isEnabled = enabled
-        cardNumberTextInputLayout.isEnabled = enabled
-        cvcInputLayout.isEnabled = enabled
-        postalInputLayout.isEnabled = enabled
+        textInputLayouts.forEach { it.isEnabled = enabled }
         isEnabled = enabled
     }
 
