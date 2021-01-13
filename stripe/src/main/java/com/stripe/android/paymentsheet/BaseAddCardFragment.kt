@@ -250,6 +250,8 @@ internal abstract class BaseAddCardFragment(
                 bottomMargin = layoutMarginVertical
             }
         }
+
+        cardMultilineWidget.setCvcIcon(R.drawable.stripe_ic_paymentsheet_cvc)
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {

@@ -289,6 +289,8 @@ class CardMultilineWidget @JvmOverloads constructor(
     @StringRes
     internal var expirationDateHintRes = R.string.expiry_date_hint
 
+    private var showCvcIconInCvcField: Boolean = false
+
     init {
         orientation = VERTICAL
 
@@ -329,7 +331,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                     postalCodeEditText.requestFocus()
                 }
                 cardInputListener?.onCvcComplete()
-            } else {
+            } else if (!showCvcIconInCvcField) {
                 flipToCvcIconIfNotFinished()
             }
             cvcEditText.shouldShowError = false
@@ -436,6 +438,18 @@ class CardMultilineWidget @JvmOverloads constructor(
     fun setCvcLabel(cvcLabel: String?) {
         customCvcLabel = cvcLabel
         updateCvc()
+    }
+
+    @JvmSynthetic
+    internal fun setCvcIcon(resId: Int?) {
+        if (resId != null) {
+            cvcInputLayout.setEndIconDrawable(resId)
+            cvcInputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
+        } else {
+            cvcInputLayout.setEndIconDrawable(0)
+            cvcInputLayout.endIconMode = TextInputLayout.END_ICON_NONE
+        }
+        showCvcIconInCvcField = resId != null
     }
 
     /**
@@ -643,7 +657,9 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                flipToCvcIconIfNotFinished()
+                if (!showCvcIconInCvcField) {
+                    flipToCvcIconIfNotFinished()
+                }
                 cvcEditText.setHintDelayed(cvcHelperText, COMMON_HINT_DELAY)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             } else {
