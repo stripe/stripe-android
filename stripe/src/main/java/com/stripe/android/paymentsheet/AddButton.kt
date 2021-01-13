@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
@@ -32,6 +33,7 @@ internal class AddButton @JvmOverloads constructor(
 
         isClickable = true
         isEnabled = false
+        isGone = true
     }
 
     fun onCompletedState(state: PaymentOptionViewState.Completed) {

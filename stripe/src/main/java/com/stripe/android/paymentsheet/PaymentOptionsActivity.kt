@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -143,6 +144,12 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                 }
             }
         }
+
+        viewModel.userSelection.observe(this) { paymentSelection ->
+            if (paymentSelection != null) {
+                onActionCompleted(paymentSelection)
+            }
+        }
     }
 
     private fun setupAddButton(addButton: AddButton) {
@@ -206,6 +213,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                 }
             }
         }
+        viewBinding.addButton.isVisible = transitionTarget != PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 

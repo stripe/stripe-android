@@ -2,12 +2,15 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.ui.SheetMode
@@ -62,21 +65,10 @@ class PaymentOptionsActivityTest {
 
     @Test
     fun `click outside of bottom sheet should return cancel result`() {
-        val intent = Intent(
-            ApplicationProvider.getApplicationContext(),
-            PaymentOptionsActivity::class.java
-        ).putExtra(
-            ActivityStarter.Args.EXTRA,
-            PaymentOptionsActivityStarter.Args(
-                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                paymentMethods = emptyList(),
-                sessionId = SessionId(),
-                config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
-            )
-        )
-
         val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(
+            createIntent(emptyList())
+        ).onActivity { activity ->
             // wait for bottom sheet to animate in
             testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
@@ -92,6 +84,57 @@ class PaymentOptionsActivityTest {
                 PaymentOptionResult.Cancelled(null)
             )
         }
+    }
+
+    @Test
+    fun `AddButton should be hidden when showing payment options`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(PaymentMethodFixtures.createCards(5))
+        ).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            viewModel.updateMode(SheetMode.Wrapped)
+
+            assertThat(activity.viewBinding.addButton.isVisible)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `AddButton should be visible when showing add payment method form`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(emptyList())
+        ).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            viewModel.updateMode(SheetMode.Wrapped)
+
+            assertThat(activity.viewBinding.addButton.isVisible)
+                .isTrue()
+        }
+    }
+
+    private fun createIntent(
+        paymentMethods: List<PaymentMethod>
+    ): Intent {
+        return Intent(
+            ApplicationProvider.getApplicationContext(),
+            PaymentOptionsActivity::class.java
+        ).putExtra(
+            ActivityStarter.Args.EXTRA,
+            PaymentOptionsActivityStarter.Args(
+                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                paymentMethods = paymentMethods,
+                sessionId = SessionId(),
+                config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
+            )
+        )
     }
 
     private fun activityScenario(
