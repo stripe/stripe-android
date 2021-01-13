@@ -210,6 +210,10 @@ internal abstract class BaseAddCardFragment(
             )
 
             editText.setBackgroundResource(android.R.color.transparent)
+
+            editText.setErrorColor(
+                ContextCompat.getColor(requireActivity(), R.color.stripe_paymentsheet_form_error)
+            )
         }
 
         cardMultilineWidget.expirationDateHintRes = R.string.stripe_paymentsheet_expiration_date_hint
