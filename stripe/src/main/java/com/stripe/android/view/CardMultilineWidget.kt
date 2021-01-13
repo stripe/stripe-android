@@ -298,6 +298,27 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateBrandUi()
     }
 
+    internal var cardNumberErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
+        ErrorListener(cardNumberTextInputLayout)
+    ) { _, _, newValue ->
+        cardNumberEditText.setErrorMessageListener(newValue)
+    }
+    internal var expirationDateErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
+        ErrorListener(expiryTextInputLayout)
+    ) { _, _, newValue ->
+        expiryDateEditText.setErrorMessageListener(newValue)
+    }
+    internal var cvcErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
+        ErrorListener(cvcInputLayout)
+    ) { _, _, newValue ->
+        cvcEditText.setErrorMessageListener(newValue)
+    }
+    internal var postalCodeErrorListener: StripeEditText.ErrorMessageListener? by Delegates.observable(
+        ErrorListener(postalInputLayout)
+    ) { _, _, newValue ->
+        postalCodeEditText.setErrorMessageListener(newValue)
+    }
+
     init {
         orientation = VERTICAL
 
@@ -306,12 +327,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         // This sets the value of shouldShowPostalCode
         attrs?.let { checkAttributeSet(it) }
 
-        initTextInputLayoutErrorHandlers(
-            cardNumberTextInputLayout,
-            expiryTextInputLayout,
-            cvcInputLayout,
-            postalInputLayout
-        )
+        initTextInputLayoutErrorHandlers()
 
         initFocusChangeListeners()
         initDeleteEmptyListeners()
@@ -674,16 +690,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
     }
 
-    private fun initTextInputLayoutErrorHandlers(
-        cardInputLayout: TextInputLayout,
-        expiryInputLayout: TextInputLayout,
-        cvcTextInputLayout: TextInputLayout,
-        postalInputLayout: TextInputLayout
-    ) {
-        cardNumberEditText.setErrorMessageListener(ErrorListener(cardInputLayout))
-        expiryDateEditText.setErrorMessageListener(ErrorListener(expiryInputLayout))
-        cvcEditText.setErrorMessageListener(ErrorListener(cvcTextInputLayout))
-        postalCodeEditText.setErrorMessageListener(ErrorListener(postalInputLayout))
+    private fun initTextInputLayoutErrorHandlers() {
+        cardNumberEditText.setErrorMessageListener(cardNumberErrorListener)
+        expiryDateEditText.setErrorMessageListener(expirationDateErrorListener)
+        cvcEditText.setErrorMessageListener(cvcErrorListener)
+        postalCodeEditText.setErrorMessageListener(postalCodeErrorListener)
     }
 
     private fun updateBrandUi() {
