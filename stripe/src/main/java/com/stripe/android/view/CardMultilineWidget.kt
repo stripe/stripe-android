@@ -291,6 +291,12 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private var showCvcIconInCvcField: Boolean = false
 
+    internal var cardBrandIconSupplier: CardBrandIconSupplier by Delegates.observable(
+        DEFAULT_CARD_BRAND_ICON_SUPPLIER
+    ) { _, _, _ ->
+        updateBrandUi()
+    }
+
     init {
         orientation = VERTICAL
 
@@ -701,9 +707,10 @@ class CardMultilineWidget @JvmOverloads constructor(
                 shouldTint = false
             )
         } else {
+            val cardBrandIcon = cardBrandIconSupplier.get(cardBrand)
             updateCardNumberIcon(
-                iconResourceId = cardBrand.icon,
-                shouldTint = CardBrand.Unknown == cardBrand
+                iconResourceId = cardBrandIcon.iconResourceId,
+                shouldTint = cardBrandIcon.shouldTint
             )
         }
     }
@@ -738,9 +745,25 @@ class CardMultilineWidget @JvmOverloads constructor(
         )
     }
 
+    internal fun interface CardBrandIconSupplier {
+        fun get(cardBrand: CardBrand): CardBrandIcon
+    }
+
+    internal data class CardBrandIcon(
+        val iconResourceId: Int,
+        val shouldTint: Boolean = false
+    )
+
     private companion object {
         private const val CARD_MULTILINE_TOKEN = "CardMultilineView"
         private const val CARD_NUMBER_HINT_DELAY = 120L
         private const val COMMON_HINT_DELAY = 90L
+
+        private val DEFAULT_CARD_BRAND_ICON_SUPPLIER = CardBrandIconSupplier { cardBrand ->
+            CardBrandIcon(
+                cardBrand.icon,
+                cardBrand == CardBrand.Unknown
+            )
+        }
     }
 }
