@@ -69,6 +69,7 @@
         <item name="android:padding">4dp</item>
         <item name="android:clickable">false</item>
         <item name="android:focusable">false</item>
+        <item name="rippleColor">@android:color/transparent</item>
         <item name="cardElevation">@dimen/stripe_paymentsheet_card_elevation</item>
         <item name="checkedIcon">@null</item>
         <item name="strokeWidth">2dp</item>
@@ -127,6 +128,7 @@
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:background">@drawable/stripe_paymentsheet_form_states</item>
+        <item name="android:textColorHint">@color/stripe_paymentsheet_textinputlayout_hint</item>
     </style>
 
     <style name="StripePaymentSheetAutocompleteTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
