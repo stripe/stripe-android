@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
+import com.stripe.android.view.StripeEditText
 
 /**
  * A `Fragment` for adding new card payment method.
@@ -254,6 +255,8 @@ internal abstract class BaseAddCardFragment(
                 topMargin = layoutMarginVertical
                 bottomMargin = layoutMarginVertical
             }
+            layout.isErrorEnabled = false
+            layout.error = null
         }
 
         cardMultilineWidget.setCvcIcon(R.drawable.stripe_ic_paymentsheet_cvc)
@@ -273,6 +276,24 @@ internal abstract class BaseAddCardFragment(
                     }
                 )
             }
+
+        cardMultilineWidget.cardNumberErrorListener =
+            StripeEditText.ErrorMessageListener { errorMessage ->
+                onCardError(errorMessage)
+            }
+        cardMultilineWidget.expirationDateErrorListener =
+            StripeEditText.ErrorMessageListener { errorMessage ->
+                onCardError(errorMessage)
+            }
+        cardMultilineWidget.cvcErrorListener =
+            StripeEditText.ErrorMessageListener { errorMessage ->
+                onCardError(errorMessage)
+            }
+        cardMultilineWidget.postalCodeErrorListener = null
+    }
+
+    private fun onCardError(errorMessage: String?) {
+        // TODO(mshafrir-stripe): render error message
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
