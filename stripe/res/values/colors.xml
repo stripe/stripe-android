@@ -25,7 +25,8 @@
     <color name="stripe_paymentsheet_form">#757575</color>
     <color name="stripe_paymentsheet_title_text">#303030</color>
     <color name="stripe_paymentsheet_header_text">#565656</color>
-    <color name="stripe_paymentsheet_selected_payment_method">#1EA672</color>
+    <color name="stripe_paymentsheet_payment_option_unselected_stroke">@android:color/transparent</color>
+    <color name="stripe_paymentsheet_payment_option_selected_stroke">#1EA672</color>
     <color name="stripe_paymentsheet_payment_method_label_text">#303030</color>
     <color name="stripe_paymentsheet_add_card_tint">#697386</color>
     <color name="stripe_paymentsheet_add_card_background">#E3E8EE</color>
