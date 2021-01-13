@@ -66,6 +66,8 @@
     <dimen name="stripe_paymentsheet_primarybutton_height">48sp</dimen>
     <dimen name="stripe_paymentsheet_primarybutton_margin">3dp</dimen>
     <dimen name="stripe_paymentsheet_card_elevation">2dp</dimen>
+    <dimen name="stripe_paymentsheet_paymentoption_card_height">25dp</dimen>
+    <dimen name="stripe_paymentsheet_paymentoption_card_width">35dp</dimen>
     <dimen name="stripe_paymentsheet_paymentoptions_margin_top">10dp</dimen>
     <dimen name="stripe_paymentsheet_paymentoptions_margin_bottom">26dp</dimen>
     <dimen name="stripe_paymentsheet_form_textsize">14sp</dimen>
