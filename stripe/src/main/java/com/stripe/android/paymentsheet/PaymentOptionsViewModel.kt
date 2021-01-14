@@ -1,12 +1,15 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
@@ -21,6 +24,9 @@ internal class PaymentOptionsViewModel(
     googlePayRepository = googlePayRepository,
     prefsRepository = prefsRepository
 ) {
+    private val _userSelection = MutableLiveData<PaymentSelection>()
+    val userSelection: LiveData<PaymentSelection> = _userSelection
+
     init {
         _paymentIntent.value = args.paymentIntent
         _paymentMethods.value = args.paymentMethods
@@ -33,6 +39,13 @@ internal class PaymentOptionsViewModel(
             prefsRepository.savePaymentSelection(paymentSelection)
             _viewState.value = PaymentOptionViewState.Completed(paymentSelection)
         }
+    }
+
+    fun onUserSelection(
+        paymentSelection: PaymentSelection
+    ) {
+        selectPaymentOption()
+        _userSelection.value = paymentSelection
     }
 
     internal enum class TransitionTarget(

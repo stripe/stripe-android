@@ -25,10 +25,7 @@ internal abstract class BasePaymentMethodsListFragment(
     protected val adapter: PaymentOptionsAdapter by lazy {
         PaymentOptionsAdapter(
             fragmentViewModel.currentPaymentSelection,
-            paymentMethodSelectedListener = {
-                fragmentViewModel.currentPaymentSelection = it
-                sheetViewModel.updateSelection(it)
-            },
+            paymentOptionSelectedListener = ::onPaymentOptionSelected,
             addCardClickListener = {
                 transitionToAddPaymentMethod()
             }
@@ -76,6 +73,14 @@ internal abstract class BasePaymentMethodsListFragment(
     override fun onDestroyView() {
         super.onDestroyView()
         _viewBinding = null
+    }
+
+    open fun onPaymentOptionSelected(
+        paymentSelection: PaymentSelection,
+        isClick: Boolean
+    ) {
+        fragmentViewModel.currentPaymentSelection = paymentSelection
+        sheetViewModel.updateSelection(paymentSelection)
     }
 
     internal class PaymentMethodsViewModel : ViewModel() {
