@@ -27,7 +27,7 @@ import kotlin.test.Test
  */
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class PaymentOptionsAdapterTest {
+class PaymentMethodsAdapterTest {
     private val adapterDataObserver: RecyclerView.AdapterDataObserver = mock()
     private val listener: PaymentMethodsAdapter.Listener = mock()
 

@@ -86,7 +86,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             val recycler = recyclerView(it)
             assertThat(recycler.adapter).isInstanceOf(PaymentOptionsAdapter::class.java)
             val adapter = recycler.adapter as PaymentOptionsAdapter
-            adapter.paymentMethodSelectedListener(savedPaymentMethod)
+            adapter.paymentOptionSelectedListener(savedPaymentMethod, true)
             idleLooper()
 
             assertThat(fragmentViewModel(it).currentPaymentSelection)

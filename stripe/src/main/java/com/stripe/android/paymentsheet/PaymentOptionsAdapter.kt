@@ -16,7 +16,7 @@ import kotlin.properties.Delegates
 
 internal class PaymentOptionsAdapter(
     private var paymentSelection: PaymentSelection?,
-    val paymentMethodSelectedListener: (PaymentSelection) -> Unit,
+    val paymentOptionSelectedListener: (PaymentSelection, Boolean) -> Unit,
     val addCardClickListener: View.OnClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var shouldShowGooglePay: Boolean by Delegates.observable(false) { _, _, _ ->
@@ -54,7 +54,8 @@ internal class PaymentOptionsAdapter(
     }
 
     private fun onPaymentMethodSelected(
-        clickedPaymentMethod: PaymentMethod
+        clickedPaymentMethod: PaymentMethod,
+        isClick: Boolean
     ) {
         if (selectedPaymentMethod?.id != clickedPaymentMethod.id) {
             // selected a new Payment Method
@@ -71,7 +72,7 @@ internal class PaymentOptionsAdapter(
                 notifyItemChanged(GOOGLE_PAY_POSITION)
             }
 
-            paymentMethodSelectedListener(paymentSelection)
+            paymentOptionSelectedListener(paymentSelection, isClick)
         }
     }
 
@@ -86,7 +87,7 @@ internal class PaymentOptionsAdapter(
 
             // select Google Pay item
             notifyItemChanged(GOOGLE_PAY_POSITION)
-            paymentMethodSelectedListener(PaymentSelection.GooglePay)
+            paymentOptionSelectedListener(PaymentSelection.GooglePay, true)
         }
     }
 
@@ -146,7 +147,8 @@ internal class PaymentOptionsAdapter(
             holder.setSelected(paymentMethod.id == selectedPaymentMethod?.id)
             holder.itemView.setOnClickListener {
                 onPaymentMethodSelected(
-                    getPaymentMethodAtPosition(holder.adapterPosition)
+                    getPaymentMethodAtPosition(holder.adapterPosition),
+                    true
                 )
             }
         } else if (holder is GooglePayViewHolder) {
@@ -185,7 +187,7 @@ internal class PaymentOptionsAdapter(
             PaymentSelection.Saved(it)
         }
         paymentSelection?.let {
-            paymentMethodSelectedListener(it)
+            paymentOptionSelectedListener(it, false)
         }
     }
 
