@@ -140,8 +140,8 @@ internal abstract class BaseAddCardFragment(
             override fun onExpirationComplete() {}
 
             override fun onCvcComplete() {
-                // move to postal code when CVC is complete
-                billingAddressView.postalCodeLayout.requestFocus()
+                // move to first field when CVC is complete
+                billingAddressView.focusFirstField()
             }
         })
 
