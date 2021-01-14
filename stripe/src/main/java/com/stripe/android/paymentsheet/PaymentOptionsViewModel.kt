@@ -14,7 +14,7 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
 internal class PaymentOptionsViewModel(
-    args: PaymentOptionsActivityStarter.Args,
+    args: PaymentOptionContract.Args,
     googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter
@@ -63,7 +63,7 @@ internal class PaymentOptionsViewModel(
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentOptionsActivityStarter.Args
+        private val starterArgsSupplier: () -> PaymentOptionContract.Args
     ) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {

@@ -39,7 +39,7 @@ class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
     private val viewModel = PaymentOptionsViewModel(
-        args = PaymentOptionsActivityStarter.Args(
+        args = PaymentOptionContract.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
             sessionId = SessionId(),
@@ -128,7 +128,7 @@ class PaymentOptionsActivityTest {
             PaymentOptionsActivity::class.java
         ).putExtra(
             ActivityStarter.Args.EXTRA,
-            PaymentOptionsActivityStarter.Args(
+            PaymentOptionContract.Args(
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 paymentMethods = paymentMethods,
                 sessionId = SessionId(),
