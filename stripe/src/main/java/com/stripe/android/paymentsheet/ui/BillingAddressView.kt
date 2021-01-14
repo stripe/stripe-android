@@ -329,6 +329,17 @@ internal class BillingAddressView @JvmOverloads constructor(
         _address.value = createAddress()
     }
 
+    fun focusFirstField() {
+        when (level) {
+            PaymentSheet.BillingAddressCollectionLevel.Automatic -> {
+                postalCodeLayout.requestFocus()
+            }
+            PaymentSheet.BillingAddressCollectionLevel.Required -> {
+                viewBinding.address1Layout.requestFocus()
+            }
+        }
+    }
+
     private val EditText.value: String?
         get() {
             return takeIf { it.isVisible }?.text?.toString().takeUnless {
