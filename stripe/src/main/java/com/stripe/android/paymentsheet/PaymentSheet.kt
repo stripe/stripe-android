@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import com.stripe.android.ApiResultCallback
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.parcelize.Parcelize
 
@@ -133,7 +131,7 @@ class PaymentSheet internal constructor(
         fun onPaymentResult(
             requestCode: Int,
             data: Intent?,
-            callback: ApiResultCallback<PaymentIntentResult>
+            callback: PaymentSheetResultCallback
         )
 
         sealed class Result {

@@ -136,7 +136,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     override fun onPaymentResult(
         requestCode: Int,
         data: Intent?,
-        callback: ApiResultCallback<PaymentIntentResult>
+        callback: PaymentSheetResultCallback
     ) {
         if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
             paymentController.handlePaymentResult(
@@ -145,15 +145,26 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                     override fun onSuccess(result: PaymentIntentResult) {
                         if (result.outcome == StripeIntentResult.Outcome.SUCCEEDED) {
                             eventReporter.onPaymentSuccess(paymentSelection)
+                            callback.onComplete(
+                                PaymentResult.Succeeded(result.intent)
+                            )
                         } else {
                             eventReporter.onPaymentFailure(paymentSelection)
+
+                            callback.onComplete(
+                                PaymentResult.Failed(
+                                    RuntimeException(result.failureMessage),
+                                    result.intent
+                                )
+                            )
                         }
-                        callback.onSuccess(result)
                     }
 
                     override fun onError(e: Exception) {
                         eventReporter.onPaymentFailure(paymentSelection)
-                        callback.onError(e)
+                        callback.onComplete(
+                            PaymentResult.Failed(e, null)
+                        )
                     }
                 }
             )
@@ -161,21 +172,30 @@ internal class DefaultPaymentSheetFlowController internal constructor(
             when (val googlePayResult = StripeGooglePayContract.Result.fromIntent(data)) {
                 is StripeGooglePayContract.Result.PaymentIntent -> {
                     eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-                    callback.onSuccess(googlePayResult.paymentIntentResult)
+                    callback.onComplete(
+                        PaymentResult.Succeeded(
+                            googlePayResult.paymentIntentResult.intent
+                        )
+                    )
                 }
                 is StripeGooglePayContract.Result.Error -> {
                     eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                     val exception = googlePayResult.exception
-                    callback.onError(
-                        when (exception) {
-                            is Exception -> exception
-                            else -> RuntimeException(exception)
-                        }
+                    callback.onComplete(
+                        PaymentResult.Failed(
+                            exception,
+                            null
+                        )
                     )
                 }
                 else -> {
                     eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                    // TODO(mshafrir-stripe): handle other outcomes; for now, treat these as payment failures
+                    callback.onComplete(
+                        PaymentResult.Failed(
+                            RuntimeException("Google Pay attempt failed"),
+                            null
+                        )
+                    )
                 }
             }
         }
