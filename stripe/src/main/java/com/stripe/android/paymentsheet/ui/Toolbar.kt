@@ -3,17 +3,17 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.databinding.StripePaymentSheetToolbarBinding
 
 internal class Toolbar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+    defStyleAttr: Int = com.google.android.material.R.attr.toolbarStyle
+) : MaterialToolbar(context, attrs, defStyleAttr) {
 
     private val _action = MutableLiveData<Action>()
     internal val action: LiveData<Action> = _action
