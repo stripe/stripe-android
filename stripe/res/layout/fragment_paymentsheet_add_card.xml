@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="@dimen/stripe_paymentsheet_outer_spacing_top"
-    android:paddingHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
     tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment"
     android:layout_marginBottom="@dimen/stripe_paymentsheet_form_bottom_margin">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/stripe_paymentsheet_outer_spacing_top"
+        android:paddingHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal">
         <LinearLayout
             android:id="@+id/top_container"
             android:layout_width="match_parent"
