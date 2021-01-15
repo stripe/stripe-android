@@ -2,12 +2,11 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.isA
+import com.nhaarman.mockitokotlin2.argWhere
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
@@ -126,8 +125,8 @@ class DefaultPaymentSheetFlowControllerTest {
     }
 
     @Test
-    fun `onPaymentResult with Google Pay PaymentIntent result should invoke callback's onSuccess()`() {
-        val callback = mock<ApiResultCallback<PaymentIntentResult>>()
+    fun `onPaymentResult with Google Pay PaymentIntent result should invoke callback with Succeeded`() {
+        val callback = mock<PaymentSheetResultCallback>()
         flowController.onPaymentResult(
             StripeGooglePayLauncher.REQUEST_CODE,
             Intent().putExtras(
@@ -137,23 +136,29 @@ class DefaultPaymentSheetFlowControllerTest {
             ),
             callback = callback
         )
-        verify(callback).onSuccess(PAYMENT_INTENT_RESULT)
+        verify(callback).onComplete(
+            PaymentResult.Succeeded(PAYMENT_INTENT_RESULT.intent)
+        )
         verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
     }
 
     @Test
-    fun `onPaymentResult with Google Pay Error result should invoke callback's onError()`() {
-        val callback = mock<ApiResultCallback<PaymentIntentResult>>()
+    fun `onPaymentResult with Google Pay Error result should invoke callback with Failed()`() {
+        val callback = mock<PaymentSheetResultCallback>()
         flowController.onPaymentResult(
             StripeGooglePayLauncher.REQUEST_CODE,
             Intent().putExtras(
                 StripeGooglePayContract.Result.Error(
-                    exception = RuntimeException()
+                    exception = RuntimeException("Google Pay failed")
                 ).toBundle()
             ),
             callback = callback
         )
-        verify(callback).onError(isA<RuntimeException>())
+        verify(callback).onComplete(
+            argWhere { paymentResult ->
+                (paymentResult as? PaymentResult.Failed)?.error?.message == "Google Pay failed"
+            }
+        )
         verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
     }
 
