@@ -3,13 +3,9 @@ package com.stripe.example
 import android.app.Application
 import android.os.Build
 import android.os.StrictMode
-import com.facebook.stetho.Stetho
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.example.service.ExampleEphemeralKeyProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class ExampleApplication : Application() {
 
@@ -46,10 +42,6 @@ class ExampleApplication : Application() {
         )
 
         super.onCreate()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            Stetho.initializeWithDefaults(this@ExampleApplication)
-        }
 
         CustomerSession.initCustomerSession(
             this,
