@@ -3,8 +3,7 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import com.stripe.android.ApiResultCallback
-import com.stripe.android.PaymentIntentResult
+import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.example.databinding.ActivityPaymentSheetCustomBinding
@@ -103,19 +102,26 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             paymentSheetFlowController?.onPaymentResult(
                 requestCode,
                 data,
-                object : ApiResultCallback<PaymentIntentResult> {
-                    override fun onSuccess(result: PaymentIntentResult) {
-                        viewModel.status.postValue(
-                            "Completed payment with outcome: ${result.outcome}"
-                        )
-                    }
-
-                    override fun onError(e: Exception) {
-                        viewModel.status.postValue("Payment failed: ${e.message}")
-                    }
-                }
+                ::onPaymentSheetResult
             )
         }
+    }
+
+    private fun onPaymentSheetResult(
+        paymentResult: PaymentResult
+    ) {
+        val statusString = when (paymentResult) {
+            is PaymentResult.Cancelled -> {
+                "MC Completed with status: Cancelled"
+            }
+            is PaymentResult.Failed -> {
+                "MC Completed with status: Failed(${paymentResult.error.message}"
+            }
+            is PaymentResult.Succeeded -> {
+                "MC Completed with status: Succeeded"
+            }
+        }
+        viewModel.status.value = viewModel.status.value + "\n\n$statusString"
     }
 
     private fun onPaymentOption(paymentOption: PaymentOption?) {
