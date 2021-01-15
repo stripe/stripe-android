@@ -7,9 +7,9 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
-import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.ui.Toolbar
 
 /**
@@ -46,9 +45,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     @VisibleForTesting
-    internal val bottomSheetBehavior by lazy {
-        BottomSheetBehavior.from(viewBinding.bottomSheet)
-    }
+    internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
 
     override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(
@@ -63,7 +60,8 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         get() = viewBinding.fragmentContainer.id
 
     override val rootView: View by lazy { viewBinding.root }
-
+    override val bottomSheet: ConstraintLayout by lazy { viewBinding.bottomSheet }
+    override val toolbar: Toolbar by lazy { viewBinding.toolbar }
     override val messageView: TextView by lazy { viewBinding.message }
 
     override val eventReporter: EventReporter by lazy {
@@ -90,24 +88,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             animateOut(
                 PaymentOptionResult.Failed(it)
             )
-        }
-        viewModel.sheetMode.observe(this) { mode ->
-            when (mode) {
-                SheetMode.Full,
-                SheetMode.FullCollapsed -> {
-                    viewBinding.toolbar.showBack()
-                }
-                SheetMode.Wrapped -> {
-                    viewBinding.toolbar.showClose()
-                }
-                else -> {
-                    // mode == null
-                }
-            }
-
-            viewBinding.bottomSheet.updateLayoutParams { height = mode.height }
-
-            bottomSheetController.updateState(mode)
         }
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
             if (shouldFinish) {
