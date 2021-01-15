@@ -10,7 +10,7 @@
     <color name="stripe_text_color_secondary">@android:color/secondary_text_dark</color>
 
     <!-- PaymentSheet -->
-    <color name="stripe_paymentsheet_background">#1C1C1E</color>
+    <color name="stripe_paymentsheet_background">#2e2e2e</color>
     <color name="stripe_paymentsheet_title_text">#DEFFFFFF</color>
     <color name="stripe_paymentsheet_header_text">#99FFFFFF</color>
     <color name="stripe_paymentsheet_textinputlayout_hint">#61FFFFFF</color>
