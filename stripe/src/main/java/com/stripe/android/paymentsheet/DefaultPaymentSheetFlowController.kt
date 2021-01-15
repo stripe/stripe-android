@@ -64,7 +64,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     ) {
         PaymentOptionsActivityStarter(activity)
             .startForResult(
-                PaymentOptionsActivityStarter.Args(
+                PaymentOptionContract.Args(
                     paymentIntent = paymentIntent,
                     paymentMethods = paymentMethods,
                     sessionId = sessionId,

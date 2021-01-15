@@ -41,8 +41,8 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
 
     override val viewModel: PaymentOptionsViewModel by viewModels { viewModelFactory }
 
-    private val starterArgs: PaymentOptionsActivityStarter.Args? by lazy {
-        PaymentOptionsActivityStarter.Args.fromIntent(intent)
+    private val starterArgs: PaymentOptionContract.Args? by lazy {
+        PaymentOptionContract.Args.fromIntent(intent)
     }
 
     @VisibleForTesting
