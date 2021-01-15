@@ -8,6 +8,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.AppBarLayout
+import com.stripe.android.R
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
@@ -22,6 +24,7 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
 
     abstract val rootView: View
     abstract val bottomSheet: ConstraintLayout
+    abstract val appbar: AppBarLayout
     abstract val toolbar: Toolbar
     abstract val messageView: TextView
 
@@ -49,6 +52,12 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         }
 
         viewModel.sheetMode.observe(this) { mode ->
+            appbar.elevation = if (mode == SheetMode.Full) {
+                resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
+            } else {
+                0f
+            }
+
             if (supportFragmentManager.backStackEntryCount == 0) {
                 toolbar.showClose()
             } else {

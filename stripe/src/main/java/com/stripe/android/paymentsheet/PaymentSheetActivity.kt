@@ -13,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
@@ -61,6 +62,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     override val rootView: View by lazy { viewBinding.root }
     override val bottomSheet: ConstraintLayout by lazy { viewBinding.bottomSheet }
+    override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: Toolbar by lazy { viewBinding.toolbar }
     override val messageView: TextView by lazy { viewBinding.message }
 
