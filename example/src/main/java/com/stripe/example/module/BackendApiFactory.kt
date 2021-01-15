@@ -1,7 +1,6 @@
 package com.stripe.example.module
 
 import android.content.Context
-import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.google.gson.GsonBuilder
 import com.stripe.example.Settings
 import com.stripe.example.service.BackendApi
@@ -29,7 +28,6 @@ internal class BackendApiFactory internal constructor(private val backendUrl: St
             .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(logging)
-            .addNetworkInterceptor(StethoInterceptor())
             .build()
 
         val gson = GsonBuilder()
