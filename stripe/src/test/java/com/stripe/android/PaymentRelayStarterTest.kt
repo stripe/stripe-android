@@ -23,9 +23,8 @@ import kotlin.test.Test
 class PaymentRelayStarterTest {
     private val activity = mock<Activity>()
     private val intentArgumentCaptor = argumentCaptor<Intent>()
-    private val starter = PaymentRelayStarter.create(
-        AuthActivityStarter.Host.create(activity),
-        500
+    private val starter = PaymentRelayStarter.Legacy(
+        AuthActivityStarter.Host.create(activity)
     )
 
     @Test
@@ -33,7 +32,10 @@ class PaymentRelayStarterTest {
         starter.start(
             PaymentRelayStarter.Args.create(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
         )
-        verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
+        verify(activity).startActivityForResult(
+            intentArgumentCaptor.capture(),
+            eq(50000)
+        )
 
         assertThat(result.clientSecret).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret)
         assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
@@ -43,8 +45,16 @@ class PaymentRelayStarterTest {
     @Test
     fun start_withException_shouldSetCorrectIntentExtras() {
         val exception = APIException(RuntimeException())
-        starter.start(PaymentRelayStarter.Args.ErrorArgs(exception))
-        verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
+        starter.start(
+            PaymentRelayStarter.Args.ErrorArgs(
+                exception,
+                50000
+            )
+        )
+        verify(activity).startActivityForResult(
+            intentArgumentCaptor.capture(),
+            eq(50000)
+        )
 
         assertThat(result.clientSecret).isNull()
         assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
@@ -56,8 +66,16 @@ class PaymentRelayStarterTest {
         val exception = PermissionException(
             stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR
         )
-        starter.start(PaymentRelayStarter.Args.ErrorArgs(exception))
-        verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
+        starter.start(
+            PaymentRelayStarter.Args.ErrorArgs(
+                exception,
+                50000
+            )
+        )
+        verify(activity).startActivityForResult(
+            intentArgumentCaptor.capture(),
+            eq(50000)
+        )
 
         assertThat(result.clientSecret).isNull()
         assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
@@ -99,7 +117,8 @@ class PaymentRelayStarterTest {
                 exception = InvalidRequestException(
                     stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
                     cause = IllegalArgumentException()
-                )
+                ),
+                requestCode = 50000
             )
         )
     }

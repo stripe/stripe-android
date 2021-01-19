@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.result.ActivityResultLauncher
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -17,6 +18,7 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
@@ -602,6 +604,7 @@ internal class StripePaymentControllerTest {
             SOURCE_ID,
             MAX_TIMEOUT,
             paymentRelayStarter,
+            StripePaymentController.PAYMENT_REQUEST_CODE,
             host,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             REQUEST_OPTIONS
@@ -618,6 +621,7 @@ internal class StripePaymentControllerTest {
             SOURCE_ID,
             MAX_TIMEOUT,
             paymentRelayStarter,
+            StripePaymentController.PAYMENT_REQUEST_CODE,
             host,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             REQUEST_OPTIONS
@@ -645,6 +649,7 @@ internal class StripePaymentControllerTest {
             SOURCE_ID,
             MAX_TIMEOUT,
             paymentRelayStarter,
+            StripePaymentController.PAYMENT_REQUEST_CODE,
             host,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             REQUEST_OPTIONS
@@ -676,6 +681,7 @@ internal class StripePaymentControllerTest {
             SOURCE_ID,
             MAX_TIMEOUT,
             paymentRelayStarter,
+            StripePaymentController.PAYMENT_REQUEST_CODE,
             host,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             REQUEST_OPTIONS
@@ -883,8 +889,29 @@ internal class StripePaymentControllerTest {
             .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
     }
 
+    @Test
+    fun `bypassAuth() with ActivityResultLauncher should use ActivityResultLauncher`() {
+        verifyZeroInteractions(activity)
+
+        val launcher = FakeActivityResultLauncher(PaymentRelayContract())
+        createController(
+            paymentRelayLauncher = launcher
+        ).bypassAuth(
+            host,
+            PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+            null
+        )
+        assertThat(launcher.launchArgs)
+            .containsExactly(
+                PaymentRelayStarter.Args.PaymentIntentArgs(
+                    PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
+                )
+            )
+    }
+
     private fun createController(
-        stripeRepository: StripeRepository = FakeStripeRepository()
+        stripeRepository: StripeRepository = FakeStripeRepository(),
+        paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null
     ): StripePaymentController {
         return StripePaymentController(
             context,
@@ -898,7 +925,8 @@ internal class StripePaymentControllerTest {
             analyticsDataFactory,
             challengeProgressActivityStarter,
             alipayRepository,
-            testDispatcher
+            paymentRelayLauncher = paymentRelayLauncher,
+            workContext = testDispatcher
         )
     }
 
