@@ -3,7 +3,6 @@ package com.stripe.android
 import android.app.Activity
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
@@ -22,9 +21,9 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentRelayStarterTest {
-    private val activity: Activity = mock()
-    private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
-    private val starter: PaymentRelayStarter = PaymentRelayStarter.create(
+    private val activity = mock<Activity>()
+    private val intentArgumentCaptor = argumentCaptor<Intent>()
+    private val starter = PaymentRelayStarter.create(
         AuthActivityStarter.Host.create(activity),
         500
     )
@@ -44,7 +43,7 @@ class PaymentRelayStarterTest {
     @Test
     fun start_withException_shouldSetCorrectIntentExtras() {
         val exception = APIException(RuntimeException())
-        starter.start(PaymentRelayStarter.Args.create(exception))
+        starter.start(PaymentRelayStarter.Args.ErrorArgs(exception))
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
 
         assertThat(result.clientSecret).isNull()
@@ -57,7 +56,7 @@ class PaymentRelayStarterTest {
         val exception = PermissionException(
             stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR
         )
-        starter.start(PaymentRelayStarter.Args.create(exception))
+        starter.start(PaymentRelayStarter.Args.ErrorArgs(exception))
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
 
         assertThat(result.clientSecret).isNull()
@@ -67,52 +66,36 @@ class PaymentRelayStarterTest {
     }
 
     @Test
-    fun testParcel_withPaymentIntent() {
+    fun `PaymentIntentArgs should parcelize successfully`() {
         verifyParcelRoundtrip(
-            PaymentRelayStarter.Args(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                source = SourceFixtures.CARD,
-                exception = InvalidRequestException(
-                    stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
-                    cause = IllegalArgumentException()
-                )
+            PaymentRelayStarter.Args.PaymentIntentArgs(
+                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
             )
         )
     }
 
     @Test
-    fun testParcel_withSetupIntent() {
+    fun `SetupIntentArgs should parcelize successfully`() {
         verifyParcelRoundtrip(
-            PaymentRelayStarter.Args(
-                stripeIntent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
-                source = SourceFixtures.CARD,
-                exception = InvalidRequestException(
-                    stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
-                    cause = IllegalArgumentException()
-                )
+            PaymentRelayStarter.Args.SetupIntentArgs(
+                setupIntent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
             )
         )
     }
 
     @Test
-    fun testParcel_withoutStripeIntent() {
+    fun `SourceArgs should parcelize successfully`() {
         verifyParcelRoundtrip(
-            PaymentRelayStarter.Args(
-                stripeIntent = null,
-                source = SourceFixtures.CARD,
-                exception = InvalidRequestException(
-                    stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
-                    cause = IllegalArgumentException()
-                )
+            PaymentRelayStarter.Args.SourceArgs(
+                source = SourceFixtures.SOURCE_CARD
             )
         )
     }
 
     @Test
-    fun testParcel_withStripeIntentwithoutSource() {
+    fun `ErrorArgs should parcelize successfully`() {
         verifyParcelRoundtrip(
-            PaymentRelayStarter.Args(
-                stripeIntent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
+            PaymentRelayStarter.Args.ErrorArgs(
                 exception = InvalidRequestException(
                     stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
                     cause = IllegalArgumentException()
