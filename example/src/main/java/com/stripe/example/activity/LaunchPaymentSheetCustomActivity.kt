@@ -3,8 +3,10 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.example.databinding.ActivityPaymentSheetCustomBinding
 
@@ -13,11 +15,25 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         ActivityPaymentSheetCustomBinding.inflate(layoutInflater)
     }
 
-    private var paymentSheetFlowController: PaymentSheet.FlowController? = null
+    private lateinit var flowController: PaymentSheet.FlowController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+
+        val paymentOptionCallback = PaymentOptionCallback { paymentOption ->
+            onPaymentOption(paymentOption)
+
+        }
+        val paymentResultCallback = PaymentSheetResultCallback { paymentResult ->
+            onPaymentSheetResult(paymentResult)
+        }
+
+        flowController = PaymentSheet.FlowController.create(
+            this,
+            paymentOptionCallback,
+            paymentResultCallback
+        )
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
@@ -27,10 +43,10 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         }
 
         viewBinding.paymentMethod.setOnClickListener {
-            this.paymentSheetFlowController?.presentPaymentOptions(this)
+            flowController.presentPaymentOptions()
         }
         viewBinding.buyButton.setOnClickListener {
-            this.paymentSheetFlowController?.confirmPayment(this)
+            flowController.confirmPayment()
         }
     }
 
@@ -58,48 +74,30 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         paymentIntentClientSecret: String,
         customerConfig: PaymentSheet.CustomerConfiguration? = null
     ) {
-        PaymentSheet.FlowController.create(
-            this,
-            clientSecret = paymentIntentClientSecret,
+        flowController.init(
+            paymentIntentClientSecret = paymentIntentClientSecret,
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = merchantName,
                 customer = customerConfig,
                 googlePay = googlePayConfig,
                 billingAddressCollection = billingAddressCollection
             )
-        ) {
-            onPaymentSheetFlowControllerResult(it)
-        }
-    }
-
-    private fun onPaymentSheetFlowControllerResult(
-        result: PaymentSheet.FlowController.Result
-    ) {
-        when (result) {
-            is PaymentSheet.FlowController.Result.Success -> {
-                onPaymentSheetFlowController(result.flowController)
-            }
-            is PaymentSheet.FlowController.Result.Failure -> {
+        ) { isReady, error ->
+            if (isReady) {
+                onPaymentOption(flowController.getPaymentOption())
+            } else {
                 viewModel.status.postValue(
-                    "Failed to create PaymentSheetFlowController: ${result.error.message}"
+                    "Failed to create PaymentSheetFlowController: ${error?.message}"
                 )
             }
         }
     }
 
-    private fun onPaymentSheetFlowController(flowController: PaymentSheet.FlowController) {
-        onPaymentOption(flowController.getPaymentOption())
-        this.paymentSheetFlowController = flowController
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (paymentSheetFlowController?.isPaymentOptionResult(requestCode) == true) {
-            val paymentOption = paymentSheetFlowController?.onPaymentOptionResult(data)
-            onPaymentOption(paymentOption)
-        } else if (paymentSheetFlowController?.isPaymentResult(requestCode, data) == true) {
-            paymentSheetFlowController?.onPaymentResult(
+        if (flowController.isPaymentResult(requestCode, data)) {
+            flowController.onPaymentResult(
                 requestCode,
                 data,
                 ::onPaymentSheetResult
