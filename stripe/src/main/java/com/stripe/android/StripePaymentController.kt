@@ -175,7 +175,18 @@ internal class StripePaymentController internal constructor(
                         handleNextAction(host, stripeIntent, requestOptions)
                     },
                     onFailure = {
-                        handleError(host, PAYMENT_REQUEST_CODE, it)
+                        handleError(
+                            host,
+                            when (type) {
+                                PaymentController.StripeIntentType.PaymentIntent -> {
+                                    PAYMENT_REQUEST_CODE
+                                }
+                                PaymentController.StripeIntentType.SetupIntent -> {
+                                    SETUP_REQUEST_CODE
+                                }
+                            },
+                            it
+                        )
                     }
                 )
             }
@@ -792,7 +803,7 @@ internal class StripePaymentController internal constructor(
         stripeAccountId: String?
     ) {
         PaymentRelayStarter.create(host, SOURCE_REQUEST_CODE)
-            .start(PaymentRelayStarter.Args.create(source, stripeAccountId))
+            .start(PaymentRelayStarter.Args.SourceArgs(source, stripeAccountId))
     }
 
     private fun begin3ds2Auth(
@@ -966,7 +977,9 @@ internal class StripePaymentController internal constructor(
                 )
             )
         )
-        paymentRelayStarter.start(PaymentRelayStarter.Args.create(stripeIntent))
+        paymentRelayStarter.start(
+            PaymentRelayStarter.Args.create(stripeIntent)
+        )
     }
 
     @VisibleForTesting
@@ -1029,7 +1042,7 @@ internal class StripePaymentController internal constructor(
         paymentRelayStarter: PaymentRelayStarter
     ) = withContext(Dispatchers.Main) {
         paymentRelayStarter.start(
-            PaymentRelayStarter.Args.create(
+            PaymentRelayStarter.Args.ErrorArgs(
                 StripeException.create(throwable)
             )
         )
@@ -1300,7 +1313,7 @@ internal class StripePaymentController internal constructor(
         ) {
             PaymentRelayStarter.create(host, requestCode)
                 .start(
-                    PaymentRelayStarter.Args.create(
+                    PaymentRelayStarter.Args.ErrorArgs(
                         StripeException.create(throwable)
                     )
                 )

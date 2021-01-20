@@ -624,7 +624,9 @@ internal class StripePaymentControllerTest {
         )
         verify(paymentRelayStarter)
             .start(relayStarterArgsArgumentCaptor.capture())
-        assertThat(relayStarterArgsArgumentCaptor.firstValue.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
+        val args = relayStarterArgsArgumentCaptor.firstValue as? PaymentRelayStarter.Args.PaymentIntentArgs
+        assertThat(args?.paymentIntent)
+            .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
 
         verify(analyticsRequestExecutor)
             .executeAsync(analyticsRequestArgumentCaptor.capture())
@@ -679,8 +681,11 @@ internal class StripePaymentControllerTest {
             REQUEST_OPTIONS
         )
 
-        verify(paymentRelayStarter).start(relayStarterArgsArgumentCaptor.capture())
-        assertThat(relayStarterArgsArgumentCaptor.firstValue.exception?.message).isEqualTo(
+        verify(paymentRelayStarter)
+            .start(relayStarterArgsArgumentCaptor.capture())
+
+        val args = relayStarterArgsArgumentCaptor.firstValue as? PaymentRelayStarter.Args.ErrorArgs
+        assertThat(args?.exception?.message).isEqualTo(
             "Error encountered during 3DS2 authentication request. " +
                 "Code: 302, Detail: null, " +
                 "Description: Data could not be decrypted by the receiving system due to " +
@@ -734,8 +739,8 @@ internal class StripePaymentControllerTest {
         )
 
         verify(paymentRelayStarter).start(
-            argWhere { args ->
-                args.exception?.message == "Error while attempting to start 3DS2 challenge flow."
+            argWhere<PaymentRelayStarter.Args.ErrorArgs> { args ->
+                args.exception.message == "Error while attempting to start 3DS2 challenge flow."
             }
         )
     }
