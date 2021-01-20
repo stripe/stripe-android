@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.parcelize.Parceler
@@ -41,7 +42,7 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
     sealed class Args : Parcelable {
         abstract val requestCode: Int
 
-        abstract fun toResult(): PaymentController.Result
+        abstract fun toResult(): PaymentFlowResult.Unvalidated
 
         @Parcelize
         data class PaymentIntentArgs(
@@ -51,8 +52,8 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
             override val requestCode: Int
                 get() = StripePaymentController.PAYMENT_REQUEST_CODE
 
-            override fun toResult(): PaymentController.Result {
-                return PaymentController.Result(
+            override fun toResult(): PaymentFlowResult.Unvalidated {
+                return PaymentFlowResult.Unvalidated(
                     clientSecret = paymentIntent.clientSecret,
                     stripeAccountId = stripeAccountId
                 )
@@ -67,8 +68,8 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
             override val requestCode: Int
                 get() = StripePaymentController.SETUP_REQUEST_CODE
 
-            override fun toResult(): PaymentController.Result {
-                return PaymentController.Result(
+            override fun toResult(): PaymentFlowResult.Unvalidated {
+                return PaymentFlowResult.Unvalidated(
                     clientSecret = setupIntent.clientSecret,
                     stripeAccountId = stripeAccountId
                 )
@@ -83,8 +84,8 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
             override val requestCode: Int
                 get() = StripePaymentController.SOURCE_REQUEST_CODE
 
-            override fun toResult(): PaymentController.Result {
-                return PaymentController.Result(
+            override fun toResult(): PaymentFlowResult.Unvalidated {
+                return PaymentFlowResult.Unvalidated(
                     source = source,
                     stripeAccountId = stripeAccountId
                 )
@@ -96,8 +97,8 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
             internal val exception: StripeException,
             override val requestCode: Int
         ) : Args() {
-            override fun toResult(): PaymentController.Result {
-                return PaymentController.Result(
+            override fun toResult(): PaymentFlowResult.Unvalidated {
+                return PaymentFlowResult.Unvalidated(
                     exception = exception
                 )
             }

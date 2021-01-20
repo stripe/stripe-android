@@ -25,6 +25,7 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
@@ -313,18 +314,11 @@ internal class StripePaymentController internal constructor(
         data: Intent,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        val result = PaymentController.Result.fromIntent(data) ?: PaymentController.Result()
-        val authException = result.exception
-        if (authException is Exception) {
-            callback.onError(authException)
-            return
-        }
-
-        val clientSecret = getClientSecret(data)
-        if (clientSecret.isNullOrBlank()) {
-            callback.onError(IllegalArgumentException(CLIENT_SECRET_INTENT_ERROR))
-            return
-        }
+        val result = runCatching {
+            PaymentFlowResult.Unvalidated.fromIntent(data).validate()
+        }.onFailure {
+            callback.onError(StripeException.create(it))
+        }.getOrNull() ?: return
 
         val shouldCancelSource = result.shouldCancelSource
         val sourceId = result.sourceId.orEmpty()
@@ -339,7 +333,7 @@ internal class StripePaymentController internal constructor(
             runCatching {
                 requireNotNull(
                     stripeRepository.retrievePaymentIntent(
-                        clientSecret,
+                        result.clientSecret,
                         requestOptions,
                         expandFields = EXPAND_PAYMENT_METHOD
                     )
@@ -382,18 +376,11 @@ internal class StripePaymentController internal constructor(
         data: Intent,
         callback: ApiResultCallback<SetupIntentResult>
     ) {
-        val result = PaymentController.Result.fromIntent(data) ?: PaymentController.Result()
-        val authException = result.exception
-        if (authException is Exception) {
-            callback.onError(authException)
-            return
-        }
-
-        val clientSecret = getClientSecret(data)
-        if (clientSecret.isNullOrBlank()) {
-            callback.onError(IllegalArgumentException(CLIENT_SECRET_INTENT_ERROR))
-            return
-        }
+        val result = runCatching {
+            PaymentFlowResult.Unvalidated.fromIntent(data).validate()
+        }.onFailure {
+            callback.onError(StripeException.create(it))
+        }.getOrNull() ?: return
 
         val shouldCancelSource = result.shouldCancelSource
         val sourceId = result.sourceId.orEmpty()
@@ -408,7 +395,7 @@ internal class StripePaymentController internal constructor(
             runCatching {
                 requireNotNull(
                     stripeRepository.retrieveSetupIntent(
-                        clientSecret,
+                        result.clientSecret,
                         requestOptions,
                         expandFields = EXPAND_PAYMENT_METHOD
                     )
@@ -442,13 +429,13 @@ internal class StripePaymentController internal constructor(
         data: Intent,
         callback: ApiResultCallback<Source>
     ) {
-        val result = PaymentController.Result.fromIntent(data)
-        val sourceId = result?.sourceId.orEmpty()
-        val clientSecret = result?.clientSecret.orEmpty()
+        val result = PaymentFlowResult.Unvalidated.fromIntent(data)
+        val sourceId = result.sourceId.orEmpty()
+        val clientSecret = result.clientSecret.orEmpty()
 
         val requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
-            stripeAccount = result?.stripeAccountId
+            stripeAccount = result.stripeAccountId
         )
 
         analyticsRequestExecutor.executeAsync(
@@ -1313,8 +1300,6 @@ internal class StripePaymentController internal constructor(
 
         /**
          * Start in-app WebView activity.
-         *
-         * @param host the payment authentication result will be returned as a result to this view host
          */
         private fun beginWebAuth(
             paymentWebWebViewStarter: PaymentAuthWebViewStarter,
@@ -1372,16 +1357,9 @@ internal class StripePaymentController internal constructor(
             )
         }
 
-        @JvmSynthetic
-        internal fun getClientSecret(data: Intent): String? {
-            return PaymentController.Result.fromIntent(data)?.clientSecret
-        }
-
         private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         internal val CHALLENGE_DELAY = TimeUnit.SECONDS.toMillis(2L)
 
         private const val REQUIRED_ERROR = "API request returned an invalid response."
-
-        private const val CLIENT_SECRET_INTENT_ERROR = "Invalid client_secret value in result Intent."
     }
 }
