@@ -267,7 +267,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     override fun onUserCancel() {
         animateOut(
-            PaymentResult.Cancelled(
+            PaymentResult.Canceled(
                 viewModel.fatal.value,
                 paymentIntent = viewModel.paymentIntent.value
             )

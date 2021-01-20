@@ -118,12 +118,12 @@ internal class PaymentSheet internal constructor(
         fun init(
             paymentIntentClientSecret: String,
             configuration: Configuration,
-            onInit: (Boolean, Throwable?) -> Unit
+            callback: InitCallback
         )
 
         fun init(
             paymentIntentClientSecret: String,
-            onInit: (Boolean, Throwable?) -> Unit
+            callback: InitCallback
         )
 
         fun presentPaymentOptions()
@@ -132,12 +132,12 @@ internal class PaymentSheet internal constructor(
 
         fun isPaymentResult(
             requestCode: Int,
-            data: Intent?
+            intent: Intent?
         ): Boolean
 
         fun onPaymentResult(
             requestCode: Int,
-            data: Intent?,
+            intent: Intent?,
             callback: PaymentSheetResultCallback
         )
 
@@ -147,6 +147,13 @@ internal class PaymentSheet internal constructor(
             class Failure(
                 val error: Throwable
             ) : Result()
+        }
+
+        fun interface InitCallback {
+            fun onInit(
+                success: Boolean,
+                error: Throwable?
+            )
         }
 
         companion object {

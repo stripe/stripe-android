@@ -11,6 +11,7 @@ import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
@@ -212,7 +213,7 @@ class DefaultPaymentSheetFlowControllerTest {
         }
 
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Cancelled(null)
+            PaymentOptionResult.Canceled(null)
         )
 
         verify(paymentOptionCallback).onPaymentOption(isNull())
@@ -278,10 +279,11 @@ class DefaultPaymentSheetFlowControllerTest {
             ),
             callback = callback
         )
+
+        verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
         verify(callback).onPaymentResult(
             PaymentResult.Succeeded(PAYMENT_INTENT)
         )
-        verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
     }
 
     @Test
@@ -296,16 +298,19 @@ class DefaultPaymentSheetFlowControllerTest {
             ),
             callback = callback
         )
+
+        verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
         verify(callback).onPaymentResult(
             argWhere { paymentResult ->
                 (paymentResult as? PaymentResult.Failed)?.error?.message == "Google Pay failed"
             }
         )
-        verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
     }
 
     @Test
     fun `onGooglePayResult() when canceled should invoke callback with canceled result`() {
+        verifyZeroInteractions(eventReporter)
+
         flowController.init(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -317,7 +322,7 @@ class DefaultPaymentSheetFlowControllerTest {
         )
 
         verify(paymentResultCallback).onPaymentResult(
-            PaymentResult.Cancelled(null, null)
+            PaymentResult.Canceled(null, null)
         )
     }
 
@@ -339,8 +344,41 @@ class DefaultPaymentSheetFlowControllerTest {
             )
         )
 
+        verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
         verify(paymentResultCallback).onPaymentResult(
             PaymentResult.Succeeded(paymentIntent)
+        )
+    }
+
+    @Test
+    fun `onGooglePayResult() when payment intent result has lastPaymentError should invoke callback with failure result`() {
+        flowController.init(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
+        flowController.onGooglePayResult(
+            StripeGooglePayContract.Result.PaymentIntent(
+                PaymentIntentResult(
+                    intent = paymentIntent,
+                    outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+        )
+
+        verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
+        verify(paymentResultCallback).onPaymentResult(
+            argWhere { paymentResult ->
+                when (paymentResult) {
+                    is PaymentResult.Failed -> {
+                        paymentResult.error.message == "Failed to confirm PaymentIntent. The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again." &&
+                            paymentResult.paymentIntent == PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
+                    }
+                    else -> false
+                }
+            }
         )
     }
 

@@ -21,7 +21,7 @@ internal sealed class PaymentResult(
     ) : PaymentResult(Activity.RESULT_CANCELED)
 
     @Parcelize
-    data class Cancelled(
+    data class Canceled(
         val mostRecentError: Throwable?,
         val paymentIntent: PaymentIntent?
     ) : PaymentResult(Activity.RESULT_CANCELED)

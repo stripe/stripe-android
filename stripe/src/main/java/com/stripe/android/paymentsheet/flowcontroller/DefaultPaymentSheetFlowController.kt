@@ -73,28 +73,28 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     override fun init(
         paymentIntentClientSecret: String,
         configuration: PaymentSheet.Configuration,
-        onInit: (Boolean, Throwable?) -> Unit
+        callback: PaymentSheet.FlowController.InitCallback
     ) {
         initScope.launch {
             val result = flowControllerInitializer.init(
                 paymentIntentClientSecret,
                 configuration
             )
-            dispatchResult(result, onInit)
+            dispatchResult(result, callback)
         }
     }
 
     override fun init(
         paymentIntentClientSecret: String,
-        onInit: (Boolean, Throwable?) -> Unit
+        callback: PaymentSheet.FlowController.InitCallback
     ) {
         initScope.launch {
             val result = flowControllerInitializer.init(paymentIntentClientSecret)
 
             if (isActive) {
-                dispatchResult(result, onInit)
+                dispatchResult(result, callback)
             } else {
-                onInit(false, null)
+                callback.onInit(false, null)
             }
         }
     }
@@ -106,7 +106,13 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     }
 
     override fun presentPaymentOptions() {
-        val initData = viewModel.initData ?: error("")
+        val initData = runCatching {
+            viewModel.initData
+        }.getOrElse {
+            error(
+                "FlowController must be successfully initialized using init() before calling presentPaymentOptions()"
+            )
+        }
 
         paymentOptionLauncher(
             PaymentOptionContract.Args(
@@ -119,7 +125,13 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     }
 
     override fun confirmPayment() {
-        val initData = viewModel.initData ?: error("")
+        val initData = runCatching {
+            viewModel.initData
+        }.getOrElse {
+            error(
+                "FlowController must be successfully initialized using init() before calling confirmPayment()"
+            )
+        }
 
         val config = initData.config
         val paymentSelection = viewModel.paymentSelection
@@ -168,29 +180,36 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     ) {
         when (googlePayResult) {
             is StripeGooglePayContract.Result.PaymentIntent -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-
                 val paymentIntentResult = googlePayResult.paymentIntentResult
                 val paymentIntent = paymentIntentResult.intent
+
+                if (paymentIntent.status == StripeIntent.Status.Succeeded) {
+                    eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
+                } else {
+                    eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                }
+
                 val paymentResult = when {
                     paymentIntent.status == StripeIntent.Status.Succeeded -> {
                         PaymentResult.Succeeded(paymentIntent)
                     }
                     paymentIntent.lastPaymentError != null -> {
                         PaymentResult.Failed(
-                            error = IllegalArgumentException(""),
+                            error = IllegalArgumentException(
+                                "Failed to confirm PaymentIntent. ${paymentIntent.lastPaymentError.message}"
+                            ),
                             paymentIntent = paymentIntent
                         )
                     }
                     paymentIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
-                        PaymentResult.Cancelled(
+                        PaymentResult.Canceled(
                             mostRecentError = null,
                             paymentIntent = paymentIntent
                         )
                     }
                     else -> {
                         PaymentResult.Failed(
-                            error = RuntimeException(),
+                            error = RuntimeException("Failed to complete payment using Google Pay"),
                             paymentIntent = paymentIntent
                         )
                     }
@@ -207,8 +226,9 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 )
             }
             is StripeGooglePayContract.Result.Canceled -> {
+                // don't log cancellations as failures
                 paymentResultCallback.onPaymentResult(
-                    PaymentResult.Cancelled(
+                    PaymentResult.Canceled(
                         mostRecentError = null,
                         paymentIntent = null
                     )
@@ -221,9 +241,12 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         }
     }
 
-    override fun isPaymentResult(requestCode: Int, data: Intent?): Boolean {
+    override fun isPaymentResult(
+        requestCode: Int,
+        intent: Intent?
+    ): Boolean {
         return requestCode == StripeGooglePayLauncher.REQUEST_CODE ||
-            paymentController.shouldHandlePaymentResult(requestCode, data)
+            paymentController.shouldHandlePaymentResult(requestCode, intent)
     }
 
     /**
@@ -232,12 +255,15 @@ internal class DefaultPaymentSheetFlowController internal constructor(
      */
     override fun onPaymentResult(
         requestCode: Int,
-        data: Intent?,
+        intent: Intent?,
         callback: PaymentSheetResultCallback
     ) {
-        if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
+        if (intent == null) {
+            return
+        }
+        if (paymentController.shouldHandlePaymentResult(requestCode, intent)) {
             paymentController.handlePaymentResult(
-                data,
+                intent,
                 object : ApiResultCallback<PaymentIntentResult> {
                     override fun onSuccess(result: PaymentIntentResult) {
                         if (result.outcome == StripeIntentResult.Outcome.SUCCEEDED) {
@@ -265,8 +291,8 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                     }
                 }
             )
-        } else if (data != null && requestCode == StripeGooglePayLauncher.REQUEST_CODE) {
-            when (val googlePayResult = StripeGooglePayContract.Result.fromIntent(data)) {
+        } else if (requestCode == StripeGooglePayLauncher.REQUEST_CODE) {
+            when (val googlePayResult = StripeGooglePayContract.Result.fromIntent(intent)) {
                 is StripeGooglePayContract.Result.PaymentIntent -> {
                     eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
                     callback.onPaymentResult(
@@ -300,21 +326,21 @@ internal class DefaultPaymentSheetFlowController internal constructor(
 
     private suspend fun dispatchResult(
         result: FlowControllerInitializer.InitResult,
-        onInit: (Boolean, Throwable?) -> Unit
+        callback: PaymentSheet.FlowController.InitCallback
     ) = withContext(Dispatchers.Main) {
         when (result) {
             is FlowControllerInitializer.InitResult.Success -> {
-                onInitSuccess(result.initData, onInit)
+                onInitSuccess(result.initData, callback)
             }
             is FlowControllerInitializer.InitResult.Failure -> {
-                onInit(false, result.throwable)
+                callback.onInit(false, result.throwable)
             }
         }
     }
 
     private fun onInitSuccess(
         initData: InitData,
-        onInit: (Boolean, Throwable?) -> Unit
+        callback: PaymentSheet.FlowController.InitCallback
     ) {
         eventReporter.onInit(initData.config)
 
@@ -325,8 +351,8 @@ internal class DefaultPaymentSheetFlowController internal constructor(
             PaymentSelection.Saved(it)
         }
 
-        viewModel.initData = initData
-        onInit(true, null)
+        viewModel.setInitData(initData)
+        callback.onInit(true, null)
     }
 
     @JvmSynthetic
