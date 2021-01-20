@@ -14,7 +14,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import kotlinx.coroutines.Dispatchers
 
-internal class PaymentSheetFlowControllerFactory(
+internal class FlowControllerFactory(
     private val activity: ComponentActivity,
     private val config: PaymentConfiguration,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -28,14 +28,18 @@ internal class PaymentSheetFlowControllerFactory(
             config.publishableKey
         )
 
-        val paymentController = StripePaymentController(
-            activity,
-            config.publishableKey,
-            stripeRepository,
-            true
-        )
+        val paymentControllerFactory = PaymentControllerFactory { paymentRelayLauncher, paymentAuthWebViewLauncher ->
+            StripePaymentController(
+                activity,
+                config.publishableKey,
+                stripeRepository,
+                enableLogging = true,
+                paymentRelayLauncher = paymentRelayLauncher,
+                paymentAuthWebViewLauncher = paymentAuthWebViewLauncher
+            )
+        }
 
-        return DefaultPaymentSheetFlowController(
+        return DefaultFlowController(
             activity = activity,
             flowControllerInitializer = DefaultFlowControllerInitializer(
                 stripeRepository,
@@ -44,7 +48,7 @@ internal class PaymentSheetFlowControllerFactory(
                 stripeAccountId = config.stripeAccountId,
                 workContext = Dispatchers.IO
             ),
-            paymentController = paymentController,
+            paymentControllerFactory = paymentControllerFactory,
             eventReporter = DefaultEventReporter(
                 mode = EventReporter.Mode.Custom,
                 sessionId,

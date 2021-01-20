@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
@@ -34,10 +36,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 
-internal class DefaultPaymentSheetFlowController internal constructor(
+internal class DefaultFlowController internal constructor(
     private val activity: ComponentActivity,
     private val flowControllerInitializer: FlowControllerInitializer,
-    private val paymentController: PaymentController,
+    paymentControllerFactory: PaymentControllerFactory,
     private val eventReporter: EventReporter,
     private val publishableKey: String,
     private val stripeAccountId: String?,
@@ -68,7 +70,24 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         googlePayActivityLauncher.launch(args)
     }
 
+    private val paymentRelayLauncher = activity.registerForActivityResult(
+        PaymentRelayContract()
+    ) { result ->
+        // TODO(mshafrir-stripe): handle result
+    }
+
+    private val paymentAuthWebViewLauncher = activity.registerForActivityResult(
+        PaymentAuthWebViewContract()
+    ) { result ->
+        // TODO(mshafrir-stripe): handle result
+    }
+
     private val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
+
+    private val paymentController = paymentControllerFactory.create(
+        paymentRelayLauncher = paymentRelayLauncher,
+        paymentAuthWebViewLauncher = paymentAuthWebViewLauncher
+    )
 
     override fun init(
         paymentIntentClientSecret: String,

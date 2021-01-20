@@ -55,13 +55,13 @@ import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class DefaultPaymentSheetFlowControllerTest {
+class DefaultFlowControllerTest {
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
     private val paymentController = mock<PaymentController>()
     private val eventReporter = mock<EventReporter>()
-    private val flowController: DefaultPaymentSheetFlowController by lazy {
+    private val flowController: DefaultFlowController by lazy {
         createFlowController()
     }
 
@@ -406,7 +406,7 @@ class DefaultPaymentSheetFlowControllerTest {
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
         defaultPaymentMethodId: String? = null
-    ): DefaultPaymentSheetFlowController {
+    ): DefaultFlowController {
         return createFlowController(
             FakeFlowControllerInitializer(
                 paymentMethods,
@@ -417,11 +417,11 @@ class DefaultPaymentSheetFlowControllerTest {
 
     private fun createFlowController(
         flowControllerInitializer: FlowControllerInitializer
-    ): DefaultPaymentSheetFlowController {
-        return DefaultPaymentSheetFlowController(
+    ): DefaultFlowController {
+        return DefaultFlowController(
             activity,
             flowControllerInitializer,
-            paymentController,
+            { _, _ -> paymentController },
             eventReporter,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
