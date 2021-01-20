@@ -80,8 +80,8 @@ internal class StripePaymentControllerTest {
         whenever(it.sdkTransactionId)
             .thenReturn(sdkTransactionId)
     }
-    private val paymentAuthResultCallback: ApiResultCallback<PaymentIntentResult> = mock()
-    private val setupAuthResultCallback: ApiResultCallback<SetupIntentResult> = mock()
+    private val paymentIntentResultCallback: ApiResultCallback<PaymentIntentResult> = mock()
+    private val setupIntentResultCallback: ApiResultCallback<SetupIntentResult> = mock()
     private val sourceCallback: ApiResultCallback<Source> = mock()
     private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
@@ -555,9 +555,9 @@ internal class StripePaymentControllerTest {
             ).toBundle()
         )
 
-        controller.handlePaymentResult(intent, paymentAuthResultCallback)
-        verify(paymentAuthResultCallback).onError(exception)
-        verify(paymentAuthResultCallback, never())
+        controller.handlePaymentResult(intent, paymentIntentResultCallback)
+        verify(paymentIntentResultCallback).onError(exception)
+        verify(paymentIntentResultCallback, never())
             .onSuccess(anyOrNull())
     }
 
@@ -570,10 +570,10 @@ internal class StripePaymentControllerTest {
             ).toBundle()
         )
 
-        controller.handleSetupResult(intent, setupAuthResultCallback)
+        controller.handleSetupResult(intent, setupIntentResultCallback)
 
-        verify(setupAuthResultCallback).onError(exception)
-        verify(setupAuthResultCallback, never())
+        verify(setupIntentResultCallback).onError(exception)
+        verify(setupIntentResultCallback, never())
             .onSuccess(anyOrNull())
     }
 
@@ -589,9 +589,9 @@ internal class StripePaymentControllerTest {
             ).toBundle()
         )
 
-        controller.handleSetupResult(intent, setupAuthResultCallback)
+        controller.handleSetupResult(intent, setupIntentResultCallback)
 
-        verify(setupAuthResultCallback)
+        verify(setupIntentResultCallback)
             .onSuccess(setupIntentResultArgumentCaptor.capture())
         val result = setupIntentResultArgumentCaptor.firstValue
         assertThat(result.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
@@ -775,7 +775,7 @@ internal class StripePaymentControllerTest {
         )
 
         createController(stripeRepository)
-            .handlePaymentResult(intent, paymentAuthResultCallback)
+            .handlePaymentResult(intent, paymentIntentResultCallback)
 
         verify(stripeRepository).retrievePaymentIntent(
             eq(clientSecret),
@@ -792,7 +792,7 @@ internal class StripePaymentControllerTest {
         // verify that cancelIntent is only called once
         verifyNoMoreInteractions(stripeRepository)
 
-        verify(paymentAuthResultCallback).onSuccess(
+        verify(paymentIntentResultCallback).onSuccess(
             PaymentIntentResult(paymentIntent)
         )
     }
@@ -935,6 +935,42 @@ internal class StripePaymentControllerTest {
             )
     }
 
+    @Test
+    fun `cancelPaymentIntent should call cancelPaymentIntentSource`() = testDispatcher.runBlockingTest {
+        controller.cancelPaymentIntent(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            REQUEST_OPTIONS,
+            StripeIntentResult.Outcome.CANCELED,
+            "src_123",
+            paymentIntentResultCallback
+        )
+
+        verify(paymentIntentResultCallback).onSuccess(
+            argWhere { result ->
+                result.intent == PaymentIntentFixtures.CANCELLED &&
+                    result.outcome == StripeIntentResult.Outcome.CANCELED
+            }
+        )
+    }
+
+    @Test
+    fun `cancelSetupIntent should call cancelSetupIntentSource`() = testDispatcher.runBlockingTest {
+        controller.cancelSetupIntent(
+            SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
+            REQUEST_OPTIONS,
+            StripeIntentResult.Outcome.CANCELED,
+            "src_123",
+            setupIntentResultCallback
+        )
+
+        verify(setupIntentResultCallback).onSuccess(
+            argWhere { result ->
+                result.intent == SetupIntentFixtures.CANCELLED &&
+                    result.outcome == StripeIntentResult.Outcome.CANCELED
+            }
+        )
+    }
+
     private fun createController(
         stripeRepository: StripeRepository = FakeStripeRepository(),
         paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
@@ -976,6 +1012,18 @@ internal class StripePaymentControllerTest {
             clientSecret: String,
             options: ApiRequest.Options
         ) = SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
+
+        override suspend fun cancelPaymentIntentSource(
+            paymentIntentId: String,
+            sourceId: String,
+            options: ApiRequest.Options
+        ) = PaymentIntentFixtures.CANCELLED
+
+        override suspend fun cancelSetupIntentSource(
+            setupIntentId: String,
+            sourceId: String,
+            options: ApiRequest.Options
+        ) = SetupIntentFixtures.CANCELLED
     }
 
     private fun verifyAnalytics(event: AnalyticsEvent) {
