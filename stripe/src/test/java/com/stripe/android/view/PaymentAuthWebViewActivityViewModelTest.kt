@@ -1,9 +1,9 @@
 package com.stripe.android.view
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -15,7 +15,8 @@ class PaymentAuthWebViewActivityViewModelTest {
     @Test
     fun cancellationResult() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 shouldCancelSource = true
@@ -23,7 +24,7 @@ class PaymentAuthWebViewActivityViewModelTest {
         )
 
         val intent = viewModel.cancellationResult
-        val resultIntent = PaymentController.Result.fromIntent(requireNotNull(intent))
+        val resultIntent = PaymentController.Result.fromIntent(intent)
         assertThat(
             resultIntent?.flowOutcome
         ).isEqualTo(StripeIntentResult.Outcome.CANCELED)
@@ -33,7 +34,8 @@ class PaymentAuthWebViewActivityViewModelTest {
     @Test
     fun `cancellationResult should set correct outcome when user nav is allowed`() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 shouldCancelSource = true,
@@ -52,7 +54,8 @@ class PaymentAuthWebViewActivityViewModelTest {
     @Test
     fun toolbarBackgroundColor_returnsCorrectValue() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 toolbarCustomization = StripeToolbarCustomization().apply {
@@ -66,7 +69,8 @@ class PaymentAuthWebViewActivityViewModelTest {
     @Test
     fun buttonText_returnsCorrectValue() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 toolbarCustomization = StripeToolbarCustomization().apply {
@@ -83,7 +87,8 @@ class PaymentAuthWebViewActivityViewModelTest {
             setHeaderText("auth webview")
         }
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 toolbarCustomization = toolbarCustomization
