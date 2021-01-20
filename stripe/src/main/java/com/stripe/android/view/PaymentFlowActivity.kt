@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
@@ -40,11 +40,8 @@ class PaymentFlowActivity : StripeActivity() {
     private val paymentSessionConfig: PaymentSessionConfig by lazy {
         args.paymentSessionConfig
     }
-    private val viewModel: PaymentFlowViewModel by lazy {
-        ViewModelProvider(
-            this,
-            PaymentFlowViewModel.Factory(customerSession, args.paymentSessionData)
-        )[PaymentFlowViewModel::class.java]
+    private val viewModel: PaymentFlowViewModel by viewModels {
+        PaymentFlowViewModel.Factory(customerSession, args.paymentSessionData)
     }
 
     private val paymentFlowPagerAdapter: PaymentFlowPagerAdapter by lazy {

@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
+import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.R
@@ -33,8 +33,8 @@ internal class BuyButton @JvmOverloads constructor(
 
     private val currencyFormatter = CurrencyFormatter()
 
-    private val mutableCompletedAnimation = MutableLiveData<ViewState.Completed>()
-    internal val completedAnimation = mutableCompletedAnimation.distinctUntilChanged()
+    private val _completedAnimation = MutableLiveData<ViewState.Completed>()
+    internal val completedAnimation = _completedAnimation.distinctUntilChanged()
 
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
@@ -44,7 +44,7 @@ internal class BuyButton @JvmOverloads constructor(
     }
 
     fun onReadyState(state: ViewState.Ready) {
-        viewBinding.confirmingIcon.visibility = View.GONE
+        viewBinding.confirmingIcon.isVisible = false
 
         val currency = Currency.getInstance(
             state.currencyCode.toUpperCase(Locale.ROOT)
@@ -56,15 +56,15 @@ internal class BuyButton @JvmOverloads constructor(
     }
 
     fun onConfirmingState() {
-        viewBinding.lockIcon.visibility = View.GONE
-        viewBinding.confirmingIcon.visibility = View.VISIBLE
+        viewBinding.lockIcon.isVisible = false
+        viewBinding.confirmingIcon.isVisible = true
 
         viewBinding.label.text = resources.getString(
             R.string.stripe_paymentsheet_pay_button_processing
         )
     }
 
-    fun onCompletedState(state: ViewState.Completed) {
+    private fun onCompletedState(state: ViewState.Completed) {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
         animator.fadeOut(viewBinding.label)
@@ -75,24 +75,13 @@ internal class BuyButton @JvmOverloads constructor(
 
     private fun animateConfirmedIcon(state: ViewState.Completed) {
         animator.fadeIn(confirmedIcon, width) {
-            mutableCompletedAnimation.value = state
+            _completedAnimation.value = state
         }
     }
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-
-        viewBinding.label.alpha = if (enabled) {
-            ALPHA_ENABLED
-        } else {
-            ALPHA_DISABLED
-        }
-
-        viewBinding.lockIcon.visibility = if (enabled) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+        viewBinding.lockIcon.isVisible = enabled
     }
 
     override fun updateState(viewState: ViewState) {
@@ -107,10 +96,5 @@ internal class BuyButton @JvmOverloads constructor(
                 onCompletedState(viewState)
             }
         }
-    }
-
-    private companion object {
-        private const val ALPHA_ENABLED = 1.0f
-        private const val ALPHA_DISABLED = 0.5f
     }
 }

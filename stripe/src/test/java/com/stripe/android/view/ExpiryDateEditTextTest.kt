@@ -10,10 +10,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 /**
  * Test class for [ExpiryDateEditText].
@@ -32,15 +28,17 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.append("1")
         expiryDateEditText.append("2")
 
-        val text = expiryDateEditText.text.toString()
-        assertEquals("12/", text)
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("12/")
     }
 
     @Test
     fun inputSingleDigit_whenDigitIsTooLargeForMonth_prependsZero() {
         expiryDateEditText.append("4")
-        assertEquals("04/", expiryDateEditText.text.toString())
-        assertEquals(3, expiryDateEditText.selectionStart)
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("04/")
+        assertThat(expiryDateEditText.selectionStart)
+            .isEqualTo(3)
     }
 
     @Test
@@ -59,18 +57,22 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.setSelection(0)
         expiryDateEditText.editableText.replace(0, 0, "3", 0, 1)
 
-        assertEquals("31", expiryDateEditText.text.toString())
-        assertEquals(1, expiryDateEditText.selectionStart)
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("31")
+        assertThat(expiryDateEditText.selectionStart)
+            .isEqualTo(1)
     }
 
     @Test
     fun inputMultipleValidDigits_whenEmpty_doesNotPrependZeroOrShowErrorState() {
         expiryDateEditText.append("11")
 
-        val text = expiryDateEditText.text.toString()
-        assertEquals("11/", text)
-        assertFalse(expiryDateEditText.shouldShowError)
-        assertEquals(3, expiryDateEditText.selectionStart)
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("11/")
+        assertThat(expiryDateEditText.shouldShowError)
+            .isFalse()
+        assertThat(expiryDateEditText.selectionStart)
+            .isEqualTo(3)
     }
 
     @Test
@@ -91,16 +93,20 @@ class ExpiryDateEditTextTest {
             invocations++
         }
 
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2059)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) <= 2059)
+            .isTrue()
 
         expiryDateEditText.append("1")
         expiryDateEditText.append("2")
         expiryDateEditText.append("5")
-        assertEquals(0, invocations)
+        assertThat(invocations)
+            .isEqualTo(0)
 
         expiryDateEditText.append("9")
-        assertTrue(expiryDateEditText.isDateValid)
-        assertEquals(1, invocations)
+        assertThat(expiryDateEditText.isDateValid)
+            .isTrue()
+        assertThat(invocations)
+            .isEqualTo(1)
     }
 
     @Test
@@ -110,76 +116,98 @@ class ExpiryDateEditTextTest {
             invocations++
         }
 
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2059)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) <= 2059)
+            .isTrue()
 
         expiryDateEditText.append("12")
         expiryDateEditText.append("59")
-        assertTrue(expiryDateEditText.isDateValid)
+        assertThat(expiryDateEditText.isDateValid)
+            .isTrue()
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        assertEquals(1, invocations)
-        assertFalse(expiryDateEditText.isDateValid)
+        assertThat(invocations)
+            .isEqualTo(1)
+        assertThat(expiryDateEditText.isDateValid)
+            .isFalse()
     }
 
     @Test
     fun updateSelectionIndex_whenMovingAcrossTheGap_movesToEnd() {
-        assertEquals(3, expiryDateEditText.updateSelectionIndex(3, 1, 1, 5))
+        assertThat(
+            expiryDateEditText.updateSelectionIndex(3, 1, 1, 5)
+        ).isEqualTo(3)
     }
 
     @Test
     fun updateSelectionIndex_atStart_onlyMovesForwardByOne() {
-        assertEquals(1, expiryDateEditText.updateSelectionIndex(1, 0, 1, 5))
+        assertThat(
+            expiryDateEditText.updateSelectionIndex(1, 0, 1, 5)
+        ).isEqualTo(1)
     }
 
     @Test
     fun updateSelectionIndex_whenDeletingAcrossTheGap_staysAtEnd() {
-        assertEquals(2, expiryDateEditText.updateSelectionIndex(2, 4, 0, 5))
+        assertThat(
+            expiryDateEditText.updateSelectionIndex(2, 4, 0, 5)
+        ).isEqualTo(2)
     }
 
     @Test
     fun updateSelectionIndex_whenInputVeryLong_respectMaxInputLength() {
-        assertEquals(5, expiryDateEditText.updateSelectionIndex(6, 4, 2, 5))
+        assertThat(
+            expiryDateEditText.updateSelectionIndex(6, 4, 2, 5)
+        ).isEqualTo(5)
     }
 
     @Test
     fun inputZero_whenEmpty_doesNotShowErrorState() {
         expiryDateEditText.append("0")
 
-        assertFalse(expiryDateEditText.shouldShowError)
-        assertEquals("0", expiryDateEditText.text.toString())
+        assertThat(expiryDateEditText.shouldShowError)
+            .isFalse()
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("0")
     }
 
     @Test
     fun inputOne_whenEmpty_doesNotShowErrorState() {
         expiryDateEditText.append("1")
 
-        assertFalse(expiryDateEditText.shouldShowError)
-        assertEquals("1", expiryDateEditText.text.toString())
+        assertThat(expiryDateEditText.shouldShowError)
+            .isFalse()
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("1")
     }
 
     @Test
     fun inputTwoDigitMonth_whenInvalid_showsErrorAndDoesNotAddSlash() {
         expiryDateEditText.append("14")
 
-        assertTrue(expiryDateEditText.shouldShowError)
-        assertEquals("14", expiryDateEditText.text.toString())
+        assertThat(expiryDateEditText.shouldShowError)
+            .isTrue()
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("14")
     }
 
     @Test
     fun inputThreeDigits_whenInvalid_showsErrorAndDoesAddSlash() {
         expiryDateEditText.append("143")
 
-        assertTrue(expiryDateEditText.shouldShowError)
-        assertEquals("14/3", expiryDateEditText.text.toString())
+        assertThat(expiryDateEditText.shouldShowError)
+            .isTrue()
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("14/3")
     }
 
     @Test
     fun delete_whenAcrossSeparator_deletesSeparator() {
         expiryDateEditText.append("12")
-        assertEquals("12/", expiryDateEditText.text.toString())
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("12/")
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        assertEquals("12", expiryDateEditText.text.toString())
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("12")
     }
 
     @Test
@@ -190,13 +218,16 @@ class ExpiryDateEditTextTest {
         }
 
         // This test will be invalid if run between 2080 and 2112. Please update the code.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2080)
+            .isTrue()
         // Date translates to December, 2012 UNTIL the 2080, at which point it translates to
         // December, 2112. Also, this simulates a PASTE action.
         expiryDateEditText.append("1212")
 
-        assertTrue(expiryDateEditText.shouldShowError)
-        assertEquals(0, invocations)
+        assertThat(expiryDateEditText.shouldShowError)
+            .isTrue()
+        assertThat(invocations)
+            .isEqualTo(0)
     }
 
     @Test
@@ -207,15 +238,19 @@ class ExpiryDateEditTextTest {
         }
 
         // This test will be invalid if run between 2080 and 2112. Please update the code.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2080)
+            .isTrue()
         // Date translates to December, 2012 UNTIL the 2080, at which point it translates to
         // December, 2112.
         expiryDateEditText.append("12/12")
-        assertTrue(expiryDateEditText.shouldShowError)
+        assertThat(expiryDateEditText.shouldShowError)
+            .isTrue()
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        assertEquals("12/1", expiryDateEditText.text.toString())
-        assertFalse(expiryDateEditText.shouldShowError)
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("12/1")
+        assertThat(expiryDateEditText.shouldShowError)
+            .isFalse()
 
         // The date is no longer "in error", but it still shouldn't have triggered the listener.
         assertThat(invocations)
@@ -225,7 +260,8 @@ class ExpiryDateEditTextTest {
     @Test
     fun validatedDate_whenDataIsValid_returnsExpectedValues() {
         // This test will be invalid if run after the year 2050. Please update the code.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+            .isTrue()
 
         expiryDateEditText.append("12")
         expiryDateEditText.append("50")
@@ -243,7 +279,8 @@ class ExpiryDateEditTextTest {
     @Test
     fun validatedDate_whenDateIsValidFormatButExpired_returnsNull() {
         // This test will be invalid if run after the year 2050. Please update the code.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2080)
+            .isTrue()
 
         expiryDateEditText.append("12")
         expiryDateEditText.append("12")
@@ -263,12 +300,53 @@ class ExpiryDateEditTextTest {
     @Test
     fun validatedDate_whenDateIsValidAndThenChangedToInvalid_returnsNull() {
         // This test will be invalid if run after the year 2050. Please update the code.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+            .isTrue()
 
         expiryDateEditText.append("12")
         expiryDateEditText.append("50")
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
 
-        assertNull(expiryDateEditText.validatedDate)
+        assertThat(expiryDateEditText.validatedDate)
+            .isNull()
+    }
+
+    @Test
+    fun `input with includeSeparatorGaps=true should have expected fieldText and validatedDate values`() {
+        expiryDateEditText.includeSeparatorGaps = true
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
+
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 / 50")
+
+        assertThat(expiryDateEditText.validatedDate)
+            .isEqualTo(ExpirationDate.Validated(12, 2050))
+    }
+
+    @Test
+    fun `input with includeSeparatorGaps=true should correctly handle delete key`() {
+        expiryDateEditText.includeSeparatorGaps = true
+        expiryDateEditText.append("12")
+        expiryDateEditText.append("50")
+
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 / 50")
+
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 / 5")
+
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 / ")
+
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 /")
+
+        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("12 ")
     }
 }

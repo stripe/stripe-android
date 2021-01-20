@@ -2,19 +2,28 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
+import com.stripe.android.googlepay.StripeGooglePayContract
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
-import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.ui.Toolbar
 
 internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() {
@@ -26,11 +35,9 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         )
 
     @VisibleForTesting
-    internal val bottomSheetBehavior by lazy {
-        BottomSheetBehavior.from(viewBinding.bottomSheet)
-    }
+    internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
 
-    private val bottomSheetController: BottomSheetController by lazy {
+    override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(
             bottomSheetBehavior = bottomSheetBehavior,
             sheetModeLiveData = viewModel.sheetMode,
@@ -43,19 +50,28 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         ActivityPaymentSheetBinding.inflate(layoutInflater)
     }
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            viewModelFactory
-        )[PaymentSheetViewModel::class.java]
-    }
+    override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
 
     private val fragmentContainerId: Int
         @IdRes
         get() = viewBinding.fragmentContainer.id
 
-    private val starterArgs: PaymentSheetActivityStarter.Args? by lazy {
-        PaymentSheetActivityStarter.Args.fromIntent(intent)
+    private val starterArgs: PaymentSheetContract.Args? by lazy {
+        PaymentSheetContract.Args.fromIntent(intent)
+    }
+
+    override val rootView: View by lazy { viewBinding.root }
+    override val bottomSheet: ConstraintLayout by lazy { viewBinding.bottomSheet }
+    override val appbar: AppBarLayout by lazy { viewBinding.appbar }
+    override val toolbar: Toolbar by lazy { viewBinding.toolbar }
+    override val messageView: TextView by lazy { viewBinding.message }
+
+    override val eventReporter: EventReporter by lazy {
+        DefaultEventReporter(
+            mode = EventReporter.Mode.Complete,
+            starterArgs?.sessionId,
+            application
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,43 +89,29 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             return
         }
 
-        viewModel.fetchIsGooglePayReady()
+        val googlePayLauncher = registerForActivityResult(
+            StripeGooglePayContract()
+        ) {
+            viewModel.onGooglePayResult(it)
+        }
+        viewModel.launchGooglePay.observe(this) { args ->
+            if (args != null) {
+                googlePayLauncher.launch(args)
+            }
+        }
+
         viewModel.updatePaymentMethods()
         viewModel.fetchPaymentIntent()
 
         setContentView(viewBinding.root)
 
-        // Handle taps outside of bottom sheet
-        viewBinding.root.setOnClickListener {
-            onUserCancel()
-        }
-        viewModel.error.observe(this) {
+        viewModel.fatal.observe(this) {
             animateOut(
                 PaymentResult.Failed(
                     it,
                     paymentIntent = viewModel.paymentIntent.value
                 )
             )
-        }
-        viewModel.sheetMode.observe(this) { mode ->
-            when (mode) {
-                SheetMode.Full,
-                SheetMode.FullCollapsed -> {
-                    viewBinding.toolbar.showBack()
-                }
-                SheetMode.Wrapped -> {
-                    viewBinding.toolbar.showClose()
-                }
-                else -> {
-                    // mode == null
-                }
-            }
-
-            viewBinding.bottomSheet.layoutParams = viewBinding.bottomSheet.layoutParams.apply {
-                height = mode.height
-            }
-
-            bottomSheetController.updateState(mode)
         }
 
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
@@ -119,11 +121,14 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         }
         bottomSheetController.setup()
 
+        viewModel.googlePayCompletion.observe(this, ::onActionCompleted)
+
         setupBuyButton()
         supportFragmentManager.commit {
             replace(
                 fragmentContainerId,
-                PaymentSheetLoadingFragment()
+                PaymentSheetLoadingFragment::class.java,
+                null
             )
         }
 
@@ -142,9 +147,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                     onUserCancel()
                 }
                 Toolbar.Action.Back -> {
-                    viewModel.transitionTo(
-                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod
-                    )
+                    onUserBack()
                 }
             }
         }
@@ -177,25 +180,22 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                     addToBackStack(null)
                     replace(
                         fragmentContainerId,
-                        PaymentSheetAddCardFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentSheetAddCardFragment::class.java,
+                        fragmentArgs
                     )
                 }
                 PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     replace(
                         fragmentContainerId,
-                        PaymentSheetPaymentMethodsListFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentSheetPaymentMethodsListFragment::class.java,
+                        fragmentArgs
                     )
                 }
                 PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                     replace(
                         fragmentContainerId,
-                        PaymentSheetAddCardFragment().also {
-                            it.arguments = fragmentArgs
-                        }
+                        PaymentSheetAddCardFragment::class.java,
+                        fragmentArgs
                     )
                 }
             }
@@ -206,7 +206,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        viewModel.onActivityResult(requestCode, resultCode, data)
+        viewModel.onActivityResult(requestCode, data)
     }
 
     private fun setupBuyButton() {
@@ -221,17 +221,26 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         }
 
         viewModel.selection.observe(this) { paymentSelection ->
-            // TODO(smaskell): show Google Pay button when GooglePay selected
-            viewBinding.buyButton.isEnabled = paymentSelection != null
+            val shouldShowGooglePay = paymentSelection == PaymentSelection.GooglePay
+
+            viewBinding.googlePayButton.isVisible = shouldShowGooglePay
+            viewBinding.buyButton.isVisible = !shouldShowGooglePay
         }
+
+        viewBinding.googlePayButton.setOnClickListener {
+            viewModel.checkout(this)
+        }
+
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout(this)
         }
 
         viewModel.processing.observe(this) { isProcessing ->
             viewBinding.toolbar.updateProcessing(isProcessing)
+        }
 
-            viewBinding.buyButton.isEnabled = !isProcessing
+        viewModel.ctaEnabled.observe(this) { isEnabled ->
+            viewBinding.buyButton.isEnabled = isEnabled
         }
     }
 
@@ -252,14 +261,14 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         setResult(
             result.resultCode,
             Intent()
-                .putExtras(PaymentSheet.Result(result).toBundle())
+                .putExtras(PaymentSheetContract.Result(result).toBundle())
         )
     }
 
     override fun onUserCancel() {
         animateOut(
             PaymentResult.Cancelled(
-                viewModel.error.value,
+                viewModel.fatal.value,
                 paymentIntent = viewModel.paymentIntent.value
             )
         )

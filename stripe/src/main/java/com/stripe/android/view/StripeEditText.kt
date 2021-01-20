@@ -9,18 +9,10 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -32,11 +24,8 @@ import kotlin.coroutines.CoroutineContext
 open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : TextInputEditText(context, attrs, defStyleAttr) {
-    internal val job = Job()
-
     protected var isLastKeyDelete: Boolean = false
 
     private var afterTextChangedListener: AfterTextChangedListener? = null
@@ -149,52 +138,11 @@ open class StripeEditText @JvmOverloads constructor(
         this.errorColor = errorColor
     }
 
-    /**
-     * Change the hint value of this control after a delay.
-     *
-     * @param hintResource the string resource for the hint text
-     * @param delayMilliseconds a delay period, measured in milliseconds
-     */
-    fun setHintDelayed(@StringRes hintResource: Int, delayMilliseconds: Long) {
-        setHintDelayed(resources.getText(hintResource), delayMilliseconds)
-    }
-
-    /**
-     * Change the hint value of this control after a delay.
-     *
-     * @param hint the hint text
-     * @param delayMilliseconds a delay period, measured in milliseconds
-     */
-    fun setHintDelayed(hint: CharSequence, delayMilliseconds: Long) {
-        CoroutineScope(workContext).launch {
-            delay(delayMilliseconds)
-
-            withContext(Dispatchers.Main) {
-                setHintSafely(hint)
-            }
-        }
-    }
-
-    /**
-     * Call setHint() and guard against NPE. This is a workaround for a
-     * [known issue on Samsung devices](https://issuetracker.google.com/issues/37127697).
-     */
-    private fun setHintSafely(hint: CharSequence) {
-        runCatching {
-            setHint(hint)
-        }
-    }
-
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(info)
         info.isContentInvalid = shouldShowError
         accessibilityText?.let { info.text = it }
         info.error = errorMessage.takeIf { shouldShowError }
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        job.cancel()
     }
 
     private fun determineDefaultErrorColor() {

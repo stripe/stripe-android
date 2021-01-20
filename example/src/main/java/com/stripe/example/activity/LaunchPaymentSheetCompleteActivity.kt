@@ -3,8 +3,8 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.example.databinding.ActivityPaymentSheetCompleteBinding
 import com.stripe.example.paymentsheet.EphemeralKey
 import com.stripe.example.paymentsheet.PaymentSheetViewModel
@@ -14,14 +14,11 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
         ActivityPaymentSheetCompleteBinding.inflate(layoutInflater)
     }
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            PaymentSheetViewModel.Factory(
-                application,
-                getPreferences(MODE_PRIVATE)
-            )
-        )[PaymentSheetViewModel::class.java]
+    private val viewModel: PaymentSheetViewModel by viewModels {
+        PaymentSheetViewModel.Factory(
+            application,
+            getPreferences(MODE_PRIVATE)
+        )
     }
 
     private lateinit var ephemeralKey: EphemeralKey

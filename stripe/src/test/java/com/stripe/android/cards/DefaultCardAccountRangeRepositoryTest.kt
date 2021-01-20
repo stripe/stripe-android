@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -35,6 +36,11 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
     private val realStore = DefaultCardAccountRangeStore(application)
     private val realRepository = createRealRepository(realStore)
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `repository with real sources returns expected results`() = runBlocking {
@@ -98,7 +104,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
             realStore.get(BinFixtures.MASTERCARD)
         ).containsExactly(
             AccountRange(
-                binRange = BinRange(low = "5555550000000000", high = "5555550099999999"),
+                binRange = BinRange(low = "5555550070000000", high = "5555550089999999"),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Mastercard,
                 country = "BR"

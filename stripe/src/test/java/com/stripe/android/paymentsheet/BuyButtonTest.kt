@@ -12,13 +12,6 @@ class BuyButtonTest {
     private val buyButton = BuyButton(ApplicationProvider.getApplicationContext())
 
     @Test
-    fun `disabling button should update label alpha`() {
-        buyButton.isEnabled = false
-        assertThat(buyButton.viewBinding.label.alpha)
-            .isEqualTo(0.5f)
-    }
-
-    @Test
     fun `onReadyState() should update label`() {
         buyButton.onReadyState(
             ViewState.Ready(amount = 1099, currencyCode = "usd")

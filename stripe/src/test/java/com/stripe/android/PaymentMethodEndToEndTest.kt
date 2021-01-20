@@ -14,14 +14,20 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class PaymentMethodEndToEndTest {
+internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun createPaymentMethod_withBacsDebit_shouldCreateObject() {
@@ -222,7 +228,8 @@ class PaymentMethodEndToEndTest {
     fun createPaymentMethod_withGrabPay_shouldCreateObject() = testDispatcher.runBlockingTest {
         val repository = StripeApiRepository(
             context,
-            ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY
+            ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY,
+            workContext = testDispatcher
         )
 
         val params = PaymentMethodCreateParamsFixtures.GRABPAY
@@ -238,7 +245,8 @@ class PaymentMethodEndToEndTest {
     fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = testDispatcher.runBlockingTest {
         val paymentMethod = StripeApiRepository(
             context,
-            ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY
+            ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY,
+            workContext = testDispatcher
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPal(),
             ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
@@ -275,7 +283,8 @@ class PaymentMethodEndToEndTest {
                 )
         }
 
-        assertThat(missingNameException.message).isEqualTo("Missing required param: billing_details[name].")
+        assertThat(missingNameException.message)
+            .isEqualTo("Missing required param: billing_details[name].")
 
         val missingEmailException = assertFailsWith<InvalidRequestException>(
             "Email is required to create an Afterpay payment method"
@@ -288,7 +297,8 @@ class PaymentMethodEndToEndTest {
                 )
         }
 
-        assertThat(missingEmailException.message).isEqualTo("Missing required param: billing_details[email].")
+        assertThat(missingEmailException.message)
+            .isEqualTo("Missing required param: billing_details[email].")
 
         val missingAddressException = assertFailsWith<InvalidRequestException>(
             "Email is required to create an Afterpay payment method"
@@ -301,6 +311,7 @@ class PaymentMethodEndToEndTest {
                 )
         }
 
-        assertThat(missingAddressException.message).isEqualTo("Missing required param: billing_details[address][line1].")
+        assertThat(missingAddressException.message)
+            .isEqualTo("Missing required param: billing_details[address][line1].")
     }
 }

@@ -6,11 +6,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.ApiResultCallback
@@ -41,10 +41,7 @@ class CreateCardTokenActivity : AppCompatActivity() {
                 orientation = LinearLayoutManager.VERTICAL
             }
 
-        val viewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[CreateCardTokenViewModel::class.java]
+        val viewModel: CreateCardTokenViewModel by viewModels()
 
         viewBinding.createTokenButton.setOnClickListener {
             BackgroundTaskTracker.onStart()

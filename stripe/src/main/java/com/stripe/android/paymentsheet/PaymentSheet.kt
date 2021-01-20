@@ -1,56 +1,168 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Intent
-import android.os.Bundle
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.core.os.bundleOf
-import com.stripe.android.view.ActivityStarter
+import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentSheet internal constructor(
-    private val args: PaymentSheetActivityStarter.Args
+    private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
+    constructor(
+        activity: ComponentActivity,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(activity, callback)
+    )
+
     /**
      * Create PaymentSheet with a Customer
      */
-    constructor(
-        clientSecret: String,
-        ephemeralKey: String,
-        customerId: String
-    ) : this(
-        PaymentSheetActivityStarter.Args.Default(
-            clientSecret,
-            ephemeralKey,
-            customerId
-        )
-    )
+    fun present(
+        paymentIntentClientSecret: String,
+        configuration: Configuration
+    ) {
+        paymentSheetLauncher.present(paymentIntentClientSecret, configuration)
+    }
 
     /**
      * Create PaymentSheet without a Customer
      */
-    constructor(
-        clientSecret: String
-    ) : this(
-        PaymentSheetActivityStarter.Args.Guest(clientSecret)
-    )
-
-    fun confirm(activity: ComponentActivity, callback: (PaymentResult) -> Unit) {
-        // TODO: Use ActivityResultContract and call callback instead of using onActivityResult
-        // when androidx.activity:1.2.0 hits GA
-        PaymentSheetActivityStarter(activity)
-            .startForResult(args)
+    fun present(
+        paymentIntentClientSecret: String
+    ) {
+        paymentSheetLauncher.present(paymentIntentClientSecret)
     }
 
     @Parcelize
-    internal data class Result(val status: PaymentResult) : ActivityStarter.Result {
-        override fun toBundle(): Bundle {
-            return bundleOf(ActivityStarter.Result.EXTRA to this)
+    data class Configuration(
+        /**
+         * Your customer-facing business name.
+         *
+         * The default value is the name of your app.
+         */
+        var merchantDisplayName: String,
+
+        /**
+         * Configuration related to the Stripe Customer making a payment.
+         *
+         * If set, PaymentSheet displays Google Pay as a payment option.
+         */
+        var googlePay: GooglePayConfiguration? = null,
+
+        /**
+         * The amount of billing address details to collect.
+         *
+         * See [BillingAddressCollectionLevel]
+         */
+        var billingAddressCollection: BillingAddressCollectionLevel = BillingAddressCollectionLevel.Automatic,
+
+        /**
+         * If set, the customer can select a previously saved payment method within PaymentSheet.
+         */
+        var customer: CustomerConfiguration? = null
+    ) : Parcelable
+
+    enum class BillingAddressCollectionLevel {
+        /**
+         * (Default) PaymentSheet will only collect the necessary billing address information.
+         */
+        Automatic,
+
+        /**
+         * PaymentSheet will always collect full billing address details.
+         */
+        Required
+    }
+
+    @Parcelize
+    data class CustomerConfiguration(
+        /**
+         * The identifier of the Stripe Customer object.
+         * See https://stripe.com/docs/api/customers/object#customer_object-id
+         */
+        val id: String,
+
+        /**
+         * A short-lived token that allows the SDK to access a Customer's payment methods.
+         */
+        val ephemeralKeySecret: String
+    ) : Parcelable
+
+    @Parcelize
+    data class GooglePayConfiguration(
+        /**
+         * The Google Pay environment to use.
+         *
+         * See https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment for more information.
+         */
+        val environment: Environment,
+        /**
+         * The two-letter ISO 3166 code of the country of your business, e.g. "US"
+         * See your account's country value here https://dashboard.stripe.com/settings/account
+         */
+        val countryCode: String
+    ) : Parcelable {
+        enum class Environment {
+            Production,
+            Test
+        }
+    }
+
+    interface FlowController {
+        fun getPaymentOption(): PaymentOption?
+
+        fun presentPaymentOptions(activity: ComponentActivity)
+
+        fun onPaymentOptionResult(intent: Intent?): PaymentOption?
+
+        fun confirmPayment(activity: ComponentActivity)
+
+        fun isPaymentResult(
+            requestCode: Int,
+            data: Intent?
+        ): Boolean
+
+        fun onPaymentResult(
+            requestCode: Int,
+            data: Intent?,
+            callback: PaymentSheetResultCallback
+        )
+
+        sealed class Result {
+            class Success(
+                val flowController: FlowController
+            ) : Result()
+
+            class Failure(
+                val error: Throwable
+            ) : Result()
         }
 
         companion object {
-            @JvmStatic
-            fun fromIntent(intent: Intent?): Result? {
-                return intent?.getParcelableExtra(ActivityStarter.Result.EXTRA)
+            fun create(
+                activity: ComponentActivity,
+                clientSecret: String,
+                configuration: Configuration,
+                onComplete: (Result) -> Unit
+            ) {
+                PaymentSheetFlowControllerFactory(activity).create(
+                    clientSecret,
+                    configuration,
+                    onComplete
+                )
+            }
+
+            fun create(
+                activity: ComponentActivity,
+                clientSecret: String,
+                onComplete: (Result) -> Unit
+            ) {
+                PaymentSheetFlowControllerFactory(activity).create(
+                    clientSecret,
+                    onComplete
+                )
             }
         }
     }

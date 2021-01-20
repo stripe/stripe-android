@@ -2,8 +2,12 @@ package com.stripe.android.paymentsheet
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Rule
@@ -16,10 +20,17 @@ class PaymentOptionsViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
+    private val eventReporter = mock<EventReporter>()
     private val viewModel = PaymentOptionsViewModel(
-        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-        stripeAccountId = null,
-        args = PaymentOptionsActivityStarter.Args.Guest
+        args = PaymentOptionContract.Args(
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            paymentMethods = emptyList(),
+            sessionId = SessionId(),
+            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
+        ),
+        googlePayRepository = mock(),
+        prefsRepository = mock(),
+        eventReporter = eventReporter
     )
 
     @Test
@@ -34,6 +45,7 @@ class PaymentOptionsViewModelTest {
 
         assertThat(viewState)
             .isEqualTo(PaymentOptionViewState.Completed(SELECTION_SAVED_PAYMENT_METHOD))
+        verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
     @Test

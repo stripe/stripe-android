@@ -8,32 +8,28 @@ import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
-internal abstract class BasePaymentMethodsListFragment : Fragment(
+internal abstract class BasePaymentMethodsListFragment(
+    private val eventReporter: EventReporter
+) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
     abstract val sheetViewModel: SheetViewModel<*, *>
 
-    abstract val shouldShowGooglePay: Boolean
+    private val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
 
-    internal val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
-
-    protected val adapter: PaymentMethodsAdapter by lazy {
-        PaymentMethodsAdapter(
+    protected val adapter: PaymentOptionsAdapter by lazy {
+        PaymentOptionsAdapter(
             fragmentViewModel.currentPaymentSelection,
-            paymentMethodSelectedListener = {
-                fragmentViewModel.currentPaymentSelection = it
-                sheetViewModel.updateSelection(it)
-            },
+            paymentOptionSelectedListener = ::onPaymentOptionSelected,
             addCardClickListener = {
                 transitionToAddPaymentMethod()
             }
-        ).also {
-            it.shouldShowGooglePay = shouldShowGooglePay
-        }
+        )
     }
 
     private var _viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
@@ -58,14 +54,33 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
         )
         viewBinding.recycler.adapter = adapter
 
+        sheetViewModel.getDefaultPaymentMethodId()
+            .observe(viewLifecycleOwner) { defaultPaymentMethodId ->
+                adapter.defaultPaymentMethodId = defaultPaymentMethodId
+            }
+
         sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
             adapter.paymentMethods = paymentMethods
         }
+
+        sheetViewModel.isGooglePayReady.observe(viewLifecycleOwner) { isGooglePayReady ->
+            adapter.shouldShowGooglePay = isGooglePayReady
+        }
+
+        eventReporter.onShowExistingPaymentOptions()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _viewBinding = null
+    }
+
+    open fun onPaymentOptionSelected(
+        paymentSelection: PaymentSelection,
+        isClick: Boolean
+    ) {
+        fragmentViewModel.currentPaymentSelection = paymentSelection
+        sheetViewModel.updateSelection(paymentSelection)
     }
 
     internal class PaymentMethodsViewModel : ViewModel() {

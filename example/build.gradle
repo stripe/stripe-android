@@ -47,14 +47,14 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
     implementation "com.google.android.material:material:$materialVersion"
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
 
     /* Used for server calls */
     implementation 'com.squareup.okio:okio:2.9.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation 'com.facebook.stetho:stetho:1.5.1'
-    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
     implementation 'com.google.code.gson:gson:2.8.6'
@@ -62,7 +62,7 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"

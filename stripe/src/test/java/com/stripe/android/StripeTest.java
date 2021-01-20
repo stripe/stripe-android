@@ -78,6 +78,8 @@ import static org.robolectric.Shadows.shadowOf;
 public class StripeTest {
     private static final CardParams CARD_PARAMS = CardParamsFixtures.MINIMUM;
 
+    private final CoroutineDispatcher testDispatcher = new TestCoroutineDispatcher();
+
     @NonNull
     private final Context context = ApplicationProvider.getApplicationContext();
     @NonNull
@@ -103,8 +105,6 @@ public class StripeTest {
     private ArgumentCaptor<Source> sourceArgumentCaptor;
     @Captor
     private ArgumentCaptor<StripeFile> stripeFileArgumentCaptor;
-
-    private final CoroutineDispatcher testDispatcher = new TestCoroutineDispatcher();
 
     @Before
     public void setup() {
@@ -1321,6 +1321,7 @@ public class StripeTest {
     ) {
         final StripeRepository stripeRepository = createStripeRepository(
                 publishableKey,
+                testDispatcher,
                 analyticsRequestExecutor,
                 fingerprintDataRepository
         );
@@ -1336,6 +1337,7 @@ public class StripeTest {
     private Stripe createStripe(@NonNull CoroutineDispatcher workDispatcher) {
         final StripeRepository stripeRepository = createStripeRepository(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                workDispatcher,
                 new FakeAnalyticsRequestExecutor(),
                 defaultFingerprintDataRepository
         );
@@ -1355,6 +1357,7 @@ public class StripeTest {
     @NonNull
     private StripeRepository createStripeRepository(
             @NonNull final String publishableKey,
+            @NonNull CoroutineDispatcher workDispatcher,
             @NonNull AnalyticsRequestExecutor analyticsRequestExecutor,
             @NonNull FingerprintDataRepository fingerprintDataRepository
     ) {
@@ -1363,6 +1366,7 @@ public class StripeTest {
                 publishableKey,
                 null,
                 new FakeLogger(),
+                workDispatcher,
                 new ApiRequestExecutor.Default(),
                 analyticsRequestExecutor,
                 fingerprintDataRepository

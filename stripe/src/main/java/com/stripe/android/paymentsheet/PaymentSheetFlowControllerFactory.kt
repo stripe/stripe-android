@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentSessionPrefs
@@ -11,99 +14,119 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetFlowControllerFactory(
-    private val context: Context,
+    private val activity: ComponentActivity,
     private val stripeRepository: StripeRepository,
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val paymentSessionPrefs: PaymentSessionPrefs,
     private val workContext: CoroutineContext
 ) {
+    private val sessionId = SessionId()
+    private val paymentIntentValidator = PaymentIntentValidator()
+
     constructor(
-        context: Context,
+        activity: ComponentActivity,
         workContext: CoroutineContext = Dispatchers.IO
     ) : this(
-        context,
-        PaymentConfiguration.getInstance(context),
+        activity,
+        PaymentConfiguration.getInstance(activity),
         workContext
     )
 
     private constructor(
-        context: Context,
+        activity: ComponentActivity,
         config: PaymentConfiguration,
         workContext: CoroutineContext
     ) : this(
-        context,
+        activity,
         StripeApiRepository(
-            context,
+            activity,
             config.publishableKey
         ),
         config.publishableKey,
         config.stripeAccountId,
-        PaymentSessionPrefs.Default(context),
+        PaymentSessionPrefs.Default(activity),
         workContext
     )
 
     fun create(
         clientSecret: String,
-        ephemeralKey: String,
-        customerId: String,
-        onComplete: (PaymentSheetFlowController.Result) -> Unit
-    ) {
-        CoroutineScope(workContext).launch {
+        config: PaymentSheet.Configuration,
+        onComplete: (PaymentSheet.FlowController.Result) -> Unit
+    ): Job {
+        val job = CoroutineScope(workContext).launch {
             dispatchResult(
-                createWithDefaultArgs(clientSecret, ephemeralKey, customerId),
+                config.customer?.let { customerConfig ->
+                    createWithCustomer(
+                        clientSecret,
+                        customerConfig,
+                        config
+                    )
+                } ?: createWithoutCustomer(clientSecret, config),
                 onComplete
             )
         }
+        registerJob(job)
+
+        return job
     }
 
     fun create(
         clientSecret: String,
-        onComplete: (PaymentSheetFlowController.Result) -> Unit
+        onComplete: (PaymentSheet.FlowController.Result) -> Unit
     ) {
-        CoroutineScope(workContext).launch {
+        val job = CoroutineScope(workContext).launch {
             dispatchResult(
-                createWithGuestArgs(clientSecret),
+                createWithoutCustomer(
+                    clientSecret,
+                    config = null
+                ),
                 onComplete
             )
         }
+        registerJob(job)
     }
 
     private suspend fun dispatchResult(
         result: Result,
-        onComplete: (PaymentSheetFlowController.Result) -> Unit
+        onComplete: (PaymentSheet.FlowController.Result) -> Unit
     ) = withContext(Dispatchers.Main) {
         when (result) {
             is Result.Success -> {
                 onComplete(
-                    PaymentSheetFlowController.Result.Success(result.flowController)
+                    PaymentSheet.FlowController.Result.Success(result.flowController)
                 )
             }
             is Result.Failure -> {
                 onComplete(
-                    PaymentSheetFlowController.Result.Failure(result.throwable)
+                    PaymentSheet.FlowController.Result.Failure(result.throwable)
                 )
             }
         }
     }
 
-    private suspend fun createWithDefaultArgs(
+    private suspend fun createWithCustomer(
         clientSecret: String,
-        ephemeralKey: String,
-        customerId: String
+        customerConfig: PaymentSheet.CustomerConfiguration,
+        config: PaymentSheet.Configuration?
     ): Result {
         // load default payment option
-        val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerId)
+        val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerConfig.id)
 
         return runCatching {
-            requireNotNull(retrievePaymentIntent(clientSecret))
+            retrievePaymentIntent(clientSecret)
         }.fold(
             onSuccess = { paymentIntent ->
                 val paymentMethodTypes = paymentIntent.paymentMethodTypes.mapNotNull {
@@ -111,22 +134,27 @@ internal class PaymentSheetFlowControllerFactory(
                 }
                 retrieveAllPaymentMethods(
                     types = paymentMethodTypes,
-                    customerId = customerId,
-                    ephemeralKey = ephemeralKey
+                    customerConfig
                 ).let { paymentMethods ->
                     Result.Success(
                         DefaultPaymentSheetFlowController(
                             paymentController = createPaymentController(),
-                            args = DefaultPaymentSheetFlowController.Args.Default(
+                            eventReporter = DefaultEventReporter(
+                                mode = EventReporter.Mode.Custom,
+                                sessionId,
+                                activity
+                            ),
+                            args = DefaultPaymentSheetFlowController.Args(
                                 clientSecret,
-                                ephemeralKey,
-                                customerId
+                                config
                             ),
                             publishableKey = publishableKey,
                             stripeAccountId = stripeAccountId,
+                            paymentIntent = paymentIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
-                            defaultPaymentMethodId = defaultPaymentMethodId
+                            defaultPaymentMethodId = defaultPaymentMethodId,
+                            sessionId = sessionId
                         )
                     )
                 }
@@ -137,11 +165,12 @@ internal class PaymentSheetFlowControllerFactory(
         )
     }
 
-    private suspend fun createWithGuestArgs(
-        clientSecret: String
+    private suspend fun createWithoutCustomer(
+        clientSecret: String,
+        config: PaymentSheet.Configuration?
     ): Result {
         return runCatching {
-            requireNotNull(retrievePaymentIntent(clientSecret))
+            retrievePaymentIntent(clientSecret)
         }.fold(
             onSuccess = { paymentIntent ->
                 val paymentMethodTypes = paymentIntent.paymentMethodTypes
@@ -151,14 +180,22 @@ internal class PaymentSheetFlowControllerFactory(
 
                 Result.Success(
                     DefaultPaymentSheetFlowController(
-                        createPaymentController(),
-                        publishableKey,
-                        stripeAccountId,
-                        DefaultPaymentSheetFlowController.Args.Guest(
-                            clientSecret
+                        paymentController = createPaymentController(),
+                        eventReporter = DefaultEventReporter(
+                            mode = EventReporter.Mode.Custom,
+                            sessionId,
+                            activity
                         ),
+                        publishableKey = publishableKey,
+                        stripeAccountId = stripeAccountId,
+                        args = DefaultPaymentSheetFlowController.Args(
+                            clientSecret,
+                            config = config
+                        ),
+                        paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
+                        sessionId = sessionId,
                         defaultPaymentMethodId = null
                     )
                 )
@@ -171,15 +208,10 @@ internal class PaymentSheetFlowControllerFactory(
 
     private suspend fun retrieveAllPaymentMethods(
         types: List<PaymentMethod.Type>,
-        customerId: String,
-        ephemeralKey: String
+        customerConfig: PaymentSheet.CustomerConfiguration
     ): List<PaymentMethod> {
         return types.flatMap { type ->
-            retrievePaymentMethodsByType(
-                type,
-                customerId,
-                ephemeralKey
-            )
+            retrievePaymentMethodsByType(type, customerConfig)
         }
     }
 
@@ -188,49 +220,63 @@ internal class PaymentSheetFlowControllerFactory(
      */
     private suspend fun retrievePaymentMethodsByType(
         type: PaymentMethod.Type,
-        customerId: String,
-        ephemeralKey: String
+        customerConfig: PaymentSheet.CustomerConfiguration
     ): List<PaymentMethod> {
         return runCatching {
             stripeRepository.getPaymentMethods(
                 ListPaymentMethodsParams(
-                    customerId = customerId,
+                    customerId = customerConfig.id,
                     paymentMethodType = type
                 ),
                 publishableKey,
                 PRODUCT_USAGE,
-                ApiRequest.Options(ephemeralKey, stripeAccountId)
+                ApiRequest.Options(customerConfig.ephemeralKeySecret, stripeAccountId)
             )
         }.getOrDefault(emptyList())
     }
 
     private suspend fun retrievePaymentIntent(
         clientSecret: String
-    ): PaymentIntent? {
-        return stripeRepository.retrievePaymentIntent(
-            clientSecret,
-            ApiRequest.Options(
-                publishableKey,
-                stripeAccountId
+    ): PaymentIntent {
+        return paymentIntentValidator.requireValid(
+            requireNotNull(
+                stripeRepository.retrievePaymentIntent(
+                    clientSecret,
+                    ApiRequest.Options(
+                        publishableKey,
+                        stripeAccountId
+                    )
+                )
             )
         )
     }
 
     private fun createPaymentController(): PaymentController {
-        val config = PaymentConfiguration.getInstance(context)
+        val config = PaymentConfiguration.getInstance(activity)
         val publishableKey = config.publishableKey
         val stripeAccountId = config.stripeAccountId
         return StripePaymentController(
-            context,
+            activity,
             publishableKey,
             stripeRepository,
             true
         )
     }
 
+    private fun registerJob(job: Job) {
+        activity.lifecycle.addObserver(
+            object : LifecycleObserver {
+                @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                fun onDestroy() {
+                    job.cancel()
+                }
+            }
+        )
+    }
+
     sealed class Result {
         class Success(
-            val flowController: PaymentSheetFlowController
+            val flowController: PaymentSheet.FlowController
         ) : Result()
 
         class Failure(

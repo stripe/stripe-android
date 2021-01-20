@@ -22,6 +22,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -30,6 +31,11 @@ internal class RemoteCardAccountRangeSourceTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val cardAccountRangeStore = mock<CardAccountRangeStore>()
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {

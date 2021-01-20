@@ -36,6 +36,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -95,6 +96,11 @@ internal class CardMultilineWidgetTest {
             BinFixtures.DINERSCLUB14,
             listOf(AccountRangeFixtures.DINERSCLUB14)
         )
+    }
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
     }
 
     private fun createWidget(
@@ -1062,6 +1068,16 @@ internal class CardMultilineWidgetTest {
             .isFalse()
     }
 
+    @Test
+    fun `cardNumberEditText's drawable should be on the end`() {
+        assertThat(
+            cardMultilineWidget.cardNumberEditText.compoundDrawables[0]
+        ).isNull()
+        assertThat(
+            cardMultilineWidget.cardNumberEditText.compoundDrawables[2]
+        ).isNotNull()
+    }
+
     internal class WidgetControlGroup(
         widget: CardMultilineWidget,
         workContext: CoroutineContext
@@ -1082,8 +1098,6 @@ internal class CardMultilineWidgetTest {
     private companion object {
         // Every Card made by the CardInputView should have the card widget token.
         private val ATTRIBUTION = setOf("CardMultilineView")
-
-        private val EMPTY_WATCHER = object : StripeTextWatcher() {}
 
         private const val CVC_VALUE_COMMON = "123"
         private const val CVC_VALUE_AMEX = "1234"

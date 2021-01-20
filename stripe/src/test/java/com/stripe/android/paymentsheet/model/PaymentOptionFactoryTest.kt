@@ -47,11 +47,20 @@ class PaymentOptionFactoryTest {
     }
 
     @Test
-    fun `create() with card params should return null`() {
+    fun `create() with card params should return expected object`() {
         assertThat(
             PaymentOptionFactory().create(
-                PaymentSelection.New(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+                PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    brand = CardBrand.Visa,
+                    shouldSavePaymentMethod = true
+                )
             )
-        ).isNull()
+        ).isEqualTo(
+            PaymentOption(
+                R.drawable.stripe_ic_paymentsheet_card_visa,
+                "Visa"
+            )
+        )
     }
 }

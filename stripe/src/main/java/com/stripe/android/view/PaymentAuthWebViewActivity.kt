@@ -6,9 +6,9 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthWebViewStarter
@@ -23,26 +23,27 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         PaymentAuthWebViewActivityBinding.inflate(layoutInflater)
     }
 
-    private lateinit var logger: Logger
-    private lateinit var viewModel: PaymentAuthWebViewActivityViewModel
+    private val _args: PaymentAuthWebViewStarter.Args? by lazy {
+        intent.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+    }
+
+    private val logger: Logger by lazy {
+        Logger.getInstance(_args?.enableLogging == true)
+    }
+    private val viewModel: PaymentAuthWebViewActivityViewModel by viewModels {
+        PaymentAuthWebViewActivityViewModel.Factory(requireNotNull(_args))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args: PaymentAuthWebViewStarter.Args? =
-            intent.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        val args = _args
         if (args == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
             return
         }
 
-        viewModel = ViewModelProvider(
-            this,
-            PaymentAuthWebViewActivityViewModel.Factory(args)
-        )[PaymentAuthWebViewActivityViewModel::class.java]
-
-        logger = Logger.getInstance(args.enableLogging)
         logger.debug("PaymentAuthWebViewActivity#onCreate()")
 
         LocalBroadcastManager.getInstance(this)

@@ -1,12 +1,13 @@
 package com.stripe.android.view
 
-import android.content.Context
 import android.widget.FrameLayout
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.Dispatchers
@@ -30,10 +31,15 @@ class PaymentMethodsAdapterTest {
     private val adapterDataObserver: RecyclerView.AdapterDataObserver = mock()
     private val listener: PaymentMethodsAdapter.Listener = mock()
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val context = ContextThemeWrapper(
+        ApplicationProvider.getApplicationContext(),
+        R.style.StripeDefaultTheme
+    )
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val paymentMethodsAdapter: PaymentMethodsAdapter = PaymentMethodsAdapter(
+    private val parentView = FrameLayout(context)
+
+    private val paymentMethodsAdapter = PaymentMethodsAdapter(
         ARGS,
         workContext = testDispatcher
     )
@@ -47,6 +53,7 @@ class PaymentMethodsAdapterTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -210,10 +217,7 @@ class PaymentMethodsAdapterTest {
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         adapter.listener = listener
 
-        val viewHolder = PaymentMethodsAdapter.ViewHolder.GooglePayViewHolder(
-            context,
-            FrameLayout(context)
-        )
+        val viewHolder = PaymentMethodsAdapter.ViewHolder.GooglePayViewHolder(context, parentView)
         adapter.onBindViewHolder(viewHolder, 0)
 
         viewHolder.itemView.performClick()
@@ -272,6 +276,54 @@ class PaymentMethodsAdapterTest {
         assertThat(adapter.paymentMethods)
             .doesNotContain(PaymentMethodFixtures.CARD_PAYMENT_METHODS.last())
         verify(adapterDataObserver).onItemRangeRemoved(3, 1)
+    }
+
+    @Test
+    fun `multiple clicks on add card view should emit single args`() {
+        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+
+        val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args>()
+        adapter.addPaymentMethodArgs.observeForever { args ->
+            if (args != null) {
+                argsList.add(args)
+            }
+        }
+
+        val viewHolder = adapter.createViewHolder(
+            FrameLayout(context),
+            PaymentMethodsAdapter.ViewType.AddCard.ordinal
+        )
+        adapter.onBindViewHolder(viewHolder, 0)
+        viewHolder.itemView.performClick()
+        viewHolder.itemView.performClick()
+        viewHolder.itemView.performClick()
+
+        assertThat(argsList)
+            .containsExactly(adapter.addCardArgs)
+    }
+
+    @Test
+    fun `multiple clicks on add FPX view should emit single args`() {
+        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+
+        val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args>()
+        adapter.addPaymentMethodArgs.observeForever { args ->
+            if (args != null) {
+                argsList.add(args)
+            }
+        }
+
+        val viewHolder = adapter.createViewHolder(
+            FrameLayout(context),
+            PaymentMethodsAdapter.ViewType.AddFpx.ordinal
+        )
+        adapter.onBindViewHolder(viewHolder, 0)
+        viewHolder.itemView.performClick()
+        viewHolder.itemView.performClick()
+        viewHolder.itemView.performClick()
+
+        assertThat(argsList)
+            .containsExactly(adapter.addFpxArgs)
     }
 
     private companion object {

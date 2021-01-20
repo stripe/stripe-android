@@ -3,9 +3,9 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
@@ -28,12 +28,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         CreateCardSourceActivityBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: SourceViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[SourceViewModel::class.java]
-    }
+    private val viewModel: SourceViewModel by viewModels()
     private val sourcesAdapter: SourcesAdapter by lazy {
         SourcesAdapter()
     }

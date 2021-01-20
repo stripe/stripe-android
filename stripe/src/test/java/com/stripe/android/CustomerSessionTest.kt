@@ -31,6 +31,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -140,6 +141,11 @@ internal class CustomerSessionTest {
                 )
             ).thenReturn(FIRST_CUSTOMER)
         }
+    }
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test

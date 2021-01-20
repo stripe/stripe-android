@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
@@ -23,6 +24,11 @@ internal class DefaultAlipayRepositoryTest {
     private val repository = DefaultAlipayRepository(stripeRepository)
 
     private val testDispatcher = TestCoroutineDispatcher()
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `authenticate() should handle success`() = testDispatcher.runBlockingTest {

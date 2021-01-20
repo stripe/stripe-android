@@ -1,28 +1,51 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentSessionPrefs
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
 internal class PaymentOptionsViewModel(
-    private val publishableKey: String,
-    private val stripeAccountId: String?,
-    private val args: PaymentOptionsActivityStarter.Args,
+    args: PaymentOptionContract.Args,
+    googlePayRepository: GooglePayRepository,
+    prefsRepository: PrefsRepository,
+    private val eventReporter: EventReporter
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
-    isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest
+    config = args.config,
+    isGooglePayEnabled = args.config?.googlePay != null,
+    googlePayRepository = googlePayRepository,
+    prefsRepository = prefsRepository
 ) {
+    private val _userSelection = MutableLiveData<PaymentSelection>()
+    val userSelection: LiveData<PaymentSelection> = _userSelection
+
     init {
-        mutablePaymentMethods.value = args.paymentMethods
+        _paymentIntent.value = args.paymentIntent
+        _paymentMethods.value = args.paymentMethods
+        _processing.postValue(false)
     }
 
     fun selectPaymentOption() {
         selection.value?.let { paymentSelection ->
-            mutableViewState.value = PaymentOptionViewState.Completed(paymentSelection)
+            eventReporter.onSelectPaymentOption(paymentSelection)
+            prefsRepository.savePaymentSelection(paymentSelection)
+            _viewState.value = PaymentOptionViewState.Completed(paymentSelection)
         }
+    }
+
+    fun onUserSelection(
+        paymentSelection: PaymentSelection
+    ) {
+        selectPaymentOption()
+        _userSelection.value = paymentSelection
     }
 
     internal enum class TransitionTarget(
@@ -40,19 +63,33 @@ internal class PaymentOptionsViewModel(
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentOptionsActivityStarter.Args
+        private val starterArgsSupplier: () -> PaymentOptionContract.Args
     ) : ViewModelProvider.Factory {
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            val starterArgs = starterArgsSupplier()
             val application = applicationSupplier()
-            val config = PaymentConfiguration.getInstance(application)
-            val publishableKey = config.publishableKey
-            val stripeAccountId = config.stripeAccountId
+            val googlePayRepository = DefaultGooglePayRepository(
+                application,
+                starterArgs.config?.googlePay?.environment ?: PaymentSheet.GooglePayConfiguration.Environment.Test
+            )
+
+            val prefsRepository = starterArgs.config?.customer?.let { (id) ->
+                DefaultPrefsRepository(
+                    customerId = id,
+                    PaymentSessionPrefs.Default(application)
+                )
+            } ?: PrefsRepository.Noop()
 
             return PaymentOptionsViewModel(
-                publishableKey,
-                stripeAccountId,
-                starterArgsSupplier()
+                starterArgs,
+                googlePayRepository,
+                prefsRepository,
+                DefaultEventReporter(
+                    mode = EventReporter.Mode.Custom,
+                    starterArgs.sessionId,
+                    application
+                )
             ) as T
         }
     }

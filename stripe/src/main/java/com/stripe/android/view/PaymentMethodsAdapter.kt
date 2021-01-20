@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
@@ -8,8 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.distinctUntilChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
+import com.stripe.android.databinding.AddPaymentMethodRowBinding
 import com.stripe.android.databinding.GooglePayRowBinding
 import com.stripe.android.databinding.MaskedCardRowBinding
 import com.stripe.android.model.PaymentMethod
@@ -45,6 +47,25 @@ internal class PaymentMethodsAdapter constructor(
 
     internal var listener: Listener? = null
     private val googlePayCount = 1.takeIf { shouldShowGooglePay } ?: 0
+
+    private val _addPaymentMethodArgs = MutableLiveData<AddPaymentMethodActivityStarter.Args>()
+    internal val addPaymentMethodArgs = _addPaymentMethodArgs.distinctUntilChanged()
+
+    internal val addCardArgs = AddPaymentMethodActivityStarter.Args.Builder()
+        .setBillingAddressFields(intentArgs.billingAddressFields)
+        .setShouldAttachToCustomer(true)
+        .setIsPaymentSessionActive(intentArgs.isPaymentSessionActive)
+        .setPaymentMethodType(PaymentMethod.Type.Card)
+        .setAddPaymentMethodFooter(intentArgs.addPaymentMethodFooterLayoutId)
+        .setPaymentConfiguration(intentArgs.paymentConfiguration)
+        .setWindowFlags(intentArgs.windowFlags)
+        .build()
+
+    internal val addFpxArgs = AddPaymentMethodActivityStarter.Args.Builder()
+        .setIsPaymentSessionActive(intentArgs.isPaymentSessionActive)
+        .setPaymentMethodType(PaymentMethod.Type.Fpx)
+        .setPaymentConfiguration(intentArgs.paymentConfiguration)
+        .build()
 
     init {
         setHasStableIds(true)
@@ -112,19 +133,32 @@ internal class PaymentMethodsAdapter constructor(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is ViewHolder.PaymentMethodViewHolder) {
-            val paymentMethod = getPaymentMethodAtPosition(position)
-            holder.setPaymentMethod(paymentMethod)
-            holder.setSelected(paymentMethod.id == selectedPaymentMethodId)
-            holder.itemView.setOnClickListener {
-                onPositionClicked(holder.adapterPosition)
+        when (holder) {
+            is ViewHolder.PaymentMethodViewHolder -> {
+                val paymentMethod = getPaymentMethodAtPosition(position)
+                holder.setPaymentMethod(paymentMethod)
+                holder.setSelected(paymentMethod.id == selectedPaymentMethodId)
+                holder.itemView.setOnClickListener {
+                    onPositionClicked(holder.adapterPosition)
+                }
             }
-        } else if (holder is ViewHolder.GooglePayViewHolder) {
-            holder.itemView.setOnClickListener {
-                selectedPaymentMethodId = null
-                listener?.onGooglePayClick()
+            is ViewHolder.GooglePayViewHolder -> {
+                holder.itemView.setOnClickListener {
+                    selectedPaymentMethodId = null
+                    listener?.onGooglePayClick()
+                }
+                holder.bind(useGooglePay)
             }
-            holder.bind(useGooglePay)
+            is ViewHolder.AddCardPaymentMethodViewHolder -> {
+                holder.itemView.setOnClickListener {
+                    _addPaymentMethodArgs.value = addCardArgs
+                }
+            }
+            is ViewHolder.AddFpxPaymentMethodViewHolder -> {
+                holder.itemView.setOnClickListener {
+                    _addPaymentMethodArgs.value = addFpxArgs
+                }
+            }
         }
     }
 
@@ -170,17 +204,13 @@ internal class PaymentMethodsAdapter constructor(
     private fun createAddCardPaymentMethodViewHolder(
         parent: ViewGroup
     ): ViewHolder.AddCardPaymentMethodViewHolder {
-        return ViewHolder.AddCardPaymentMethodViewHolder(
-            AddPaymentMethodRowView.createCard(parent.context as Activity, intentArgs)
-        )
+        return ViewHolder.AddCardPaymentMethodViewHolder(parent.context, parent)
     }
 
     private fun createAddFpxPaymentMethodViewHolder(
         parent: ViewGroup
     ): ViewHolder.AddFpxPaymentMethodViewHolder {
-        return ViewHolder.AddFpxPaymentMethodViewHolder(
-            AddPaymentMethodRowView.createFpx(parent.context as Activity, intentArgs)
-        )
+        return ViewHolder.AddFpxPaymentMethodViewHolder(parent.context, parent)
     }
 
     private fun createPaymentMethodViewHolder(
@@ -254,12 +284,40 @@ internal class PaymentMethodsAdapter constructor(
 
     internal sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal class AddCardPaymentMethodViewHolder(
-            itemView: View
-        ) : RecyclerView.ViewHolder(itemView)
+            viewBinding: AddPaymentMethodRowBinding
+        ) : RecyclerView.ViewHolder(viewBinding.root) {
+            constructor(context: Context, parent: ViewGroup) : this(
+                AddPaymentMethodRowBinding.inflate(
+                    LayoutInflater.from(context),
+                    parent,
+                    false
+                )
+            )
+
+            init {
+                itemView.id = R.id.stripe_payment_methods_add_card
+                itemView.contentDescription = itemView.resources.getString(R.string.payment_method_add_new_card)
+                viewBinding.label.text = itemView.resources.getString(R.string.payment_method_add_new_card)
+            }
+        }
 
         internal class AddFpxPaymentMethodViewHolder(
-            itemView: View
-        ) : RecyclerView.ViewHolder(itemView)
+            viewBinding: AddPaymentMethodRowBinding
+        ) : RecyclerView.ViewHolder(viewBinding.root) {
+            constructor(context: Context, parent: ViewGroup) : this(
+                AddPaymentMethodRowBinding.inflate(
+                    LayoutInflater.from(context),
+                    parent,
+                    false
+                )
+            )
+
+            init {
+                itemView.id = R.id.stripe_payment_methods_add_fpx
+                itemView.contentDescription = itemView.resources.getString(R.string.payment_method_add_new_fpx)
+                viewBinding.label.text = itemView.resources.getString(R.string.payment_method_add_new_fpx)
+            }
+        }
 
         internal class GooglePayViewHolder(
             private val viewBinding: GooglePayRowBinding

@@ -4,10 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
@@ -35,12 +35,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         PaymentSessionActivityBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: ActivityViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.NewInstanceFactory()
-        )[ActivityViewModel::class.java]
-    }
+    private val viewModel: ActivityViewModel by viewModels()
 
     private val customerSession: CustomerSession by lazy {
         CustomerSession.getInstance()

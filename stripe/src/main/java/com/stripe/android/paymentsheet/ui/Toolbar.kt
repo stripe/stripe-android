@@ -3,20 +3,20 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.FrameLayout
+import androidx.core.view.isVisible
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.distinctUntilChanged
+import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.databinding.StripePaymentSheetToolbarBinding
 
 internal class Toolbar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+    defStyleAttr: Int = com.google.android.material.R.attr.toolbarStyle
+) : MaterialToolbar(context, attrs, defStyleAttr) {
 
-    private val mutableAction = MutableLiveData<Action>()
-    internal val action = mutableAction.distinctUntilChanged()
+    private val _action = MutableLiveData<Action>()
+    internal val action: LiveData<Action> = _action
 
     private val viewBinding = StripePaymentSheetToolbarBinding.inflate(
         LayoutInflater.from(context),
@@ -26,18 +26,18 @@ internal class Toolbar @JvmOverloads constructor(
     internal val backButton = viewBinding.back
 
     init {
-        closeButton.setOnClickListener { mutableAction.value = Action.Close }
-        backButton.setOnClickListener { mutableAction.value = Action.Back }
+        closeButton.setOnClickListener { _action.value = Action.Close }
+        backButton.setOnClickListener { _action.value = Action.Back }
     }
 
     fun showClose() {
-        closeButton.visibility = View.VISIBLE
-        backButton.visibility = View.GONE
+        closeButton.isVisible = true
+        backButton.isVisible = false
     }
 
     fun showBack() {
-        closeButton.visibility = View.GONE
-        backButton.visibility = View.VISIBLE
+        closeButton.isVisible = false
+        backButton.isVisible = true
     }
 
     fun updateProcessing(isProcessing: Boolean) {

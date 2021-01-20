@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.TextWatcher
@@ -19,6 +18,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.PaymentConfiguration
@@ -32,8 +32,6 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import java.math.BigDecimal
-import java.math.RoundingMode
 import kotlin.properties.Delegates
 
 /**
@@ -57,10 +55,18 @@ class CardMultilineWidget @JvmOverloads constructor(
     internal val cvcEditText = viewBinding.etCvc
     internal val postalCodeEditText = viewBinding.etPostalCode
 
-    private val cardNumberTextInputLayout = viewBinding.tlCardNumber
-    private val expiryTextInputLayout = viewBinding.tlExpiry
-    private val cvcInputLayout = viewBinding.tlCvc
+    internal val secondRowLayout = viewBinding.secondRowLayout
+    internal val cardNumberTextInputLayout = viewBinding.tlCardNumber
+    internal val expiryTextInputLayout = viewBinding.tlExpiry
+    internal val cvcInputLayout = viewBinding.tlCvc
     internal val postalInputLayout = viewBinding.tlPostalCode
+
+    private val textInputLayouts = listOf(
+        cardNumberTextInputLayout,
+        expiryTextInputLayout,
+        cvcInputLayout,
+        postalInputLayout
+    )
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
@@ -86,15 +92,16 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
     private var isEnabled: Boolean = false
-    private var hasAdjustedDrawable: Boolean = false
     private var customCvcLabel: String? = null
 
     private var cardBrand: CardBrand = CardBrand.Unknown
 
+    internal val brand: CardBrand
+        @JvmSynthetic
+        get() = cardBrand
+
     @ColorInt
     private val tintColorInt: Int
-
-    private var cardHintText: String = resources.getString(R.string.card_number_hint)
 
     /**
      * If [shouldShowPostalCode] is true and [postalCodeRequired] is true, then postal code is a
@@ -273,15 +280,6 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-    private val pixelsToAdjust: Double =
-        resources
-            .getDimension(R.dimen.stripe_card_icon_multiline_padding_bottom)
-            .toDouble()
-
-    private val dynamicBufferInPixels: Int = BigDecimal(pixelsToAdjust)
-        .setScale(0, RoundingMode.HALF_DOWN)
-        .toInt()
-
     @VisibleForTesting
     internal var shouldShowErrorIcon = false
         private set(value) {
@@ -293,20 +291,54 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
+    internal var expirationDateHintRes: Int by Delegates.observable(
+        R.string.expiry_date_hint
+    ) { _, _, newValue ->
+        expiryTextInputLayout.placeholderText = resources.getString(newValue)
+    }
+
+    private var showCvcIconInCvcField: Boolean = false
+
+    internal var cardBrandIconSupplier: CardBrandIconSupplier by Delegates.observable(
+        DEFAULT_CARD_BRAND_ICON_SUPPLIER
+    ) { _, _, _ ->
+        updateBrandUi()
+    }
+
+    internal var cardNumberErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
+        ErrorListener(cardNumberTextInputLayout)
+    ) { _, _, newValue ->
+        cardNumberEditText.setErrorMessageListener(newValue)
+    }
+    internal var expirationDateErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
+        ErrorListener(expiryTextInputLayout)
+    ) { _, _, newValue ->
+        expiryDateEditText.setErrorMessageListener(newValue)
+    }
+    internal var cvcErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
+        ErrorListener(cvcInputLayout)
+    ) { _, _, newValue ->
+        cvcEditText.setErrorMessageListener(newValue)
+    }
+    internal var postalCodeErrorListener: StripeEditText.ErrorMessageListener? by Delegates.observable(
+        ErrorListener(postalInputLayout)
+    ) { _, _, newValue ->
+        postalCodeEditText.setErrorMessageListener(newValue)
+    }
+
     init {
         orientation = VERTICAL
 
         tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
+        textInputLayouts.forEach {
+            it.placeholderTextColor = it.editText?.hintTextColors
+        }
+
         // This sets the value of shouldShowPostalCode
         attrs?.let { checkAttributeSet(it) }
 
-        initTextInputLayoutErrorHandlers(
-            cardNumberTextInputLayout,
-            expiryTextInputLayout,
-            cvcInputLayout,
-            postalInputLayout
-        )
+        initTextInputLayoutErrorHandlers()
 
         initFocusChangeListeners()
         initDeleteEmptyListeners()
@@ -333,7 +365,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                     postalCodeEditText.requestFocus()
                 }
                 cardInputListener?.onCvcComplete()
-            } else {
+            } else if (!showCvcIconInCvcField) {
                 flipToCvcIconIfNotFinished()
             }
             cvcEditText.shouldShowError = false
@@ -359,9 +391,10 @@ class CardMultilineWidget @JvmOverloads constructor(
         isEnabled = true
     }
 
-    override fun onFinishInflate() {
-        super.onFinishInflate()
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
         postalCodeEditText.config = PostalCodeEditText.Config.Global
+        cvcEditText.hint = null
     }
 
     /**
@@ -402,7 +435,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     override fun setCardHint(cardHint: String) {
-        cardHintText = cardHint
+        cardNumberTextInputLayout.placeholderText = cardHint
     }
 
     /**
@@ -439,6 +472,18 @@ class CardMultilineWidget @JvmOverloads constructor(
     fun setCvcLabel(cvcLabel: String?) {
         customCvcLabel = cvcLabel
         updateCvc()
+    }
+
+    @JvmSynthetic
+    internal fun setCvcIcon(resId: Int?) {
+        if (resId != null) {
+            cvcInputLayout.setEndIconDrawable(resId)
+            cvcInputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
+        } else {
+            cvcInputLayout.setEndIconDrawable(0)
+            cvcInputLayout.endIconMode = TextInputLayout.END_ICON_NONE
+        }
+        showCvcIconInCvcField = resId != null
     }
 
     /**
@@ -515,10 +560,8 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     override fun setEnabled(enabled: Boolean) {
-        expiryTextInputLayout.isEnabled = enabled
-        cardNumberTextInputLayout.isEnabled = enabled
-        cvcInputLayout.isEnabled = enabled
-        postalInputLayout.isEnabled = enabled
+        super.setEnabled(enabled)
+        textInputLayouts.forEach { it.isEnabled = enabled }
         isEnabled = enabled
     }
 
@@ -555,16 +598,13 @@ class CardMultilineWidget @JvmOverloads constructor(
             EditorInfo.IME_ACTION_NEXT
         }
 
-        val marginPixels = if (shouldShowPostalCode) {
-            resources.getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
-        } else {
-            0
+        cvcInputLayout.updateLayoutParams<LayoutParams> {
+            marginEnd = if (shouldShowPostalCode) {
+                resources.getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
+            } else {
+                0
+            }
         }
-        val linearParams = cvcInputLayout.layoutParams as LayoutParams
-        linearParams.setMargins(0, 0, marginPixels, 0)
-        linearParams.marginEnd = marginPixels
-
-        cvcInputLayout.layoutParams = linearParams
     }
 
     private fun checkAttributeSet(attrs: AttributeSet) {
@@ -599,12 +639,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         if (shouldShowErrorIcon) {
-            updateDrawable(
+            updateCardNumberIcon(
                 iconResourceId = cardBrand.errorIcon,
                 shouldTint = false
             )
         } else {
-            updateDrawable(
+            updateCardNumberIcon(
                 iconResourceId = cardBrand.cvcIcon,
                 shouldTint = true
             )
@@ -630,69 +670,53 @@ class CardMultilineWidget @JvmOverloads constructor(
     private fun initFocusChangeListeners() {
         cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                cardNumberEditText.setHintDelayed(cardHintText, CARD_NUMBER_HINT_DELAY)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
-            } else {
-                cardNumberEditText.hint = ""
             }
         }
 
         expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                expiryDateEditText.setHintDelayed(R.string.expiry_date_hint, COMMON_HINT_DELAY)
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
-            } else {
-                expiryDateEditText.hint = ""
             }
         }
 
         cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                flipToCvcIconIfNotFinished()
-                cvcEditText.setHintDelayed(cvcHelperText, COMMON_HINT_DELAY)
+                if (!showCvcIconInCvcField) {
+                    flipToCvcIconIfNotFinished()
+                }
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             } else {
                 updateBrandUi()
-                cvcEditText.hint = ""
             }
         }
 
         postalCodeEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
-            if (!shouldShowPostalCode) {
-                return@OnFocusChangeListener
-            }
-            if (hasFocus) {
-                postalCodeEditText.setHintDelayed(R.string.zip_helper, COMMON_HINT_DELAY)
+            if (shouldShowPostalCode && hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
-            } else {
-                postalCodeEditText.hint = ""
             }
         }
     }
 
-    private fun initTextInputLayoutErrorHandlers(
-        cardInputLayout: TextInputLayout,
-        expiryInputLayout: TextInputLayout,
-        cvcTextInputLayout: TextInputLayout,
-        postalInputLayout: TextInputLayout
-    ) {
-        cardNumberEditText.setErrorMessageListener(ErrorListener(cardInputLayout))
-        expiryDateEditText.setErrorMessageListener(ErrorListener(expiryInputLayout))
-        cvcEditText.setErrorMessageListener(ErrorListener(cvcTextInputLayout))
-        postalCodeEditText.setErrorMessageListener(ErrorListener(postalInputLayout))
+    private fun initTextInputLayoutErrorHandlers() {
+        cardNumberEditText.setErrorMessageListener(cardNumberErrorListener)
+        expiryDateEditText.setErrorMessageListener(expirationDateErrorListener)
+        cvcEditText.setErrorMessageListener(cvcErrorListener)
+        postalCodeEditText.setErrorMessageListener(postalCodeErrorListener)
     }
 
     private fun updateBrandUi() {
         updateCvc()
         if (shouldShowErrorIcon) {
-            updateDrawable(
+            updateCardNumberIcon(
                 iconResourceId = cardBrand.errorIcon,
                 shouldTint = false
             )
         } else {
-            updateDrawable(
-                iconResourceId = cardBrand.icon,
-                shouldTint = CardBrand.Unknown == cardBrand
+            val cardBrandIcon = cardBrandIconSupplier.get(cardBrand)
+            updateCardNumberIcon(
+                iconResourceId = cardBrandIcon.iconResourceId,
+                shouldTint = cardBrandIcon.shouldTint
             )
         }
     }
@@ -701,42 +725,51 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcInputLayout)
     }
 
-    private fun updateDrawable(@DrawableRes iconResourceId: Int, shouldTint: Boolean) {
-        val icon = ContextCompat.getDrawable(context, iconResourceId) ?: return
-        val original = cardNumberEditText.compoundDrawablesRelative[0] ?: return
-        val iconPadding = cardNumberEditText.compoundDrawablePadding
-        icon.bounds = createDrawableBounds(original)
-
-        val compatIcon = DrawableCompat.wrap(icon)
-        if (shouldTint) {
-            DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
+    private fun updateCardNumberIcon(
+        @DrawableRes iconResourceId: Int,
+        shouldTint: Boolean
+    ) {
+        ContextCompat.getDrawable(context, iconResourceId)?.let { icon ->
+            updateCompoundDrawable(
+                if (shouldTint) {
+                    DrawableCompat.wrap(icon).also {
+                        it.setTint(tintColorInt)
+                    }
+                } else {
+                    icon
+                }
+            )
         }
+    }
 
-        cardNumberEditText.compoundDrawablePadding = iconPadding
-        cardNumberEditText.setCompoundDrawablesRelative(
-            compatIcon,
+    private fun updateCompoundDrawable(drawable: Drawable) {
+        cardNumberEditText.setCompoundDrawablesRelativeWithIntrinsicBounds(
             null,
             null,
+            drawable,
             null
         )
     }
 
-    private fun createDrawableBounds(drawable: Drawable): Rect {
-        val newBounds = Rect()
-        drawable.copyBounds(newBounds)
-
-        if (!hasAdjustedDrawable) {
-            newBounds.top = newBounds.top - dynamicBufferInPixels
-            newBounds.bottom = newBounds.bottom - dynamicBufferInPixels
-            hasAdjustedDrawable = true
-        }
-
-        return newBounds
+    internal fun interface CardBrandIconSupplier {
+        fun get(cardBrand: CardBrand): CardBrandIcon
     }
+
+    internal data class CardBrandIcon(
+        val iconResourceId: Int,
+        val shouldTint: Boolean = false
+    )
 
     private companion object {
         private const val CARD_MULTILINE_TOKEN = "CardMultilineView"
         private const val CARD_NUMBER_HINT_DELAY = 120L
         private const val COMMON_HINT_DELAY = 90L
+
+        private val DEFAULT_CARD_BRAND_ICON_SUPPLIER = CardBrandIconSupplier { cardBrand ->
+            CardBrandIcon(
+                cardBrand.icon,
+                cardBrand == CardBrand.Unknown
+            )
+        }
     }
 }

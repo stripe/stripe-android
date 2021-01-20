@@ -1,14 +1,15 @@
 package com.stripe.android.paymentsheet
 
-import android.os.Bundle
-import android.view.View
-import androidx.annotation.VisibleForTesting
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import com.stripe.android.R
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import java.util.Currency
+import java.util.Locale
 
-internal class PaymentSheetAddCardFragment : BaseAddCardFragment() {
+internal class PaymentSheetAddCardFragment(
+    eventReporter: EventReporter
+) : BaseAddCardFragment(eventReporter) {
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
@@ -20,32 +21,27 @@ internal class PaymentSheetAddCardFragment : BaseAddCardFragment() {
         )
     }
 
-    @VisibleForTesting
-    internal val googlePayButton: View by lazy { viewBinding.googlePayButton }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        sheetViewModel.fetchAddPaymentMethodConfig().observe(viewLifecycleOwner) { config ->
-            if (config != null) {
-                onConfigReady(config)
-            }
-        }
-    }
-
-    @VisibleForTesting
-    fun onConfigReady(config: AddPaymentMethodConfig) {
-        val shouldShowGooglePayButton = config.shouldShowGooglePayButton
-        googlePayButton.setOnClickListener {
-            launchGooglePay()
-        }
-        googlePayButton.isVisible = shouldShowGooglePayButton
-        viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
-        viewBinding.addCardHeader.isVisible = !shouldShowGooglePayButton
-    }
-
-    private fun launchGooglePay() {
-        sheetViewModel.updateSelection(PaymentSelection.GooglePay)
+    override fun onGooglePaySelected() {
         sheetViewModel.checkout(requireActivity())
+    }
+
+    override fun onConfigReady(config: AddPaymentMethodConfig) {
+        super.onConfigReady(config)
+
+        val amount = config.paymentIntent.amount
+        val currencyCode = config.paymentIntent.currency
+
+        addCardHeader.text = if (amount != null && currencyCode != null) {
+            val currency = Currency.getInstance(
+                currencyCode.toUpperCase(Locale.ROOT)
+            )
+
+            resources.getString(
+                R.string.stripe_paymentsheet_pay_using_with_amount,
+                CurrencyFormatter().format(amount, currency)
+            )
+        } else {
+            resources.getString(R.string.stripe_paymentsheet_pay_using)
+        }
     }
 }

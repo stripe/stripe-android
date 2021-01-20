@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/StripePaymentOptionItemContainer"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingVertical="4dp"
-    android:paddingStart="0dp"
-    android:paddingEnd="4dp">
+    android:layout_height="wrap_content">
 
-    <FrameLayout
-        style="@style/StripePaymentSheetPaymentMethodsIconContainer"
-        android:background="@drawable/stripe_paymentsheet_add_card_bg">
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
+        style="@style/StripePaymentOptionItemCard"
+        android:checkable="false"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/label">
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/stripe_ic_add_circle"
+            style="@style/StripePaymentOptionItemCardImage"
+            android:src="@drawable/stripe_ic_paymentsheet_add"
             android:contentDescription="@null" />
-    </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
+        android:id="@+id/label"
         style="@style/StripePaymentSheetPaymentMethodsLabel"
-        android:text="@string/stripe_paymentsheet_add_payment_method_button"
+        android:text="@string/stripe_paymentsheet_new_card_button_label"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/card"
+        app:layout_constraintTop_toBottomOf="@+id/card"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

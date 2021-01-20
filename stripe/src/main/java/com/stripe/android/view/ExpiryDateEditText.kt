@@ -12,6 +12,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
 import com.stripe.android.model.ExpirationDate
 import kotlin.math.min
+import kotlin.properties.Delegates
 
 /**
  * An [EditText] that handles putting numbers around a central divider character.
@@ -21,22 +22,6 @@ open class ExpiryDateEditText @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
-
-    init {
-        inputType = InputType.TYPE_CLASS_NUMBER
-        filters = listOf(
-            InputFilter.LengthFilter(
-                context.resources.getInteger(R.integer.stripe_date_length)
-            )
-        ).toTypedArray()
-
-        setErrorMessage(resources.getString(R.string.invalid_expiry_year))
-        listenForTextChanges()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
-        }
-    }
 
     // invoked when a valid date has been entered
     @JvmSynthetic
@@ -68,10 +53,38 @@ open class ExpiryDateEditText @JvmOverloads constructor(
             }
         }
 
-    override val accessibilityText: String?
+    override val accessibilityText: String
         get() {
             return resources.getString(R.string.acc_label_expiry_date_node, text)
         }
+
+    internal var includeSeparatorGaps: Boolean by Delegates.observable(
+        INCLUDE_SEPARATOR_GAPS_DEFAULT
+    ) { _, _, newValue ->
+        updateSeparatorUi(newValue)
+    }
+
+    private val dateDigitsLength = context.resources.getInteger(R.integer.stripe_date_digits_length)
+
+    private var separator = if (INCLUDE_SEPARATOR_GAPS_DEFAULT) {
+        SEPARATOR_WITH_GAPS
+    } else {
+        SEPARATOR_WITHOUT_GAPS
+    }
+
+    private fun updateSeparatorUi(
+        includeSeparatorGaps: Boolean = INCLUDE_SEPARATOR_GAPS_DEFAULT
+    ) {
+        separator = if (includeSeparatorGaps) {
+            SEPARATOR_WITH_GAPS
+        } else {
+            SEPARATOR_WITHOUT_GAPS
+        }
+
+        filters = listOf(
+            InputFilter.LengthFilter(dateDigitsLength + separator.length)
+        ).toTypedArray()
+    }
 
     private fun listenForTextChanges() {
         addTextChangedListener(
@@ -79,10 +92,7 @@ open class ExpiryDateEditText @JvmOverloads constructor(
                 private var ignoreChanges = false
                 private var latestChangeStart: Int = 0
                 private var latestInsertionSize: Int = 0
-                private var expirationDate = ExpirationDate.Unvalidated(
-                    month = "",
-                    year = ""
-                )
+                private var expirationDate = ExpirationDate.Unvalidated.EMPTY
 
                 private var newCursorPosition: Int? = null
                 private var formattedDate: String? = null
@@ -103,7 +113,7 @@ open class ExpiryDateEditText @JvmOverloads constructor(
                     var inErrorState = false
 
                     val inputText = s?.toString().orEmpty()
-                    var rawNumericInput = inputText.replace("/".toRegex(), "")
+                    var rawNumericInput = inputText.filter { it.isDigit() }
 
                     if (rawNumericInput.length == 1 && latestChangeStart == 0 &&
                         latestInsertionSize == 1
@@ -128,10 +138,11 @@ open class ExpiryDateEditText @JvmOverloads constructor(
                         rawNumericInput = rawNumericInput.substring(0, 1)
                     }
 
-                    val expirationDate =
-                        ExpirationDate.Unvalidated.create(rawNumericInput).also {
-                            this.expirationDate = it
-                        }
+                    val expirationDate = ExpirationDate.Unvalidated.create(
+                        rawNumericInput
+                    ).also {
+                        this.expirationDate = it
+                    }
 
                     if (!expirationDate.isMonthValid) {
                         inErrorState = true
@@ -143,7 +154,7 @@ open class ExpiryDateEditText @JvmOverloads constructor(
                     if (expirationDate.month.length == 2 && latestInsertionSize > 0 &&
                         !inErrorState || rawNumericInput.length > 2
                     ) {
-                        formattedDateBuilder.append("/")
+                        formattedDateBuilder.append(separator)
                     }
 
                     formattedDateBuilder.append(expirationDate.year)
@@ -153,7 +164,7 @@ open class ExpiryDateEditText @JvmOverloads constructor(
                         formattedDate.length,
                         latestChangeStart,
                         latestInsertionSize,
-                        MAX_INPUT_LENGTH
+                        dateDigitsLength + separator.length
                     )
                     this.formattedDate = formattedDate
                 }
@@ -188,7 +199,7 @@ open class ExpiryDateEditText @JvmOverloads constructor(
                     // so we might not be properly catching an error state.
                     if (month.length == 2 && year.length == 2) {
                         val wasComplete = isDateValid
-                        updateInputValues(month, year)
+                        isDateValid = isDateValid(month, year)
                         // Here, we have a complete date, so if we've made an invalid one, we want
                         // to show an error.
                         shouldShowError = !isDateValid
@@ -206,6 +217,18 @@ open class ExpiryDateEditText @JvmOverloads constructor(
                 }
             }
         )
+    }
+
+    init {
+        inputType = InputType.TYPE_CLASS_NUMBER
+        updateSeparatorUi()
+
+        setErrorMessage(resources.getString(R.string.invalid_expiry_year))
+        listenForTextChanges()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
+        }
     }
 
     /**
@@ -226,26 +249,31 @@ open class ExpiryDateEditText @JvmOverloads constructor(
         editActionAddition: Int,
         maxInputLength: Int
     ): Int {
-        val gapsJumped =
-            if (editActionStart <= 2 && editActionStart + editActionAddition >= 2) {
-                1
+        val gapsJumped = if (editActionStart <= 2 && editActionStart + editActionAddition >= 2) {
+            separator.length
+        } else {
+            0
+        }
+
+        // `shouldRemoveSeparator` will be true when deleting the character immediately after the
+        // separator. For example, if the input text is currently "01/2" and a character is
+        // deleted, both the '2' and the separator should be deleted.
+        val isDelete = editActionAddition == 0
+        val shouldRemoveSeparator = isDelete && editActionStart == (2 + separator.length)
+
+        val newPosition = (editActionStart + editActionAddition + gapsJumped).let { newPosition ->
+            newPosition - if (shouldRemoveSeparator && newPosition > 0) {
+                separator.length
             } else {
                 0
             }
-
-        // editActionAddition can only be 0 if we are deleting,
-        // so we need to check whether or not to skip backwards one space
-        val skipBack = editActionAddition == 0 && editActionStart == 3
-
-        var newPosition: Int = editActionStart + editActionAddition + gapsJumped
-        if (skipBack && newPosition > 0) {
-            newPosition--
         }
-        val untruncatedPosition = if (newPosition <= newLength) newPosition else newLength
+
+        val untruncatedPosition = min(newPosition, newLength)
         return min(maxInputLength, untruncatedPosition)
     }
 
-    private fun updateInputValues(month: String, year: String) {
+    private fun isDateValid(month: String, year: String): Boolean {
         val inputMonth = if (month.length != 2) {
             INVALID_INPUT
         } else {
@@ -262,11 +290,15 @@ open class ExpiryDateEditText @JvmOverloads constructor(
             }.getOrDefault(INVALID_INPUT)
         }
 
-        isDateValid = DateUtils.isExpiryDataValid(inputMonth, inputYear)
+        return DateUtils.isExpiryDataValid(inputMonth, inputYear)
     }
 
     private companion object {
         private const val INVALID_INPUT = -1
-        private const val MAX_INPUT_LENGTH = 5
+
+        private const val SEPARATOR_WITHOUT_GAPS = "/"
+        private const val SEPARATOR_WITH_GAPS = " / "
+
+        private const val INCLUDE_SEPARATOR_GAPS_DEFAULT = false
     }
 }

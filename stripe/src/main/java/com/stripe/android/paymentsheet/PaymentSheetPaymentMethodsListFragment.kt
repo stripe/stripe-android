@@ -6,10 +6,13 @@ import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import java.util.Currency
 import java.util.Locale
 
-internal class PaymentSheetPaymentMethodsListFragment : BasePaymentMethodsListFragment() {
+internal class PaymentSheetPaymentMethodsListFragment(
+    eventReporter: EventReporter
+) : BasePaymentMethodsListFragment(eventReporter) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
@@ -22,10 +25,6 @@ internal class PaymentSheetPaymentMethodsListFragment : BasePaymentMethodsListFr
     }
 
     override val sheetViewModel: PaymentSheetViewModel by lazy { activityViewModel }
-
-    override val shouldShowGooglePay: Boolean by lazy {
-        sheetViewModel.isGooglePayReady.value == true
-    }
 
     private val currencyFormatter = CurrencyFormatter()
 
