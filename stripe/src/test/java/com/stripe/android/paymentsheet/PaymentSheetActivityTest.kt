@@ -123,7 +123,7 @@ internal class PaymentSheetActivityTest {
             assertThat(
                 contract.parseResult(0, shadowOf(activity).resultIntent)
             ).isEqualTo(
-                PaymentResult.Cancelled(
+                PaymentResult.Canceled(
                     null,
                     PAYMENT_INTENT
                 )
@@ -189,7 +189,7 @@ internal class PaymentSheetActivityTest {
             assertThat(
                 contract.parseResult(0, shadowOf(activity).resultIntent)
             ).isEqualTo(
-                PaymentResult.Cancelled(
+                PaymentResult.Canceled(
                     null,
                     PAYMENT_INTENT
                 )
@@ -295,7 +295,7 @@ internal class PaymentSheetActivityTest {
             assertThat(
                 contract.parseResult(0, shadowOf(activity).resultIntent)
             ).isEqualTo(
-                PaymentResult.Cancelled(
+                PaymentResult.Canceled(
                     null,
                     PAYMENT_INTENT
                 )
