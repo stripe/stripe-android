@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -70,11 +71,18 @@ internal class StripePaymentController internal constructor(
     private val challengeProgressActivityStarter: ChallengeProgressActivityStarter =
         ChallengeProgressActivityStarter.Default(),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
+    private val paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val resources: Resources = context.applicationContext.resources
 ) : PaymentController {
     private val logger = Logger.getInstance(enableLogging)
     private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
+
+    private val paymentRelayStarterFactory = { host: AuthActivityStarter.Host ->
+        paymentRelayLauncher?.let {
+            PaymentRelayStarter.Modern(it)
+        } ?: PaymentRelayStarter.Legacy(host)
+    }
 
     init {
         threeDs2Service.initialize(
@@ -94,6 +102,7 @@ internal class StripePaymentController internal constructor(
             confirmStripeIntentParams,
             requestOptions,
             ConfirmStripeIntentCallback(
+                paymentRelayStarterFactory(host),
                 host,
                 requestOptions,
                 this,
@@ -176,7 +185,7 @@ internal class StripePaymentController internal constructor(
                     },
                     onFailure = {
                         handleError(
-                            host,
+                            paymentRelayStarterFactory(host),
                             when (type) {
                                 PaymentController.StripeIntentType.PaymentIntent -> {
                                     PAYMENT_REQUEST_CODE
@@ -224,7 +233,11 @@ internal class StripePaymentController internal constructor(
                         onSourceRetrieved(host, retrievedSourced, requestOptions)
                     },
                     onFailure = {
-                        handleError(host, SOURCE_REQUEST_CODE, it)
+                        handleError(
+                            paymentRelayStarterFactory(host),
+                            SOURCE_REQUEST_CODE,
+                            it
+                        )
                     }
                 )
             }
@@ -541,7 +554,11 @@ internal class StripePaymentController internal constructor(
                     } else {
                         logger.debug("Dispatching PaymentIntentResult for ${result.id}")
                         callback.onSuccess(
-                            PaymentIntentResult(result, flowOutcome, getFailureMessage(result, flowOutcome))
+                            PaymentIntentResult(
+                                result,
+                                flowOutcome,
+                                getFailureMessage(result, flowOutcome)
+                            )
                         )
                     }
                 } else {
@@ -559,7 +576,10 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    private fun getFailureMessage(intent: StripeIntent, @StripeIntentResult.Outcome outcome: Int): String? {
+    private fun getFailureMessage(
+        intent: StripeIntent,
+        @StripeIntentResult.Outcome outcome: Int
+    ): String? {
         return when {
             intent.status == StripeIntent.Status.RequiresPaymentMethod -> {
                 when (intent) {
@@ -647,7 +667,11 @@ internal class StripePaymentController internal constructor(
                     } else {
                         logger.debug("Dispatching SetupIntentResult for ${result.id}")
                         callback.onSuccess(
-                            SetupIntentResult(result, flowOutcome, getFailureMessage(result, flowOutcome))
+                            SetupIntentResult(
+                                result,
+                                flowOutcome,
+                                getFailureMessage(result, flowOutcome)
+                            )
                         )
                     }
                 } else {
@@ -694,7 +718,11 @@ internal class StripePaymentController internal constructor(
                             requestOptions
                         )
                     } catch (e: CertificateException) {
-                        handleError(host, getRequestCode(stripeIntent), e)
+                        handleError(
+                            paymentRelayStarterFactory(host),
+                            getRequestCode(stripeIntent),
+                            e
+                        )
                     }
                 }
                 is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
@@ -788,13 +816,16 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    private fun bypassAuth(
+    @JvmSynthetic
+    internal fun bypassAuth(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         stripeAccountId: String?
     ) {
-        PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
-            .start(PaymentRelayStarter.Args.create(stripeIntent, stripeAccountId))
+        paymentRelayStarterFactory(host)
+            .start(
+                PaymentRelayStarter.Args.create(stripeIntent, stripeAccountId)
+            )
     }
 
     private fun bypassAuth(
@@ -802,8 +833,10 @@ internal class StripePaymentController internal constructor(
         source: Source,
         stripeAccountId: String?
     ) {
-        PaymentRelayStarter.create(host, SOURCE_REQUEST_CODE)
-            .start(PaymentRelayStarter.Args.SourceArgs(source, stripeAccountId))
+        paymentRelayStarterFactory(host)
+            .start(
+                PaymentRelayStarter.Args.SourceArgs(source, stripeAccountId)
+            )
     }
 
     private fun begin3ds2Auth(
@@ -870,11 +903,7 @@ internal class StripePaymentController internal constructor(
                 )
             }
 
-            val paymentRelayStarter = PaymentRelayStarter.create(
-                host,
-                getRequestCode(stripeIntent)
-            )
-
+            val paymentRelayStarter = paymentRelayStarterFactory(host)
             start3ds2AuthResult.fold(
                 onSuccess = { authResult ->
                     on3ds2AuthSuccess(
@@ -883,13 +912,18 @@ internal class StripePaymentController internal constructor(
                         stripe3ds2Fingerprint.source,
                         timeout,
                         paymentRelayStarter,
+                        getRequestCode(stripeIntent),
                         host,
                         stripeIntent,
                         requestOptions
                     )
                 },
                 onFailure = { throwable ->
-                    on3ds2AuthFailure(throwable, paymentRelayStarter)
+                    on3ds2AuthFailure(
+                        throwable,
+                        getRequestCode(stripeIntent),
+                        paymentRelayStarter
+                    )
                 }
             )
         }
@@ -902,6 +936,7 @@ internal class StripePaymentController internal constructor(
         sourceId: String,
         timeout: Int,
         paymentRelayStarter: PaymentRelayStarter,
+        requestCode: Int,
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
@@ -960,6 +995,7 @@ internal class StripePaymentController internal constructor(
                 RuntimeException(
                     "Error encountered during 3DS2 authentication request. $errorMessage"
                 ),
+                requestCode,
                 paymentRelayStarter
             )
         }
@@ -1031,6 +1067,7 @@ internal class StripePaymentController internal constructor(
             onFailure = {
                 on3ds2AuthFailure(
                     it,
+                    getRequestCode(stripeIntent),
                     paymentRelayStarter
                 )
             }
@@ -1039,16 +1076,19 @@ internal class StripePaymentController internal constructor(
 
     private suspend fun on3ds2AuthFailure(
         throwable: Throwable,
+        requestCode: Int,
         paymentRelayStarter: PaymentRelayStarter
     ) = withContext(Dispatchers.Main) {
         paymentRelayStarter.start(
             PaymentRelayStarter.Args.ErrorArgs(
-                StripeException.create(throwable)
+                StripeException.create(throwable),
+                requestCode
             )
         )
     }
 
     private class ConfirmStripeIntentCallback constructor(
+        private val paymentRelayStarter: PaymentRelayStarter,
         private val host: AuthActivityStarter.Host,
         private val requestOptions: ApiRequest.Options,
         private val paymentController: PaymentController,
@@ -1060,7 +1100,11 @@ internal class StripePaymentController internal constructor(
         }
 
         override fun onError(e: Exception) {
-            handleError(host, requestCode, e)
+            handleError(
+                paymentRelayStarter,
+                requestCode,
+                e
+            )
         }
     }
 
@@ -1307,14 +1351,15 @@ internal class StripePaymentController internal constructor(
         }
 
         private fun handleError(
-            host: AuthActivityStarter.Host,
+            paymentRelayStarter: PaymentRelayStarter,
             requestCode: Int,
             throwable: Throwable
         ) {
-            PaymentRelayStarter.create(host, requestCode)
+            paymentRelayStarter
                 .start(
                     PaymentRelayStarter.Args.ErrorArgs(
-                        StripeException.create(throwable)
+                        StripeException.create(throwable),
+                        requestCode
                     )
                 )
         }
