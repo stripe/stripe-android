@@ -12,7 +12,6 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -23,6 +22,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -236,7 +236,7 @@ internal class PaymentSheetActivityTest {
                 StripePaymentController.PAYMENT_REQUEST_CODE,
                 Intent().apply {
                     putExtras(
-                        PaymentController.Result(
+                        PaymentFlowResult.Unvalidated(
                             "client_secret",
                             StripeIntentResult.Outcome.SUCCEEDED
                         ).toBundle()

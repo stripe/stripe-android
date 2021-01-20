@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.ChallengeCompletionIntentStarter
 import com.stripe.android.stripe3ds2.transaction.ChallengeFlowOutcome
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
@@ -39,7 +39,7 @@ class Stripe3ds2CompletionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val result = PaymentController.Result(
+        val result = PaymentFlowResult.Unvalidated(
             clientSecret = intent.getStringExtra(EXTRA_CLIENT_SECRET),
             flowOutcome = flowOutcome,
             stripeAccountId = intent.getStringExtra(EXTRA_STRIPE_ACCOUNT)

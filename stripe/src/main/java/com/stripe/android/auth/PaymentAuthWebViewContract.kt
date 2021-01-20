@@ -5,12 +5,12 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.PaymentController
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.PaymentAuthWebViewActivity
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentController.Result>() {
+internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult>() {
     override fun createIntent(
         context: Context,
         input: Args?
@@ -32,7 +32,7 @@ internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWe
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): PaymentController.Result? {
+    ): PaymentFlowResult? {
         return intent?.getParcelableExtra(EXTRA_ARGS)
     }
 

@@ -4,9 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 
 internal class PaymentAuthWebViewActivityViewModel(
@@ -27,10 +27,10 @@ internal class PaymentAuthWebViewActivityViewModel(
     @JvmSynthetic
     internal val toolbarBackgroundColor = args.toolbarCustomization?.backgroundColor
 
-    internal val paymentResult: PaymentController.Result
+    internal val paymentResult: PaymentFlowResult.Unvalidated
         @JvmSynthetic
         get() {
-            return PaymentController.Result(
+            return PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 sourceId = Uri.parse(args.url).lastPathSegment.orEmpty(),
                 stripeAccountId = args.stripeAccountId

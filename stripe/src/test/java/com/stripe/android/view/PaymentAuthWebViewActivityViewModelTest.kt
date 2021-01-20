@@ -1,9 +1,9 @@
 package com.stripe.android.view
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -24,11 +24,11 @@ class PaymentAuthWebViewActivityViewModelTest {
         )
 
         val intent = viewModel.cancellationResult
-        val resultIntent = PaymentController.Result.fromIntent(intent)
-        assertThat(
-            resultIntent?.flowOutcome
-        ).isEqualTo(StripeIntentResult.Outcome.CANCELED)
-        assertThat(resultIntent?.shouldCancelSource).isTrue()
+        val resultIntent = PaymentFlowResult.Unvalidated.fromIntent(intent)
+        assertThat(resultIntent.flowOutcome)
+            .isEqualTo(StripeIntentResult.Outcome.CANCELED)
+        assertThat(resultIntent.shouldCancelSource)
+            .isTrue()
     }
 
     @Test
@@ -44,11 +44,11 @@ class PaymentAuthWebViewActivityViewModelTest {
         )
 
         val intent = viewModel.cancellationResult
-        val resultIntent = PaymentController.Result.fromIntent(requireNotNull(intent))
-        assertThat(
-            resultIntent?.flowOutcome
-        ).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
-        assertThat(resultIntent?.shouldCancelSource).isTrue()
+        val resultIntent = PaymentFlowResult.Unvalidated.fromIntent(intent)
+        assertThat(resultIntent.flowOutcome)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+        assertThat(resultIntent.shouldCancelSource)
+            .isTrue()
     }
 
     @Test
