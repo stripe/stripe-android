@@ -197,7 +197,7 @@ class DefaultPaymentSheetFlowControllerTest {
             label = CardBrand.Visa.displayName
         )
 
-        verify(paymentOptionCallback).onComplete(expectedPaymentOption)
+        verify(paymentOptionCallback).onPaymentOption(expectedPaymentOption)
 
         assertThat(flowController.getPaymentOption())
             .isEqualTo(expectedPaymentOption)
@@ -215,7 +215,7 @@ class DefaultPaymentSheetFlowControllerTest {
             PaymentOptionResult.Cancelled(null)
         )
 
-        verify(paymentOptionCallback).onComplete(isNull())
+        verify(paymentOptionCallback).onPaymentOption(isNull())
     }
 
     @Test
@@ -278,7 +278,7 @@ class DefaultPaymentSheetFlowControllerTest {
             ),
             callback = callback
         )
-        verify(callback).onComplete(
+        verify(callback).onPaymentResult(
             PaymentResult.Succeeded(PAYMENT_INTENT)
         )
         verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
@@ -296,7 +296,7 @@ class DefaultPaymentSheetFlowControllerTest {
             ),
             callback = callback
         )
-        verify(callback).onComplete(
+        verify(callback).onPaymentResult(
             argWhere { paymentResult ->
                 (paymentResult as? PaymentResult.Failed)?.error?.message == "Google Pay failed"
             }
@@ -316,7 +316,7 @@ class DefaultPaymentSheetFlowControllerTest {
             StripeGooglePayContract.Result.Canceled
         )
 
-        verify(paymentResultCallback).onComplete(
+        verify(paymentResultCallback).onPaymentResult(
             PaymentResult.Cancelled(null, null)
         )
     }
@@ -339,7 +339,7 @@ class DefaultPaymentSheetFlowControllerTest {
             )
         )
 
-        verify(paymentResultCallback).onComplete(
+        verify(paymentResultCallback).onPaymentResult(
             PaymentResult.Succeeded(paymentIntent)
         )
     }

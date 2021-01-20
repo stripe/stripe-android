@@ -1,5 +1,5 @@
 package com.stripe.android.paymentsheet
 
 internal fun interface PaymentSheetResultCallback {
-    fun onComplete(paymentResult: PaymentResult)
+    fun onPaymentResult(paymentResult: PaymentResult)
 }

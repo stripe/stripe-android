@@ -195,11 +195,11 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                         )
                     }
                 }
-                paymentResultCallback.onComplete(paymentResult)
+                paymentResultCallback.onPaymentResult(paymentResult)
             }
             is StripeGooglePayContract.Result.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                paymentResultCallback.onComplete(
+                paymentResultCallback.onPaymentResult(
                     PaymentResult.Failed(
                         googlePayResult.exception,
                         paymentIntent = null
@@ -207,7 +207,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 )
             }
             is StripeGooglePayContract.Result.Canceled -> {
-                paymentResultCallback.onComplete(
+                paymentResultCallback.onPaymentResult(
                     PaymentResult.Cancelled(
                         mostRecentError = null,
                         paymentIntent = null
@@ -242,13 +242,13 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                     override fun onSuccess(result: PaymentIntentResult) {
                         if (result.outcome == StripeIntentResult.Outcome.SUCCEEDED) {
                             eventReporter.onPaymentSuccess(viewModel.paymentSelection)
-                            callback.onComplete(
+                            callback.onPaymentResult(
                                 PaymentResult.Succeeded(result.intent)
                             )
                         } else {
                             eventReporter.onPaymentFailure(viewModel.paymentSelection)
 
-                            callback.onComplete(
+                            callback.onPaymentResult(
                                 PaymentResult.Failed(
                                     RuntimeException(result.failureMessage),
                                     result.intent
@@ -259,7 +259,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
 
                     override fun onError(e: Exception) {
                         eventReporter.onPaymentFailure(viewModel.paymentSelection)
-                        callback.onComplete(
+                        callback.onPaymentResult(
                             PaymentResult.Failed(e, null)
                         )
                     }
@@ -269,7 +269,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
             when (val googlePayResult = StripeGooglePayContract.Result.fromIntent(data)) {
                 is StripeGooglePayContract.Result.PaymentIntent -> {
                     eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-                    callback.onComplete(
+                    callback.onPaymentResult(
                         PaymentResult.Succeeded(
                             googlePayResult.paymentIntentResult.intent
                         )
@@ -278,7 +278,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 is StripeGooglePayContract.Result.Error -> {
                     eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                     val exception = googlePayResult.exception
-                    callback.onComplete(
+                    callback.onPaymentResult(
                         PaymentResult.Failed(
                             exception,
                             null
@@ -287,7 +287,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 }
                 else -> {
                     eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                    callback.onComplete(
+                    callback.onPaymentResult(
                         PaymentResult.Failed(
                             RuntimeException("Google Pay attempt failed"),
                             null
@@ -335,7 +335,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     ) {
         val paymentSelection = (paymentOptionResult as? PaymentOptionResult.Succeeded)?.paymentSelection
         viewModel.paymentSelection = paymentSelection
-        paymentOptionCallback.onComplete(
+        paymentOptionCallback.onPaymentOption(
             paymentSelection?.let(paymentOptionFactory::create)
         )
     }
