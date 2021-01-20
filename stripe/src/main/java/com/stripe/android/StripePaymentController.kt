@@ -175,7 +175,18 @@ internal class StripePaymentController internal constructor(
                         handleNextAction(host, stripeIntent, requestOptions)
                     },
                     onFailure = {
-                        handleError(host, PAYMENT_REQUEST_CODE, it)
+                        handleError(
+                            host,
+                            when (type) {
+                                PaymentController.StripeIntentType.PaymentIntent -> {
+                                    PAYMENT_REQUEST_CODE
+                                }
+                                PaymentController.StripeIntentType.SetupIntent -> {
+                                    SETUP_REQUEST_CODE
+                                }
+                            },
+                            it
+                        )
                     }
                 )
             }
