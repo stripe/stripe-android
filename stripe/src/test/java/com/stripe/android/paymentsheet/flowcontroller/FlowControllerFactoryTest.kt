@@ -21,12 +21,12 @@ import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class PaymentSheetFlowControllerFactoryTest {
+class FlowControllerFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val activityScenarioFactory = ActivityScenarioFactory(context)
-    private val factory: PaymentSheetFlowControllerFactory by lazy {
+    private val factory: FlowControllerFactory by lazy {
         createFactory()
     }
 
@@ -60,8 +60,8 @@ class PaymentSheetFlowControllerFactoryTest {
             .isNotNull()
     }
 
-    private fun createFactory(): PaymentSheetFlowControllerFactory {
-        return PaymentSheetFlowControllerFactory(
+    private fun createFactory(): FlowControllerFactory {
+        return FlowControllerFactory(
             activity,
             PaymentConfiguration.getInstance(context),
             mock(),
