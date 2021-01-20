@@ -4,7 +4,6 @@ import android.content.Context
 import com.stripe.android.Logger
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.ApiRequest
@@ -27,36 +26,32 @@ internal class PaymentFlowResultProcessor(
     ): PaymentIntentResult = withContext(workContext) {
         val result = unvalidatedResult.validate()
 
-        @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
-
         val requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = result.stripeAccountId
         )
 
-        val paymentIntent = requireNotNull(
+        requireNotNull(
             stripeRepository.retrievePaymentIntent(
                 result.clientSecret,
                 requestOptions,
                 expandFields = EXPAND_PAYMENT_METHOD
             )
-        )
-        if (result.shouldCancelSource && paymentIntent.requiresAction()) {
-            val canceledPaymentIntent = cancelPaymentIntent(
-                paymentIntent,
-                requestOptions,
-                result.sourceId.orEmpty(),
-            )
-            PaymentIntentResult(
-                canceledPaymentIntent,
-                flowOutcome,
-                failureMessageFactory.create(paymentIntent, flowOutcome)
-            )
-        } else {
+        ).let { paymentIntent ->
+            if (result.shouldCancelSource && paymentIntent.requiresAction()) {
+                cancelPaymentIntent(
+                    paymentIntent,
+                    requestOptions,
+                    result.sourceId.orEmpty(),
+                )
+            } else {
+                paymentIntent
+            }
+        }.let { paymentIntent ->
             PaymentIntentResult(
                 paymentIntent,
-                flowOutcome,
-                failureMessageFactory.create(paymentIntent, flowOutcome)
+                result.flowOutcome,
+                failureMessageFactory.create(paymentIntent, result.flowOutcome)
             )
         }
     }
@@ -66,36 +61,32 @@ internal class PaymentFlowResultProcessor(
     ): SetupIntentResult = withContext(workContext) {
         val result = unvalidatedResult.validate()
 
-        @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
-
         val requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = result.stripeAccountId
         )
 
-        val setupIntent = requireNotNull(
+        requireNotNull(
             stripeRepository.retrieveSetupIntent(
                 result.clientSecret,
                 requestOptions,
                 expandFields = EXPAND_PAYMENT_METHOD
             )
-        )
-        if (result.shouldCancelSource && setupIntent.requiresAction()) {
-            val canceledSetupIntent = cancelSetupIntent(
-                setupIntent,
-                requestOptions,
-                result.sourceId.orEmpty(),
-            )
-            SetupIntentResult(
-                canceledSetupIntent,
-                flowOutcome,
-                failureMessageFactory.create(setupIntent, flowOutcome)
-            )
-        } else {
+        ).let { setupIntent ->
+            if (result.shouldCancelSource && setupIntent.requiresAction()) {
+                cancelSetupIntent(
+                    setupIntent,
+                    requestOptions,
+                    result.sourceId.orEmpty(),
+                )
+            } else {
+                setupIntent
+            }
+        }.let { setupIntent ->
             SetupIntentResult(
                 setupIntent,
-                flowOutcome,
-                failureMessageFactory.create(setupIntent, flowOutcome)
+                result.flowOutcome,
+                failureMessageFactory.create(setupIntent, result.flowOutcome)
             )
         }
     }
