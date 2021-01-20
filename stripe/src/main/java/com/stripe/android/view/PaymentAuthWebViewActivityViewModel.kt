@@ -4,13 +4,13 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 
 internal class PaymentAuthWebViewActivityViewModel(
-    private val args: PaymentAuthWebViewStarter.Args
+    private val args: PaymentAuthWebViewContract.Args
 ) : ViewModel() {
     @JvmSynthetic
     internal val buttonText = args.toolbarCustomization?.let { toolbarCustomization ->
@@ -58,7 +58,7 @@ internal class PaymentAuthWebViewActivityViewModel(
     )
 
     internal class Factory(
-        private val args: PaymentAuthWebViewStarter.Args
+        private val args: PaymentAuthWebViewContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return PaymentAuthWebViewActivityViewModel(args) as T

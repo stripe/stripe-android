@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.Resources
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -72,6 +73,7 @@ internal class StripePaymentController internal constructor(
         ChallengeProgressActivityStarter.Default(),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
+    private val paymentAuthWebViewLauncher: ActivityResultLauncher<PaymentAuthWebViewContract.Args>? = null,
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val resources: Resources = context.applicationContext.resources
 ) : PaymentController {
@@ -82,6 +84,12 @@ internal class StripePaymentController internal constructor(
         paymentRelayLauncher?.let {
             PaymentRelayStarter.Modern(it)
         } ?: PaymentRelayStarter.Legacy(host)
+    }
+
+    private val paymentAuthWebViewStarterFactory = { host: AuthActivityStarter.Host ->
+        paymentAuthWebViewLauncher?.let {
+            PaymentAuthWebViewStarter.Modern(it)
+        } ?: PaymentAuthWebViewStarter.Legacy(host)
     }
 
     init {
@@ -259,11 +267,9 @@ internal class StripePaymentController internal constructor(
                 )
             )
 
-            PaymentAuthWebViewStarter(
-                host,
-                SOURCE_REQUEST_CODE
-            ).start(
-                PaymentAuthWebViewStarter.Args(
+            paymentAuthWebViewStarterFactory(host).start(
+                PaymentAuthWebViewContract.Args(
+                    requestCode = SOURCE_REQUEST_CODE,
                     clientSecret = source.clientSecret.orEmpty(),
                     url = source.redirect?.url.orEmpty(),
                     returnUrl = source.redirect?.returnUrl,
@@ -735,7 +741,7 @@ internal class StripePaymentController internal constructor(
                         )
                     )
                     beginWebAuth(
-                        host,
+                        paymentAuthWebViewStarterFactory(host),
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret.orEmpty(),
                         nextActionData.url,
@@ -756,7 +762,7 @@ internal class StripePaymentController internal constructor(
                     )
 
                     beginWebAuth(
-                        host,
+                        paymentAuthWebViewStarterFactory(host),
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret.orEmpty(),
                         nextActionData.url.toString(),
@@ -782,7 +788,7 @@ internal class StripePaymentController internal constructor(
                     )
 
                     beginWebAuth(
-                        host,
+                        paymentAuthWebViewStarterFactory(host),
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret.orEmpty(),
                         nextActionData.webViewUrl.toString(),
@@ -795,7 +801,7 @@ internal class StripePaymentController internal constructor(
                     // TODO(smaskell): add analytics event
                     if (nextActionData.hostedVoucherUrl != null) {
                         beginWebAuth(
-                            host,
+                            paymentAuthWebViewStarterFactory(host),
                             getRequestCode(stripeIntent),
                             stripeIntent.clientSecret.orEmpty(),
                             nextActionData.hostedVoucherUrl,
@@ -961,23 +967,11 @@ internal class StripePaymentController internal constructor(
                 )
             }
         } else if (result.fallbackRedirectUrl != null) {
-            analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.create(
-                    analyticsDataFactory.createAuthParams(
-                        AnalyticsEvent.Auth3ds2Fallback,
-                        stripeIntent.id.orEmpty()
-                    )
-                )
-            )
-            beginWebAuth(
-                host,
-                getRequestCode(stripeIntent),
-                stripeIntent.clientSecret.orEmpty(),
+            on3ds2AuthFallback(
                 result.fallbackRedirectUrl,
-                requestOptions.stripeAccount,
-                enableLogging = enableLogging,
-                // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
-                shouldCancelSource = true
+                host,
+                stripeIntent,
+                requestOptions
             )
         } else {
             val error = result.error
@@ -999,6 +993,35 @@ internal class StripePaymentController internal constructor(
                 paymentRelayStarter
             )
         }
+    }
+
+    /**
+     * Used when standard 3DS2 authentication mechanisms are unavailable.
+     */
+    internal fun on3ds2AuthFallback(
+        fallbackRedirectUrl: String,
+        host: AuthActivityStarter.Host,
+        stripeIntent: StripeIntent,
+        requestOptions: ApiRequest.Options
+    ) {
+        analyticsRequestExecutor.executeAsync(
+            analyticsRequestFactory.create(
+                analyticsDataFactory.createAuthParams(
+                    AnalyticsEvent.Auth3ds2Fallback,
+                    stripeIntent.id.orEmpty()
+                )
+            )
+        )
+        beginWebAuth(
+            paymentAuthWebViewStarterFactory(host),
+            getRequestCode(stripeIntent),
+            stripeIntent.clientSecret.orEmpty(),
+            fallbackRedirectUrl,
+            requestOptions.stripeAccount,
+            enableLogging = enableLogging,
+            // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
+            shouldCancelSource = true
+        )
     }
 
     private suspend fun startFrictionlessFlow(
@@ -1325,7 +1348,7 @@ internal class StripePaymentController internal constructor(
          * @param host the payment authentication result will be returned as a result to this view host
          */
         private fun beginWebAuth(
-            host: AuthActivityStarter.Host,
+            paymentWebWebViewStarter: PaymentAuthWebViewStarter,
             requestCode: Int,
             clientSecret: String,
             authUrl: String,
@@ -1336,9 +1359,9 @@ internal class StripePaymentController internal constructor(
             shouldCancelIntentOnUserNavigation: Boolean = true
         ) {
             Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
-            val starter = PaymentAuthWebViewStarter(host, requestCode)
-            starter.start(
-                PaymentAuthWebViewStarter.Args(
+            paymentWebWebViewStarter.start(
+                PaymentAuthWebViewContract.Args(
+                    requestCode,
                     clientSecret,
                     authUrl,
                     returnUrl,

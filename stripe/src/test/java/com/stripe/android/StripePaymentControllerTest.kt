@@ -20,6 +20,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.AlipayAuthResult
@@ -102,6 +103,7 @@ internal class StripePaymentControllerTest {
 
     private val testDispatcher = TestCoroutineDispatcher()
 
+    private val paymentAuthWebViewContract = PaymentAuthWebViewContract()
     private val controller = createController()
 
     @BeforeTest
@@ -231,8 +233,8 @@ internal class StripePaymentControllerTest {
             intentArgumentCaptor.capture(),
             eq(StripePaymentController.PAYMENT_REQUEST_CODE)
         )
-        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
-            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        val args = requireNotNull(
+            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
         )
         assertThat(args.url)
             .isEqualTo("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW")
@@ -252,8 +254,8 @@ internal class StripePaymentControllerTest {
             intentArgumentCaptor.capture(),
             eq(StripePaymentController.PAYMENT_REQUEST_CODE)
         )
-        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
-            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        val args = requireNotNull(
+            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
         )
         assertThat(args.url)
             .isEqualTo("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv")
@@ -292,8 +294,8 @@ internal class StripePaymentControllerTest {
             intentArgumentCaptor.capture(),
             eq(StripePaymentController.PAYMENT_REQUEST_CODE)
         )
-        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
-            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        val args = requireNotNull(
+            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
         )
         assertThat(args.url)
             .isEqualTo("https://payments.stripe.com/oxxo/voucher/vchr_test_YWNjdF8xR1hhNUZIU0wxMEo5d3F2LHZjaHJfSGJIOGVMYmNmQlkyMUJ5OU1WTU5uMVYxdDNta1Q2RQ0000gtenGCef")
@@ -658,8 +660,8 @@ internal class StripePaymentControllerTest {
             intentArgumentCaptor.capture(),
             eq(StripePaymentController.PAYMENT_REQUEST_CODE)
         )
-        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
-            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        val args = requireNotNull(
+            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
         )
         assertThat(args.url)
             .isEqualTo("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW")
@@ -909,9 +911,34 @@ internal class StripePaymentControllerTest {
             )
     }
 
+    @Test
+    fun `on3ds2AuthFallback() with ActivityResultLauncher should use ActivityResultLauncher`() {
+        verifyZeroInteractions(activity)
+
+        val launcher = FakeActivityResultLauncher(PaymentAuthWebViewContract())
+        createController(
+            paymentAuthWebViewLauncher = launcher
+        ).on3ds2AuthFallback(
+            "https://example.com",
+            host,
+            PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+            REQUEST_OPTIONS
+        )
+        assertThat(launcher.launchArgs)
+            .containsExactly(
+                PaymentAuthWebViewContract.Args(
+                    requestCode = 50000,
+                    clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
+                    url = "https://example.com",
+                    shouldCancelSource = true
+                )
+            )
+    }
+
     private fun createController(
         stripeRepository: StripeRepository = FakeStripeRepository(),
-        paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null
+        paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
+        paymentAuthWebViewLauncher: ActivityResultLauncher<PaymentAuthWebViewContract.Args>? = null
     ): StripePaymentController {
         return StripePaymentController(
             context,
@@ -926,6 +953,7 @@ internal class StripePaymentControllerTest {
             challengeProgressActivityStarter,
             alipayRepository,
             paymentRelayLauncher = paymentRelayLauncher,
+            paymentAuthWebViewLauncher = paymentAuthWebViewLauncher,
             workContext = testDispatcher
         )
     }
