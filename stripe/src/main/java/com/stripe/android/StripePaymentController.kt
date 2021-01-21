@@ -2,7 +2,6 @@ package com.stripe.android
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.auth.PaymentAuthWebViewContract
@@ -25,7 +24,9 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
@@ -75,9 +76,17 @@ internal class StripePaymentController internal constructor(
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
     private val paymentAuthWebViewLauncher: ActivityResultLauncher<PaymentAuthWebViewContract.Args>? = null,
-    private val workContext: CoroutineContext = Dispatchers.IO,
-    private val resources: Resources = context.applicationContext.resources
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : PaymentController {
+    private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
+    private val paymentFlowResultProcessor = PaymentFlowResultProcessor(
+        context,
+        publishableKey,
+        stripeRepository,
+        enableLogging,
+        workContext
+    )
+
     private val logger = Logger.getInstance(enableLogging)
     private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
 
@@ -314,47 +323,14 @@ internal class StripePaymentController internal constructor(
         data: Intent,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        val result = runCatching {
-            PaymentFlowResult.Unvalidated.fromIntent(data).validate()
-        }.onFailure {
-            callback.onError(StripeException.create(it))
-        }.getOrNull() ?: return
-
-        val shouldCancelSource = result.shouldCancelSource
-        val sourceId = result.sourceId.orEmpty()
-        @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
-
-        val requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = result.stripeAccountId
-        )
-
         CoroutineScope(workContext).launch {
             runCatching {
-                requireNotNull(
-                    stripeRepository.retrievePaymentIntent(
-                        result.clientSecret,
-                        requestOptions,
-                        expandFields = EXPAND_PAYMENT_METHOD
-                    )
+                paymentFlowResultProcessor.processPaymentIntent(
+                    PaymentFlowResult.Unvalidated.fromIntent(data)
                 )
             }.fold(
-                onSuccess = { paymentIntent ->
-                    if (shouldCancelSource && paymentIntent.requiresAction()) {
-                        cancelPaymentIntent(
-                            paymentIntent,
-                            requestOptions,
-                            flowOutcome,
-                            sourceId,
-                            callback
-                        )
-                    } else {
-                        dispatchPaymentIntentResult(
-                            paymentIntent,
-                            flowOutcome,
-                            callback
-                        )
-                    }
+                onSuccess = {
+                    dispatchPaymentIntentResult(it, callback)
                 },
                 onFailure = {
                     dispatchError(it, callback)
@@ -376,47 +352,14 @@ internal class StripePaymentController internal constructor(
         data: Intent,
         callback: ApiResultCallback<SetupIntentResult>
     ) {
-        val result = runCatching {
-            PaymentFlowResult.Unvalidated.fromIntent(data).validate()
-        }.onFailure {
-            callback.onError(StripeException.create(it))
-        }.getOrNull() ?: return
-
-        val shouldCancelSource = result.shouldCancelSource
-        val sourceId = result.sourceId.orEmpty()
-        @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
-
-        val requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = result.stripeAccountId
-        )
-
         CoroutineScope(workContext).launch {
             runCatching {
-                requireNotNull(
-                    stripeRepository.retrieveSetupIntent(
-                        result.clientSecret,
-                        requestOptions,
-                        expandFields = EXPAND_PAYMENT_METHOD
-                    )
+                paymentFlowResultProcessor.processSetupIntent(
+                    PaymentFlowResult.Unvalidated.fromIntent(data)
                 )
             }.fold(
-                onSuccess = { setupIntent ->
-                    if (shouldCancelSource && setupIntent.requiresAction()) {
-                        cancelSetupIntent(
-                            setupIntent,
-                            requestOptions,
-                            flowOutcome,
-                            sourceId,
-                            callback
-                        )
-                    } else {
-                        dispatchSetupIntentResult(
-                            setupIntent,
-                            flowOutcome,
-                            callback
-                        )
-                    }
+                onSuccess = {
+                    dispatchSetupIntentResult(it, callback)
                 },
                 onFailure = {
                     dispatchError(it, callback)
@@ -490,7 +433,7 @@ internal class StripePaymentController internal constructor(
                 PaymentIntentResult(
                     paymentIntent,
                     alipayAuth.outcome,
-                    getFailureMessage(paymentIntent, alipayAuth.outcome)
+                    failureMessageFactory.create(paymentIntent, alipayAuth.outcome)
                 )
             }.let { result ->
                 withContext(Dispatchers.Main) {
@@ -505,98 +448,20 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    @VisibleForTesting
-    internal suspend fun cancelPaymentIntent(
-        paymentIntent: PaymentIntent,
-        requestOptions: ApiRequest.Options,
-        @StripeIntentResult.Outcome flowOutcome: Int,
-        sourceId: String,
-        callback: ApiResultCallback<PaymentIntentResult>
-    ) = withContext(workContext) {
-        logger.debug("Canceling source '$sourceId' for PaymentIntent")
-
-        runCatching {
-            requireNotNull(
-                stripeRepository.cancelPaymentIntentSource(
-                    paymentIntent.id.orEmpty(),
-                    sourceId,
-                    requestOptions,
-                )
-            )
-        }.fold(
-            onSuccess = {
-                dispatchPaymentIntentResult(
-                    it,
-                    flowOutcome,
-                    callback
-                )
-            },
-            onFailure = {
-                dispatchError(it, callback)
-            }
-        )
-    }
-
-    @VisibleForTesting
-    internal suspend fun cancelSetupIntent(
-        setupIntent: SetupIntent,
-        requestOptions: ApiRequest.Options,
-        @StripeIntentResult.Outcome flowOutcome: Int,
-        sourceId: String,
-        callback: ApiResultCallback<SetupIntentResult>
-    ) = withContext(workContext) {
-        logger.debug("Canceling source '$sourceId' for SetupIntent")
-
-        runCatching {
-            requireNotNull(
-                stripeRepository.cancelSetupIntentSource(
-                    setupIntent.id.orEmpty(),
-                    sourceId,
-                    requestOptions
-                )
-            )
-        }.fold(
-            onSuccess = {
-                dispatchSetupIntentResult(
-                    it,
-                    flowOutcome,
-                    callback
-                )
-            },
-            onFailure = {
-                dispatchError(it, callback)
-            }
-        )
-    }
-
     private suspend fun dispatchPaymentIntentResult(
-        paymentIntent: PaymentIntent,
-        @StripeIntentResult.Outcome flowOutcome: Int,
+        paymentIntentResult: PaymentIntentResult,
         callback: ApiResultCallback<PaymentIntentResult>
     ) = withContext(Dispatchers.Main) {
-        logger.debug("Dispatching PaymentIntentResult for ${paymentIntent.id}")
-        callback.onSuccess(
-            PaymentIntentResult(
-                paymentIntent,
-                flowOutcome,
-                getFailureMessage(paymentIntent, flowOutcome)
-            )
-        )
+        logger.debug("Dispatching PaymentIntentResult for ${paymentIntentResult.intent.id}")
+        callback.onSuccess(paymentIntentResult)
     }
 
     private suspend fun dispatchSetupIntentResult(
-        setupIntent: SetupIntent,
-        @StripeIntentResult.Outcome flowOutcome: Int,
+        setupIntentResult: SetupIntentResult,
         callback: ApiResultCallback<SetupIntentResult>
     ) = withContext(Dispatchers.Main) {
-        logger.debug("Dispatching SetupIntentResult for ${setupIntent.id}")
-        callback.onSuccess(
-            SetupIntentResult(
-                setupIntent,
-                flowOutcome,
-                getFailureMessage(setupIntent, flowOutcome)
-            )
-        )
+        logger.debug("Dispatching SetupIntentResult for ${setupIntentResult.intent.id}")
+        callback.onSuccess(setupIntentResult)
     }
 
     private suspend fun dispatchError(
@@ -604,51 +469,6 @@ internal class StripePaymentController internal constructor(
         callback: ApiResultCallback<*>
     ) = withContext(Dispatchers.Main) {
         callback.onError(StripeException.create(throwable))
-    }
-
-    private fun getFailureMessage(
-        intent: StripeIntent,
-        @StripeIntentResult.Outcome outcome: Int
-    ): String? {
-        return when {
-            intent.status == StripeIntent.Status.RequiresPaymentMethod -> {
-                when (intent) {
-                    is PaymentIntent -> {
-                        when {
-                            intent.lastPaymentError?.code == PaymentIntent.Error.CODE_AUTHENTICATION_ERROR -> {
-                                resources.getString(R.string.stripe_failure_reason_authentication)
-                            }
-                            intent.lastPaymentError?.type == PaymentIntent.Error.Type.CardError -> {
-                                intent.lastPaymentError.message
-                            }
-                            else -> {
-                                null
-                            }
-                        }
-                    }
-                    is SetupIntent -> {
-                        when {
-                            intent.lastSetupError?.code == SetupIntent.Error.CODE_AUTHENTICATION_ERROR -> {
-                                resources.getString(R.string.stripe_failure_reason_authentication)
-                            }
-                            intent.lastSetupError?.type == SetupIntent.Error.Type.CardError -> {
-                                intent.lastSetupError.message
-                            }
-                            else -> {
-                                null
-                            }
-                        }
-                    }
-                    else -> null
-                }
-            }
-            outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
-                resources.getString(R.string.stripe_failure_reason_timed_out)
-            }
-            else -> {
-                null
-            }
-        }
     }
 
     /**

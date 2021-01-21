@@ -926,42 +926,6 @@ internal class StripePaymentControllerTest {
             )
     }
 
-    @Test
-    fun `cancelPaymentIntent should call cancelPaymentIntentSource`() = testDispatcher.runBlockingTest {
-        controller.cancelPaymentIntent(
-            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            REQUEST_OPTIONS,
-            StripeIntentResult.Outcome.CANCELED,
-            "src_123",
-            paymentIntentResultCallback
-        )
-
-        verify(paymentIntentResultCallback).onSuccess(
-            argWhere { result ->
-                result.intent == PaymentIntentFixtures.CANCELLED &&
-                    result.outcome == StripeIntentResult.Outcome.CANCELED
-            }
-        )
-    }
-
-    @Test
-    fun `cancelSetupIntent should call cancelSetupIntentSource`() = testDispatcher.runBlockingTest {
-        controller.cancelSetupIntent(
-            SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
-            REQUEST_OPTIONS,
-            StripeIntentResult.Outcome.CANCELED,
-            "src_123",
-            setupIntentResultCallback
-        )
-
-        verify(setupIntentResultCallback).onSuccess(
-            argWhere { result ->
-                result.intent == SetupIntentFixtures.CANCELLED &&
-                    result.outcome == StripeIntentResult.Outcome.CANCELED
-            }
-        )
-    }
-
     private fun createController(
         stripeRepository: StripeRepository = FakeStripeRepository(),
         paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
