@@ -29,14 +29,15 @@ internal class FlowControllerFactory(
             config.publishableKey
         )
 
-        val paymentControllerFactory = PaymentControllerFactory { paymentRelayLauncher, paymentAuthWebViewLauncher ->
+        val paymentControllerFactory = PaymentControllerFactory { paymentRelayLauncher, paymentAuthWebViewLauncher, stripe3ds2ChallengeLauncher ->
             StripePaymentController(
                 activity,
                 config.publishableKey,
                 stripeRepository,
                 enableLogging = true,
                 paymentRelayLauncher = paymentRelayLauncher,
-                paymentAuthWebViewLauncher = paymentAuthWebViewLauncher
+                paymentAuthWebViewLauncher = paymentAuthWebViewLauncher,
+                stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
             )
         }
 
