@@ -13,45 +13,51 @@ internal class PaymentFlowFailureMessageFactory(
     fun create(
         intent: StripeIntent,
         @StripeIntentResult.Outcome outcome: Int
-    ): String? {
-        return when {
-            intent.status == StripeIntent.Status.RequiresPaymentMethod -> {
-                when (intent) {
-                    is PaymentIntent -> {
-                        when {
-                            intent.lastPaymentError?.code == PaymentIntent.Error.CODE_AUTHENTICATION_ERROR -> {
-                                context.resources.getString(R.string.stripe_failure_reason_authentication)
-                            }
-                            intent.lastPaymentError?.type == PaymentIntent.Error.Type.CardError -> {
-                                intent.lastPaymentError.message
-                            }
-                            else -> {
-                                null
-                            }
-                        }
-                    }
-                    is SetupIntent -> {
-                        when {
-                            intent.lastSetupError?.code == SetupIntent.Error.CODE_AUTHENTICATION_ERROR -> {
-                                context.resources.getString(R.string.stripe_failure_reason_authentication)
-                            }
-                            intent.lastSetupError?.type == SetupIntent.Error.Type.CardError -> {
-                                intent.lastSetupError.message
-                            }
-                            else -> {
-                                null
-                            }
-                        }
-                    }
-                    else -> null
+    ) = when {
+        intent.status == StripeIntent.Status.RequiresPaymentMethod -> {
+            when (intent) {
+                is PaymentIntent -> {
+                    createForPaymentIntent(intent)
                 }
+                is SetupIntent -> {
+                    createForSetupIntent(intent)
+                }
+                else -> null
             }
-            outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
-                context.resources.getString(R.string.stripe_failure_reason_timed_out)
-            }
-            else -> {
-                null
-            }
+        }
+        outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
+            context.resources.getString(R.string.stripe_failure_reason_timed_out)
+        }
+        else -> {
+            null
+        }
+    }
+
+    private fun createForPaymentIntent(
+        paymentIntent: PaymentIntent
+    ) = when {
+        paymentIntent.lastPaymentError?.code == PaymentIntent.Error.CODE_AUTHENTICATION_ERROR -> {
+            context.resources.getString(R.string.stripe_failure_reason_authentication)
+        }
+        paymentIntent.lastPaymentError?.type == PaymentIntent.Error.Type.CardError -> {
+            paymentIntent.lastPaymentError.message
+        }
+        else -> {
+            null
+        }
+    }
+
+    private fun createForSetupIntent(
+        setupIntent: SetupIntent
+    ) = when {
+        setupIntent.lastSetupError?.code == SetupIntent.Error.CODE_AUTHENTICATION_ERROR -> {
+            context.resources.getString(R.string.stripe_failure_reason_authentication)
+        }
+        setupIntent.lastSetupError?.type == SetupIntent.Error.Type.CardError -> {
+            setupIntent.lastSetupError.message
+        }
+        else -> {
+            null
         }
     }
 }
