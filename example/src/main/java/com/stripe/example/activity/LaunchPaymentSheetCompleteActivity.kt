@@ -83,7 +83,7 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         paymentResult: PaymentResult
     ) {
         val statusString = when (paymentResult) {
-            is PaymentResult.Cancelled -> {
+            is PaymentResult.Canceled -> {
                 "MC Completed with status: Cancelled"
             }
             is PaymentResult.Failed -> {
