@@ -19,6 +19,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -86,11 +87,18 @@ internal class DefaultFlowController internal constructor(
         onPaymentFlowResult(result)
     }
 
+    private val stripe3ds2ChallengeLauncher = activity.registerForActivityResult(
+        Stripe3ds2CompletionContract()
+    ) { result ->
+        // TODO(mshafrir-stripe): handle result
+    }
+
     private val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
 
     private val paymentController = paymentControllerFactory.create(
         paymentRelayLauncher = paymentRelayLauncher,
-        paymentAuthWebViewLauncher = paymentAuthWebViewLauncher
+        paymentAuthWebViewLauncher = paymentAuthWebViewLauncher,
+        stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
     )
 
     override fun init(

@@ -27,6 +27,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
@@ -76,6 +77,7 @@ internal class StripePaymentController internal constructor(
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
     private val paymentAuthWebViewLauncher: ActivityResultLauncher<PaymentAuthWebViewContract.Args>? = null,
+    private val stripe3ds2ChallengeLauncher: ActivityResultLauncher<Intent>? = null,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : PaymentController {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
@@ -638,11 +640,11 @@ internal class StripePaymentController internal constructor(
             stripe3ds2Fingerprint.directoryServerEncryption.keyId,
             challengeCompletionIntent = Intent(activity, Stripe3ds2CompletionActivity::class.java)
                 .putExtra(
-                    Stripe3ds2CompletionActivity.EXTRA_CLIENT_SECRET,
+                    Stripe3ds2CompletionContract.EXTRA_CLIENT_SECRET,
                     stripeIntent.clientSecret
                 )
                 .putExtra(
-                    Stripe3ds2CompletionActivity.EXTRA_STRIPE_ACCOUNT,
+                    Stripe3ds2CompletionContract.EXTRA_STRIPE_ACCOUNT,
                     requestOptions.stripeAccount
                 )
                 .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT),
