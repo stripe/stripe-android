@@ -215,7 +215,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
 
     override fun onUserCancel() {
         animateOut(
-            PaymentOptionResult.Cancelled(
+            PaymentOptionResult.Canceled(
                 mostRecentError = viewModel.fatal.value
             )
         )

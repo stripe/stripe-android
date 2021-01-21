@@ -81,7 +81,7 @@ class PaymentOptionsActivityTest {
             assertThat(
                 PaymentOptionResult.fromIntent(Shadows.shadowOf(activity).resultIntent)
             ).isEqualTo(
-                PaymentOptionResult.Cancelled(null)
+                PaymentOptionResult.Canceled(null)
             )
         }
     }

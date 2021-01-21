@@ -16,7 +16,7 @@ internal class DefaultPaymentSheetLauncher(
         activity.registerForActivityResult(
             PaymentSheetContract()
         ) {
-            callback.onComplete(it)
+            callback.onPaymentResult(it)
         }
     )
 

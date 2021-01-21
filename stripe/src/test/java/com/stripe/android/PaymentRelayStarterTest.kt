@@ -13,6 +13,7 @@ import com.stripe.android.exception.PermissionException
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.utils.ParcelUtils.verifyParcelRoundtrip
 import com.stripe.android.view.AuthActivityStarter
 import org.junit.runner.RunWith
@@ -123,10 +124,6 @@ class PaymentRelayStarterTest {
         )
     }
 
-    private val result: PaymentController.Result
-        get() {
-            return requireNotNull(
-                PaymentController.Result.fromIntent(intentArgumentCaptor.firstValue)
-            )
-        }
+    private val result: PaymentFlowResult.Unvalidated
+        get() = PaymentFlowResult.Unvalidated.fromIntent(intentArgumentCaptor.firstValue)
 }

@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.parcelize.Parcelize
 
@@ -113,60 +115,59 @@ class PaymentSheet internal constructor(
     interface FlowController {
         fun getPaymentOption(): PaymentOption?
 
-        fun presentPaymentOptions(activity: ComponentActivity)
+        fun init(
+            paymentIntentClientSecret: String,
+            configuration: Configuration,
+            callback: InitCallback
+        )
 
-        fun isPaymentOptionResult(
-            requestCode: Int
-        ): Boolean
+        fun init(
+            paymentIntentClientSecret: String,
+            callback: InitCallback
+        )
 
-        fun onPaymentOptionResult(intent: Intent?): PaymentOption?
+        fun presentPaymentOptions()
 
-        fun confirmPayment(activity: ComponentActivity)
+        fun confirmPayment()
 
         fun isPaymentResult(
             requestCode: Int,
-            data: Intent?
+            intent: Intent?
         ): Boolean
 
         fun onPaymentResult(
             requestCode: Int,
-            data: Intent?,
+            intent: Intent?,
             callback: PaymentSheetResultCallback
         )
 
         sealed class Result {
-            class Success(
-                val flowController: FlowController
-            ) : Result()
+            object Success : Result()
 
             class Failure(
                 val error: Throwable
             ) : Result()
         }
 
+        fun interface InitCallback {
+            fun onInit(
+                success: Boolean,
+                error: Throwable?
+            )
+        }
+
         companion object {
             fun create(
                 activity: ComponentActivity,
-                clientSecret: String,
-                configuration: Configuration,
-                onComplete: (Result) -> Unit
-            ) {
-                PaymentSheetFlowControllerFactory(activity).create(
-                    clientSecret,
-                    configuration,
-                    onComplete
-                )
-            }
-
-            fun create(
-                activity: ComponentActivity,
-                clientSecret: String,
-                onComplete: (Result) -> Unit
-            ) {
-                PaymentSheetFlowControllerFactory(activity).create(
-                    clientSecret,
-                    onComplete
-                )
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback
+            ): FlowController {
+                return FlowControllerFactory(
+                    activity,
+                    PaymentConfiguration.getInstance(activity),
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
             }
         }
     }

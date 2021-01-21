@@ -41,6 +41,7 @@ import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.CompletionEvent
@@ -80,8 +81,8 @@ internal class StripePaymentControllerTest {
         whenever(it.sdkTransactionId)
             .thenReturn(sdkTransactionId)
     }
-    private val paymentAuthResultCallback: ApiResultCallback<PaymentIntentResult> = mock()
-    private val setupAuthResultCallback: ApiResultCallback<SetupIntentResult> = mock()
+    private val paymentIntentResultCallback: ApiResultCallback<PaymentIntentResult> = mock()
+    private val setupIntentResultCallback: ApiResultCallback<SetupIntentResult> = mock()
     private val sourceCallback: ApiResultCallback<Source> = mock()
     private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
@@ -535,29 +536,17 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun getClientSecret_shouldGetClientSecretFromIntent() {
-        val data = Intent().putExtras(
-            PaymentController.Result(
-                clientSecret = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret
-            ).toBundle()
-        )
-        assertThat(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret).isNotNull()
-        assertThat(StripePaymentController.getClientSecret(data))
-            .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret)
-    }
-
-    @Test
     fun handlePaymentResult_withAuthException_shouldCallCallbackOnError() {
         val exception = APIException(RuntimeException())
         val intent = Intent().putExtras(
-            PaymentController.Result(
+            PaymentFlowResult.Unvalidated(
                 exception = exception
             ).toBundle()
         )
 
-        controller.handlePaymentResult(intent, paymentAuthResultCallback)
-        verify(paymentAuthResultCallback).onError(exception)
-        verify(paymentAuthResultCallback, never())
+        controller.handlePaymentResult(intent, paymentIntentResultCallback)
+        verify(paymentIntentResultCallback).onError(exception)
+        verify(paymentIntentResultCallback, never())
             .onSuccess(anyOrNull())
     }
 
@@ -565,15 +554,15 @@ internal class StripePaymentControllerTest {
     fun handleSetupResult_withAuthException_shouldCallCallbackOnError() {
         val exception = APIException(RuntimeException())
         val intent = Intent().putExtras(
-            PaymentController.Result(
+            PaymentFlowResult.Unvalidated(
                 exception = exception
             ).toBundle()
         )
 
-        controller.handleSetupResult(intent, setupAuthResultCallback)
+        controller.handleSetupResult(intent, setupIntentResultCallback)
 
-        verify(setupAuthResultCallback).onError(exception)
-        verify(setupAuthResultCallback, never())
+        verify(setupIntentResultCallback).onError(exception)
+        verify(setupIntentResultCallback, never())
             .onSuccess(anyOrNull())
     }
 
@@ -583,15 +572,15 @@ internal class StripePaymentControllerTest {
             .isNotNull()
 
         val intent = Intent().putExtras(
-            PaymentController.Result(
+            PaymentFlowResult.Unvalidated(
                 clientSecret = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
             ).toBundle()
         )
 
-        controller.handleSetupResult(intent, setupAuthResultCallback)
+        controller.handleSetupResult(intent, setupIntentResultCallback)
 
-        verify(setupAuthResultCallback)
+        verify(setupIntentResultCallback)
             .onSuccess(setupIntentResultArgumentCaptor.capture())
         val result = setupIntentResultArgumentCaptor.firstValue
         assertThat(result.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
@@ -767,7 +756,7 @@ internal class StripePaymentControllerTest {
         val sourceId = "src_1Ff87qCRMbs6FrXfPABTYaEd"
 
         val intent = Intent().putExtras(
-            PaymentController.Result(
+            PaymentFlowResult.Unvalidated(
                 clientSecret = clientSecret,
                 sourceId = sourceId,
                 shouldCancelSource = true
@@ -775,7 +764,7 @@ internal class StripePaymentControllerTest {
         )
 
         createController(stripeRepository)
-            .handlePaymentResult(intent, paymentAuthResultCallback)
+            .handlePaymentResult(intent, paymentIntentResultCallback)
 
         verify(stripeRepository).retrievePaymentIntent(
             eq(clientSecret),
@@ -792,7 +781,7 @@ internal class StripePaymentControllerTest {
         // verify that cancelIntent is only called once
         verifyNoMoreInteractions(stripeRepository)
 
-        verify(paymentAuthResultCallback).onSuccess(
+        verify(paymentIntentResultCallback).onSuccess(
             PaymentIntentResult(paymentIntent)
         )
     }
@@ -808,7 +797,7 @@ internal class StripePaymentControllerTest {
     fun handleSourceResult_withSuccessfulResult_shouldCallOnSuccess() {
         controller.handleSourceResult(
             data = Intent().putExtras(
-                PaymentController.Result(
+                PaymentFlowResult.Unvalidated(
                     sourceId = "src_123",
                     clientSecret = "src_123_secret_abc"
                 ).toBundle()
@@ -845,7 +834,7 @@ internal class StripePaymentControllerTest {
 
     @Test
     fun result_creationRoundTrip_shouldReturnExpectedObject() {
-        val expectedResult = PaymentController.Result(
+        val expectedResult = PaymentFlowResult.Unvalidated(
             clientSecret = "client_secret",
             exception = InvalidRequestException(
                 stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
@@ -863,9 +852,11 @@ internal class StripePaymentControllerTest {
             expectedResult.toBundle(),
             Bundle.CREATOR
         )
-        val actualResult =
-            PaymentController.Result.fromIntent(Intent().putExtras(resultBundle))
-        assertThat(actualResult).isEqualTo(expectedResult)
+        assertThat(
+            PaymentFlowResult.Unvalidated.fromIntent(
+                Intent().putExtras(resultBundle)
+            )
+        ).isEqualTo(expectedResult)
     }
 
     @Test
@@ -935,6 +926,42 @@ internal class StripePaymentControllerTest {
             )
     }
 
+    @Test
+    fun `cancelPaymentIntent should call cancelPaymentIntentSource`() = testDispatcher.runBlockingTest {
+        controller.cancelPaymentIntent(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            REQUEST_OPTIONS,
+            StripeIntentResult.Outcome.CANCELED,
+            "src_123",
+            paymentIntentResultCallback
+        )
+
+        verify(paymentIntentResultCallback).onSuccess(
+            argWhere { result ->
+                result.intent == PaymentIntentFixtures.CANCELLED &&
+                    result.outcome == StripeIntentResult.Outcome.CANCELED
+            }
+        )
+    }
+
+    @Test
+    fun `cancelSetupIntent should call cancelSetupIntentSource`() = testDispatcher.runBlockingTest {
+        controller.cancelSetupIntent(
+            SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
+            REQUEST_OPTIONS,
+            StripeIntentResult.Outcome.CANCELED,
+            "src_123",
+            setupIntentResultCallback
+        )
+
+        verify(setupIntentResultCallback).onSuccess(
+            argWhere { result ->
+                result.intent == SetupIntentFixtures.CANCELLED &&
+                    result.outcome == StripeIntentResult.Outcome.CANCELED
+            }
+        )
+    }
+
     private fun createController(
         stripeRepository: StripeRepository = FakeStripeRepository(),
         paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
@@ -976,6 +1003,18 @@ internal class StripePaymentControllerTest {
             clientSecret: String,
             options: ApiRequest.Options
         ) = SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
+
+        override suspend fun cancelPaymentIntentSource(
+            paymentIntentId: String,
+            sourceId: String,
+            options: ApiRequest.Options
+        ) = PaymentIntentFixtures.CANCELLED
+
+        override suspend fun cancelSetupIntentSource(
+            setupIntentId: String,
+            sourceId: String,
+            options: ApiRequest.Options
+        ) = SetupIntentFixtures.CANCELLED
     }
 
     private fun verifyAnalytics(event: AnalyticsEvent) {
