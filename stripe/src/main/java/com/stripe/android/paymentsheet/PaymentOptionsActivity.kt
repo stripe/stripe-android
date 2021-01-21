@@ -214,11 +214,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     override fun onUserCancel() {
-        animateOut(
-            PaymentOptionResult.Canceled(
-                mostRecentError = viewModel.fatal.value
-            )
-        )
+        animateOut(viewModel.getPaymentOptionResult())
     }
 
     override fun hideSheet() {
