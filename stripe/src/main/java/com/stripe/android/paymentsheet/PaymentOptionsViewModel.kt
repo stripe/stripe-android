@@ -48,6 +48,14 @@ internal class PaymentOptionsViewModel(
         _userSelection.value = paymentSelection
     }
 
+    fun getPaymentOptionResult(): PaymentOptionResult {
+        return selection.value?.let {
+            PaymentOptionResult.Succeeded(it)
+        } ?: PaymentOptionResult.Canceled(
+            mostRecentError = fatal.value
+        )
+    }
+
     internal enum class TransitionTarget(
         val sheetMode: SheetMode
     ) {

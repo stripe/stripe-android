@@ -60,6 +60,26 @@ class PaymentOptionsViewModelTest {
             .isNull()
     }
 
+    @Test
+    fun `getPaymentOptionResult() after selection is set should return Succeeded`() {
+        viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
+
+        assertThat(
+            viewModel.getPaymentOptionResult()
+        ).isEqualTo(
+            PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD)
+        )
+    }
+
+    @Test
+    fun `getPaymentOptionResult() when selection is not set should return Canceled`() {
+        assertThat(
+            viewModel.getPaymentOptionResult()
+        ).isEqualTo(
+            PaymentOptionResult.Canceled(null)
+        )
+    }
+
     private companion object {
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
