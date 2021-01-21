@@ -37,6 +37,29 @@ class Stripe3ds2CompletionContractTest {
     }
 
     @Test
+    fun `parseResult() with out of bounds ordinal should return valid PaymentFlowResult`() {
+        assertThat(
+            Stripe3ds2CompletionContract().parseResult(
+                Activity.RESULT_OK,
+                Intent()
+                    .putExtras(
+                        bundleOf(
+                            "extra_client_secret" to "client_secret_123",
+                            "extra_outcome" to 5000,
+                            "extra_stripe_account" to "acct_123"
+                        )
+                    )
+            ).validate()
+        ).isEqualTo(
+            PaymentFlowResult.Validated(
+                clientSecret = "client_secret_123",
+                flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                stripeAccountId = "acct_123"
+            )
+        )
+    }
+
+    @Test
     fun `parseResult() with empty Intent should return empty unvalidated PaymentFlowResult`() {
         assertThat(
             Stripe3ds2CompletionContract().parseResult(

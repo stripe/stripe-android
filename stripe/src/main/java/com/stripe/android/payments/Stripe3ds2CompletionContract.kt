@@ -48,7 +48,7 @@ internal class Stripe3ds2CompletionContract :
         return if (outcomeOrdinal == UNKNOWN_FLOW_OUTCOME) {
             StripeIntentResult.Outcome.UNKNOWN
         } else {
-            when (ChallengeFlowOutcome.values()[outcomeOrdinal]) {
+            when (ChallengeFlowOutcome.values().toList().getOrNull(outcomeOrdinal)) {
                 ChallengeFlowOutcome.CompleteSuccessful ->
                     StripeIntentResult.Outcome.SUCCEEDED
                 ChallengeFlowOutcome.Cancel ->
@@ -59,6 +59,7 @@ internal class Stripe3ds2CompletionContract :
                 ChallengeFlowOutcome.ProtocolError,
                 ChallengeFlowOutcome.RuntimeError ->
                     StripeIntentResult.Outcome.FAILED
+                else -> StripeIntentResult.Outcome.UNKNOWN
             }
         }
     }
