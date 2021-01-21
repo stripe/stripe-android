@@ -24,6 +24,7 @@ import kotlin.test.Test
 internal class DefaultFlowControllerInitializerTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
+    private val paymentSessionPrefs = FakePaymentSessionPrefs()
     private val initializer = createInitializer()
 
     @Test
@@ -45,6 +46,8 @@ internal class DefaultFlowControllerInitializerTest {
 
     @Test
     fun `init with configuration should return expect result`() = testDispatcher.runBlockingTest {
+        paymentSessionPrefs.paymentMethodId = "pm_123"
+
         assertThat(
             initializer.init(
                 PaymentSheetFixtures.CLIENT_SECRET,
@@ -60,6 +63,35 @@ internal class DefaultFlowControllerInitializerTest {
                     "pm_123"
                 )
             )
+        )
+    }
+
+    @Test
+    fun `init() with customer should set first payment method as default if prefs payment method is null`() = testDispatcher.runBlockingTest {
+        paymentSessionPrefs.paymentMethodId = null
+
+        val initializer = createInitializer()
+        assertThat(
+            initializer.init(
+                PaymentSheetFixtures.CLIENT_SECRET,
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            )
+        ).isEqualTo(
+            FlowControllerInitializer.InitResult.Success(
+                InitData(
+                    PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    listOf(PaymentMethod.Type.Card),
+                    PAYMENT_METHODS,
+                    "pm_123456789"
+                )
+            )
+        )
+
+        assertThat(
+            paymentSessionPrefs.savedPaymentMethodIds
+        ).isEqualTo(
+            listOf("customer_id" to "pm_123456789")
         )
     }
 
@@ -96,7 +128,7 @@ internal class DefaultFlowControllerInitializerTest {
     ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
             FakeStripeRepository(paymentIntent),
-            FakePaymentSessionPrefs(),
+            paymentSessionPrefs,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
             testDispatcher
@@ -123,13 +155,22 @@ internal class DefaultFlowControllerInitializerTest {
     }
 
     private class FakePaymentSessionPrefs : PaymentSessionPrefs {
-        override fun getPaymentMethodId(customerId: String?): String = "pm_123"
+        var paymentMethodId: String? = null
+        val savedPaymentMethodIds = mutableListOf<Pair<String, String?>>()
 
-        override fun savePaymentMethodId(customerId: String, paymentMethodId: String?) {
+        override fun getPaymentMethodId(
+            customerId: String?
+        ): String? = paymentMethodId
+
+        override fun savePaymentMethodId(
+            customerId: String,
+            paymentMethodId: String?
+        ) {
+            savedPaymentMethodIds.add(customerId to paymentMethodId)
         }
     }
 
     private companion object {
-        private val PAYMENT_METHODS = PaymentMethodFixtures.createCards(5)
+        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
     }
 }
