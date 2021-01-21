@@ -10,7 +10,7 @@ import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.PaymentAuthWebViewActivity
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult>() {
+internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
     override fun createIntent(
         context: Context,
         input: Args?
@@ -32,7 +32,7 @@ internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWe
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): PaymentFlowResult? {
+    ): PaymentFlowResult.Unvalidated? {
         return intent?.getParcelableExtra(EXTRA_ARGS)
     }
 
