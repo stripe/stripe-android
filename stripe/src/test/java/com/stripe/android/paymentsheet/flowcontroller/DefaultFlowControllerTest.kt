@@ -65,6 +65,8 @@ class DefaultFlowControllerTest {
 
     private val paymentController = mock<PaymentController>()
     private val eventReporter = mock<EventReporter>()
+
+    private val paymentFlowResultProcessor = FakePaymentFlowResultProcessor()
     private val flowController: DefaultFlowController by lazy {
         createFlowController()
     }
@@ -408,16 +410,66 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onPaymentFlowResult when successful should invoke callback with Succeeded`() {
+    fun `onPaymentFlowResult when succeeded should invoke callback with Succeeded`() {
+        paymentFlowResultProcessor.paymentIntentResult = PaymentIntentResult(
+            PaymentIntentFixtures.PI_WITH_SHIPPING,
+            StripeIntentResult.Outcome.SUCCEEDED
+        )
+
         flowController.onPaymentFlowResult(
             PaymentFlowResult.Unvalidated(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                flowOutcome = StripeIntentResult.Outcome.CANCELED
             )
         )
 
         verify(paymentResultCallback).onPaymentResult(
             argWhere { paymentResult ->
                 (paymentResult as? PaymentResult.Succeeded)?.paymentIntent ==
+                    PaymentIntentFixtures.PI_WITH_SHIPPING
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentFlowResult when canceled should invoke callback with Cancelled`() {
+        paymentFlowResultProcessor.paymentIntentResult = PaymentIntentResult(
+            PaymentIntentFixtures.CANCELLED,
+            StripeIntentResult.Outcome.CANCELED
+        )
+
+        flowController.onPaymentFlowResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                flowOutcome = StripeIntentResult.Outcome.CANCELED
+            )
+        )
+
+        verify(paymentResultCallback).onPaymentResult(
+            argWhere { paymentResult ->
+                (paymentResult as? PaymentResult.Canceled)?.paymentIntent ==
+                    PaymentIntentFixtures.CANCELLED
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentFlowResult when error should invoke callback with Failed`() {
+        paymentFlowResultProcessor.paymentIntentResult = PaymentIntentResult(
+            PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+            StripeIntentResult.Outcome.FAILED
+        )
+
+        flowController.onPaymentFlowResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                flowOutcome = StripeIntentResult.Outcome.CANCELED
+            )
+        )
+
+        verify(paymentResultCallback).onPaymentResult(
+            argWhere { paymentResult ->
+                (paymentResult as? PaymentResult.Failed)?.paymentIntent ==
                     PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
             }
         )
@@ -442,7 +494,7 @@ class DefaultFlowControllerTest {
             activity,
             flowControllerInitializer,
             { _, _, _ -> paymentController },
-            FakePaymentFlowResultProcessor(),
+            paymentFlowResultProcessor,
             eventReporter,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
@@ -510,23 +562,23 @@ class DefaultFlowControllerTest {
     }
 
     private class FakePaymentFlowResultProcessor : PaymentFlowResultProcessor {
+        var paymentIntentResult = PaymentIntentResult(
+            PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+            StripeIntentResult.Outcome.FAILED
+        )
+
+        var setupIntentResult = SetupIntentResult(
+            SetupIntentFixtures.SI_WITH_LAST_PAYMENT_ERROR,
+            StripeIntentResult.Outcome.FAILED
+        )
+
         override suspend fun processPaymentIntent(
             unvalidatedResult: PaymentFlowResult.Unvalidated
-        ): PaymentIntentResult {
-            return PaymentIntentResult(
-                PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-                StripeIntentResult.Outcome.FAILED
-            )
-        }
+        ): PaymentIntentResult = paymentIntentResult
 
         override suspend fun processSetupIntent(
             unvalidatedResult: PaymentFlowResult.Unvalidated
-        ): SetupIntentResult {
-            return SetupIntentResult(
-                SetupIntentFixtures.SI_WITH_LAST_PAYMENT_ERROR,
-                StripeIntentResult.Outcome.FAILED
-            )
-        }
+        ): SetupIntentResult = setupIntentResult
     }
 
     private companion object {
