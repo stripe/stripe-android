@@ -19,10 +19,10 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-internal class PaymentFlowResultProcessorTest {
+internal class DefaultPaymentFlowResultProcessorTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val processor = PaymentFlowResultProcessor(
+    private val processor = DefaultPaymentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         FakeStripeRepository(),

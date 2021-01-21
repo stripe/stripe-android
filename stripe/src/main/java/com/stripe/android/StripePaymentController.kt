@@ -24,9 +24,9 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
@@ -79,7 +79,7 @@ internal class StripePaymentController internal constructor(
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : PaymentController {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
-    private val paymentFlowResultProcessor = PaymentFlowResultProcessor(
+    private val paymentFlowResultProcessor = DefaultPaymentFlowResultProcessor(
         context,
         publishableKey,
         stripeRepository,

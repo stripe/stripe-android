@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
@@ -16,6 +17,8 @@ import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -40,6 +43,7 @@ internal class DefaultFlowController internal constructor(
     private val activity: ComponentActivity,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
+    private val paymentFlowResultProcessor: PaymentFlowResultProcessor,
     private val eventReporter: EventReporter,
     private val publishableKey: String,
     private val stripeAccountId: String?,
@@ -73,13 +77,13 @@ internal class DefaultFlowController internal constructor(
     private val paymentRelayLauncher = activity.registerForActivityResult(
         PaymentRelayContract()
     ) { result ->
-        // TODO(mshafrir-stripe): handle result
+        onPaymentFlowResult(result)
     }
 
     private val paymentAuthWebViewLauncher = activity.registerForActivityResult(
         PaymentAuthWebViewContract()
     ) { result ->
-        // TODO(mshafrir-stripe): handle result
+        onPaymentFlowResult(result)
     }
 
     private val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
@@ -383,6 +387,37 @@ internal class DefaultFlowController internal constructor(
         paymentOptionCallback.onPaymentOption(
             paymentSelection?.let(paymentOptionFactory::create)
         )
+    }
+
+    @VisibleForTesting
+    internal fun onPaymentFlowResult(
+        paymentFlowResult: PaymentFlowResult.Unvalidated
+    ) {
+        activity.lifecycleScope.launch {
+            runCatching {
+                paymentFlowResultProcessor.processPaymentIntent(paymentFlowResult)
+            }.fold(
+                onSuccess = { (intent) ->
+                    withContext(Dispatchers.Main) {
+                        paymentResultCallback.onPaymentResult(
+                            PaymentResult.Succeeded(
+                                intent
+                            )
+                        )
+                    }
+                },
+                onFailure = {
+                    withContext(Dispatchers.Main) {
+                        paymentResultCallback.onPaymentResult(
+                            PaymentResult.Failed(
+                                it,
+                                null
+                            )
+                        )
+                    }
+                }
+            )
+        }
     }
 
     @Parcelize
