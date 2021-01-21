@@ -421,7 +421,7 @@ class DefaultFlowControllerTest {
         return DefaultFlowController(
             activity,
             flowControllerInitializer,
-            { _, _ -> paymentController },
+            { _, _, _ -> paymentController },
             eventReporter,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
