@@ -6,6 +6,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripePaymentController
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -39,6 +40,14 @@ internal class FlowControllerFactory(
             )
         }
 
+        val paymentFlowResultProcessor = DefaultPaymentFlowResultProcessor(
+            activity,
+            config.publishableKey,
+            stripeRepository,
+            enableLogging = false,
+            Dispatchers.IO
+        )
+
         return DefaultFlowController(
             activity = activity,
             flowControllerInitializer = DefaultFlowControllerInitializer(
@@ -49,6 +58,7 @@ internal class FlowControllerFactory(
                 workContext = Dispatchers.IO
             ),
             paymentControllerFactory = paymentControllerFactory,
+            paymentFlowResultProcessor = paymentFlowResultProcessor,
             eventReporter = DefaultEventReporter(
                 mode = EventReporter.Mode.Custom,
                 sessionId,

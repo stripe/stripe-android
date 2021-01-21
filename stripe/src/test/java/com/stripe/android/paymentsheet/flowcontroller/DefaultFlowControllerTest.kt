@@ -17,6 +17,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
+import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
@@ -25,7 +26,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -403,6 +407,22 @@ class DefaultFlowControllerTest {
             .isEqualTo(0)
     }
 
+    @Test
+    fun `onPaymentFlowResult when successful should invoke callback with Succeeded`() {
+        flowController.onPaymentFlowResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET
+            )
+        )
+
+        verify(paymentResultCallback).onPaymentResult(
+            argWhere { paymentResult ->
+                (paymentResult as? PaymentResult.Succeeded)?.paymentIntent ==
+                    PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
+            }
+        )
+    }
+
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
         defaultPaymentMethodId: String? = null
@@ -422,6 +442,7 @@ class DefaultFlowControllerTest {
             activity,
             flowControllerInitializer,
             { _, _ -> paymentController },
+            FakePaymentFlowResultProcessor(),
             eventReporter,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
@@ -484,6 +505,26 @@ class DefaultFlowControllerTest {
         ): FlowControllerInitializer.InitResult {
             return FlowControllerInitializer.InitResult.Failure(
                 IllegalStateException("Failed to initialize")
+            )
+        }
+    }
+
+    private class FakePaymentFlowResultProcessor : PaymentFlowResultProcessor {
+        override suspend fun processPaymentIntent(
+            unvalidatedResult: PaymentFlowResult.Unvalidated
+        ): PaymentIntentResult {
+            return PaymentIntentResult(
+                PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+                StripeIntentResult.Outcome.FAILED
+            )
+        }
+
+        override suspend fun processSetupIntent(
+            unvalidatedResult: PaymentFlowResult.Unvalidated
+        ): SetupIntentResult {
+            return SetupIntentResult(
+                SetupIntentFixtures.SI_WITH_LAST_PAYMENT_ERROR,
+                StripeIntentResult.Outcome.FAILED
             )
         }
     }
