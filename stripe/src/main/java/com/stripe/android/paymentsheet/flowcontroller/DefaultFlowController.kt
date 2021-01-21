@@ -220,31 +220,7 @@ internal class DefaultFlowController internal constructor(
                     eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 }
 
-                val paymentResult = when {
-                    paymentIntent.status == StripeIntent.Status.Succeeded -> {
-                        PaymentResult.Succeeded(paymentIntent)
-                    }
-                    paymentIntent.lastPaymentError != null -> {
-                        PaymentResult.Failed(
-                            error = IllegalArgumentException(
-                                "Failed to confirm PaymentIntent. ${paymentIntent.lastPaymentError.message}"
-                            ),
-                            paymentIntent = paymentIntent
-                        )
-                    }
-                    paymentIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
-                        PaymentResult.Canceled(
-                            mostRecentError = null,
-                            paymentIntent = paymentIntent
-                        )
-                    }
-                    else -> {
-                        PaymentResult.Failed(
-                            error = RuntimeException("Failed to complete payment using Google Pay"),
-                            paymentIntent = paymentIntent
-                        )
-                    }
-                }
+                val paymentResult = createPaymentResult(paymentIntentResult)
                 paymentResultCallback.onPaymentResult(paymentResult)
             }
             is StripeGooglePayContract.Result.Error -> {
@@ -405,12 +381,10 @@ internal class DefaultFlowController internal constructor(
             runCatching {
                 paymentFlowResultProcessor.processPaymentIntent(paymentFlowResult)
             }.fold(
-                onSuccess = { (intent) ->
+                onSuccess = {
                     withContext(Dispatchers.Main) {
                         paymentResultCallback.onPaymentResult(
-                            PaymentResult.Succeeded(
-                                intent
-                            )
+                            createPaymentResult(it)
                         )
                     }
                 },
@@ -425,6 +399,37 @@ internal class DefaultFlowController internal constructor(
                     }
                 }
             )
+        }
+    }
+
+    private fun createPaymentResult(
+        paymentIntentResult: PaymentIntentResult
+    ): PaymentResult {
+        val paymentIntent = paymentIntentResult.intent
+        return when {
+            paymentIntent.status == StripeIntent.Status.Succeeded -> {
+                PaymentResult.Succeeded(paymentIntent)
+            }
+            paymentIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
+                PaymentResult.Canceled(
+                    mostRecentError = null,
+                    paymentIntent = paymentIntent
+                )
+            }
+            paymentIntent.lastPaymentError != null -> {
+                PaymentResult.Failed(
+                    error = IllegalArgumentException(
+                        "Failed to confirm PaymentIntent. ${paymentIntent.lastPaymentError.message}"
+                    ),
+                    paymentIntent = paymentIntent
+                )
+            }
+            else -> {
+                PaymentResult.Failed(
+                    error = RuntimeException("Failed to complete payment."),
+                    paymentIntent = paymentIntent
+                )
+            }
         }
     }
 
