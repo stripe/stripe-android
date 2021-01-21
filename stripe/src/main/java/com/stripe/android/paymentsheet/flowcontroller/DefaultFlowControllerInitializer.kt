@@ -47,8 +47,7 @@ internal class DefaultFlowControllerInitializer(
         customerConfig: PaymentSheet.CustomerConfiguration,
         config: PaymentSheet.Configuration?
     ): FlowControllerInitializer.InitResult {
-        // load default payment option
-        val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerConfig.id)
+        val prefsPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerConfig.id)
 
         return runCatching {
             retrievePaymentIntent(clientSecret)
@@ -61,6 +60,14 @@ internal class DefaultFlowControllerInitializer(
                     types = paymentMethodTypes,
                     customerConfig
                 ).let { paymentMethods ->
+                    val defaultPaymentMethodId = prefsPaymentMethodId
+                        ?: paymentMethods.firstOrNull()?.id?.also {
+                            paymentSessionPrefs.savePaymentMethodId(
+                                customerConfig.id,
+                                it
+                            )
+                        }
+
                     FlowControllerInitializer.InitResult.Success(
                         InitData(
                             config = config,
