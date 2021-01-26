@@ -2,10 +2,8 @@ package com.stripe.android.payments
 
 import android.app.Activity
 import android.content.Intent
-import androidx.core.os.bundleOf
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.stripe3ds2.transaction.ChallengeFlowOutcome
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -20,11 +18,11 @@ class Stripe3ds2CompletionContractTest {
                 Activity.RESULT_OK,
                 Intent()
                     .putExtras(
-                        bundleOf(
-                            "extra_client_secret" to "client_secret_123",
-                            "extra_outcome" to ChallengeFlowOutcome.Timeout.ordinal,
-                            "extra_stripe_account" to "acct_123"
-                        )
+                        PaymentFlowResult.Unvalidated(
+                            clientSecret = "client_secret_123",
+                            flowOutcome = StripeIntentResult.Outcome.TIMEDOUT,
+                            stripeAccountId = "acct_123"
+                        ).toBundle()
                     )
             ).validate()
         ).isEqualTo(
@@ -43,11 +41,11 @@ class Stripe3ds2CompletionContractTest {
                 Activity.RESULT_OK,
                 Intent()
                     .putExtras(
-                        bundleOf(
-                            "extra_client_secret" to "client_secret_123",
-                            "extra_outcome" to 5000,
-                            "extra_stripe_account" to "acct_123"
-                        )
+                        PaymentFlowResult.Unvalidated(
+                            clientSecret = "client_secret_123",
+                            flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                            stripeAccountId = "acct_123"
+                        ).toBundle()
                     )
             ).validate()
         ).isEqualTo(
