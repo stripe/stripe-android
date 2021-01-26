@@ -90,7 +90,7 @@ internal class DefaultFlowController internal constructor(
     private val stripe3ds2ChallengeLauncher = activity.registerForActivityResult(
         Stripe3ds2CompletionContract()
     ) { result ->
-        // TODO(mshafrir-stripe): handle result
+        onPaymentFlowResult(result)
     }
 
     private val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
@@ -407,7 +407,8 @@ internal class DefaultFlowController internal constructor(
     ): PaymentResult {
         val paymentIntent = paymentIntentResult.intent
         return when {
-            paymentIntent.status == StripeIntent.Status.Succeeded -> {
+            paymentIntent.status == StripeIntent.Status.Succeeded ||
+                paymentIntent.status == StripeIntent.Status.RequiresCapture -> {
                 PaymentResult.Succeeded(paymentIntent)
             }
             paymentIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
