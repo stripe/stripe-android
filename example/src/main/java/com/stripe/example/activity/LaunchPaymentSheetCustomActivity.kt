@@ -1,6 +1,5 @@
 package com.stripe.example.activity
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -93,18 +92,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             flowController.confirmPayment()
         }
         onPaymentOption(flowController.getPaymentOption())
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (flowController.isPaymentResult(requestCode, data)) {
-            flowController.onPaymentResult(
-                requestCode,
-                data,
-                ::onPaymentSheetResult
-            )
-        }
     }
 
     private fun onPaymentSheetResult(
