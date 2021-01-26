@@ -40,13 +40,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         viewModel.status.observe(this) {
             viewBinding.status.text = it
         }
-
-        viewBinding.paymentMethod.setOnClickListener {
-            flowController.presentPaymentOptions()
-        }
-        viewBinding.buyButton.setOnClickListener {
-            flowController.confirmPayment()
-        }
     }
 
     private fun createPaymentSheetFlowController(
@@ -83,13 +76,23 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             )
         ) { isReady, error ->
             if (isReady) {
-                onPaymentOption(flowController.getPaymentOption())
+                onFlowControllerReady()
             } else {
                 viewModel.status.postValue(
                     "Failed to create PaymentSheetFlowController: ${error?.message}"
                 )
             }
         }
+    }
+
+    private fun onFlowControllerReady() {
+        viewBinding.paymentMethod.setOnClickListener {
+            flowController.presentPaymentOptions()
+        }
+        viewBinding.buyButton.setOnClickListener {
+            flowController.confirmPayment()
+        }
+        onPaymentOption(flowController.getPaymentOption())
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
