@@ -23,7 +23,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
         val paymentOptionCallback = PaymentOptionCallback { paymentOption ->
             onPaymentOption(paymentOption)
-
         }
         val paymentResultCallback = PaymentSheetResultCallback { paymentResult ->
             onPaymentSheetResult(paymentResult)
