@@ -65,7 +65,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         paymentIntentClientSecret: String,
         customerConfig: PaymentSheet.CustomerConfiguration? = null
     ) {
-        flowController.init(
+        flowController.configure(
             paymentIntentClientSecret = paymentIntentClientSecret,
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = merchantName,
