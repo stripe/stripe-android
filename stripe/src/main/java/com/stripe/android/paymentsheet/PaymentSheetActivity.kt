@@ -275,7 +275,9 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     }
 
     override fun hideSheet() {
-        bottomSheetController.hide()
+        viewModel.startAnimateOut().observe(this) {
+            bottomSheetController.hide()
+        }
     }
 
     internal companion object {
