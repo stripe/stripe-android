@@ -22,7 +22,6 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -117,6 +116,8 @@ class DefaultFlowControllerTest {
     @Test
     fun `getPaymentOption() when defaultPaymentMethodId is not null should return expected value`() {
         val paymentMethods = PaymentMethodFixtures.createCards(5)
+        val last4 = paymentMethods.first().card?.last4.orEmpty()
+
         val flowController = createFlowController(
             paymentMethods = paymentMethods,
             defaultPaymentMethodId = paymentMethods.first().id
@@ -129,8 +130,8 @@ class DefaultFlowControllerTest {
         assertThat(flowController.getPaymentOption())
             .isEqualTo(
                 PaymentOption(
-                    drawableResourceId = CardBrand.Visa.icon,
-                    label = "Visa"
+                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
+                    label = "····$last4"
                 )
             )
     }
@@ -199,15 +200,9 @@ class DefaultFlowControllerTest {
             )
         )
 
-        val expectedPaymentOption = PaymentOption(
-            drawableResourceId = R.drawable.stripe_ic_visa,
-            label = CardBrand.Visa.displayName
-        )
-
-        verify(paymentOptionCallback).onPaymentOption(expectedPaymentOption)
-
+        verify(paymentOptionCallback).onPaymentOption(VISA_PAYMENT_OPTION)
         assertThat(flowController.getPaymentOption())
-            .isEqualTo(expectedPaymentOption)
+            .isEqualTo(VISA_PAYMENT_OPTION)
     }
 
     @Test
@@ -586,5 +581,10 @@ class DefaultFlowControllerTest {
 
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         private val PAYMENT_INTENT_RESULT = PaymentIntentResult(PAYMENT_INTENT)
+
+        private val VISA_PAYMENT_OPTION = PaymentOption(
+            drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
+            label = "····4242"
+        )
     }
 }
