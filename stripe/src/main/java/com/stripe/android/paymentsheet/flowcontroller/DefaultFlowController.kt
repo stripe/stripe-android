@@ -101,10 +101,10 @@ internal class DefaultFlowController internal constructor(
         stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
     )
 
-    override fun init(
+    override fun configure(
         paymentIntentClientSecret: String,
         configuration: PaymentSheet.Configuration,
-        callback: PaymentSheet.FlowController.InitCallback
+        callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         initScope.launch {
             val result = flowControllerInitializer.init(
@@ -115,9 +115,9 @@ internal class DefaultFlowController internal constructor(
         }
     }
 
-    override fun init(
+    override fun configure(
         paymentIntentClientSecret: String,
-        callback: PaymentSheet.FlowController.InitCallback
+        callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         initScope.launch {
             val result = flowControllerInitializer.init(paymentIntentClientSecret)
@@ -125,7 +125,7 @@ internal class DefaultFlowController internal constructor(
             if (isActive) {
                 dispatchResult(result, callback)
             } else {
-                callback.onInit(false, null)
+                callback.onConfigured(false, null)
             }
         }
     }
@@ -141,7 +141,7 @@ internal class DefaultFlowController internal constructor(
             viewModel.initData
         }.getOrElse {
             error(
-                "FlowController must be successfully initialized using init() before calling presentPaymentOptions()"
+                "FlowController must be successfully initialized using configure() before calling presentPaymentOptions()"
             )
         }
 
@@ -160,7 +160,7 @@ internal class DefaultFlowController internal constructor(
             viewModel.initData
         }.getOrElse {
             error(
-                "FlowController must be successfully initialized using init() before calling confirmPayment()"
+                "FlowController must be successfully initialized using configure() before calling confirmPayment()"
             )
         }
 
@@ -333,21 +333,21 @@ internal class DefaultFlowController internal constructor(
 
     private suspend fun dispatchResult(
         result: FlowControllerInitializer.InitResult,
-        callback: PaymentSheet.FlowController.InitCallback
+        callback: PaymentSheet.FlowController.ConfigCallback
     ) = withContext(Dispatchers.Main) {
         when (result) {
             is FlowControllerInitializer.InitResult.Success -> {
                 onInitSuccess(result.initData, callback)
             }
             is FlowControllerInitializer.InitResult.Failure -> {
-                callback.onInit(false, result.throwable)
+                callback.onConfigured(false, result.throwable)
             }
         }
     }
 
     private fun onInitSuccess(
         initData: InitData,
-        callback: PaymentSheet.FlowController.InitCallback
+        callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         eventReporter.onInit(initData.config)
 
@@ -359,7 +359,7 @@ internal class DefaultFlowController internal constructor(
         }
 
         viewModel.setInitData(initData)
-        callback.onInit(true, null)
+        callback.onConfigured(true, null)
     }
 
     @JvmSynthetic

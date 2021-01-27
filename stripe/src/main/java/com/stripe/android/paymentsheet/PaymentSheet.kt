@@ -115,15 +115,15 @@ class PaymentSheet internal constructor(
     interface FlowController {
         fun getPaymentOption(): PaymentOption?
 
-        fun init(
+        fun configure(
             paymentIntentClientSecret: String,
             configuration: Configuration,
-            callback: InitCallback
+            callback: ConfigCallback
         )
 
-        fun init(
+        fun configure(
             paymentIntentClientSecret: String,
-            callback: InitCallback
+            callback: ConfigCallback
         )
 
         fun presentPaymentOptions()
@@ -149,8 +149,8 @@ class PaymentSheet internal constructor(
             ) : Result()
         }
 
-        fun interface InitCallback {
-            fun onInit(
+        fun interface ConfigCallback {
+            fun onConfigured(
                 success: Boolean,
                 error: Throwable?
             )
