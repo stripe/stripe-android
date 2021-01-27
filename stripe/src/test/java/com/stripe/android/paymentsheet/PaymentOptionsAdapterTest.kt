@@ -144,6 +144,7 @@ class PaymentOptionsAdapterTest {
 
     private fun createAdapter(): PaymentOptionsAdapter {
         return PaymentOptionsAdapter(
+            canClickSelectedItem = false,
             paymentSelection = null,
             paymentOptionSelectedListener = { paymentSelection, _ ->
                 paymentSelections.add(paymentSelection)

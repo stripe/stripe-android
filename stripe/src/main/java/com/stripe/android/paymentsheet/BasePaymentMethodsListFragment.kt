@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
 internal abstract class BasePaymentMethodsListFragment(
+    private val canClickSelectedItem: Boolean,
     private val eventReporter: EventReporter
 ) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
@@ -24,6 +25,7 @@ internal abstract class BasePaymentMethodsListFragment(
 
     protected val adapter: PaymentOptionsAdapter by lazy {
         PaymentOptionsAdapter(
+            canClickSelectedItem,
             fragmentViewModel.currentPaymentSelection,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             addCardClickListener = {

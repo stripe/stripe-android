@@ -12,7 +12,10 @@ import java.util.Locale
 
 internal class PaymentSheetPaymentMethodsListFragment(
     eventReporter: EventReporter
-) : BasePaymentMethodsListFragment(eventReporter) {
+) : BasePaymentMethodsListFragment(
+    canClickSelectedItem = false,
+    eventReporter
+) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
