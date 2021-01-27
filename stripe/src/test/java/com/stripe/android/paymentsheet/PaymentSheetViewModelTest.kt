@@ -410,6 +410,7 @@ internal class PaymentSheetViewModelTest {
             prefsRepository,
             eventReporter,
             args,
+            animateOutMillis = 0,
             workContext = testDispatcher
         )
     }

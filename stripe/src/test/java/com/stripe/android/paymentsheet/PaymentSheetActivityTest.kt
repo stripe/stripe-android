@@ -75,6 +75,7 @@ internal class PaymentSheetActivityTest {
         prefsRepository = mock(),
         eventReporter = eventReporter,
         args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        animateOutMillis = 0,
         workContext = testDispatcher
     )
 
@@ -270,6 +271,7 @@ internal class PaymentSheetActivityTest {
             prefsRepository = mock(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            animateOutMillis = 0,
             workContext = testDispatcher
         )
 
