@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlin.properties.Delegates
 
 internal class PaymentOptionsAdapter(
+    private val canClickSelectedItem: Boolean,
     private var paymentSelection: PaymentSelection?,
     val paymentOptionSelectedListener: (PaymentSelection, Boolean) -> Unit,
     val addCardClickListener: View.OnClickListener
@@ -57,8 +58,9 @@ internal class PaymentOptionsAdapter(
         clickedPaymentMethod: PaymentMethod,
         isClick: Boolean
     ) {
-        if (selectedPaymentMethod?.id != clickedPaymentMethod.id) {
-            // selected a new Payment Method
+        // allowed to click the selected item or a new Payment Method was selected
+        if (canClickSelectedItem || selectedPaymentMethod?.id != clickedPaymentMethod.id
+        ) {
             selectedPaymentMethod?.let {
                 notifyItemChanged(getPosition(it))
             }

@@ -9,7 +9,10 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentOptionsListFragment(
     eventReporter: EventReporter
-) : BasePaymentMethodsListFragment(eventReporter) {
+) : BasePaymentMethodsListFragment(
+    canClickSelectedItem = true,
+    eventReporter
+) {
     private val activityViewModel by activityViewModels<PaymentOptionsViewModel> {
         PaymentOptionsViewModel.Factory(
             { requireActivity().application },
