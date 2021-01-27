@@ -713,7 +713,7 @@ data class PaymentMethodCreateParams internal constructor(
 
         @JvmSynthetic
         @JvmOverloads
-        internal fun createAfterpayClearpay(
+        fun createAfterpayClearpay(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
