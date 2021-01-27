@@ -32,4 +32,29 @@ class BuyButtonTest {
             "Processing…"
         )
     }
+
+    @Test
+    fun `label alpha is initially 50%`() {
+        assertThat(buyButton.viewBinding.label.alpha)
+            .isEqualTo(0.5f)
+    }
+
+    @Test
+    fun `after viewState ready and disabled, label alpha is 100%`() {
+        buyButton.onReadyState(
+            ViewState.Ready(amount = 1099, currencyCode = "usd")
+        )
+        assertThat(buyButton.viewBinding.label.alpha)
+            .isEqualTo(0.5f)
+    }
+
+    @Test
+    fun `after viewState ready and enabled, label alpha is 100%`() {
+        buyButton.onReadyState(
+            ViewState.Ready(amount = 1099, currencyCode = "usd")
+        )
+        buyButton.isEnabled = true
+        assertThat(buyButton.viewBinding.label.alpha)
+            .isEqualTo(1.0f)
+    }
 }

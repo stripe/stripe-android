@@ -36,6 +36,8 @@ internal class BuyButton @JvmOverloads constructor(
     private val _completedAnimation = MutableLiveData<ViewState.Completed>()
     internal val completedAnimation = _completedAnimation.distinctUntilChanged()
 
+    private var viewState: ViewState? = null
+
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
 
@@ -82,9 +84,13 @@ internal class BuyButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         viewBinding.lockIcon.isVisible = enabled
+        updateAlpha()
     }
 
     override fun updateState(viewState: ViewState) {
+        this.viewState = viewState
+        updateAlpha()
+
         when (viewState) {
             is ViewState.Ready -> {
                 onReadyState(viewState)
@@ -95,6 +101,14 @@ internal class BuyButton @JvmOverloads constructor(
             is ViewState.Completed -> {
                 onCompletedState(viewState)
             }
+        }
+    }
+
+    private fun updateAlpha() {
+        if ((viewState == null || viewState is ViewState.Ready) && !isEnabled) {
+            viewBinding.label.alpha = 0.5f
+        } else {
+            viewBinding.label.alpha = 1.0f
         }
     }
 }
