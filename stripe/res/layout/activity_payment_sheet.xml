@@ -67,13 +67,14 @@
                 android:id="@+id/buy_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/stripe_paymentsheet_primarybutton_margin"/>
+                android:layout_margin="@dimen/stripe_paymentsheet_primarybutton_margin"
+                android:visibility="gone" />
 
             <com.stripe.android.paymentsheet.ui.GooglePayButton
                 android:id="@+id/google_pay_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"/>
+                android:visibility="gone" />
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -200,6 +200,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                 }
             }
         }
+        viewBinding.buyButton.isVisible = true
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
