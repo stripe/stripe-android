@@ -90,7 +90,11 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
                 "MC Completed with status: Failed(${paymentResult.error.message}"
             }
             is PaymentResult.Succeeded -> {
-                "MC Completed with status: Succeeded"
+                """
+                MC Completed with status: Succeeded
+
+                ${paymentResult.paymentIntent}
+                """.trimIndent()
             }
         }
         viewModel.status.value = viewModel.status.value + "\n\n$statusString"
