@@ -53,7 +53,7 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback
 ) : PaymentSheet.FlowController {
-    private val paymentOptionFactory = PaymentOptionFactory()
+    private val paymentOptionFactory = PaymentOptionFactory(activity.resources)
 
     private val paymentOptionActivityLauncher = activity.registerForActivityResult(
         PaymentOptionContract()
