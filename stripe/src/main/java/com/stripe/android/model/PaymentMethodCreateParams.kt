@@ -711,7 +711,7 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        @JvmSynthetic
+        @JvmStatic
         @JvmOverloads
         fun createAfterpayClearpay(
             billingDetails: PaymentMethod.BillingDetails? = null,
