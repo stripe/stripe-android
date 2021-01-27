@@ -22,7 +22,7 @@ internal class PaymentSheetAddCardFragment(
     }
 
     override fun onGooglePaySelected() {
-        sheetViewModel.checkout(requireActivity())
+        sheetViewModel.checkout()
     }
 
     override fun onConfigReady(config: AddPaymentMethodConfig) {
