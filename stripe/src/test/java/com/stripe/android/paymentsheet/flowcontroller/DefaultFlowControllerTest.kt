@@ -17,7 +17,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
-import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
@@ -25,10 +24,9 @@ import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -554,26 +552,6 @@ class DefaultFlowControllerTest {
                 IllegalStateException("Failed to initialize")
             )
         }
-    }
-
-    private class FakePaymentFlowResultProcessor : PaymentFlowResultProcessor {
-        var paymentIntentResult = PaymentIntentResult(
-            PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-            StripeIntentResult.Outcome.FAILED
-        )
-
-        var setupIntentResult = SetupIntentResult(
-            SetupIntentFixtures.SI_WITH_LAST_PAYMENT_ERROR,
-            StripeIntentResult.Outcome.FAILED
-        )
-
-        override suspend fun processPaymentIntent(
-            unvalidatedResult: PaymentFlowResult.Unvalidated
-        ): PaymentIntentResult = paymentIntentResult
-
-        override suspend fun processSetupIntent(
-            unvalidatedResult: PaymentFlowResult.Unvalidated
-        ): SetupIntentResult = setupIntentResult
     }
 
     private companion object {
