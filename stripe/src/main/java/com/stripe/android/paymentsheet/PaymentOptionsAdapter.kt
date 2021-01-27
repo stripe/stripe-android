@@ -58,8 +58,9 @@ internal class PaymentOptionsAdapter(
         clickedPaymentMethod: PaymentMethod,
         isClick: Boolean
     ) {
-        if (canClickSelectedItem || selectedPaymentMethod?.id != clickedPaymentMethod.id) {
-            // selected a new Payment Method
+        // allowed to click the selected item or a new Payment Method was selected
+        if (canClickSelectedItem || selectedPaymentMethod?.id != clickedPaymentMethod.id
+        ) {
             selectedPaymentMethod?.let {
                 notifyItemChanged(getPosition(it))
             }
