@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.app.Activity
 import android.content.Context
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -27,14 +26,13 @@ class PaymentRelayActivityTest {
             PaymentRelayStarter.Args.PaymentIntentArgs(
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
             )
-        ) { activity ->
-            assertThat(
-                contract.parseResult(0, Shadows.shadowOf(activity).resultIntent)
-            ).isEqualTo(
-                PaymentFlowResult.Unvalidated(
-                    clientSecret = "pi_1ExkUeAWhjPjYwPiXph9ouXa_secret_nGTdfGlzL9Uop59wN55LraiC7"
+        ) { paymentFlowResult ->
+            assertThat(paymentFlowResult)
+                .isEqualTo(
+                    PaymentFlowResult.Unvalidated(
+                        clientSecret = "pi_1ExkUeAWhjPjYwPiXph9ouXa_secret_nGTdfGlzL9Uop59wN55LraiC7"
+                    )
                 )
-            )
         }
     }
 
@@ -48,20 +46,19 @@ class PaymentRelayActivityTest {
                 exception,
                 requestCode = 50000
             )
-        ) { activity ->
-            assertThat(
-                contract.parseResult(0, Shadows.shadowOf(activity).resultIntent)
-            ).isEqualTo(
-                PaymentFlowResult.Unvalidated(
-                    exception = exception
+        ) { paymentFlowResult ->
+            assertThat(paymentFlowResult)
+                .isEqualTo(
+                    PaymentFlowResult.Unvalidated(
+                        exception = exception
+                    )
                 )
-            )
         }
     }
 
     private fun createActivity(
         args: PaymentRelayStarter.Args,
-        onActivity: (Activity) -> Unit
+        onComplete: (PaymentFlowResult.Unvalidated) -> Unit
     ) {
         ActivityScenario.launch<PaymentRelayActivity>(
             contract.createIntent(
@@ -70,7 +67,9 @@ class PaymentRelayActivityTest {
             )
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
-                onActivity(activity)
+                onComplete(
+                    contract.parseResult(0, Shadows.shadowOf(activity).resultIntent)
+                )
             }
         }
     }
