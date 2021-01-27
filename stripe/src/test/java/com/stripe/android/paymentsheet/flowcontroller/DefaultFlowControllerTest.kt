@@ -97,9 +97,9 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `successful init() should fire analytics event`() {
+    fun `successful configure() should fire analytics event`() {
         val flowController = createFlowController()
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -121,7 +121,7 @@ class DefaultFlowControllerTest {
             paymentMethods = paymentMethods,
             defaultPaymentMethodId = paymentMethods.first().id
         )
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -140,7 +140,7 @@ class DefaultFlowControllerTest {
         var result = Pair<Boolean, Throwable?>(false, null)
         createFlowController(
             FailingFlowControllerInitializer()
-        ).init(PaymentSheetFixtures.CLIENT_SECRET) { isReady, error ->
+        ).configure(PaymentSheetFixtures.CLIENT_SECRET) { isReady, error ->
             result = isReady to error
         }
 
@@ -158,7 +158,7 @@ class DefaultFlowControllerTest {
         }
 
         var isReadyState = false
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET
         ) { isReady, _ ->
             isReadyState = isReady
@@ -187,7 +187,7 @@ class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentOptionResult() with saved payment method selection result should invoke callback with payment option`() {
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -212,7 +212,7 @@ class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentOptionResult() with cancelled result should return invoke callback with null`() {
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -228,7 +228,7 @@ class DefaultFlowControllerTest {
     @Test
     fun `confirmPayment() without paymentSelection should not call paymentController`() {
         verifyNoMoreInteractions(paymentController)
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -243,7 +243,7 @@ class DefaultFlowControllerTest {
             launchArgs = it
         }
 
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -317,7 +317,7 @@ class DefaultFlowControllerTest {
     fun `onGooglePayResult() when canceled should invoke callback with canceled result`() {
         verifyZeroInteractions(eventReporter)
 
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -334,7 +334,7 @@ class DefaultFlowControllerTest {
 
     @Test
     fun `onGooglePayResult() when payment intent result should invoke callback with canceled result`() {
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -358,7 +358,7 @@ class DefaultFlowControllerTest {
 
     @Test
     fun `onGooglePayResult() when payment intent result has lastPaymentError should invoke callback with failure result`() {
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -389,7 +389,7 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `init() when scope is cancelled before completion should not call onInit lambda`() {
+    fun `configure() when scope is cancelled before completion should not call onInit lambda`() {
         var onInitCallbacks = 0
 
         val flowController = createFlowController(
@@ -398,7 +398,7 @@ class DefaultFlowControllerTest {
                 delayMillis = 2000L
             )
         )
-        flowController.init(PaymentSheetFixtures.CLIENT_SECRET) { _, _ ->
+        flowController.configure(PaymentSheetFixtures.CLIENT_SECRET) { _, _ ->
             onInitCallbacks++
         }
 
