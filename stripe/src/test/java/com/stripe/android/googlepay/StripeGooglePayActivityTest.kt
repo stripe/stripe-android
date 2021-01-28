@@ -82,8 +82,9 @@ class StripeGooglePayActivityTest {
             )
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
-                onCreated(activityScenario)
+                activity.finish()
             }
+            onCreated(activityScenario)
         }
     }
 
