@@ -10,6 +10,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -26,6 +27,17 @@ class StripeGooglePayActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+    }
+
+    @Ignore("failing in CI but not locally")
+    fun `successful start should return Unavailable result`() {
+        createActivity(
+            PAYMENT_DATA_ARGS
+        ) { activityScenario ->
+            // Google Pay is only available on a real device
+            assertThat(parseResult(activityScenario))
+                .isInstanceOf(StripeGooglePayContract.Result.Unavailable::class.java)
+        }
     }
 
     @Test
@@ -71,8 +83,9 @@ class StripeGooglePayActivityTest {
             )
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
-                onCreated(activityScenario)
+                activity.finish()
             }
+            onCreated(activityScenario)
         }
     }
 
