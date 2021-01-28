@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
 
 internal class PaymentRelayContract : ActivityResultContract<PaymentRelayStarter.Args, PaymentFlowResult.Unvalidated>() {
@@ -12,8 +11,9 @@ internal class PaymentRelayContract : ActivityResultContract<PaymentRelayStarter
         context: Context,
         input: PaymentRelayStarter.Args?
     ): Intent {
+        val paymentFlowResult = input?.toResult() ?: PaymentFlowResult.Unvalidated()
         return Intent(context, PaymentRelayActivity::class.java)
-            .putExtra(ActivityStarter.Args.EXTRA, input)
+            .putExtras(paymentFlowResult.toBundle())
     }
 
     override fun parseResult(
