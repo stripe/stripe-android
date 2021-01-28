@@ -16,8 +16,7 @@ import kotlin.properties.Delegates
 
 internal class PaymentOptionsAdapter(
     private val canClickSelectedItem: Boolean,
-    private var paymentSelection: PaymentSelection?,
-    val paymentOptionSelectedListener: (PaymentSelection, Boolean) -> Unit,
+    val paymentOptionSelectedListener: (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
     val addCardClickListener: View.OnClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var shouldShowGooglePay: Boolean by Delegates.observable(false) { _, _, _ ->
@@ -46,7 +45,23 @@ internal class PaymentOptionsAdapter(
         }
     }
 
-    private val selectedPaymentMethod: PaymentMethod? get() = (paymentSelection as? PaymentSelection.Saved)?.paymentMethod
+    internal var paymentSelection: PaymentSelection? by Delegates.observable(
+        null
+    ) { _, oldValue, newValue ->
+        if (oldValue != newValue) {
+            when (newValue) {
+                PaymentSelection.GooglePay -> {
+                    onGooglePaySelected(
+                        isNewSelection = true,
+                        isClick = false
+                    )
+                }
+                else -> {
+                    // noop
+                }
+            }
+        }
+    }
 
     private val googlePayCount: Int get() = 1.takeIf { shouldShowGooglePay } ?: 0
 
@@ -56,12 +71,13 @@ internal class PaymentOptionsAdapter(
 
     private fun onPaymentMethodSelected(
         clickedPaymentMethod: PaymentMethod,
-        isClick: Boolean
     ) {
+        val currentSelectedPaymentMethod = (paymentSelection as? PaymentSelection.Saved)?.paymentMethod
+
         // allowed to click the selected item or a new Payment Method was selected
-        if (canClickSelectedItem || selectedPaymentMethod?.id != clickedPaymentMethod.id
+        if (canClickSelectedItem || currentSelectedPaymentMethod?.id != clickedPaymentMethod.id
         ) {
-            selectedPaymentMethod?.let {
+            currentSelectedPaymentMethod?.let {
                 notifyItemChanged(getPosition(it))
             }
             notifyItemChanged(getPosition(clickedPaymentMethod))
@@ -74,22 +90,29 @@ internal class PaymentOptionsAdapter(
                 notifyItemChanged(GOOGLE_PAY_POSITION)
             }
 
-            paymentOptionSelectedListener(paymentSelection, isClick)
+            paymentOptionSelectedListener(
+                paymentSelection,
+                true
+            )
         }
     }
 
-    private fun onGooglePaySelected() {
-        if (paymentSelection != PaymentSelection.GooglePay) {
+    private fun onGooglePaySelected(
+        isNewSelection: Boolean,
+        isClick: Boolean
+    ) {
+        if (canClickSelectedItem || isNewSelection) {
             // unselect previous item
-            val previouslySelectedPaymentMethod = selectedPaymentMethod
+            val previousPaymentSelection = paymentSelection
             paymentSelection = PaymentSelection.GooglePay
-            previouslySelectedPaymentMethod?.let {
-                notifyItemChanged(getPosition(it))
+
+            if (previousPaymentSelection is PaymentSelection.Saved) {
+                notifyItemChanged(getPosition(previousPaymentSelection.paymentMethod))
             }
 
             // select Google Pay item
             notifyItemChanged(GOOGLE_PAY_POSITION)
-            paymentOptionSelectedListener(PaymentSelection.GooglePay, true)
+            paymentOptionSelectedListener(PaymentSelection.GooglePay, isClick)
         }
     }
 
@@ -146,17 +169,23 @@ internal class PaymentOptionsAdapter(
         if (holder is CardViewHolder) {
             val paymentMethod = getPaymentMethodAtPosition(position)
             holder.setPaymentMethod(paymentMethod)
-            holder.setSelected(paymentMethod.id == selectedPaymentMethod?.id)
+
+            (paymentSelection as? PaymentSelection.Saved)?.let {
+                holder.setSelected(paymentMethod.id == it.paymentMethod.id)
+            }
+
             holder.itemView.setOnClickListener {
                 onPaymentMethodSelected(
-                    getPaymentMethodAtPosition(holder.adapterPosition),
-                    true
+                    clickedPaymentMethod = getPaymentMethodAtPosition(holder.adapterPosition)
                 )
             }
         } else if (holder is GooglePayViewHolder) {
             holder.setSelected(paymentSelection == PaymentSelection.GooglePay)
             holder.itemView.setOnClickListener {
-                onGooglePaySelected()
+                onGooglePaySelected(
+                    isNewSelection = paymentSelection != PaymentSelection.GooglePay,
+                    isClick = true
+                )
             }
         }
     }
