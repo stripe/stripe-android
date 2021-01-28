@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
@@ -84,8 +83,8 @@ internal class PaymentOptionsViewModel(
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
-                    customerId = id,
-                    PaymentSessionPrefs.Default(application)
+                    application,
+                    customerId = id
                 )
             } ?: PrefsRepository.Noop()
 

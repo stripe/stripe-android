@@ -10,7 +10,6 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
-import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
@@ -301,8 +300,8 @@ internal class PaymentSheetViewModel internal constructor(
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
-                    customerId = id,
-                    PaymentSessionPrefs.Default(application)
+                    application,
+                    customerId = id
                 )
             } ?: PrefsRepository.Noop()
 

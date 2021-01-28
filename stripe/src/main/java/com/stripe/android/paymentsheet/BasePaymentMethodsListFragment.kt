@@ -10,6 +10,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
@@ -56,9 +57,15 @@ internal abstract class BasePaymentMethodsListFragment(
         )
         viewBinding.recycler.adapter = adapter
 
-        sheetViewModel.getDefaultPaymentMethodId()
-            .observe(viewLifecycleOwner) { defaultPaymentMethodId ->
-                adapter.defaultPaymentMethodId = defaultPaymentMethodId
+        sheetViewModel.getSavedSelection()
+            .observe(viewLifecycleOwner) { savedSelection ->
+                adapter.defaultPaymentMethodId = when (savedSelection) {
+                    is SavedSelection.PaymentMethod -> savedSelection.id
+                    else -> {
+                        // TODO(mshafrir-stripe): add support for Google Pay
+                        null
+                    }
+                }
             }
 
         sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
