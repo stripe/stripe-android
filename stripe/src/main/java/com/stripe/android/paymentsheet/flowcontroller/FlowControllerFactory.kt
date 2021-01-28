@@ -3,10 +3,12 @@ package com.stripe.android.paymentsheet.flowcontroller
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripePaymentController
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
+import com.stripe.android.paymentsheet.DefaultGooglePayRepository
+import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.GooglePayRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -49,11 +51,27 @@ internal class FlowControllerFactory(
             Dispatchers.IO
         )
 
+        val prefsRepositoryFactory = { customerId: String, environment: PaymentSheet.GooglePayConfiguration.Environment? ->
+            val googlePayRepository = environment?.let {
+                DefaultGooglePayRepository(
+                    activity,
+                    it
+                )
+            } ?: GooglePayRepository.Disabled()
+
+            DefaultPrefsRepository(
+                activity,
+                customerId,
+                googlePayRepository,
+                Dispatchers.IO
+            )
+        }
+
         return DefaultFlowController(
             activity = activity,
             flowControllerInitializer = DefaultFlowControllerInitializer(
                 stripeRepository,
-                PaymentSessionPrefs.Default(activity),
+                prefsRepositoryFactory = prefsRepositoryFactory,
                 publishableKey = config.publishableKey,
                 stripeAccountId = config.stripeAccountId,
                 workContext = Dispatchers.IO

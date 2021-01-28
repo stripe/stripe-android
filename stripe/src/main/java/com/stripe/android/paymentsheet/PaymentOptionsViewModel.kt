@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import kotlinx.coroutines.Dispatchers
 
 internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
@@ -76,15 +77,19 @@ internal class PaymentOptionsViewModel(
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val starterArgs = starterArgsSupplier()
             val application = applicationSupplier()
-            val googlePayRepository = DefaultGooglePayRepository(
-                application,
-                starterArgs.config?.googlePay?.environment ?: PaymentSheet.GooglePayConfiguration.Environment.Test
-            )
+            val googlePayRepository = starterArgs.config?.googlePay?.environment?.let { environment ->
+                DefaultGooglePayRepository(
+                    application,
+                    environment
+                )
+            } ?: GooglePayRepository.Disabled()
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
                     application,
-                    customerId = id
+                    customerId = id,
+                    googlePayRepository = googlePayRepository,
+                    workContext = Dispatchers.IO
                 )
             } ?: PrefsRepository.Noop()
 
