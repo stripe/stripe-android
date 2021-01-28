@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import com.stripe.android.PaymentConfiguration
@@ -129,17 +128,6 @@ internal class PaymentSheet internal constructor(
         fun presentPaymentOptions()
 
         fun confirmPayment()
-
-        fun isPaymentResult(
-            requestCode: Int,
-            intent: Intent?
-        ): Boolean
-
-        fun onPaymentResult(
-            requestCode: Int,
-            intent: Intent?,
-            callback: PaymentSheetResultCallback
-        )
 
         sealed class Result {
             object Success : Result()
