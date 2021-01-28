@@ -1,20 +1,16 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.ApiResultCallback
-import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
-import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
@@ -244,89 +240,6 @@ internal class DefaultFlowController internal constructor(
             else -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 // TODO(mshafrir-stripe): handle other outcomes; for now, treat these as payment failures
-            }
-        }
-    }
-
-    override fun isPaymentResult(
-        requestCode: Int,
-        intent: Intent?
-    ): Boolean {
-        return requestCode == StripeGooglePayLauncher.REQUEST_CODE ||
-            paymentController.shouldHandlePaymentResult(requestCode, intent)
-    }
-
-    /**
-     * Handles results from both the standard confirmation flow via [PaymentController] and the
-     * [StripeGooglePayContract] flow.
-     */
-    override fun onPaymentResult(
-        requestCode: Int,
-        intent: Intent?,
-        callback: PaymentSheetResultCallback
-    ) {
-        if (intent == null) {
-            return
-        }
-        if (paymentController.shouldHandlePaymentResult(requestCode, intent)) {
-            paymentController.handlePaymentResult(
-                intent,
-                object : ApiResultCallback<PaymentIntentResult> {
-                    override fun onSuccess(result: PaymentIntentResult) {
-                        if (result.outcome == StripeIntentResult.Outcome.SUCCEEDED) {
-                            eventReporter.onPaymentSuccess(viewModel.paymentSelection)
-                            callback.onPaymentResult(
-                                PaymentResult.Succeeded(result.intent)
-                            )
-                        } else {
-                            eventReporter.onPaymentFailure(viewModel.paymentSelection)
-
-                            callback.onPaymentResult(
-                                PaymentResult.Failed(
-                                    RuntimeException(result.failureMessage),
-                                    result.intent
-                                )
-                            )
-                        }
-                    }
-
-                    override fun onError(e: Exception) {
-                        eventReporter.onPaymentFailure(viewModel.paymentSelection)
-                        callback.onPaymentResult(
-                            PaymentResult.Failed(e, null)
-                        )
-                    }
-                }
-            )
-        } else if (requestCode == StripeGooglePayLauncher.REQUEST_CODE) {
-            when (val googlePayResult = StripeGooglePayContract.Result.fromIntent(intent)) {
-                is StripeGooglePayContract.Result.PaymentIntent -> {
-                    eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-                    callback.onPaymentResult(
-                        PaymentResult.Succeeded(
-                            googlePayResult.paymentIntentResult.intent
-                        )
-                    )
-                }
-                is StripeGooglePayContract.Result.Error -> {
-                    eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                    val exception = googlePayResult.exception
-                    callback.onPaymentResult(
-                        PaymentResult.Failed(
-                            exception,
-                            null
-                        )
-                    )
-                }
-                else -> {
-                    eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                    callback.onPaymentResult(
-                        PaymentResult.Failed(
-                            RuntimeException("Google Pay attempt failed"),
-                            null
-                        )
-                    )
-                }
             }
         }
     }
