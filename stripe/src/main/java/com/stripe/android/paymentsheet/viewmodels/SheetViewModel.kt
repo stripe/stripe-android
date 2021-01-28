@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -123,7 +122,7 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
                 viewModelScope.launch {
                     withContext(workContext) {
                         _isGooglePayReady.postValue(
-                            googlePayRepository.isReady().filterNotNull().first()
+                            googlePayRepository.isReady().first()
                         )
                     }
                 }

@@ -11,7 +11,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -24,7 +27,7 @@ import kotlin.test.Test
 internal class DefaultFlowControllerInitializerTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val paymentSessionPrefs = FakePaymentSessionPrefs()
+    private val prefsRepository = FakePrefsRepository()
     private val initializer = createInitializer()
 
     @Test
@@ -46,7 +49,9 @@ internal class DefaultFlowControllerInitializerTest {
 
     @Test
     fun `init with configuration should return expect result`() = testDispatcher.runBlockingTest {
-        paymentSessionPrefs.paymentMethodId = "pm_123"
+        prefsRepository.savePaymentSelection(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
 
         assertThat(
             initializer.init(
@@ -60,15 +65,17 @@ internal class DefaultFlowControllerInitializerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
-                    "pm_123"
+                    SavedSelection.PaymentMethod(
+                        id = "pm_123456789"
+                    )
                 )
             )
         )
     }
 
     @Test
-    fun `init() with customer should set first payment method as default if prefs payment method is null`() = testDispatcher.runBlockingTest {
-        paymentSessionPrefs.paymentMethodId = null
+    fun `init() with customer should set first payment method as saved selection if saved selection is null`() = testDispatcher.runBlockingTest {
+        prefsRepository.savePaymentSelection(null)
 
         val initializer = createInitializer()
         assertThat(
@@ -83,15 +90,17 @@ internal class DefaultFlowControllerInitializerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
-                    "pm_123456789"
+                    SavedSelection.PaymentMethod("pm_123456789")
                 )
             )
         )
 
         assertThat(
-            paymentSessionPrefs.savedPaymentMethodIds
+            prefsRepository.getSavedSelection()
         ).isEqualTo(
-            listOf("customer_id" to "pm_123456789")
+            SavedSelection.PaymentMethod(
+                id = "pm_123456789"
+            )
         )
     }
 
@@ -128,7 +137,7 @@ internal class DefaultFlowControllerInitializerTest {
     ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
             FakeStripeRepository(paymentIntent),
-            paymentSessionPrefs,
+            { _, _ -> prefsRepository },
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
             testDispatcher

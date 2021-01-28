@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -266,11 +267,20 @@ internal class DefaultFlowController internal constructor(
     ) {
         eventReporter.onInit(initData.config)
 
-        val defaultPaymentMethod = initData.paymentMethods.firstOrNull {
-            it.id == initData.defaultPaymentMethodId
-        }
-        viewModel.paymentSelection = defaultPaymentMethod?.let {
-            PaymentSelection.Saved(it)
+        when (val savedString = initData.savedSelection) {
+            SavedSelection.GooglePay -> {
+                PaymentSelection.GooglePay
+            }
+            is SavedSelection.PaymentMethod -> {
+                initData.paymentMethods.firstOrNull {
+                    it.id == savedString.id
+                }?.let {
+                    PaymentSelection.Saved(it)
+                }
+            }
+            else -> null
+        }?.let {
+            viewModel.paymentSelection = it
         }
 
         viewModel.setInitData(initData)
