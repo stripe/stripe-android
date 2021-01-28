@@ -159,10 +159,10 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
         _userMessage.value = null
     }
 
-    fun getDefaultPaymentMethodId() = liveData {
+    fun getSavedSelection() = liveData {
         emit(
             withContext(workContext) {
-                prefsRepository.getDefaultPaymentMethodId()
+                prefsRepository.getSavedSelection()
             }
         )
     }
