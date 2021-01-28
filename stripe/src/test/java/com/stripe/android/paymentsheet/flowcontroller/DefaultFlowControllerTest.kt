@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
-import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
@@ -20,7 +19,6 @@ import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
-import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -247,63 +245,15 @@ class DefaultFlowControllerTest {
         flowController.confirmPayment()
         assertThat(launchArgs)
             .isEqualTo(
-                StripeGooglePayContract.Args(
-                    environment = StripeGooglePayEnvironment.Test,
+                StripeGooglePayContract.Args.ConfirmPaymentIntent(
                     paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    countryCode = "US",
-                    merchantName = "Widget Store"
+                    config = StripeGooglePayContract.GooglePayConfig(
+                        environment = StripeGooglePayEnvironment.Test,
+                        countryCode = "US",
+                        merchantName = "Widget Store"
+                    )
                 )
             )
-    }
-
-    @Test
-    fun `isPaymentResult with Google Pay request code should return true`() {
-        assertThat(
-            flowController.isPaymentResult(
-                StripeGooglePayLauncher.REQUEST_CODE,
-                Intent()
-            )
-        ).isTrue()
-    }
-
-    @Test
-    fun `onPaymentResult with Google Pay PaymentIntent result should invoke callback with Succeeded`() {
-        val callback = mock<PaymentSheetResultCallback>()
-        flowController.onPaymentResult(
-            StripeGooglePayLauncher.REQUEST_CODE,
-            Intent().putExtras(
-                StripeGooglePayContract.Result.PaymentIntent(
-                    paymentIntentResult = PAYMENT_INTENT_RESULT
-                ).toBundle()
-            ),
-            callback = callback
-        )
-
-        verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
-        verify(callback).onPaymentResult(
-            PaymentResult.Succeeded(PAYMENT_INTENT)
-        )
-    }
-
-    @Test
-    fun `onPaymentResult with Google Pay Error result should invoke callback with Failed()`() {
-        val callback = mock<PaymentSheetResultCallback>()
-        flowController.onPaymentResult(
-            StripeGooglePayLauncher.REQUEST_CODE,
-            Intent().putExtras(
-                StripeGooglePayContract.Result.Error(
-                    exception = RuntimeException("Google Pay failed")
-                ).toBundle()
-            ),
-            callback = callback
-        )
-
-        verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
-        verify(callback).onPaymentResult(
-            argWhere { paymentResult ->
-                (paymentResult as? PaymentResult.Failed)?.error?.message == "Google Pay failed"
-            }
-        )
     }
 
     @Test
@@ -558,7 +508,6 @@ class DefaultFlowControllerTest {
         private val SESSION_ID = SessionId()
 
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        private val PAYMENT_INTENT_RESULT = PaymentIntentResult(PAYMENT_INTENT)
 
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,

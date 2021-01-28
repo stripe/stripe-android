@@ -29,15 +29,12 @@ import org.json.JSONObject
  */
 internal class StripeGooglePayActivity : AppCompatActivity() {
     private val paymentsClient: PaymentsClient by lazy {
-        PaymentsClientFactory(this).create(args.environment)
+        PaymentsClientFactory(this).create(args.config.environment)
     }
     private val publishableKey: String by lazy {
         PaymentConfiguration.getInstance(this).publishableKey
     }
     private val stripe: Stripe by lazy { Stripe(this, publishableKey) }
-    private val args: StripeGooglePayContract.Args by lazy {
-        StripeGooglePayContract.Args.create(intent)
-    }
     private val viewModel: StripeGooglePayViewModel by viewModels {
         StripeGooglePayViewModel.Factory(
             application,
@@ -45,6 +42,8 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
             args
         )
     }
+
+    private lateinit var args: StripeGooglePayContract.Args
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +56,19 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
                 StripeGooglePayContract.Result.Canceled.toBundle()
             )
         )
+
+        val nullableArgs = StripeGooglePayContract.Args.create(intent)
+        if (nullableArgs == null) {
+            finishWithResult(
+                StripeGooglePayContract.Result.Error(
+                    RuntimeException(
+                        "StripeGooglePayActivity was started without arguments."
+                    )
+                )
+            )
+            return
+        }
+        args = nullableArgs
 
         viewModel.googlePayResult.observe(this) { googlePayResult ->
             googlePayResult?.let(::finishWithResult)
