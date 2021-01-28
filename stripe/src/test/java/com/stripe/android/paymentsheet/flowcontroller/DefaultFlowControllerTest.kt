@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -116,7 +117,9 @@ class DefaultFlowControllerTest {
 
         val flowController = createFlowController(
             paymentMethods = paymentMethods,
-            defaultPaymentMethodId = paymentMethods.first().id
+            savedSelection = SavedSelection.PaymentMethod(
+                requireNotNull(paymentMethods.first().id)
+            )
         )
         flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
@@ -420,12 +423,12 @@ class DefaultFlowControllerTest {
 
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
-        defaultPaymentMethodId: String? = null
+        savedSelection: SavedSelection? = null
     ): DefaultFlowController {
         return createFlowController(
             FakeFlowControllerInitializer(
                 paymentMethods,
-                defaultPaymentMethodId
+                savedSelection
             )
         )
     }
@@ -450,7 +453,7 @@ class DefaultFlowControllerTest {
 
     private class FakeFlowControllerInitializer(
         private val paymentMethods: List<PaymentMethod>,
-        private val defaultPaymentMethodId: String? = null,
+        private val savedSelection: SavedSelection? = null,
         private val delayMillis: Long = 0L
     ) : FlowControllerInitializer {
         override suspend fun init(
@@ -464,7 +467,7 @@ class DefaultFlowControllerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     paymentMethods,
-                    defaultPaymentMethodId
+                    savedSelection
                 )
             )
         }

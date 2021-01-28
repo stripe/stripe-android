@@ -17,9 +17,12 @@ import kotlin.test.Test
 internal class DefaultPrefsRepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
+    private val googlePayRepository = FakeGooglePayRepository(true)
     private val prefsRepository = DefaultPrefsRepository(
         ApplicationProvider.getApplicationContext(),
-        "cus_123"
+        "cus_123",
+        googlePayRepository,
+        testDispatcher
     )
 
     @Test
@@ -32,6 +35,18 @@ internal class DefaultPrefsRepositoryTest {
         ).isEqualTo(
             SavedSelection.GooglePay
         )
+    }
+
+    @Test
+    fun `save then get GooglePay should return null if Google Pay is not available`() = testDispatcher.runBlockingTest {
+        googlePayRepository.isReady = false
+
+        prefsRepository.savePaymentSelection(
+            PaymentSelection.GooglePay
+        )
+        assertThat(
+            prefsRepository.getSavedSelection()
+        ).isNull()
     }
 
     @Test

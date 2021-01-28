@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -14,5 +15,5 @@ internal data class InitData(
     val paymentMethodTypes: List<PaymentMethod.Type>,
     // the customer's existing payment methods
     val paymentMethods: List<PaymentMethod>,
-    val defaultPaymentMethodId: String?,
+    val savedSelection: SavedSelection?
 ) : Parcelable

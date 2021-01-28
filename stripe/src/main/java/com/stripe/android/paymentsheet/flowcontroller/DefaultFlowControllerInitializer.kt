@@ -1,19 +1,20 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultFlowControllerInitializer(
     private val stripeRepository: StripeRepository,
-    private val paymentSessionPrefs: PaymentSessionPrefs,
+    private val prefsRepositoryFactory: (String, PaymentSheet.GooglePayConfiguration.Environment?) -> PrefsRepository,
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val workContext: CoroutineContext
@@ -47,7 +48,10 @@ internal class DefaultFlowControllerInitializer(
         customerConfig: PaymentSheet.CustomerConfiguration,
         config: PaymentSheet.Configuration?
     ): FlowControllerInitializer.InitResult {
-        val prefsPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerConfig.id)
+        val prefsRepository = prefsRepositoryFactory(
+            customerConfig.id,
+            config?.googlePay?.environment
+        )
 
         return runCatching {
             retrievePaymentIntent(clientSecret)
@@ -60,13 +64,13 @@ internal class DefaultFlowControllerInitializer(
                     types = paymentMethodTypes,
                     customerConfig
                 ).let { paymentMethods ->
-                    val defaultPaymentMethodId = prefsPaymentMethodId
-                        ?: paymentMethods.firstOrNull()?.id?.also {
-                            paymentSessionPrefs.savePaymentMethodId(
-                                customerConfig.id,
-                                it
+                    if (prefsRepository.getSavedSelection() == null) {
+                        paymentMethods.firstOrNull()?.let { paymentMethod ->
+                            prefsRepository.savePaymentSelection(
+                                PaymentSelection.Saved(paymentMethod)
                             )
                         }
+                    }
 
                     FlowControllerInitializer.InitResult.Success(
                         InitData(
@@ -74,7 +78,7 @@ internal class DefaultFlowControllerInitializer(
                             paymentIntent = paymentIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
-                            defaultPaymentMethodId = defaultPaymentMethodId
+                            savedSelection = prefsRepository.getSavedSelection()
                         )
                     )
                 }
@@ -104,7 +108,7 @@ internal class DefaultFlowControllerInitializer(
                         paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
-                        defaultPaymentMethodId = null
+                        savedSelection = null
                     )
                 )
             },

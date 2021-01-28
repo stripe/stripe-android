@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
@@ -312,16 +311,20 @@ internal class PaymentSheetViewModel internal constructor(
             )
 
             val starterArgs = starterArgsSupplier()
-            val googlePayRepository = DefaultGooglePayRepository(
-                application,
-                starterArgs.config?.googlePay?.environment
-                    ?: PaymentSheet.GooglePayConfiguration.Environment.Test
-            )
+
+            val googlePayRepository = starterArgs.config?.googlePay?.environment?.let { environment ->
+                DefaultGooglePayRepository(
+                    application,
+                    environment
+                )
+            } ?: GooglePayRepository.Disabled()
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
                     application,
-                    customerId = id
+                    customerId = id,
+                    googlePayRepository = googlePayRepository,
+                    workContext = Dispatchers.IO
                 )
             } ?: PrefsRepository.Noop()
 
