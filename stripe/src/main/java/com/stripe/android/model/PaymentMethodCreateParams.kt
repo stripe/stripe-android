@@ -21,7 +21,7 @@ import java.util.Locale
 data class PaymentMethodCreateParams internal constructor(
     internal val type: Type,
 
-    private val card: Card? = null,
+    internal val card: Card? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
     private val sepaDebit: SepaDebit? = null,
@@ -211,6 +211,8 @@ data class PaymentMethodCreateParams internal constructor(
 
         internal val attribution: Set<String>? = null
     ) : StripeParamsModel, Parcelable {
+        internal val last4: String? get() = number?.takeLast(4)
+
         override fun toParamMap(): Map<String, Any> {
             return listOf(
                 PARAM_NUMBER to number,
@@ -711,9 +713,9 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        @JvmSynthetic
+        @JvmStatic
         @JvmOverloads
-        internal fun createAfterpayClearpay(
+        fun createAfterpayClearpay(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {

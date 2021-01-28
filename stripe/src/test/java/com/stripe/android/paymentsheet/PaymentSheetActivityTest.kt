@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import android.content.Intent
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -12,16 +11,18 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.StripePaymentController
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
@@ -30,7 +31,6 @@ import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
-import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -57,6 +57,7 @@ internal class PaymentSheetActivityTest {
         PaymentMethod("payment_method_id", 0, false, PaymentMethod.Type.Card)
     )
 
+    private val paymentFlowResultProcessor = FakePaymentFlowResultProcessor()
     private val googlePayRepository = FakeGooglePayRepository(true)
     private val stripeRepository = FakeStripeRepository(PAYMENT_INTENT, paymentMethods)
     private val eventReporter = mock<EventReporter>()
@@ -65,16 +66,12 @@ internal class PaymentSheetActivityTest {
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
         stripeRepository = stripeRepository,
-        paymentController = StripePaymentController(
-            context,
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeRepository,
-            workContext = testDispatcher
-        ),
+        paymentFlowResultProcessor = paymentFlowResultProcessor,
         googlePayRepository = googlePayRepository,
         prefsRepository = mock(),
         eventReporter = eventReporter,
         args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        animateOutMillis = 0,
         workContext = testDispatcher
     )
 
@@ -217,40 +214,39 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isFalse()
 
-            // payment intent was confirmed and result will be communicated through PaymentRelayActivity
-            val nextActivity = shadowOf(activity).peekNextStartedActivity()
-            assertThat(nextActivity.component?.className)
-                .isEqualTo(PaymentRelayActivity::class.java.name)
+            assertThat(viewModel.startConfirm.value)
+                .isEqualTo(
+                    ConfirmPaymentIntentParams(
+                        clientSecret = "client_secret",
+                        paymentMethodId = "pm_123456789"
+                    )
+                )
         }
     }
 
     @Test
-    fun `reports successful payment intent result`() {
+    fun `successful payment should dismiss bottom sheet`() {
+        paymentFlowResultProcessor.paymentIntentResult = PaymentIntentResult(
+            intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
+            outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
+        )
+
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             testDispatcher.advanceTimeBy(500)
             idleLooper()
 
-            viewModel.onActivityResult(
-                StripePaymentController.PAYMENT_REQUEST_CODE,
-                Intent().apply {
-                    putExtras(
-                        PaymentFlowResult.Unvalidated(
-                            "client_secret",
-                            StripeIntentResult.Outcome.SUCCEEDED
-                        ).toBundle()
-                    )
-                }
+            viewModel.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated(
+                    "client_secret",
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
             )
             idleLooper()
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(contract.parseResult(0, shadowOf(activity).resultIntent))
-                .isEqualTo(
-                    PaymentResult.Succeeded(PAYMENT_INTENT)
-                )
         }
     }
 
@@ -260,16 +256,12 @@ internal class PaymentSheetActivityTest {
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = null,
             stripeRepository = FakeStripeRepository(PAYMENT_INTENT, listOf()),
-            paymentController = StripePaymentController(
-                context,
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeRepository,
-                workContext = testDispatcher
-            ),
+            paymentFlowResultProcessor = paymentFlowResultProcessor,
             googlePayRepository = googlePayRepository,
             prefsRepository = mock(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            animateOutMillis = 0,
             workContext = testDispatcher
         )
 

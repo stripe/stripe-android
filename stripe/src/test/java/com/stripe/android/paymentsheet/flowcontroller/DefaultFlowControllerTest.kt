@@ -17,19 +17,16 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
-import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.StripeGooglePayLauncher
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -97,9 +94,9 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `successful init() should fire analytics event`() {
+    fun `successful configure() should fire analytics event`() {
         val flowController = createFlowController()
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -117,11 +114,13 @@ class DefaultFlowControllerTest {
     @Test
     fun `getPaymentOption() when defaultPaymentMethodId is not null should return expected value`() {
         val paymentMethods = PaymentMethodFixtures.createCards(5)
+        val last4 = paymentMethods.first().card?.last4.orEmpty()
+
         val flowController = createFlowController(
             paymentMethods = paymentMethods,
             defaultPaymentMethodId = paymentMethods.first().id
         )
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -129,8 +128,8 @@ class DefaultFlowControllerTest {
         assertThat(flowController.getPaymentOption())
             .isEqualTo(
                 PaymentOption(
-                    drawableResourceId = CardBrand.Visa.icon,
-                    label = "Visa"
+                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
+                    label = "····$last4"
                 )
             )
     }
@@ -140,7 +139,7 @@ class DefaultFlowControllerTest {
         var result = Pair<Boolean, Throwable?>(false, null)
         createFlowController(
             FailingFlowControllerInitializer()
-        ).init(PaymentSheetFixtures.CLIENT_SECRET) { isReady, error ->
+        ).configure(PaymentSheetFixtures.CLIENT_SECRET) { isReady, error ->
             result = isReady to error
         }
 
@@ -158,7 +157,7 @@ class DefaultFlowControllerTest {
         }
 
         var isReadyState = false
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET
         ) { isReady, _ ->
             isReadyState = isReady
@@ -187,7 +186,7 @@ class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentOptionResult() with saved payment method selection result should invoke callback with payment option`() {
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -199,20 +198,14 @@ class DefaultFlowControllerTest {
             )
         )
 
-        val expectedPaymentOption = PaymentOption(
-            drawableResourceId = R.drawable.stripe_ic_visa,
-            label = CardBrand.Visa.displayName
-        )
-
-        verify(paymentOptionCallback).onPaymentOption(expectedPaymentOption)
-
+        verify(paymentOptionCallback).onPaymentOption(VISA_PAYMENT_OPTION)
         assertThat(flowController.getPaymentOption())
-            .isEqualTo(expectedPaymentOption)
+            .isEqualTo(VISA_PAYMENT_OPTION)
     }
 
     @Test
     fun `onPaymentOptionResult() with cancelled result should return invoke callback with null`() {
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -228,7 +221,7 @@ class DefaultFlowControllerTest {
     @Test
     fun `confirmPayment() without paymentSelection should not call paymentController`() {
         verifyNoMoreInteractions(paymentController)
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -243,7 +236,7 @@ class DefaultFlowControllerTest {
             launchArgs = it
         }
 
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -317,7 +310,7 @@ class DefaultFlowControllerTest {
     fun `onGooglePayResult() when canceled should invoke callback with canceled result`() {
         verifyZeroInteractions(eventReporter)
 
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -334,7 +327,7 @@ class DefaultFlowControllerTest {
 
     @Test
     fun `onGooglePayResult() when payment intent result should invoke callback with canceled result`() {
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -358,7 +351,7 @@ class DefaultFlowControllerTest {
 
     @Test
     fun `onGooglePayResult() when payment intent result has lastPaymentError should invoke callback with failure result`() {
-        flowController.init(
+        flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -389,7 +382,7 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `init() when scope is cancelled before completion should not call onInit lambda`() {
+    fun `configure() when scope is cancelled before completion should not call onInit lambda`() {
         var onInitCallbacks = 0
 
         val flowController = createFlowController(
@@ -398,7 +391,7 @@ class DefaultFlowControllerTest {
                 delayMillis = 2000L
             )
         )
-        flowController.init(PaymentSheetFixtures.CLIENT_SECRET) { _, _ ->
+        flowController.configure(PaymentSheetFixtures.CLIENT_SECRET) { _, _ ->
             onInitCallbacks++
         }
 
@@ -561,30 +554,15 @@ class DefaultFlowControllerTest {
         }
     }
 
-    private class FakePaymentFlowResultProcessor : PaymentFlowResultProcessor {
-        var paymentIntentResult = PaymentIntentResult(
-            PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-            StripeIntentResult.Outcome.FAILED
-        )
-
-        var setupIntentResult = SetupIntentResult(
-            SetupIntentFixtures.SI_WITH_LAST_PAYMENT_ERROR,
-            StripeIntentResult.Outcome.FAILED
-        )
-
-        override suspend fun processPaymentIntent(
-            unvalidatedResult: PaymentFlowResult.Unvalidated
-        ): PaymentIntentResult = paymentIntentResult
-
-        override suspend fun processSetupIntent(
-            unvalidatedResult: PaymentFlowResult.Unvalidated
-        ): SetupIntentResult = setupIntentResult
-    }
-
     private companion object {
         private val SESSION_ID = SessionId()
 
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         private val PAYMENT_INTENT_RESULT = PaymentIntentResult(PAYMENT_INTENT)
+
+        private val VISA_PAYMENT_OPTION = PaymentOption(
+            drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
+            label = "····4242"
+        )
     }
 }
