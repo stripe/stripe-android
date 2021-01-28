@@ -17,10 +17,18 @@ import com.stripe.android.model.GooglePayResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.ShippingInformation
 import org.json.JSONObject
 
 /**
- * [StripeGooglePayActivity] is used to confirm a `PaymentIntent` using Google Pay.
+ * [StripeGooglePayActivity] is used to return the result of a Google Pay operation.
+ *
+ * When started with [StripeGooglePayContract.Args.ConfirmPaymentIntent], the activity
+ * will confirm a [PaymentIntent] using Google Pay and return the result via
+ * will return payment data via [StripeGooglePayContract.Result.PaymentIntent].
+ *
+ * When started with [StripeGooglePayContract.Args.PaymentData], the activity
+ * will return payment data via [StripeGooglePayContract.Result.PaymentData].
  *
  * Use [StripeGooglePayContract] to start [StripeGooglePayActivity].
  *
@@ -47,9 +55,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         overridePendingTransition(0, 0)
-
         setResult(
             RESULT_OK,
             Intent().putExtras(
@@ -76,7 +82,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
 
         if (!viewModel.hasLaunched) {
             viewModel.hasLaunched = true
-            startGooglePay(args.paymentIntent)
+            startGooglePay(args)
         }
     }
 
@@ -85,8 +91,12 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         overridePendingTransition(0, 0)
     }
 
-    private fun startGooglePay(paymentIntent: PaymentIntent) {
-        if (paymentIntent.confirmationMethod == PaymentIntent.ConfirmationMethod.Manual) {
+    private fun startGooglePay(
+        args: StripeGooglePayContract.Args
+    ) {
+        if (args is StripeGooglePayContract.Args.ConfirmPaymentIntent &&
+            args.paymentIntent.confirmationMethod == PaymentIntent.ConfirmationMethod.Manual
+        ) {
             viewModel.updateGooglePayResult(
                 StripeGooglePayContract.Result.Error(
                     RuntimeException(
@@ -221,7 +231,13 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
         viewModel.createPaymentMethod(params).observe(this) { result ->
             result?.fold(
-                onSuccess = ::onPaymentMethodCreated,
+                onSuccess = {
+                    onPaymentMethodCreated(
+                        args,
+                        it,
+                        shippingInformation
+                    )
+                },
                 onFailure = {
                     viewModel.paymentMethod = null
                     viewModel.updateGooglePayResult(
@@ -232,9 +248,26 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         }
     }
 
-    private fun onPaymentMethodCreated(paymentMethod: PaymentMethod) {
+    private fun onPaymentMethodCreated(
+        args: StripeGooglePayContract.Args,
+        paymentMethod: PaymentMethod,
+        shippingInformation: ShippingInformation?
+    ) {
         viewModel.paymentMethod = paymentMethod
-        confirmIntent(args.paymentIntent.clientSecret.orEmpty(), paymentMethod)
+
+        when (args) {
+            is StripeGooglePayContract.Args.PaymentData -> {
+                viewModel.updateGooglePayResult(
+                    StripeGooglePayContract.Result.PaymentData(
+                        paymentMethod,
+                        shippingInformation
+                    )
+                )
+            }
+            is StripeGooglePayContract.Args.ConfirmPaymentIntent -> {
+                confirmIntent(args.paymentIntent.clientSecret.orEmpty(), paymentMethod)
+            }
+        }
     }
 
     private fun confirmIntent(
