@@ -1,19 +1,57 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.PaymentSessionPrefs
+import android.content.Context
+import android.content.SharedPreferences
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 
 internal class DefaultPrefsRepository(
-    private val customerId: String,
-    private val paymentSessionPrefs: PaymentSessionPrefs
+    private val context: Context,
+    private val customerId: String
 ) : PrefsRepository {
-    override suspend fun getDefaultPaymentMethodId(): String? {
-        return paymentSessionPrefs.getPaymentMethodId(customerId)
+    private val prefs: SharedPreferences by lazy {
+        context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
+    }
+
+    override suspend fun getSavedSelection(): SavedSelection? {
+        val prefData = prefs.getString(getKey(), null).orEmpty().split(":")
+        val key = prefData.firstOrNull()
+        return when (key) {
+            "google_pay" -> SavedSelection.GooglePay
+            "payment_method" -> {
+                prefData.getOrNull(1)?.let {
+                    SavedSelection.PaymentMethod(id = it)
+                }
+            }
+            else -> null
+        }
     }
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
-        if (paymentSelection is PaymentSelection.Saved) {
-            paymentSessionPrefs.savePaymentMethodId(customerId, paymentSelection.paymentMethod.id)
+        when (paymentSelection) {
+            PaymentSelection.GooglePay -> {
+                "google_pay"
+            }
+            is PaymentSelection.Saved -> {
+                "payment_method:${paymentSelection.paymentMethod.id.orEmpty()}"
+            }
+            else -> null
+        }?.let { value ->
+            write(value)
         }
+    }
+
+    private fun write(value: String) {
+        prefs.edit()
+            .putString(getKey(), value)
+            .apply()
+    }
+
+    private fun getKey(): String {
+        return "customer[$customerId]"
+    }
+
+    private companion object {
+        private const val PREF_FILE = "DefaultPrefsRepository"
     }
 }
