@@ -51,20 +51,20 @@ internal class StripeGooglePayViewModel(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
                 currencyCode = paymentIntent.currency.orEmpty(),
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
-                countryCode = args.countryCode,
+                countryCode = args.config.countryCode,
                 transactionId = paymentIntent.id,
                 totalPrice = paymentIntent.amount?.toInt(),
                 checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
             ),
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
-                merchantName = args.merchantName ?: appName
+                merchantName = args.config.merchantName ?: appName
             ),
             billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
                 isRequired = true,
                 format = GooglePayJsonFactory.BillingAddressParameters.Format.Min,
                 isPhoneNumberRequired = false
             ),
-            isEmailRequired = args.isEmailRequired
+            isEmailRequired = args.config.isEmailRequired
         )
     }
 

@@ -247,11 +247,13 @@ class DefaultFlowControllerTest {
         flowController.confirmPayment()
         assertThat(launchArgs)
             .isEqualTo(
-                StripeGooglePayContract.Args(
-                    environment = StripeGooglePayEnvironment.Test,
+                StripeGooglePayContract.Args.ConfirmPaymentIntent(
                     paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    countryCode = "US",
-                    merchantName = "Widget Store"
+                    config = StripeGooglePayContract.GooglePayConfig(
+                        environment = StripeGooglePayEnvironment.Test,
+                        countryCode = "US",
+                        merchantName = "Widget Store"
+                    )
                 )
             )
     }

@@ -105,7 +105,11 @@ class StripeGooglePayViewModelTest {
     fun `createPaymentDataRequestForPaymentIntentArgs() with merchant name should return expected JSON`() {
         assertThat(
             createViewModel(
-                ARGS.copy(merchantName = "Widgets, Inc.")
+                ARGS.copy(
+                    config = CONFIG.copy(
+                        merchantName = "Widgets, Inc."
+                    )
+                )
             ).createPaymentDataRequestForPaymentIntentArgs().toString()
         ).isEqualTo(
             JSONObject(
@@ -167,11 +171,15 @@ class StripeGooglePayViewModelTest {
     private class FakeStripeRepository : AbsFakeStripeRepository()
 
     private companion object {
-        private val ARGS = StripeGooglePayContract.Args(
+        private val CONFIG = StripeGooglePayContract.GooglePayConfig(
             environment = StripeGooglePayEnvironment.Test,
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             countryCode = "US",
             isEmailRequired = true
+        )
+
+        private val ARGS = StripeGooglePayContract.Args.ConfirmPaymentIntent(
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            config = CONFIG
         )
     }
 }

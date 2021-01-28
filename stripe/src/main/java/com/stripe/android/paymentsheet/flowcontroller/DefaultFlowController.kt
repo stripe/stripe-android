@@ -168,16 +168,18 @@ internal class DefaultFlowController internal constructor(
         val paymentSelection = viewModel.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
             googlePayLauncher(
-                StripeGooglePayContract.Args(
-                    environment = when (config?.googlePay?.environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                            StripeGooglePayEnvironment.Production
-                        else ->
-                            StripeGooglePayEnvironment.Test
-                    },
+                StripeGooglePayContract.Args.ConfirmPaymentIntent(
                     paymentIntent = initData.paymentIntent,
-                    countryCode = config?.googlePay?.countryCode.orEmpty(),
-                    merchantName = config?.merchantDisplayName
+                    config = StripeGooglePayContract.GooglePayConfig(
+                        environment = when (config?.googlePay?.environment) {
+                            PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                                StripeGooglePayEnvironment.Production
+                            else ->
+                                StripeGooglePayEnvironment.Test
+                        },
+                        countryCode = config?.googlePay?.countryCode.orEmpty(),
+                        merchantName = config?.merchantDisplayName
+                    )
                 )
             )
         } else {

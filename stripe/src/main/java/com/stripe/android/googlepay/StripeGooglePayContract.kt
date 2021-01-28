@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
+import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.os.bundleOf
 import com.google.android.gms.common.api.Status
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.model.PaymentIntent
@@ -13,7 +15,6 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
-import java.lang.IllegalStateException
 
 internal class StripeGooglePayContract :
     ActivityResultContract<StripeGooglePayContract.Args, StripeGooglePayContract.Result>() {
@@ -33,11 +34,42 @@ internal class StripeGooglePayContract :
         return Result.fromIntent(intent)
     }
 
-    @Parcelize
-    data class Args(
-        internal var environment: StripeGooglePayEnvironment,
+    sealed class Args : ActivityStarter.Args {
+        abstract var paymentIntent: PaymentIntent
+        abstract var config: GooglePayConfig
 
-        internal var paymentIntent: PaymentIntent,
+        /**
+         * Args to start [StripeGooglePayActivity] and collect payment data. If successful, the
+         * result will be returned through [Result.PaymentData].
+         */
+        @Parcelize
+        data class PaymentData(
+            override var paymentIntent: PaymentIntent,
+            override var config: GooglePayConfig
+        ) : Args()
+
+        /**
+         * Args to start [StripeGooglePayActivity] and confirm the [paymentIntent] with the
+         * selected payment data. If successful, the result will be returned through
+         * [Result.PaymentIntent].
+         */
+        @Parcelize
+        data class ConfirmPaymentIntent(
+            override var paymentIntent: PaymentIntent,
+            override var config: GooglePayConfig
+        ) : Args()
+
+        companion object {
+            @JvmSynthetic
+            internal fun create(intent: Intent): Args? {
+                return intent.getParcelableExtra(ActivityStarter.Args.EXTRA)
+            }
+        }
+    }
+
+    @Parcelize
+    data class GooglePayConfig(
+        var environment: StripeGooglePayEnvironment,
 
         /**
          * ISO 3166-1 alpha-2 country code where the transaction is processed.
@@ -50,21 +82,11 @@ internal class StripeGooglePayContract :
         internal var isEmailRequired: Boolean = false,
 
         internal var merchantName: String? = null
-    ) : ActivityStarter.Args {
-
-        companion object {
-            @JvmSynthetic
-            internal fun create(intent: Intent): Args {
-                return requireNotNull(intent.getParcelableExtra(ActivityStarter.Args.EXTRA))
-            }
-        }
-    }
+    ) : Parcelable
 
     sealed class Result : ActivityStarter.Result {
         override fun toBundle(): Bundle {
-            return Bundle().also {
-                it.putParcelable(ActivityStarter.Result.EXTRA, this)
-            }
+            return bundleOf(ActivityStarter.Result.EXTRA to this)
         }
 
         @Parcelize
@@ -89,9 +111,21 @@ internal class StripeGooglePayContract :
             }
         }
 
+        /**
+         * See [Args.ConfirmPaymentIntent]
+         */
         @Parcelize
-        class PaymentIntent(
+        data class PaymentIntent(
             val paymentIntentResult: PaymentIntentResult
+        ) : Result()
+
+        /**
+         * See [Args.PaymentData]
+         */
+        @Parcelize
+        data class PaymentData(
+            val paymentMethod: PaymentMethod,
+            val shippingInformation: ShippingInformation?
         ) : Result()
 
         @Parcelize

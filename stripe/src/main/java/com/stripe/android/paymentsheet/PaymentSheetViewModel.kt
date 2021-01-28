@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentSessionPrefs
@@ -136,16 +137,18 @@ internal class PaymentSheetViewModel internal constructor(
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
-                _launchGooglePay.value = StripeGooglePayContract.Args(
-                    environment = when (args.config?.googlePay?.environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                            StripeGooglePayEnvironment.Production
-                        else ->
-                            StripeGooglePayEnvironment.Test
-                    },
+                _launchGooglePay.value = StripeGooglePayContract.Args.ConfirmPaymentIntent(
                     paymentIntent = paymentIntent,
-                    countryCode = args.googlePayConfig?.countryCode.orEmpty(),
-                    merchantName = args.config?.merchantDisplayName
+                    config = StripeGooglePayContract.GooglePayConfig(
+                        environment = when (args.config?.googlePay?.environment) {
+                            PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                                StripeGooglePayEnvironment.Production
+                            else ->
+                                StripeGooglePayEnvironment.Test
+                        },
+                        countryCode = args.googlePayConfig?.countryCode.orEmpty(),
+                        merchantName = args.config?.merchantDisplayName
+                    )
                 )
             }
         } else {
