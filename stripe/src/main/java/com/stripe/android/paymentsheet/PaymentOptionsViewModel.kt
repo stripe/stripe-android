@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
@@ -18,7 +17,7 @@ internal class PaymentOptionsViewModel(
     googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter
-) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
+) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     isGooglePayEnabled = args.config?.googlePay != null,
     googlePayRepository = googlePayRepository,
@@ -33,19 +32,12 @@ internal class PaymentOptionsViewModel(
         _processing.postValue(false)
     }
 
-    fun selectPaymentOption() {
+    fun onUserSelection() {
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
-            _viewState.value = PaymentOptionViewState.Completed(paymentSelection)
+            _userSelection.value = paymentSelection
         }
-    }
-
-    fun onUserSelection(
-        paymentSelection: PaymentSelection
-    ) {
-        selectPaymentOption()
-        _userSelection.value = paymentSelection
     }
 
     fun getPaymentOptionResult(): PaymentOptionResult {

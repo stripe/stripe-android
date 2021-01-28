@@ -44,7 +44,7 @@ internal class PaymentOptionsListFragment(
         super.onPaymentOptionSelected(paymentSelection, isClick)
         if (isClick) {
             // this is a click-triggered selection
-            sheetViewModel.onUserSelection(paymentSelection)
+            sheetViewModel.onUserSelection()
         }
     }
 }

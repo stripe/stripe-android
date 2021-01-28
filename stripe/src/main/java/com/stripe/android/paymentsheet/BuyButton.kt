@@ -21,7 +21,7 @@ internal class BuyButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : PrimaryButton<ViewState>(context, attrs, defStyleAttr) {
+) : PrimaryButton(context, attrs, defStyleAttr) {
     private val animator = PrimaryButtonAnimator(context)
 
     internal val viewBinding = PaymentSheetBuyButtonBinding.inflate(
@@ -87,7 +87,7 @@ internal class BuyButton @JvmOverloads constructor(
         updateAlpha()
     }
 
-    override fun updateState(viewState: ViewState) {
+    fun updateState(viewState: ViewState) {
         this.viewState = viewState
         updateAlpha()
 

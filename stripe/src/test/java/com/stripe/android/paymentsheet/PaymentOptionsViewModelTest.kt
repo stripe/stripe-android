@@ -8,7 +8,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
-import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -34,29 +33,29 @@ class PaymentOptionsViewModelTest {
     )
 
     @Test
-    fun `selectPaymentOption() when selection has been made should emit completion view state`() {
-        var viewState: PaymentOptionViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
+    fun `onUserSelection() when selection has been made should emit on userSelection`() {
+        var paymentSelection: PaymentSelection? = null
+        viewModel.userSelection.observeForever {
+            paymentSelection = it
         }
         viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
 
-        viewModel.selectPaymentOption()
+        viewModel.onUserSelection()
 
-        assertThat(viewState)
-            .isEqualTo(PaymentOptionViewState.Completed(SELECTION_SAVED_PAYMENT_METHOD))
+        assertThat(paymentSelection)
+            .isEqualTo(SELECTION_SAVED_PAYMENT_METHOD)
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
     @Test
-    fun `selectPaymentOption() when selection has not been made should not emit`() {
-        var viewState: PaymentOptionViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
+    fun `onUserSelection() when selection has not been made should not emit`() {
+        var paymentSelection: PaymentSelection? = null
+        viewModel.userSelection.observeForever {
+            paymentSelection = it
         }
-        viewModel.selectPaymentOption()
+        viewModel.onUserSelection()
 
-        assertThat(viewState)
+        assertThat(paymentSelection)
             .isNull()
     }
 

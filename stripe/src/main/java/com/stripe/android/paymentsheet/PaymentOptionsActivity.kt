@@ -135,18 +135,8 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     private fun setupAddButton(addButton: AddButton) {
-        addButton.completed.observe(this) { completedState ->
-            completedState?.paymentSelection?.let(::onActionCompleted)
-        }
-
-        viewModel.viewState.observe(this) { state ->
-            if (state != null) {
-                addButton.updateState(state)
-            }
-        }
-
         addButton.setOnClickListener {
-            viewModel.selectPaymentOption()
+            viewModel.onUserSelection()
         }
 
         viewModel.processing.observe(this) { isProcessing ->
