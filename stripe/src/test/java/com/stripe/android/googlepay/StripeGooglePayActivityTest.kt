@@ -29,6 +29,17 @@ class StripeGooglePayActivityTest {
     }
 
     @Test
+    fun `successful start should return Unavailable result`() {
+        createActivity(
+            PAYMENT_DATA_ARGS
+        ) { activityScenario ->
+            // Google Pay is only available on a real device
+            assertThat(parseResult(activityScenario))
+                .isInstanceOf(StripeGooglePayContract.Result.Unavailable::class.java)
+        }
+    }
+
+    @Test
     fun `start should ConfirmPaymentIntent args and manual confirmation should finish with Error result`() {
         createActivity(
             CONFIRM_ARGS.copy(

@@ -164,7 +164,7 @@ internal class DefaultFlowController internal constructor(
         val paymentSelection = viewModel.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
             googlePayLauncher(
-                StripeGooglePayContract.Args.ConfirmPaymentIntent(
+                StripeGooglePayContract.Args.PaymentData(
                     paymentIntent = initData.paymentIntent,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
@@ -179,27 +179,34 @@ internal class DefaultFlowController internal constructor(
                 )
             )
         } else {
-            val confirmParamsFactory = ConfirmParamsFactory(
-                initData.paymentIntent.clientSecret.orEmpty()
-            )
-            when (paymentSelection) {
-                is PaymentSelection.Saved -> {
-                    confirmParamsFactory.create(paymentSelection)
-                }
-                is PaymentSelection.New.Card -> {
-                    confirmParamsFactory.create(paymentSelection)
-                }
-                else -> null
-            }?.let { confirmParams ->
-                paymentController.startConfirmAndAuth(
-                    AuthActivityStarter.Host.create(activity),
-                    confirmParams,
-                    ApiRequest.Options(
-                        apiKey = publishableKey,
-                        stripeAccount = stripeAccountId
-                    )
-                )
+            confirmPaymentSelection(paymentSelection, initData)
+        }
+    }
+
+    private fun confirmPaymentSelection(
+        paymentSelection: PaymentSelection?,
+        initData: InitData
+    ) {
+        val confirmParamsFactory = ConfirmParamsFactory(
+            initData.paymentIntent.clientSecret.orEmpty()
+        )
+        when (paymentSelection) {
+            is PaymentSelection.Saved -> {
+                confirmParamsFactory.create(paymentSelection)
             }
+            is PaymentSelection.New.Card -> {
+                confirmParamsFactory.create(paymentSelection)
+            }
+            else -> null
+        }?.let { confirmParams ->
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
         }
     }
 
@@ -220,6 +227,31 @@ internal class DefaultFlowController internal constructor(
 
                 val paymentResult = createPaymentResult(paymentIntentResult)
                 paymentResultCallback.onPaymentResult(paymentResult)
+            }
+            is StripeGooglePayContract.Result.PaymentData -> {
+                runCatching {
+                    viewModel.initData
+                }.fold(
+                    onSuccess = { initData ->
+                        val paymentSelection = PaymentSelection.Saved(
+                            googlePayResult.paymentMethod
+                        )
+                        viewModel.paymentSelection = paymentSelection
+                        confirmPaymentSelection(
+                            paymentSelection,
+                            initData
+                        )
+                    },
+                    onFailure = {
+                        eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+                        paymentResultCallback.onPaymentResult(
+                            PaymentResult.Failed(
+                                it,
+                                paymentIntent = null
+                            )
+                        )
+                    }
+                )
             }
             is StripeGooglePayContract.Result.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
