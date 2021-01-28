@@ -132,6 +132,19 @@ class PaymentOptionsAdapterTest {
             .isEmpty()
     }
 
+    @Test
+    fun `updating paymentSelection to GooglePay should invoke paymentMethodSelectedListener`() {
+        val adapter = createAdapter().also {
+            it.shouldShowGooglePay = true
+        }
+
+        adapter.paymentSelection = PaymentSelection.GooglePay
+        adapter.paymentSelection = PaymentSelection.GooglePay
+        adapter.paymentSelection = PaymentSelection.GooglePay
+        assertThat(paymentSelections)
+            .containsExactly(PaymentSelection.GooglePay)
+    }
+
     private fun createConfiguredAdapter(
         shouldShowGooglePay: Boolean,
         paymentMethodsCount: Int = 6
@@ -145,7 +158,6 @@ class PaymentOptionsAdapterTest {
     private fun createAdapter(): PaymentOptionsAdapter {
         return PaymentOptionsAdapter(
             canClickSelectedItem = false,
-            paymentSelection = null,
             paymentOptionSelectedListener = { paymentSelection, _ ->
                 paymentSelections.add(paymentSelection)
             },

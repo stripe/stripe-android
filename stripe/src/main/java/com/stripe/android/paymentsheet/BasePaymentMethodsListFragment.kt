@@ -27,12 +27,13 @@ internal abstract class BasePaymentMethodsListFragment(
     protected val adapter: PaymentOptionsAdapter by lazy {
         PaymentOptionsAdapter(
             canClickSelectedItem,
-            fragmentViewModel.currentPaymentSelection,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             addCardClickListener = {
                 transitionToAddPaymentMethod()
             }
-        )
+        ).also {
+            it.paymentSelection = fragmentViewModel.currentPaymentSelection
+        }
     }
 
     private var _viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
@@ -59,11 +60,15 @@ internal abstract class BasePaymentMethodsListFragment(
 
         sheetViewModel.getSavedSelection()
             .observe(viewLifecycleOwner) { savedSelection ->
-                adapter.defaultPaymentMethodId = when (savedSelection) {
-                    is SavedSelection.PaymentMethod -> savedSelection.id
+                when (savedSelection) {
+                    SavedSelection.GooglePay -> {
+                        adapter.paymentSelection = PaymentSelection.GooglePay
+                    }
+                    is SavedSelection.PaymentMethod -> {
+                        adapter.defaultPaymentMethodId = savedSelection.id
+                    }
                     else -> {
-                        // TODO(mshafrir-stripe): add support for Google Pay
-                        null
+                        // noop
                     }
                 }
             }
