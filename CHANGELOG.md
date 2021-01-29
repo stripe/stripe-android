@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.2.1 - unreleased
+## 16.2.1 - 2021-01-29
 * [#3275](https://github.com/stripe/stripe-android/pull/3257) Fix spinner positioning in `CardMultilineWidget`
 * [#3275](https://github.com/stripe/stripe-android/pull/3275) Upgrade Android Gradle Plugin to `4.1.2`
 * [#3291](https://github.com/stripe/stripe-android/pull/3291) Upgrade Gradle to `6.8.1`
