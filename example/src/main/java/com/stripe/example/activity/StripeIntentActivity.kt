@@ -12,6 +12,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.StripeFactory
@@ -67,7 +68,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         shippingDetails: ConfirmPaymentIntentParams.Shipping? = null,
         stripeAccountId: String? = null,
         existingPaymentMethodId: String? = null,
-        mandateDataParams: MandateDataParams? = null
+        mandateDataParams: MandateDataParams? = null,
+        paymentMethodOptions: PaymentMethodOptionsParams? = null,
     ) {
         requireNotNull(paymentMethodCreateParams ?: existingPaymentMethodId)
 
@@ -83,7 +85,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                         shippingDetails,
                         stripeAccountId,
                         existingPaymentMethodId,
-                        mandateDataParams
+                        mandateDataParams,
+                        paymentMethodOptions
                     )
                 }
             }
@@ -113,7 +116,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,
         stripeAccountId: String?,
         existingPaymentMethodId: String?,
-        mandateDataParams: MandateDataParams?
+        mandateDataParams: MandateDataParams?,
+        paymentMethodOptions: PaymentMethodOptionsParams?
     ) {
         val secret = responseData.getString("secret")
         viewModel.status.postValue(
@@ -135,7 +139,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
                 paymentMethodId = existingPaymentMethodId,
                 clientSecret = secret,
-                mandateData = mandateDataParams
+                mandateData = mandateDataParams,
+                paymentMethodOptions = paymentMethodOptions
             )
         }
         stripe.confirmPayment(this, confirmPaymentIntentParams, stripeAccountId)

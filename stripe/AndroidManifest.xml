@@ -17,6 +17,10 @@
             android:theme="@style/StripeDefaultTheme"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".view.PaymentAuthUpiAppViewActivity"
+            android:theme="@style/StripeDefaultTheme"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".view.PaymentRelayActivity"
             android:theme="@style/StripeDefaultTheme" />
         <activity

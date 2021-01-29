@@ -95,6 +95,8 @@
         <activity
             android:name=".activity.UpiPaymentActivity" />
         <activity
+            android:name=".activity.UpiAppPaymentActivity" />
+        <activity
             android:name=".activity.UpiWaitingActivity" />
         <activity
             android:name=".activity.KlarnaSourceActivity" />

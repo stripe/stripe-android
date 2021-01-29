@@ -27,4 +27,33 @@ class PaymentMethodOptionsParamsTest {
                 .toParamMap()
         ).isEmpty()
     }
+
+    @Test
+    fun upiToParamMap_withFlow_shouldOnlyIncludeFlow() {
+        assertThat(
+            PaymentMethodOptionsParams.Upi(
+                flow = "app_redirect"
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "upi" to mapOf(
+                    "flow" to "app_redirect"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun upiToParamMap_withNoData_shouldHaveIncludeFlow() {
+        assertThat(
+            PaymentMethodOptionsParams.Upi()
+                .toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "upi" to mapOf(
+                    "flow" to "app_redirect"
+                )
+            )
+        )
+    }
 }

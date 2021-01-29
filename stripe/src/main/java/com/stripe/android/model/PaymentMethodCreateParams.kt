@@ -338,7 +338,7 @@ data class PaymentMethodCreateParams internal constructor(
 
     @Parcelize
     data class Upi(
-        private val vpa: String?
+        private val vpa: String? = null
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return vpa?.let {

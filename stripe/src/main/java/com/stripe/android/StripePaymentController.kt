@@ -48,6 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.nio.charset.Charset
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
@@ -598,6 +599,16 @@ internal class StripePaymentController internal constructor(
                         bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
                     }
                 }
+                // Anirudh
+                is StripeIntent.NextActionData.UpiAppRedirect -> {
+                    beginUpiAppAuth(
+                        host,
+                        getRequestCode(stripeIntent),
+                        (stripeIntent.nextActionData as StripeIntent.NextActionData.UpiAppRedirect).native_data,
+                        stripeIntent.clientSecret.orEmpty(),
+                        false
+                    )
+                }
                 else -> bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
             }
         } else {
@@ -1134,6 +1145,24 @@ internal class StripePaymentController internal constructor(
                     stripeAccountId = stripeAccount,
                     shouldCancelSource = shouldCancelSource,
                     shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
+                )
+            )
+        }
+
+        private fun beginUpiAppAuth(
+            host: AuthActivityStarter.Host,
+            requestCode: Int,
+            nativeData: String,
+            clientSecret: String,
+            enableLogging: Boolean = false
+        ) {
+            Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
+            val starter = PaymentAuthUpiAppViewStarter(host, requestCode)
+            starter.start(
+                PaymentAuthUpiAppViewStarter.Args(
+                    nativeData,
+                    enableLogging,
+                    clientSecret
                 )
             )
         }

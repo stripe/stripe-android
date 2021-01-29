@@ -24,6 +24,7 @@
     <string name="becs_debit_example">BECS Debit Confirmation Example</string>
     <string name="sofort_example">SOFORT Confirmation Example</string>
     <string name="upi_example">UPI Confirmation Example</string>
+    <string name="upi_app_example">UPI App Confirmation Example</string>
     <string name="netbanking_example">Netbanking Confirmation Example</string>
     <string name="card_brands">Card Brands</string>
 

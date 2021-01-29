@@ -97,6 +97,10 @@ class LauncherActivity : AppCompatActivity() {
                 UpiPaymentActivity::class.java
             ),
             Item(
+                activity.getString(R.string.upi_app_example),
+                UpiAppPaymentActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.netbanking_example),
                 NetbankingPaymentActivity::class.java
             ),

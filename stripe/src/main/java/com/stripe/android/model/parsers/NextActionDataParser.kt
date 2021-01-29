@@ -14,6 +14,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
+            StripeIntent.NextActionType.UpiAppRedirect -> UpiAppRedirectParser()
             else -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
@@ -50,6 +51,22 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         private companion object {
             internal const val FIELD_URL = "url"
             internal const val FIELD_RETURN_URL = "return_url"
+        }
+    }
+
+    internal class UpiAppRedirectParser : ModelJsonParser<StripeIntent.NextActionData.UpiAppRedirect> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.UpiAppRedirect? {
+            return when {
+                json.has(FIELD_NATIVE_DATA) ->
+                    StripeIntent.NextActionData.UpiAppRedirect(
+                        json.getString(FIELD_NATIVE_DATA)
+                    )
+                else -> null
+            }
+        }
+
+        private companion object {
+            internal const val FIELD_NATIVE_DATA = "native_data"
         }
     }
 

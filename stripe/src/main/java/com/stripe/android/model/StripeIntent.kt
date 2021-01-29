@@ -61,7 +61,8 @@ interface StripeIntent : StripeModel {
         RedirectToUrl("redirect_to_url"),
         UseStripeSdk("use_stripe_sdk"),
         DisplayOxxoDetails("display_oxxo_details"),
-        AlipayRedirect("alipay_handle_redirect");
+        AlipayRedirect("alipay_handle_redirect"),
+        UpiAppRedirect("upi_app_redirect");
 
         override fun toString(): String {
             return code
@@ -164,6 +165,20 @@ interface StripeIntent : StripeModel {
              * to this specified URL after completion.
              */
             val returnUrl: String?
+        ) : NextActionData()
+
+        /**
+         * Contains instructions for authenticating by redirecting your customer to an
+         * application which support UPI payment.
+         */
+        @Parcelize
+        data class UpiAppRedirect(
+            /**
+             * Base64 encoded data returned by Billdesk
+             * Decoding this gives 'upi://pay?pa=&pn=xxxxx&mc=NA&tr=dummyRefId&tn=Pay&am=100.00&mam=100.00&cu=INR'
+             * This value needs to be passed to PSP app while transferring the intent
+             */
+            val native_data: String,
         ) : NextActionData()
 
         @Parcelize

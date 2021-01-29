@@ -39,4 +39,19 @@ sealed class PaymentMethodOptionsParams(
             private const val PARAM_NETWORK = "network"
         }
     }
+
+    @Parcelize
+    data class Upi(
+        var flow: String = "app_redirect"
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Upi) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_FLOW to flow
+            )
+        }
+
+        private companion object {
+            private const val PARAM_FLOW = "flow"
+        }
+    }
 }
