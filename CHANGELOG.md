@@ -4,9 +4,10 @@
 * [#3275](https://github.com/stripe/stripe-android/pull/3257) Fix spinner positioning in `CardMultilineWidget`
 * [#3275](https://github.com/stripe/stripe-android/pull/3275) Upgrade Android Gradle Plugin to `4.1.2`
 * [#3291](https://github.com/stripe/stripe-android/pull/3291) Upgrade Gradle to `6.8.1`
-* [#3294](https://github.com/stripe/stripe-android/pull/3294) Upgrade 3DS2 SDK to `5.1.0`
-    * Upgrade `nimbus-jose-jwt` to `9.4.1`
 * [#3300](https://github.com/stripe/stripe-android/pull/3300) Upgrade AndroidX fragment dependency to `1.3.0-rc2`
+* [#3302](https://github.com/stripe/stripe-android/pull/3302) Add support for creating `afterpay_clearpay` payment methods
+* [#3315](https://github.com/stripe/stripe-android/pull/3315) Upgrade 3DS2 SDK to `5.1.1`
+    * Upgrade `nimbus-jose-jwt` to `9.4.2`
 
 ## 16.2.0 - 2021-01-11
 * [#3088](https://github.com/stripe/stripe-android/pull/3088) Mark some builders in `PaymentMethodCreateParams` as deprecated
