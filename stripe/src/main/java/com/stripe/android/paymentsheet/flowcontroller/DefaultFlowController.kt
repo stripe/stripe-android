@@ -148,7 +148,8 @@ internal class DefaultFlowController internal constructor(
                 paymentMethods = initData.paymentMethods,
                 sessionId = sessionId,
                 config = initData.config,
-                isGooglePayReady = initData.isGooglePayReady
+                isGooglePayReady = initData.isGooglePayReady,
+                newCard = viewModel.paymentSelection as? PaymentSelection.New.Card
             )
         )
     }

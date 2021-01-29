@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
 import kotlinx.parcelize.Parcelize
@@ -211,6 +212,7 @@ data class PaymentMethodCreateParams internal constructor(
 
         internal val attribution: Set<String>? = null
     ) : StripeParamsModel, Parcelable {
+        internal val brand: CardBrand get() = CardUtils.getPossibleCardBrand(number)
         internal val last4: String? get() = number?.takeLast(4)
 
         override fun toParamMap(): Map<String, Any> {
