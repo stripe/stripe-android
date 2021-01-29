@@ -40,7 +40,7 @@ class BuyButtonTest {
     }
 
     @Test
-    fun `after viewState ready and disabled, label alpha is 100%`() {
+    fun `after viewState ready and disabled, label alpha is 50%`() {
         buyButton.onReadyState(
             ViewState.Ready(amount = 1099, currencyCode = "usd")
         )

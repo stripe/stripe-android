@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
@@ -48,7 +49,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val args: PaymentSheetContract.Args,
     private val animateOutMillis: Long,
     workContext: CoroutineContext
-) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
+) : SheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     config = args.config,
     isGooglePayEnabled = args.isGooglePayEnabled,
     googlePayRepository = googlePayRepository,
@@ -64,6 +65,9 @@ internal class PaymentSheetViewModel internal constructor(
 
     private val _startConfirm = MutableLiveData<ConfirmPaymentIntentParams>()
     internal val startConfirm: LiveData<ConfirmPaymentIntentParams> = _startConfirm
+
+    private val _viewState = MutableLiveData<ViewState>(null)
+    internal val viewState: LiveData<ViewState> = _viewState.distinctUntilChanged()
 
     private val paymentIntentValidator = PaymentIntentValidator()
 

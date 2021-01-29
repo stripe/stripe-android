@@ -18,7 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
-    abstract val viewModel: SheetViewModel<*, *>
+    abstract val viewModel: SheetViewModel<*>
     abstract val bottomSheetController: BottomSheetController
     abstract val eventReporter: EventReporter
 

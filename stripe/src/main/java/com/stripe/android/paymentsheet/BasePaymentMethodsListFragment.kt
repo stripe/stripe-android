@@ -20,7 +20,7 @@ internal abstract class BasePaymentMethodsListFragment(
 ) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
-    abstract val sheetViewModel: SheetViewModel<*, *>
+    abstract val sheetViewModel: SheetViewModel<*>
 
     private val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
 

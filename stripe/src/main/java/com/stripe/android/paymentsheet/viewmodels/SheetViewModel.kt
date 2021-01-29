@@ -26,7 +26,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
-internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
+internal abstract class SheetViewModel<TransitionTargetType>(
     internal val config: PaymentSheet.Configuration?,
     private val isGooglePayEnabled: Boolean,
     private val googlePayRepository: GooglePayRepository,
@@ -62,9 +62,6 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
 
     protected val _processing = MutableLiveData(true)
     val processing: LiveData<Boolean> = _processing
-
-    protected val _viewState = MutableLiveData<ViewStateType>(null)
-    internal val viewState: LiveData<ViewStateType> = _viewState.distinctUntilChanged()
 
     // a message shown to the user
     protected val _userMessage = MutableLiveData<UserMessage?>()

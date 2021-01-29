@@ -41,7 +41,7 @@ import com.stripe.android.view.StripeEditText
 internal abstract class BaseAddCardFragment(
     private val eventReporter: EventReporter
 ) : Fragment() {
-    abstract val sheetViewModel: SheetViewModel<*, *>
+    abstract val sheetViewModel: SheetViewModel<*>
 
     private var _viewBinding: FragmentPaymentsheetAddCardBinding? = null
     protected val viewBinding get() = requireNotNull(_viewBinding)
