@@ -14,7 +14,8 @@ import kotlin.coroutines.CoroutineContext
 
 internal class DefaultFlowControllerInitializer(
     private val stripeRepository: StripeRepository,
-    private val prefsRepositoryFactory: (String, PaymentSheet.GooglePayConfiguration.Environment?) -> PrefsRepository,
+    private val prefsRepositoryFactory: (String, Boolean) -> PrefsRepository,
+    private val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean,
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val workContext: CoroutineContext
@@ -25,13 +26,19 @@ internal class DefaultFlowControllerInitializer(
         paymentIntentClientSecret: String,
         configuration: PaymentSheet.Configuration
     ) = withContext(workContext) {
+        val isGooglePayReady = isGooglePayReadySupplier(configuration.googlePay?.environment)
         configuration.customer?.let { customerConfig ->
             createWithCustomer(
                 paymentIntentClientSecret,
                 customerConfig,
-                configuration
+                configuration,
+                isGooglePayReady
             )
-        } ?: createWithoutCustomer(paymentIntentClientSecret, configuration)
+        } ?: createWithoutCustomer(
+            paymentIntentClientSecret,
+            configuration,
+            isGooglePayReady
+        )
     }
 
     override suspend fun init(
@@ -39,18 +46,20 @@ internal class DefaultFlowControllerInitializer(
     ) = withContext(workContext) {
         createWithoutCustomer(
             paymentIntentClientSecret,
-            config = null
+            config = null,
+            isGooglePayReady = false
         )
     }
 
     private suspend fun createWithCustomer(
         clientSecret: String,
         customerConfig: PaymentSheet.CustomerConfiguration,
-        config: PaymentSheet.Configuration?
+        config: PaymentSheet.Configuration?,
+        isGooglePayReady: Boolean
     ): FlowControllerInitializer.InitResult {
         val prefsRepository = prefsRepositoryFactory(
             customerConfig.id,
-            config?.googlePay?.environment
+            isGooglePayReady
         )
 
         return runCatching {
@@ -78,7 +87,8 @@ internal class DefaultFlowControllerInitializer(
                             paymentIntent = paymentIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
-                            savedSelection = prefsRepository.getSavedSelection()
+                            savedSelection = prefsRepository.getSavedSelection(),
+                            isGooglePayReady = isGooglePayReady
                         )
                     )
                 }
@@ -91,7 +101,8 @@ internal class DefaultFlowControllerInitializer(
 
     private suspend fun createWithoutCustomer(
         clientSecret: String,
-        config: PaymentSheet.Configuration?
+        config: PaymentSheet.Configuration?,
+        isGooglePayReady: Boolean
     ): FlowControllerInitializer.InitResult {
         return runCatching {
             retrievePaymentIntent(clientSecret)
@@ -108,7 +119,8 @@ internal class DefaultFlowControllerInitializer(
                         paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
-                        savedSelection = null
+                        savedSelection = null,
+                        isGooglePayReady = isGooglePayReady
                     )
                 )
             },

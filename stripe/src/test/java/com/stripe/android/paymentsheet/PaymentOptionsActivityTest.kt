@@ -42,9 +42,9 @@ class PaymentOptionsActivityTest {
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
             sessionId = SessionId(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
+            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+            isGooglePayReady = false
         ),
-        googlePayRepository = FakeGooglePayRepository(false),
         prefsRepository = mock(),
         eventReporter = eventReporter
     )
@@ -131,7 +131,8 @@ class PaymentOptionsActivityTest {
                 paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 paymentMethods = paymentMethods,
                 sessionId = SessionId(),
-                config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
+                config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                isGooglePayReady = false
             )
         )
     }

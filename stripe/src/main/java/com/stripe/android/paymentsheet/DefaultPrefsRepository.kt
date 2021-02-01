@@ -4,14 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultPrefsRepository(
     private val context: Context,
     private val customerId: String,
-    private val googlePayRepository: GooglePayRepository,
+    private val isGooglePayReady: suspend () -> Boolean,
     private val workContext: CoroutineContext
 ) : PrefsRepository {
     private val prefs: SharedPreferences by lazy {
@@ -23,9 +22,7 @@ internal class DefaultPrefsRepository(
         val key = prefData.firstOrNull()
         when (key) {
             "google_pay" -> {
-                SavedSelection.GooglePay.takeIf {
-                    googlePayRepository.isReady().first()
-                }
+                SavedSelection.GooglePay.takeIf { isGooglePayReady() }
             }
             "payment_method" -> {
                 prefData.getOrNull(1)?.let {

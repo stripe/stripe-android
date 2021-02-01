@@ -7,19 +7,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.GooglePayRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -28,8 +24,6 @@ import kotlin.coroutines.CoroutineContext
  */
 internal abstract class SheetViewModel<TransitionTargetType>(
     internal val config: PaymentSheet.Configuration?,
-    private val isGooglePayEnabled: Boolean,
-    private val googlePayRepository: GooglePayRepository,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
@@ -39,7 +33,7 @@ internal abstract class SheetViewModel<TransitionTargetType>(
     private val _fatal = MutableLiveData<Throwable>()
     internal val fatal: LiveData<Throwable> = _fatal
 
-    private val _isGooglePayReady = MutableLiveData<Boolean>()
+    protected val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
     protected val _launchGooglePay = MutableLiveData<StripeGooglePayContract.Args>()
@@ -77,10 +71,6 @@ internal abstract class SheetViewModel<TransitionTargetType>(
         }
     }
 
-    init {
-        fetchIsGooglePayReady()
-    }
-
     fun fetchAddPaymentMethodConfig() = liveData {
         emitSource(
             MediatorLiveData<AddPaymentMethodConfig?>().also { configLiveData ->
@@ -110,22 +100,6 @@ internal abstract class SheetViewModel<TransitionTargetType>(
             )
         } else {
             null
-        }
-    }
-
-    fun fetchIsGooglePayReady() {
-        if (isGooglePayReady.value == null) {
-            if (isGooglePayEnabled) {
-                viewModelScope.launch {
-                    withContext(workContext) {
-                        _isGooglePayReady.postValue(
-                            googlePayRepository.isReady().first()
-                        )
-                    }
-                }
-            } else {
-                _isGooglePayReady.value = false
-            }
         }
     }
 

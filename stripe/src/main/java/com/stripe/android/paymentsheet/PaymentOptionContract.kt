@@ -30,7 +30,8 @@ internal class PaymentOptionContract : ActivityResultContract<PaymentOptionContr
         val paymentIntent: PaymentIntent,
         val paymentMethods: List<PaymentMethod>,
         val sessionId: SessionId,
-        val config: PaymentSheet.Configuration?
+        val config: PaymentSheet.Configuration?,
+        val isGooglePayReady: Boolean
     ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {

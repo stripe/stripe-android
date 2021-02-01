@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -41,7 +40,8 @@ internal class DefaultFlowControllerInitializerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     emptyList(),
-                    null
+                    null,
+                    isGooglePayReady = false
                 )
             )
         )
@@ -67,7 +67,8 @@ internal class DefaultFlowControllerInitializerTest {
                     PAYMENT_METHODS,
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
-                    )
+                    ),
+                    isGooglePayReady = true
                 )
             )
         )
@@ -90,7 +91,8 @@ internal class DefaultFlowControllerInitializerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
-                    SavedSelection.PaymentMethod("pm_123456789")
+                    SavedSelection.PaymentMethod("pm_123456789"),
+                    isGooglePayReady = true
                 )
             )
         )
@@ -138,6 +140,7 @@ internal class DefaultFlowControllerInitializerTest {
         return DefaultFlowControllerInitializer(
             FakeStripeRepository(paymentIntent),
             { _, _ -> prefsRepository },
+            { true },
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
             testDispatcher
@@ -160,22 +163,6 @@ internal class DefaultFlowControllerInitializerTest {
             requestOptions: ApiRequest.Options
         ): List<PaymentMethod> {
             return PAYMENT_METHODS
-        }
-    }
-
-    private class FakePaymentSessionPrefs : PaymentSessionPrefs {
-        var paymentMethodId: String? = null
-        val savedPaymentMethodIds = mutableListOf<Pair<String, String?>>()
-
-        override fun getPaymentMethodId(
-            customerId: String?
-        ): String? = paymentMethodId
-
-        override fun savePaymentMethodId(
-            customerId: String,
-            paymentMethodId: String?
-        ) {
-            savedPaymentMethodIds.add(customerId to paymentMethodId)
         }
     }
 
