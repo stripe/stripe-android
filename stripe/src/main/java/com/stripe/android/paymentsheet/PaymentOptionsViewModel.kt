@@ -14,19 +14,17 @@ import kotlinx.coroutines.Dispatchers
 
 internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
-    googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
-    isGooglePayEnabled = args.config?.googlePay != null,
-    googlePayRepository = googlePayRepository,
     prefsRepository = prefsRepository
 ) {
     private val _userSelection = MutableLiveData<PaymentSelection>()
     val userSelection: LiveData<PaymentSelection> = _userSelection
 
     init {
+        _isGooglePayReady.value = args.isGooglePayReady
         _paymentIntent.value = args.paymentIntent
         _paymentMethods.value = args.paymentMethods
         _processing.postValue(false)
@@ -69,25 +67,18 @@ internal class PaymentOptionsViewModel(
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val starterArgs = starterArgsSupplier()
             val application = applicationSupplier()
-            val googlePayRepository = starterArgs.config?.googlePay?.environment?.let { environment ->
-                DefaultGooglePayRepository(
-                    application,
-                    environment
-                )
-            } ?: GooglePayRepository.Disabled()
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
                     application,
                     customerId = id,
-                    googlePayRepository = googlePayRepository,
+                    isGooglePayReady = { starterArgs.isGooglePayReady },
                     workContext = Dispatchers.IO
                 )
             } ?: PrefsRepository.Noop()
 
             return PaymentOptionsViewModel(
                 starterArgs,
-                googlePayRepository,
                 prefsRepository,
                 DefaultEventReporter(
                     mode = EventReporter.Mode.Custom,

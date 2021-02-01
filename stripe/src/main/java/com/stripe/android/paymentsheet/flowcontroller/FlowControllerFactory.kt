@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 
 internal class FlowControllerFactory(
     private val activity: ComponentActivity,
@@ -51,18 +52,21 @@ internal class FlowControllerFactory(
             Dispatchers.IO
         )
 
-        val prefsRepositoryFactory = { customerId: String, environment: PaymentSheet.GooglePayConfiguration.Environment? ->
+        val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean = { environment ->
             val googlePayRepository = environment?.let {
                 DefaultGooglePayRepository(
                     activity,
                     it
                 )
-            } ?: GooglePayRepository.Disabled()
+            } ?: GooglePayRepository.Disabled
+            googlePayRepository.isReady().first()
+        }
 
+        val prefsRepositoryFactory = { customerId: String, isGooglePayReady: Boolean ->
             DefaultPrefsRepository(
                 activity,
                 customerId,
-                googlePayRepository,
+                { isGooglePayReady },
                 Dispatchers.IO
             )
         }
@@ -72,6 +76,7 @@ internal class FlowControllerFactory(
             flowControllerInitializer = DefaultFlowControllerInitializer(
                 stripeRepository,
                 prefsRepositoryFactory = prefsRepositoryFactory,
+                isGooglePayReadySupplier = isGooglePayReadySupplier,
                 publishableKey = config.publishableKey,
                 stripeAccountId = config.stripeAccountId,
                 workContext = Dispatchers.IO

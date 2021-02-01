@@ -25,9 +25,9 @@ class PaymentOptionsViewModelTest {
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
             sessionId = SessionId(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY
+            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+            isGooglePayReady = true
         ),
-        googlePayRepository = mock(),
         prefsRepository = mock(),
         eventReporter = eventReporter
     )
