@@ -40,7 +40,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
@@ -117,15 +116,19 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(
-                contract.parseResult(0, shadowOf(activity).resultIntent)
-            ).isEqualTo(
-                PaymentResult.Canceled(
-                    null,
-                    PAYMENT_INTENT
-                )
-            )
         }
+
+        assertThat(
+            contract.parseResult(
+                scenario.getResult().resultCode,
+                scenario.getResult().resultData
+            )
+        ).isEqualTo(
+            PaymentResult.Canceled(
+                null,
+                PAYMENT_INTENT
+            )
+        )
     }
 
     @Test
@@ -182,16 +185,19 @@ internal class PaymentSheetActivityTest {
             // animating out
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-
-            assertThat(
-                contract.parseResult(0, shadowOf(activity).resultIntent)
-            ).isEqualTo(
-                PaymentResult.Canceled(
-                    null,
-                    PAYMENT_INTENT
-                )
-            )
         }
+
+        assertThat(
+            contract.parseResult(
+                scenario.getResult().resultCode,
+                scenario.getResult().resultData
+            )
+        ).isEqualTo(
+            PaymentResult.Canceled(
+                null,
+                PAYMENT_INTENT
+            )
+        )
     }
 
     @Test
@@ -284,15 +290,19 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(
-                contract.parseResult(0, shadowOf(activity).resultIntent)
-            ).isEqualTo(
-                PaymentResult.Canceled(
-                    null,
-                    PAYMENT_INTENT
-                )
-            )
         }
+
+        assertThat(
+            contract.parseResult(
+                scenario.getResult().resultCode,
+                scenario.getResult().resultData
+            )
+        ).isEqualTo(
+            PaymentResult.Canceled(
+                null,
+                PAYMENT_INTENT
+            )
+        )
     }
 
     @Test
