@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -45,7 +46,7 @@ class PaymentOptionsActivityTest {
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
             isGooglePayReady = false
         ),
-        prefsRepository = mock(),
+        prefsRepository = FakePrefsRepository(),
         eventReporter = eventReporter
     )
 
@@ -125,14 +126,16 @@ class PaymentOptionsActivityTest {
         return Intent(
             ApplicationProvider.getApplicationContext(),
             PaymentOptionsActivity::class.java
-        ).putExtra(
-            ActivityStarter.Args.EXTRA,
-            PaymentOptionContract.Args(
-                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                paymentMethods = paymentMethods,
-                sessionId = SessionId(),
-                config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-                isGooglePayReady = false
+        ).putExtras(
+            bundleOf(
+                ActivityStarter.Args.EXTRA to
+                    PaymentOptionContract.Args(
+                        paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                        paymentMethods = paymentMethods,
+                        sessionId = SessionId(),
+                        config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                        isGooglePayReady = false
+                    )
             )
         )
     }

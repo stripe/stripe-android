@@ -28,7 +28,7 @@ internal class PaymentOptionsListFragment(
 
     override fun transitionToAddPaymentMethod() {
         activityViewModel.transitionTo(
-            PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull
+            PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull(config)
         )
     }
 

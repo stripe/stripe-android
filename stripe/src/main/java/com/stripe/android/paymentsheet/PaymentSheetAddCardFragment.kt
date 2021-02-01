@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import java.util.Currency
 import java.util.Locale
 
@@ -25,7 +25,7 @@ internal class PaymentSheetAddCardFragment(
         sheetViewModel.checkout()
     }
 
-    override fun onConfigReady(config: AddPaymentMethodConfig) {
+    override fun onConfigReady(config: FragmentConfig) {
         super.onConfigReady(config)
 
         val amount = config.paymentIntent.amount

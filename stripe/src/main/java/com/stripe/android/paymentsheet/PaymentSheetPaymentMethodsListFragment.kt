@@ -35,7 +35,7 @@ internal class PaymentSheetPaymentMethodsListFragment(
 
     override fun transitionToAddPaymentMethod() {
         activityViewModel.transitionTo(
-            PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull
+            PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(config)
         )
     }
 

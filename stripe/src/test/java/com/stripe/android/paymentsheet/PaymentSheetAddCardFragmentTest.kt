@@ -13,10 +13,9 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.Address
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
+import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import org.junit.Before
@@ -144,13 +143,7 @@ class PaymentSheetAddCardFragmentTest {
         createScenario().onFragment { fragment ->
             val activityViewModel = activityViewModel(fragment)
 
-            fragment.onConfigReady(
-                AddPaymentMethodConfig(
-                    paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    paymentMethods = emptyList(),
-                    isGooglePayReady = true
-                )
-            )
+            fragment.onConfigReady(FragmentConfigFixtures.DEFAULT)
             val paymentSelections = mutableListOf<PaymentSelection>()
             activityViewModel.selection.observeForever { paymentSelection ->
                 if (paymentSelection != null) {
@@ -171,13 +164,7 @@ class PaymentSheetAddCardFragmentTest {
     @Test
     fun `onConfigReady() should update header text`() {
         createScenario().onFragment { fragment ->
-            fragment.onConfigReady(
-                AddPaymentMethodConfig(
-                    paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    paymentMethods = emptyList(),
-                    isGooglePayReady = true
-                )
-            )
+            fragment.onConfigReady(FragmentConfigFixtures.DEFAULT)
 
             assertThat(fragment.addCardHeader.text.toString())
                 .isEqualTo("Pay $10.99 using")
@@ -216,6 +203,7 @@ class PaymentSheetAddCardFragmentTest {
     ): FragmentScenario<PaymentSheetAddCardFragment> {
         return launchFragmentInContainer<PaymentSheetAddCardFragment>(
             bundleOf(
+                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to FragmentConfigFixtures.DEFAULT,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args
             ),
             R.style.StripePaymentSheetDefaultTheme,

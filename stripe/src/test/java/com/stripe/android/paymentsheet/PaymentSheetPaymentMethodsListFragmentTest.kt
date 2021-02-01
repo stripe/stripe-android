@@ -17,6 +17,7 @@ import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -28,11 +29,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetPaymentMethodsListFragmentTest {
     private val eventReporter = mock<EventReporter>()
-
-    private val paymentMethods = listOf(
-        PaymentMethod("one", 0, false, PaymentMethod.Type.Card),
-        PaymentMethod("two", 0, false, PaymentMethod.Type.Card)
-    )
 
     @Before
     fun setup() {
@@ -63,14 +59,11 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         createScenario().onFragment {
             val recycler = recyclerView(it)
             val adapter = recycler.adapter as PaymentOptionsAdapter
-            assertThat(adapter.paymentMethods)
-                .isEmpty()
 
-            activityViewModel(it).setPaymentMethods(paymentMethods)
             idleLooper()
 
             assertThat(adapter.paymentMethods)
-                .isEqualTo(paymentMethods)
+                .isEqualTo(PAYMENT_METHODS)
         }
     }
 
@@ -80,7 +73,6 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
-            activityViewModel.setPaymentMethods(paymentMethods)
             idleLooper()
 
             val recycler = recyclerView(it)
@@ -102,7 +94,6 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             val activityViewModel = activityViewModel(it)
             assertThat(activityViewModel.transition.value).isNull()
 
-            activityViewModel.setPaymentMethods(paymentMethods)
             idleLooper()
 
             val recycler = recyclerView(it)
@@ -112,7 +103,13 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             idleLooper()
 
             assertThat(activityViewModel.transition.value)
-                .isEqualTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+                .isEqualTo(
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+                        FragmentConfigFixtures.DEFAULT.copy(
+                            paymentMethods = PAYMENT_METHODS
+                        )
+                    )
+                )
         }
     }
 
@@ -120,7 +117,6 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     fun `click on GooglePay item should update selection`() {
         createScenario().onFragment { fragment ->
             val activityViewModel = activityViewModel(fragment)
-            activityViewModel.setPaymentMethods(paymentMethods)
             idleLooper()
 
             val recycler = recyclerView(fragment)
@@ -172,13 +168,25 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         fragment: PaymentSheetPaymentMethodsListFragment
     ) = fragment.viewModels<BasePaymentMethodsListFragment.PaymentMethodsViewModel>().value
 
-    private fun createScenario(): FragmentScenario<PaymentSheetPaymentMethodsListFragment> {
+    private fun createScenario(
+        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS
+    ): FragmentScenario<PaymentSheetPaymentMethodsListFragment> {
         return launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>(
             bundleOf(
+                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to FragmentConfigFixtures.DEFAULT.copy(
+                    paymentMethods = paymentMethods
+                ),
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
             ),
             R.style.StripePaymentSheetDefaultTheme,
             factory = PaymentSheetFragmentFactory(eventReporter)
+        )
+    }
+
+    private companion object {
+        private val PAYMENT_METHODS = listOf(
+            PaymentMethod("one", 0, false, PaymentMethod.Type.Card),
+            PaymentMethod("two", 0, false, PaymentMethod.Type.Card)
         )
     }
 }
