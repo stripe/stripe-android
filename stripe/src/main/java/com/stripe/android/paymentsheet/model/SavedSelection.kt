@@ -11,4 +11,7 @@ internal sealed class SavedSelection : Parcelable {
     data class PaymentMethod(
         val id: String
     ) : SavedSelection()
+
+    @Parcelize
+    object None : SavedSelection()
 }

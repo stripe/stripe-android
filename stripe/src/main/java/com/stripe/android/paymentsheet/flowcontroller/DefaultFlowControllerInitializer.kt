@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -73,7 +74,7 @@ internal class DefaultFlowControllerInitializer(
                     types = paymentMethodTypes,
                     customerConfig
                 ).let { paymentMethods ->
-                    if (prefsRepository.getSavedSelection() == null) {
+                    if (prefsRepository.getSavedSelection() == SavedSelection.None) {
                         paymentMethods.firstOrNull()?.let { paymentMethod ->
                             prefsRepository.savePaymentSelection(
                                 PaymentSelection.Saved(paymentMethod)
@@ -119,7 +120,7 @@ internal class DefaultFlowControllerInitializer(
                         paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
-                        savedSelection = null,
+                        savedSelection = SavedSelection.None,
                         isGooglePayReady = isGooglePayReady
                     )
                 )

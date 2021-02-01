@@ -424,7 +424,7 @@ class DefaultFlowControllerTest {
 
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
-        savedSelection: SavedSelection? = null
+        savedSelection: SavedSelection = SavedSelection.None
     ): DefaultFlowController {
         return createFlowController(
             FakeFlowControllerInitializer(
@@ -454,7 +454,7 @@ class DefaultFlowControllerTest {
 
     private class FakeFlowControllerInitializer(
         private val paymentMethods: List<PaymentMethod>,
-        private val savedSelection: SavedSelection? = null,
+        private val savedSelection: SavedSelection = SavedSelection.None,
         private val delayMillis: Long = 0L
     ) : FlowControllerInitializer {
         override suspend fun init(
@@ -484,7 +484,7 @@ class DefaultFlowControllerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     emptyList(),
-                    null,
+                    SavedSelection.None,
                     isGooglePayReady = false
                 )
             )

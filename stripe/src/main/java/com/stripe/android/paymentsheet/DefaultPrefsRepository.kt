@@ -17,7 +17,7 @@ internal class DefaultPrefsRepository(
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
     }
 
-    override suspend fun getSavedSelection(): SavedSelection? = withContext(workContext) {
+    override suspend fun getSavedSelection(): SavedSelection = withContext(workContext) {
         val prefData = prefs.getString(getKey(), null).orEmpty().split(":")
         val key = prefData.firstOrNull()
         when (key) {
@@ -30,7 +30,7 @@ internal class DefaultPrefsRepository(
                 }
             }
             else -> null
-        }
+        } ?: SavedSelection.None
     }
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
