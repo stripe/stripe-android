@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flowOf
 interface GooglePayRepository {
     fun isReady(): Flow<Boolean>
 
-    class Disabled : GooglePayRepository {
+    object Disabled : GooglePayRepository {
         override fun isReady(): Flow<Boolean> = flowOf(false)
     }
 }

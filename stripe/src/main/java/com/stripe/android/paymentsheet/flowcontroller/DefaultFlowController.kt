@@ -147,7 +147,8 @@ internal class DefaultFlowController internal constructor(
                 paymentIntent = initData.paymentIntent,
                 paymentMethods = initData.paymentMethods,
                 sessionId = sessionId,
-                config = initData.config
+                config = initData.config,
+                isGooglePayReady = initData.isGooglePayReady
             )
         )
     }

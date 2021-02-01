@@ -173,7 +173,8 @@ class DefaultFlowControllerTest {
                     paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     paymentMethods = emptyList(),
                     sessionId = SESSION_ID,
-                    config = null
+                    config = null,
+                    isGooglePayReady = false
                 )
             )
     }
@@ -467,7 +468,8 @@ class DefaultFlowControllerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     paymentMethods,
-                    savedSelection
+                    savedSelection,
+                    isGooglePayReady = false
                 )
             )
         }
@@ -482,7 +484,8 @@ class DefaultFlowControllerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     emptyList(),
-                    null
+                    null,
+                    isGooglePayReady = false
                 )
             )
         }

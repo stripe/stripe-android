@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -43,7 +44,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
     private val paymentFlowResultProcessor: PaymentFlowResultProcessor,
-    googlePayRepository: GooglePayRepository,
+    private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
@@ -51,8 +52,6 @@ internal class PaymentSheetViewModel internal constructor(
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     config = args.config,
-    isGooglePayEnabled = args.isGooglePayEnabled,
-    googlePayRepository = googlePayRepository,
     prefsRepository = prefsRepository,
     workContext = workContext
 ) {
@@ -72,7 +71,24 @@ internal class PaymentSheetViewModel internal constructor(
     private val paymentIntentValidator = PaymentIntentValidator()
 
     init {
+        fetchIsGooglePayReady()
         eventReporter.onInit(config)
+    }
+
+    fun fetchIsGooglePayReady() {
+        if (isGooglePayReady.value == null) {
+            if (args.isGooglePayEnabled) {
+                viewModelScope.launch {
+                    withContext(workContext) {
+                        _isGooglePayReady.postValue(
+                            googlePayRepository.isReady().first()
+                        )
+                    }
+                }
+            } else {
+                _isGooglePayReady.value = false
+            }
+        }
     }
 
     fun updatePaymentMethods() {
@@ -321,13 +337,13 @@ internal class PaymentSheetViewModel internal constructor(
                     application,
                     environment
                 )
-            } ?: GooglePayRepository.Disabled()
+            } ?: GooglePayRepository.Disabled
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
                     application,
                     customerId = id,
-                    googlePayRepository = googlePayRepository,
+                    isGooglePayReady = { googlePayRepository.isReady().first() },
                     workContext = Dispatchers.IO
                 )
             } ?: PrefsRepository.Noop()
