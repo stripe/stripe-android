@@ -13,7 +13,6 @@ import com.stripe.android.payments.PaymentFlowResult
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentRelayActivityTest {
@@ -68,7 +67,7 @@ class PaymentRelayActivityTest {
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 onComplete(
-                    contract.parseResult(0, Shadows.shadowOf(activity).resultIntent)
+                    contract.parseResult(0, activityScenario.result.resultData)
                 )
             }
         }

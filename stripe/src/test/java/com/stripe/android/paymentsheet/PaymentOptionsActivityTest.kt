@@ -25,7 +25,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
@@ -76,14 +75,14 @@ class PaymentOptionsActivityTest {
             viewModel.updateMode(SheetMode.Wrapped)
 
             activity.viewBinding.root.performClick()
-            idleLooper()
-
-            assertThat(
-                PaymentOptionResult.fromIntent(Shadows.shadowOf(activity).resultIntent)
-            ).isEqualTo(
-                PaymentOptionResult.Canceled(null)
-            )
+            activity.finish()
         }
+
+        assertThat(
+            PaymentOptionResult.fromIntent(scenario.getResult().resultData)
+        ).isEqualTo(
+            PaymentOptionResult.Canceled(null)
+        )
     }
 
     @Test
