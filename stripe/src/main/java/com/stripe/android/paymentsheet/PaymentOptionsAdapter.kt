@@ -63,6 +63,9 @@ internal class PaymentOptionsAdapter(
         }
     }
 
+    private val addNewPosition = 0
+    private val googlePayPosition get() = 1.takeIf { shouldShowGooglePay } ?: -1
+
     private val googlePayCount: Int get() = 1.takeIf { shouldShowGooglePay } ?: 0
 
     init {
@@ -87,7 +90,7 @@ internal class PaymentOptionsAdapter(
 
             // unselect Google Pay if Google Pay is enabled
             if (shouldShowGooglePay) {
-                notifyItemChanged(GOOGLE_PAY_POSITION)
+                notifyItemChanged(googlePayPosition)
             }
 
             paymentOptionSelectedListener(
@@ -111,7 +114,7 @@ internal class PaymentOptionsAdapter(
             }
 
             // select Google Pay item
-            notifyItemChanged(GOOGLE_PAY_POSITION)
+            notifyItemChanged(googlePayPosition)
             paymentOptionSelectedListener(PaymentSelection.GooglePay, isClick)
         }
     }
@@ -119,13 +122,13 @@ internal class PaymentOptionsAdapter(
     override fun getItemId(position: Int): Long {
         return if (shouldShowGooglePay) {
             when (position) {
-                ADD_NEW_POSITION -> ADD_NEW_ID
-                GOOGLE_PAY_POSITION -> GOOGLE_PAY_ID
+                addNewPosition -> ADD_NEW_ID
+                googlePayPosition -> GOOGLE_PAY_ID
                 else -> getPaymentMethodAtPosition(position).hashCode().toLong()
             }
         } else {
             when (position) {
-                ADD_NEW_POSITION -> ADD_NEW_ID
+                addNewPosition -> ADD_NEW_ID
                 else -> getPaymentMethodAtPosition(position).hashCode().toLong()
             }
         }
@@ -152,13 +155,13 @@ internal class PaymentOptionsAdapter(
     override fun getItemViewType(position: Int): Int {
         val type = if (shouldShowGooglePay) {
             when (position) {
-                ADD_NEW_POSITION -> ViewType.AddCard
-                GOOGLE_PAY_POSITION -> ViewType.GooglePay
+                addNewPosition -> ViewType.AddCard
+                googlePayPosition -> ViewType.GooglePay
                 else -> ViewType.Card
             }
         } else {
             when (position) {
-                ADD_NEW_POSITION -> ViewType.AddCard
+                addNewPosition -> ViewType.AddCard
                 else -> ViewType.Card
             }
         }
@@ -331,8 +334,5 @@ internal class PaymentOptionsAdapter(
     internal companion object {
         internal const val ADD_NEW_ID = 1234L
         internal const val GOOGLE_PAY_ID = 1235L
-
-        private const val ADD_NEW_POSITION = 0
-        private const val GOOGLE_PAY_POSITION = 1
     }
 }
