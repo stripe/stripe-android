@@ -38,7 +38,7 @@ internal class DefaultPrefsRepositoryTest {
     }
 
     @Test
-    fun `save then get GooglePay should return null if Google Pay is not available`() = testDispatcher.runBlockingTest {
+    fun `save then get GooglePay should return None if Google Pay is not available`() = testDispatcher.runBlockingTest {
         isGooglePayReady = false
 
         prefsRepository.savePaymentSelection(
@@ -46,7 +46,9 @@ internal class DefaultPrefsRepositoryTest {
         )
         assertThat(
             prefsRepository.getSavedSelection()
-        ).isNull()
+        ).isEqualTo(
+            SavedSelection.None
+        )
     }
 
     @Test

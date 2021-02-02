@@ -40,7 +40,7 @@ internal class DefaultFlowControllerInitializerTest {
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     emptyList(),
-                    null,
+                    SavedSelection.None,
                     isGooglePayReady = false
                 )
             )

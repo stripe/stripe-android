@@ -15,6 +15,6 @@ internal data class InitData(
     val paymentMethodTypes: List<PaymentMethod.Type>,
     // the customer's existing payment methods
     val paymentMethods: List<PaymentMethod>,
-    val savedSelection: SavedSelection?,
+    val savedSelection: SavedSelection,
     val isGooglePayReady: Boolean
 ) : Parcelable
