@@ -192,8 +192,8 @@ class PaymentSheetAddCardFragmentTest {
         createScenario(
             fragmentConfig = null
         ).onFragment { fragment ->
-            assertThat(fragment.sheetViewModel.fatal.value)
-                .isEqualTo(IllegalArgumentException("Failed to start add payment option fragment."))
+            assertThat(fragment.sheetViewModel.fatal.value?.message)
+                .isEqualTo("Failed to start add payment option fragment.")
         }
     }
 

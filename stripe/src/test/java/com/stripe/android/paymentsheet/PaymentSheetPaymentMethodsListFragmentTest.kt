@@ -156,8 +156,8 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         createScenario(
             fragmentConfig = null
         ).onFragment { fragment ->
-            assertThat(fragment.sheetViewModel.fatal.value)
-                .isEqualTo(IllegalArgumentException("Failed to start existing payment options fragment."))
+            assertThat(fragment.sheetViewModel.fatal.value?.message)
+                .isEqualTo("Failed to start existing payment options fragment.")
         }
     }
 
