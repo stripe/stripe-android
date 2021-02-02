@@ -30,7 +30,10 @@ internal class PaymentOptionsAdapter(
             if (sortedPaymentMethods != field) {
                 field = sortedPaymentMethods
                 notifyDataSetChanged()
-                updatePaymentSelection(defaultPaymentMethodId)
+
+                if (paymentSelection == null) {
+                    updatePaymentSelection(defaultPaymentMethodId)
+                }
             }
         }
 

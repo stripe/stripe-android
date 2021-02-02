@@ -13,10 +13,10 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.Address
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
+import com.stripe.android.paymentsheet.model.FragmentConfig
+import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import org.junit.Before
@@ -144,13 +144,7 @@ class PaymentSheetAddCardFragmentTest {
         createScenario().onFragment { fragment ->
             val activityViewModel = activityViewModel(fragment)
 
-            fragment.onConfigReady(
-                AddPaymentMethodConfig(
-                    paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    paymentMethods = emptyList(),
-                    isGooglePayReady = true
-                )
-            )
+            fragment.onConfigReady(FragmentConfigFixtures.DEFAULT)
             val paymentSelections = mutableListOf<PaymentSelection>()
             activityViewModel.selection.observeForever { paymentSelection ->
                 if (paymentSelection != null) {
@@ -171,13 +165,7 @@ class PaymentSheetAddCardFragmentTest {
     @Test
     fun `onConfigReady() should update header text`() {
         createScenario().onFragment { fragment ->
-            fragment.onConfigReady(
-                AddPaymentMethodConfig(
-                    paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    paymentMethods = emptyList(),
-                    isGooglePayReady = true
-                )
-            )
+            fragment.onConfigReady(FragmentConfigFixtures.DEFAULT)
 
             assertThat(fragment.addCardHeader.text.toString())
                 .isEqualTo("Pay $10.99 using")
@@ -199,6 +187,16 @@ class PaymentSheetAddCardFragmentTest {
         }
     }
 
+    @Test
+    fun `fragment started without FragmentConfig should emit fatal`() {
+        createScenario(
+            fragmentConfig = null
+        ).onFragment { fragment ->
+            assertThat(fragment.sheetViewModel.fatal.value?.message)
+                .isEqualTo("Failed to start add payment option fragment.")
+        }
+    }
+
     private fun activityViewModel(
         fragment: PaymentSheetAddCardFragment,
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
@@ -212,10 +210,12 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     private fun createScenario(
-        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT
     ): FragmentScenario<PaymentSheetAddCardFragment> {
         return launchFragmentInContainer<PaymentSheetAddCardFragment>(
             bundleOf(
+                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args
             ),
             R.style.StripePaymentSheetDefaultTheme,

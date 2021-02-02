@@ -114,7 +114,8 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         }
     }
 
-    protected companion object {
+    internal companion object {
+        const val EXTRA_FRAGMENT_CONFIG = "com.stripe.android.paymentsheet.extra_fragment_config"
         const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
     }
 }

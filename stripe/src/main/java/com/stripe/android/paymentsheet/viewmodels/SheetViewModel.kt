@@ -5,17 +5,19 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -45,6 +47,9 @@ internal abstract class SheetViewModel<TransitionTargetType>(
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
+    private val _savedSelection = MutableLiveData<SavedSelection>()
+    private val savedSelection: LiveData<SavedSelection> = _savedSelection
+
     private val _transition = MutableLiveData<TransitionTargetType?>(null)
     internal val transition: LiveData<TransitionTargetType?> = _transition
 
@@ -71,32 +76,40 @@ internal abstract class SheetViewModel<TransitionTargetType>(
         }
     }
 
-    fun fetchAddPaymentMethodConfig() = liveData {
-        emitSource(
-            MediatorLiveData<AddPaymentMethodConfig?>().also { configLiveData ->
-                listOf(paymentIntent, paymentMethods, isGooglePayReady).forEach { source ->
-                    configLiveData.addSource(source) {
-                        configLiveData.value = createAddPaymentMethodConfig()
-                    }
-                }
-            }.distinctUntilChanged()
-        )
+    init {
+        fetchSavedSelection()
     }
 
-    private fun createAddPaymentMethodConfig(): AddPaymentMethodConfig? {
+    fun fetchFragmentConfig() = MediatorLiveData<FragmentConfig?>().also { configLiveData ->
+        listOf(
+            savedSelection,
+            paymentIntent,
+            paymentMethods,
+            isGooglePayReady
+        ).forEach { source ->
+            configLiveData.addSource(source) {
+                configLiveData.value = createFragmentConfig()
+            }
+        }
+    }.distinctUntilChanged()
+
+    private fun createFragmentConfig(): FragmentConfig? {
         val paymentIntentValue = paymentIntent.value
         val paymentMethodsValue = paymentMethods.value
         val isGooglePayReadyValue = isGooglePayReady.value
+        val savedSelectionValue = savedSelection.value
 
         return if (
             paymentIntentValue != null &&
             paymentMethodsValue != null &&
-            isGooglePayReadyValue != null
+            isGooglePayReadyValue != null &&
+            savedSelectionValue != null
         ) {
-            AddPaymentMethodConfig(
+            FragmentConfig(
                 paymentIntent = paymentIntentValue,
                 paymentMethods = paymentMethodsValue,
-                isGooglePayReady = isGooglePayReadyValue
+                isGooglePayReady = isGooglePayReadyValue,
+                savedSelection = savedSelectionValue
             )
         } else {
             null
@@ -129,12 +142,13 @@ internal abstract class SheetViewModel<TransitionTargetType>(
         _userMessage.value = null
     }
 
-    fun getSavedSelection() = liveData {
-        emit(
-            withContext(workContext) {
+    private fun fetchSavedSelection() {
+        viewModelScope.launch {
+            val savedSelection = withContext(workContext) {
                 prefsRepository.getSavedSelection()
             }
-        )
+            _savedSelection.value = savedSelection
+        }
     }
 
     sealed class UserMessage {

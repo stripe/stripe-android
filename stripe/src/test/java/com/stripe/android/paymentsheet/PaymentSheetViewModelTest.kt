@@ -21,14 +21,17 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
+import com.stripe.android.paymentsheet.model.FragmentConfig
+import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -46,7 +49,7 @@ internal class PaymentSheetViewModelTest {
 
     private val googlePayRepository = FakeGooglePayRepository(true)
     private val stripeRepository: StripeRepository = FakeStripeRepository(PAYMENT_INTENT)
-    private val prefsRepository = mock<PrefsRepository>()
+    private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val paymentFlowResultProcessor = FakePaymentFlowResultProcessor()
@@ -102,13 +105,16 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should not attempt to confirm when no payment selection has been mode`() {
+    fun `checkout() should not attempt to confirm when no payment selection has been mode`() = testDispatcher.runBlockingTest {
         viewModel.checkout()
-        verify(prefsRepository).savePaymentSelection(null)
+        assertThat(prefsRepository.paymentSelectionArgs)
+            .containsExactly(null)
+        assertThat(prefsRepository.getSavedSelection())
+            .isEqualTo(SavedSelection.None)
     }
 
     @Test
-    fun `checkout() should confirm saved payment methods`() {
+    fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
         val confirmParams = mutableListOf<ConfirmPaymentIntentParams>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -118,7 +124,12 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        verify(prefsRepository).savePaymentSelection(paymentSelection)
+        assertThat(prefsRepository.paymentSelectionArgs)
+            .containsExactly(paymentSelection)
+        assertThat(prefsRepository.getSavedSelection())
+            .isEqualTo(
+                SavedSelection.PaymentMethod(paymentSelection.paymentMethod.id.orEmpty())
+            )
 
         assertThat(confirmParams)
             .containsExactly(
@@ -130,7 +141,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should confirm new payment methods`() {
+    fun `checkout() should confirm new payment methods`() = testDispatcher.runBlockingTest {
         val confirmParams = mutableListOf<ConfirmPaymentIntentParams>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -153,7 +164,10 @@ internal class PaymentSheetViewModelTest {
                 )
             )
 
-        verify(prefsRepository).savePaymentSelection(paymentSelection)
+        assertThat(prefsRepository.paymentSelectionArgs)
+            .containsExactly(paymentSelection)
+        assertThat(prefsRepository.getSavedSelection())
+            .isEqualTo(SavedSelection.None)
     }
 
     @Test
@@ -339,18 +353,17 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `fetchAddPaymentMethodConfig() when all data is ready should emit value`() {
+    fun `fetchFragmentConfig() when all data is ready should emit value`() {
         viewModel.fetchPaymentIntent()
         viewModel.fetchIsGooglePayReady()
         viewModel.updatePaymentMethods()
 
-        val configs = mutableListOf<AddPaymentMethodConfig>()
-        viewModel.fetchAddPaymentMethodConfig().observeForever { config ->
+        val configs = mutableListOf<FragmentConfig>()
+        viewModel.fetchFragmentConfig().observeForever { config ->
             if (config != null) {
                 configs.add(config)
             }
         }
-        viewModel.fetchAddPaymentMethodConfig()
 
         assertThat(configs)
             .hasSize(1)
@@ -367,7 +380,9 @@ internal class PaymentSheetViewModelTest {
             .isFalse()
 
         viewModel.transitionTo(
-            PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod
+            PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(
+                FragmentConfigFixtures.DEFAULT
+            )
         )
         assertThat(isEnabled)
             .isFalse()

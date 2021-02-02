@@ -179,7 +179,10 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             if (transitionTarget != null) {
                 onTransitionTarget(
                     transitionTarget,
-                    bundleOf(EXTRA_STARTER_ARGS to starterArgs)
+                    bundleOf(
+                        EXTRA_STARTER_ARGS to starterArgs,
+                        EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+                    )
                 )
             }
         }
@@ -195,12 +198,12 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             }
         }
 
-        viewModel.fetchAddPaymentMethodConfig().observe(this) { config ->
+        viewModel.fetchFragmentConfig().observe(this) { config ->
             if (config != null) {
                 val target = if (config.paymentMethods.isEmpty()) {
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                 } else {
-                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod
+                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
                 }
                 viewModel.transitionTo(target)
             }
@@ -224,7 +227,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     ) {
         supportFragmentManager.commit {
             when (transitionTarget) {
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
+                is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,
@@ -238,14 +241,14 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                         fragmentArgs
                     )
                 }
-                PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                is PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     replace(
                         fragmentContainerId,
                         PaymentSheetPaymentMethodsListFragment::class.java,
                         fragmentArgs
                     )
                 }
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                     replace(
                         fragmentContainerId,
                         PaymentSheetAddCardFragment::class.java,
@@ -330,6 +333,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     }
 
     internal companion object {
+        internal const val EXTRA_FRAGMENT_CONFIG = BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BasePaymentSheetActivity.EXTRA_STARTER_ARGS
     }
 }
