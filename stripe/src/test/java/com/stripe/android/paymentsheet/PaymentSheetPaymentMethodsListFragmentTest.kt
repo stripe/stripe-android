@@ -17,6 +17,7 @@ import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
@@ -150,6 +151,16 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         }
     }
 
+    @Test
+    fun `fragment started without FragmentConfig should emit fatal`() {
+        createScenario(
+            fragmentConfig = null
+        ).onFragment { fragment ->
+            assertThat(fragment.sheetViewModel.fatal.value)
+                .isEqualTo(IllegalArgumentException("Failed to start existing payment options fragment."))
+        }
+    }
+
     private fun recyclerView(it: PaymentSheetPaymentMethodsListFragment) =
         it.requireView().findViewById<RecyclerView>(R.id.recycler)
 
@@ -169,13 +180,11 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     ) = fragment.viewModels<BasePaymentMethodsListFragment.PaymentMethodsViewModel>().value
 
     private fun createScenario(
-        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS
+        fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG
     ): FragmentScenario<PaymentSheetPaymentMethodsListFragment> {
         return launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>(
             bundleOf(
-                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to FragmentConfigFixtures.DEFAULT.copy(
-                    paymentMethods = paymentMethods
-                ),
+                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
             ),
             R.style.StripePaymentSheetDefaultTheme,
@@ -187,6 +196,10 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         private val PAYMENT_METHODS = listOf(
             PaymentMethod("one", 0, false, PaymentMethod.Type.Card),
             PaymentMethod("two", 0, false, PaymentMethod.Type.Card)
+        )
+
+        private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT.copy(
+            paymentMethods = PAYMENT_METHODS
         )
     }
 }

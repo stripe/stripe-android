@@ -50,12 +50,18 @@ internal abstract class BasePaymentMethodsListFragment(
         val nullableConfig = arguments?.getParcelable<FragmentConfig>(BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG)
         if (nullableConfig == null) {
             sheetViewModel.onFatal(
-                IllegalArgumentException("Failed to start paymnt options fragment.")
+                IllegalArgumentException("Failed to start existing payment options fragment.")
             )
-            return
+        } else {
+            this.config = nullableConfig
+            onPostViewCreated(view, nullableConfig)
         }
-        this.config = nullableConfig
+    }
 
+    open fun onPostViewCreated(
+        view: View,
+        fragmentConfig: FragmentConfig
+    ) {
         // If we're returning to this fragment from elsewhere, we need to reset the selection to
         // whatever the user had selected previously
         sheetViewModel.updateSelection(fragmentViewModel.currentPaymentSelection)

@@ -15,6 +15,7 @@ import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
@@ -186,6 +187,16 @@ class PaymentSheetAddCardFragmentTest {
         }
     }
 
+    @Test
+    fun `fragment started without FragmentConfig should emit fatal`() {
+        createScenario(
+            fragmentConfig = null
+        ).onFragment { fragment ->
+            assertThat(fragment.sheetViewModel.fatal.value)
+                .isEqualTo(IllegalArgumentException("Failed to start add payment option fragment."))
+        }
+    }
+
     private fun activityViewModel(
         fragment: PaymentSheetAddCardFragment,
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
@@ -199,11 +210,12 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     private fun createScenario(
-        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT
     ): FragmentScenario<PaymentSheetAddCardFragment> {
         return launchFragmentInContainer<PaymentSheetAddCardFragment>(
             bundleOf(
-                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to FragmentConfigFixtures.DEFAULT,
+                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args
             ),
             R.style.StripePaymentSheetDefaultTheme,

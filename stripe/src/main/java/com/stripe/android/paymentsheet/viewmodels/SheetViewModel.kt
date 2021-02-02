@@ -144,9 +144,10 @@ internal abstract class SheetViewModel<TransitionTargetType>(
 
     private fun fetchSavedSelection() {
         viewModelScope.launch {
-            _savedSelection.value = withContext(workContext) {
+            val savedSelection = withContext(workContext) {
                 prefsRepository.getSavedSelection()
             }
+            _savedSelection.value = savedSelection
         }
     }
 

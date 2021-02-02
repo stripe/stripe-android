@@ -109,7 +109,7 @@ internal abstract class BaseAddCardFragment(
         val nullableConfig = arguments?.getParcelable<FragmentConfig>(BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG)
         if (activity == null || nullableConfig == null) {
             sheetViewModel.onFatal(
-                IllegalArgumentException("Failed to start paymnt options fragment.")
+                IllegalArgumentException("Failed to start add payment option fragment.")
             )
             return
         }

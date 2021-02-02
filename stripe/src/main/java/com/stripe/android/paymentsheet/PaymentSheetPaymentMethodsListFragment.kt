@@ -1,12 +1,12 @@
 package com.stripe.android.paymentsheet
 
-import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import java.util.Currency
 import java.util.Locale
 
@@ -39,8 +39,11 @@ internal class PaymentSheetPaymentMethodsListFragment(
         )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onPostViewCreated(
+        view: View,
+        fragmentConfig: FragmentConfig
+    ) {
+        super.onPostViewCreated(view, fragmentConfig)
 
         // Only fetch the payment methods list if we haven't already
         if (activityViewModel.paymentMethods.value == null) {
