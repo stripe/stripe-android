@@ -26,8 +26,9 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
@@ -105,9 +106,15 @@ internal abstract class BaseAddCardFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (activity == null) {
+        val nullableConfig = arguments?.getParcelable<FragmentConfig>(BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG)
+        if (activity == null || nullableConfig == null) {
+            sheetViewModel.onFatal(
+                IllegalArgumentException("Failed to start add payment option fragment.")
+            )
             return
         }
+
+        val config = nullableConfig
 
         _viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
 
@@ -162,11 +169,7 @@ internal abstract class BaseAddCardFragment(
 
         setupSaveCardCheckbox(saveCardCheckbox)
 
-        sheetViewModel.fetchAddPaymentMethodConfig().observe(viewLifecycleOwner) { config ->
-            if (config != null) {
-                onConfigReady(config)
-            }
-        }
+        onConfigReady(config)
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
@@ -325,7 +328,7 @@ internal abstract class BaseAddCardFragment(
         _viewBinding = null
     }
 
-    open fun onConfigReady(config: AddPaymentMethodConfig) {
+    open fun onConfigReady(config: FragmentConfig) {
         val shouldShowGooglePayButton = config.shouldShowGooglePayButton
         googlePayButton.setOnClickListener {
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)

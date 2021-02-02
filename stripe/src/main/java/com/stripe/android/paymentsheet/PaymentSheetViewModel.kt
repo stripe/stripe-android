@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -27,6 +26,7 @@ import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
@@ -233,11 +233,6 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    @VisibleForTesting
-    internal fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
-        _paymentMethods.value = paymentMethods
-    }
-
     internal fun startAnimateOut() = liveData {
         delay(animateOutMillis)
         emit(Unit)
@@ -288,21 +283,36 @@ internal class PaymentSheetViewModel internal constructor(
                 }
             }.getOrDefault(
                 emptyList()
-            ).let(::setPaymentMethods)
+            ).let {
+                _paymentMethods.value = it
+            }
         }
     }
 
-    internal enum class TransitionTarget(
-        val sheetMode: SheetMode
-    ) {
+    internal sealed class TransitionTarget {
+        abstract val fragmentConfig: FragmentConfig
+        abstract val sheetMode: SheetMode
+
         // User has saved PM's and is selected
-        SelectSavedPaymentMethod(SheetMode.Wrapped),
+        data class SelectSavedPaymentMethod(
+            override val fragmentConfig: FragmentConfig
+        ) : TransitionTarget() {
+            override val sheetMode = SheetMode.Wrapped
+        }
 
         // User has saved PM's and is adding a new one
-        AddPaymentMethodFull(SheetMode.Full),
+        data class AddPaymentMethodFull(
+            override val fragmentConfig: FragmentConfig
+        ) : TransitionTarget() {
+            override val sheetMode = SheetMode.Full
+        }
 
         // User has no saved PM's
-        AddPaymentMethodSheet(SheetMode.FullCollapsed)
+        data class AddPaymentMethodSheet(
+            override val fragmentConfig: FragmentConfig
+        ) : TransitionTarget() {
+            override val sheetMode = SheetMode.FullCollapsed
+        }
     }
 
     internal class Factory(

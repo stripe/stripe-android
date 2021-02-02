@@ -26,6 +26,7 @@ import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -52,13 +53,9 @@ internal class PaymentSheetActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val paymentMethods = listOf(
-        PaymentMethod("payment_method_id", 0, false, PaymentMethod.Type.Card)
-    )
-
     private val paymentFlowResultProcessor = FakePaymentFlowResultProcessor()
     private val googlePayRepository = FakeGooglePayRepository(true)
-    private val stripeRepository = FakeStripeRepository(PAYMENT_INTENT, paymentMethods)
+    private val stripeRepository = FakeStripeRepository(PAYMENT_INTENT, PAYMENT_METHODS)
     private val eventReporter = mock<EventReporter>()
 
     private val viewModel = PaymentSheetViewModel(
@@ -67,7 +64,7 @@ internal class PaymentSheetActivityTest {
         stripeRepository = stripeRepository,
         paymentFlowResultProcessor = paymentFlowResultProcessor,
         googlePayRepository = googlePayRepository,
-        prefsRepository = mock(),
+        prefsRepository = FakePrefsRepository(),
         eventReporter = eventReporter,
         args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         animateOutMillis = 0,
@@ -162,7 +159,11 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
                 .isEqualTo(WRAP_CONTENT)
 
-            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+            viewModel.transitionTo(
+                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+                    FragmentConfigFixtures.DEFAULT
+                )
+            )
             idleLooper()
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetAddCardFragment::class.java)
@@ -264,7 +265,7 @@ internal class PaymentSheetActivityTest {
             stripeRepository = FakeStripeRepository(PAYMENT_INTENT, listOf()),
             paymentFlowResultProcessor = paymentFlowResultProcessor,
             googlePayRepository = googlePayRepository,
-            prefsRepository = mock(),
+            prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
             animateOutMillis = 0,
@@ -367,5 +368,9 @@ internal class PaymentSheetActivityTest {
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        private val PAYMENT_METHODS = listOf(
+            PaymentMethod("payment_method_id", 0, false, PaymentMethod.Type.Card)
+        )
     }
 }
