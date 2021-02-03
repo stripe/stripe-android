@@ -37,7 +37,7 @@ internal class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Configuration(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Your customer-facing business name.
          *
