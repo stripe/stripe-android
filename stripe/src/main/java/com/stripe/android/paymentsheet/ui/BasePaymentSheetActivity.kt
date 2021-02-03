@@ -47,7 +47,6 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         }
 
         viewModel.processing.observe(this) { isProcessing ->
-            bottomSheetController.setDraggable(!isProcessing)
             updateRootViewClickHandling(isProcessing)
         }
 

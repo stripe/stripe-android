@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+`android:nestedScrollingEnabled=false` is required to prevent dragging when a `ScrollViews
+is nested in a `BottomSheetBehavior`.
+-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment"
-    android:layout_marginBottom="@dimen/stripe_paymentsheet_form_bottom_margin">
+    android:layout_marginBottom="@dimen/stripe_paymentsheet_form_bottom_margin"
+    android:nestedScrollingEnabled="false"
+    tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
