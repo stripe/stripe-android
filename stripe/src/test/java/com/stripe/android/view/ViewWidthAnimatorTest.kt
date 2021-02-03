@@ -35,7 +35,7 @@ class ViewWidthAnimatorTest {
     }
 
     @Test
-    fun animate_shouldSetViewWidthToEndWidth() {
+    fun `animate() should invoke callback at end`() {
         var isAnimationCompleted = false
         ViewWidthAnimator(view, 500L)
             .animate(START_WIDTH, END_WIDTH) {
@@ -47,8 +47,6 @@ class ViewWidthAnimatorTest {
 
         assertThat(isAnimationCompleted)
             .isTrue()
-        assertThat(view.width)
-            .isEqualTo(END_WIDTH)
     }
 
     private companion object {
