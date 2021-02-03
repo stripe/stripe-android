@@ -24,6 +24,8 @@ internal class PaymentOptionsViewModel(
     private val _userSelection = MutableLiveData<PaymentSelection>()
     val userSelection: LiveData<PaymentSelection> = _userSelection
 
+    override val newCard = args.newCard
+
     init {
         _isGooglePayReady.value = args.isGooglePayReady
         _paymentIntent.value = args.paymentIntent

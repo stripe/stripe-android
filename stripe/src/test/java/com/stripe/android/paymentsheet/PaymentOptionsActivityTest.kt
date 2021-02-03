@@ -44,7 +44,8 @@ class PaymentOptionsActivityTest {
             paymentMethods = emptyList(),
             sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = false
+            isGooglePayReady = false,
+            newCard = null
         ),
         prefsRepository = FakePrefsRepository(),
         eventReporter = eventReporter
@@ -134,7 +135,8 @@ class PaymentOptionsActivityTest {
                         paymentMethods = paymentMethods,
                         sessionId = SessionId(),
                         config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-                        isGooglePayReady = false
+                        isGooglePayReady = false,
+                        newCard = null
                     )
             )
         )

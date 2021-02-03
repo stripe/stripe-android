@@ -66,6 +66,8 @@ internal abstract class SheetViewModel<TransitionTargetType>(
     protected val _userMessage = MutableLiveData<UserMessage?>()
     internal val userMessage: LiveData<UserMessage?> = _userMessage
 
+    abstract val newCard: PaymentSelection.New.Card?
+
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         transition.switchMap { transitionTarget ->
             selection.switchMap { paymentSelection ->

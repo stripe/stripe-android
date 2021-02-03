@@ -174,7 +174,8 @@ class DefaultFlowControllerTest {
                     paymentMethods = emptyList(),
                     sessionId = SESSION_ID,
                     config = null,
-                    isGooglePayReady = false
+                    isGooglePayReady = false,
+                    newCard = null
                 )
             )
     }

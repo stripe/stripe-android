@@ -26,7 +26,8 @@ class PaymentOptionsViewModelTest {
             paymentMethods = emptyList(),
             sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = true
+            isGooglePayReady = true,
+            newCard = null
         ),
         prefsRepository = FakePrefsRepository(),
         eventReporter = eventReporter

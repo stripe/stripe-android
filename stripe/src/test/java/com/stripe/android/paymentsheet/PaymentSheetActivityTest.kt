@@ -132,7 +132,8 @@ internal class PaymentSheetActivityTest {
     fun `updates buy button state`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isTrue()
 
             viewModel.updateSelection(PaymentSelection.GooglePay)
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
@@ -311,13 +312,13 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isFalse()
+                .isTrue()
             // wait for bottom sheet to animate in
             testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
-                .isFalse()
+                .isTrue()
 
             viewModel.updateSelection(PaymentSelection.GooglePay)
             idleLooper()
