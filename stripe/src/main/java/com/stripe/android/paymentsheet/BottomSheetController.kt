@@ -22,6 +22,7 @@ internal class BottomSheetController(
     fun setup() {
         bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
         bottomSheetBehavior.isHideable = true
+        bottomSheetBehavior.isDraggable = false
         // Start hidden and then animate in after delay
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
@@ -53,10 +54,6 @@ internal class BottomSheetController(
         // When the bottom sheet finishes animating to its new state,
         // the callback will finish the activity
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-    }
-
-    fun setDraggable(isDraggable: Boolean) {
-        bottomSheetBehavior.isDraggable = isDraggable
     }
 
     internal companion object {
