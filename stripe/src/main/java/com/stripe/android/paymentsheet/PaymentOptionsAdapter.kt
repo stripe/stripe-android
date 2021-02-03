@@ -91,7 +91,7 @@ internal class PaymentOptionsAdapter(
 
             // the first payment method
             items.indexOfFirst { it is Item.ExistingPaymentMethod }.takeIf { it != -1 }
-        ).firstOrNull() ?: -1
+        ).firstOrNull() ?: NO_POSITION
     }
 
     private fun onItemSelected(
