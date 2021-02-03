@@ -291,10 +291,12 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-    internal var expirationDateHintRes: Int by Delegates.observable(
+    internal var expirationDateHintRes: Int? by Delegates.observable(
         R.string.expiry_date_hint
     ) { _, _, newValue ->
-        expiryTextInputLayout.placeholderText = resources.getString(newValue)
+        expiryTextInputLayout.placeholderText = newValue?.let {
+            resources.getString(it)
+        }.orEmpty()
     }
 
     private var showCvcIconInCvcField: Boolean = false
