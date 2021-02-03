@@ -145,6 +145,7 @@ class PaymentSheet internal constructor(
         }
 
         companion object {
+            @JvmStatic
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
