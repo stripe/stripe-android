@@ -218,7 +218,7 @@ internal abstract class BaseAddCardFragment(
             )
         }
 
-        cardMultilineWidget.expirationDateHintRes = null
+        cardMultilineWidget.expirationDatePlaceholderRes = null
         cardMultilineWidget.expiryTextInputLayout.hint = getString(R.string.stripe_paymentsheet_expiration_date_hint)
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT

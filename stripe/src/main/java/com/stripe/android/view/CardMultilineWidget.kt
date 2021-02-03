@@ -291,7 +291,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-    internal var expirationDateHintRes: Int? by Delegates.observable(
+    internal var expirationDatePlaceholderRes: Int? by Delegates.observable(
         R.string.expiry_date_hint
     ) { _, _, newValue ->
         expiryTextInputLayout.placeholderText = newValue?.let {
@@ -764,8 +764,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private companion object {
         private const val CARD_MULTILINE_TOKEN = "CardMultilineView"
-        private const val CARD_NUMBER_HINT_DELAY = 120L
-        private const val COMMON_HINT_DELAY = 90L
 
         private val DEFAULT_CARD_BRAND_ICON_SUPPLIER = CardBrandIconSupplier { cardBrand ->
             CardBrandIcon(
