@@ -114,7 +114,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         viewModel.fetchFragmentConfig().observe(this) { config ->
             if (config != null) {
                 viewModel.transitionTo(
-                    if (starterArgs.paymentMethods.isEmpty()) {
+                    if (starterArgs.paymentMethods.isEmpty() && starterArgs.newCard == null) {
                         PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                     } else {
                         PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(config)

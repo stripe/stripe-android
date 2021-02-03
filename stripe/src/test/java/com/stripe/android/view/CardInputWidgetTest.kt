@@ -6,9 +6,6 @@ import android.view.ViewGroup
 import androidx.core.view.updateLayoutParams
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.reset
-import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
@@ -27,7 +24,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.testharness.TestFocusChangeListener
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
@@ -69,8 +65,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeEditText
     }
 
-    private val onGlobalFocusChangeListener: TestFocusChangeListener = TestFocusChangeListener()
-    private val cardInputListener: CardInputListener = mock()
+    private val cardInputListener = FakeCardInputListener()
 
     private val accountRangeStore = DefaultCardAccountRangeStore(context)
 
@@ -95,6 +90,8 @@ internal class CardInputWidgetTest {
             BinFixtures.DINERSCLUB14,
             listOf(AccountRangeFixtures.DINERSCLUB14)
         )
+
+        cardInputWidget.setCardInputListener(cardInputListener)
     }
 
     @AfterTest
@@ -119,9 +116,6 @@ internal class CardInputWidgetTest {
                 width = 48
                 marginEnd = 12
             }
-
-            it.viewTreeObserver
-                .addOnGlobalFocusChangeListener(onGlobalFocusChangeListener)
 
             it.cardNumberEditText.workContext = testDispatcher
         }
@@ -623,17 +617,14 @@ internal class CardInputWidgetTest {
 
     @Test
     fun onCompleteCardNumber_whenValid_shiftsFocusToExpiryDate() {
-        cardInputWidget.setCardInputListener(cardInputListener)
-
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        verify(cardInputListener).onCardComplete()
-        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
-
-        assertThat(onGlobalFocusChangeListener.oldFocusId)
-            .isEqualTo(cardNumberEditText.id)
-        assertThat(onGlobalFocusChangeListener.newFocusId)
-            .isEqualTo(expiryEditText.id)
+        assertThat(cardInputListener.cardCompleteCalls)
+            .isEqualTo(1)
+        assertThat(cardInputListener.focusedFields)
+            .isEqualTo(
+                listOf(CardInputListener.FocusField.ExpiryDate)
+            )
     }
 
     @Test
@@ -646,12 +637,14 @@ internal class CardInputWidgetTest {
             .isTrue()
 
         ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
-        verify(cardInputListener)
-            .onFocusChange(CardInputListener.FocusField.CardNumber)
-        assertThat(onGlobalFocusChangeListener.oldFocusId)
-            .isEqualTo(expiryEditText.id)
-        assertThat(onGlobalFocusChangeListener.newFocusId)
-            .isEqualTo(cardNumberEditText.id)
+
+        assertThat(cardInputListener.focusedFields)
+            .isEqualTo(
+                listOf(
+                    CardInputListener.FocusField.ExpiryDate,
+                    CardInputListener.FocusField.CardNumber
+                )
+            )
 
         val subString = VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1)
         assertThat(cardNumberEditText.fieldText)
@@ -678,29 +671,39 @@ internal class CardInputWidgetTest {
 
     @Test
     fun onDeleteFromCvcDate_whenEmpty_shiftsFocusToExpiryAndDeletesDigit() {
-        cardInputWidget.setCardInputListener(cardInputListener)
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        verify(cardInputListener).onCardComplete()
-        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
+        assertThat(cardInputListener.cardCompleteCalls)
+            .isEqualTo(1)
+        assertThat(cardInputListener.focusedFields)
+            .isEqualTo(
+                listOf(CardInputListener.FocusField.ExpiryDate)
+            )
 
         expiryEditText.append("12")
         expiryEditText.append("79")
 
-        verify(cardInputListener).onExpirationComplete()
-        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.Cvc)
+        assertThat(cardInputListener.expirationCompleteCalls)
+            .isEqualTo(1)
+        assertThat(cardInputListener.focusedFields)
+            .isEqualTo(
+                listOf(
+                    CardInputListener.FocusField.ExpiryDate,
+                    CardInputListener.FocusField.Cvc
+                )
+            )
         assertThat(cvcEditText.hasFocus())
             .isTrue()
 
-        // Clearing already-verified data.
-        reset(cardInputListener)
-
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
-        assertThat(onGlobalFocusChangeListener.oldFocusId)
-            .isEqualTo(cvcEditText.id)
-        assertThat(onGlobalFocusChangeListener.newFocusId)
-            .isEqualTo(expiryEditText.id)
+        assertThat(cardInputListener.focusedFields)
+            .isEqualTo(
+                listOf(
+                    CardInputListener.FocusField.ExpiryDate,
+                    CardInputListener.FocusField.Cvc,
+                    CardInputListener.FocusField.ExpiryDate
+                )
+            )
 
         val expectedResult = "12/7"
         assertThat(expiryEditText.fieldText)
@@ -757,10 +760,14 @@ internal class CardInputWidgetTest {
         cvcEditText.requestFocus()
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        assertThat(onGlobalFocusChangeListener.oldFocusId)
-            .isEqualTo(cvcEditText.id)
-        assertThat(onGlobalFocusChangeListener.newFocusId)
-            .isEqualTo(expiryEditText.id)
+        assertThat(cardInputListener.focusedFields)
+            .isEqualTo(
+                listOf(
+                    CardInputListener.FocusField.ExpiryDate,
+                    CardInputListener.FocusField.Cvc,
+                    CardInputListener.FocusField.ExpiryDate
+                )
+            )
     }
 
     @Test
@@ -1264,10 +1271,14 @@ internal class CardInputWidgetTest {
         assertThat(cvcEditText.fieldText)
             .isEmpty()
 
-        assertThat(onGlobalFocusChangeListener.oldFocusId)
-            .isEqualTo(cvcEditText.id)
-        assertThat(onGlobalFocusChangeListener.newFocusId)
-            .isEqualTo(cardNumberEditText.id)
+        assertThat(cardInputListener.focusedFields)
+            .isEqualTo(
+                listOf(
+                    CardInputListener.FocusField.ExpiryDate,
+                    CardInputListener.FocusField.Cvc,
+                    CardInputListener.FocusField.CardNumber
+                )
+            )
     }
 
     @Test
@@ -1288,10 +1299,13 @@ internal class CardInputWidgetTest {
         assertThat(postalCodeEditText.fieldText)
             .isEmpty()
 
-        assertThat(onGlobalFocusChangeListener.oldFocusId)
-            .isEqualTo(postalCodeEditText.id)
-        assertThat(onGlobalFocusChangeListener.newFocusId)
-            .isEqualTo(cardNumberEditText.id)
+        assertThat(cardInputListener.focusedFields)
+            .isEqualTo(
+                listOf(
+                    CardInputListener.FocusField.Cvc,
+                    CardInputListener.FocusField.CardNumber
+                )
+            )
     }
 
     @Test
@@ -1554,6 +1568,29 @@ internal class CardInputWidgetTest {
     private fun updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
         idleLooper()
+    }
+
+    private class FakeCardInputListener : CardInputListener {
+        internal val focusedFields = mutableListOf<CardInputListener.FocusField>()
+        var cardCompleteCalls = 0
+        var expirationCompleteCalls = 0
+        var cvcCompleteCalls = 0
+
+        override fun onFocusChange(focusField: CardInputListener.FocusField) {
+            focusedFields.add(focusField)
+        }
+
+        override fun onCardComplete() {
+            cardCompleteCalls++
+        }
+
+        override fun onExpirationComplete() {
+            expirationCompleteCalls++
+        }
+
+        override fun onCvcComplete() {
+            cvcCompleteCalls++
+        }
     }
 
     private companion object {

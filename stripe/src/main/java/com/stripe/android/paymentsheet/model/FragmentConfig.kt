@@ -19,4 +19,26 @@ internal data class FragmentConfig(
 ) : Parcelable {
     val shouldShowGooglePayButton: Boolean
         get() = isGooglePayReady && paymentMethods.isEmpty()
+
+    val sortedPaymentMethods: List<PaymentMethod>
+        get() {
+            val primaryPaymentMethodIndex = when (savedSelection) {
+                is SavedSelection.PaymentMethod -> {
+                    paymentMethods.indexOfFirst {
+                        it.id == savedSelection.id
+                    }
+                }
+                else -> -1
+            }
+            return if (primaryPaymentMethodIndex != -1) {
+                val mutablePaymentMethods = paymentMethods.toMutableList()
+                mutablePaymentMethods.removeAt(primaryPaymentMethodIndex)
+                    .also { primaryPaymentMethod ->
+                        mutablePaymentMethods.add(0, primaryPaymentMethod)
+                    }
+                mutablePaymentMethods
+            } else {
+                paymentMethods
+            }
+        }
 }

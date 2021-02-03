@@ -5,7 +5,6 @@ import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -20,6 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
@@ -41,17 +41,25 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
     @Test
     fun `resets payment method selection when shown`() {
-        val savedPaymentMethod = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val paymentSelection = PaymentSelection.Saved(paymentMethod)
 
-        val scenario = createScenario()
+        val scenario = createScenario(
+            fragmentConfig = FRAGMENT_CONFIG.copy(
+                isGooglePayReady = true,
+                paymentMethods = listOf(paymentMethod),
+                savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
+            )
+        )
         scenario.onFragment {
-            assertThat(activityViewModel(it).selection.value).isNull()
-            fragmentViewModel(it).currentPaymentSelection = savedPaymentMethod
+            assertThat(activityViewModel(it).selection.value)
+                .isEqualTo(paymentSelection)
         }
+
         scenario.recreate()
         scenario.onFragment {
             assertThat(activityViewModel(it).selection.value)
-                .isEqualTo(savedPaymentMethod)
+                .isEqualTo(paymentSelection)
         }
     }
 
@@ -63,8 +71,8 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
             idleLooper()
 
-            assertThat(adapter.paymentMethods)
-                .isEqualTo(PAYMENT_METHODS)
+            assertThat(adapter.itemCount)
+                .isEqualTo(4)
         }
     }
 
@@ -82,8 +90,6 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             adapter.paymentOptionSelectedListener(savedPaymentMethod, true)
             idleLooper()
 
-            assertThat(fragmentViewModel(it).currentPaymentSelection)
-                .isEqualTo(savedPaymentMethod)
             assertThat(activityViewModel.selection.value)
                 .isEqualTo(savedPaymentMethod)
         }
@@ -121,9 +127,6 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             idleLooper()
 
             val recycler = recyclerView(fragment)
-            val adapter = recycler.adapter as PaymentOptionsAdapter
-            adapter.shouldShowGooglePay = true
-            idleLooper()
 
             val googlePayView = recycler.children.toList()[1]
             googlePayView.performClick()
@@ -174,10 +177,6 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             )
         }.value
     }
-
-    private fun fragmentViewModel(
-        fragment: PaymentSheetPaymentMethodsListFragment
-    ) = fragment.viewModels<BasePaymentMethodsListFragment.PaymentMethodsViewModel>().value
 
     private fun createScenario(
         fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG
