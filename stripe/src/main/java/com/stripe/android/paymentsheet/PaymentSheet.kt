@@ -46,6 +46,11 @@ class PaymentSheet internal constructor(
         var merchantDisplayName: String,
 
         /**
+         * If set, the customer can select a previously saved payment method within PaymentSheet.
+         */
+        var customer: CustomerConfiguration? = null,
+
+        /**
          * Configuration related to the Stripe Customer making a payment.
          *
          * If set, PaymentSheet displays Google Pay as a payment option.
@@ -57,12 +62,7 @@ class PaymentSheet internal constructor(
          *
          * See [BillingAddressCollectionLevel]
          */
-        var billingAddressCollection: BillingAddressCollectionLevel = BillingAddressCollectionLevel.Automatic,
-
-        /**
-         * If set, the customer can select a previously saved payment method within PaymentSheet.
-         */
-        var customer: CustomerConfiguration? = null
+        var billingAddressCollection: BillingAddressCollectionLevel = BillingAddressCollectionLevel.Automatic
     ) : Parcelable
 
     enum class BillingAddressCollectionLevel {
