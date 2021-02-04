@@ -45,6 +45,6 @@ class PaymentSheetConfigBottomSheet : BottomSheetDialogFragment() {
     }
 
     internal companion object {
-        const val TAG = "PaymentSheetConfigBottomSheet"
+        val TAG = PaymentSheetConfigBottomSheet::class.java.simpleName
     }
 }
