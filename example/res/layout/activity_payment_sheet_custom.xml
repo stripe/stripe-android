@@ -30,15 +30,7 @@
                 android:enabled="true"
                 android:text="Launch Inline" />
 
-            <Button
-                android:id="@+id/clear"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Clear Secrets"/>
-
         </LinearLayout>
-
-
 
         <TextView
             android:id="@+id/status"

@@ -31,16 +31,11 @@ class LaunchPaymentSheetCustomActivity : AppCompatActivity() {
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
             viewBinding.launch.isEnabled = !it
-            viewBinding.clear.isEnabled = !it
         }
         viewModel.status.observe(this) {
             viewBinding.status.text = it
         }
 
-        viewBinding.clear.setOnClickListener {
-            viewModel.clearKeys()
-            fetchEphemeralKey()
-        }
         viewBinding.launch.setOnClickListener {
             // TODO(mshafrir-stripe): handle click
         }
