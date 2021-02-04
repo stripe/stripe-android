@@ -1,7 +1,6 @@
 package com.stripe.example.activity
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -30,22 +29,16 @@ class LaunchPaymentSheetCustomActivity : AppCompatActivity() {
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
-            viewBinding.launch.isEnabled = !it
+            viewBinding.buyButton.isEnabled = !it
         }
         viewModel.status.observe(this) {
             viewBinding.status.text = it
         }
 
-        viewBinding.launch.setOnClickListener {
+        viewBinding.buyButton.setOnClickListener {
             // TODO(mshafrir-stripe): handle click
         }
         fetchEphemeralKey()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        // handle result
     }
 
     private fun fetchEphemeralKey() {
