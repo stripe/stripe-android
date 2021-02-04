@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -311,7 +312,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     override fun setActivityResult(result: PaymentResult) {
         setResult(
-            result.resultCode,
+            Activity.RESULT_OK,
             Intent()
                 .putExtras(PaymentSheetContract.Result(result).toBundle())
         )
