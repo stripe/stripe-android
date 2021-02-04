@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  * The result a payment sheet operation.
  */
 sealed class PaymentResult(
-    val resultCode: Int
+    internal val resultCode: Int
 ) : Parcelable {
 
     @Parcelize
