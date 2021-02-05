@@ -81,11 +81,10 @@ internal class PaymentSheetViewModel internal constructor(
         if (isGooglePayReady.value == null) {
             if (args.isGooglePayEnabled) {
                 viewModelScope.launch {
-                    withContext(workContext) {
-                        _isGooglePayReady.postValue(
-                            googlePayRepository.isReady().first()
-                        )
+                    val isGooglePayReady = withContext(workContext) {
+                        googlePayRepository.isReady().first()
                     }
+                    _isGooglePayReady.value = isGooglePayReady
                 }
             } else {
                 _isGooglePayReady.value = false
@@ -94,9 +93,11 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun updatePaymentMethods() {
-        customerConfig?.let {
-            updatePaymentMethods(it)
-        } ?: _paymentMethods.postValue(emptyList())
+        if (customerConfig != null) {
+            updatePaymentMethods(customerConfig)
+        } else {
+            _paymentMethods.value = emptyList()
+        }
     }
 
     fun fetchPaymentIntent() {
