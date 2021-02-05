@@ -128,6 +128,11 @@ internal abstract class BaseAddCardFragment(
             updateSelection()
         }
 
+        billingAddressView.onFocus = {
+            // If the user focuses on the billing address view, expand to full screen
+            sheetViewModel.updateMode(SheetMode.Full)
+        }
+
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
             // update selection whenever card details changes
             addCardViewModel.isCardValid = isValid

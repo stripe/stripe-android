@@ -45,6 +45,8 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
+    internal var onFocus: () -> Unit = {}
+
     private val viewBinding = StripeBillingAddressLayoutBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -135,15 +137,28 @@ internal class BillingAddressView @JvmOverloads constructor(
         stateView,
     )
 
+    private val allFields = setOf(
+        address1View,
+        address2View,
+        cityView,
+        stateView,
+        postalCodeView,
+        countryView
+    )
+
     init {
         configureCountryAutoComplete()
         configureForLevel()
 
-        setOf(
-            postalCodeView, address1View, address2View, cityView, stateView
-        ).forEach { editText ->
+        allFields.forEach { editText ->
             editText.doAfterTextChanged {
                 _address.value = createAddress()
+            }
+
+            editText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    onFocus()
+                }
             }
         }
     }
