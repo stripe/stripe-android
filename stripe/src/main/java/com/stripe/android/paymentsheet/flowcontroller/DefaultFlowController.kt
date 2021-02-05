@@ -368,7 +368,7 @@ internal class DefaultFlowController internal constructor(
         return when {
             paymentIntent.status == StripeIntent.Status.Succeeded ||
                 paymentIntent.status == StripeIntent.Status.RequiresCapture -> {
-                PaymentResult.Succeeded(paymentIntent)
+                PaymentResult.Completed(paymentIntent)
             }
             paymentIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
                 PaymentResult.Canceled(

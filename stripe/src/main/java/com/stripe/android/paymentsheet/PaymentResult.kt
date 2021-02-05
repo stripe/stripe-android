@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 sealed class PaymentResult : Parcelable {
 
     @Parcelize
-    data class Succeeded(
+    data class Completed(
         val paymentIntent: PaymentIntent
     ) : PaymentResult()
 
