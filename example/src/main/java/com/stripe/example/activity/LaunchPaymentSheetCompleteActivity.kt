@@ -89,7 +89,7 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
             is PaymentResult.Failed -> {
                 "MC Completed with status: Failed(${paymentResult.error.message}"
             }
-            is PaymentResult.Succeeded -> {
+            is PaymentResult.Completed -> {
                 """
                 MC Completed with status: Succeeded
 
