@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripePaymentController
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
@@ -15,6 +16,8 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 
@@ -71,14 +74,29 @@ internal class FlowControllerFactory(
             )
         }
 
+        val paymentMethodsRepository = PaymentMethodsRepository.Api(
+            stripeRepository = stripeRepository,
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
+            workContext = Dispatchers.IO
+        )
+
+        val paymentInteRepository = PaymentIntentRepository.Api(
+            stripeRepository = stripeRepository,
+            requestOptions = ApiRequest.Options(
+                config.publishableKey,
+                config.stripeAccountId
+            ),
+            workContext = Dispatchers.IO
+        )
+
         return DefaultFlowController(
             activity = activity,
             flowControllerInitializer = DefaultFlowControllerInitializer(
-                stripeRepository,
+                paymentIntentRepository = paymentInteRepository,
+                paymentMethodsRepository = paymentMethodsRepository,
                 prefsRepositoryFactory = prefsRepositoryFactory,
                 isGooglePayReadySupplier = isGooglePayReadySupplier,
-                publishableKey = config.publishableKey,
-                stripeAccountId = config.stripeAccountId,
                 workContext = Dispatchers.IO
             ),
             paymentControllerFactory = paymentControllerFactory,
