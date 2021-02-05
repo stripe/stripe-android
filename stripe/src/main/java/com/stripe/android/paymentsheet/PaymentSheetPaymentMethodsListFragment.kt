@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.view.View
 import android.widget.TextView
-import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -45,24 +44,15 @@ internal class PaymentSheetPaymentMethodsListFragment(
     ) {
         super.onPostViewCreated(view, fragmentConfig)
 
-        // Only fetch the payment methods list if we haven't already
-        if (activityViewModel.paymentMethods.value == null) {
-            activityViewModel.updatePaymentMethods()
+        val paymentIntent = fragmentConfig.paymentIntent
+        if (paymentIntent.currency != null && paymentIntent.amount != null) {
+            updateHeader(paymentIntent.amount, paymentIntent.currency)
+        } else {
+            viewBinding.header.setText(R.string.stripe_paymentsheet_pay_using)
         }
-
-        viewBinding.header.setText(R.string.stripe_paymentsheet_pay_using)
-        activityViewModel.paymentIntent
-            .observe(viewLifecycleOwner) { paymentIntent ->
-                if (paymentIntent == null) {
-                    // ignore null
-                } else if (paymentIntent.currency != null && paymentIntent.amount != null) {
-                    updateHeader(paymentIntent.amount, paymentIntent.currency)
-                }
-            }
     }
 
-    @VisibleForTesting
-    internal fun updateHeader(
+    private fun updateHeader(
         amount: Long,
         currencyCode: String
     ) {
