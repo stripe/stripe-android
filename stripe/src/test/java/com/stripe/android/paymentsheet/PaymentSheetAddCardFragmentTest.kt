@@ -197,6 +197,33 @@ class PaymentSheetAddCardFragmentTest {
         }
     }
 
+    @Test
+    fun `cardErrors should react to input validity`() {
+        createScenario().onFragment { fragment ->
+            assertThat(fragment.cardErrors.isVisible)
+                .isFalse()
+
+            fragment.cardMultilineWidget.setCardNumber("4242424242424249")
+            fragment.cardMultilineWidget.setExpiryDate(1, 2010)
+            assertThat(fragment.cardErrors.text)
+                .isEqualTo("Your card's number is invalid.")
+            assertThat(fragment.cardErrors.isVisible)
+                .isTrue()
+
+            fragment.cardMultilineWidget.setCardNumber("4242424242424242")
+            assertThat(fragment.cardErrors.text)
+                .isEqualTo("Your card's expiration year is invalid.")
+            assertThat(fragment.cardErrors.isVisible)
+                .isTrue()
+
+            fragment.cardMultilineWidget.setExpiryDate(1, 2030)
+            assertThat(fragment.cardErrors.text.toString())
+                .isEmpty()
+            assertThat(fragment.cardErrors.isVisible)
+                .isFalse()
+        }
+    }
+
     private fun activityViewModel(
         fragment: PaymentSheetAddCardFragment,
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY

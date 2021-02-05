@@ -57,6 +57,11 @@ internal abstract class BaseAddCardFragment(
         viewBinding.billingAddress
     }
 
+    @VisibleForTesting
+    internal val cardErrors: TextView by lazy {
+        viewBinding.cardErrors
+    }
+
     /**
      * A [PaymentMethodCreateParams] instance of card and billing address details are valid;
      * otherwise, `null`.
@@ -281,21 +286,40 @@ internal abstract class BaseAddCardFragment(
 
         cardMultilineWidget.cardNumberErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
-                onCardError(errorMessage)
+                onCardError(
+                    AddCardViewModel.Field.Number,
+                    errorMessage
+                )
             }
         cardMultilineWidget.expirationDateErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
-                onCardError(errorMessage)
+                onCardError(
+                    AddCardViewModel.Field.Date,
+                    errorMessage
+                )
             }
         cardMultilineWidget.cvcErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
-                onCardError(errorMessage)
+                onCardError(
+                    AddCardViewModel.Field.Cvc,
+                    errorMessage
+                )
             }
         cardMultilineWidget.postalCodeErrorListener = null
     }
 
-    private fun onCardError(errorMessage: String?) {
-        // TODO(mshafrir-stripe): render error message
+    private fun onCardError(
+        field: AddCardViewModel.Field,
+        errorMessage: String?
+    ) {
+        addCardViewModel.cardErrors[field] = errorMessage
+
+        val error = AddCardViewModel.Field.values()
+            .map { addCardViewModel.cardErrors[it] }
+            .firstOrNull { !it.isNullOrBlank() }
+
+        cardErrors.text = error
+        cardErrors.isVisible = error != null
     }
 
     private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
@@ -341,5 +365,13 @@ internal abstract class BaseAddCardFragment(
 
     internal class AddCardViewModel : ViewModel() {
         var isCardValid: Boolean = false
+
+        val cardErrors = mutableMapOf<Field, String?>()
+
+        enum class Field {
+            Number,
+            Date,
+            Cvc
+        }
     }
 }
