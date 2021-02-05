@@ -91,7 +91,7 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
             }
             is PaymentResult.Completed -> {
                 """
-                MC Completed with status: Succeeded
+                MC Completed with status: Completed
 
                 ${paymentResult.paymentIntent}
                 """.trimIndent()
