@@ -301,7 +301,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 animateOut(
-                    PaymentResult.Succeeded(paymentIntentResult.intent)
+                    PaymentResult.Completed(paymentIntentResult.intent)
                 )
             }
             else -> {

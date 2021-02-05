@@ -281,7 +281,7 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onGooglePayResult() when payment intent result should invoke callback with canceled result`() {
+    fun `onGooglePayResult() when payment intent result should invoke callback with Completed result`() {
         flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -300,7 +300,7 @@ class DefaultFlowControllerTest {
 
         verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
         verify(paymentResultCallback).onPaymentResult(
-            PaymentResult.Succeeded(paymentIntent)
+            PaymentResult.Completed(paymentIntent)
         )
     }
 
@@ -358,7 +358,7 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onPaymentFlowResult when succeeded should invoke callback with Succeeded`() {
+    fun `onPaymentFlowResult when succeeded should invoke callback with Completed`() {
         paymentFlowResultProcessor.paymentIntentResult = PaymentIntentResult(
             PaymentIntentFixtures.PI_WITH_SHIPPING,
             StripeIntentResult.Outcome.SUCCEEDED
@@ -373,7 +373,7 @@ class DefaultFlowControllerTest {
 
         verify(paymentResultCallback).onPaymentResult(
             argWhere { paymentResult ->
-                (paymentResult as? PaymentResult.Succeeded)?.paymentIntent ==
+                (paymentResult as? PaymentResult.Completed)?.paymentIntent ==
                     PaymentIntentFixtures.PI_WITH_SHIPPING
             }
         )
