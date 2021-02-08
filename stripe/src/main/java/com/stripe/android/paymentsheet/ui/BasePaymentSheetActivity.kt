@@ -66,6 +66,10 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
             bottomSheet.updateLayoutParams { height = mode.height }
             bottomSheetController.updateState(mode)
         }
+
+        // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
+        // `rootView`'s click listener
+        bottomSheet.isClickable = true
     }
 
     override fun finish() {
