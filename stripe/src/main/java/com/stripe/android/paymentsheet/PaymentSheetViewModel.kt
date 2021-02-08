@@ -14,12 +14,10 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
@@ -30,6 +28,8 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +42,8 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentSheetViewModel internal constructor(
     private val publishableKey: String,
     private val stripeAccountId: String?,
-    private val stripeRepository: StripeRepository,
+    private val paymentIntentRepository: PaymentIntentRepository,
+    private val paymentMethodsRepository: PaymentMethodsRepository,
     private val paymentFlowResultProcessor: PaymentFlowResultProcessor,
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
@@ -93,31 +94,24 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun updatePaymentMethods() {
-        if (customerConfig != null) {
-            updatePaymentMethods(customerConfig)
-        } else {
-            _paymentMethods.value = emptyList()
+        viewModelScope.launch {
+            _paymentMethods.value = customerConfig?.let {
+                paymentMethodsRepository.get(
+                    it,
+                    PaymentMethod.Type.Card
+                )
+            }.orEmpty()
         }
     }
 
     fun fetchPaymentIntent() {
         viewModelScope.launch {
-            val result = withContext(workContext) {
-                runCatching {
-                    val paymentIntent = stripeRepository.retrievePaymentIntent(
-                        args.clientSecret,
-                        ApiRequest.Options(publishableKey, stripeAccountId)
-                    )
-                    requireNotNull(paymentIntent) {
-                        "Could not parse PaymentIntent."
-                    }
-                }
-            }
-            result.fold(
+            runCatching {
+                paymentIntentRepository.get(args.clientSecret)
+            }.fold(
                 onSuccess = ::onPaymentIntentResponse,
                 onFailure = {
                     _paymentIntent.value = null
-
                     onFatal(it)
                 }
             )
@@ -265,33 +259,6 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun updatePaymentMethods(
-        customerConfig: PaymentSheet.CustomerConfiguration
-    ) {
-        viewModelScope.launch {
-            withContext(workContext) {
-                runCatching {
-                    stripeRepository.getPaymentMethods(
-                        ListPaymentMethodsParams(
-                            customerId = customerConfig.id,
-                            paymentMethodType = PaymentMethod.Type.Card
-                        ),
-                        publishableKey,
-                        PRODUCT_USAGE,
-                        ApiRequest.Options(
-                            customerConfig.ephemeralKeySecret,
-                            stripeAccountId
-                        )
-                    )
-                }
-            }.getOrDefault(
-                emptyList()
-            ).let {
-                _paymentMethods.value = it
-            }
-        }
-    }
-
     internal sealed class TransitionTarget {
         abstract val fragmentConfig: FragmentConfig
         abstract val sheetMode: SheetMode
@@ -361,10 +328,24 @@ internal class PaymentSheetViewModel internal constructor(
                 )
             } ?: PrefsRepository.Noop()
 
+            val paymentIntentRepository = PaymentIntentRepository.Api(
+                stripeRepository = stripeRepository,
+                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                workContext = Dispatchers.IO
+            )
+
+            val paymentMethodsRepository = PaymentMethodsRepository.Api(
+                stripeRepository = stripeRepository,
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+                workContext = Dispatchers.IO
+            )
+
             return PaymentSheetViewModel(
                 publishableKey,
                 stripeAccountId,
-                stripeRepository,
+                paymentIntentRepository,
+                paymentMethodsRepository,
                 DefaultPaymentFlowResultProcessor(
                     application,
                     publishableKey,
@@ -387,8 +368,6 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private companion object {
-        private val PRODUCT_USAGE = setOf("PaymentSheet")
-
         // the delay before the payment sheet is dismissed
         private const val ANIMATE_OUT_MILLIS = 1500L
     }

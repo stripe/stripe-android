@@ -1,19 +1,17 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -138,32 +136,12 @@ internal class DefaultFlowControllerInitializerTest {
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
     ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
-            FakeStripeRepository(paymentIntent),
+            PaymentIntentRepository.Static(paymentIntent),
+            PaymentMethodsRepository.Static(PAYMENT_METHODS),
             { _, _ -> prefsRepository },
             { true },
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            null,
             testDispatcher
         )
-    }
-
-    private class FakeStripeRepository(
-        private val paymentIntent: PaymentIntent
-    ) : AbsFakeStripeRepository() {
-        override suspend fun retrievePaymentIntent(
-            clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
-        ) = paymentIntent
-
-        override suspend fun getPaymentMethods(
-            listPaymentMethodsParams: ListPaymentMethodsParams,
-            publishableKey: String,
-            productUsageTokens: Set<String>,
-            requestOptions: ApiRequest.Options
-        ): List<PaymentMethod> {
-            return PAYMENT_METHODS
-        }
     }
 
     private companion object {

@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet
 
-import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentOptionsListFragment(
@@ -32,13 +30,7 @@ internal class PaymentOptionsListFragment(
         )
     }
 
-    override fun onPostViewCreated(
-        view: View,
-        fragmentConfig: FragmentConfig
-    ) {
-        super.onPostViewCreated(view, fragmentConfig)
-        viewBinding.header.setText(R.string.stripe_paymentsheet_select_payment_method)
-    }
+    override fun createHeaderText() = getString(R.string.stripe_paymentsheet_select_payment_method)
 
     override fun onPaymentOptionSelected(
         paymentSelection: PaymentSelection,

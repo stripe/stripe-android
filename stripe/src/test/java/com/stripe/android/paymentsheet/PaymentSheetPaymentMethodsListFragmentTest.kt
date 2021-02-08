@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import android.widget.TextView
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
@@ -23,12 +25,16 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetPaymentMethodsListFragmentTest {
+    @get:Rule
+    val rule = InstantTaskExecutorRule()
+
     private val eventReporter = mock<EventReporter>()
 
     @Before
@@ -139,7 +145,8 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     @Test
     fun `updateHeader() should update header view`() {
         createScenario().onFragment { fragment ->
-            assertThat(fragment.header.text.toString())
+            val header = requireNotNull(fragment.view?.findViewById<TextView>(R.id.header))
+            assertThat(header.text.toString())
                 .isEqualTo("Pay $10.99 using")
         }
     }

@@ -1,24 +1,22 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultFlowControllerInitializer(
-    private val stripeRepository: StripeRepository,
+    private val paymentIntentRepository: PaymentIntentRepository,
+    private val paymentMethodsRepository: PaymentMethodsRepository,
     private val prefsRepositoryFactory: (String, Boolean) -> PrefsRepository,
     private val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean,
-    private val publishableKey: String,
-    private val stripeAccountId: String?,
     private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
     private val paymentIntentValidator = PaymentIntentValidator()
@@ -136,47 +134,15 @@ internal class DefaultFlowControllerInitializer(
         customerConfig: PaymentSheet.CustomerConfiguration
     ): List<PaymentMethod> {
         return types.flatMap { type ->
-            retrievePaymentMethodsByType(type, customerConfig)
+            paymentMethodsRepository.get(customerConfig, type)
         }
-    }
-
-    /**
-     * Return empty list on failure.
-     */
-    private suspend fun retrievePaymentMethodsByType(
-        type: PaymentMethod.Type,
-        customerConfig: PaymentSheet.CustomerConfiguration
-    ): List<PaymentMethod> {
-        return runCatching {
-            stripeRepository.getPaymentMethods(
-                ListPaymentMethodsParams(
-                    customerId = customerConfig.id,
-                    paymentMethodType = type
-                ),
-                publishableKey,
-                PRODUCT_USAGE,
-                ApiRequest.Options(customerConfig.ephemeralKeySecret, stripeAccountId)
-            )
-        }.getOrDefault(emptyList())
     }
 
     private suspend fun retrievePaymentIntent(
         clientSecret: String
     ): PaymentIntent {
         return paymentIntentValidator.requireValid(
-            requireNotNull(
-                stripeRepository.retrievePaymentIntent(
-                    clientSecret,
-                    ApiRequest.Options(
-                        publishableKey,
-                        stripeAccountId
-                    )
-                )
-            )
+            paymentIntentRepository.get(clientSecret)
         )
-    }
-
-    private companion object {
-        private val PRODUCT_USAGE = setOf("PaymentSheet")
     }
 }
