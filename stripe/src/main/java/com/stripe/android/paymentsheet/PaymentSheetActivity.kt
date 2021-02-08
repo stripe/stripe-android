@@ -174,7 +174,9 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             replace(
                 fragmentContainerId,
                 PaymentSheetLoadingFragment::class.java,
-                null
+                bundleOf(
+                    EXTRA_STARTER_ARGS to starterArgs
+                )
             )
         }
 
