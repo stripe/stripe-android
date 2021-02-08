@@ -28,6 +28,8 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -55,13 +57,13 @@ internal class PaymentSheetActivityTest {
 
     private val paymentFlowResultProcessor = FakePaymentFlowResultProcessor()
     private val googlePayRepository = FakeGooglePayRepository(true)
-    private val stripeRepository = FakeStripeRepository(PAYMENT_INTENT, PAYMENT_METHODS)
     private val eventReporter = mock<EventReporter>()
 
     private val viewModel = PaymentSheetViewModel(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
-        stripeRepository = stripeRepository,
+        paymentIntentRepository = PaymentIntentRepository.Static(PAYMENT_INTENT),
+        paymentMethodsRepository = PaymentMethodsRepository.Static(PAYMENT_METHODS),
         paymentFlowResultProcessor = paymentFlowResultProcessor,
         googlePayRepository = googlePayRepository,
         prefsRepository = FakePrefsRepository(),
@@ -263,7 +265,8 @@ internal class PaymentSheetActivityTest {
         val viewModel = PaymentSheetViewModel(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = null,
-            stripeRepository = FakeStripeRepository(PAYMENT_INTENT, listOf()),
+            paymentIntentRepository = PaymentIntentRepository.Static(PAYMENT_INTENT),
+            paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
             paymentFlowResultProcessor = paymentFlowResultProcessor,
             googlePayRepository = googlePayRepository,
             prefsRepository = FakePrefsRepository(),

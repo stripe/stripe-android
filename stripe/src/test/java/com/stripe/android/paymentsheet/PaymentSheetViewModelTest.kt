@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
@@ -26,6 +27,8 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -81,7 +84,12 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() {
         val viewModel = createViewModel(
-            stripeRepository = FailingStripeRepository()
+            paymentMethodsRepository = PaymentMethodsRepository.Api(
+                stripeRepository = FailingStripeRepository(),
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+                workContext = testDispatcher
+            )
         )
         var paymentMethods: List<PaymentMethod>? = null
         viewModel.paymentMethods.observeForever {
@@ -270,7 +278,13 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `fetchPaymentIntent() should propagate errors`() {
         val viewModel = createViewModel(
-            stripeRepository = FailingStripeRepository()
+            paymentIntentRepository = PaymentIntentRepository.Api(
+                stripeRepository = FailingStripeRepository(),
+                requestOptions = ApiRequest.Options(
+                    apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                ),
+                workContext = testDispatcher
+            )
         )
         var error: Throwable? = null
         viewModel.fatal.observeForever {
@@ -284,15 +298,11 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `fetchPaymentIntent() should fail if confirmationMethod=manual`() {
         val viewModel = createViewModel(
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun retrievePaymentIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentIntentRepository = PaymentIntentRepository.Static(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
                 )
-            }
+            )
         )
         var error: Throwable? = null
         viewModel.fatal.observeForever {
@@ -309,13 +319,9 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `fetchPaymentIntent() should fail if status != requires_payment_method`() {
         val viewModel = createViewModel(
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun retrievePaymentIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
-            }
+            paymentIntentRepository = PaymentIntentRepository.Static(
+                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
+            )
         )
         var error: Throwable? = null
         viewModel.fatal.observeForever {
@@ -398,12 +404,14 @@ internal class PaymentSheetViewModelTest {
 
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        stripeRepository: StripeRepository = this.stripeRepository
+        paymentIntentRepository: PaymentIntentRepository = PaymentIntentRepository.Static(PAYMENT_INTENT),
+        paymentMethodsRepository: PaymentMethodsRepository = PaymentMethodsRepository.Static(PAYMENT_METHODS)
     ): PaymentSheetViewModel {
         return PaymentSheetViewModel(
             "publishable_key",
             "stripe_account_id",
-            stripeRepository,
+            paymentIntentRepository = paymentIntentRepository,
+            paymentMethodsRepository = paymentMethodsRepository,
             paymentFlowResultProcessor,
             googlePayRepository,
             prefsRepository,
@@ -448,6 +456,8 @@ internal class PaymentSheetViewModelTest {
         private const val CLIENT_SECRET = PaymentSheetFixtures.CLIENT_SECRET
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
         private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
+
+        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_RESULT = PaymentIntentResult(
