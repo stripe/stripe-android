@@ -14,6 +14,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
@@ -98,11 +99,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
             }
         }
         viewModel.progressData.observe(this) {
-            viewBinding.progressBar.visibility = if (it) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            viewBinding.progressBar.isVisible = it
         }
 
         setupRecyclerView()
@@ -130,7 +127,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
                 footer.accessibilityTraversalAfter = viewBinding.recycler.id
             }
             viewBinding.footerContainer.addView(footer)
-            viewBinding.footerContainer.visibility = View.VISIBLE
+            viewBinding.footerContainer.isVisible = true
         }
 
         fetchCustomerPaymentMethods()
