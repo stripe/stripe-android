@@ -212,7 +212,8 @@ class CardMultilineWidget @JvmOverloads constructor(
                 .takeIf { shouldShowPostalCode }
 
             return CardParams(
-                setOf(CARD_MULTILINE_TOKEN),
+                brand = brand,
+                loggingTokens = setOf(CARD_MULTILINE_TOKEN),
                 number = validatedCardNumber?.value.orEmpty(),
                 expMonth = expirationDate.month,
                 expYear = expirationDate.year,
