@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -29,6 +30,11 @@ internal class DefaultPaymentFlowResultProcessorTest {
         false,
         testDispatcher
     )
+
+    @AfterTest
+    fun after() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `processPaymentIntent() when shouldCancelSource=true should return canceled PaymentIntent`() = testDispatcher.runBlockingTest {

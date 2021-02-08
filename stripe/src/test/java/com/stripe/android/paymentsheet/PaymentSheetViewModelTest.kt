@@ -18,7 +18,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -51,7 +50,6 @@ internal class PaymentSheetViewModelTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val googlePayRepository = FakeGooglePayRepository(true)
-    private val stripeRepository: StripeRepository = FakeStripeRepository(PAYMENT_INTENT)
     private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
@@ -429,27 +427,6 @@ internal class PaymentSheetViewModelTest {
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options
         ): List<PaymentMethod> = error("Request failed.")
-    }
-
-    private class FakeStripeRepository(
-        var paymentIntent: PaymentIntent
-    ) : AbsFakeStripeRepository() {
-        override suspend fun retrievePaymentIntent(
-            clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
-        ): PaymentIntent {
-            return paymentIntent
-        }
-
-        override suspend fun getPaymentMethods(
-            listPaymentMethodsParams: ListPaymentMethodsParams,
-            publishableKey: String,
-            productUsageTokens: Set<String>,
-            requestOptions: ApiRequest.Options
-        ): List<PaymentMethod> {
-            return listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        }
     }
 
     private companion object {

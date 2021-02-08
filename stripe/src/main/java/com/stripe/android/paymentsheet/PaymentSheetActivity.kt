@@ -10,6 +10,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -148,6 +149,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewModel.fetchPaymentIntent()
 
         setContentView(viewBinding.root)
+        appbar.isInvisible = true
 
         viewModel.fatal.observe(this) {
             animateOut(
@@ -259,6 +261,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             }
         }
         viewBinding.buyButton.isVisible = true
+        appbar.isVisible = true
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
