@@ -23,11 +23,6 @@ internal abstract class BasePaymentMethodsListFragment(
 
     protected lateinit var config: FragmentConfig
 
-    private var _viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
-    protected val viewBinding get() = requireNotNull(_viewBinding)
-
-    abstract fun transitionToAddPaymentMethod()
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -36,20 +31,15 @@ internal abstract class BasePaymentMethodsListFragment(
             sheetViewModel.onFatal(
                 IllegalArgumentException("Failed to start existing payment options fragment.")
             )
-        } else {
-            this.config = nullableConfig
-            onPostViewCreated(view, nullableConfig)
+            return
         }
-    }
 
-    open fun onPostViewCreated(
-        view: View,
-        fragmentConfig: FragmentConfig
-    ) {
+        this.config = nullableConfig
+
         // reset the mode in case we're returning from the back stack
         sheetViewModel.updateMode(SheetMode.Wrapped)
 
-        _viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
+        val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         viewBinding.recycler.layoutManager = LinearLayoutManager(
             activity,
             LinearLayoutManager.HORIZONTAL,
@@ -72,12 +62,12 @@ internal abstract class BasePaymentMethodsListFragment(
         )
 
         eventReporter.onShowExistingPaymentOptions()
+
+        viewBinding.header.text = createHeaderText()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _viewBinding = null
-    }
+    abstract fun transitionToAddPaymentMethod()
+    abstract fun createHeaderText(): String
 
     open fun onPaymentOptionSelected(
         paymentSelection: PaymentSelection,
