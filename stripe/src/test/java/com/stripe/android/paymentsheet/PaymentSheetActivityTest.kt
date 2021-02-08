@@ -14,14 +14,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ListPaymentMethodsParams
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -344,37 +339,8 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    private class FakeStripeRepository(
-        val paymentIntent: PaymentIntent,
-        val paymentMethods: List<PaymentMethod>
-    ) : AbsFakeStripeRepository() {
-        override suspend fun getPaymentMethods(
-            listPaymentMethodsParams: ListPaymentMethodsParams,
-            publishableKey: String,
-            productUsageTokens: Set<String>,
-            requestOptions: ApiRequest.Options
-        ): List<PaymentMethod> {
-            return paymentMethods
-        }
-
-        override suspend fun confirmPaymentIntent(
-            confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-            options: ApiRequest.Options,
-            expandFields: List<String>
-        ): PaymentIntent = paymentIntent
-
-        override suspend fun retrievePaymentIntent(
-            clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
-        ): PaymentIntent = paymentIntent
-    }
-
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-
-        private val PAYMENT_METHODS = listOf(
-            PaymentMethod("payment_method_id", 0, false, PaymentMethod.Type.Card)
-        )
+        private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 }
