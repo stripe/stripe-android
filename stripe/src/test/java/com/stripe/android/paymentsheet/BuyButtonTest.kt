@@ -1,15 +1,34 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.view.ActivityScenarioFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class BuyButtonTest {
-    private val buyButton = BuyButton(ApplicationProvider.getApplicationContext())
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
+    private val buyButton: BuyButton by lazy {
+        activityScenarioFactory.createView {
+            BuyButton(it)
+        }
+    }
+
+    @BeforeTest
+    fun setup() {
+        PaymentConfiguration.init(
+            context,
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        )
+    }
 
     @Test
     fun `onReadyState() should update label`() {
