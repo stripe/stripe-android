@@ -25,13 +25,12 @@ internal class PaymentSheetAddCardFragment(
         sheetViewModel.checkout()
     }
 
-    override fun onConfigReady(config: FragmentConfig) {
-        super.onConfigReady(config)
-
+    override fun createHeaderText(
+        config: FragmentConfig
+    ): String {
         val amount = config.paymentIntent.amount
         val currencyCode = config.paymentIntent.currency
-
-        addCardHeader.text = if (amount != null && currencyCode != null) {
+        return if (amount != null && currencyCode != null) {
             val currency = Currency.getInstance(
                 currencyCode.toUpperCase(Locale.ROOT)
             )
