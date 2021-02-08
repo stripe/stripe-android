@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -24,6 +25,11 @@ internal class DefaultPrefsRepositoryTest {
         { isGooglePayReady },
         testDispatcher
     )
+
+    @AfterTest
+    fun after() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `save GooglePay should return GooglePay`() = testDispatcher.runBlockingTest {

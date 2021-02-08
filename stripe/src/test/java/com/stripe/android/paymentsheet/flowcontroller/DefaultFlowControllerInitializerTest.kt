@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -26,6 +27,11 @@ internal class DefaultFlowControllerInitializerTest {
 
     private val prefsRepository = FakePrefsRepository()
     private val initializer = createInitializer()
+
+    @AfterTest
+    fun after() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `init without configuration should return expect result`() = testDispatcher.runBlockingTest {
