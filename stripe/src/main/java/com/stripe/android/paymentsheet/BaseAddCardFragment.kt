@@ -10,7 +10,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
@@ -44,30 +43,18 @@ internal abstract class BaseAddCardFragment(
 ) : Fragment() {
     abstract val sheetViewModel: SheetViewModel<*>
 
-    private var _viewBinding: FragmentPaymentsheetAddCardBinding? = null
-    protected val viewBinding get() = requireNotNull(_viewBinding)
-
-    @VisibleForTesting
-    internal val cardMultilineWidget: CardMultilineWidget by lazy {
-        viewBinding.cardMultilineWidget
-    }
-
-    @VisibleForTesting
-    internal val billingAddressView: BillingAddressView by lazy {
-        viewBinding.billingAddress
-    }
-
-    @VisibleForTesting
-    internal val cardErrors: TextView by lazy {
-        viewBinding.cardErrors
-    }
+    private lateinit var cardMultilineWidget: CardMultilineWidget
+    private lateinit var billingAddressView: BillingAddressView
+    private lateinit var cardErrors: TextView
+    private lateinit var googlePayButton: View
+    private lateinit var saveCardCheckbox: CheckBox
+    private lateinit var addCardHeader: TextView
 
     /**
      * A [PaymentMethodCreateParams] instance of card and billing address details are valid;
      * otherwise, `null`.
      */
-    @VisibleForTesting
-    internal val paymentMethodParams: PaymentMethodCreateParams?
+    private val paymentMethodParams: PaymentMethodCreateParams?
         get() {
             val cardParams = billingAddressView.address.value?.let { billingAddress ->
                 cardMultilineWidget.cardParams?.also { cardParams ->
@@ -80,18 +67,10 @@ internal abstract class BaseAddCardFragment(
             }
         }
 
-    @VisibleForTesting
-    internal val googlePayButton: View by lazy { viewBinding.googlePayButton }
-
-    @VisibleForTesting
-    internal val saveCardCheckbox: CheckBox by lazy { viewBinding.saveCardCheckbox }
-
-    @VisibleForTesting
-    internal val addCardHeader: TextView by lazy { viewBinding.addCardHeader }
-
     private val addCardViewModel: AddCardViewModel by viewModels()
 
     abstract fun onGooglePaySelected()
+    abstract fun createHeaderText(config: FragmentConfig): String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -119,7 +98,13 @@ internal abstract class BaseAddCardFragment(
             return
         }
 
-        _viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
+        val viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
+        cardMultilineWidget = viewBinding.cardMultilineWidget
+        billingAddressView = viewBinding.billingAddress
+        cardErrors = viewBinding.cardErrors
+        googlePayButton = viewBinding.googlePayButton
+        saveCardCheckbox = viewBinding.saveCardCheckbox
+        addCardHeader = viewBinding.addCardHeader
 
         billingAddressView.level = sheetViewModel.config?.billingAddressCollection
             ?: PaymentSheet.BillingAddressCollectionLevel.Automatic
@@ -177,7 +162,14 @@ internal abstract class BaseAddCardFragment(
 
         setupSaveCardCheckbox(saveCardCheckbox)
 
-        onConfigReady(config)
+        val shouldShowGooglePayButton = config.shouldShowGooglePayButton
+        googlePayButton.setOnClickListener {
+            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
+        }
+        googlePayButton.isVisible = shouldShowGooglePayButton
+        viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
+        addCardHeader.isVisible = !shouldShowGooglePayButton
+        addCardHeader.text = createHeaderText(config)
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
@@ -349,21 +341,6 @@ internal abstract class BaseAddCardFragment(
                 selection.copy(shouldSavePaymentMethod = shouldSaveCard())
             )
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _viewBinding = null
-    }
-
-    open fun onConfigReady(config: FragmentConfig) {
-        val shouldShowGooglePayButton = config.shouldShowGooglePayButton
-        googlePayButton.setOnClickListener {
-            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
-        }
-        googlePayButton.isVisible = shouldShowGooglePayButton
-        viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
-        addCardHeader.isVisible = !shouldShowGooglePayButton
     }
 
     private fun shouldSaveCard() = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
