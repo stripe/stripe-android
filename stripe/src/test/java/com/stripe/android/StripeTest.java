@@ -47,6 +47,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -372,7 +373,7 @@ public class StripeTest {
         assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
     }
 
-    @Test
+    @Ignore("Flaky test")
     public void createSourceSynchronous_withWeChatPayParams_passesIntegrationTest()
             throws StripeException {
         final String weChatAppId = "wx65997d6307c3827d";
