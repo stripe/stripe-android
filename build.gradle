@@ -13,6 +13,7 @@ buildscript {
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:2.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.4.0"
     }
 }
 
@@ -69,4 +70,11 @@ nexusStaging {
     username = project.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
     password = project.hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
     packageGroup = GROUP
+}
+
+apply plugin: 'binary-compatibility-validator'
+
+apiValidation {
+    ignoredPackages += ["com.stripe.android.databinding"]
+    ignoredProjects += ["example"]
 }
