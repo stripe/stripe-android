@@ -36,9 +36,9 @@
             app:title="@string/secure_checkout" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ProgressBar
+    <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress_bar"
-        style="@style/Widget.AppCompat.ProgressBar"
+        style="@style/Widget.MaterialComponents.CircularProgressIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
