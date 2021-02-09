@@ -77,3 +77,8 @@ jobs:
                   api-level: ${{ matrix.api-level }}
                   arch: x86
                   script: ./gradlew connectedCheck --stacktrace
+            - uses: actions/upload-artifact@v2
+              if: failure()
+              with:
+                  name: unit-test-report
+                  path: example/build/reports/androidTests/connected/flavors/debugAndroidTest/
