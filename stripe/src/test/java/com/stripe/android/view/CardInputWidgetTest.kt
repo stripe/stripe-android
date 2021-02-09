@@ -140,6 +140,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -185,6 +186,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -234,6 +236,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -279,6 +282,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -330,6 +334,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.DinersClub,
                     loggingTokens = ATTRIBUTION,
                     number = DINERS_CLUB_14_NO_SPACES,
                     expMonth = 12,
@@ -373,6 +378,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.DinersClub,
                     loggingTokens = ATTRIBUTION,
                     number = DINERS_CLUB_14_NO_SPACES,
                     expMonth = 12,
@@ -481,6 +487,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -511,6 +518,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -543,6 +551,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -1190,6 +1199,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -1232,6 +1242,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -1553,6 +1564,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,

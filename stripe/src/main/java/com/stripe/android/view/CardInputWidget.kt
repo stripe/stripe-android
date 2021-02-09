@@ -255,7 +255,8 @@ class CardInputWidget @JvmOverloads constructor(
                 else -> {
                     shouldShowErrorIcon = false
                     return CardParams(
-                        setOf(LOGGING_TOKEN),
+                        brand = brand,
+                        loggingTokens = setOf(LOGGING_TOKEN),
                         number = cardNumber.value,
                         expMonth = expirationDate.month,
                         expYear = expirationDate.year,
