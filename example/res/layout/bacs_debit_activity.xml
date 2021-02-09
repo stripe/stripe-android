@@ -10,14 +10,13 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:visibility="invisible"
-            style="?android:attr/progressBarStyleHorizontal"
-            />
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
