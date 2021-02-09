@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.example.R
 import com.stripe.example.paymentsheet.PaymentSheetViewModel
@@ -84,6 +85,22 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
                     )
                 }
             }
+    }
+
+    protected fun onPaymentSheetResult(
+        paymentResult: PaymentResult
+    ) {
+        viewModel.status.value = paymentResult.toString()
+    }
+
+    protected fun onError(error: Throwable) {
+        viewModel.status.postValue(
+            """
+            ${viewModel.status.value}
+            
+            Failed: ${error.message}
+            """.trimIndent()
+        )
     }
 
     abstract fun onRefreshEphemeralKey()

@@ -2,7 +2,6 @@ package com.stripe.example.activity
 
 import android.os.Bundle
 import android.view.View
-import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.example.databinding.ActivityPaymentSheetCompleteBinding
 
@@ -41,7 +40,7 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         customerConfig: PaymentSheet.CustomerConfiguration?
     ) {
         viewModel.createPaymentIntent(
-            "us",
+            COUNTRY_CODE,
             customerId = customerConfig?.id
         ).observe(this) {
             it.fold(
@@ -54,9 +53,7 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
                         customerConfig
                     )
                 },
-                onFailure = {
-                    viewModel.status.postValue(viewModel.status.value + "\nFailed: ${it.message}")
-                }
+                onFailure = ::onError
             )
         }
     }
@@ -79,28 +76,11 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         )
     }
 
-    private fun onPaymentSheetResult(
-        paymentResult: PaymentResult
-    ) {
-        val statusString = when (paymentResult) {
-            is PaymentResult.Canceled -> {
-                "MC Completed with status: Cancelled"
-            }
-            is PaymentResult.Failed -> {
-                "MC Completed with status: Failed(${paymentResult.error.message}"
-            }
-            is PaymentResult.Completed -> {
-                """
-                MC Completed with status: Completed
-
-                ${paymentResult.paymentIntent}
-                """.trimIndent()
-            }
-        }
-        viewModel.status.value = viewModel.status.value + "\n\n$statusString"
-    }
-
     override fun onRefreshEphemeralKey() {
         fetchEphemeralKey()
+    }
+
+    private companion object {
+        private const val COUNTRY_CODE = "us"
     }
 }

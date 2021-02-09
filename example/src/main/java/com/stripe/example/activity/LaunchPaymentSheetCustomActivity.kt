@@ -3,7 +3,6 @@ package com.stripe.example.activity
 import android.os.Bundle
 import android.view.View
 import com.stripe.android.paymentsheet.PaymentOptionCallback
-import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -45,7 +44,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         customerConfig: PaymentSheet.CustomerConfiguration?
     ) {
         viewModel.createPaymentIntent(
-            "us",
+            COUNTRY_CODE,
             customerConfig?.id
         ).observe(this) { responseResult ->
             responseResult.fold(
@@ -54,9 +53,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                     val paymentIntentClientSecret = json.getString("secret")
                     onPaymentIntent(paymentIntentClientSecret, customerConfig)
                 },
-                onFailure = {
-                    viewModel.status.postValue("${viewModel.status.value}\nFailed: ${it.message}")
-                }
+                onFailure = ::onError
             )
         }
     }
@@ -94,23 +91,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         onPaymentOption(flowController.getPaymentOption())
     }
 
-    private fun onPaymentSheetResult(
-        paymentResult: PaymentResult
-    ) {
-        val statusString = when (paymentResult) {
-            is PaymentResult.Canceled -> {
-                "MC Completed with status: Cancelled"
-            }
-            is PaymentResult.Failed -> {
-                "MC Completed with status: Failed(${paymentResult.error.message}"
-            }
-            is PaymentResult.Completed -> {
-                "MC Completed with status: Completed"
-            }
-        }
-        viewModel.status.value = viewModel.status.value + "\n\n$statusString"
-    }
-
     private fun onPaymentOption(paymentOption: PaymentOption?) {
         if (paymentOption != null) {
             viewBinding.paymentMethod.text = paymentOption.label
@@ -122,7 +102,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             )
             viewBinding.buyButton.isEnabled = true
         } else {
-            viewBinding.paymentMethod.text = "N/A"
+            viewBinding.paymentMethod.text = "Select"
             viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 null,
                 null,
@@ -141,5 +121,9 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         } else {
             createPaymentSheetFlowController(null)
         }
+    }
+
+    private companion object {
+        private const val COUNTRY_CODE = "us"
     }
 }
