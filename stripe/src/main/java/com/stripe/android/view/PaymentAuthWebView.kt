@@ -8,7 +8,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
-import android.view.View
 import android.webkit.ConsoleMessage
 import android.webkit.JsResult
 import android.webkit.URLUtil
@@ -18,6 +17,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isGone
 import com.stripe.android.Logger
 import com.stripe.android.R
 import com.stripe.android.view.PaymentAuthWebView.PaymentAuthWebViewClient.Companion.BLANK_PAGE
@@ -138,7 +138,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
 
         private fun hideProgressBar() {
             logger.debug("PaymentAuthWebViewClient#hideProgressBar()")
-            progressBar.visibility = View.GONE
+            progressBar.isGone = true
         }
 
         private fun isAuthenticateUrl(url: String) = isAllowedUrl(url, AUTHENTICATE_URLS)
