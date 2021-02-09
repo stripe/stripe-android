@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.CardUtils
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -7,6 +8,11 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class CardParams internal constructor(
+    /**
+     * The likely [CardBrand] based on the [number].
+     */
+    val brand: CardBrand,
+
     private val loggingTokens: Set<String> = emptySet(),
 
     /**
@@ -79,6 +85,7 @@ data class CardParams internal constructor(
      */
     var metadata: Map<String, String>? = null
 ) : TokenParams(Token.Type.Card, loggingTokens) {
+    val last4: String get() = number.takeLast(4)
 
     @JvmOverloads
     constructor(
@@ -152,6 +159,7 @@ data class CardParams internal constructor(
          */
         metadata: Map<String, String>? = null
     ) : this(
+        brand = CardUtils.getPossibleCardBrand(number),
         loggingTokens = emptySet(),
         number = number,
         expMonth = expMonth,
