@@ -7,10 +7,10 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentSheet internal constructor(
+class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
-    constructor(
+    internal constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
@@ -20,7 +20,7 @@ internal class PaymentSheet internal constructor(
     /**
      * Create PaymentSheet with a Customer
      */
-    fun present(
+    internal fun present(
         paymentIntentClientSecret: String,
         configuration: Configuration
     ) {
@@ -30,7 +30,7 @@ internal class PaymentSheet internal constructor(
     /**
      * Create PaymentSheet without a Customer
      */
-    fun present(
+    internal fun present(
         paymentIntentClientSecret: String
     ) {
         paymentSheetLauncher.present(paymentIntentClientSecret)
@@ -111,7 +111,7 @@ internal class PaymentSheet internal constructor(
         }
     }
 
-    interface FlowController {
+    internal interface FlowController {
         fun getPaymentOption(): PaymentOption?
 
         fun configure(
