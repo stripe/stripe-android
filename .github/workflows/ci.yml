@@ -60,21 +60,14 @@ jobs:
 
         steps:
             - uses: actions/checkout@v2
-            - uses: gradle/wrapper-validation-action@v1
-            # Restore the cache.
-            # Intentionally don't set 'restore-keys' so the cache never contains redundant dependencies.
-            - uses: actions/cache@v2
-              with:
-                  path: ~/.gradle/caches
-                  key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/src/main/kotlin/Library.kt') }}
-
-            - run: ./gradlew :example:build :example:assembleAndroidTest
 
             - name: Instrumentation tests
               uses: reactivecircus/android-emulator-runner@v2
               with:
-                  api-level: 24
-                  script: ./gradlew :example:connectedCheck --stacktrace
+                  api-level: 29
+                  arch: x86
+                  disable-animations: true
+                  script: ./gradlew connectedAndroidTest --stacktrace
 
             - uses: actions/upload-artifact@v2
               if: failure()
