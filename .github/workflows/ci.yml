@@ -76,6 +76,8 @@ jobs:
                   path: ~/.gradle/caches
                   key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/src/main/kotlin/Library.kt') }}
 
+            - run: ./gradlew :example:build :example:assembleAndroidTest
+
             - name: Instrumentation tests
               uses: reactivecircus/android-emulator-runner@v2
               with:
@@ -85,5 +87,5 @@ jobs:
             - uses: actions/upload-artifact@v2
               if: failure()
               with:
-                  name: unit-test-report
+                  name: instrumentation-test-report
                   path: example/build/reports/androidTests/connected/flavors/debugAndroidTest/
