@@ -44,7 +44,7 @@ allprojects {
 }
 
 ext {
-    buildToolsVersion = "30.0.2"
+    buildToolsVersion = "30.0.3"
     compileSdkVersion = 30
 
     kotlinCoroutinesVersion = '1.4.2'
