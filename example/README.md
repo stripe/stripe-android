@@ -16,7 +16,7 @@
 
 ### Deploy the example backend to Heroku
 1. [Create a Heroku account](https://signup.heroku.com/) if you don't have one.
-2. Navigate to the [example mobile backend repo](https://github.com/stripe/example-mobile-backend/tree/v18.1.0)
+2. Navigate to the [example mobile backend repo](https://github.com/stripe/example-mobile-backend/tree/v19.0.0)
    and click "Deploy to Heroku".
 3. Set an _App Name_ of your choice (e.g. Stripe Example Mobile Backend).
 4. Under _Config Vars_, set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys)
