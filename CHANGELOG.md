@@ -7,6 +7,13 @@
 * [#3359](https://github.com/stripe/stripe-android/pull/3359) Add `brand` and `last4` properties to `CardParams`
 * [#3367](https://github.com/stripe/stripe-android/pull/3367) Upgrade `fragment-ktx` to `1.3.0` and `activity-ktx` to `1.2.0`
 * [#3368](https://github.com/stripe/stripe-android/pull/3368) Upgrade `androidx.lifecycle` dependencies to `2.3.0`
+* [#3372](https://github.com/stripe/stripe-android/pull/3372) Upgrade 3DS2 SDK to `5.2.0`
+    * Upgrade `nimbus-jose-jwt` to `9.5`
+    * Upgrade Kotlin to `1.4.30`
+    * Upgrade `material-components` to `1.3.0`
+    * Upgrade `activity-ktx` to `1.2.0` and `fragment-ktx` to `1.3.0`
+    * Upgrade `androidx.lifecycle` to `2.3.0`
+    * Migrate `ProgressBar` to `CircularProgressIndicator`
 
 ## 16.2.1 - 2021-01-29
 * [#3275](https://github.com/stripe/stripe-android/pull/3257) Fix spinner positioning in `CardMultilineWidget`
