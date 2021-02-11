@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 16.3.0 - unreleased
+* [#3334](https://github.com/stripe/stripe-android/pull/3334) Upgrade Kotlin to `1.4.30`
+* [#3346](https://github.com/stripe/stripe-android/pull/3346) Upgrade Gradle to `6.8.2`
+* [#3349](https://github.com/stripe/stripe-android/pull/3349) Upgrade `material-components` to `1.3.0`
+* [#3359](https://github.com/stripe/stripe-android/pull/3359) Add `brand` and `last4` properties to `CardParams`
+* [#3367](https://github.com/stripe/stripe-android/pull/3367) Upgrade `fragment-ktx` to `1.3.0` and `activity-ktx` to `1.2.0`
+* [#3368](https://github.com/stripe/stripe-android/pull/3368) Upgrade `androidx.lifecycle` dependencies to `2.3.0`
+
 ## 16.2.1 - 2021-01-29
 * [#3275](https://github.com/stripe/stripe-android/pull/3257) Fix spinner positioning in `CardMultilineWidget`
 * [#3275](https://github.com/stripe/stripe-android/pull/3275) Upgrade Android Gradle Plugin to `4.1.2`
