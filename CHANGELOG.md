@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.3.0 - unreleased
+## 16.3.0 - 2021-02-11
 * [#3334](https://github.com/stripe/stripe-android/pull/3334) Upgrade Kotlin to `1.4.30`
 * [#3346](https://github.com/stripe/stripe-android/pull/3346) Upgrade Gradle to `6.8.2`
 * [#3349](https://github.com/stripe/stripe-android/pull/3349) Upgrade `material-components` to `1.3.0`
