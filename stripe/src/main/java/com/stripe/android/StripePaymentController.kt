@@ -604,7 +604,7 @@ internal class StripePaymentController internal constructor(
                     beginUpiAppAuth(
                         host,
                         getRequestCode(stripeIntent),
-                        (stripeIntent.nextActionData as StripeIntent.NextActionData.UpiAppRedirect).native_data,
+                        nextActionData.native_data,
                         stripeIntent.clientSecret.orEmpty(),
                         false
                     )
@@ -1156,7 +1156,7 @@ internal class StripePaymentController internal constructor(
             clientSecret: String,
             enableLogging: Boolean = false
         ) {
-            Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
+            Logger.getInstance(enableLogging).debug("PaymentAuthUpiAppViewStarter#start()")
             val starter = PaymentAuthUpiAppViewStarter(host, requestCode)
             starter.start(
                 PaymentAuthUpiAppViewStarter.Args(

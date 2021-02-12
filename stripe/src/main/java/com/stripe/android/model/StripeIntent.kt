@@ -175,7 +175,7 @@ interface StripeIntent : StripeModel {
         data class UpiAppRedirect(
             /**
              * Base64 encoded data returned by Billdesk
-             * Decoding this gives 'upi://pay?pa=&pn=xxxxx&mc=NA&tr=dummyRefId&tn=Pay&am=100.00&mam=100.00&cu=INR'
+             * Decoding this gives 'upi://pay?pa=&pn=xxxxx&mc=NA&tr=refId&tn=Pay&am=100.00&mam=100.00&cu=INR'
              * This value needs to be passed to PSP app while transferring the intent
              */
             val native_data: String,

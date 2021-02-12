@@ -50,7 +50,12 @@ class UpiAppPaymentActivity : StripeIntentActivity() {
                 params,
                 callback = object : ApiResultCallback<PaymentMethod> {
                     override fun onSuccess(result: PaymentMethod) {
-                        createAndConfirmPaymentIntent("in", paymentMethodCreateParams = null, existingPaymentMethodId = result.id, paymentMethodOptions=paymentMethodOptions)
+                        createAndConfirmPaymentIntent(
+                            country = "in",
+                            paymentMethodCreateParams = null,
+                            existingPaymentMethodId = result.id,
+                            paymentMethodOptions=paymentMethodOptions
+                        )
                     }
 
                     override fun onError(e: Exception) {

@@ -56,12 +56,8 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
     internal class UpiAppRedirectParser : ModelJsonParser<StripeIntent.NextActionData.UpiAppRedirect> {
         override fun parse(json: JSONObject): StripeIntent.NextActionData.UpiAppRedirect? {
-            return when {
-                json.has(FIELD_NATIVE_DATA) ->
-                    StripeIntent.NextActionData.UpiAppRedirect(
-                        json.getString(FIELD_NATIVE_DATA)
-                    )
-                else -> null
+            return StripeJsonUtils.optString(json, FIELD_NATIVE_DATA)?.let {
+                StripeIntent.NextActionData.UpiAppRedirect(it)
             }
         }
 

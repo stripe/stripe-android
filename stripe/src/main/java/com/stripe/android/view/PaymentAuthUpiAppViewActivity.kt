@@ -5,14 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthUpiAppViewStarter
-import com.stripe.android.R
-import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
 import java.nio.charset.Charset
 
 class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
@@ -37,10 +32,6 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
 
         logger.debug("PaymentAuthUpiAppViewActivity#onCreate()")
 
-        LocalBroadcastManager.getInstance(this)
-            .sendBroadcast(Intent().setAction(UL_HANDLE_CHALLENGE_ACTION))
-
-
         val clientSecret = args.clientSecret
 
         if (clientSecret.isBlank()) {
@@ -60,31 +51,19 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
 
         val chooser = Intent.createChooser(upiPayIntent, "Pay with")
 
-        if (null != chooser.resolveActivity(packageManager)) {
-            startActivityForResult(chooser, 0)
-        } else {
-            print("error")
+        runCatching {
+            startActivityForResult(chooser, REQUEST_CODE)
+        }.onFailure {
+            // handle failure
         }
-    }
-
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        logger.debug("PaymentAuthUpiAppViewActivity#onCreateOptionsMenu()")
-        menuInflater.inflate(R.menu.payment_auth_web_view_menu, menu)
-
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        logger.debug("PaymentAuthUpiAppViewActivity#onOptionsItemSelected()")
-        if (item.itemId == R.id.action_close) {
-            cancelIntentSource()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun cancelIntentSource() {
         finish()
     }
+
+    companion object {
+        const val REQUEST_CODE: Int = 3442
+    }
 }
+
