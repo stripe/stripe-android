@@ -599,14 +599,13 @@ internal class StripePaymentController internal constructor(
                         bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
                     }
                 }
-                // Anirudh
                 is StripeIntent.NextActionData.UpiAppRedirect -> {
                     beginUpiAppAuth(
                         host,
                         getRequestCode(stripeIntent),
                         nextActionData.native_data,
                         stripeIntent.clientSecret.orEmpty(),
-                        false
+                        enableLogging = enableLogging
                     )
                 }
                 else -> bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
