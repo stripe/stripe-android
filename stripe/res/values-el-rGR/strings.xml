@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Αριθμός κάρτας</string>
+    <string name="acc_label_card_number_node">%s, Αριθμός κάρτας</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Ημερομηνία λήξης</string>
+    <string name="acc_label_expiry_date_node">%s, Ημερομηνία λήξης</string>
+    <string name="acc_label_zip">Ταχυδρομικός κώδικας</string>
+    <string name="acc_label_zip_short">Τ.Κ.</string>
+    <string name="add_card">Προσθέστε νέα χρεωστική ή πιστωτική κάρτα για να πραγματοποιήσετε αγορές σε αυτήν την εφαρμογή.</string>
+    <string name="added">Προστέθηκε %s</string>
+    <string name="address_city_required">Εισαγάγετε την πόλη σας</string>
+    <string name="address_country_invalid">Η χώρα σας δεν είναι έγκυρη</string>
+    <string name="address_county_required">Εισαγάγετε την κομητεία σας</string>
+    <string name="address_label_address">Διεύθυνση</string>
+    <string name="address_label_address_line1">Γραμμή διεύθυνσης 1</string>
+    <string name="address_label_address_line1_optional">Γραμμή διεύθυνσης 1 (προαιρετικό)</string>
+    <string name="address_label_address_line2">Γραμμή διεύθυνσης 2</string>
+    <string name="address_label_address_line2_optional">Γραμμή διεύθυνσης 2 (προαιρετικό)</string>
+    <string name="address_label_address_optional">Διεύθυνση (προαιρετικό) </string>
+    <string name="address_label_apt">Διαμ. </string>
+    <string name="address_label_apt_optional">Διαμ. (προαιρετικό)</string>
+    <string name="address_label_city">Πόλη</string>
+    <string name="address_label_city_optional">Πόλη (προαιρετικό)</string>
+    <string name="address_label_country">Χώρα</string>
+    <string name="address_label_county">Κομητεία</string>
+    <string name="address_label_county_optional">Κομητεία (προαιρετικό)</string>
+    <string name="address_label_name">Όνομα</string>
+    <string name="address_label_name_optional">Όνομα (προαιρετικό)</string>
+    <string name="address_label_phone_number">Αριθμός τηλεφώνου</string>
+    <string name="address_label_phone_number_optional">Αριθμός τηλεφώνου (προαιρετικό)</string>
+    <string name="address_label_postal_code">Ταχυδρομικός κώδικας</string>
+    <string name="address_label_postal_code_optional">Ταχυδρομικός κώδικας (προαιρετικό)</string>
+    <string name="address_label_postcode">Ταχυδρομικός κώδικας</string>
+    <string name="address_label_postcode_optional">Ταχυδρομικός κώδικας (προαιρετικό)</string>
+    <string name="address_label_province">Επαρχία</string>
+    <string name="address_label_province_optional">Επαρχία (προαιρετικό)</string>
+    <string name="address_label_region_generic">Πολιτεία / Επαρχία / Περιοχή</string>
+    <string name="address_label_region_generic_optional">Πολιτεία / Επαρχία / Περιοχή (προαιρετικό)</string>
+    <string name="address_label_state">Πολιτεία</string>
+    <string name="address_label_state_optional">Πολιτεία (προαιρετικό)</string>
+    <string name="address_label_zip_code">Ταχυδρομικός κώδικας</string>
+    <string name="address_label_zip_code_optional">Ταχυδρομικός κώδικας (προαιρετικό)</string>
+    <string name="address_label_zip_postal_code">Ταχυδρομικός κώδικας</string>
+    <string name="address_label_zip_postal_code_optional">Ταχυδρομικός κώδικας (προαιρετικό)</string>
+    <string name="address_name_required">Εισαγάγετε το όνομά σας</string>
+    <string name="address_phone_number_required">Εισαγάγετε τον αριθμό τηλεφώνου σας</string>
+    <string name="address_postal_code_invalid">Ο ταχυδρομικός κώδικάς σας δεν είναι έγκυρος</string>
+    <string name="address_postcode_invalid">Ο ταχυδρομικός κώδικάς σας δεν είναι έγκυρος</string>
+    <string name="address_province_required">Εισαγάγετε την επαρχία σας</string>
+    <string name="address_region_generic_required">Εισαγάγετε την πολιτεία/επαρχία/περιοχή σας</string>
+    <string name="address_required">Εισαγάγετε τη διεύθυνσή σας</string>
+    <string name="address_shipping_address">Διεύθυνση αποστολής</string>
+    <string name="address_state_required">Εισαγάγετε την πολιτεία σας</string>
+    <string name="address_zip_invalid">Ο ταχυδρομικός κώδικάς σας δεν είναι έγκυρος.</string>
+    <string name="address_zip_postal_invalid">Ο ταχυδρομικός κώδικάς σας δεν είναι έγκυρος</string>
+    <string name="becs_mandate_acceptance">
+    Παρέχοντας τα στοιχεία του αριθμού λογαριασμού σας και επιβεβαιώνοντας αυτήν την πληρωμή, συμφωνείτε με το παρόν
+    Αίτημα άμεσης χρέωσης και με τη σύμβαση παροχής υπηρεσιών Αιτήματος άμεσης χρέωσης και εξουσιοδοτείτε τη
+    Stripe Payments Australia Pty Ltd ACN 160 180 343 με Αναγνωριστικό αριθμό χρήστη 507156 για την Άμεση χρέωση
+    (η «Stripe»), προκειμένου να χρεώνει τον λογαριασμό σας μέσω του συστήματος Bulk Electronic Clearing System (BECS) για
+    λογαριασμό της %1$s (ο «Έμπορος») για οποιαδήποτε ποσά που αναφέρει ο Έμπορος
+    μόνο σε εσάς. Επιβεβαιώνετε είτε ότι είστε ο δικαιούχος του λογαριασμού είτε εξουσιοδοτημένος
+    υπογράφων για τον προαναφερθέντα λογαριασμό.
+    </string>
+    <string name="becs_widget_account_number">Αριθμός λογαριασμού</string>
+    <string name="becs_widget_account_number_required">Ο αριθμός λογαριασμού σας απαιτείται.</string>
+    <string name="becs_widget_bsb">Κωδικός BSB</string>
+    <string name="becs_widget_bsb_incomplete">Ο κωδικός BSB που εισαγάγατε είναι ελλιπής.</string>
+    <string name="becs_widget_bsb_invalid">Ο κωδικός BSB που εισαγάγατε δεν είναι έγκυρος.</string>
+    <string name="becs_widget_email">Διεύθυνση ηλεκτρονικού ταχυδρομείου</string>
+    <string name="becs_widget_email_required">Η διεύθυνση ηλεκτρονικού ταχυδρομείου σας απαιτείται.</string>
+    <string name="becs_widget_name">Όνομα</string>
+    <string name="becs_widget_name_required">Το όνομά σας απαιτείται.</string>
+    <string name="close">Κλείσιμο</string>
+    <string name="delete_payment_method">Διαγραφή μεθόδου πληρωμής;</string>
+    <string name="delete_payment_method_prompt_title">Να γίνει διαγραφή μεθόδου πληρωμής;</string>
+    <string name="expiry_date_hint">ΜΜ/ΕΕ</string>
+    <string name="expiry_label_short">Λήξη</string>
+    <string name="fpx_bank_offline">%s - Εκτός σύνδεσης</string>
+    <string name="google_pay">Google Pay</string>
+    <string name="invalid_card_number">Ο αριθμός της κάρτας σας δεν είναι έγκυρος.</string>
+    <string name="invalid_cvc">Ο κωδικός ασφαλείας της κάρτας σας δεν είναι έγκυρος.</string>
+    <string name="invalid_expiry_month">Ο μήνας λήξης της κάρτας σας δεν είναι έγκυρος.</string>
+    <string name="invalid_expiry_year">Το έτος λήξης της κάρτας σας δεν είναι έγκυρο.</string>
+    <string name="invalid_shipping_information">Μη έγκυρη διεύθυνση αποστολής</string>
+    <string name="invalid_zip">Ο ταχυδρομικός κώδικάς σας είναι ελλιπής.</string>
+    <string name="no_payment_methods">Καμία μέθοδος πληρωμής.</string>
+    <string name="payment_method_add_new_card">Προσθήκη νέας κάρτας…</string>
+    <string name="payment_method_add_new_fpx">Επιλογή τραπεζικού λογαριασμού (FPX)…</string>
+    <string name="price_free">Δωρεάν</string>
+    <string name="removed">Αφαιρέθηκε %s</string>
+    <string name="secure_checkout">Ασφαλής ολοκλήρωση αγοράς</string>
+    <string name="title_add_a_card">Προσθήκη κάρτας</string>
+    <string name="title_add_an_address">Καθορισμός διεύθυνσης</string>
+    <string name="title_bank_account">Τραπεζικός λογαριασμός</string>
+    <string name="title_payment_method">Μέθοδος πληρωμής</string>
+    <string name="title_select_shipping_method">Επιλογή μεθόδου αποστολής</string>
+</resources>

@@ -2,7 +2,8 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import com.stripe.android.utils.StripeUrlUtils
+import kotlinx.parcelize.Parcelize
 
 /**
  * An interface for methods available in [PaymentIntent] and [SetupIntent]
@@ -43,28 +44,7 @@ interface StripeIntent : StripeModel {
 
     val nextActionType: NextActionType?
 
-    /**
-     * @deprecated use {@link #nextActionData} instead
-     *
-     * Contains instructions for authenticating by redirecting your customer to another page
-     * or application.
-     */
-    @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.RedirectToUrl"))
-    val redirectData: RedirectData?
-
     val clientSecret: String?
-
-    /**
-     * @deprecated use {@link #nextActionData} instead
-     *
-     * When confirming a PaymentIntent with the Stripe SDK, the Stripe SDK depends on this property
-     * to invoke authentication flows. The shape of the contents is subject to change and is only
-     * intended to be used by the Stripe SDK.
-     */
-    @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.SdkData"))
-    val stripeSdkData: SdkData?
 
     val status: Status?
 
@@ -80,7 +60,8 @@ interface StripeIntent : StripeModel {
     enum class NextActionType(val code: String) {
         RedirectToUrl("redirect_to_url"),
         UseStripeSdk("use_stripe_sdk"),
-        DisplayOxxoDetails("display_oxxo_details");
+        DisplayOxxoDetails("display_oxxo_details"),
+        AlipayRedirect("alipay_handle_redirect");
 
         override fun toString(): String {
             return code
@@ -149,62 +130,6 @@ interface StripeIntent : StripeModel {
         }
     }
 
-    /**
-     * @deprecated use {@link StripeIntent.NextActionData.SdkData} instead
-     *
-     * When confirming a [PaymentIntent] or [SetupIntent] with the Stripe SDK, the Stripe SDK
-     * depends on this property to invoke authentication flows. The shape of the contents is subject
-     * to change and is only intended to be used by the Stripe SDK.
-     */
-    @Deprecated("use [StripeIntent.NextActionData.SdkData]")
-    data class SdkData internal constructor(
-        val is3ds1: Boolean,
-        val is3ds2: Boolean
-    )
-
-    /**
-     * @deprecated use {@link StripeIntent.NextActionData.RedirectToUrl} instead
-     *
-     * Contains instructions for authenticating by redirecting your customer to another
-     * page or application.
-     */
-    @Deprecated("use {@link StripeIntent.NextActionData.RedirectToUrl}")
-    @Parcelize
-    data class RedirectData internal constructor(
-        /**
-         * The URL you must redirect your customer to in order to authenticate.
-         */
-        val url: Uri,
-
-        /**
-         * If the customer does not exit their browser while authenticating, they will be redirected
-         * to this specified URL after completion.
-         */
-        val returnUrl: String?
-    ) : Parcelable {
-        internal companion object {
-            internal const val FIELD_URL = "url"
-            internal const val FIELD_RETURN_URL = "return_url"
-
-            @JvmSynthetic
-            internal fun create(redirectToUrlHash: Map<*, *>): RedirectData? {
-                val urlObj = redirectToUrlHash[FIELD_URL]
-                val returnUrlObj = redirectToUrlHash[FIELD_RETURN_URL]
-                val url = if (urlObj is String) {
-                    urlObj.toString()
-                } else {
-                    null
-                }
-                val returnUrl = if (returnUrlObj is String) {
-                    returnUrlObj.toString()
-                } else {
-                    null
-                }
-                return url?.let { RedirectData(Uri.parse(it), returnUrl) }
-            }
-        }
-    }
-
     sealed class NextActionData : StripeModel {
         @Parcelize
         data class DisplayOxxoDetails(
@@ -216,7 +141,12 @@ interface StripeIntent : StripeModel {
             /**
              * The OXXO number.
              */
-            val number: String? = null
+            val number: String? = null,
+
+            /**
+             * URL of a webpage containing the voucher for this OXXO payment.
+             */
+            val hostedVoucherUrl: String? = null
         ) : NextActionData()
 
         /**
@@ -233,15 +163,33 @@ interface StripeIntent : StripeModel {
              * If the customer does not exit their browser while authenticating, they will be redirected
              * to this specified URL after completion.
              */
-            val returnUrl: String?,
-            val mobileData: MobileData?
+            val returnUrl: String?
+        ) : NextActionData()
+
+        @Parcelize
+        internal data class AlipayRedirect constructor(
+            val data: String,
+            val authCompleteUrl: String?,
+            val webViewUrl: Uri,
+            val returnUrl: String? = null
         ) : NextActionData() {
 
-            sealed class MobileData : StripeModel {
-                @Parcelize
-                data class Alipay(
-                    val data: String
-                ) : MobileData()
+            internal constructor(data: String, webViewUrl: String, returnUrl: String? = null) :
+                this(data, extractReturnUrl(data), Uri.parse(webViewUrl), returnUrl)
+
+            private companion object {
+                /**
+                 * The alipay data string is formatted as query parameters.
+                 * When authenticate is complete, we make a request to the
+                 * return_url param, as a hint to the backend to ping Alipay for
+                 * the updated state
+                 */
+                private fun extractReturnUrl(data: String): String? = runCatching {
+                    Uri.parse("alipay://url?$data")
+                        .getQueryParameter("return_url")?.takeIf {
+                            StripeUrlUtils.isStripeUrl(it)
+                        }
+                }.getOrNull()
             }
         }
 

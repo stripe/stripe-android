@@ -3,9 +3,9 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Parcelable
 import com.stripe.android.model.StripeJsonUtils
-import java.util.Scanner
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.Scanner
 
 internal class BecsDebitBanks(
     internal val banks: List<Bank>,

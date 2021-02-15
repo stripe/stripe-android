@@ -1,10 +1,10 @@
 package com.stripe.android
 
 import androidx.test.core.app.ApplicationProvider
-import kotlin.test.Test
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class FileFactoryTest {

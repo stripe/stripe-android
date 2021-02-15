@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Kártyaszám</string>
+    <string name="acc_label_card_number_node">%s, kártyaszám</string>
+    <string name="acc_label_cvc_node">%s, CVC-kód</string>
+    <string name="acc_label_expiry_date">Lejárati dátum</string>
+    <string name="acc_label_expiry_date_node">%s, lejárati dátum</string>
+    <string name="acc_label_zip">Irányítószám</string>
+    <string name="acc_label_zip_short">Irányítószám</string>
+    <string name="add_card">Az alkalmazásban való vásárlásokhoz adjon hozzá egy új hitelkártyát vagy bankkártyát.</string>
+    <string name="added">%s hozzáadva</string>
+    <string name="address_city_required">Írja be a várost.</string>
+    <string name="address_country_invalid">Az országnév érvénytelen.</string>
+    <string name="address_county_required">Írja be az országot.</string>
+    <string name="address_label_address">Cím</string>
+    <string name="address_label_address_line1">1. címsor</string>
+    <string name="address_label_address_line1_optional">1. címsor (nem kötelező)</string>
+    <string name="address_label_address_line2">2. címsor</string>
+    <string name="address_label_address_line2_optional">2. címsor (nem kötelező)</string>
+    <string name="address_label_address_optional">Cím (nem kötelező)</string>
+    <string name="address_label_apt">Házszám</string>
+    <string name="address_label_apt_optional">Házszám (nem kötelező)</string>
+    <string name="address_label_city">Város</string>
+    <string name="address_label_city_optional">Város (nem kötelező)</string>
+    <string name="address_label_country">Ország</string>
+    <string name="address_label_county">Ország</string>
+    <string name="address_label_county_optional">Ország (nem kötelező)</string>
+    <string name="address_label_name">Név</string>
+    <string name="address_label_name_optional">Név (nem kötelező)</string>
+    <string name="address_label_phone_number">Telefonszám</string>
+    <string name="address_label_phone_number_optional">Telefonszám (nem kötelező)</string>
+    <string name="address_label_postal_code">Irányítószám</string>
+    <string name="address_label_postal_code_optional">Irányítószám (nem kötelező)</string>
+    <string name="address_label_postcode">Irányítószám</string>
+    <string name="address_label_postcode_optional">Irányítószám (nem kötelező)</string>
+    <string name="address_label_province">Tartomány</string>
+    <string name="address_label_province_optional">Tartomány (nem kötelező)</string>
+    <string name="address_label_region_generic">Állam/tartomány/régió</string>
+    <string name="address_label_region_generic_optional">Állam/tartomány/régió (nem kötelező)</string>
+    <string name="address_label_state">Állam</string>
+    <string name="address_label_state_optional">Állam (nem kötelező)</string>
+    <string name="address_label_zip_code">Irányítószám</string>
+    <string name="address_label_zip_code_optional">Irányítószám (nem kötelező)</string>
+    <string name="address_label_zip_postal_code">Irányítószám</string>
+    <string name="address_label_zip_postal_code_optional">Irányítószám (nem kötelező)</string>
+    <string name="address_name_required">Írja be a nevét.</string>
+    <string name="address_phone_number_required">Adja meg a telefonszámát.</string>
+    <string name="address_postal_code_invalid">Irányítószáma érvénytelen.</string>
+    <string name="address_postcode_invalid">Irányítószáma érvénytelen.</string>
+    <string name="address_province_required">Adja meg a tartományt.</string>
+    <string name="address_region_generic_required">Írja be az államot/tartományt/régiót.</string>
+    <string name="address_required">Adja meg címét.</string>
+    <string name="address_shipping_address">Szállítási cím</string>
+    <string name="address_state_required">Írja be az államot.</string>
+    <string name="address_zip_invalid">Irányítószáma érvénytelen.</string>
+    <string name="address_zip_postal_invalid">Irányítószáma érvénytelen.</string>
+    <string name="becs_mandate_acceptance">
+    Bankszámlaadatainak megadásával és a kifizetés jóváhagyásával Ön elfogadja ezt a
+   Beszedési igényt és a Beszedési igény szolgáltatást, és felhatalmazza a 
+    Stripe Payments Australia Pty Ltd ACN 160 180 343 beszedési szolgáltatót, amelynek azonosítója 507156
+    (“Stripe”), hogy megterhelje számláját a Bulk Electronic Clearing System (BECS) rendszeren keresztül 
+    a(z) %1$s (a \"Kereskedő\") nevében minden olyan összeg vonatkozásában, amelyet a 
+    Kereskedő külön közölt Önnel. Ön tanúsítja, hogy vagy számlatulajdonosa vagy egy aláírási meghatalmazottja
+    a fent említett számlának.
+    </string>
+    <string name="becs_widget_account_number">Számlaszám</string>
+    <string name="becs_widget_account_number_required">Számlaszámának megadása kötelező.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">A beírt BSB-szám hiányos.</string>
+    <string name="becs_widget_bsb_invalid">A beírt BSB-szám érvénytelen.</string>
+    <string name="becs_widget_email">E-mail-cím</string>
+    <string name="becs_widget_email_required">E-mail-címének megadása kötelező.</string>
+    <string name="becs_widget_name">Név</string>
+    <string name="becs_widget_name_required">Nevének megadása kötelező.</string>
+    <string name="close">Bezárás</string>
+    <string name="delete_payment_method">Törli a fizetési módot?</string>
+    <string name="delete_payment_method_prompt_title">Törli a fizetési módot?</string>
+    <string name="expiry_date_hint">ÉÉ/HH</string>
+    <string name="expiry_label_short">Lejárat</string>
+    <string name="fpx_bank_offline">%s - offline</string>
+    <string name="google_pay">Google Pay</string>
+    <string name="invalid_card_number">Kártyaszáma érvénytelen.</string>
+    <string name="invalid_cvc">Kártyájának biztonsági kódja érvénytelen.</string>
+    <string name="invalid_expiry_month">Kártyájának lejárati hónapja érvénytelen.</string>
+    <string name="invalid_expiry_year">Kártyájának lejárati éve érvénytelen.</string>
+    <string name="invalid_shipping_information">Érvénytelen szállítási cím</string>
+    <string name="invalid_zip">Irányítószáma hiányos.</string>
+    <string name="no_payment_methods">Nem található fizetési mód.</string>
+    <string name="payment_method_add_new_card">Új kártya hozzáadása...</string>
+    <string name="payment_method_add_new_fpx">Bankszámlaválasztás (FPX)...</string>
+    <string name="price_free">Ingyenes</string>
+    <string name="removed">%s eltávolítva</string>
+    <string name="secure_checkout">Biztonságos kifizetés</string>
+    <string name="title_add_a_card">Kártya hozzáadása</string>
+    <string name="title_add_an_address">Cím beállítása</string>
+    <string name="title_bank_account">Bankszámla</string>
+    <string name="title_payment_method">Fizetési mód</string>
+    <string name="title_select_shipping_method">Szállítási mód választása</string>
+</resources>

@@ -9,11 +9,10 @@ import android.text.util.Linkify
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -39,7 +38,11 @@ class AddPaymentMethodActivity : StripeActivity() {
     private val stripe: Stripe by lazy {
         val paymentConfiguration = args.paymentConfiguration
             ?: PaymentConfiguration.getInstance(this)
-        Stripe(applicationContext, paymentConfiguration.publishableKey)
+        Stripe(
+            applicationContext,
+            publishableKey = paymentConfiguration.publishableKey,
+            stripeAccountId = paymentConfiguration.stripeAccountId
+        )
     }
 
     private val paymentMethodType: PaymentMethod.Type by lazy {
@@ -56,14 +59,11 @@ class AddPaymentMethodActivity : StripeActivity() {
         }
     }
 
-    private val customerSession: CustomerSession by lazy {
-        CustomerSession.getInstance()
-    }
-
-    private val viewModel: AddPaymentMethodViewModel by lazy {
-        ViewModelProvider(this, AddPaymentMethodViewModel.Factory(
-            stripe, customerSession, args
-        ))[AddPaymentMethodViewModel::class.java]
+    private val viewModel: AddPaymentMethodViewModel by viewModels {
+        AddPaymentMethodViewModel.Factory(
+            stripe,
+            args
+        )
     }
 
     private val titleStringRes: Int
@@ -78,7 +78,8 @@ class AddPaymentMethodActivity : StripeActivity() {
                 }
                 else -> {
                     throw IllegalArgumentException(
-                        "Unsupported Payment Method type: ${paymentMethodType.code}")
+                        "Unsupported Payment Method type: ${paymentMethodType.code}"
+                    )
                 }
             }
         }
@@ -86,6 +87,14 @@ class AddPaymentMethodActivity : StripeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         configureView(args)
+        setResult(
+            Activity.RESULT_OK,
+            Intent()
+                .putExtras(
+                    AddPaymentMethodActivityStarter.Result.Canceled
+                        .toBundle()
+                )
+        )
     }
 
     override fun onResume() {
@@ -129,7 +138,8 @@ class AddPaymentMethodActivity : StripeActivity() {
             }
             else -> {
                 throw IllegalArgumentException(
-                    "Unsupported Payment Method type: ${paymentMethodType.code}")
+                    "Unsupported Payment Method type: ${paymentMethodType.code}"
+                )
             }
         }
     }
@@ -139,7 +149,9 @@ class AddPaymentMethodActivity : StripeActivity() {
     ): View? {
         return if (args.addPaymentMethodFooterLayoutId > 0) {
             val footerView = layoutInflater.inflate(
-                args.addPaymentMethodFooterLayoutId, contentRoot, false
+                args.addPaymentMethodFooterLayoutId,
+                contentRoot,
+                false
             )
             footerView.id = R.id.stripe_add_payment_method_footer
             if (footerView is TextView) {
@@ -167,41 +179,63 @@ class AddPaymentMethodActivity : StripeActivity() {
 
         isProgressBarVisible = true
 
-        viewModel.createPaymentMethod(params).observe(this, Observer { result ->
-            result.fold(
-                onSuccess = {
-                    if (shouldAttachToCustomer) {
-                        attachPaymentMethodToCustomer(it)
-                    } else {
-                        finishWithPaymentMethod(it)
+        viewModel.createPaymentMethod(params).observe(
+            this,
+            { result ->
+                result.fold(
+                    onSuccess = {
+                        if (shouldAttachToCustomer) {
+                            attachPaymentMethodToCustomer(it)
+                        } else {
+                            finishWithPaymentMethod(it)
+                        }
+                    },
+                    onFailure = {
+                        isProgressBarVisible = false
+                        showError(it.message.orEmpty())
                     }
-                },
-                onFailure = {
-                    isProgressBarVisible = false
-                    showError(it.message.orEmpty())
-                }
-            )
-        })
+                )
+            }
+        )
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
-        viewModel.attachPaymentMethod(
-            paymentMethod
-        ).observe(this, Observer { result ->
-            result.fold(
-                onSuccess = ::finishWithPaymentMethod,
-                onFailure = {
-                    isProgressBarVisible = false
-                    showError(it.message.orEmpty())
-                }
-            )
-        })
+        runCatching {
+            CustomerSession.getInstance()
+        }.fold(
+            onSuccess = { customerSession ->
+                viewModel.attachPaymentMethod(
+                    customerSession,
+                    paymentMethod
+                ).observe(
+                    this,
+                    { result ->
+                        result.fold(
+                            onSuccess = ::finishWithPaymentMethod,
+                            onFailure = {
+                                isProgressBarVisible = false
+                                showError(it.message.orEmpty())
+                            }
+                        )
+                    }
+                )
+            },
+            onFailure = {
+                finishWithResult(AddPaymentMethodActivityStarter.Result.Failure(it))
+            }
+        )
     }
 
     private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {
+        finishWithResult(AddPaymentMethodActivityStarter.Result.Success(paymentMethod))
+    }
+
+    private fun finishWithResult(result: AddPaymentMethodActivityStarter.Result) {
         isProgressBarVisible = false
-        setResult(Activity.RESULT_OK, Intent()
-            .putExtras(AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle()))
+        setResult(
+            Activity.RESULT_OK,
+            Intent().putExtras(result.toBundle())
+        )
         finish()
     }
 

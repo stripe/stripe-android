@@ -1,0 +1,6 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/stripe_paymentsheet_payment_option_selected_stroke"
+        android:state_checked="true" />
+    <item android:color="@color/stripe_paymentsheet_payment_option_unselected_stroke"
+        android:state_checked="false" />
+</selector>

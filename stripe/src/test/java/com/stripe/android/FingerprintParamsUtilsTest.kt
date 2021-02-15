@@ -1,33 +1,29 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CardFixtures
+import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SourceParams
-import java.util.UUID
-import kotlin.test.Test
+import com.stripe.android.networking.FingerprintParamsUtils
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class FingerprintParamsUtilsTest {
 
-    private val fingerprintParamsUtils = FingerprintParamsUtils(
-        ApiFingerprintParamsFactory(
-            store = FakeClientFingerprintDataStore(MUID)
-        )
-    )
+    private val fingerprintParamsUtils = FingerprintParamsUtils()
 
     @Test
     fun addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
         val updatedParams = fingerprintParamsUtils.addFingerprintData(
             params = mapOf(
                 ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to
-                    SourceParams.createCardParams(CardFixtures.CARD).toParamMap()
+                    SourceParams.createCardParams(CardParamsFixtures.DEFAULT).toParamMap()
             ),
-            fingerprintGuid = GUID.toString()
+            fingerprintData = FINGERPRINT_DATA
         )
 
         assertThat(updatedParams[ConfirmPaymentIntentParams.PARAM_SOURCE_DATA])
@@ -38,21 +34,23 @@ class FingerprintParamsUtilsTest {
                         "address" to mapOf(
                             "city" to "San Francisco",
                             "country" to "US",
-                            "line1" to "1234 Main Street",
-                            "line2" to "906",
-                            "postal_code" to "94111",
+                            "line1" to "123 Market St",
+                            "line2" to "#345",
+                            "postal_code" to "94107",
                             "state" to "CA"
                         ),
                         "name" to "Jenny Rosen"
                     ),
                     "card" to mapOf(
                         "number" to CardNumberFixtures.VISA_NO_SPACES,
-                        "exp_month" to 8,
-                        "exp_year" to 2019,
+                        "exp_month" to 12,
+                        "exp_year" to 2025,
                         "cvc" to "123"
                     ),
-                    "muid" to MUID.toString(),
-                    "guid" to GUID.toString()
+                    "metadata" to mapOf("fruit" to "orange"),
+                    "muid" to FINGERPRINT_DATA.muid,
+                    "guid" to FINGERPRINT_DATA.guid,
+                    "sid" to FINGERPRINT_DATA.sid
                 )
             )
     }
@@ -64,7 +62,7 @@ class FingerprintParamsUtilsTest {
                 PARAM_PAYMENT_METHOD_DATA to
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap()
             ),
-            fingerprintGuid = GUID.toString()
+            fingerprintData = FINGERPRINT_DATA
         )
         assertThat(updatedParams[PARAM_PAYMENT_METHOD_DATA])
             .isEqualTo(
@@ -88,14 +86,14 @@ class FingerprintParamsUtilsTest {
                         "exp_year" to 2024,
                         "cvc" to "111"
                     ),
-                    "muid" to MUID.toString(),
-                    "guid" to GUID.toString()
+                    "muid" to FINGERPRINT_DATA.muid,
+                    "guid" to FINGERPRINT_DATA.guid,
+                    "sid" to FINGERPRINT_DATA.sid
                 )
             )
     }
 
     private companion object {
-        private val GUID = UUID.randomUUID()
-        private val MUID = UUID.randomUUID()
+        private val FINGERPRINT_DATA = FingerprintDataFixtures.create()
     }
 }

@@ -31,7 +31,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     private val viewModel: FpxViewModel by lazy {
         ViewModelProvider(
             activity,
-            ViewModelProvider.AndroidViewModelFactory(activity.application)
+            FpxViewModel.Factory(activity.application)
         ).get(FpxViewModel::class.java)
     }
 
@@ -93,7 +93,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
         private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses()
 
-        internal val selectedBank: FpxBank?
+        val selectedBank: FpxBank?
             get() = if (selectedPosition == -1) {
                 null
             } else {
@@ -137,12 +137,12 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             return FpxBank.values()[position]
         }
 
-        internal fun updateSelected(position: Int) {
+        fun updateSelected(position: Int) {
             selectedPosition = position
             notifyItemChanged(position)
         }
 
-        internal fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
+        fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
             this.fpxBankStatuses = fpxBankStatuses
 
             // flag offline bank
@@ -161,7 +161,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             private val resources: Resources = itemView.resources
 
-            internal fun update(fpxBank: FpxBank, isOnline: Boolean) {
+            fun update(fpxBank: FpxBank, isOnline: Boolean) {
                 viewBinding.name.text = if (isOnline) {
                     fpxBank.displayName
                 } else {
@@ -173,7 +173,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
                 viewBinding.icon.setImageResource(fpxBank.brandIconResId)
             }
 
-            internal fun setSelected(isSelected: Boolean) {
+            fun setSelected(isSelected: Boolean) {
                 viewBinding.name.setTextColor(themeConfig.getTextColor(isSelected))
                 ImageViewCompat.setImageTintList(
                     viewBinding.checkIcon,

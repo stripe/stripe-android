@@ -2,108 +2,138 @@ package com.stripe.android
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
-import kotlinx.android.parcel.Parceler
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parceler
+import kotlinx.parcelize.Parcelize
 
 /**
  * Starts an instance of [PaymentRelayStarter].
  * Should only be called from [StripePaymentController].
  */
 internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter.Args> {
-    companion object {
-        @JvmSynthetic
-        internal fun create(
-            host: AuthActivityStarter.Host,
-            requestCode: Int
-        ): PaymentRelayStarter {
-            return object : PaymentRelayStarter {
-                override fun start(args: Args) {
-                    val extras = PaymentController.Result(
-                        clientSecret = args.stripeIntent?.clientSecret,
-                        source = args.source,
-                        exception = args.exception,
-                        stripeAccountId = args.stripeAccountId
-                    ).toBundle()
-                    host.startActivityForResult(
-                        PaymentRelayActivity::class.java, extras, requestCode
-                    )
-                }
-            }
+    class Legacy(
+        private val host: AuthActivityStarter.Host
+    ) : PaymentRelayStarter {
+        override fun start(args: Args) {
+            host.startActivityForResult(
+                PaymentRelayActivity::class.java,
+                args.toResult().toBundle(),
+                args.requestCode
+            )
         }
     }
 
-    @Parcelize
-    data class Args internal constructor(
-        val stripeIntent: StripeIntent? = null,
-        val source: Source? = null,
-        val exception: StripeException? = null,
-        val stripeAccountId: String? = null
-    ) : Parcelable {
-        internal companion object : Parceler<Args> {
-            @JvmSynthetic
-            internal fun create(stripeIntent: StripeIntent, stripeAccountId: String? = null): Args {
-                return Args(stripeIntent = stripeIntent, stripeAccountId = stripeAccountId)
-            }
+    class Modern(
+        private val launcher: ActivityResultLauncher<Args>
+    ) : PaymentRelayStarter {
+        override fun start(args: Args) {
+            launcher.launch(args)
+        }
+    }
 
-            @JvmSynthetic
-            internal fun create(source: Source, stripeAccountId: String? = null): Args {
-                return Args(source = source, stripeAccountId = stripeAccountId)
-            }
+    sealed class Args : Parcelable {
+        abstract val requestCode: Int
 
-            @JvmSynthetic
-            internal fun create(exception: StripeException): Args {
-                return Args(exception = exception)
-            }
+        abstract fun toResult(): PaymentFlowResult.Unvalidated
 
-            override fun create(parcel: Parcel): Args {
-                return Args(
-                    stripeIntent = readStripeIntent(parcel),
-                    source = parcel.readParcelable(Source::class.java.classLoader),
-                    exception = parcel.readSerializable() as? StripeException?,
-                    stripeAccountId = parcel.readString()
+        @Parcelize
+        data class PaymentIntentArgs(
+            internal val paymentIntent: PaymentIntent,
+            internal val stripeAccountId: String? = null
+        ) : Args() {
+            override val requestCode: Int
+                get() = StripePaymentController.PAYMENT_REQUEST_CODE
+
+            override fun toResult(): PaymentFlowResult.Unvalidated {
+                return PaymentFlowResult.Unvalidated(
+                    clientSecret = paymentIntent.clientSecret,
+                    stripeAccountId = stripeAccountId
+                )
+            }
+        }
+
+        @Parcelize
+        data class SetupIntentArgs(
+            internal val setupIntent: SetupIntent,
+            internal val stripeAccountId: String? = null
+        ) : Args() {
+            override val requestCode: Int
+                get() = StripePaymentController.SETUP_REQUEST_CODE
+
+            override fun toResult(): PaymentFlowResult.Unvalidated {
+                return PaymentFlowResult.Unvalidated(
+                    clientSecret = setupIntent.clientSecret,
+                    stripeAccountId = stripeAccountId
+                )
+            }
+        }
+
+        @Parcelize
+        data class SourceArgs(
+            internal val source: Source,
+            internal val stripeAccountId: String? = null
+        ) : Args() {
+            override val requestCode: Int
+                get() = StripePaymentController.SOURCE_REQUEST_CODE
+
+            override fun toResult(): PaymentFlowResult.Unvalidated {
+                return PaymentFlowResult.Unvalidated(
+                    source = source,
+                    stripeAccountId = stripeAccountId
+                )
+            }
+        }
+
+        @Parcelize
+        data class ErrorArgs(
+            internal val exception: StripeException,
+            override val requestCode: Int
+        ) : Args() {
+            override fun toResult(): PaymentFlowResult.Unvalidated {
+                return PaymentFlowResult.Unvalidated(
+                    exception = exception
                 )
             }
 
-            override fun Args.write(parcel: Parcel, flags: Int) {
-                writeStripeIntent(parcel, stripeIntent)
-                parcel.writeParcelable(source, 0)
-                parcel.writeSerializable(exception)
-                parcel.writeString(stripeAccountId)
-            }
+            internal companion object : Parceler<ErrorArgs> {
+                override fun create(parcel: Parcel): ErrorArgs {
+                    return ErrorArgs(
+                        exception = parcel.readSerializable() as StripeException,
+                        requestCode = parcel.readInt()
+                    )
+                }
 
-            private fun readStripeIntent(parcel: Parcel): StripeIntent? {
-                return when (StripeIntentType.values()[parcel.readInt()]) {
-                    StripeIntentType.PaymentIntent ->
-                        parcel.readParcelable(PaymentIntent::class.java.classLoader)
-                    StripeIntentType.SetupIntent ->
-                        parcel.readParcelable(SetupIntent::class.java.classLoader)
-                    else -> null
+                override fun ErrorArgs.write(parcel: Parcel, flags: Int) {
+                    parcel.writeSerializable(exception)
+                    parcel.writeInt(requestCode)
                 }
             }
+        }
 
-            private fun writeStripeIntent(parcel: Parcel, stripeIntent: StripeIntent?) {
-                val stripeIntentType = when (stripeIntent) {
-                    is PaymentIntent -> StripeIntentType.PaymentIntent
-                    is SetupIntent -> StripeIntentType.SetupIntent
-                    else -> StripeIntentType.None
+        companion object {
+            fun create(
+                stripeIntent: StripeIntent,
+                stripeAccountId: String? = null
+            ): Args {
+                return when (stripeIntent) {
+                    is PaymentIntent -> {
+                        PaymentIntentArgs(stripeIntent, stripeAccountId)
+                    }
+                    is SetupIntent -> {
+                        SetupIntentArgs(stripeIntent, stripeAccountId)
+                    }
+                    else -> {
+                        error("StripeIntent must either be a PaymentIntent or SetupIntent.")
+                    }
                 }
-                parcel.writeInt(stripeIntentType.ordinal)
-                stripeIntent?.let {
-                    parcel.writeParcelable(it, 0)
-                }
-            }
-
-            private enum class StripeIntentType {
-                None,
-                PaymentIntent,
-                SetupIntent
             }
         }
     }

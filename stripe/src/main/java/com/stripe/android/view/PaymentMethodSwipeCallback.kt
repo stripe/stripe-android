@@ -21,7 +21,8 @@ internal class PaymentMethodSwipeCallback(
     private val adapter: PaymentMethodsAdapter,
     private val listener: Listener
 ) : ItemTouchHelper.SimpleCallback(
-    0, ItemTouchHelper.RIGHT
+    0,
+    ItemTouchHelper.RIGHT
 ) {
     private val trashIcon =
         ContextCompat.getDrawable(context, R.drawable.stripe_ic_trash)!!
@@ -121,9 +122,12 @@ internal class PaymentMethodSwipeCallback(
                     trashIcon.setBounds(0, 0, 0, 0)
                 }
 
-                background.setBounds(itemView.left, itemView.top,
+                background.setBounds(
+                    itemView.left,
+                    itemView.top,
                     itemView.left + dX + itemViewStartPadding,
-                    itemView.bottom)
+                    itemView.bottom
+                )
                 background.color = when {
                     transitionFraction <= 0.0F ->
                         swipeStartColor

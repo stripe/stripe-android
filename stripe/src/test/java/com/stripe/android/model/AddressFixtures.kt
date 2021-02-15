@@ -5,8 +5,9 @@ import org.json.JSONObject
 
 object AddressFixtures {
     @JvmField
-    val ADDRESS: Address = AddressJsonParser().parse(JSONObject(
-        """
+    val ADDRESS: Address = AddressJsonParser().parse(
+        JSONObject(
+            """
         {
             "city": "San Francisco",
             "country": "US",
@@ -15,6 +16,7 @@ object AddressFixtures {
             "postal_code": "94107",
             "state": "CA"
         }
-        """.trimIndent()
-    ))
+            """.trimIndent()
+        )
+    )
 }

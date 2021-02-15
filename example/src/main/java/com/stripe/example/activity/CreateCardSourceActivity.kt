@@ -3,16 +3,15 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
@@ -29,12 +28,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         CreateCardSourceActivityBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: SourceViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[SourceViewModel::class.java]
-    }
+    private val viewModel: SourceViewModel by viewModels()
     private val sourcesAdapter: SourcesAdapter by lazy {
         SourcesAdapter()
     }
@@ -55,7 +49,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         viewBinding.createButton.setOnClickListener {
-            viewBinding.cardWidget.card?.let {
+            viewBinding.cardWidget.cardParams?.let {
                 createCardSource(it)
             } ?: showSnackbar("Enter a valid card.")
         }
@@ -69,15 +63,18 @@ class CreateCardSourceActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (data != null && stripe.isAuthenticateSourceResult(requestCode, data)) {
-            stripe.onAuthenticateSourceResult(data, object : ApiResultCallback<Source> {
-                override fun onSuccess(result: Source) {
-                    sourcesAdapter.addSource(result)
-                }
+            stripe.onAuthenticateSourceResult(
+                data,
+                object : ApiResultCallback<Source> {
+                    override fun onSuccess(result: Source) {
+                        sourcesAdapter.addSource(result)
+                    }
 
-                override fun onError(e: Exception) {
-                    showSnackbar(e.message.orEmpty())
+                    override fun onError(e: Exception) {
+                        showSnackbar(e.message.orEmpty())
+                    }
                 }
-            })
+            )
         }
     }
 
@@ -88,19 +85,20 @@ class CreateCardSourceActivity : AppCompatActivity() {
     }
 
     /**
-     * To start the 3DS cycle, create a [Source] out of the user-entered [Card].
+     * To start the 3DS cycle, create a [Source] out of the user-entered [CardParams].
      *
-     * @param card the [Card] used to create a source
+     * @param cardParams the [CardParams] used to create a source
      */
-    private fun createCardSource(card: Card) {
+    private fun createCardSource(cardParams: CardParams) {
         keyboardController.hide()
 
         viewBinding.createButton.isEnabled = false
         viewBinding.progressBar.visibility = View.VISIBLE
 
-        val params = SourceParams.createCardParams(card)
-        viewModel.createSource(params).observe(this,
-            Observer { result ->
+        val params = SourceParams.createCardParams(cardParams)
+        viewModel.createSource(params).observe(
+            this,
+            { result ->
                 viewBinding.createButton.isEnabled = true
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
@@ -122,9 +120,8 @@ class CreateCardSourceActivity : AppCompatActivity() {
         // Making a note of the Card Source in our list.
         sourcesAdapter.addSource(source)
 
-        // If we need to get 3DS verification for this card, we first create a
-        // 3DS Source.
-        if (SourceTypeModel.Card.ThreeDSecureStatus.REQUIRED == cardData.threeDSecureStatus) {
+        // If we need to get 3DS verification for this card, we first create a 3DS Source.
+        if (SourceTypeModel.Card.ThreeDSecureStatus.Required == cardData.threeDSecureStatus) {
             // The card Source can be used to create a 3DS Source
             createThreeDSecureSource(source)
         }
@@ -135,7 +132,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
      * to verify the third-party approval. The only information from the Card source
      * that is used is the ID field.
      *
-     * @param source the [Card]-created [Source].
+     * @param source the [CardParams]-created [Source].
      */
     private fun createThreeDSecureSource(source: Source) {
         // This represents a request for a 3DS purchase of 10.00 euro.
@@ -146,8 +143,9 @@ class CreateCardSourceActivity : AppCompatActivity() {
             cardId = source.id.orEmpty()
         )
 
-        viewModel.createSource(params).observe(this,
-            Observer { result ->
+        viewModel.createSource(params).observe(
+            this,
+            { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
                 result.fold(
@@ -164,7 +162,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
      * Authenticate the [Source]
      */
     private fun authenticateSource(source: Source) {
-        if (source.flow == Source.SourceFlow.REDIRECT) {
+        if (source.flow == Source.Flow.Redirect) {
             createAuthenticateSourceDialog(source).let {
                 alertDialog = it
                 it.show()
@@ -177,14 +175,18 @@ class CreateCardSourceActivity : AppCompatActivity() {
         val cardBrand = CardBrand.fromCode(typeData["brand"] as String?)
         return MaterialAlertDialogBuilder(this)
             .setTitle(this.getString(R.string.authentication_dialog_title))
-            .setMessage(getString(
-                R.string.authentication_dialog_message, cardBrand.displayName, typeData["last4"]
-            ))
+            .setMessage(
+                getString(
+                    R.string.authentication_dialog_message,
+                    cardBrand.displayName,
+                    typeData["last4"]
+                )
+            )
             .setIcon(cardBrand.icon)
-            .setPositiveButton(android.R.string.yes) { _, _ ->
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 stripe.authenticateSource(this, source)
             }
-            .setNegativeButton(android.R.string.no, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .create()
     }
 

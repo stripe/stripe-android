@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * [WeChat Pay Payments with Sources](https://stripe.com/docs/sources/wechat-pay)

@@ -3,16 +3,19 @@ package com.stripe.android
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.SourceOrder
 import com.stripe.android.model.SourceParams
-import kotlin.test.Test
+import com.stripe.android.model.SourceTypeModel
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class SourceEndToEndTest {
+internal class SourceEndToEndTest {
     @Test
     fun createKlarnaParams_createsExpectedSourceOrderItems() {
         val sourceParams = SourceParams.createKlarna(
@@ -20,7 +23,8 @@ class SourceEndToEndTest {
             currency = "eur",
             klarnaParams = KlarnaSourceParams(
                 purchaseCountry = "DE",
-                lineItems = LINE_ITEMS
+                lineItems = LINE_ITEMS,
+                billingDob = DateOfBirth(1, 1, 1990)
             )
         )
         val stripe = createStripe(ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
@@ -35,13 +39,15 @@ class SourceEndToEndTest {
         assertThat(items)
             .hasSize(4)
         assertThat(items.first())
-            .isEqualTo(SourceOrder.Item(
-                type = SourceOrder.Item.Type.Sku,
-                amount = 10000,
-                currency = "eur",
-                description = "towel",
-                quantity = 1
-            ))
+            .isEqualTo(
+                SourceOrder.Item(
+                    type = SourceOrder.Item.Type.Sku,
+                    amount = 10000,
+                    currency = "eur",
+                    description = "towel",
+                    quantity = 1
+                )
+            )
     }
 
     @Test
@@ -83,7 +89,8 @@ class SourceEndToEndTest {
                 customPaymentMethods = setOf(
                     KlarnaSourceParams.CustomPaymentMethods.Installments,
                     KlarnaSourceParams.CustomPaymentMethods.PayIn4
-                )
+                ),
+                billingDob = DateOfBirth(1, 1, 1990)
             )
         )
 
@@ -91,6 +98,40 @@ class SourceEndToEndTest {
         val source = requireNotNull(stripe.createSourceSynchronous(sourceParams))
         assertThat(source.redirect?.returnUrl)
             .isEqualTo(RETURN_URL)
+    }
+
+    @Test
+    fun `Source objects should be populated with the expected CardBrand value`() {
+        val stripe = createStripe(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+
+        assertThat(
+            listOf(
+                CardNumberFixtures.AMEX_NO_SPACES to CardBrand.AmericanExpress,
+                CardNumberFixtures.VISA_NO_SPACES to CardBrand.Visa,
+                CardNumberFixtures.MASTERCARD_NO_SPACES to CardBrand.MasterCard,
+                CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
+                CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
+                CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
+            ).all { (cardNumber, cardBrand) ->
+                val source = requireNotNull(
+                    stripe.createSourceSynchronous(
+                        SourceParams.createCardParams(
+                            CardParams(
+                                number = cardNumber,
+                                expMonth = 10,
+                                expYear = 2030,
+                                cvc = "123"
+                            )
+                        )
+                    )
+                )
+                val cardModel = requireNotNull(
+                    source.sourceTypeModel as? SourceTypeModel.Card
+                )
+                cardModel.brand == cardBrand
+            }
+        ).isTrue()
     }
 
     @Test
@@ -104,7 +145,8 @@ class SourceEndToEndTest {
                 pageOptions = KlarnaSourceParams.PaymentPageOptions(
                     pageTitle = "Very cool checkout page",
                     purchaseType = KlarnaSourceParams.PaymentPageOptions.PurchaseType.Order
-                )
+                ),
+                billingDob = DateOfBirth(1, 1, 1990)
             )
         )
         val stripe = createStripe(ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)

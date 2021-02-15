@@ -16,13 +16,13 @@
         android:paddingEnd="8dp"
         tools:context="com.stripe.example.activity.CreateCardSourceActivity">
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="true"
-            android:visibility="invisible" />
+            android:visibility="invisible"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator" />
 
         <TextView android:id="@+id/payment_form_title"
                   android:text="@string/create_source_header"

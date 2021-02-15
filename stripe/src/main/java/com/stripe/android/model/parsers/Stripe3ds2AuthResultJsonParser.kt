@@ -1,61 +1,43 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.Stripe3ds2AuthResult
-import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONArray
 import org.json.JSONObject
 
 internal class Stripe3ds2AuthResultJsonParser : ModelJsonParser<Stripe3ds2AuthResult> {
     override fun parse(json: JSONObject): Stripe3ds2AuthResult {
-        val ares =
-            if (json.isNull(FIELD_ARES)) {
-                null
-            } else {
-                json.optJSONObject(FIELD_ARES)?.let {
-                    AresJsonParser().parse(it)
-                }
-            }
-        val error =
-            if (json.isNull(FIELD_ERROR)) {
-                null
-            } else {
-                json.optJSONObject(FIELD_ERROR)?.let {
-                    ThreeDS2ErrorJsonParser().parse(it)
-                }
-            }
-        val fallbackRedirectUrl =
-            if (json.isNull(FIELD_FALLBACK_REDIRECT_URL)) {
-                null
-            } else {
-                json.optString(FIELD_FALLBACK_REDIRECT_URL)
-            }
         return Stripe3ds2AuthResult(
             id = json.getString(FIELD_ID),
-            objectType = json.getString(FIELD_OBJECT),
             created = json.getLong(FIELD_CREATED),
             liveMode = json.getBoolean(FIELD_LIVEMODE),
             source = json.getString(FIELD_SOURCE),
             state = json.optString(FIELD_STATE),
-            ares = ares,
-            error = error,
-            fallbackRedirectUrl = fallbackRedirectUrl
+            ares = json.optJSONObject(FIELD_ARES)?.let {
+                AresJsonParser().parse(it)
+            },
+            error = json.optJSONObject(FIELD_ERROR)?.let {
+                ThreeDS2ErrorJsonParser().parse(it)
+            },
+            fallbackRedirectUrl = optString(json, FIELD_FALLBACK_REDIRECT_URL),
+            creq = optString(json, FIELD_CREQ)
         )
     }
 
     internal class AresJsonParser : ModelJsonParser<Stripe3ds2AuthResult.Ares> {
         override fun parse(json: JSONObject): Stripe3ds2AuthResult.Ares {
             return Stripe3ds2AuthResult.Ares(
-                threeDSServerTransId = json.getString(FIELD_THREE_DS_SERVER_TRANS_ID),
-                acsChallengeMandated = StripeJsonUtils.optString(json, FIELD_ACS_CHALLENGE_MANDATED),
-                acsSignedContent = StripeJsonUtils.optString(json, FIELD_ACS_SIGNED_CONTENT),
+                threeDSServerTransId = optString(json, FIELD_THREE_DS_SERVER_TRANS_ID),
+                acsChallengeMandated = optString(json, FIELD_ACS_CHALLENGE_MANDATED),
+                acsSignedContent = optString(json, FIELD_ACS_SIGNED_CONTENT),
                 acsTransId = json.getString(FIELD_ACS_TRANS_ID),
-                acsUrl = StripeJsonUtils.optString(json, FIELD_ACS_URL),
-                authenticationType = StripeJsonUtils.optString(json, FIELD_AUTHENTICATION_TYPE),
-                cardholderInfo = StripeJsonUtils.optString(json, FIELD_CARDHOLDER_INFO),
+                acsUrl = optString(json, FIELD_ACS_URL),
+                authenticationType = optString(json, FIELD_AUTHENTICATION_TYPE),
+                cardholderInfo = optString(json, FIELD_CARDHOLDER_INFO),
                 messageType = json.getString(FIELD_MESSAGE_TYPE),
                 messageVersion = json.getString(FIELD_MESSAGE_VERSION),
-                sdkTransId = StripeJsonUtils.optString(json, FIELD_SDK_TRANS_ID),
-                transStatus = StripeJsonUtils.optString(json, FIELD_TRANS_STATUS),
+                sdkTransId = optString(json, FIELD_SDK_TRANS_ID),
+                transStatus = optString(json, FIELD_TRANS_STATUS),
                 messageExtension = json.optJSONArray(FIELD_MESSAGE_EXTENSION)?.let {
                     MessageExtensionJsonParser().parse(it)
                 }
@@ -98,9 +80,9 @@ internal class Stripe3ds2AuthResultJsonParser : ModelJsonParser<Stripe3ds2AuthRe
             }
 
             return Stripe3ds2AuthResult.MessageExtension(
-                name = StripeJsonUtils.optString(json, FIELD_NAME),
+                name = optString(json, FIELD_NAME),
                 criticalityIndicator = json.optBoolean(FIELD_CRITICALITY_INDICATOR),
-                id = StripeJsonUtils.optString(json, FIELD_ID),
+                id = optString(json, FIELD_ID),
                 data = data.toMap()
             )
         }
@@ -117,16 +99,16 @@ internal class Stripe3ds2AuthResultJsonParser : ModelJsonParser<Stripe3ds2AuthRe
         override fun parse(json: JSONObject): Stripe3ds2AuthResult.ThreeDS2Error {
             return Stripe3ds2AuthResult.ThreeDS2Error(
                 threeDSServerTransId = json.getString(FIELD_THREE_DS_SERVER_TRANS_ID),
-                acsTransId = StripeJsonUtils.optString(json, FIELD_ACS_TRANS_ID),
-                dsTransId = StripeJsonUtils.optString(json, FIELD_DS_TRANS_ID),
+                acsTransId = optString(json, FIELD_ACS_TRANS_ID),
+                dsTransId = optString(json, FIELD_DS_TRANS_ID),
                 errorCode = json.getString(FIELD_ERROR_CODE),
                 errorComponent = json.getString(FIELD_ERROR_COMPONENT),
                 errorDescription = json.getString(FIELD_ERROR_DESCRIPTION),
                 errorDetail = json.getString(FIELD_ERROR_DETAIL),
-                errorMessageType = StripeJsonUtils.optString(json, FIELD_ERROR_MESSAGE_TYPE),
+                errorMessageType = optString(json, FIELD_ERROR_MESSAGE_TYPE),
                 messageType = json.getString(FIELD_MESSAGE_TYPE),
                 messageVersion = json.getString(FIELD_MESSAGE_VERSION),
-                sdkTransId = StripeJsonUtils.optString(json, FIELD_SDK_TRANS_ID)
+                sdkTransId = optString(json, FIELD_SDK_TRANS_ID)
             )
         }
 
@@ -147,9 +129,9 @@ internal class Stripe3ds2AuthResultJsonParser : ModelJsonParser<Stripe3ds2AuthRe
 
     private companion object {
         private const val FIELD_ID = "id"
-        private const val FIELD_OBJECT = "object"
         private const val FIELD_ARES = "ares"
         private const val FIELD_CREATED = "created"
+        private const val FIELD_CREQ = "creq"
         private const val FIELD_ERROR = "error"
         private const val FIELD_FALLBACK_REDIRECT_URL = "fallback_redirect_url"
         private const val FIELD_LIVEMODE = "livemode"

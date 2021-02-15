@@ -1,37 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:app="http://schemas.android.com/apk/res-auto"
        android:layout_width="match_parent"
        android:layout_height="wrap_content">
 
-    <com.stripe.android.view.IconTextInputLayout
+    <com.stripe.android.view.CardNumberTextInputLayout
         android:id="@+id/tl_card_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/acc_label_card_number"
         android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
-        style="@style/Widget.Design.TextInputLayout"
+        style="@style/Stripe.CardMultilineWidget.TextInputLayout"
         >
 
         <com.stripe.android.view.CardNumberEditText
             android:id="@+id/et_card_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:digits="@string/valid_digits"
             android:drawablePadding="@dimen/stripe_card_icon_multiline_padding"
-            android:drawableStart="@drawable/stripe_ic_unknown"
             android:imeOptions="actionNext"
-            android:inputType="number"
             android:nextFocusDown="@+id/et_expiry"
             android:nextFocusForward="@+id/et_expiry"
             />
 
-    </com.stripe.android.view.IconTextInputLayout>
+    </com.stripe.android.view.CardNumberTextInputLayout>
 
     <LinearLayout
         android:id="@+id/second_row_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
         android:baselineAligned="false"
         android:orientation="horizontal"
         >
@@ -40,10 +37,12 @@
             android:id="@+id/tl_expiry"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
             android:hint="@string/acc_label_expiry_date"
-            style="@style/Widget.Design.TextInputLayout"
+            app:placeholderText="@string/expiry_date_hint"
+            style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             >
 
             <com.stripe.android.view.ExpiryDateEditText
@@ -51,10 +50,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionNext"
-                android:inputType="date"
-                android:maxLength="@integer/stripe_date_length"
+                android:digits="@string/stripe_expiration_date_allowlist"
                 android:nextFocusDown="@+id/et_cvc"
                 android:nextFocusForward="@+id/et_cvc"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -63,9 +62,11 @@
             android:id="@+id/tl_cvc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
-            style="@style/Widget.Design.TextInputLayout"
+            app:placeholderText="@string/cvc_multiline_helper"
+            style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             >
 
             <com.stripe.android.view.CvcEditText
@@ -75,6 +76,7 @@
                 android:imeOptions="actionNext"
                 android:nextFocusDown="@+id/et_postal_code"
                 android:nextFocusForward="@+id/et_postal_code"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -84,7 +86,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            style="@style/Widget.Design.TextInputLayout"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
+            app:placeholderText="@string/stripe_postalcode_placeholder"
+            style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             >
 
             <com.stripe.android.view.PostalCodeEditText
@@ -92,6 +96,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
+                android:minHeight="@dimen/stripe_cmw_edit_text_minheight"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>

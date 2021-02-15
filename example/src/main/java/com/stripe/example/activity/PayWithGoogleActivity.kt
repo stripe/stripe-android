@@ -34,10 +34,12 @@ class PayWithGoogleActivity : AppCompatActivity() {
     }
 
     private val paymentsClient: PaymentsClient by lazy {
-        Wallet.getPaymentsClient(this,
+        Wallet.getPaymentsClient(
+            this,
             Wallet.WalletOptions.Builder()
                 .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
-                .build())
+                .build()
+        )
     }
     private val googlePayJsonFactory: GooglePayJsonFactory by lazy {
         GooglePayJsonFactory(this)
@@ -71,17 +73,22 @@ class PayWithGoogleActivity : AppCompatActivity() {
             .addOnCompleteListener { task ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
-                try {
-                    if (task.isSuccessful) {
-                        showSnackbar("Google Pay is ready")
-                        viewBinding.googlePayButton.isEnabled = true
-                    } else {
-                        showSnackbar("Google Pay is unavailable")
+                runCatching {
+                    task.getResult(ApiException::class.java) == true
+                }.fold(
+                    onSuccess = { isReady ->
+                        if (isReady) {
+                            showSnackbar("Google Pay is ready")
+                            viewBinding.googlePayButton.isEnabled = true
+                        } else {
+                            showSnackbar("Google Pay is unavailable")
+                        }
+                    },
+                    onFailure = {
+                        Log.e("StripeExample", "Exception in isReadyToPay", it)
+                        showSnackbar("Exception: ${it.message}")
                     }
-                } catch (exception: ApiException) {
-                    Log.e("StripeExample", "Exception in isReadyToPay", exception)
-                    showSnackbar("Exception: ${exception.localizedMessage}")
-                }
+                )
             }
     }
 
@@ -134,9 +141,11 @@ class PayWithGoogleActivity : AppCompatActivity() {
                 AutoResolveHelper.RESULT_ERROR -> {
                     val status = AutoResolveHelper.getStatusFromIntent(data)
                     val statusMessage = status?.statusMessage ?: "unknown"
-                    Toast.makeText(this@PayWithGoogleActivity,
+                    Toast.makeText(
+                        this@PayWithGoogleActivity,
                         "Got error: $statusMessage",
-                        Toast.LENGTH_SHORT).show()
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 // Log the status for debugging

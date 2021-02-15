@@ -1,5 +1,223 @@
 # Migration Guide
 
+## Migrating from versions < 16.0.0
+- Changes to `CardInputWidget` and `CardMultilineWidget`
+    -  To enable 19-digit card support, [PaymentConfiguration.init]
+       must be called before the card widgets are instantiated.
+    - `card` and `cardBuilder` are deprecated. Use `cardParams` instead.
+- Changes to `CardNumberEditText`
+    - `lengthMax` and `cardNumber` are deprecated
+- Changes to `CvcEditText`
+    - `cvcValue` is deprecated
+- Changes to `Card`
+    - `number` and `cvc` are deprecated and will be removed in a future release.
+    - `Card.Builder` and `toBuilder()` are deprecated; use `CardParams` instead.
+    - `Card.fromString()`, `Card.fromJson()`, and `Card.create()` are deprecated
+      and will be removed in a future release.
+    - `metadata` is deprecated and no longer populated on the client.
+        It must be fetched on your server using your secret key.
+        If this is causing issues with your deployed app versions please reach out
+        to [Stripe Support](https://support.stripe.com/?contact=true).
+        This field will be removed in a future SDK version.
+    - `toPaymentMethodsParams()` and `toPaymentMethodParamsCard()` are deprecated;
+      use `PaymentMethodCreateParams.createCard()` instead.
+    - `validateCard()`, `validateNumber()`, `validateExpiryDate()`,
+      `validateCVC()`, `validateExpMonth()` are deprecated
+- Changes to `CardBrand`
+    - Methods `fromCardNumber()`, `formatNumber()`, `groupNumber()`,
+      `getSpacePositionsForCardNumber()`,
+      `getMaxLengthWithSpacesForCardNumber()`,
+      `getMaxLengthForCardNumber()` are deprecated
+    - Properties `defaultMaxLength`, `pattern`, and
+      `defaultSpacePositions` are deprecated
+- Changes to `CardUtils`
+    - `getPossibleCardBrand()` and `isValidCardNumber` are deprecated
+- Changes to `StripeTextUtils`
+    - `removeSpacesAndHyphens()` is deprecated
+- Changes to `SourceParams`
+    - `createCardToken()` that accepts a `Card` parameter is deprecated.
+      Use `createCardToken()` that accepts a `CardParams` parameter instead.
+    - `createCardTokenSynchronous()` that accepts a `Card` parameter is deprecated.
+      Use `createCardTokenSynchronous()` that accepts a `CardParams` parameter instead.
+- Changes to `Source`
+    - `metadata` is deprecated and no longer populated on the client.
+        It must be fetched on your server using your secret key.
+        If this is causing issues with your deployed app versions please reach out
+        to [Stripe Support](https://support.stripe.com/?contact=true).
+        This field will be removed in a future SDK version.
+- Changes to `PaymentMethod`
+    - `metadata` is deprecated and no longer populated on the client.
+        It must be fetched on your server using your secret key.
+        If this is causing issues with your deployed app versions please reach out
+        to [Stripe Support](https://support.stripe.com/?contact=true).
+        This field will be removed in a future SDK version.
+- Changes to `Stripe`
+    - `createCardParams()` that accepts a `Card` parameter is deprecated.
+      Use `createCardParams()` that accepts a `CardParams` parameter instead.
+    - `createToken()` has been removed; use `createCardToken()` instead.
+
+## Migrating from versions < 15.0.0
+- The SDK now targets JVM 1.8
+- The SDK now requires Android 5.0+ (API level 21+)
+- Changes to `PaymentIntent`
+    - `PaymentIntent#captureMethod` is now an enum, `PaymentIntent.CaptureMethod`
+        ```kotlin
+        // before
+        if (paymentIntent.captureMethod == "automatic") {
+
+        } else if (paymentIntent.captureMethod == "manual") {
+
+        }
+
+        // after
+        when (paymentIntent.captureMethod) {
+            PaymentIntent.CaptureMethod.Automatic -> {}
+            PaymentIntent.CaptureMethod.Manual -> {}
+        }
+        ```
+    - `PaymentIntent#confirmationMethod` is now an enum, `PaymentIntent.ConfirmationMethod`
+        ```kotlin
+        // before
+        if (paymentIntent.confirmationMethod == "automatic") {
+
+        } else if (paymentIntent.confirmationMethod == "manual") {
+
+        }
+
+        // after
+        when (paymentIntent.confirmationMethod) {
+            PaymentIntent.ConfirmationMethod.Automatic -> {}
+            PaymentIntent.ConfirmationMethod.Manual -> {}
+        }
+        ```
+- Changes to `PaymentMethod`
+    - `PaymentMethod.Card#brand` is now a `CardBrand`
+        ```kotlin
+        // before
+        when (paymentMethod.card?.brand) {
+            "visa" -> {}
+            "mastercard" -> {}
+            else -> {}
+        }
+
+        // after
+        when (paymentMethod.card?.brand) {
+            CardBrand.Visa -> {}
+            CardBrand.MasterCard -> {}
+            else -> {}
+        }
+        ```
+- Changes to `Token`
+    - `Token.TokenType` is renamed to `Token.Type` and is now an enum
+        ```kotlin
+        // before
+        when (token.type) {
+            Token.TokenType.CARD -> {}
+            Token.TokenType.BANK_ACCOUNT -> {}
+            else -> {}
+        }
+
+        // after
+        when (token.type) {
+            Token.Type.Card -> {}
+            Token.Type.BankAccount -> {}
+            else -> {}
+        }
+        ```
+- Changes to `PaymentSession`
+    - Remove `PaymentSession#ActivityPaymentSessionListener`
+- Changes to `CustomerSession`
+    - `CustomerSession`'s constructor no longer takes a `stripeAccountId`;
+      instead, instantiate `PaymentConfiguration` with a `stripeAccountId`
+        ```kotlin
+        // before
+        PaymentConfiguration.init(
+            context,
+            "pk_test"
+        )
+        CustomerSession.initCustomerSession(
+            context
+            ephemeralKeyProvider,
+            "acct_1234"
+        )
+
+        // after
+        PaymentConfiguration.init(
+            context,
+            "pk_test",
+            "acct_1234"
+        )
+        CustomerSession.initCustomerSession(
+            context
+            ephemeralKeyProvider
+        )
+        ```
+    - Remove `CustomerSession#ActivityCustomerRetrievalListener`, `CustomerSession#ActivityPaymentMethodRetrievalListener`,
+      `CustomerSession#ActivityPaymentMethodsRetrievalListener`, and `CustomerSession#ActivitySourceRetrievalListener`
+- Changes to `AddPaymentMethodActivity`
+    - When `PaymentConfiguration` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
+      when creating a payment method
+        ```kotlin
+        PaymentConfiguration.init(context, "pk_test", "acct_1234")
+        ```
+    - `AddPaymentMethodActivity.Result` is now a sealed class with `Success`, `Failure`, and `Canceled` subclasses
+        ```kotlin
+        // before
+        val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+            intent
+        )
+        when {
+            result != null -> result.paymentMethod
+            else -> {
+                // error happened or customer canceled
+            }
+        }
+    
+        // after
+        val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+            intent
+        )
+        when (result) {
+            is AddPaymentMethodActivityStarter.Result.Success -> {
+                result.paymentMethod
+            }
+            is AddPaymentMethodActivityStarter.Result.Failure -> {
+                result.exception
+            }
+            is AddPaymentMethodActivityStarter.Result.Canceled -> {
+                // customer canceled
+            }
+        }
+        ```
+- Changes to `ShippingInfoWidget`
+    - `setOptionalFields()` is now `optionalFields`
+    - `setHiddenFields()` is now `hiddenFields`
+    - `CustomizableShippingField` is now an enum
+- Changes to `Source`
+    - `Source.SourceFlow` has been renamed to `Source.Flow` and is now an enum
+    - `Source.SourceStatus` has been renamed to `Source.Status` and is now an enum
+    - `Source.Usage` is now an enum
+    - `SourceCodeVerification` has been moved to `Source.CodeVerification`
+    - `SourceOwner` has been moved to `Source.Owner`
+    - `SourceReceiver` has been moved to `Source.Receiver`
+    - `SourceRedirect` has been moved to `Source.Redirect`
+- Changes to `CustomerSource`
+    - `CustomerSource#tokenizationMethod` is now a `TokenizationMethod?`
+- Changes to `SourceTypeModel.Card`
+    - `SourceTypeModel.Card.ThreeDSecureStatus` is now an enum
+- Changes to `BankAccount`
+    - public constructors have been removed
+    - `BankAccount#accountNumber` has been removed
+    - `Stripe#createBankAccountToken()` no longer accepts a `BankAccount` instance;
+      instead, use `BankAccountTokenParams`
+    - `Stripe#createBankAccountTokenSynchronous()` no longer accepts a `BankAccount` instance;
+      instead, use `BankAccountTokenParams`
+- Changes to `AccountParams`
+    - Remove `AccountParams.create()` that takes a raw map; instead, use `create()` method that takes a
+      `AccountParams.BusinessTypeParams.Individual` or `AccountParams.BusinessTypeParams.Company`
+- Changes to `CardInputListener`
+    - `FocusField` is now an enum
+
 ## Migrating from versions < 14.5.0
 - Changes to `StripeIntent`
     - `redirectData` is now deprecated.
@@ -535,7 +753,7 @@
 - The `samplestore` app has moved to [stripe-samples/sample-store-android](https://github.com/stripe-samples/sample-store-android).
 - Remove `PaymentMethodsActivity.newIntent()`. Use `PaymentMethodsActivityStarter#startForResult()` to start `PaymentMethodsActivity`.
 - Remove `PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT`. Use `PaymentMethodsActivityStarter.Result#fromIntent(intent)` to obtain the result of `PaymentMethodsActivity`.
-- Remove `Stripe#createToken()` with `Executor` argument. Use [Stripe#createToken(Card, ApiResultCallback)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createToken-com.stripe.android.model.Card-com.stripe.android.ApiResultCallback-) instead.
+- Remove `Stripe#createToken()` with `Executor` argument. Use [Stripe#createCardToken()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/create-card-token.html) instead.
 
 ## Migration from versions < 10.1.0
 - You must call `PaymentConfiguration.init()` before calling `CustomerSession.initCustomerSession()`.

@@ -1,14 +1,19 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import com.stripe.android.CardUtils
+import kotlinx.parcelize.Parcelize
 
 /**
  * [Create a card token](https://stripe.com/docs/api/tokens/create_card)
  */
 @Parcelize
-internal data class CardParams internal constructor(
-    internal val attribution: Set<String> = emptySet(),
+data class CardParams internal constructor(
+    /**
+     * The likely [CardBrand] based on the [number].
+     */
+    val brand: CardBrand,
+
+    private val loggingTokens: Set<String> = emptySet(),
 
     /**
      * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
@@ -17,7 +22,7 @@ internal data class CardParams internal constructor(
      *
      * The card number, as a string without any separators.
      */
-    var number: String,
+    internal var number: String,
 
     /**
      * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
@@ -26,7 +31,7 @@ internal data class CardParams internal constructor(
      *
      * Two-digit number representing the card's expiration month.
      */
-    var expMonth: Int,
+    internal var expMonth: Int,
 
     /**
      * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
@@ -35,7 +40,7 @@ internal data class CardParams internal constructor(
      *
      * Two- or four-digit number representing the card's expiration year.
      */
-    var expYear: Int,
+    internal var expYear: Int,
 
     /**
      * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
@@ -45,7 +50,7 @@ internal data class CardParams internal constructor(
      * Card security code. Highly recommended to always include this value, but it's required only
      * for accounts based in European countries.
      */
-    var cvc: String? = null,
+    internal var cvc: String? = null,
 
     /**
      * [card.name](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-name)
@@ -68,8 +73,19 @@ internal data class CardParams internal constructor(
      * as a transfer destination for funds in this currency. Currently, the only supported
      * currency for debit card payouts is `usd`.
      */
-    var currency: String? = null
-) : StripeParamsModel, Parcelable {
+    var currency: String? = null,
+
+    /**
+     * [card.metadata](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-metadata)
+     *
+     * Optional
+     *
+     * A set of key-value pairs that you can attach to a card object. This can be useful for
+     * storing additional information about the card in a structured format.
+     */
+    var metadata: Map<String, String>? = null
+) : TokenParams(Token.Type.Card, loggingTokens) {
+    val last4: String get() = number.takeLast(4)
 
     @JvmOverloads
     constructor(
@@ -131,20 +147,32 @@ internal data class CardParams internal constructor(
          * as a transfer destination for funds in this currency. Currently, the only supported
          * currency for debit card payouts is `usd`.
          */
-        currency: String? = null
+        currency: String? = null,
+
+        /**
+         * [card.metadata](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-metadata)
+         *
+         * Optional
+         *
+         * A set of key-value pairs that you can attach to a card object. This can be useful for
+         * storing additional information about the card in a structured format.
+         */
+        metadata: Map<String, String>? = null
     ) : this(
-        attribution = emptySet(),
+        brand = CardUtils.getPossibleCardBrand(number),
+        loggingTokens = emptySet(),
         number = number,
         expMonth = expMonth,
         expYear = expYear,
         address = address,
         cvc = cvc,
         name = name,
-        currency = currency
+        currency = currency,
+        metadata = metadata
     )
 
-    override fun toParamMap(): Map<String, Any> {
-        val params: Map<String, Any> = listOf(
+    override val typeDataParams: Map<String, Any>
+        get() = listOf(
             PARAM_NUMBER to number,
             PARAM_EXP_MONTH to expMonth,
             PARAM_EXP_YEAR to expYear,
@@ -156,15 +184,13 @@ internal data class CardParams internal constructor(
             PARAM_ADDRESS_CITY to address?.city,
             PARAM_ADDRESS_STATE to address?.state,
             PARAM_ADDRESS_ZIP to address?.postalCode,
-            PARAM_ADDRESS_COUNTRY to address?.country
+            PARAM_ADDRESS_COUNTRY to address?.country,
+            PARAM_METADATA to metadata
         ).fold(emptyMap()) { acc, (key, value) ->
             acc.plus(
                 value?.let { mapOf(key to it) }.orEmpty()
             )
         }
-
-        return mapOf(Token.TokenType.CARD to params)
-    }
 
     private companion object {
         private const val PARAM_NUMBER = "number"
@@ -179,5 +205,6 @@ internal data class CardParams internal constructor(
         private const val PARAM_ADDRESS_ZIP = "address_zip"
         private const val PARAM_ADDRESS_COUNTRY = "address_country"
         private const val PARAM_CURRENCY = "currency"
+        private const val PARAM_METADATA = "metadata"
     }
 }

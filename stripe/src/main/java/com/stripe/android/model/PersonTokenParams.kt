@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Creates a single-use token that represents the details for a person. Use this when creating or
@@ -150,36 +150,33 @@ data class PersonTokenParams(
      * [person.verification](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-verification)
      */
     val verification: Verification? = null
-) : TokenParams(Token.TokenType.BANK_ACCOUNT) {
-    override fun toParamMap(): Map<String, Any> {
-        return mapOf(PARAM_PERSON to
-            listOf(
-                PARAM_ADDRESS to address?.toParamMap(),
-                PARAM_ADDRESS_KANA to addressKana?.toParamMap(),
-                PARAM_ADDRESS_KANJI to addressKanji?.toParamMap(),
-                PARAM_DOB to dateOfBirth?.toParamMap(),
-                PARAM_EMAIL to email,
-                PARAM_FIRST_NAME to firstName,
-                PARAM_FIRST_NAME_KANA to firstNameKana,
-                PARAM_FIRST_NAME_KANJI to firstNameKanji,
-                PARAM_GENDER to gender,
-                PARAM_ID_NUMBER to idNumber,
-                PARAM_LAST_NAME to lastName,
-                PARAM_LAST_NAME_KANA to lastNameKana,
-                PARAM_LAST_NAME_KANJI to lastNameKanji,
-                PARAM_MAIDEN_NAME to maidenName,
-                PARAM_METADATA to metadata,
-                PARAM_PHONE to phone,
-                PARAM_RELATIONSHIP to relationship?.toParamMap(),
-                PARAM_SSN_LAST_4 to ssnLast4,
-                PARAM_VERIFICATION to verification?.toParamMap()
-            ).fold(emptyMap<String, Any>()) { acc, (key, value) ->
-                acc.plus(
-                    value?.let { mapOf(key to it) }.orEmpty()
-                )
-            }
-        )
-    }
+) : TokenParams(Token.Type.Person) {
+    override val typeDataParams: Map<String, Any>
+        get() = listOf(
+            PARAM_ADDRESS to address?.toParamMap(),
+            PARAM_ADDRESS_KANA to addressKana?.toParamMap(),
+            PARAM_ADDRESS_KANJI to addressKanji?.toParamMap(),
+            PARAM_DOB to dateOfBirth?.toParamMap(),
+            PARAM_EMAIL to email,
+            PARAM_FIRST_NAME to firstName,
+            PARAM_FIRST_NAME_KANA to firstNameKana,
+            PARAM_FIRST_NAME_KANJI to firstNameKanji,
+            PARAM_GENDER to gender,
+            PARAM_ID_NUMBER to idNumber,
+            PARAM_LAST_NAME to lastName,
+            PARAM_LAST_NAME_KANA to lastNameKana,
+            PARAM_LAST_NAME_KANJI to lastNameKanji,
+            PARAM_MAIDEN_NAME to maidenName,
+            PARAM_METADATA to metadata,
+            PARAM_PHONE to phone,
+            PARAM_RELATIONSHIP to relationship?.toParamMap(),
+            PARAM_SSN_LAST_4 to ssnLast4,
+            PARAM_VERIFICATION to verification?.toParamMap()
+        ).fold(emptyMap()) { acc, (key, value) ->
+            acc.plus(
+                value?.let { mapOf(key to it) }.orEmpty()
+            )
+        }
 
     /**
      * The relationship that this person has with the account’s legal entity.

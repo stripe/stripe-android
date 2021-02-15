@@ -3,7 +3,7 @@ package com.stripe.android.model.wallets
 import android.os.Parcelable
 import com.stripe.android.model.Address
 import com.stripe.android.model.StripeModel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Details of the card wallet.

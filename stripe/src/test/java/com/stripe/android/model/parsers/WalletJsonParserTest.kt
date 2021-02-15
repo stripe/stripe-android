@@ -3,11 +3,11 @@ package com.stripe.android.model.parsers
 import com.stripe.android.model.Address
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.utils.ParcelUtils
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class WalletJsonParserTest {

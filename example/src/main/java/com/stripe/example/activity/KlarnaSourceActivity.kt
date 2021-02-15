@@ -3,13 +3,14 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -21,15 +22,17 @@ class KlarnaSourceActivity : AppCompatActivity() {
         KlarnaSourceActivityBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: SourceViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[SourceViewModel::class.java]
-    }
+    private val viewModel: SourceViewModel by viewModels()
 
     private val stripe: Stripe by lazy {
         StripeFactory(this).create()
+    }
+
+    private val buttons: Set<Button> by lazy {
+        setOf(
+            viewBinding.createButton,
+            viewBinding.fetchButton
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,27 +42,30 @@ class KlarnaSourceActivity : AppCompatActivity() {
 
         viewBinding.createButton.setOnClickListener {
             viewBinding.sourceResult.text = ""
-            viewBinding.progressBar.visibility = View.VISIBLE
-            createKlarnaSource().observe(this, Observer { result ->
-                viewBinding.progressBar.visibility = View.INVISIBLE
-                result.fold(
-                    onSuccess = { source ->
-                        logSource(source)
-                        stripe.authenticateSource(this, source)
-                    },
-                    onFailure = {
-                        viewBinding.sourceResult.text = it.localizedMessage
-                    }
-                )
-            })
+            disableUi()
+            createKlarnaSource().observe(
+                this,
+                { result ->
+                    result.fold(
+                        onSuccess = { source ->
+                            logSource(source)
+                            stripe.authenticateSource(this, source)
+                        },
+                        onFailure = ::logException
+                    )
+                }
+            )
         }
 
         viewBinding.fetchButton.setOnClickListener {
-            viewBinding.progressBar.visibility = View.VISIBLE
-            viewModel.fetchSource(viewModel.source).observe(this, Observer { result ->
-                viewBinding.progressBar.visibility = View.INVISIBLE
-                result.fold(::logSource, ::logException)
-            })
+            disableUi()
+            viewModel.fetchSource(viewModel.source).observe(
+                this,
+                { result ->
+                    enableUi()
+                    result.fold(::logSource, ::logException)
+                }
+            )
         }
     }
 
@@ -67,68 +73,78 @@ class KlarnaSourceActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (data != null && stripe.isAuthenticateSourceResult(requestCode, data)) {
-            stripe.onAuthenticateSourceResult(data, object : ApiResultCallback<Source> {
-                override fun onSuccess(result: Source) {
-                    viewModel.source = result
-                    logSource(result)
-                }
+            stripe.onAuthenticateSourceResult(
+                data,
+                object : ApiResultCallback<Source> {
+                    override fun onSuccess(result: Source) {
+                        enableUi()
+                        viewModel.source = result
+                        logSource(result)
+                    }
 
-                override fun onError(e: Exception) {
-                    logException(e)
+                    override fun onError(e: Exception) {
+                        enableUi()
+                        logException(e)
+                    }
                 }
-            })
+            )
         }
     }
 
     private fun logSource(source: Source) {
-        viewBinding.sourceResult.text = """
-            Source ID
-            ${source.id}
-            
-            Flow
-            ${source.flow}
-            
-            Status
-            ${source.status}
-
-            Redirect Status
-            ${source.redirect?.status}
-                
-            Authenticate URL
-            ${source.redirect?.url}
-                
-            Return URL
-            ${source.redirect?.returnUrl}
-        """.trimIndent()
+        viewBinding.sourceResult.text = listOf(
+            "Source ID" to source.id,
+            "Flow" to source.flow,
+            "Status" to source.status,
+            "Redirect Status" to source.redirect?.status,
+            "Authenticate URL" to source.redirect?.url,
+            "Return URL" to source.redirect?.returnUrl
+        ).joinToString(separator = "\n") {
+            "${it.first}: ${it.second}"
+        }
     }
 
     private fun logException(throwable: Throwable) {
+        enableUi()
         viewBinding.sourceResult.text = throwable.localizedMessage
     }
 
+    private fun enableUi() {
+        viewBinding.progressBar.visibility = View.INVISIBLE
+        buttons.forEach { it.isEnabled = true }
+    }
+
+    private fun disableUi() {
+        viewBinding.progressBar.visibility = View.VISIBLE
+        buttons.forEach { it.isEnabled = false }
+    }
+
     private fun createKlarnaSource(): LiveData<Result<Source>> {
-        return viewModel.createSource(SourceParams.createKlarna(
-            returnUrl = RETURN_URL,
-            currency = "gbp",
-            klarnaParams = KlarnaSourceParams(
-                purchaseCountry = "UK",
-                lineItems = LINE_ITEMS,
-                customPaymentMethods = setOf(
-                    KlarnaSourceParams.CustomPaymentMethods.Installments,
-                    KlarnaSourceParams.CustomPaymentMethods.PayIn4
-                ),
-                billingFirstName = "Arthur",
-                billingLastName = "Dent",
-                billingAddress = Address.Builder()
-                    .setLine1("29 Arlington Avenue")
-                    .setCity("London")
-                    .setCountry("UK")
-                    .setPostalCode("N1 7BE")
-                    .build(),
-                billingEmail = "test@example.com",
-                billingPhone = "02012267709"
+        return viewModel.createSource(
+            SourceParams.createKlarna(
+                returnUrl = RETURN_URL,
+                currency = "gbp",
+                klarnaParams = KlarnaSourceParams(
+                    purchaseCountry = "UK",
+                    lineItems = LINE_ITEMS,
+                    customPaymentMethods = setOf(
+                        KlarnaSourceParams.CustomPaymentMethods.Installments,
+                        KlarnaSourceParams.CustomPaymentMethods.PayIn4
+                    ),
+                    billingFirstName = "Arthur",
+                    billingLastName = "Dent",
+                    billingAddress = Address.Builder()
+                        .setLine1("29 Arlington Avenue")
+                        .setCity("London")
+                        .setCountry("UK")
+                        .setPostalCode("N1 7BE")
+                        .build(),
+                    billingEmail = "test@example.com",
+                    billingPhone = "02012267709",
+                    billingDob = DateOfBirth(1, 1, 1990)
+                )
             )
-        ))
+        )
     }
 
     private companion object {
