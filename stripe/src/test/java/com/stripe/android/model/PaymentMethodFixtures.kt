@@ -158,6 +158,7 @@ internal object PaymentMethodFixtures {
                     "exp_month": 8,
                     "exp_year": 2022,
                     "funding": "credit",
+                    "fingerprint": "fingerprint123",
                     "last4": "4242",
                     "three_d_secure_usage": {
                         "supported": true
