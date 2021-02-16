@@ -16,7 +16,8 @@ internal class BackUpFieldDeleteListener(
         val fieldText = backUpTarget.text?.toString() ?: ""
         if (fieldText.length > 1) {
             backUpTarget.setText(
-                fieldText.substring(0, fieldText.length - 1))
+                fieldText.substring(0, fieldText.length - 1)
+            )
         }
         backUpTarget.requestFocus()
         backUpTarget.setSelection(backUpTarget.length())

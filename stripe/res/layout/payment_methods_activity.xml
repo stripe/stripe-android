@@ -19,21 +19,30 @@
             app:title="@string/title_payment_method"
             android:theme="@style/StripeToolBarStyle" />
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:indeterminate="true"
             android:layout_below="@id/toolbar"
-            android:visibility="gone" />
+            android:visibility="gone"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator" />
+
+        <FrameLayout
+            android:id="@+id/footer_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:visibility="gone"/>
 
         <com.stripe.android.view.PaymentMethodsRecyclerView
             android:id="@+id/recycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/toolbar"
-            android:layout_marginTop="@dimen/stripe_list_top_margin" />
+            android:layout_above="@+id/footer_container"
+            android:layout_marginTop="@dimen/stripe_list_top_margin"
+            android:layout_marginBottom="@dimen/stripe_list_top_margin"/>
     </RelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -2,6 +2,7 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/stripe_list_row_height"
     android:layout_marginTop="@dimen/stripe_activity_total_margin"
@@ -13,9 +14,10 @@
     android:orientation="horizontal">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/stripe_masked_card_icon_width"
-        android:src="@drawable/stripe_google_pay_mark"
+        android:layout_height="wrap_content"
+        android:layout_width="@dimen/stripe_masked_card_icon_width"
+        app:srcCompat="@drawable/stripe_google_pay_mark"
+        android:scaleType="centerInside"
         android:focusableInTouchMode="false"
         android:clickable="false"
         android:layout_gravity="center_vertical|start"
@@ -39,7 +41,7 @@
         android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/stripe_ic_checkmark"
+        app:srcCompat="@drawable/stripe_ic_checkmark"
         android:visibility="invisible"
         />
 

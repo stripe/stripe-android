@@ -11,7 +11,7 @@ class GooglePayConfig @JvmOverloads constructor(
     publishableKey: String,
     private val connectedAccountId: String? = null
 ) {
-    private val publishableKey: String = ApiKeyValidator.get().requireValid(publishableKey)
+    private val validPublishableKey: String = ApiKeyValidator.get().requireValid(publishableKey)
     private val apiVersion: String = ApiVersion.get().code
 
     /**
@@ -31,15 +31,28 @@ class GooglePayConfig @JvmOverloads constructor(
             )
 
     private val key: String
-        get() = connectedAccountId?.let { "$publishableKey/$it" } ?: publishableKey
+        get() = connectedAccountId?.let { "$validPublishableKey/$it" } ?: validPublishableKey
+
+    /**
+     * Instantiate with [PaymentConfiguration].
+     * [PaymentConfiguration] must be initialized.
+     */
+    constructor(context: Context) : this(
+        PaymentConfiguration.getInstance(context)
+    )
 
     /**
      * Instantiate with [PaymentConfiguration] and optional Connect Account Id.
      * [PaymentConfiguration] must be initialized.
      */
-    @JvmOverloads
+    @Deprecated("Configure connectedAccountId in PaymentConfiguration")
     constructor(context: Context, connectedAccountId: String? = null) : this(
-        PaymentConfiguration.getInstance(context).publishableKey,
-        connectedAccountId
+        publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
+        connectedAccountId = connectedAccountId
+    )
+
+    private constructor(paymentConfiguration: PaymentConfiguration) : this(
+        publishableKey = paymentConfiguration.publishableKey,
+        connectedAccountId = paymentConfiguration.stripeAccountId
     )
 }

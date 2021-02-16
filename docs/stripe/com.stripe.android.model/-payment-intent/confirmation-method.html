@@ -10,19 +10,14 @@
 <h1>confirmationMethod</h1>
 <a name="com.stripe.android.model.PaymentIntent$confirmationMethod"></a>
 <code><span class="keyword">val </span><span class="identifier">confirmationMethod</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
-<p><strong>Return</strong><br/>
 <p>One of automatic (default) or manual.</p>
-
-
-<p>When the confirmation method is <code>automatic</code>, a PaymentIntent can be confirmed
+<p>When <a href="./confirmation-method.html">confirmationMethod</a> is <code>automatic</code>, a <a href="index.html">PaymentIntent</a> can be confirmed
 using a publishable key. After <code>next_action</code>s are handled, no additional
 confirmation is required to complete the payment.</p>
-
-
-<p>When the confirmation method is <code>manual</code>, all payment attempts must be made
-using a secret key. The PaymentIntent returns to the <code>requires_confirmation</code>
+<p>When <a href="./confirmation-method.html">confirmationMethod</a> is <code>manual</code>, all payment attempts must be made
+using a secret key. The <a href="index.html">PaymentIntent</a> returns to the
+<a href="../-stripe-intent/-status/-requires-confirmation.html">RequiresConfirmation</a>
 state after handling <code>next_action</code>s, and requires your server to initiate each
 payment attempt with an explicit confirmation.</p>
-</p>
 </BODY>
 </HTML>

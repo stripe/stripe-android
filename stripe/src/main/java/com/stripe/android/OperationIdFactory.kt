@@ -1,6 +1,6 @@
 package com.stripe.android
 
-internal interface OperationIdFactory {
+internal fun interface OperationIdFactory {
     fun create(): String
 
     companion object {

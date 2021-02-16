@@ -1,7 +1,6 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.Card
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.TokenizationMethod
@@ -22,32 +21,31 @@ internal class CardJsonParser : ModelJsonParser<Card> {
             .takeUnless { it < 0 }
 
         // Note that we'll never get the CVC or card number in JSON, so those values are null
-        return Card.Builder(expMonth = expMonth, expYear = expYear)
-            .addressCity(StripeJsonUtils.optString(json, FIELD_ADDRESS_CITY))
-            .addressLine1(StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1))
-            .addressLine1Check(StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1_CHECK))
-            .addressLine2(StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE2))
-            .addressCountry(StripeJsonUtils.optString(json, FIELD_ADDRESS_COUNTRY))
-            .addressState(StripeJsonUtils.optString(json, FIELD_ADDRESS_STATE))
-            .addressZip(StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP))
-            .addressZipCheck(StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP_CHECK))
-            .brand(CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)))
-            .country(StripeJsonUtils.optCountryCode(json, FIELD_COUNTRY))
-            .customer(StripeJsonUtils.optString(json, FIELD_CUSTOMER))
-            .currency(StripeJsonUtils.optCurrency(json, FIELD_CURRENCY))
-            .cvcCheck(StripeJsonUtils.optString(json, FIELD_CVC_CHECK))
-            .funding(CardFunding.fromCode(StripeJsonUtils.optString(json, FIELD_FUNDING)))
-            .fingerprint(StripeJsonUtils.optString(json, FIELD_FINGERPRINT))
-            .id(StripeJsonUtils.optString(json, FIELD_ID))
-            .last4(StripeJsonUtils.optString(json, FIELD_LAST4))
-            .name(StripeJsonUtils.optString(json, FIELD_NAME))
-            .tokenizationMethod(
-                TokenizationMethod.fromCode(
-                    StripeJsonUtils.optString(json, FIELD_TOKENIZATION_METHOD)
-                )
+        return Card(
+            expMonth = expMonth,
+            expYear = expYear,
+            addressCity = StripeJsonUtils.optString(json, FIELD_ADDRESS_CITY),
+            addressLine1 = StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1),
+            addressLine1Check = StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1_CHECK),
+            addressLine2 = StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE2),
+            addressCountry = StripeJsonUtils.optString(json, FIELD_ADDRESS_COUNTRY),
+            addressState = StripeJsonUtils.optString(json, FIELD_ADDRESS_STATE),
+            addressZip = StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP),
+            addressZipCheck = StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP_CHECK),
+            brand = Card.getCardBrand(StripeJsonUtils.optString(json, FIELD_BRAND)),
+            country = StripeJsonUtils.optCountryCode(json, FIELD_COUNTRY),
+            customerId = StripeJsonUtils.optString(json, FIELD_CUSTOMER),
+            currency = StripeJsonUtils.optCurrency(json, FIELD_CURRENCY),
+            cvcCheck = StripeJsonUtils.optString(json, FIELD_CVC_CHECK),
+            funding = CardFunding.fromCode(StripeJsonUtils.optString(json, FIELD_FUNDING)),
+            fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
+            id = StripeJsonUtils.optString(json, FIELD_ID),
+            last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
+            name = StripeJsonUtils.optString(json, FIELD_NAME),
+            tokenizationMethod = TokenizationMethod.fromCode(
+                StripeJsonUtils.optString(json, FIELD_TOKENIZATION_METHOD)
             )
-            .metadata(StripeJsonUtils.optHash(json, FIELD_METADATA))
-            .build()
+        )
     }
 
     companion object {
@@ -72,7 +70,6 @@ internal class CardJsonParser : ModelJsonParser<Card> {
         private const val FIELD_EXP_YEAR = "exp_year"
         private const val FIELD_FINGERPRINT = "fingerprint"
         private const val FIELD_FUNDING = "funding"
-        private const val FIELD_METADATA = "metadata"
         private const val FIELD_NAME = "name"
         private const val FIELD_LAST4 = "last4"
         private const val FIELD_ID = "id"

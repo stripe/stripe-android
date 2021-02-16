@@ -2,9 +2,9 @@ package com.stripe.android.model
 
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.AddressJsonParser
-import java.util.Locale
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.Locale
 
 /**
  * Model for an owner [address](https://stripe.com/docs/api#source_object-owner-address)
@@ -13,7 +13,7 @@ import org.json.JSONObject
 @Parcelize
 data class Address internal constructor(
     val city: String? = null,
-    val country: String? = null,
+    val country: String? = null, // two-character country code
     val line1: String? = null,
     val line2: String? = null,
     val postalCode: String? = null,

@@ -8,18 +8,32 @@ import java.util.regex.Pattern
  */
 internal class PostalCodeValidator {
 
+    /**
+     * 1. if there is a regex for the country code, validate the postal code against it
+     * 2. if the country does not use a postal code, treat postal code as valid
+     * 3. otherwise, postal code must be not-blank
+     */
+    fun isValid(
+        postalCode: String,
+        countryCode: String
+    ): Boolean {
+        return POSTAL_CODE_PATTERNS[countryCode]?.matcher(postalCode)?.matches()
+            ?: (!CountryUtils.doesCountryUsePostalCode(countryCode) || postalCode.isNotBlank())
+    }
+
     fun isValid(
         postalCode: String,
         countryCode: String?,
-        optionalShippingInfoFields: List<String>,
-        hiddenShippingInfoFields: List<String>
+        optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
+        hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
     ): Boolean {
         if (countryCode == null) {
             return false
         }
 
         return if (postalCode.isEmpty() &&
-            isPostalCodeNotRequired(optionalShippingInfoFields, hiddenShippingInfoFields)) {
+            isPostalCodeNotRequired(optionalShippingInfoFields, hiddenShippingInfoFields)
+        ) {
             // user has configured postal code as optional or hidden and customer has not inputted
             // a postal code
             true
@@ -42,13 +56,13 @@ internal class PostalCodeValidator {
         )
 
         private fun isPostalCodeNotRequired(
-            optionalShippingInfoFields: List<String>,
-            hiddenShippingInfoFields: List<String>
+            optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
+            hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
         ): Boolean {
             return optionalShippingInfoFields.contains(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
+                ShippingInfoWidget.CustomizableShippingField.PostalCode
             ) || hiddenShippingInfoFields.contains(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
+                ShippingInfoWidget.CustomizableShippingField.PostalCode
             )
         }
     }

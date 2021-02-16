@@ -1,24 +1,16 @@
 package com.stripe.android.view
 
-import androidx.annotation.StringDef
-
 /**
  * Represents a listener for card input events. Note that events are
  * not one-time events. For instance, a user can "complete" the CVC many times
  * by deleting and re-entering the value.
  */
 interface CardInputListener {
-
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef(FocusField.FOCUS_CARD, FocusField.FOCUS_EXPIRY, FocusField.FOCUS_CVC,
-        FocusField.FOCUS_POSTAL)
-    annotation class FocusField {
-        companion object {
-            const val FOCUS_CARD: String = "focus_card"
-            const val FOCUS_EXPIRY: String = "focus_expiry"
-            const val FOCUS_CVC: String = "focus_cvc"
-            const val FOCUS_POSTAL: String = "focus_postal"
-        }
+    enum class FocusField {
+        CardNumber,
+        ExpiryDate,
+        Cvc,
+        PostalCode
     }
 
     /**
@@ -26,7 +18,7 @@ interface CardInputListener {
      *
      * @param focusField a [FocusField] to which the focus has just changed.
      */
-    fun onFocusChange(@FocusField focusField: String)
+    fun onFocusChange(focusField: FocusField)
 
     /**
      * Called when a potentially valid card number has been completed in the

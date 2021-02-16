@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.SourceOrder.Item.Type
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Information about the items and shipping associated with the source.

@@ -1,36 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="@dimen/stripe_toolbar_elevation"
-        android:theme="@style/StripeToolBarStyle"
-        app:title="@string/secure_checkout" />
+    android:layout_height="match_parent"
+    android:windowSoftInputMode="adjustResize"
+    android:fitsSystemWindows="true">
 
     <FrameLayout
-        android:id="@+id/auth_web_view_container"
-        android:layout_below="@id/toolbar"
+        android:id="@+id/web_view_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <com.stripe.android.view.PaymentAuthWebView
-            android:id="@+id/auth_web_view"
+            android:id="@+id/web_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:windowSoftInputMode="adjustResize"
             android:focusable="true"
             android:focusableInTouchMode="true" />
     </FrameLayout>
 
-    <ProgressBar
-        android:id="@+id/auth_web_view_progress_bar"
-        style="@style/Widget.AppCompat.ProgressBar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/stripe_toolbar_elevation">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/StripeToolBarStyle"
+            app:title="@string/secure_checkout" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_bar"
+        style="@style/Widget.MaterialComponents.CircularProgressIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:indeterminate="true" />
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

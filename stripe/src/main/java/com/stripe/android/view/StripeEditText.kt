@@ -2,9 +2,6 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.os.Build
-import android.os.Handler
-import android.text.Editable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -12,8 +9,8 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
 
@@ -29,7 +26,6 @@ open class StripeEditText @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : TextInputEditText(context, attrs, defStyleAttr) {
-
     protected var isLastKeyDelete: Boolean = false
 
     private var afterTextChangedListener: AfterTextChangedListener? = null
@@ -71,10 +67,10 @@ open class StripeEditText @JvmOverloads constructor(
 
     @ColorInt
     private var defaultErrorColor: Int = 0
+
     @ColorInt
     private var errorColor: Int? = null
 
-    private val hintHandler: Handler = Handler()
     private var errorMessageListener: ErrorMessageListener? = null
 
     /**
@@ -142,52 +138,11 @@ open class StripeEditText @JvmOverloads constructor(
         this.errorColor = errorColor
     }
 
-    /**
-     * Change the hint value of this control after a delay.
-     *
-     * @param hintResource the string resource for the hint text
-     * @param delayMilliseconds a delay period, measured in milliseconds
-     */
-    fun setHintDelayed(@StringRes hintResource: Int, delayMilliseconds: Long) {
-        setHintDelayed(resources.getText(hintResource), delayMilliseconds)
-    }
-
-    /**
-     * Change the hint value of this control after a delay.
-     *
-     * @param hint the hint text
-     * @param delayMilliseconds a delay period, measured in milliseconds
-     */
-    fun setHintDelayed(hint: CharSequence, delayMilliseconds: Long) {
-        hintHandler.postDelayed({
-            setHintSafely(hint)
-        }, delayMilliseconds)
-    }
-
-    /**
-     * Call setHint() and guard against NPE. This is a workaround for a
-     * [known issue on Samsung devices](https://issuetracker.google.com/issues/37127697).
-     */
-    private fun setHintSafely(hint: CharSequence) {
-        try {
-            setHint(hint)
-        } catch (e: NullPointerException) {
-        }
-    }
-
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(info)
         info.isContentInvalid = shouldShowError
         accessibilityText?.let { info.text = it }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            info.error = errorMessage.takeIf { shouldShowError }
-        }
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        // Passing a null token removes all callbacks and messages to the handler.
-        hintHandler.removeCallbacksAndMessages(null)
+        info.error = errorMessage.takeIf { shouldShowError }
     }
 
     private fun determineDefaultErrorColor() {
@@ -205,11 +160,9 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : StripeTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                afterTextChangedListener?.onTextChanged(s?.toString().orEmpty())
-            }
-        })
+        doAfterTextChanged { editable ->
+            afterTextChangedListener?.onTextChanged(editable?.toString().orEmpty())
+        }
     }
 
     private fun listenForDeleteEmpty() {
@@ -227,15 +180,15 @@ open class StripeEditText @JvmOverloads constructor(
         return keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN
     }
 
-    interface DeleteEmptyListener {
+    fun interface DeleteEmptyListener {
         fun onDeleteEmpty()
     }
 
-    interface AfterTextChangedListener {
+    fun interface AfterTextChangedListener {
         fun onTextChanged(text: String)
     }
 
-    interface ErrorMessageListener {
+    fun interface ErrorMessageListener {
         fun displayErrorMessage(message: String?)
     }
 

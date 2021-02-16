@@ -17,8 +17,10 @@ internal class AddressJsonParser : ModelJsonParser<Address> {
 
     private companion object {
         private const val FIELD_CITY = "city"
+
         // 2 Character Country Code
         private const val FIELD_COUNTRY = "country"
+
         private const val FIELD_LINE_1 = "line1"
         private const val FIELD_LINE_2 = "line2"
         private const val FIELD_POSTAL_CODE = "postal_code"

@@ -16,43 +16,43 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
     private val activity: Activity,
     private val fragment: Fragment? = null,
     private val targetClass: Class<TargetActivityType>,
-    private val defaultArgs: ArgsType,
-    private val requestCode: Int
+    private val requestCode: Int,
+    private val intentFlags: Int? = null
 ) {
     internal constructor(
         activity: Activity,
         targetClass: Class<TargetActivityType>,
-        args: ArgsType,
-        requestCode: Int
+        requestCode: Int,
+        intentFlags: Int? = null
     ) : this(
         activity = activity,
         fragment = null,
         targetClass = targetClass,
-        defaultArgs = args,
-        requestCode = requestCode
+        requestCode = requestCode,
+        intentFlags = intentFlags
     )
 
     internal constructor(
         fragment: Fragment,
         targetClass: Class<TargetActivityType>,
-        args: ArgsType,
-        requestCode: Int
+        requestCode: Int,
+        intentFlags: Int? = null
     ) : this(
         activity = fragment.requireActivity(),
         fragment = fragment,
         targetClass = targetClass,
-        defaultArgs = args,
-        requestCode = requestCode
+        requestCode = requestCode,
+        intentFlags = intentFlags
     )
-
-    @Deprecated("startForResult() requires an args parameter")
-    fun startForResult() {
-        startForResult(defaultArgs)
-    }
 
     fun startForResult(args: ArgsType) {
         val intent = Intent(activity, targetClass)
             .putExtra(Args.EXTRA, args)
+            .also {
+                if (intentFlags != null) {
+                    it.addFlags(intentFlags)
+                }
+            }
 
         if (fragment != null) {
             fragment.startActivityForResult(intent, requestCode)

@@ -2,40 +2,42 @@ package com.stripe.android.view
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
-import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.FpxBankStatuses
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelChildren
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 
-internal class FpxViewModel @JvmOverloads internal constructor(
+internal class FpxViewModel internal constructor(
     application: Application,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val publishableKey: String,
+    private val stripeRepository: StripeRepository
 ) : AndroidViewModel(application) {
-    private val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
-    private val stripeRepository = StripeApiRepository(
-        application,
-        publishableKey,
-        workContext = workContext
-    )
-
     internal var selectedPosition: Int? = null
 
     @JvmSynthetic
-    internal fun getFpxBankStatues() = liveData<FpxBankStatuses>(workContext) {
-        emitSource(
+    internal fun getFpxBankStatues() = liveData {
+        emit(
             runCatching {
                 stripeRepository.getFpxBankStatus(ApiRequest.Options(publishableKey))
-            }.getOrDefault(MutableLiveData(FpxBankStatuses()))
+            }.getOrDefault(FpxBankStatuses())
         )
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        workContext.cancelChildren()
+    internal class Factory(
+        private val application: Application
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
+            val stripeRepository = StripeApiRepository(
+                application,
+                publishableKey
+            )
+
+            return FpxViewModel(application, publishableKey, stripeRepository) as T
+        }
     }
 }

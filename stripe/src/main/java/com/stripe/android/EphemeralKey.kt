@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.model.StripeModel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Represents an Ephemeral Key that can be used temporarily for API operations that typically

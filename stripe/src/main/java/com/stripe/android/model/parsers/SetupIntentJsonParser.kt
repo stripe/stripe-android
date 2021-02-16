@@ -2,64 +2,60 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
 internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
     override fun parse(json: JSONObject): SetupIntent? {
-        val objectType = StripeJsonUtils.optString(json, FIELD_OBJECT)
+        val objectType = optString(json, FIELD_OBJECT)
         if (VALUE_SETUP_INTENT != objectType) {
             return null
         }
 
-        val nextAction = StripeJsonUtils.optMap(json, FIELD_NEXT_ACTION)
-
         val paymentMethod = json.optJSONObject(FIELD_PAYMENT_METHOD)?.let {
             PaymentMethodJsonParser().parse(it)
         }
-        val paymentMethodId =
-            StripeJsonUtils.optString(json, FIELD_PAYMENT_METHOD).takeIf { paymentMethod == null }
-                ?: paymentMethod?.id
-
-        val nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
-            NextActionDataParser().parse(it)
-        }
+        val paymentMethodId = optString(json, FIELD_PAYMENT_METHOD).takeIf {
+            paymentMethod == null
+        } ?: paymentMethod?.id
 
         return SetupIntent(
-            id = StripeJsonUtils.optString(json, FIELD_ID),
+            id = optString(json, FIELD_ID),
             created = json.optLong(FIELD_CREATED),
-            clientSecret = StripeJsonUtils.optString(json, FIELD_CLIENT_SECRET),
+            clientSecret = optString(json, FIELD_CLIENT_SECRET),
             cancellationReason = SetupIntent.CancellationReason.fromCode(
-                StripeJsonUtils.optString(json, FIELD_CANCELLATION_REASON)
+                optString(json, FIELD_CANCELLATION_REASON)
             ),
-            description = StripeJsonUtils.optString(json, FIELD_DESCRIPTION),
+            description = optString(json, FIELD_DESCRIPTION),
             isLiveMode = json.optBoolean(FIELD_LIVEMODE),
             paymentMethod = paymentMethod,
             paymentMethodId = paymentMethodId,
             paymentMethodTypes = ModelJsonParser.jsonArrayToList(
                 json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
             ),
-            status = StripeIntent.Status.fromCode(StripeJsonUtils.optString(json, FIELD_STATUS)),
-            usage = StripeIntent.Usage.fromCode(StripeJsonUtils.optString(json, FIELD_USAGE)),
+            status = StripeIntent.Status.fromCode(optString(json, FIELD_STATUS)),
+            usage = StripeIntent.Usage.fromCode(optString(json, FIELD_USAGE)),
             lastSetupError = json.optJSONObject(FIELD_LAST_SETUP_ERROR)?.let {
                 ErrorJsonParser().parse(it)
             },
-            nextActionData = nextActionData
+            nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
+                NextActionDataParser().parse(it)
+            }
         )
     }
 
     internal class ErrorJsonParser : ModelJsonParser<SetupIntent.Error> {
         override fun parse(json: JSONObject): SetupIntent.Error {
             return SetupIntent.Error(
-                code = StripeJsonUtils.optString(json, FIELD_CODE),
-                declineCode = StripeJsonUtils.optString(json, FIELD_DECLINE_CODE),
-                docUrl = StripeJsonUtils.optString(json, FIELD_DOC_URL),
-                message = StripeJsonUtils.optString(json, FIELD_MESSAGE),
-                param = StripeJsonUtils.optString(json, FIELD_PARAM),
+                code = optString(json, FIELD_CODE),
+                declineCode = optString(json, FIELD_DECLINE_CODE),
+                docUrl = optString(json, FIELD_DOC_URL),
+                message = optString(json, FIELD_MESSAGE),
+                param = optString(json, FIELD_PARAM),
                 paymentMethod = json.optJSONObject(FIELD_PAYMENT_METHOD)?.let {
                     PaymentMethodJsonParser().parse(it)
                 },
-                type = SetupIntent.Error.Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))
+                type = SetupIntent.Error.Type.fromCode(optString(json, FIELD_TYPE))
             )
         }
 
@@ -90,7 +86,5 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         private const val FIELD_STATUS = "status"
         private const val FIELD_USAGE = "usage"
         private const val FIELD_PAYMENT_METHOD = "payment_method"
-
-        private const val FIELD_NEXT_ACTION_TYPE = "type"
     }
 }

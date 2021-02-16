@@ -23,8 +23,10 @@ internal class ShippingMethodView @JvmOverloads constructor(
 
     @ColorInt
     private val selectedColorInt: Int
+
     @ColorInt
     private val unselectedTextColorSecondaryInt: Int
+
     @ColorInt
     private val unselectedTextColorPrimaryInt: Int
 
@@ -34,9 +36,9 @@ internal class ShippingMethodView @JvmOverloads constructor(
     )
 
     init {
-        val rawSelectedColorInt = colorUtils.getThemeAccentColor().data
-        val rawUnselectedTextColorPrimaryInt = colorUtils.getThemeTextColorPrimary().data
-        val rawUnselectedTextColorSecondaryInt = colorUtils.getThemeTextColorSecondary().data
+        val rawSelectedColorInt = colorUtils.colorAccent
+        val rawUnselectedTextColorPrimaryInt = colorUtils.textColorPrimary
+        val rawUnselectedTextColorSecondaryInt = colorUtils.textColorSecondary
 
         selectedColorInt =
             if (StripeColorUtils.isColorTransparent(rawSelectedColorInt)) {

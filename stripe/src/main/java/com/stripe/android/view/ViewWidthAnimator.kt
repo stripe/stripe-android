@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.view.View
+import androidx.core.view.updateLayoutParams
 
 internal class ViewWidthAnimator(
     private val view: View,
@@ -18,23 +19,25 @@ internal class ViewWidthAnimator(
         ValueAnimator.ofInt(startWidth, endWidth)
             .setDuration(duration).also {
                 it.addUpdateListener { valueAnimator ->
-                    val width = valueAnimator.animatedValue as Int
-                    view.layoutParams = view.layoutParams.also { layoutParams ->
-                        layoutParams.width = width
+                    val animatedWidth = valueAnimator.animatedValue as Int
+                    view.updateLayoutParams {
+                        width = animatedWidth
                     }
                 }
 
-                it.addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        super.onAnimationEnd(animation)
+                it.addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            super.onAnimationEnd(animation)
 
-                        view.layoutParams = view.layoutParams.also { layoutParams ->
-                            layoutParams.width = endWidth
+                            view.updateLayoutParams {
+                                width = endWidth
+                            }
+
+                            onAnimationEnd()
                         }
-
-                        onAnimationEnd()
                     }
-                })
+                )
             }.start()
     }
 }

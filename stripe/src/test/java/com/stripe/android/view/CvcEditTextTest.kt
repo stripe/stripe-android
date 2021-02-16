@@ -1,60 +1,78 @@
 package com.stripe.android.view
 
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.model.CardBrand
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class CvcEditTextTest {
-
-    private val cvcEditText: CvcEditText by lazy {
-        CvcEditText(ApplicationProvider.getApplicationContext())
-    }
+    private val cvcEditText = CvcEditText(
+        ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext(),
+            R.style.StripeDefaultTheme
+        )
+    )
 
     @Test
     fun cvcValue_withoutText_returnsNull() {
-        assertNull(cvcEditText.cvcValue)
+        assertThat(cvcEditText.cvc)
+            .isNull()
     }
 
     @Test
     fun cvcValue_withValidVisaValue_returnsCvcValue() {
         cvcEditText.setText("123")
         cvcEditText.updateBrand(CardBrand.Visa)
-        assertEquals("123", cvcEditText.cvcValue)
+        assertThat(cvcEditText.cvc?.value)
+            .isEqualTo("123")
+    }
+
+    @Test
+    fun `CvcEditText should remove non-digits from input`() {
+        cvcEditText.append("-1.2")
+        cvcEditText.append("a")
+        cvcEditText.append("3")
+        assertThat(cvcEditText.fieldText)
+            .isEqualTo("123")
     }
 
     @Test
     fun cvcValue_withValidInvalidVisaValue_returnsCvcValue() {
         cvcEditText.setText("1234")
         cvcEditText.updateBrand(CardBrand.Visa)
-        assertNull(cvcEditText.cvcValue)
+        assertThat(cvcEditText.cvc)
+            .isNull()
     }
 
     @Test
     fun cvcValue_withInvalidAmexValue_returnsCvcValue() {
         cvcEditText.setText("12")
         cvcEditText.updateBrand(CardBrand.AmericanExpress)
-        assertNull(cvcEditText.cvcValue)
+        assertThat(cvcEditText.cvc)
+            .isNull()
     }
 
     @Test
     fun cvcValue_withValid3DigitAmexValue_returnsCvcValue() {
         cvcEditText.setText("123")
         cvcEditText.updateBrand(CardBrand.AmericanExpress)
-        assertEquals("123", cvcEditText.cvcValue)
+        assertThat(cvcEditText.cvc?.value)
+            .isEqualTo("123")
     }
 
     @Test
     fun cvcValue_withValid4DigitAmexValue_returnsCvcValue() {
         cvcEditText.setText("1234")
         cvcEditText.updateBrand(CardBrand.AmericanExpress)
-        assertEquals("1234", cvcEditText.cvcValue)
+        assertThat(cvcEditText.cvc?.value)
+            .isEqualTo("1234")
     }
 
     @Test

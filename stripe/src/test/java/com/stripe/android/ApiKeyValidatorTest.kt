@@ -8,14 +8,18 @@ class ApiKeyValidatorTest {
 
     @Test
     fun testPublishableKey() {
-        assertEquals(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            ApiKeyValidator.get().requireValid(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY))
+        assertEquals(
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            ApiKeyValidator.get().requireValid(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        )
     }
 
     @Test
     fun testEphemeralKey() {
-        assertEquals(ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
-            ApiKeyValidator.get().requireValid(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
+        assertEquals(
+            ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
+            ApiKeyValidator.get().requireValid(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        )
     }
 
     @Test

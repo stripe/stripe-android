@@ -4,8 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
@@ -32,6 +35,12 @@ class PaymentSessionActivity : AppCompatActivity() {
         PaymentSessionActivityBinding.inflate(layoutInflater)
     }
 
+    private val viewModel: ActivityViewModel by viewModels()
+
+    private val customerSession: CustomerSession by lazy {
+        CustomerSession.getInstance()
+    }
+
     private lateinit var paymentSession: PaymentSession
     private val notSelectedText: String by lazy {
         getString(R.string.not_selected)
@@ -54,6 +63,43 @@ class PaymentSessionActivity : AppCompatActivity() {
         viewBinding.startPaymentFlowButton.setOnClickListener {
             paymentSession.presentShippingFlow()
         }
+
+        viewModel.paymentSessionDataResult.observe(
+            this,
+            { result ->
+                result.fold(
+                    onSuccess = {
+                        onPaymentSessionDataChanged(it)
+                    },
+                    onFailure = {
+                        snackbarController.show(it.message.orEmpty())
+                    }
+                )
+            }
+        )
+        viewModel.customerResult.observe(
+            this,
+            { result ->
+                result.fold(
+                    onSuccess = {
+                        onCustomerRetrieved()
+                    },
+                    onFailure = {
+                        hideProgressBar()
+                    }
+                )
+            }
+        )
+
+        viewModel.isProcessing.observe(
+            this,
+            { isCommunicating ->
+                when (isCommunicating) {
+                    true -> disableUi()
+                    false -> enableUi()
+                }
+            }
+        )
     }
 
     private fun createPaymentSession(
@@ -65,12 +111,10 @@ class PaymentSessionActivity : AppCompatActivity() {
             enableUi()
         }
 
-        // CustomerSession only needs to be initialized once per app.
-        val customerSession = CustomerSession.getInstance()
-
-        val paymentSession = PaymentSession(
+        return PaymentSession(
             activity = this,
             config = PaymentSessionConfig.Builder()
+                .setPaymentMethodsFooter(R.layout.add_payment_method_footer)
                 .setAddPaymentMethodFooter(R.layout.add_payment_method_footer)
                 .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
                 .setHiddenShippingInfoFields()
@@ -86,13 +130,10 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setShouldPrefetchCustomer(shouldPrefetchCustomer)
                 .setCanDeletePaymentMethods(true)
                 .build()
-        )
-        paymentSession.init(
-            listener = PaymentSessionListenerImpl(this, customerSession)
-        )
-        paymentSession.setCartTotal(2000L)
-
-        return paymentSession
+        ).also {
+            it.init(listener = viewModel.paymentSessionListener)
+            it.setCartTotal(2000L)
+        }
     }
 
     private fun createPaymentMethodDescription(data: PaymentSessionData): String {
@@ -151,18 +192,15 @@ class PaymentSessionActivity : AppCompatActivity() {
     }
 
     private fun onPaymentSessionDataChanged(
-        customerSession: CustomerSession,
         data: PaymentSessionData
     ) {
         paymentSessionData = data
         disableUi()
-        customerSession.retrieveCurrentCustomer(
-            PaymentSessionChangeCustomerRetrievalListener(this)
-        )
+        customerSession.retrieveCurrentCustomer(viewModel.customerSessionListener)
     }
 
     private fun enableUi() {
-        viewBinding.progressBar.visibility = View.INVISIBLE
+        hideProgressBar()
         viewBinding.selectPaymentMethodButton.isEnabled = true
         viewBinding.startPaymentFlowButton.isEnabled = true
     }
@@ -178,12 +216,17 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         paymentSessionData?.let { paymentSessionData ->
             viewBinding.readyToCharge.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                if (paymentSessionData.isPaymentReadyToCharge) {
-                    ContextCompat.getDrawable(this, R.drawable.ic_check)
-                } else {
-                    ContextCompat.getDrawable(this, R.drawable.ic_cancel)
-                },
-                null, null, null
+                VectorDrawableCompat.create(
+                    resources,
+                    when (paymentSessionData.isPaymentReadyToCharge) {
+                        true -> R.drawable.ic_check
+                        false -> R.drawable.ic_cancel
+                    },
+                    null
+                ),
+                null,
+                null,
+                null
             )
 
             viewBinding.paymentMethod.text =
@@ -199,72 +242,78 @@ class PaymentSessionActivity : AppCompatActivity() {
 
     private class ShippingInformationValidator : PaymentSessionConfig.ShippingInformationValidator {
         override fun isValid(shippingInformation: ShippingInformation): Boolean {
-            return shippingInformation.address?.country == Locale.US.country
+            return setOf(Locale.US.country, Locale.CANADA.country)
+                .contains(shippingInformation.address?.country.orEmpty())
         }
 
         override fun getErrorMessage(shippingInformation: ShippingInformation): String {
-            return "The country must be US."
+            return "The country must be US or Canada."
         }
     }
 
     private class ShippingMethodsFactory : PaymentSessionConfig.ShippingMethodsFactory {
-        override fun create(shippingInformation: ShippingInformation): List<ShippingMethod> {
-            return SHIPPING_METHODS
-        }
-    }
-
-    private fun showError(errorMessage: String) {
-        snackbarController.show(errorMessage)
-    }
-
-    private class PaymentSessionListenerImpl internal constructor(
-        activity: PaymentSessionActivity,
-        private val customerSession: CustomerSession
-    ) : PaymentSession.ActivityPaymentSessionListener<PaymentSessionActivity>(activity) {
-
-        override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
-            if (isCommunicating) {
-                BackgroundTaskTracker.onStart()
-            }
-
-            if (isCommunicating) {
-                listenerActivity?.disableUi()
-            } else {
-                listenerActivity?.enableUi()
+        override fun create(
+            shippingInformation: ShippingInformation
+        ): List<ShippingMethod> {
+            return when (shippingInformation.address?.country) {
+                "CA" -> SHIPPING_METHODS_CA
+                else -> SHIPPING_METHODS_US
             }
         }
-
-        override fun onError(errorCode: Int, errorMessage: String) {
-            BackgroundTaskTracker.onStop()
-            listenerActivity?.showError(errorMessage)
-        }
-
-        override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
-            BackgroundTaskTracker.onStop()
-            listenerActivity?.onPaymentSessionDataChanged(customerSession, data)
-        }
     }
 
-    private fun onError() {
+    private fun hideProgressBar() {
         viewBinding.progressBar.visibility = View.INVISIBLE
     }
 
-    private class PaymentSessionChangeCustomerRetrievalListener internal constructor(
-        activity: PaymentSessionActivity
-    ) : CustomerSession.ActivityCustomerRetrievalListener<PaymentSessionActivity>(activity) {
+    internal class ActivityViewModel : ViewModel() {
+        val isProcessing = MutableLiveData<Boolean>()
+        val paymentSessionDataResult = MutableLiveData<Result<PaymentSessionData>>()
 
-        init {
-            BackgroundTaskTracker.onStart()
+        val customerResult = MutableLiveData<Result<Customer>>()
+
+        val customerSessionListener: CustomerSession.CustomerRetrievalListener by lazy {
+            object : CustomerSession.CustomerRetrievalListener {
+                init {
+                    BackgroundTaskTracker.onStart()
+                }
+
+                override fun onCustomerRetrieved(customer: Customer) {
+                    BackgroundTaskTracker.onStop()
+                    customerResult.value = Result.success(customer)
+                }
+
+                override fun onError(
+                    errorCode: Int,
+                    errorMessage: String,
+                    stripeError: StripeError?
+                ) {
+                    BackgroundTaskTracker.onStop()
+                    customerResult.value = Result.failure(RuntimeException())
+                }
+            }
         }
 
-        override fun onCustomerRetrieved(customer: Customer) {
-            BackgroundTaskTracker.onStop()
-            activity?.onCustomerRetrieved()
-        }
+        val paymentSessionListener: PaymentSession.PaymentSessionListener by lazy {
+            object : PaymentSession.PaymentSessionListener {
+                override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
+                    if (isCommunicating) {
+                        BackgroundTaskTracker.onStart()
+                    }
 
-        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
-            BackgroundTaskTracker.onStop()
-            activity?.onError()
+                    isProcessing.value = isCommunicating
+                }
+
+                override fun onError(errorCode: Int, errorMessage: String) {
+                    BackgroundTaskTracker.onStop()
+                    paymentSessionDataResult.value = Result.failure(RuntimeException(errorMessage))
+                }
+
+                override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
+                    BackgroundTaskTracker.onStop()
+                    paymentSessionDataResult.value = Result.success(data)
+                }
+            }
         }
     }
 
@@ -282,11 +331,31 @@ class PaymentSessionActivity : AppCompatActivity() {
             "(555) 555-5555"
         )
 
-        private val SHIPPING_METHODS = listOf(
-            ShippingMethod("UPS Ground", "ups-ground",
-                599, "USD", "Arrives in 3-5 days"),
-            ShippingMethod("FedEx Overnight", "fedex",
-                1499, "USD", "Arrives tomorrow")
+        private val SHIPPING_METHODS_CA = listOf(
+            ShippingMethod(
+                "Canada Post",
+                "canada-post",
+                599,
+                "CAD",
+                "Arrives in 3-5 days"
+            )
+        )
+
+        private val SHIPPING_METHODS_US = listOf(
+            ShippingMethod(
+                "UPS Ground",
+                "ups-ground",
+                599,
+                "USD",
+                "Arrives in 3-5 days"
+            ),
+            ShippingMethod(
+                "FedEx Overnight",
+                "fedex",
+                1499,
+                "USD",
+                "Arrives tomorrow"
+            )
         )
     }
 }

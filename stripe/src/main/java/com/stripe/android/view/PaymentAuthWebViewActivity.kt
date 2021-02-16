@@ -6,14 +6,13 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
-import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.R
+import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
@@ -24,25 +23,27 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         PaymentAuthWebViewActivityBinding.inflate(layoutInflater)
     }
 
-    private lateinit var logger: Logger
-    private lateinit var viewModel: PaymentAuthWebViewActivityViewModel
+    private val _args: PaymentAuthWebViewContract.Args? by lazy {
+        PaymentAuthWebViewContract().parseArgs(intent)
+    }
+
+    private val logger: Logger by lazy {
+        Logger.getInstance(_args?.enableLogging == true)
+    }
+    private val viewModel: PaymentAuthWebViewActivityViewModel by viewModels {
+        PaymentAuthWebViewActivityViewModel.Factory(requireNotNull(_args))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args: PaymentAuthWebViewStarter.Args? =
-            intent.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        val args = _args
         if (args == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
             return
         }
 
-        viewModel = ViewModelProvider(
-            this, PaymentAuthWebViewActivityViewModel.Factory(args)
-        )[PaymentAuthWebViewActivityViewModel::class.java]
-
-        logger = Logger.getInstance(args.enableLogging)
         logger.debug("PaymentAuthWebViewActivity#onCreate()")
 
         LocalBroadcastManager.getInstance(this)
@@ -63,19 +64,19 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         }
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
-        viewBinding.authWebView.init(
+        viewBinding.webView.init(
             this,
             logger,
-            viewBinding.authWebViewProgressBar,
+            viewBinding.progressBar,
             clientSecret,
             args.returnUrl
         )
-        viewBinding.authWebView.loadUrl(args.url)
+        viewBinding.webView.loadUrl(args.url)
     }
 
     override fun onDestroy() {
-        viewBinding.authWebViewContainer.removeAllViews()
-        viewBinding.authWebView.destroy()
+        viewBinding.webViewContainer.removeAllViews()
+        viewBinding.webView.destroy()
         super.onDestroy()
     }
 
@@ -101,14 +102,16 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        cancelIntentSource()
+        if (viewBinding.webView.canGoBack()) {
+            viewBinding.webView.goBack()
+        } else {
+            cancelIntentSource()
+        }
     }
 
     private fun cancelIntentSource() {
-        viewModel.cancelIntentSource().observe(this, Observer { intent ->
-            setResult(Activity.RESULT_OK, intent)
-            finish()
-        })
+        setResult(Activity.RESULT_OK, viewModel.cancellationResult)
+        finish()
     }
 
     private fun customizeToolbar() {

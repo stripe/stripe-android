@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +18,6 @@ import java.lang.RuntimeException
 
 internal class AddPaymentMethodViewModel(
     private val stripe: Stripe,
-    private val customerSession: CustomerSession,
     private val args: AddPaymentMethodActivityStarter.Args,
     private val errorMessageTranslator: ErrorMessageTranslator =
         TranslatorManager.getErrorMessageTranslator()
@@ -33,7 +33,7 @@ internal class AddPaymentMethodViewModel(
     ): LiveData<Result<PaymentMethod>> {
         val resultData = MutableLiveData<Result<PaymentMethod>>()
         stripe.createPaymentMethod(
-            paymentMethodCreateParams = params.copy(productUsage = productUsage),
+            paymentMethodCreateParams = updatedPaymentMethodCreateParams(params),
             callback = object : ApiResultCallback<PaymentMethod> {
                 override fun onSuccess(result: PaymentMethod) {
                     resultData.value = Result.success(result)
@@ -42,12 +42,21 @@ internal class AddPaymentMethodViewModel(
                 override fun onError(e: Exception) {
                     resultData.value = Result.failure(e)
                 }
-            })
+            }
+        )
         return resultData
     }
 
+    @VisibleForTesting
+    internal fun updatedPaymentMethodCreateParams(
+        params: PaymentMethodCreateParams
+    ) = params.copy(productUsage = productUsage)
+
     @JvmSynthetic
-    internal fun attachPaymentMethod(paymentMethod: PaymentMethod): LiveData<Result<PaymentMethod>> {
+    internal fun attachPaymentMethod(
+        customerSession: CustomerSession,
+        paymentMethod: PaymentMethod
+    ): LiveData<Result<PaymentMethod>> {
         val resultData = MutableLiveData<Result<PaymentMethod>>()
         customerSession.attachPaymentMethod(
             paymentMethodId = paymentMethod.id.orEmpty(),
@@ -79,13 +88,10 @@ internal class AddPaymentMethodViewModel(
 
     internal class Factory(
         private val stripe: Stripe,
-        private val customerSession: CustomerSession,
         private val args: AddPaymentMethodActivityStarter.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return AddPaymentMethodViewModel(
-                stripe, customerSession, args
-            ) as T
+            return AddPaymentMethodViewModel(stripe, args) as T
         }
     }
 }

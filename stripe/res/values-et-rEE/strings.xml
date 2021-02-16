@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Kaardinumber</string>
+    <string name="acc_label_card_number_node">%s, kaardinumber</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Aegumiskuupäev</string>
+    <string name="acc_label_expiry_date_node">%s, aegumiskuupäev</string>
+    <string name="acc_label_zip">Sihtnumber</string>
+    <string name="acc_label_zip_short">Sihtnumber</string>
+    <string name="add_card">Selles rakenduses ostude tegemiseks peate lisama uue deebet- või krediitkaardi.</string>
+    <string name="added">Lisati %s</string>
+    <string name="address_city_required">Sisestage linn</string>
+    <string name="address_country_invalid">Riik ei sobi</string>
+    <string name="address_county_required">Sisestage riik</string>
+    <string name="address_label_address">Aadress</string>
+    <string name="address_label_address_line1">Aadressirida 1</string>
+    <string name="address_label_address_line1_optional">Aadressirida 1 (valikuline)</string>
+    <string name="address_label_address_line2">Aadressirida 2</string>
+    <string name="address_label_address_line2_optional">Aadressirida 2 (valikuline)</string>
+    <string name="address_label_address_optional">Aadress (valikuline)</string>
+    <string name="address_label_apt">Korter</string>
+    <string name="address_label_apt_optional">Korter (valikuline)</string>
+    <string name="address_label_city">Linn</string>
+    <string name="address_label_city_optional">Linn (valikuline)</string>
+    <string name="address_label_country">Riik</string>
+    <string name="address_label_county">Maakond</string>
+    <string name="address_label_county_optional">Maakond (valikuline)</string>
+    <string name="address_label_name">Nimi</string>
+    <string name="address_label_name_optional">Nimi (valikuline)</string>
+    <string name="address_label_phone_number">Telefoninumber</string>
+    <string name="address_label_phone_number_optional">Telefoninumber (valikuline)</string>
+    <string name="address_label_postal_code">Sihtnumber</string>
+    <string name="address_label_postal_code_optional">Sihtnumber (valikuline)</string>
+    <string name="address_label_postcode">Sihtnumber</string>
+    <string name="address_label_postcode_optional">Sihtnumber (valikuline)</string>
+    <string name="address_label_province">Maakond</string>
+    <string name="address_label_province_optional">Maakond (valikuline)</string>
+    <string name="address_label_region_generic">Osariik/maakond/regioon</string>
+    <string name="address_label_region_generic_optional">Osariik/maakond/regioon (valikuline)</string>
+    <string name="address_label_state">Osariik</string>
+    <string name="address_label_state_optional">Osariik (valikuline)</string>
+    <string name="address_label_zip_code">Sihtnumber</string>
+    <string name="address_label_zip_code_optional">Sihtnumber (valikuline)</string>
+    <string name="address_label_zip_postal_code">Sihtnumber</string>
+    <string name="address_label_zip_postal_code_optional">Sihtnumber (valikuline)</string>
+    <string name="address_name_required">Sisestage oma nimi</string>
+    <string name="address_phone_number_required">Sisestage telefoninumber</string>
+    <string name="address_postal_code_invalid">Sihtnumber on kehtetu</string>
+    <string name="address_postcode_invalid">Sihtnumber eon kehtetu</string>
+    <string name="address_province_required">Sisestage maakond</string>
+    <string name="address_region_generic_required">Sisestage osariik/maakond/regioon</string>
+    <string name="address_required">Sisestage aadress</string>
+    <string name="address_shipping_address">Tarneaadress</string>
+    <string name="address_state_required">Sisestage osariik</string>
+    <string name="address_zip_invalid">Sihtnumber on kehtetu.</string>
+    <string name="address_zip_postal_invalid">Sihtnumber on kehtetu.</string>
+    <string name="becs_mandate_acceptance">
+    Esitades oma pangakonto andmed ja kinnitades selle makse, nõustute käesoleva
+    otsekorralduse taotluse ja otsekorralduse taotluse teenuselepinguga ning volitate ettevõtet
+    Stripe Payments Australia Pty Ltd ACN 160 180 343, otsekorralduse kasutaja ID number 507156
+    („Stripe“), sooritama teenuse Bulk Electronic Clearing System (BECS)
+    kaudu %1$s („Kaupleja“) nimel makseid teie kontolt kooskõlas teie ja Kaupleja
+    vahel kokku lepitud summades. Te kinnitate, et olete ülalnimetatud konto
+    omanik või volitatud allkirjaõiguslik isik.
+    </string>
+    <string name="becs_widget_account_number">Kontonumber</string>
+    <string name="becs_widget_account_number_required">Kontonumbri esitamine on kohustuslik.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">Sisestatud BSB-number on puudulik.</string>
+    <string name="becs_widget_bsb_invalid">Sisestatud BSB-number ei ole kehtiv.</string>
+    <string name="becs_widget_email">Meiliaadress</string>
+    <string name="becs_widget_email_required">Meiliaadressi esitamine kohustuslik.</string>
+    <string name="becs_widget_name">Nimi</string>
+    <string name="becs_widget_name_required">Nime esitamine on kohustuslik.</string>
+    <string name="close">Sulge</string>
+    <string name="delete_payment_method">Kas kustutada makseviis?</string>
+    <string name="delete_payment_method_prompt_title">Kas kustutada makseviis?</string>
+    <string name="expiry_date_hint">KK/AA</string>
+    <string name="expiry_label_short">Aegumine</string>
+    <string name="fpx_bank_offline">%s - võrguühenduseta</string>
+    <string name="google_pay">Google Pay</string>
+    <string name="invalid_card_number">Kaardi number on kehtetu.</string>
+    <string name="invalid_cvc">Kaardi turvakood on kehtetu.</string>
+    <string name="invalid_expiry_month">Kaardi aegumiskuu on kehtetu.</string>
+    <string name="invalid_expiry_year">Kaardi aegumisaasta on kehtetu.</string>
+    <string name="invalid_shipping_information">Kehtetu tarneaadress</string>
+    <string name="invalid_zip">Sihtnumber on puudulik.</string>
+    <string name="no_payment_methods">Makseviisid puuduvad.</string>
+    <string name="payment_method_add_new_card">Lisage uus kaart ...</string>
+    <string name="payment_method_add_new_fpx">Valige pangakonto (FPX) ...</string>
+    <string name="price_free">Tasuta</string>
+    <string name="removed">Eemaldati %s</string>
+    <string name="secure_checkout">Turvaline maksmine</string>
+    <string name="title_add_a_card">Kaardi lisamine</string>
+    <string name="title_add_an_address">Määrake aadress</string>
+    <string name="title_bank_account">Pangakonto</string>
+    <string name="title_payment_method">Makseviis</string>
+    <string name="title_select_shipping_method">Valige tarneviis</string>
+</resources>

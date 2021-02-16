@@ -1,16 +1,17 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.EphemeralKey
+import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.json.JSONObject
 
 class EphemeralKeyJsonParserTest {
 
     @Test
     fun parse() {
-        val actual = EphemeralKeyJsonParser().parse(JSONObject(
-            """
+        val actual = EphemeralKeyJsonParser().parse(
+            JSONObject(
+                """
             {
                 "id": "ephkey_123",
                 "object": "ephemeral_key",
@@ -23,8 +24,9 @@ class EphemeralKeyJsonParserTest {
                     "id": "cus_123"
                 }]
             }
-            """.trimIndent()
-        ))
+                """.trimIndent()
+            )
+        )
 
         val expected = EphemeralKey(
             objectId = "cus_123",

@@ -2,20 +2,16 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.utils.ParcelUtils
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
-/**
- * Test class for [PaymentConfiguration].
- */
 @RunWith(RobolectricTestRunner::class)
 class PaymentConfigurationTest {
-
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @BeforeTest
@@ -32,6 +28,24 @@ class PaymentConfigurationTest {
     }
 
     @Test
+    fun `stripeAccountId should be persisted`() {
+        PaymentConfiguration.init(
+            context,
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            "acct_12345"
+        )
+
+        assertThat(
+            PaymentConfiguration.getInstance(context)
+        ).isEqualTo(
+            PaymentConfiguration(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "acct_12345"
+            )
+        )
+    }
+
+    @Test
     fun getInstance_whenInstanceIsNull_loadsFromPrefs() {
         PaymentConfiguration.init(
             context,
@@ -40,19 +54,21 @@ class PaymentConfigurationTest {
 
         PaymentConfiguration.clearInstance()
 
-        assertEquals(
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            PaymentConfiguration
-                .getInstance(context)
-                .publishableKey
+        assertThat(
+            PaymentConfiguration.getInstance(context)
+        ).isEqualTo(
+            PaymentConfiguration(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            )
         )
     }
 
     @Test
     fun testParcel() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
         val paymentConfig = PaymentConfiguration.getInstance(context)
-        assertEquals(paymentConfig, ParcelUtils.create(paymentConfig))
+        assertThat(ParcelUtils.create(paymentConfig))
+            .isEqualTo(paymentConfig)
     }
 }

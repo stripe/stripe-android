@@ -2,10 +2,7 @@ package com.stripe.android.model
 
 import com.stripe.android.model.SourceOrderFixtures.SOURCE_ORDER_JSON
 import com.stripe.android.model.parsers.CustomerSourceJsonParser
-import com.stripe.android.model.parsers.SourceCodeVerificationJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
-import com.stripe.android.model.parsers.SourceReceiverJsonParser
-import com.stripe.android.model.parsers.SourceRedirectJsonParser
 import org.json.JSONObject
 
 internal object SourceFixtures {
@@ -49,8 +46,10 @@ internal object SourceFixtures {
         """.trimIndent()
     )
 
-    val WECHAT = requireNotNull(PARSER.parse(JSONObject(
-        """
+    val WECHAT = requireNotNull(
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "src_1F4ZSkBNJ02",
             "object": "source",
@@ -88,8 +87,10 @@ internal object SourceFixtures {
                 "qr_code_url": null
             }
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 
     val SOURCE_CARD_JSON = JSONObject(
         """
@@ -140,8 +141,10 @@ internal object SourceFixtures {
 
     val SOURCE_CARD = requireNotNull(PARSER.parse(SOURCE_CARD_JSON))
 
-    val CARD = requireNotNull(PARSER.parse(JSONObject(
-        """
+    val CARD = requireNotNull(
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "card_1ELxrOCRMbs6FrXfdxOGjnaD",
             "object": "card",
@@ -166,21 +169,23 @@ internal object SourceFixtures {
             "name": null,
             "tokenization_method": null
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 
     val APPLE_PAY = JSONObject(
         """
         {
             "id": "card_189fi32eZvKYlo2CHK8NPRME",
             "object": "card",
-            "address_city": "Des Moines",
+            "address_city": "San Francisco",
             "address_country": "US",
-            "address_line1": "123 Any Street",
+            "address_line1": "123 Market St",
             "address_line1_check": "unavailable",
-            "address_line2": "456",
-            "address_state": "IA",
-            "address_zip": "50305",
+            "address_line2": "#345",
+            "address_state": "CA",
+            "address_zip": "94107",
             "address_zip_check": "unavailable",
             "brand": "Visa",
             "country": "US",
@@ -208,7 +213,8 @@ internal object SourceFixtures {
         """.trimIndent()
     )
 
-    val SOURCE_REDIRECT = SourceRedirectJsonParser().parse(SOURCE_REDIRECT_JSON)
+    val REDIRECT = SourceJsonParser.RedirectJsonParser()
+        .parse(SOURCE_REDIRECT_JSON)
 
     private val SOURCE_CODE_VERIFICATION_JSON = JSONObject(
         """
@@ -220,7 +226,7 @@ internal object SourceFixtures {
     )
 
     val SOURCE_CODE_VERIFICATION =
-        SourceCodeVerificationJsonParser().parse(SOURCE_CODE_VERIFICATION_JSON)
+        SourceJsonParser.CodeVerificationJsonParser().parse(SOURCE_CODE_VERIFICATION_JSON)
 
     private val SOURCE_RECEIVER_JSON = JSONObject(
         """
@@ -233,7 +239,8 @@ internal object SourceFixtures {
         """.trimIndent()
     )
 
-    val SOURCE_RECEIVER = SourceReceiverJsonParser().parse(SOURCE_RECEIVER_JSON)
+    val SOURCE_RECEIVER = SourceJsonParser.ReceiverJsonParser()
+        .parse(SOURCE_RECEIVER_JSON)
 
     val SOURCE_OWNER_WITH_NULLS = JSONObject(
         """
@@ -295,11 +302,13 @@ internal object SourceFixtures {
                 "tokenization_method": "apple_pay",
                 "dynamic_last4": "4242"
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
-    internal val SOURCE_WITH_SOURCE_ORDER = requireNotNull(PARSER.parse(JSONObject(
-        """
+    internal val SOURCE_WITH_SOURCE_ORDER = requireNotNull(
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "src_1FfB6GKmrohBAXC",
             "object": "source",
@@ -315,8 +324,10 @@ internal object SourceFixtures {
             "type": "klarna",
             "usage": "single_use"
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 
     internal val CUSTOMER_SOURCE_CARD_JSON = JSONObject(
         """
@@ -387,7 +398,7 @@ internal object SourceFixtures {
                     "brand": "Visa"
                 }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
     internal val CUSTOMER_SOURCE_CARD = requireNotNull(
@@ -459,7 +470,7 @@ internal object SourceFixtures {
                     "uri": "dogecoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000"
                 }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
     internal val DELETED_CARD_JSON = JSONObject(
@@ -469,11 +480,13 @@ internal object SourceFixtures {
                 "object": "card",
                 "deleted": true
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
-    internal val KLARNA = requireNotNull(PARSER.parse(JSONObject(
-        """
+    internal val KLARNA = requireNotNull(
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "src_1FfB6GKmrohBAXC",
             "object": "source",
@@ -504,6 +517,8 @@ internal object SourceFixtures {
                 "payment_method_categories": "pay_later,pay_over_time"
             }
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 }

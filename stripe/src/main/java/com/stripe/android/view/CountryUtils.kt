@@ -18,6 +18,12 @@ internal object CountryUtils {
         }
 
     @JvmSynthetic
+    fun getDisplayCountry(
+        countryCode: String
+    ): String = getCountryByCode(countryCode)?.name
+        ?: Locale("", countryCode).displayCountry
+
+    @JvmSynthetic
     internal fun getCountryByName(countryName: String): Country? {
         return COUNTRIES.firstOrNull { it.name == countryName }
     }
@@ -40,6 +46,6 @@ internal object CountryUtils {
 
     @JvmSynthetic
     internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode)
+        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.toUpperCase(Locale.ROOT))
     }
 }

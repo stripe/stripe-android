@@ -1,25 +1,28 @@
 package com.stripe.android.model
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.parsers.CardJsonParser
+import org.json.JSONObject
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertNotSame
-import kotlin.test.assertTrue
-import org.json.JSONObject
 
 /**
  * Test class for [StripeModel].
  */
 class StripeModelTest {
 
+    @BeforeTest
+    fun setup() {
+        assertThat(StripeModel::class.java.isAssignableFrom(Card::class.java))
+            .isTrue()
+    }
+
     @Test
     fun equals_whenEquals_returnsTrue() {
-        assertTrue(StripeModel::class.java.isAssignableFrom(Card::class.java))
-
-        val firstCard = parse(CardTest.JSON_CARD_USD)
-        val secondCard = parse(CardTest.JSON_CARD_USD)
+        val firstCard = parse(CardFixtures.CARD_USD_JSON)
+        val secondCard = parse(CardFixtures.CARD_USD_JSON)
 
         assertEquals(firstCard, secondCard)
         // Just confirming for sanity
@@ -28,38 +31,27 @@ class StripeModelTest {
 
     @Test
     fun equals_whenNotEquals_returnsFalse() {
-        assertTrue(StripeModel::class.java.isAssignableFrom(Card::class.java))
-        val firstCard = Card.create("4242", null, null, null)
-        val secondCard = Card.create("4343", null, null, null)
-        assertNotEquals(firstCard, secondCard)
+        assertThat(CardParams("4242", 1, 2021))
+            .isNotEqualTo(CardParams("4343", 1, 20201))
     }
 
     @Test
     fun hashCode_whenEquals_returnsSameValue() {
-        assertTrue(StripeModel::class.java.isAssignableFrom(Card::class.java))
-
-        val firstCard = parse(CardTest.JSON_CARD_USD)
-        val secondCard = parse(CardTest.JSON_CARD_USD)
-        assertNotNull(firstCard)
-        assertNotNull(secondCard)
-
-        assertEquals(firstCard.hashCode(), secondCard.hashCode())
+        assertThat(parse(CardFixtures.CARD_USD_JSON).hashCode())
+            .isEqualTo(parse(CardFixtures.CARD_USD_JSON).hashCode())
     }
 
     @Test
     fun hashCode_whenNotEquals_returnsDifferentValues() {
-        assertTrue(StripeModel::class.java.isAssignableFrom(Card::class.java))
-
-        val usdCard = CardFixtures.CARD_USD
-        val eurCard = CardFixtures.CARD_EUR
-
-        assertNotNull(usdCard)
-        assertNotNull(eurCard)
-
-        assertNotEquals(usdCard.hashCode(), eurCard.hashCode())
+        assertThat(CardFixtures.CARD_USD.hashCode())
+            .isNotEqualTo(
+                CardFixtures.CARD_USD
+                    .copy(currency = "eur")
+                    .hashCode()
+            )
     }
 
-    private fun parse(json: JSONObject): Card? {
+    private fun parse(json: JSONObject): Card {
         return requireNotNull(CardJsonParser().parse(json))
     }
 }

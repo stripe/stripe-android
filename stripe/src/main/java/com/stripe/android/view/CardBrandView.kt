@@ -8,6 +8,7 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.DrawableCompat
 import com.stripe.android.databinding.CardBrandViewBinding
 import com.stripe.android.model.CardBrand
+import kotlin.properties.Delegates
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
@@ -19,36 +20,93 @@ internal class CardBrandView @JvmOverloads constructor(
         this
     )
     private val iconView = viewBinding.icon
+    private val progressView = viewBinding.progress
 
     @ColorInt
     internal var tintColorInt: Int = 0
+
+    var isLoading: Boolean by Delegates.observable(
+        false
+    ) { _, wasLoading, isLoading ->
+        if (wasLoading != isLoading) {
+            updateIcon()
+
+            if (isLoading) {
+                progressView.show()
+            } else {
+                progressView.hide()
+            }
+        }
+    }
+
+    var brand: CardBrand by Delegates.observable(
+        CardBrand.Unknown
+    ) { _, prevValue, newValue ->
+        if (prevValue != newValue) {
+            updateIcon()
+        }
+    }
+
+    var shouldShowCvc: Boolean by Delegates.observable(
+        false
+    ) { _, prevValue, newValue ->
+        if (prevValue != newValue) {
+            updateIcon()
+        }
+    }
+
+    var shouldShowErrorIcon: Boolean by Delegates.observable(
+        false
+    ) { _, prevValue, newValue ->
+        if (prevValue != newValue) {
+            updateIcon()
+        }
+    }
 
     init {
         isClickable = false
         isFocusable = false
     }
 
-    internal fun showBrandIcon(brand: CardBrand, shouldShowErrorIcon: Boolean) {
-        if (shouldShowErrorIcon) {
-            iconView.setImageResource(brand.errorIcon)
-        } else {
-            iconView.setImageResource(brand.icon)
+    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
+        super.onWindowFocusChanged(hasWindowFocus)
+        // needed to tint CardBrand.Unknown icon
+        updateIcon()
+    }
 
-            if (brand == CardBrand.Unknown) {
+    private fun updateIcon() {
+        when {
+            isLoading -> {
+                renderBrandIcon()
+            }
+            shouldShowErrorIcon -> {
+                iconView.setImageResource(brand.errorIcon)
+            }
+            shouldShowCvc -> {
+                iconView.setImageResource(brand.cvcIcon)
                 applyTint()
+            }
+            else -> {
+                renderBrandIcon()
             }
         }
     }
 
-    internal fun showCvcIcon(brand: CardBrand) {
-        iconView.setImageResource(brand.cvcIcon)
-        applyTint()
+    private fun renderBrandIcon() {
+        iconView.setImageResource(brand.icon)
+
+        if (brand == CardBrand.Unknown) {
+            applyTint()
+        }
     }
 
-    internal fun applyTint() {
-        val icon = iconView.drawable
-        val compatIcon = DrawableCompat.wrap(icon)
-        DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
-        iconView.setImageDrawable(DrawableCompat.unwrap(compatIcon))
+    private fun applyTint() {
+        iconView.setImageDrawable(
+            DrawableCompat.unwrap(
+                DrawableCompat.wrap(iconView.drawable).also { compatIcon ->
+                    DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
+                }
+            )
+        )
     }
 }

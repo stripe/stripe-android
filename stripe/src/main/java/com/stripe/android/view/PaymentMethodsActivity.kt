@@ -2,13 +2,22 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.core.text.util.LinkifyCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
+import com.stripe.android.R
 import com.stripe.android.databinding.PaymentMethodsActivityBinding
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
@@ -33,8 +42,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
         args.isPaymentSessionActive
     }
 
-    private val customerSession: CustomerSession by lazy {
-        CustomerSession.getInstance()
+    private val customerSession: Result<CustomerSession> by lazy {
+        runCatching { CustomerSession.getInstance() }
     }
     private val cardDisplayTextFactory: CardDisplayTextFactory by lazy {
         CardDisplayTextFactory(this)
@@ -48,16 +57,13 @@ class PaymentMethodsActivity : AppCompatActivity() {
         PaymentMethodsActivityStarter.Args.create(intent)
     }
 
-    private val viewModel: PaymentMethodsViewModel by lazy {
-        ViewModelProvider(
-            this,
-            PaymentMethodsViewModel.Factory(
-                application,
-                customerSession,
-                args.initialPaymentMethodId,
-                startedFromPaymentSession
-            )
-        )[PaymentMethodsViewModel::class.java]
+    private val viewModel: PaymentMethodsViewModel by viewModels {
+        PaymentMethodsViewModel.Factory(
+            application,
+            customerSession,
+            args.initialPaymentMethodId,
+            startedFromPaymentSession
+        )
     }
 
     private val adapter: PaymentMethodsAdapter by lazy {
@@ -73,32 +79,55 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (customerSession.isFailure) {
+            finishWithResult(
+                null,
+                Activity.RESULT_CANCELED
+            )
+            return
+        }
+
         setContentView(viewBinding.root)
 
         args.windowFlags?.let {
             window.addFlags(it)
         }
 
-        viewModel.snackbarData.observe(this, Observer { snackbarText ->
+        viewModel.snackbarData.observe(this) { snackbarText ->
             snackbarText?.let {
                 Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
             }
-        })
-        viewModel.progressData.observe(this, Observer {
-            viewBinding.progressBar.visibility = if (it) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-        })
+        }
+        viewModel.progressData.observe(this) {
+            viewBinding.progressBar.isVisible = it
+        }
 
         setupRecyclerView()
+
+        val addPaymentMethodLauncher = registerForActivityResult(
+            AddPaymentMethodContract(),
+            ::onAddPaymentMethodResult
+        )
+        adapter.addPaymentMethodArgs.observe(this) { args ->
+            if (args != null) {
+                addPaymentMethodLauncher.launch(args)
+            }
+        }
 
         setSupportActionBar(viewBinding.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
+        }
+
+        createFooterView(viewBinding.footerContainer)?.let { footer ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                viewBinding.recycler.accessibilityTraversalBefore = footer.id
+                footer.accessibilityTraversalAfter = viewBinding.recycler.id
+            }
+            viewBinding.footerContainer.addView(footer)
+            viewBinding.footerContainer.isVisible = true
         }
 
         fetchCustomerPaymentMethods()
@@ -136,18 +165,11 @@ class PaymentMethodsActivity : AppCompatActivity() {
         if (args.canDeletePaymentMethods) {
             viewBinding.recycler.attachItemTouchHelper(
                 PaymentMethodSwipeCallback(
-                    this, adapter,
+                    this,
+                    adapter,
                     SwipeToDeleteCallbackListener(deletePaymentMethodDialogFactory)
                 )
             )
-        }
-    }
-
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AddPaymentMethodActivityStarter.REQUEST_CODE &&
-            resultCode == Activity.RESULT_OK) {
-            onPaymentMethodCreated(data)
         }
     }
 
@@ -156,12 +178,19 @@ class PaymentMethodsActivity : AppCompatActivity() {
         return true
     }
 
-    private fun onPaymentMethodCreated(data: Intent?) {
-        data?.let {
-            val result =
-                AddPaymentMethodActivityStarter.Result.fromIntent(data)
-            result?.paymentMethod?.let { onAddedPaymentMethod(it) }
-        } ?: fetchCustomerPaymentMethods()
+    @VisibleForTesting
+    internal fun onAddPaymentMethodResult(result: AddPaymentMethodActivityStarter.Result) {
+        when (result) {
+            is AddPaymentMethodActivityStarter.Result.Success -> {
+                onAddedPaymentMethod(result.paymentMethod)
+            }
+            is AddPaymentMethodActivityStarter.Result.Failure -> {
+                // TODO(mshafrir-stripe): notify user that payment method can not be added at this time
+            }
+            else -> {
+                // no-op
+            }
+        }
     }
 
     private fun onAddedPaymentMethod(paymentMethod: PaymentMethod) {
@@ -182,7 +211,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun fetchCustomerPaymentMethods() {
-        viewModel.getPaymentMethods().observe(this, Observer { result ->
+        viewModel.getPaymentMethods().observe(this) { result ->
             result.fold(
                 onSuccess = { adapter.setPaymentMethods(it) },
                 onFailure = {
@@ -199,11 +228,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
                     )
                 }
             )
-        })
+        }
     }
 
     private fun finishWithGooglePay() {
-        setResult(Activity.RESULT_OK,
+        setResult(
+            Activity.RESULT_OK,
             Intent().putExtras(
                 PaymentMethodsActivityStarter.Result(useGooglePay = true).toBundle()
             )
@@ -219,14 +249,37 @@ class PaymentMethodsActivity : AppCompatActivity() {
         setResult(
             resultCode,
             Intent().also {
-                it.putExtras(PaymentMethodsActivityStarter.Result(
-                    paymentMethod = paymentMethod,
-                    useGooglePay = args.useGooglePay && paymentMethod == null
-                ).toBundle())
+                it.putExtras(
+                    PaymentMethodsActivityStarter.Result(
+                        paymentMethod = paymentMethod,
+                        useGooglePay = args.useGooglePay && paymentMethod == null
+                    ).toBundle()
+                )
             }
         )
 
         finish()
+    }
+
+    private fun createFooterView(
+        contentRoot: ViewGroup
+    ): View? {
+        return if (args.paymentMethodsFooterLayoutId > 0) {
+            val footerView = layoutInflater.inflate(
+                args.paymentMethodsFooterLayoutId,
+                contentRoot,
+                false
+            )
+            footerView.id = R.id.stripe_payment_methods_footer
+            if (footerView is TextView) {
+                LinkifyCompat.addLinks(footerView, Linkify.ALL)
+                ViewCompat.enableAccessibleClickableSpanSupport(footerView)
+                footerView.movementMethod = LinkMovementMethod.getInstance()
+            }
+            footerView
+        } else {
+            null
+        }
     }
 
     override fun onDestroy() {

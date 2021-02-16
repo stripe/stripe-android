@@ -13,6 +13,7 @@ object StripeTextUtils {
      * @return the input number minus any spaces, for instance "4242424242424242".
      * Returns `null` if the input was `null` or all spaces.
      */
+    @Deprecated("Will be removed in upcoming major release.")
     @JvmStatic
     fun removeSpacesAndHyphens(cardNumberWithSpaces: String?): String? {
         return cardNumberWithSpaces.takeUnless { it.isNullOrBlank() }

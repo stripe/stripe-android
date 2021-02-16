@@ -3,21 +3,22 @@ package com.stripe.android.view
 import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionFixtures
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class StripeColorUtilsTest {
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
-    }
+    private val activityScenarioFactory = ActivityScenarioFactory(
+        ApplicationProvider.getApplicationContext()
+    )
 
     @BeforeTest
     fun setup() {
@@ -25,25 +26,25 @@ internal class StripeColorUtilsTest {
     }
 
     @Test
-    fun getThemeAccentColor_whenOnPostLollipopConfig_getsNonzeroColor() {
+    fun getThemeAccentColor_getsNonzeroColor() {
         activityScenarioFactory.create<PaymentFlowActivity>(
             PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity {
-                @ColorInt val color = StripeColorUtils(it).getThemeAccentColor().data
-                assertTrue(Color.alpha(color) > 0)
+                assertThat(Color.alpha(StripeColorUtils(it).colorAccent))
+                    .isGreaterThan(0)
             }
         }
     }
 
     @Test
-    fun getThemeColorControlNormal_whenOnPostLollipopConfig_getsNonzeroColor() {
+    fun getThemeColorControlNormal_getsNonzeroColor() {
         activityScenarioFactory.create<PaymentFlowActivity>(
             PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity {
-                @ColorInt val color = StripeColorUtils(it).getThemeColorControlNormal().data
-                assertTrue(Color.alpha(color) > 0)
+                assertThat(Color.alpha(StripeColorUtils(it).colorControlNormal))
+                    .isGreaterThan(0)
             }
         }
     }
