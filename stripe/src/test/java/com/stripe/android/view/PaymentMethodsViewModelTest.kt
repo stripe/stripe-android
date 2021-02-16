@@ -13,9 +13,9 @@ import com.stripe.android.PaymentSession
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsViewModelTest {
@@ -24,7 +24,7 @@ class PaymentMethodsViewModelTest {
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
     private val viewModel = PaymentMethodsViewModel(
         application = ApplicationProvider.getApplicationContext(),
-        customerSession = customerSession,
+        customerSession = Result.success(customerSession),
         startedFromPaymentSession = true
     )
 
@@ -69,7 +69,9 @@ class PaymentMethodsViewModelTest {
         )
 
         listenerArgumentCaptor.firstValue.onError(
-            404, "error!", null
+            404,
+            "error!",
+            null
         )
 
         assertThat(throwable)
@@ -98,6 +100,22 @@ class PaymentMethodsViewModelTest {
             .isEqualTo("Removed Visa ending in 4242")
         assertThat(values[1])
             .isNull()
+    }
+
+    @Test
+    fun `getPaymentMethods() with CustomerSession failure should return failure result`() {
+        var result: Result<List<PaymentMethod>>? = null
+        PaymentMethodsViewModel(
+            application = ApplicationProvider.getApplicationContext(),
+            customerSession = Result.failure(RuntimeException("failure")),
+            startedFromPaymentSession = true
+        ).getPaymentMethods().observeForever {
+            result = it
+        }
+
+        requireNotNull(result)
+        assertThat(result?.isFailure)
+            .isTrue()
     }
 
     private companion object {

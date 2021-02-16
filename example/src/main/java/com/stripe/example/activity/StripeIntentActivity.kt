@@ -2,9 +2,8 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
@@ -25,11 +24,7 @@ import org.json.JSONObject
  * in order to display state of the interaction.
  */
 abstract class StripeIntentActivity : AppCompatActivity() {
-    internal val viewModel: StripeIntentViewModel by lazy {
-        ViewModelProvider(this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[StripeIntentViewModel::class.java]
-    }
+    internal val viewModel: StripeIntentViewModel by viewModels()
     private val stripeAccountId: String? by lazy {
         Settings(this).stripeAccountId
     }
@@ -44,20 +39,26 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         viewModel.paymentIntentResultLiveData
-            .observe(this, Observer {
-                it.fold(
-                    onSuccess = ::onConfirmSuccess,
-                    onFailure = ::onConfirmError
-                )
-            })
+            .observe(
+                this,
+                {
+                    it.fold(
+                        onSuccess = ::onConfirmSuccess,
+                        onFailure = ::onConfirmError
+                    )
+                }
+            )
 
         viewModel.setupIntentResultLiveData
-            .observe(this, Observer {
-                it.fold(
-                    onSuccess = ::onConfirmSuccess,
-                    onFailure = ::onConfirmError
-                )
-            })
+            .observe(
+                this,
+                {
+                    it.fold(
+                        onSuccess = ::onConfirmSuccess,
+                        onFailure = ::onConfirmError
+                    )
+                }
+            )
     }
 
     protected fun createAndConfirmPaymentIntent(
@@ -72,12 +73,21 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         keyboardController.hide()
 
-        viewModel.createPaymentIntent(country).observe(this, Observer { result ->
-            result.onSuccess {
-                handleCreatePaymentIntentResponse(it, paymentMethodCreateParams, shippingDetails,
-                    stripeAccountId, existingPaymentMethodId, mandateDataParams)
+        viewModel.createPaymentIntent(country).observe(
+            this,
+            { result ->
+                result.onSuccess {
+                    handleCreatePaymentIntentResponse(
+                        it,
+                        paymentMethodCreateParams,
+                        shippingDetails,
+                        stripeAccountId,
+                        existingPaymentMethodId,
+                        mandateDataParams
+                    )
+                }
             }
-        })
+        )
     }
 
     protected fun createAndConfirmSetupIntent(
@@ -87,11 +97,14 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     ) {
         keyboardController.hide()
 
-        viewModel.createSetupIntent(country).observe(this, Observer { result ->
-            result.onSuccess {
-                handleCreateSetupIntentResponse(it, params, stripeAccountId)
+        viewModel.createSetupIntent(country).observe(
+            this,
+            { result ->
+                result.onSuccess {
+                    handleCreateSetupIntentResponse(it, params, stripeAccountId)
+                }
             }
-        })
+        )
     }
 
     private fun handleCreatePaymentIntentResponse(
@@ -105,9 +118,12 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         val secret = responseData.getString("secret")
         viewModel.status.postValue(
             viewModel.status.value +
-                "\n\nStarting PaymentIntent confirmation" + (stripeAccountId?.let {
-                " for $it"
-            } ?: ""))
+                "\n\nStarting PaymentIntent confirmation" + (
+                stripeAccountId?.let {
+                    " for $it"
+                } ?: ""
+                )
+        )
         val confirmPaymentIntentParams = if (existingPaymentMethodId == null) {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = requireNotNull(params),
@@ -133,9 +149,12 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         val secret = responseData.getString("secret")
         viewModel.status.postValue(
             viewModel.status.value +
-                "\n\nStarting SetupIntent confirmation" + (stripeAccountId?.let {
-                " for $it"
-            } ?: ""))
+                "\n\nStarting SetupIntent confirmation" + (
+                stripeAccountId?.let {
+                    " for $it"
+                } ?: ""
+                )
+        )
         stripe.confirmSetupIntent(
             this,
             ConfirmSetupIntentParams.create(

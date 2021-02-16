@@ -1,22 +1,26 @@
 package com.stripe.android.view
 
 import android.app.Activity
-import android.content.Context
 import android.text.InputType
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionFixtures
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import com.stripe.android.R
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PostalCodeEditTextTest {
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val context = ContextThemeWrapper(
+        ApplicationProvider.getApplicationContext(),
+        R.style.StripeDefaultTheme
+    )
     private val postalCodeEditText = PostalCodeEditText(context)
 
     @BeforeTest

@@ -11,7 +11,7 @@ internal class DeletePaymentMethodDialogFactory internal constructor(
     private val context: Context,
     private val adapter: PaymentMethodsAdapter,
     private val cardDisplayTextFactory: CardDisplayTextFactory,
-    private val customerSession: CustomerSession,
+    private val customerSession: Result<CustomerSession>,
     private val productUsage: Set<String>,
     private val onDeletedPaymentMethodCallback: (PaymentMethod) -> Unit
 ) {
@@ -23,10 +23,10 @@ internal class DeletePaymentMethodDialogFactory internal constructor(
         return AlertDialog.Builder(context, R.style.AlertDialogStyle)
             .setTitle(R.string.delete_payment_method_prompt_title)
             .setMessage(message)
-            .setPositiveButton(android.R.string.yes) { _, _ ->
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 onDeletedPaymentMethod(paymentMethod)
             }
-            .setNegativeButton(android.R.string.no) { _, _ ->
+            .setNegativeButton(android.R.string.cancel) { _, _ ->
                 adapter.resetPaymentMethod(paymentMethod)
             }
             .setOnCancelListener {
@@ -40,7 +40,7 @@ internal class DeletePaymentMethodDialogFactory internal constructor(
         adapter.deletePaymentMethod(paymentMethod)
 
         paymentMethod.id?.let { paymentMethodId ->
-            customerSession.detachPaymentMethod(
+            customerSession.getOrNull()?.detachPaymentMethod(
                 paymentMethodId = paymentMethodId,
                 productUsage = productUsage,
                 listener = PaymentMethodDeleteListener()

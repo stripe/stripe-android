@@ -3,9 +3,9 @@ package com.stripe.android.view
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class BecsDebitBanksTest {
@@ -30,7 +30,7 @@ class BecsDebitBanksTest {
     @Test
     fun shouldIncludeTestBank_shouldConditionallyAddTestBank() {
         val testBank = BecsDebitBanks(
-            context = ApplicationProvider.getApplicationContext<Context>(),
+            context = ApplicationProvider.getApplicationContext(),
             shouldIncludeTestBank = true
         ).byPrefix("STRIPE")
         assertThat(testBank)

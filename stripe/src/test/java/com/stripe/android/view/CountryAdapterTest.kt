@@ -1,24 +1,28 @@
 package com.stripe.android.view
 
+import android.content.Context
+import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import java.util.Locale
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
+import kotlin.test.Test
 
 /**
  * Test class for [CountryAdapter]
  */
 @RunWith(RobolectricTestRunner::class)
 class CountryAdapterTest {
-
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val orderedCountries = CountryUtils.getOrderedCountries(Locale.US)
     private val countryAdapter =
         CountryAdapter(
             ApplicationProvider.getApplicationContext(),
             orderedCountries
-        )
+        ) {
+            TextView(context)
+        }
 
     private val suggestions: List<Country>
         get() {

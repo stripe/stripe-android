@@ -4,14 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.view.CardValidCallback
 import com.stripe.example.databinding.CreateCardPaymentMethodActivityBinding
 import com.stripe.example.databinding.PaymentMethodItemBinding
 
@@ -20,12 +18,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         CreateCardPaymentMethodActivityBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: PaymentMethodViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(application)
-        )[PaymentMethodViewModel::class.java]
-    }
+    private val viewModel: PaymentMethodViewModel by viewModels()
 
     private val adapter: PaymentMethodsAdapter = PaymentMethodsAdapter()
     private val snackbarController: SnackbarController by lazy {
@@ -43,14 +36,9 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         viewBinding.paymentMethods.layoutManager = LinearLayoutManager(this)
         viewBinding.paymentMethods.adapter = adapter
 
-        viewBinding.cardMultilineWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                // added as an example - no-op
-            }
-        })
+        viewBinding.cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+            // added as an example - no-op
+        }
 
         viewBinding.createButton.setOnClickListener {
             keyboardController.hide()
@@ -63,15 +51,18 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
 
     private fun createPaymentMethod(params: PaymentMethodCreateParams) {
         onCreatePaymentMethodStart()
-        viewModel.createPaymentMethod(params).observe(this, Observer { result ->
-            onCreatePaymentMethodCompleted()
-            result.fold(
-                onSuccess = ::onCreatedPaymentMethod,
-                onFailure = {
-                    showSnackbar(it.message.orEmpty())
-                }
-            )
-        })
+        viewModel.createPaymentMethod(params).observe(
+            this,
+            { result ->
+                onCreatePaymentMethodCompleted()
+                result.fold(
+                    onSuccess = ::onCreatedPaymentMethod,
+                    onFailure = {
+                        showSnackbar(it.message.orEmpty())
+                    }
+                )
+            }
+        )
     }
 
     private fun showSnackbar(message: String) {
@@ -99,7 +90,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
 
     private class PaymentMethodsAdapter :
         RecyclerView.Adapter<PaymentMethodsAdapter.PaymentMethodViewHolder>() {
-        internal val paymentMethods: MutableList<PaymentMethod> = mutableListOf()
+        val paymentMethods: MutableList<PaymentMethod> = mutableListOf()
 
         init {
             setHasStableIds(true)
@@ -127,13 +118,13 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             return requireNotNull(paymentMethods[position].id).hashCode().toLong()
         }
 
-        internal class PaymentMethodViewHolder internal constructor(
+        class PaymentMethodViewHolder internal constructor(
             private val viewBinding: PaymentMethodItemBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             internal fun setPaymentMethod(paymentMethod: PaymentMethod) {
                 val card = paymentMethod.card
                 viewBinding.paymentMethodId.text = paymentMethod.id
-                viewBinding.brand.text = card?.brand.orEmpty()
+                viewBinding.brand.text = card?.brand?.displayName.orEmpty()
                 viewBinding.last4.text = card?.last4.orEmpty()
             }
         }

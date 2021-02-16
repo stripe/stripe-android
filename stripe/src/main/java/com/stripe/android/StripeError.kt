@@ -1,8 +1,8 @@
 package com.stripe.android
 
 import com.stripe.android.model.StripeModel
+import kotlinx.parcelize.Parcelize
 import java.io.Serializable
-import kotlinx.android.parcel.Parcelize
 
 /**
  * A model representing a Stripe [Errors](https://stripe.com/docs/api/errors) object.

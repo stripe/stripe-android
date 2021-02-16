@@ -10,10 +10,7 @@
 <h1>cardNumber</h1>
 <a name="com.stripe.android.view.CardNumberEditText$cardNumber"></a>
 <code><span class="keyword">val </span><span class="identifier">cardNumber</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
-<p>Gets a usable form of the card number. If the text is "4242 4242 4242 4242", this
-method will return "4242424242424242". If the card number is invalid, this returns
-<code>null</code>.</p>
-<p><strong>Return</strong><br/>
-a space-free version of the card number, or <code>null</code> if the number is invalid</p>
+<p>A normalized form of the card number. If the entered card number is "4242 4242 4242 4242",
+this will be "4242424242424242". If the entered card number is invalid, this is <code>null</code>.</p>
 </BODY>
 </HTML>

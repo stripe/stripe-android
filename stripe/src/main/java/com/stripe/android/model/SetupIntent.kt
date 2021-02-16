@@ -1,10 +1,9 @@
 package com.stripe.android.model
 
-import android.net.Uri
 import com.stripe.android.model.parsers.SetupIntentJsonParser
-import java.util.regex.Pattern
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.regex.Pattern
 
 /**
  * A [SetupIntent] guides you through the process of setting up a customer's payment credentials for
@@ -97,31 +96,6 @@ data class SetupIntent internal constructor(
             else -> null
         }
 
-    @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.RedirectToUrl"))
-    override val redirectData: StripeIntent.RedirectData?
-        get() = when (nextActionData) {
-            is StripeIntent.NextActionData.RedirectToUrl ->
-                StripeIntent.RedirectData(nextActionData.url, nextActionData.returnUrl)
-            else -> null
-        }
-
-    @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("(nextActionData as? StripeIntent.NextActionData.RedirectToUrl)?.url"))
-    val redirectUrl: Uri?
-        get() {
-            return redirectData?.url
-        }
-
-    @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.SdkData"))
-    override val stripeSdkData: StripeIntent.SdkData?
-        get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(is3ds1 = true, is3ds2 = false)
-            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(is3ds1 = false, is3ds2 = true)
-            else -> null
-        }
-
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
     }
@@ -193,6 +167,10 @@ data class SetupIntent internal constructor(
                     return values().firstOrNull { it.code == typeCode }
                 }
             }
+        }
+
+        internal companion object {
+            internal const val CODE_AUTHENTICATION_ERROR = "payment_intent_authentication_failure"
         }
     }
 

@@ -1,6 +1,8 @@
 package com.stripe.android.exception
 
 import com.stripe.android.StripeError
+import org.json.JSONException
+import java.io.IOException
 import java.util.Objects
 
 /**
@@ -37,5 +39,20 @@ abstract class StripeException(
             requestId == ex.requestId &&
             statusCode == ex.statusCode &&
             message == ex.message
+    }
+
+    internal companion object {
+        fun create(throwable: Throwable): StripeException {
+            return when (throwable) {
+                is StripeException -> throwable
+                is JSONException -> APIException(throwable)
+                is IOException -> APIConnectionException.create(throwable)
+                is IllegalArgumentException -> InvalidRequestException(
+                    message = throwable.message,
+                    cause = throwable
+                )
+                else -> APIException(throwable)
+            }
+        }
     }
 }

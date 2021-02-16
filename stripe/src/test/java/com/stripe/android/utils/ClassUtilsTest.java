@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 public class ClassUtilsTest {
 
     @Test
-    public void testfindField_withValidWhitelist_shouldReturnField() {
+    public void findField_withValidAllowedFields_shouldReturnField() {
         final Field nameField = ClassUtils.findField(FakeClass.class, new HashSet<>(
             Arrays.asList("mInvalid", "mName")
         ));
@@ -25,13 +25,13 @@ public class ClassUtilsTest {
     }
 
     @Test
-    public void testfindField_withEmptyWhitelist_shouldReturnNull() {
-        final Field nameField = ClassUtils.findField(FakeClass.class, new HashSet<String>());
+    public void findField_withEmptyAllowedFields_shouldReturnNull() {
+        final Field nameField = ClassUtils.findField(FakeClass.class, new HashSet<>());
         assertNull(nameField);
     }
 
     @Test
-    public void testFindMethod_withValidWhitelist_shouldReturnMethod() {
+    public void findMethod_withValidAllowedMethods_shouldReturnMethod() {
         final Method method = ClassUtils.findMethod(FakeClass.class, new HashSet<>(
                 Arrays.asList("walk", "run")
         ));
@@ -40,7 +40,7 @@ public class ClassUtilsTest {
     }
 
     @Test
-    public void testgetInternalObject() {
+    public void getInternalObject_shouldReturnExpectedObject() {
         final FakeClass fake = new FakeClass();
         final OuterFakeClass outerClass = new OuterFakeClass(fake);
         final Object obj = ClassUtils.getInternalObject(OuterFakeClass.class, new HashSet<>(

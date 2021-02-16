@@ -28,7 +28,8 @@ internal class SourceViewModel(
                 override fun onError(e: Exception) {
                     resultData.value = Result.failure(e)
                 }
-            })
+            }
+        )
         return resultData
     }
 

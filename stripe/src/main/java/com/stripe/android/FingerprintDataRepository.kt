@@ -1,14 +1,13 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.Transformations
-import java.util.Calendar
+import com.stripe.android.networking.FingerprintRequestExecutor
+import com.stripe.android.networking.FingerprintRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.util.Calendar
+import kotlin.coroutines.CoroutineContext
 
 internal interface FingerprintDataRepository {
     fun refresh()
@@ -16,11 +15,11 @@ internal interface FingerprintDataRepository {
     fun save(fingerprintData: FingerprintData)
 
     class Default(
-        private val store: FingerprintDataStore,
+        private val localStore: FingerprintDataStore,
         private val fingerprintRequestFactory: FingerprintRequestFactory,
         private val fingerprintRequestExecutor: FingerprintRequestExecutor =
             FingerprintRequestExecutor.Default(),
-        private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+        private val workContext: CoroutineContext
     ) : FingerprintDataRepository {
         private var cachedFingerprintData: FingerprintData? = null
 
@@ -31,34 +30,32 @@ internal interface FingerprintDataRepository {
         constructor(
             context: Context
         ) : this(
-            store = FingerprintDataStore.Default(context),
-            fingerprintRequestFactory = FingerprintRequestFactory(context)
+            localStore = FingerprintDataStore.Default(context),
+            fingerprintRequestFactory = FingerprintRequestFactory.Default(context),
+            workContext = Dispatchers.IO
         )
 
         override fun refresh() {
             if (Stripe.advancedFraudSignalsEnabled) {
-                coroutineScope.launch {
-                    Transformations.switchMap(store.get()) { localFingerprintData ->
-                        if (localFingerprintData.isExpired(timestampSupplier())) {
+                CoroutineScope(workContext).launch {
+                    localStore.get().let { localFingerprintData ->
+                        if (localFingerprintData == null ||
+                            localFingerprintData.isExpired(timestampSupplier())
+                        ) {
                             fingerprintRequestExecutor.execute(
                                 request = fingerprintRequestFactory.create(
-                                    localFingerprintData.guid
+                                    localFingerprintData
                                 )
                             )
                         } else {
-                            MutableLiveData(localFingerprintData)
+                            localFingerprintData
                         }
-                    }.let { liveData ->
-                        liveData.observeForever(object : Observer<FingerprintData?> {
-                            override fun onChanged(fingerprintData: FingerprintData?) {
-                                if (cachedFingerprintData != fingerprintData) {
-                                    fingerprintData?.let {
-                                        save(it)
-                                    }
-                                }
-                                liveData.removeObserver(this)
+                    }.let { fingerprintData ->
+                        if (cachedFingerprintData != fingerprintData) {
+                            fingerprintData?.let {
+                                save(it)
                             }
-                        })
+                        }
                     }
                 }
             }
@@ -72,7 +69,7 @@ internal interface FingerprintDataRepository {
 
         override fun save(fingerprintData: FingerprintData) {
             cachedFingerprintData = fingerprintData
-            store.save(fingerprintData)
+            localStore.save(fingerprintData)
         }
     }
 }

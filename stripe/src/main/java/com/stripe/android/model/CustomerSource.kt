@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Model of the "data" object inside a [Customer] "source" object.
@@ -13,16 +13,16 @@ data class CustomerSource internal constructor(
     override val id: String?
         get() = stripePaymentSource.id
 
-    val tokenizationMethod: String?
+    val tokenizationMethod: TokenizationMethod?
         get() {
             return asSource()?.let { source ->
                 when (source.sourceTypeModel) {
                     is SourceTypeModel.Card -> {
-                        source.sourceTypeModel.tokenizationMethod?.code
+                        source.sourceTypeModel.tokenizationMethod
                     }
                     else -> null
                 }
-            } ?: asCard()?.tokenizationMethod?.code
+            } ?: asCard()?.tokenizationMethod
         }
 
     val sourceType: String

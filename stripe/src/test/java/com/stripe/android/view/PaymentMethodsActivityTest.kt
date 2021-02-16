@@ -1,9 +1,7 @@
 package com.stripe.android.view
 
 import android.app.Activity.RESULT_CANCELED
-import android.app.Activity.RESULT_OK
 import android.content.Context
-import android.content.Intent
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -18,15 +16,15 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import org.junit.runner.RunWith
+import org.mockito.Mockito.times
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.mockito.Mockito.times
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 
 /**
  * Test class for [PaymentMethodsActivity].
@@ -38,9 +36,7 @@ class PaymentMethodsActivityTest {
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(context)
-    }
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @BeforeTest
     fun setup() {
@@ -147,11 +143,14 @@ class PaymentMethodsActivityTest {
                 val addCardView: View = activity
                     .findViewById(R.id.stripe_payment_methods_add_card)
                 addCardView.performClick()
+
                 val intentForResult = shadowOf(activity).nextStartedActivityForResult
                 val component = intentForResult.intent.component
                 assertEquals(AddPaymentMethodActivity::class.java.name, component?.className)
-                assertTrue(AddPaymentMethodActivityStarter.Args.create(intentForResult.intent)
-                    .isPaymentSessionActive)
+                assertTrue(
+                    AddPaymentMethodActivityStarter.Args.create(intentForResult.intent)
+                        .isPaymentSessionActive
+                )
             }
         }
     }
@@ -170,11 +169,10 @@ class PaymentMethodsActivityTest {
                 val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHODS[2]
                 assertNotNull(paymentMethod)
 
-                val resultIntent = Intent()
-                    .putExtras(AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle())
-                activity.onActivityResult(
-                    AddPaymentMethodActivityStarter.REQUEST_CODE, RESULT_OK, resultIntent
+                activity.onAddPaymentMethodResult(
+                    AddPaymentMethodActivityStarter.Result.Success(paymentMethod)
                 )
+
                 assertEquals(View.VISIBLE, progressBar.visibility)
                 verify(customerSession, times(2))
                     .getPaymentMethods(

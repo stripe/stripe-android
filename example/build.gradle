@@ -1,8 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-android-extensions'
     id 'checkstyle'
+    id 'org.jetbrains.kotlin.plugin.parcelize'
 }
 
 assemble.dependsOn('lint')
@@ -42,31 +42,28 @@ private def readProperty(name) {
 
 dependencies {
     implementation project(':stripe')
-    implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation "com.google.android.material:material:$materialVersion"
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.preference:preference-ktx:1.1.1'
 
-    implementation 'com.google.android.gms:play-services-wallet:18.0.0'
+    implementation 'com.google.android.gms:play-services-wallet:18.1.2'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:2.6.0'
+    implementation 'com.squareup.okio:okio:2.9.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation 'com.facebook.stetho:stetho:1.5.1'
-    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
-    // Used to debug your Retrofit connections
-    // Do not upgrade as it will require increasing minSdkVersion to 21
-    //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.3'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
@@ -84,10 +81,10 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
 
     // Assertions
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.2'
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
-    androidTestImplementation 'com.google.truth:truth:1.0.1'
+    androidTestImplementation 'com.google.truth:truth:1.1.2'
 
     // Espresso dependencies
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
@@ -117,9 +114,10 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
-        multiDexEnabled true
+
+        vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
@@ -168,10 +166,6 @@ android {
     buildFeatures {
         viewBinding true
     }
-}
-
-androidExtensions {
-    features = []
 }
 
 task ktlint(type: JavaExec, group: "verification") {

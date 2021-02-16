@@ -8,11 +8,12 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.example.R
 import com.stripe.example.activity.BaseViewModel
+import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.HttpException
 
-internal class StripeIntentViewModel(
+internal open class StripeIntentViewModel(
     application: Application
 ) : BaseViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
@@ -22,13 +23,20 @@ internal class StripeIntentViewModel(
     val setupIntentResultLiveData = MutableLiveData<Result<SetupIntentResult>>()
 
     fun createPaymentIntent(
-        country: String
+        country: String,
+        customerId: String? = null
     ) = makeBackendRequest(
         R.string.creating_payment_intent,
         R.string.payment_intent_status
     ) {
         backendApi.createPaymentIntent(
-            mutableMapOf("country" to country)
+            mapOf("country" to country)
+                .plus(
+                    customerId?.let {
+                        mapOf("customer_id" to it)
+                    }.orEmpty()
+                )
+                .toMutableMap()
         )
     }
 
@@ -47,12 +55,14 @@ internal class StripeIntentViewModel(
         @StringRes creatingStringRes: Int,
         @StringRes resultStringRes: Int,
         apiMethod: suspend () -> ResponseBody
-    ) = liveData<Result<JSONObject>>(workContext) {
+    ) = liveData {
         inProgress.postValue(true)
         status.postValue(resources.getString(creatingStringRes))
 
-        val result = runCatching {
-            JSONObject(apiMethod().string())
+        val result = withContext(workContext) {
+            runCatching {
+                JSONObject(apiMethod().string())
+            }
         }
 
         result.fold(
@@ -63,11 +73,11 @@ internal class StripeIntentViewModel(
                 )
                 status.postValue(
                     """
-                        ${status.value}
-                        
-                        
-                        $intentStatus
-                        """.trimIndent()
+                    ${status.value}
+                    
+                    
+                    $intentStatus
+                    """.trimIndent()
                 )
             },
             onFailure = {
@@ -76,13 +86,13 @@ internal class StripeIntentViewModel(
                         ?: it.message
                 status.postValue(
                     """
-                        ${status.value}
-                        
-                        
-                        $errorMessage
-                        """.trimIndent()
+                    ${status.value}
+                    
+                    
+                    $errorMessage
+                    """.trimIndent()
                 )
-                inProgress.value = false
+                inProgress.postValue(false)
             }
         )
 

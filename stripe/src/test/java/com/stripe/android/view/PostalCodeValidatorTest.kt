@@ -8,26 +8,30 @@ class PostalCodeValidatorTest {
 
     @Test
     fun testPostalCodeOptional() {
-        assertTrue(VALIDATOR.isValid(
-            postalCode = "",
-            countryCode = "US",
-            optionalShippingInfoFields = listOf(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
-            ),
-            hiddenShippingInfoFields = emptyList()
-        ))
+        assertTrue(
+            VALIDATOR.isValid(
+                postalCode = "",
+                countryCode = "US",
+                optionalShippingInfoFields = listOf(
+                    ShippingInfoWidget.CustomizableShippingField.PostalCode
+                ),
+                hiddenShippingInfoFields = emptyList()
+            )
+        )
     }
 
     @Test
     fun testCountryCodeOptional() {
-        assertTrue(VALIDATOR.isValid(
-            postalCode = "94107",
-            countryCode = "",
-            optionalShippingInfoFields = listOf(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
-            ),
-            hiddenShippingInfoFields = emptyList()
-        ))
+        assertTrue(
+            VALIDATOR.isValid(
+                postalCode = "94107",
+                countryCode = "",
+                optionalShippingInfoFields = listOf(
+                    ShippingInfoWidget.CustomizableShippingField.PostalCode
+                ),
+                hiddenShippingInfoFields = emptyList()
+            )
+        )
     }
 
     @Test

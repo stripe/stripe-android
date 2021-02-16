@@ -7,14 +7,27 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeApiRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class PaymentMethodEndToEndTest {
+internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val testDispatcher = TestCoroutineDispatcher()
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun createPaymentMethod_withBacsDebit_shouldCreateObject() {
@@ -88,6 +101,16 @@ class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun createPaymentMethod_withNetBanking_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.NETBANKING
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.NETBANKING_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Netbanking)
+    }
+
+    @Test
     fun createPaymentMethod_withGiropay_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.GIROPAY
         val paymentMethod =
@@ -138,45 +161,40 @@ class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun createPaymentMethod_withUpi_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.UPI
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.UPI_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Upi)
+    }
+
+    @Test
     fun createPaymentMethod_withOxxo_shouldCreatePaymentMethodWithOxxoType() {
-        val repository = StripeApiRepository(
-            context,
-            ApiKeyFixtures.OXXO_PUBLISHABLE_KEY,
-            apiVersion = "2020-03-02;oxxo_beta=v1"
+        val params = PaymentMethodCreateParams.createOxxo(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
         )
-        val paymentMethod = repository.createPaymentMethod(
-            PaymentMethodCreateParams.createOxxo(
-                billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
-            ),
-            ApiRequest.Options(
-                ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
-            )
-        )
+        val paymentMethod = Stripe(context, ApiKeyFixtures.OXXO_PUBLISHABLE_KEY)
+            .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Oxxo)
     }
 
     @Test
     fun createPaymentMethod_withOxxo_shouldRequireNameAndEmail() {
-        val repository = StripeApiRepository(
-            context,
-            ApiKeyFixtures.OXXO_PUBLISHABLE_KEY,
-            apiVersion = "2020-03-02;oxxo_beta=v1"
-        )
-
+        val stripe = Stripe(context, ApiKeyFixtures.OXXO_PUBLISHABLE_KEY)
         val missingNameException = assertFailsWith<InvalidRequestException>(
             "A name is required to create an OXXO payment method."
         ) {
-            repository.createPaymentMethod(
-                PaymentMethodCreateParams.createOxxo(
-                    billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
-                        name = null
+            stripe
+                .createPaymentMethodSynchronous(
+                    PaymentMethodCreateParams.createOxxo(
+                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
+                            name = null
+                        )
                     )
-                ),
-                ApiRequest.Options(
-                    ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
                 )
-            )
         }
         assertThat(missingNameException.message)
             .isEqualTo("Missing required param: billing_details[name].")
@@ -184,14 +202,11 @@ class PaymentMethodEndToEndTest {
         val missingEmailException = assertFailsWith<InvalidRequestException>(
             "An email is required to create an OXXO payment method."
         ) {
-            repository.createPaymentMethod(
+            stripe.createPaymentMethodSynchronous(
                 PaymentMethodCreateParams.createOxxo(
                     billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
                         email = null
                     )
-                ),
-                ApiRequest.Options(
-                    ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
                 )
             )
         }
@@ -201,17 +216,102 @@ class PaymentMethodEndToEndTest {
 
     @Test
     fun createPaymentMethod_withAlipay_shouldCreateObject() {
-        val repository = StripeApiRepository(
-            context,
-            ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY,
-            apiVersion = "2020-03-02;alipay_beta=v1"
-        )
-
-        val paymentMethod = repository.createPaymentMethod(
-            PaymentMethodCreateParams.createAlipay(),
-            ApiRequest.Options(ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY)
-        )
+        val params = PaymentMethodCreateParams.createAlipay()
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Alipay)
+    }
+
+    @Test
+    fun createPaymentMethod_withGrabPay_shouldCreateObject() = testDispatcher.runBlockingTest {
+        val repository = StripeApiRepository(
+            context,
+            ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY,
+            workContext = testDispatcher
+        )
+
+        val params = PaymentMethodCreateParamsFixtures.GRABPAY
+        val paymentMethod = repository.createPaymentMethod(
+            params,
+            ApiRequest.Options(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY)
+        )
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.GrabPay)
+    }
+
+    @Test
+    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = testDispatcher.runBlockingTest {
+        val paymentMethod = StripeApiRepository(
+            context,
+            ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY,
+            workContext = testDispatcher
+        ).createPaymentMethod(
+            PaymentMethodCreateParams.createPayPal(),
+            ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
+        )
+
+        requireNotNull(paymentMethod)
+        assertThat(paymentMethod.type)
+            .isEqualTo(PaymentMethod.Type.PayPal)
+    }
+
+    @Test
+    fun `createPaymentMethod with Afterpay should create expected object`() {
+        val paymentMethod = Stripe(context, ApiKeyFixtures.AFTERPAY_PUBLISHABLE_KEY)
+            .createPaymentMethodSynchronous(
+                PaymentMethodCreateParams.createAfterpayClearpay(
+                    billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
+                )
+            )
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.AfterpayClearpay)
+    }
+
+    @Test
+    fun `createPaymentMethod with Afterpay should require name, email, and address`() {
+        val stripe = Stripe(context, ApiKeyFixtures.AFTERPAY_PUBLISHABLE_KEY)
+        val missingNameException = assertFailsWith<InvalidRequestException>(
+            "Name is required to create an Afterpay payment method"
+        ) {
+            stripe
+                .createPaymentMethodSynchronous(
+                    PaymentMethodCreateParams.createAfterpayClearpay(
+                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+                    )
+                )
+        }
+
+        assertThat(missingNameException.message)
+            .isEqualTo("Missing required param: billing_details[name].")
+
+        val missingEmailException = assertFailsWith<InvalidRequestException>(
+            "Email is required to create an Afterpay payment method"
+        ) {
+            stripe
+                .createPaymentMethodSynchronous(
+                    PaymentMethodCreateParams.createAfterpayClearpay(
+                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(email = null)
+                    )
+                )
+        }
+
+        assertThat(missingEmailException.message)
+            .isEqualTo("Missing required param: billing_details[email].")
+
+        val missingAddressException = assertFailsWith<InvalidRequestException>(
+            "Email is required to create an Afterpay payment method"
+        ) {
+            stripe
+                .createPaymentMethodSynchronous(
+                    PaymentMethodCreateParams.createAfterpayClearpay(
+                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = null)
+                    )
+                )
+        }
+
+        assertThat(missingAddressException.message)
+            .isEqualTo("Missing required param: billing_details[address][line1].")
     }
 }

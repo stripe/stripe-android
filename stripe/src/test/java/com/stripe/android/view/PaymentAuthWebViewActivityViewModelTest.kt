@@ -1,41 +1,61 @@
 package com.stripe.android.view
 
-import android.content.Intent
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentAuthWebViewStarter
-import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewActivityViewModelTest {
     @Test
-    fun cancelIntentSource() {
+    fun cancellationResult() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
-                url = "https://example.com"
+                url = "https://example.com",
+                shouldCancelSource = true
             )
         )
 
-        var intent: Intent? = null
-        viewModel.cancelIntentSource().observeForever {
-            intent = it
-        }
+        val intent = viewModel.cancellationResult
+        val resultIntent = PaymentFlowResult.Unvalidated.fromIntent(intent)
+        assertThat(resultIntent.flowOutcome)
+            .isEqualTo(StripeIntentResult.Outcome.CANCELED)
+        assertThat(resultIntent.shouldCancelSource)
+            .isTrue()
+    }
 
-        assertThat(
-            PaymentController.Result.fromIntent(requireNotNull(intent))?.flowOutcome
-        ).isEqualTo(StripeIntentResult.Outcome.CANCELED)
+    @Test
+    fun `cancellationResult should set correct outcome when user nav is allowed`() {
+        val viewModel = PaymentAuthWebViewActivityViewModel(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
+                clientSecret = "client_secret",
+                url = "https://example.com",
+                shouldCancelSource = true,
+                shouldCancelIntentOnUserNavigation = false
+            )
+        )
+
+        val intent = viewModel.cancellationResult
+        val resultIntent = PaymentFlowResult.Unvalidated.fromIntent(intent)
+        assertThat(resultIntent.flowOutcome)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+        assertThat(resultIntent.shouldCancelSource)
+            .isTrue()
     }
 
     @Test
     fun toolbarBackgroundColor_returnsCorrectValue() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 toolbarCustomization = StripeToolbarCustomization().apply {
@@ -49,7 +69,8 @@ class PaymentAuthWebViewActivityViewModelTest {
     @Test
     fun buttonText_returnsCorrectValue() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 toolbarCustomization = StripeToolbarCustomization().apply {
@@ -66,15 +87,19 @@ class PaymentAuthWebViewActivityViewModelTest {
             setHeaderText("auth webview")
         }
         val viewModel = PaymentAuthWebViewActivityViewModel(
-            PaymentAuthWebViewStarter.Args(
+            PaymentAuthWebViewContract.Args(
+                requestCode = 100,
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 toolbarCustomization = toolbarCustomization
             )
         )
-        assertEquals(PaymentAuthWebViewActivityViewModel.ToolbarTitleData(
-            "auth webview",
-            toolbarCustomization
-        ), viewModel.toolbarTitle)
+        assertEquals(
+            PaymentAuthWebViewActivityViewModel.ToolbarTitleData(
+                "auth webview",
+                toolbarCustomization
+            ),
+            viewModel.toolbarTitle
+        )
     }
 }

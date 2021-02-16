@@ -1,15 +1,29 @@
 package com.stripe.android
 
-import java.util.concurrent.TimeUnit
+import com.stripe.android.model.StripeModel
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
+@Parcelize
 internal data class FingerprintData(
-    internal val guid: String? = null,
+    internal val guid: String,
+    internal val muid: String,
+    internal val sid: String,
     internal val timestamp: Long = 0L
-) {
+) : StripeModel {
+    val params: Map<String, String>
+        get() = mapOf(
+            KEY_GUID to guid,
+            KEY_MUID to muid,
+            KEY_SID to sid
+        )
+
     fun toJson(): JSONObject {
         return JSONObject()
             .put(KEY_GUID, guid)
+            .put(KEY_MUID, muid)
+            .put(KEY_SID, sid)
             .put(KEY_TIMESTAMP, timestamp)
     }
 
@@ -18,18 +32,10 @@ internal data class FingerprintData(
     }
 
     internal companion object {
-        fun fromJson(json: JSONObject): FingerprintData {
-            return FingerprintData(
-                guid = json.optString(KEY_GUID),
-                timestamp = json.optLong(
-                    KEY_TIMESTAMP,
-                    -1
-                )
-            )
-        }
-
         private const val KEY_GUID = "guid"
-        private const val KEY_TIMESTAMP = "timestamp"
+        private const val KEY_MUID = "muid"
+        private const val KEY_SID = "sid"
+        internal const val KEY_TIMESTAMP = "timestamp"
 
         private val TTL = TimeUnit.MINUTES.toMillis(30L)
     }

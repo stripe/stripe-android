@@ -10,7 +10,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Model representing parameters for [confirming a PaymentIntent](https://stripe.com/docs/api/payment_intents/confirm).
@@ -510,14 +510,15 @@ data class ConfirmPaymentIntentParams internal constructor(
          * process
          */
         @JvmStatic
-        internal fun createAlipay(
-            clientSecret: String,
-            returnUrl: String
+        fun createAlipay(
+            clientSecret: String
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
-                returnUrl = returnUrl
+                // return_url is no longer used by is still required by the backend
+                // TODO(smaskell): remove this when no longer required
+                returnUrl = "stripe://return_url"
             )
         }
     }

@@ -3,10 +3,10 @@ package com.stripe.android.view
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.ViewStub
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeActivityBinding
 
@@ -28,11 +28,7 @@ abstract class StripeActivity : AppCompatActivity() {
 
     protected var isProgressBarVisible: Boolean = false
         set(value) {
-            progressBar.visibility = if (value) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            progressBar.isVisible = value
             invalidateOptionsMenu()
 
             onProgressBarVisibilityChanged(value)

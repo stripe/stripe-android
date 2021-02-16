@@ -6,4 +6,5 @@
     <item type="id" name="stripe_payment_methods_add_fpx" />
     <item type="id" name="stripe_add_payment_method_form" />
     <item type="id" name="stripe_add_payment_method_footer" />
+    <item type="id" name="stripe_payment_methods_footer" />
 </resources>

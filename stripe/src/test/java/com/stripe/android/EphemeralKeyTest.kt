@@ -1,10 +1,10 @@
 package com.stripe.android
 
 import com.stripe.android.utils.ParcelUtils
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class EphemeralKeyTest {

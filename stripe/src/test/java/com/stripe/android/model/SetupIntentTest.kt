@@ -1,13 +1,14 @@
 package com.stripe.android.model
 
+import android.net.Uri
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class SetupIntentTest {
@@ -24,8 +25,10 @@ class SetupIntentTest {
     fun fromJsonStringWithNextAction_createsSetupIntentWithNextAction() {
         val setupIntent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
         assertEquals("seti_1EqTSZGMT9dGPIDGVzCUs6dV", setupIntent.id)
-        assertEquals("seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y",
-            setupIntent.clientSecret)
+        assertEquals(
+            "seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y",
+            setupIntent.clientSecret
+        )
         assertEquals(1561677666, setupIntent.created)
         assertEquals("a description", setupIntent.description)
         assertEquals("pm_1EqTSoGMT9dGPIDG7dgafX1H", setupIntent.paymentMethodId)
@@ -34,14 +37,13 @@ class SetupIntentTest {
         assertEquals(StripeIntent.Status.RequiresAction, setupIntent.status)
         assertEquals(StripeIntent.Usage.OffSession, setupIntent.usage)
 
-        val redirectData = setupIntent.redirectData
-        assertNotNull(redirectData)
-        assertNotNull(redirectData.returnUrl)
-        assertNotNull(setupIntent.redirectUrl)
-        assertEquals("stripe://setup_intent_return", redirectData.returnUrl)
-        assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02", redirectData.url.toString())
-        assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02",
-            setupIntent.redirectUrl?.toString())
+        assertEquals(
+            StripeIntent.NextActionData.RedirectToUrl(
+                Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"),
+                returnUrl = "stripe://setup_intent_return"
+            ),
+            setupIntent.nextActionData
+        )
     }
 
     @Test
@@ -64,10 +66,14 @@ class SetupIntentTest {
 
     @Test
     fun testCanceled() {
-        assertEquals(StripeIntent.Status.Canceled,
-            SetupIntentFixtures.CANCELLED.status)
-        assertEquals(SetupIntent.CancellationReason.Abandoned,
-            SetupIntentFixtures.CANCELLED.cancellationReason)
+        assertEquals(
+            StripeIntent.Status.Canceled,
+            SetupIntentFixtures.CANCELLED.status
+        )
+        assertEquals(
+            SetupIntent.CancellationReason.Abandoned,
+            SetupIntentFixtures.CANCELLED.cancellationReason
+        )
     }
 
     @Test

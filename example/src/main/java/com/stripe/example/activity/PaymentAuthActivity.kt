@@ -27,46 +27,58 @@ class PaymentAuthActivity : StripeIntentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        viewModel.inProgress.observe(this, Observer { enableUi(!it) })
+        viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         val stripeAccountId = Settings(this).stripeAccountId
 
         val uiCustomization =
             PaymentAuthConfig.Stripe3ds2UiCustomization.Builder().build()
-        PaymentAuthConfig.init(PaymentAuthConfig.Builder()
-            .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder()
-                .setTimeout(6)
-                .setUiCustomization(uiCustomization)
-                .build())
-            .build())
+        PaymentAuthConfig.init(
+            PaymentAuthConfig.Builder()
+                .set3ds2Config(
+                    PaymentAuthConfig.Stripe3ds2Config.Builder()
+                        .setTimeout(6)
+                        .setUiCustomization(uiCustomization)
+                        .build()
+                )
+                .build()
+        )
 
         viewBinding.confirmWith3ds1Button.setOnClickListener {
-            createAndConfirmPaymentIntent("us",
+            createAndConfirmPaymentIntent(
+                "us",
                 confirmParams3ds1,
-                stripeAccountId = stripeAccountId)
+                stripeAccountId = stripeAccountId
+            )
         }
         viewBinding.confirmWith3ds2Button.setOnClickListener {
-            createAndConfirmPaymentIntent("us",
+            createAndConfirmPaymentIntent(
+                "us",
                 confirmParams3ds2,
                 shippingDetails = SHIPPING,
-                stripeAccountId = stripeAccountId)
+                stripeAccountId = stripeAccountId
+            )
         }
 
         viewBinding.confirmWithNewCardButton.setOnClickListener {
             keyboardController.hide()
             viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
-                createAndConfirmPaymentIntent("us",
+                createAndConfirmPaymentIntent(
+                    "us",
                     it,
                     shippingDetails = SHIPPING,
-                    stripeAccountId = stripeAccountId)
+                    stripeAccountId = stripeAccountId
+                )
             }
         }
 
         viewBinding.setupButton.setOnClickListener {
-            createAndConfirmSetupIntent("us",
+            createAndConfirmSetupIntent(
+                "us",
                 confirmParams3ds2,
-                stripeAccountId = stripeAccountId)
+                stripeAccountId = stripeAccountId
+            )
         }
     }
 

@@ -4,7 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
@@ -22,6 +26,8 @@ class CustomerSessionActivity : AppCompatActivity() {
         CustomerSessionActivityBinding.inflate(layoutInflater)
     }
 
+    private val viewModel: ActivityViewModel by viewModels()
+
     private val snackbarController: SnackbarController by lazy {
         SnackbarController(viewBinding.coordinator)
     }
@@ -32,8 +38,20 @@ class CustomerSessionActivity : AppCompatActivity() {
         setTitle(R.string.customer_payment_data_example)
 
         viewBinding.progressBar.visibility = View.VISIBLE
-        CustomerSession.getInstance().retrieveCurrentCustomer(
-            CustomerRetrievalListenerImpl(this))
+        viewModel.retrieveCustomer().observe(
+            this,
+            {
+                viewBinding.progressBar.visibility = View.INVISIBLE
+                viewBinding.selectPaymentMethodButton.isEnabled = it.isSuccess
+
+                it.fold(
+                    onSuccess = {},
+                    onFailure = { error ->
+                        snackbarController.show(error.message.orEmpty())
+                    }
+                )
+            }
+        )
 
         viewBinding.selectPaymentMethodButton.isEnabled = false
         viewBinding.selectPaymentMethodButton.setOnClickListener { launchWithCustomer() }
@@ -41,15 +59,18 @@ class CustomerSessionActivity : AppCompatActivity() {
 
     private fun launchWithCustomer() {
         PaymentMethodsActivityStarter(this)
-            .startForResult(PaymentMethodsActivityStarter.Args.Builder()
-                .setCanDeletePaymentMethods(true)
-                .build())
+            .startForResult(
+                PaymentMethodsActivityStarter.Args.Builder()
+                    .setCanDeletePaymentMethods(true)
+                    .build()
+            )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE &&
-            resultCode == Activity.RESULT_OK && data != null) {
+            resultCode == Activity.RESULT_OK && data != null
+        ) {
             val paymentMethod =
                 PaymentMethodsActivityStarter.Result.fromIntent(data)?.paymentMethod
             paymentMethod?.card?.let { card ->
@@ -59,30 +80,30 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun buildCardString(data: PaymentMethod.Card): String {
-        return getString(R.string.ending_in, data.brand, data.last4)
+        return getString(R.string.card_ending_in, data.brand, data.last4)
     }
 
-    private fun onCustomerRetrieved() {
-        viewBinding.selectPaymentMethodButton.isEnabled = true
-        viewBinding.progressBar.visibility = View.INVISIBLE
-    }
+    internal class ActivityViewModel : ViewModel() {
+        private val customerSession = CustomerSession.getInstance()
 
-    private fun onRetrieveError(errorMessage: String) {
-        viewBinding.selectPaymentMethodButton.isEnabled = false
-        viewBinding.progressBar.visibility = View.INVISIBLE
-        snackbarController.show(errorMessage)
-    }
+        fun retrieveCustomer(): LiveData<Result<Customer>> {
+            val liveData = MutableLiveData<Result<Customer>>()
+            customerSession.retrieveCurrentCustomer(
+                object : CustomerSession.CustomerRetrievalListener {
+                    override fun onCustomerRetrieved(customer: Customer) {
+                        liveData.value = Result.success(customer)
+                    }
 
-    private class CustomerRetrievalListenerImpl constructor(
-        activity: CustomerSessionActivity
-    ) : CustomerSession.ActivityCustomerRetrievalListener<CustomerSessionActivity>(activity) {
-
-        override fun onCustomerRetrieved(customer: Customer) {
-            activity?.onCustomerRetrieved()
-        }
-
-        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
-            activity?.onRetrieveError(errorMessage)
+                    override fun onError(
+                        errorCode: Int,
+                        errorMessage: String,
+                        stripeError: StripeError?
+                    ) {
+                        liveData.value = Result.failure(RuntimeException(errorMessage))
+                    }
+                }
+            )
+            return liveData
         }
     }
 }

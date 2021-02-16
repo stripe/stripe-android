@@ -85,6 +85,24 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
+    internal val GRABPAY = PaymentMethodCreateParams.createGrabPay(
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val UPI = PaymentMethodCreateParams.create(
+        upi = PaymentMethodCreateParams.Upi(
+            vpa = "vpa@hdfcbank"
+        ),
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val NETBANKING = PaymentMethodCreateParams.create(
+        netbanking = PaymentMethodCreateParams.Netbanking(
+            bank = "hdfc"
+        ),
+        billingDetails = BILLING_DETAILS
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(

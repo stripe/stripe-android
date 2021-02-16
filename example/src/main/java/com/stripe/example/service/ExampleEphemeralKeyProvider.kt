@@ -8,27 +8,30 @@ import com.stripe.example.Settings
 import com.stripe.example.module.BackendApiFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * An implementation of [EphemeralKeyProvider] that can be used to generate
  * ephemeral keys on the backend.
  */
 internal class ExampleEphemeralKeyProvider(
-    backendUrl: String
+    backendUrl: String,
+    private val workContext: CoroutineContext
 ) : EphemeralKeyProvider {
-    constructor(context: Context) : this(Settings(context).backendUrl)
+    constructor(context: Context) : this(
+        Settings(context).backendUrl,
+        Dispatchers.IO
+    )
 
-    private val workScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val backendApi = BackendApiFactory(backendUrl).create()
 
     override fun createEphemeralKey(
         @Size(min = 4) apiVersion: String,
         keyUpdateListener: EphemeralKeyUpdateListener
     ) {
-        workScope.launch {
+        CoroutineScope(workContext).launch {
             val response =
                 kotlin.runCatching {
                     backendApi

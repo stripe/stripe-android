@@ -1,10 +1,8 @@
 package com.stripe.android
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 /**
  * Test class for [CardUtils].
@@ -13,178 +11,178 @@ class CardUtilsTest {
 
     @Test
     fun getPossibleCardBrand_withEmptyCard_returnsUnknown() {
-        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardBrand("   "))
+        assertThat(CardUtils.getPossibleCardBrand("   ")).isEqualTo(CardBrand.Unknown)
     }
 
     @Test
     fun getPossibleCardBrand_withNullCardNumber_returnsUnknown() {
-        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardBrand(null))
+        assertThat(CardUtils.getPossibleCardBrand(null)).isEqualTo(CardBrand.Unknown)
     }
 
     @Test
     fun getPossibleCardBrand_withVisaPrefix_returnsVisa() {
-        assertEquals(CardBrand.Visa, CardUtils.getPossibleCardBrand("4899 99"))
-        assertEquals(CardBrand.Visa, CardUtils.getPossibleCardBrand("4"))
+        assertThat(CardUtils.getPossibleCardBrand("4899 99")).isEqualTo(CardBrand.Visa)
+        assertThat(CardUtils.getPossibleCardBrand("4")).isEqualTo(CardBrand.Visa)
     }
 
     @Test
     fun getPossibleCardBrand_withAmexPrefix_returnsAmex() {
-        assertEquals(CardBrand.AmericanExpress, CardUtils.getPossibleCardBrand("345"))
-        assertEquals(CardBrand.AmericanExpress, CardUtils.getPossibleCardBrand("37999999999"))
+        assertThat(CardUtils.getPossibleCardBrand("345")).isEqualTo(CardBrand.AmericanExpress)
+        assertThat(CardUtils.getPossibleCardBrand("37999999999")).isEqualTo(CardBrand.AmericanExpress)
     }
 
     @Test
     fun getPossibleCardBrand_withJCBPrefix_returnsJCB() {
-        assertEquals(CardBrand.JCB, CardUtils.getPossibleCardBrand("3535 3535"))
+        assertThat(CardUtils.getPossibleCardBrand("3535 3535")).isEqualTo(CardBrand.JCB)
     }
 
     @Test
     fun getPossibleCardBrand_withMasterCardPrefix_returnsMasterCard() {
-        assertEquals(CardBrand.MasterCard, CardUtils.getPossibleCardBrand("2222 452"))
-        assertEquals(CardBrand.MasterCard, CardUtils.getPossibleCardBrand("5050"))
+        assertThat(CardUtils.getPossibleCardBrand("2222 452")).isEqualTo(CardBrand.MasterCard)
+        assertThat(CardUtils.getPossibleCardBrand("5050")).isEqualTo(CardBrand.MasterCard)
     }
 
     @Test
     fun getPossibleCardBrand_withDinersClub16Prefix_returnsDinersClub() {
-        assertEquals(CardBrand.DinersClub, CardUtils.getPossibleCardBrand("303922 2234"))
+        assertThat(CardUtils.getPossibleCardBrand("303922 2234")).isEqualTo(CardBrand.DinersClub)
     }
 
     @Test
     fun getPossibleCardBrand_withDinersClub14Prefix_returnsDinersClub() {
-        assertEquals(CardBrand.DinersClub, CardUtils.getPossibleCardBrand("36778 9098"))
+        assertThat(CardUtils.getPossibleCardBrand("36778 9098")).isEqualTo(CardBrand.DinersClub)
     }
 
     @Test
     fun getPossibleCardBrand_withDiscoverPrefix_returnsDiscover() {
-        assertEquals(CardBrand.Discover, CardUtils.getPossibleCardBrand("60355"))
-        assertEquals(CardBrand.Discover, CardUtils.getPossibleCardBrand("6433 8 90923"))
+        assertThat(CardUtils.getPossibleCardBrand("60355")).isEqualTo(CardBrand.Discover)
+        assertThat(CardUtils.getPossibleCardBrand("6433 8 90923")).isEqualTo(CardBrand.Discover)
         // This one has too many numbers on purpose. Checking for length is not part of the
         // function under test.
-        assertEquals(CardBrand.Discover, CardUtils.getPossibleCardBrand("6523452309209340293423"))
+        assertThat(CardUtils.getPossibleCardBrand("6523452309209340293423")).isEqualTo(CardBrand.Discover)
     }
 
     @Test
     fun getPossibleCardBrand_withUnionPayPrefix_returnsUnionPay() {
-        assertEquals(CardBrand.UnionPay, CardUtils.getPossibleCardBrand("62"))
+        assertThat(CardUtils.getPossibleCardBrand("62")).isEqualTo(CardBrand.UnionPay)
     }
 
     @Test
     fun getPossibleCardBrand_withNonsenseNumber_returnsUnknown() {
-        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardBrand("1234567890123456"))
-        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardBrand("9999 9999 9999 9999"))
-        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardBrand("3"))
+        assertThat(CardUtils.getPossibleCardBrand("1234567890123456")).isEqualTo(CardBrand.Unknown)
+        assertThat(CardUtils.getPossibleCardBrand("9999 9999 9999 9999")).isEqualTo(CardBrand.Unknown)
+        assertThat(CardUtils.getPossibleCardBrand("3")).isEqualTo(CardBrand.Unknown)
     }
 
     @Test
     fun isValidCardLength_whenValidVisaNumber_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.VISA_NO_SPACES))
+        assertThat(CardUtils.isValidCardLength(CardNumberFixtures.VISA_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidCardLength_whenValidJCBNumber_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength("3530111333300000"))
+        assertThat(CardUtils.isValidCardLength("3530111333300000")).isTrue()
     }
 
     @Test
     fun isValidCardLength_whenValidDiscover_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.DISCOVER_NO_SPACES))
+        assertThat(CardUtils.isValidCardLength(CardNumberFixtures.DISCOVER_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidCardLength_whenValidDinersClub16_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES))
+        assertThat(CardUtils.isValidCardLength(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidCardLength_whenValidMasterCard_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.MASTERCARD_NO_SPACES))
+        assertThat(CardUtils.isValidCardLength(CardNumberFixtures.MASTERCARD_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidCardLength_whenValidAmEx_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.AMEX_NO_SPACES))
+        assertThat(CardUtils.isValidCardLength(CardNumberFixtures.AMEX_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidCardLength_whenValidUnionPay_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.UNIONPAY_NO_SPACES))
+        assertThat(CardUtils.isValidCardLength(CardNumberFixtures.UNIONPAY_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidCardLength_whenNull_returnsFalse() {
-        assertFalse(CardUtils.isValidCardLength(null))
+        assertThat(CardUtils.isValidCardLength(null)).isFalse()
     }
 
     @Test
     fun isValidCardLength_whenVisaStyleNumberButDinersClubLength_returnsFalse() {
-        assertFalse(CardUtils.isValidCardLength("42424242424242"))
+        assertThat(CardUtils.isValidCardLength("42424242424242")).isFalse()
     }
 
     @Test
     fun isValidCardLength_whenVisaStyleNumberButAmExLength_returnsFalse() {
-        assertFalse(CardUtils.isValidCardLength("424242424242424"))
+        assertThat(CardUtils.isValidCardLength("424242424242424")).isFalse()
     }
 
     @Test
     fun isValidCardLength_whenAmExStyleNumberButVisaLength_returnsFalse() {
-        assertFalse(CardUtils.isValidCardLength("3782822463100050"))
+        assertThat(CardUtils.isValidCardLength("3782822463100050")).isFalse()
     }
 
     @Test
     fun isValidCardLength_whenAmExStyleNumberButDinersClubLength_returnsFalse() {
-        assertFalse(CardUtils.isValidCardLength("37828224631000"))
+        assertThat(CardUtils.isValidCardLength("37828224631000")).isFalse()
     }
 
     @Test
     fun isValidCardLength_whenDinersClubStyleNumberStyleNumberButAmexLength_returnsFalse() {
-        assertFalse(CardUtils.isValidCardLength("305693090259040"))
+        assertThat(CardUtils.isValidCardLength("305693090259040")).isFalse()
     }
 
     @Test
     fun isValidLuhnNumber_whenValidVisaNumber_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber(CardNumberFixtures.VISA_NO_SPACES))
+        assertThat(CardUtils.isValidLuhnNumber(CardNumberFixtures.VISA_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidLuhnNumber_whenValidJCBNumber_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber("3530111333300000"))
+        assertThat(CardUtils.isValidLuhnNumber("3530111333300000")).isTrue()
     }
 
     @Test
     fun isValidLuhnNumber_whenValidDiscover_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber(CardNumberFixtures.DISCOVER_NO_SPACES))
+        assertThat(CardUtils.isValidLuhnNumber(CardNumberFixtures.DISCOVER_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidLuhnNumber_whenValidDinersClub_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber("30569309025904"))
+        assertThat(CardUtils.isValidLuhnNumber("30569309025904")).isTrue()
     }
 
     @Test
     fun isValidLuhnNumber_whenValidMasterCard_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber(CardNumberFixtures.MASTERCARD_NO_SPACES))
+        assertThat(CardUtils.isValidLuhnNumber(CardNumberFixtures.MASTERCARD_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidLuhnNumber_whenValidAmEx_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber(CardNumberFixtures.AMEX_NO_SPACES))
+        assertThat(CardUtils.isValidLuhnNumber(CardNumberFixtures.AMEX_NO_SPACES)).isTrue()
     }
 
     @Test
     fun isValidLunhNumber_whenNumberIsInvalid_returnsFalse() {
-        assertFalse(CardUtils.isValidLuhnNumber("4242424242424243"))
+        assertThat(CardUtils.isValidLuhnNumber("4242424242424243")).isFalse()
     }
 
     @Test
     fun isValidLuhnNumber_whenInputIsNull_returnsFalse() {
-        assertFalse(CardUtils.isValidLuhnNumber(null))
+        assertThat(CardUtils.isValidLuhnNumber(null)).isFalse()
     }
 
     @Test
     fun isValidLuhnNumber_whenInputIsNotNumeric_returnsFalse() {
-        assertFalse(CardUtils.isValidLuhnNumber("abcdefg"))
+        assertThat(CardUtils.isValidLuhnNumber("abcdefg")).isFalse()
         // Note: it is not the job of this function to de-space the card number, nor de-hyphen it
-        assertFalse(CardUtils.isValidLuhnNumber("4242 4242 4242 4242"))
-        assertFalse(CardUtils.isValidLuhnNumber("4242-4242-4242-4242"))
+        assertThat(CardUtils.isValidLuhnNumber("4242 4242 4242 4242")).isFalse()
+        assertThat(CardUtils.isValidLuhnNumber("4242-4242-4242-4242")).isFalse()
     }
 }
