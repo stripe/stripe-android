@@ -5,7 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthUpiAppViewStarter
 import java.nio.charset.Charset
@@ -19,6 +21,8 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
     private val logger: Logger by lazy {
         Logger.getInstance(_args?.enableLogging == true)
     }
+
+    private val viewModel: UpiAuthActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,12 +46,8 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
 
         logger.debug("PaymentAuthUpiAppViewActivity#onCreate() - PaymentAuthUpiAppView init and loadUrl")
 
-        val nativeData = args.nativeData
-        val decodedNativeData = Base64.decode(nativeData,0)
-        val nativeDataString = decodedNativeData.toString(Charset.forName("utf-8"))
-
         val upiPayIntent = Intent(Intent.ACTION_VIEW)
-        upiPayIntent.data = Uri.parse(nativeDataString)
+        upiPayIntent.data = Uri.parse(viewModel.decode(args.nativeData))
 
         val chooser = Intent.createChooser(upiPayIntent, "Pay with")
 
@@ -65,5 +65,11 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
     companion object {
         const val REQUEST_CODE: Int = 3442
     }
-}
 
+    internal class UpiAuthActivityViewModel : ViewModel() {
+        fun decode(nativeData: String): String {
+            val decodedNativeData = Base64.decode(nativeData, 0)
+            return decodedNativeData.toString(Charset.forName("utf-8"))
+        }
+    }
+}

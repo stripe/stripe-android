@@ -31,9 +31,7 @@ class PaymentMethodOptionsParamsTest {
     @Test
     fun upiToParamMap_withFlow_shouldOnlyIncludeFlow() {
         assertThat(
-            PaymentMethodOptionsParams.Upi(
-                flow = "app_redirect"
-            ).toParamMap()
+            PaymentMethodOptionsParams.Upi.toParamMap()
         ).isEqualTo(
             mapOf(
                 "upi" to mapOf(
@@ -46,8 +44,7 @@ class PaymentMethodOptionsParamsTest {
     @Test
     fun upiToParamMap_withNoData_shouldHaveIncludeFlow() {
         assertThat(
-            PaymentMethodOptionsParams.Upi()
-                .toParamMap()
+            PaymentMethodOptionsParams.Upi.toParamMap()
         ).isEqualTo(
             mapOf(
                 "upi" to mapOf(

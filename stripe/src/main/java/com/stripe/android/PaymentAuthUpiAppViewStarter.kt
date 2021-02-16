@@ -2,7 +2,6 @@ package com.stripe.android
 
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentAuthUpiAppViewActivity
 import com.stripe.android.view.PaymentAuthWebViewActivity

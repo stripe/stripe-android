@@ -41,17 +41,12 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Upi(
-        var flow: String = "app_redirect"
-    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Upi) {
+    object Upi : PaymentMethodOptionsParams(PaymentMethod.Type.Upi) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
-                PARAM_FLOW to flow
+                PARAM_FLOW to "app_redirect"
             )
         }
-
-        private companion object {
-            private const val PARAM_FLOW = "flow"
-        }
+        private const val PARAM_FLOW = "flow"
     }
 }
