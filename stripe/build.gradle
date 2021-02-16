@@ -45,7 +45,7 @@ dependencies {
     javadocDeps 'androidx.appcompat:appcompat:1.2.0'
     javadocDeps "com.google.android.material:material:$materialVersion"
 
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-core:3.7.7"
     testImplementation 'org.robolectric:robolectric:4.5.1'
     testImplementation "androidx.test:core:$androidTestVersion"
