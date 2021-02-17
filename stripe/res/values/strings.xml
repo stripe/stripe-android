@@ -179,6 +179,9 @@
     signatory on the account listed above.
     </string>
 
+    <!-- UPI payment app selection -->
+    <string name="upi_app_pay_with" tools:ignore="MissingTranslation">Pay With</string>
+
     <!-- Payment Sheet -->
     <string name="stripe_paymentsheet_back" tools:ignore="MissingTranslation">Back</string>
     <string name="stripe_paymentsheet_close" tools:ignore="MissingTranslation">Close</string>

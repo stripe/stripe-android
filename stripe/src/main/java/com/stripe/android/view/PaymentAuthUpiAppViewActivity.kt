@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthUpiAppViewStarter
+import com.stripe.android.R
 import java.nio.charset.Charset
 
 class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
@@ -49,7 +50,7 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
         val upiPayIntent = Intent(Intent.ACTION_VIEW)
         upiPayIntent.data = Uri.parse(viewModel.decode(args.nativeData))
 
-        val chooser = Intent.createChooser(upiPayIntent, "Pay with")
+        val chooser = Intent.createChooser(upiPayIntent, getString(R.string.upi_app_pay_with))
 
         runCatching {
             startActivityForResult(chooser, REQUEST_CODE)

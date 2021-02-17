@@ -10,10 +10,10 @@ class PaymentAuthUpiAppViewActivityTest {
 
     @Test
     fun `Decoder works as expected`() {
-        var nativeData = "ZHVtbXlfbmF0aXZlX2RhdGE="
+        var nativeData = "c2FtcGxlX25hdGl2ZV9kYXRh"
         val viewModel = PaymentAuthUpiAppViewActivity.UpiAuthActivityViewModel()
         var decodedData = viewModel.decode(nativeData)
 
-        assertEquals("dummy_native_data", decodedData)
+        assertEquals("sample_native_data", decodedData)
     }
 }

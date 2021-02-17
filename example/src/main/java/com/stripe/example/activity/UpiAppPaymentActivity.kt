@@ -44,8 +44,6 @@ class UpiAppPaymentActivity : StripeIntentActivity() {
                 )
             )
 
-            val paymentMethodOptions = PaymentMethodOptionsParams.Upi
-
             stripe.createPaymentMethod(
                 params,
                 callback = object : ApiResultCallback<PaymentMethod> {
@@ -54,7 +52,7 @@ class UpiAppPaymentActivity : StripeIntentActivity() {
                             country = "in",
                             paymentMethodCreateParams = null,
                             existingPaymentMethodId = result.id,
-                            paymentMethodOptions = paymentMethodOptions
+                            paymentMethodOptions = PaymentMethodOptionsParams.Upi
                         )
                     }
 
