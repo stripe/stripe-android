@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 android:layout_marginVertical="2dp"
-                android:layout_marginHorizontal="23dp"
+                android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                 style="@style/StripePaymentSheetErrorMessage" />
         </LinearLayout>
 
