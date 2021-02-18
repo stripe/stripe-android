@@ -15,6 +15,7 @@ com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.analytics
 com.stripe.android.paymentsheet.flowcontroller
 com.stripe.android.paymentsheet.model
+com.stripe.android.paymentsheet.repositories
 com.stripe.android.paymentsheet.ui
 com.stripe.android.paymentsheet.viewmodels
 com.stripe.android.utils
