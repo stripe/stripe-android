@@ -125,10 +125,21 @@ internal class StripePaymentController internal constructor(
     ) {
         CoroutineScope(workContext).launch {
             val result = runCatching {
-                confirmPaymentIntent(
-                    confirmStripeIntentParams,
-                    requestOptions
-                )
+                when (confirmStripeIntentParams) {
+                    is ConfirmPaymentIntentParams -> {
+                        confirmPaymentIntent(
+                            confirmStripeIntentParams,
+                            requestOptions
+                        )
+                    }
+                    is ConfirmSetupIntentParams -> {
+                        confirmSetupIntent(
+                            confirmStripeIntentParams,
+                            requestOptions
+                        )
+                    }
+                    else -> error("Confirmation params must be ConfirmPaymentIntentParams or ConfirmSetupIntentParams")
+                }
             }
 
             withContext(Dispatchers.Main) {
@@ -161,9 +172,9 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             }.fold(
-                onSuccess = { intent ->
+                onSuccess = { paymentIntent ->
                     authenticateAlipay(
-                        intent,
+                        paymentIntent,
                         authenticator,
                         requestOptions,
                         callback
@@ -177,29 +188,35 @@ internal class StripePaymentController internal constructor(
     }
 
     private suspend fun confirmPaymentIntent(
-        confirmStripeIntentParams: ConfirmStripeIntentParams,
+        confirmStripeIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options
-    ): StripeIntent {
-        val intent = when (confirmStripeIntentParams) {
-            is ConfirmPaymentIntentParams ->
-                stripeRepository.confirmPaymentIntent(
-                    // mark this request as `use_stripe_sdk=true`
-                    confirmStripeIntentParams
-                        .withShouldUseStripeSdk(shouldUseStripeSdk = true),
-                    requestOptions,
-                    expandFields = EXPAND_PAYMENT_METHOD
-                )
-            is ConfirmSetupIntentParams ->
-                stripeRepository.confirmSetupIntent(
-                    // mark this request as `use_stripe_sdk=true`
-                    confirmStripeIntentParams
-                        .withShouldUseStripeSdk(shouldUseStripeSdk = true),
-                    requestOptions,
-                    expandFields = EXPAND_PAYMENT_METHOD
-                )
-            else -> error("Confirmation params must be ConfirmPaymentIntentParams or ConfirmSetupIntentParams")
+    ): PaymentIntent {
+        return requireNotNull(
+            stripeRepository.confirmPaymentIntent(
+                // mark this request as `use_stripe_sdk=true`
+                confirmStripeIntentParams
+                    .withShouldUseStripeSdk(shouldUseStripeSdk = true),
+                requestOptions,
+                expandFields = EXPAND_PAYMENT_METHOD
+            )
+        ) {
+            REQUIRED_ERROR
         }
-        return requireNotNull(intent) {
+    }
+
+    private suspend fun confirmSetupIntent(
+        confirmStripeIntentParams: ConfirmSetupIntentParams,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent {
+        return requireNotNull(
+            stripeRepository.confirmSetupIntent(
+                // mark this request as `use_stripe_sdk=true`
+                confirmStripeIntentParams
+                    .withShouldUseStripeSdk(shouldUseStripeSdk = true),
+                requestOptions,
+                expandFields = EXPAND_PAYMENT_METHOD
+            )
+        ) {
             REQUIRED_ERROR
         }
     }
@@ -443,25 +460,25 @@ internal class StripePaymentController internal constructor(
 
     @VisibleForTesting
     internal suspend fun authenticateAlipay(
-        intent: StripeIntent,
+        paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
         runCatching {
-            alipayRepository.authenticate(intent, authenticator, requestOptions)
+            alipayRepository.authenticate(paymentIntent, authenticator, requestOptions)
         }.mapCatching { (outcome) ->
-            val paymentIntent = requireNotNull(
+            val refreshedPaymentIntent = requireNotNull(
                 stripeRepository.retrievePaymentIntent(
-                    intent.clientSecret.orEmpty(),
+                    paymentIntent.clientSecret.orEmpty(),
                     requestOptions,
                     expandFields = EXPAND_PAYMENT_METHOD
                 )
             )
             PaymentIntentResult(
-                paymentIntent,
+                refreshedPaymentIntent,
                 outcome,
-                failureMessageFactory.create(paymentIntent, outcome)
+                failureMessageFactory.create(refreshedPaymentIntent, outcome)
             )
         }.fold(
             onSuccess = {

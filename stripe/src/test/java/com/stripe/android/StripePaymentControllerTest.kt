@@ -1027,7 +1027,7 @@ internal class StripePaymentControllerTest {
 
     private class FakeAlipayRepostiory : AlipayRepository {
         override suspend fun authenticate(
-            intent: StripeIntent,
+            paymentIntent: PaymentIntent,
             authenticator: AlipayAuthenticator,
             requestOptions: ApiRequest.Options
         ) = AlipayAuthResult(StripeIntentResult.Outcome.SUCCEEDED)
