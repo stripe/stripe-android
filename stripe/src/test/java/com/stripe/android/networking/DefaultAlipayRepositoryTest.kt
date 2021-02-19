@@ -121,9 +121,9 @@ internal class DefaultAlipayRepositoryTest {
             )
     }
 
-    private fun createAuthenticator(resultCode: String?) = AlipayAuthenticator { data ->
+    private fun createAuthenticator(resultCode: String?) = AlipayAuthenticator {
         resultCode?.let {
-            mapOf("resultStatus" to data)
+            mapOf("resultStatus" to it)
         }.orEmpty()
     }
 
