@@ -148,29 +148,31 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    override fun startConfirm(
-        confirmStripeIntentParams: ConfirmStripeIntentParams,
+    override fun startConfirmAlipay(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<StripeIntent>
+        callback: ApiResultCallback<PaymentIntentResult>
     ) {
         CoroutineScope(workContext).launch {
-            val result = runCatching {
+            runCatching {
                 confirmPaymentIntent(
-                    confirmStripeIntentParams,
+                    confirmPaymentIntentParams,
                     requestOptions
                 )
-            }
-
-            withContext(Dispatchers.Main) {
-                result.fold(
-                    onSuccess = { intent ->
-                        callback.onSuccess(intent)
-                    },
-                    onFailure = {
-                        dispatchError(it, callback)
-                    }
-                )
-            }
+            }.fold(
+                onSuccess = { intent ->
+                    authenticateAlipay(
+                        intent,
+                        authenticator,
+                        requestOptions,
+                        callback
+                    )
+                },
+                onFailure = {
+                    dispatchError(it, callback)
+                }
+            )
         }
     }
 
@@ -439,44 +441,38 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    override fun authenticateAlipay(
+    @VisibleForTesting
+    internal suspend fun authenticateAlipay(
         intent: StripeIntent,
-        stripeAccountId: String?,
         authenticator: AlipayAuthenticator,
+        requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        val requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
-        )
-
-        CoroutineScope(workContext).launch {
-            runCatching {
-                alipayRepository.authenticate(intent, authenticator, requestOptions)
-            }.mapCatching { alipayAuth ->
-                val paymentIntent = requireNotNull(
-                    stripeRepository.retrievePaymentIntent(
-                        intent.clientSecret.orEmpty(),
-                        requestOptions,
-                        expandFields = EXPAND_PAYMENT_METHOD
-                    )
+        runCatching {
+            alipayRepository.authenticate(intent, authenticator, requestOptions)
+        }.mapCatching { (outcome) ->
+            val paymentIntent = requireNotNull(
+                stripeRepository.retrievePaymentIntent(
+                    intent.clientSecret.orEmpty(),
+                    requestOptions,
+                    expandFields = EXPAND_PAYMENT_METHOD
                 )
-                PaymentIntentResult(
-                    paymentIntent,
-                    alipayAuth.outcome,
-                    failureMessageFactory.create(paymentIntent, alipayAuth.outcome)
-                )
-            }.let { result ->
+            )
+            PaymentIntentResult(
+                paymentIntent,
+                outcome,
+                failureMessageFactory.create(paymentIntent, outcome)
+            )
+        }.fold(
+            onSuccess = {
                 withContext(Dispatchers.Main) {
-                    result.fold(
-                        onSuccess = callback::onSuccess,
-                        onFailure = {
-                            dispatchError(it, callback)
-                        }
-                    )
+                    callback.onSuccess(it)
                 }
+            },
+            onFailure = {
+                dispatchError(it, callback)
             }
-        }
+        )
     }
 
     private suspend fun dispatchPaymentIntentResult(

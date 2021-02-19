@@ -121,10 +121,10 @@ internal class DefaultAlipayRepositoryTest {
             )
     }
 
-    private fun createAuthenticator(resultCode: String?) = object : AlipayAuthenticator {
-        override fun onAuthenticationRequest(data: String): Map<String, String> {
-            return resultCode?.let { mapOf("resultStatus" to it) }.orEmpty()
-        }
+    private fun createAuthenticator(resultCode: String?) = AlipayAuthenticator { data ->
+        resultCode?.let {
+            mapOf("resultStatus" to data)
+        }.orEmpty()
     }
 
     private companion object {

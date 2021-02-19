@@ -5,18 +5,15 @@ import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.ApiRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
@@ -138,48 +135,6 @@ class StripePaymentAuthTest {
         )
 
         verify(paymentController).handleSetupResult(data, setupCallback)
-    }
-
-    @Test
-    fun confirmAlipayPayment_shouldConfirmAndAuth() {
-        val authenticationCallbackCaptor: KArgumentCaptor<ApiResultCallback<StripeIntent>> = argumentCaptor()
-
-        val stripe = createStripe()
-        val confirmPaymentIntentParams = ConfirmPaymentIntentParams.createAlipay(
-            "client_secret"
-        )
-        val authenticationHandler = object : AlipayAuthenticator {
-            override fun onAuthenticationRequest(data: String): Map<String, String> {
-                return mapOf("resultStatus" to "9000")
-            }
-        }
-        stripe.confirmAlipayPayment(
-            confirmPaymentIntentParams,
-            authenticator = authenticationHandler,
-            callback = paymentCallback
-        )
-        verify(paymentController).startConfirm(
-            eq(confirmPaymentIntentParams),
-            eq(REQUEST_OPTIONS),
-            authenticationCallbackCaptor.capture()
-        )
-        val authenticationCallback = authenticationCallbackCaptor.firstValue
-
-        // passes through errors
-        verify(paymentCallback, never()).onError(any())
-        val e = RuntimeException()
-        authenticationCallback.onError(e)
-        verify(paymentCallback).onError(e)
-
-        // handles authentication
-        val confirmedIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
-        authenticationCallback.onSuccess(confirmedIntent)
-        verify(paymentController).authenticateAlipay(
-            confirmedIntent,
-            null,
-            authenticationHandler,
-            paymentCallback
-        )
     }
 
     private fun createStripe(): Stripe {
