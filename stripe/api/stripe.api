@@ -3365,7 +3365,9 @@ public class com/stripe/android/model/PaymentMethodCreateParams$Sofort$Creator :
 
 public final class com/stripe/android/model/PaymentMethodCreateParams$Upi : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Upi;
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Upi;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams$Upi;
 	public fun describeContents ()I
@@ -3415,6 +3417,21 @@ public class com/stripe/android/model/PaymentMethodOptionsParams$Card$Creator : 
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodOptionsParams$Card;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodOptionsParams$Card;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/PaymentMethodOptionsParams$Upi : com/stripe/android/model/PaymentMethodOptionsParams {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/model/PaymentMethodOptionsParams$Upi;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/model/PaymentMethodOptionsParams$Upi$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodOptionsParams$Upi;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodOptionsParams$Upi;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -4743,11 +4760,34 @@ public class com/stripe/android/model/StripeIntent$NextActionData$SdkData$Use3DS
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/StripeIntent$NextActionData$UpiAppRedirect : com/stripe/android/model/StripeIntent$NextActionData {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/model/StripeIntent$NextActionData$UpiAppRedirect;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/StripeIntent$NextActionData$UpiAppRedirect;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/StripeIntent$NextActionData$UpiAppRedirect;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNative_data ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/model/StripeIntent$NextActionData$UpiAppRedirect$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/StripeIntent$NextActionData$UpiAppRedirect;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/StripeIntent$NextActionData$UpiAppRedirect;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/StripeIntent$NextActionType : java/lang/Enum {
 	public static final field AlipayRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field Companion Lcom/stripe/android/model/StripeIntent$NextActionType$Companion;
 	public static final field DisplayOxxoDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field RedirectToUrl Lcom/stripe/android/model/StripeIntent$NextActionType;
+	public static final field UpiAppRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field UseStripeSdk Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public final fun getCode ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
@@ -5616,6 +5656,15 @@ public final class com/stripe/android/view/FpxBank : java/lang/Enum {
 
 public final class com/stripe/android/view/FpxBank$Companion {
 	public final fun get (Ljava/lang/String;)Lcom/stripe/android/view/FpxBank;
+}
+
+public final class com/stripe/android/view/PaymentAuthUpiAppViewActivity : androidx/appcompat/app/AppCompatActivity {
+	public static final field Companion Lcom/stripe/android/view/PaymentAuthUpiAppViewActivity$Companion;
+	public static final field REQUEST_CODE I
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/view/PaymentAuthUpiAppViewActivity$Companion {
 }
 
 public final class com/stripe/android/view/PaymentAuthWebViewActivity : androidx/appcompat/app/AppCompatActivity {
