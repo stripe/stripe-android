@@ -85,6 +85,9 @@ sealed class PaymentFlowResult {
         }
     }
 
+    /**
+     * The representation of a valid [PaymentFlowResult]. See [Unvalidated.validate].
+     */
     internal data class Validated internal constructor(
         val clientSecret: String,
         @StripeIntentResult.Outcome internal val flowOutcome: Int,
