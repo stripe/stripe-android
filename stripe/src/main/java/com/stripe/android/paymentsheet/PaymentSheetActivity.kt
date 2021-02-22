@@ -332,11 +332,6 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         )
     }
 
-    override fun hideSheet() {
-        viewModel.startAnimateOut().observe(this) {
-            bottomSheetController.hide()
-        }
-    }
 
     internal companion object {
         internal const val EXTRA_FRAGMENT_CONFIG = BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG
