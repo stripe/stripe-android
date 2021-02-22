@@ -144,6 +144,19 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     private fun setupAddButton(addButton: AddButton) {
+        addButton.completedAnimation.observe(this) { completedState ->
+            animateOut(
+                    PaymentOptionResult.Succeeded(completedState.paymentSelection)
+            )
+        }
+        addButton.updateState(AddButtonViewState.Ready)
+
+        viewModel.viewState.observe(this) { state ->
+            if (state != null) {
+                addButton.updateState(state)
+            }
+        }
+
         addButton.setOnClickListener {
             viewModel.onUserSelection()
         }
@@ -199,9 +212,9 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     private fun onActionCompleted(paymentSelection: PaymentSelection) {
-        animateOut(
-            PaymentOptionResult.Succeeded(paymentSelection)
-        )
+        startAnimateOut().observe(this) {
+            viewBinding.addButton.updateState(AddButtonViewState.Completed(paymentSelection))
+        }
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {
