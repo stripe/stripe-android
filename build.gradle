@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlinVersion = '1.4.30'
+    ext.kotlinVersion = '1.4.21'
     ext.dokkaVersion = '1.4.0-rc'
 
     repositories {
@@ -44,7 +44,6 @@ allprojects {
 }
 
 ext {
-    buildToolsVersion = "30.0.3"
     compileSdkVersion = 30
 
     kotlinCoroutinesVersion = '1.4.2'
