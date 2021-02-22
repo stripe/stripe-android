@@ -11,14 +11,15 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.example.StripeFactory
+import com.stripe.example.databinding.UpiAppPaymentActivityBinding
 import com.stripe.example.databinding.UpiPaymentActivityBinding
 
 class UpiAppPaymentActivity : StripeIntentActivity() {
     private val stripe by lazy {
         StripeFactory(application).create()
     }
-    private val viewBinding: UpiPaymentActivityBinding by lazy {
-        UpiPaymentActivityBinding.inflate(layoutInflater)
+    private val viewBinding: UpiAppPaymentActivityBinding by lazy {
+        UpiAppPaymentActivityBinding.inflate(layoutInflater)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
