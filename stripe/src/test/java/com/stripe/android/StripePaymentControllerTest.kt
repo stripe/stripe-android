@@ -876,23 +876,27 @@ internal class StripePaymentControllerTest {
 
     @Test
     fun `authenticateAlipay() should return expected outcome`() = testDispatcher.runBlockingTest {
-        var actualResult: Result<PaymentIntentResult>? = null
+        val results = mutableListOf<Result<PaymentIntentResult>>()
         controller.authenticateAlipay(
             PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
-            null,
-            mock(),
+            {
+                mapOf("key" to "value")
+            },
+            REQUEST_OPTIONS,
             object : ApiResultCallback<PaymentIntentResult> {
                 override fun onSuccess(result: PaymentIntentResult) {
-                    actualResult = Result.success(result)
+                    results.add(Result.success(result))
                 }
 
                 override fun onError(e: Exception) {
-                    actualResult = Result.failure(e)
+                    results.add(Result.failure(e))
                 }
             }
         )
 
-        val paymentIntentResult = requireNotNull(actualResult?.getOrNull())
+        assertThat(results)
+            .hasSize(1)
+        val paymentIntentResult = requireNotNull(results.first().getOrNull())
         assertThat(paymentIntentResult.outcome)
             .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
     }
@@ -1023,7 +1027,7 @@ internal class StripePaymentControllerTest {
 
     private class FakeAlipayRepostiory : AlipayRepository {
         override suspend fun authenticate(
-            intent: StripeIntent,
+            paymentIntent: PaymentIntent,
             authenticator: AlipayAuthenticator,
             requestOptions: ApiRequest.Options
         ) = AlipayAuthResult(StripeIntentResult.Outcome.SUCCEEDED)
