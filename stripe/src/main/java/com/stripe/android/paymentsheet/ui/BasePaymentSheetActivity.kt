@@ -29,7 +29,6 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
     abstract val messageView: TextView
 
     abstract fun onUserCancel()
-    abstract fun hideSheet()
     abstract fun setActivityResult(result: ResultType)
 
     private val keyboardController: KeyboardController by lazy {
@@ -90,7 +89,7 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         result: ResultType
     ) {
         setActivityResult(result)
-        hideSheet()
+        bottomSheetController.hide()
     }
 
     private fun updateRootViewClickHandling(isProcessing: Boolean) {

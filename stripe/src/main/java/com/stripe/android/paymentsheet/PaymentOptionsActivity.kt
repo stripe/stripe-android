@@ -216,10 +216,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         animateOut(viewModel.getPaymentOptionResult())
     }
 
-    override fun hideSheet() {
-        bottomSheetController.hide()
-    }
-
     internal companion object {
         internal const val EXTRA_FRAGMENT_CONFIG = BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BasePaymentSheetActivity.EXTRA_STARTER_ARGS

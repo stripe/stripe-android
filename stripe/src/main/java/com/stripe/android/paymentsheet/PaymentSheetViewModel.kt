@@ -200,7 +200,6 @@ internal class PaymentSheetViewModel internal constructor(
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
 
-                val paymentIntent = paymentIntentResult.intent
                 onApiError(paymentIntentResult.failureMessage)
                 onPaymentIntentResponse(paymentIntentResult.intent)
             }
@@ -341,6 +340,7 @@ internal class PaymentSheetViewModel internal constructor(
                 workContext = Dispatchers.IO
             )
 
+            @Suppress("UNCHECKED_CAST")
             return PaymentSheetViewModel(
                 publishableKey,
                 stripeAccountId,

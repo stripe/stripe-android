@@ -193,6 +193,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         }
 
         viewBinding.toolbar.action.observe(this) { action ->
+            @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
             when (action) {
                 Toolbar.Action.Close -> {
                     onUserCancel()
@@ -269,7 +270,11 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     private fun setupBuyButton() {
         viewBinding.buyButton.completedAnimation.observe(this) { completedState ->
-            completedState?.paymentIntentResult?.let(::onActionCompleted)
+            completedState?.paymentIntentResult?.let { paymentIntentResult ->
+                viewModel.startAnimateOut().observe(this) {
+                    onActionCompleted(paymentIntentResult)
+                }
+            }
         }
 
         viewModel.viewState.observe(this) { state ->
@@ -330,12 +335,6 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                 paymentIntent = viewModel.paymentIntent.value
             )
         )
-    }
-
-    override fun hideSheet() {
-        viewModel.startAnimateOut().observe(this) {
-            bottomSheetController.hide()
-        }
     }
 
     internal companion object {
