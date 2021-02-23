@@ -64,6 +64,7 @@ jobs:
           # Write secrets to location accessible by Gradle
           # See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties
           env:
+            ACTIONS_ALLOW_UNSECURE_COMMANDS: true
             BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
             PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
           shell: bash
