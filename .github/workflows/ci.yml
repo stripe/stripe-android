@@ -69,10 +69,13 @@ jobs:
             PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
           shell: bash
           run: |
+            echo "STRIPE_END_TO_END_TESTS_BACKEND_URL=${BACKEND_URL}" >> $GITHUB_ENV
+            echo "STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}" >> $GITHUB_ENV
+
             mkdir -p ~/.gradle/
             echo "::set-env name=GRADLE_USER_HOME::$HOME/.gradle"
-            echo "STRIPE_END_TO_END_TESTS_BACKEND_URL=${BACKEND_URL}" > ~/.gradle/gradle.properties
-            echo "STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}" > ~/.gradle/gradle.properties
+            echo "STRIPE_END_TO_END_TESTS_BACKEND_URL=${BACKEND_URL}" >> ~/.gradle/gradle.properties
+            echo "STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}" >> ~/.gradle/gradle.properties
         - uses: gradle/wrapper-validation-action@v1
         - uses: actions/setup-java@v1
           with:
