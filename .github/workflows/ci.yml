@@ -60,23 +60,6 @@ jobs:
       timeout-minutes: 5
       steps:
         - uses: actions/checkout@v2
-        - name: Populate gradle.properties
-          # Write secrets to location accessible by Gradle
-          # See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties
-          env:
-            ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-            BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
-            PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
-          shell: bash
-          run: |
-            echo "STRIPE_END_TO_END_TESTS_BACKEND_URL=${BACKEND_URL}" >> $GITHUB_ENV
-            echo "STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}" >> $GITHUB_ENV
-
-            mkdir -p $HOME/.gradle/
-            echo "::set-env name=GRADLE_USER_HOME::$HOME/.gradle"
-            echo "$HOME/.gradle" >> $GITHUB_PATH
-            echo "STRIPE_END_TO_END_TESTS_BACKEND_URL=${BACKEND_URL}" >> $HOME/.gradle/gradle.properties
-            echo "STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}" >> $HOME/.gradle/gradle.properties
         - uses: gradle/wrapper-validation-action@v1
         - uses: actions/setup-java@v1
           with:
