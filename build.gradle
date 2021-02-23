@@ -47,7 +47,7 @@ ext {
     buildToolsVersion = "30.0.3"
     compileSdkVersion = 30
 
-    kotlinCoroutinesVersion = '1.4.2'
+    kotlinCoroutinesVersion = '1.4.2-native-mt'
     androidLifecycleVersion = '2.3.0'
     espressoVersion = '3.3.0'
     ktlintVersion = '0.40.0'
