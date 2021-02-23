@@ -417,6 +417,13 @@ data class PaymentMethod internal constructor(
         @JvmField val expiryYear: Int? = null,
 
         /**
+         * Uniquely identifies this particular card number. You can use this attribute to check whether two customers who’ve signed up with you are using the same card number, for example. For payment methods that tokenize card information (Apple Pay, Google Pay), the tokenized number might be provided instead of the underlying card number.
+         *
+         * [card.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-fingerprint)
+         */
+        @JvmField val fingerprint: String? = null,
+
+        /**
          * Card funding type. Can be `credit`, `debit, `prepaid`, or `unknown`.
          *
          * [card.funding](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-funding)
@@ -454,6 +461,7 @@ data class PaymentMethod internal constructor(
             private var country: String? = null
             private var expiryMonth: Int? = null
             private var expiryYear: Int? = null
+            private var fingerprint: String? = null
             private var funding: String? = null
             private var last4: String? = null
             private var threeDSecureUsage: ThreeDSecureUsage? = null
@@ -479,6 +487,10 @@ data class PaymentMethod internal constructor(
                 this.expiryYear = expiryYear
             }
 
+            fun setFingerprint(fingerprint: String?): Builder = apply {
+                this.fingerprint = fingerprint
+            }
+
             fun setFunding(funding: String?): Builder = apply {
                 this.funding = funding
             }
@@ -502,6 +514,7 @@ data class PaymentMethod internal constructor(
                     country,
                     expiryMonth,
                     expiryYear,
+                    fingerprint,
                     funding,
                     last4,
                     threeDSecureUsage,

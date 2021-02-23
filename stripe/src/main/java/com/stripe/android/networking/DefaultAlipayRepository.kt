@@ -3,17 +3,18 @@ package com.stripe.android.networking
 import com.stripe.android.AlipayAuthenticator
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.AlipayAuthResult
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 
 internal class DefaultAlipayRepository(
     private val stripeRepository: StripeRepository
 ) : AlipayRepository {
     override suspend fun authenticate(
-        intent: StripeIntent,
+        paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
     ): AlipayAuthResult {
-        if (intent.paymentMethod?.liveMode == false) {
+        if (paymentIntent.paymentMethod?.liveMode == false) {
             throw IllegalArgumentException(
                 "Attempted to authenticate test mode " +
                     "PaymentIntent with the Alipay SDK.\n" +
@@ -21,7 +22,7 @@ internal class DefaultAlipayRepository(
             )
         }
 
-        val nextActionData = intent.nextActionData
+        val nextActionData = paymentIntent.nextActionData
         if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
             val output =
                 authenticator.onAuthenticationRequest(nextActionData.data)

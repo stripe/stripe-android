@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Intent
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
@@ -17,10 +18,11 @@ internal interface PaymentController {
         requestOptions: ApiRequest.Options
     )
 
-    fun startConfirm(
-        confirmStripeIntentParams: ConfirmStripeIntentParams,
+    fun startConfirmAlipay(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<StripeIntent>
+        callback: ApiResultCallback<PaymentIntentResult>
     )
 
     fun startAuth(
@@ -89,13 +91,6 @@ internal interface PaymentController {
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
-    )
-
-    fun authenticateAlipay(
-        intent: StripeIntent,
-        stripeAccountId: String?,
-        authenticator: AlipayAuthenticator,
-        callback: ApiResultCallback<PaymentIntentResult>
     )
 
     enum class StripeIntentType {

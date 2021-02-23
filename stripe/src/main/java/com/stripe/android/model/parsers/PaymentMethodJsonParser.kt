@@ -116,6 +116,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 country = StripeJsonUtils.optString(json, FIELD_COUNTRY),
                 expiryMonth = StripeJsonUtils.optInteger(json, FIELD_EXP_MONTH),
                 expiryYear = StripeJsonUtils.optInteger(json, FIELD_EXP_YEAR),
+                fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
                 funding = StripeJsonUtils.optString(json, FIELD_FUNDING),
                 last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
                 threeDSecureUsage = json.optJSONObject(FIELD_THREE_D_SECURE_USAGE)?.let {
@@ -162,7 +163,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
 
         internal class NetworksJsonParser : ModelJsonParser<PaymentMethod.Card.Networks> {
-            override fun parse(json: JSONObject): PaymentMethod.Card.Networks? {
+            override fun parse(json: JSONObject): PaymentMethod.Card.Networks {
                 val available = StripeJsonUtils.jsonArrayToList(json.optJSONArray(FIELD_AVAIABLE))
                     .orEmpty()
                     .map { it.toString() }
@@ -190,6 +191,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_COUNTRY = "country"
             private const val FIELD_EXP_MONTH = "exp_month"
             private const val FIELD_EXP_YEAR = "exp_year"
+            private const val FIELD_FINGERPRINT = "fingerprint"
             private const val FIELD_FUNDING = "funding"
             private const val FIELD_LAST4 = "last4"
             private const val FIELD_THREE_D_SECURE_USAGE = "three_d_secure_usage"
@@ -259,7 +261,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     }
 
     internal class AuBecsDebitJsonParser : ModelJsonParser<PaymentMethod.AuBecsDebit> {
-        override fun parse(json: JSONObject): PaymentMethod.AuBecsDebit? {
+        override fun parse(json: JSONObject): PaymentMethod.AuBecsDebit {
             return PaymentMethod.AuBecsDebit(
                 bsbNumber = StripeJsonUtils.optString(json, FIELD_BSB_NUMBER),
                 fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
@@ -275,7 +277,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     }
 
     internal class BacsDebitJsonParser : ModelJsonParser<PaymentMethod.BacsDebit> {
-        override fun parse(json: JSONObject): PaymentMethod.BacsDebit? {
+        override fun parse(json: JSONObject): PaymentMethod.BacsDebit {
             return PaymentMethod.BacsDebit(
                 fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
                 last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
@@ -303,7 +305,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     }
 
     internal class UpiJsonParser : ModelJsonParser<PaymentMethod.Upi> {
-        override fun parse(json: JSONObject): PaymentMethod.Upi? {
+        override fun parse(json: JSONObject): PaymentMethod.Upi {
             return PaymentMethod.Upi(
                 vpa = StripeJsonUtils.optString(json, FIELD_VPA)
             )
