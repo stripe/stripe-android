@@ -74,6 +74,7 @@ jobs:
 
             mkdir -p ~/.gradle/
             echo "::set-env name=GRADLE_USER_HOME::$HOME/.gradle"
+            echo "$HOME/.gradle" >> $GITHUB_PATH
             echo "STRIPE_END_TO_END_TESTS_BACKEND_URL=${BACKEND_URL}" >> ~/.gradle/gradle.properties
             echo "STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}" >> ~/.gradle/gradle.properties
         - uses: gradle/wrapper-validation-action@v1
