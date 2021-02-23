@@ -6,9 +6,5 @@
         <meta-data
             android:name="com.stripe.android.test.e2e.metadata.backend_url"
             android:value="${BACKEND_URL}" />
-        <meta-data
-            android:name="com.stripe.android.test.e2e.metadata.publishable_key"
-            android:value="${PUBLISHABLE_KEY}" />
-
     </application>
 </manifest>
