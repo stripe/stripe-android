@@ -581,6 +581,15 @@ internal class StripePaymentController internal constructor(
                         nextActionData
                     )
                 }
+                is StripeIntent.NextActionData.UpiAppRedirect -> {
+                    beginUpiAppAuth(
+                        host,
+                        getRequestCode(stripeIntent),
+                        nextActionData.native_data,
+                        stripeIntent.clientSecret.orEmpty(),
+                        enableLogging = enableLogging
+                    )
+                }
                 else -> bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
             }
         } else {
@@ -722,46 +731,6 @@ internal class StripePaymentController internal constructor(
             )
         } else {
             // TODO(smaskell): Determine how to handle missing URL
-                    beginWebAuth(
-                        paymentAuthWebViewStarterFactory(host),
-                        getRequestCode(stripeIntent),
-                        stripeIntent.clientSecret.orEmpty(),
-                        nextActionData.webViewUrl.toString(),
-                        requestOptions.stripeAccount,
-                        nextActionData.returnUrl,
-                        enableLogging = enableLogging
-                    )
-                }
-                is StripeIntent.NextActionData.DisplayOxxoDetails -> {
-                    // TODO(smaskell): add analytics event
-                    if (nextActionData.hostedVoucherUrl != null) {
-                        beginWebAuth(
-                            paymentAuthWebViewStarterFactory(host),
-                            getRequestCode(stripeIntent),
-                            stripeIntent.clientSecret.orEmpty(),
-                            nextActionData.hostedVoucherUrl,
-                            requestOptions.stripeAccount,
-                            enableLogging = enableLogging,
-                            shouldCancelIntentOnUserNavigation = false
-                        )
-                    } else {
-                        // TODO(smaskell): Determine how to handle missing URL
-                        bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
-                    }
-                }
-                is StripeIntent.NextActionData.UpiAppRedirect -> {
-                    beginUpiAppAuth(
-                        host,
-                        getRequestCode(stripeIntent),
-                        nextActionData.native_data,
-                        stripeIntent.clientSecret.orEmpty(),
-                        enableLogging = enableLogging
-                    )
-                }
-                else -> bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
-            }
-        } else {
-            // no action required, so bypass authentication
             bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
         }
     }
@@ -1292,20 +1261,6 @@ internal class StripePaymentController internal constructor(
                     clientSecret
                 )
             )
-        }
-
-        private fun handleError(
-            paymentRelayStarter: PaymentRelayStarter,
-            requestCode: Int,
-            throwable: Throwable
-        ) {
-            paymentRelayStarter
-                .start(
-                    PaymentRelayStarter.Args.ErrorArgs(
-                        StripeException.create(throwable),
-                        requestCode
-                    )
-                )
         }
 
         @JvmStatic

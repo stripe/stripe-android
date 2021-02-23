@@ -12,7 +12,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.UpiAppPaymentActivityBinding
-import com.stripe.example.databinding.UpiPaymentActivityBinding
 
 class UpiAppPaymentActivity : StripeIntentActivity() {
     private val stripe by lazy {
