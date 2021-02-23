@@ -12,10 +12,6 @@ def getBackendUrl() {
     return readProperty('STRIPE_END_TO_END_TESTS_BACKEND_URL')
 }
 
-def getPublishableKey() {
-    return readProperty('STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY')
-}
-
 private def readProperty(name) {
     final String propValue
     if (hasProperty(name)) {
@@ -39,8 +35,7 @@ android {
         consumerProguardFiles "consumer-rules.pro"
 
         manifestPlaceholders = [
-                BACKEND_URL: getBackendUrl(),
-                PUBLISHABLE_KEY: getPublishableKey()
+                BACKEND_URL: getBackendUrl()
         ]
     }
 
@@ -60,6 +55,7 @@ dependencies {
 
     testImplementation 'org.robolectric:robolectric:4.5.1'
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'com.google.truth:truth:1.1.2'
     testImplementation "androidx.test:core:$androidTestVersion"
 
     testImplementation "com.squareup.retrofit2:retrofit:2.9.0"
