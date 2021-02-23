@@ -15,10 +15,9 @@ import kotlin.test.Test
 internal class EndToEndTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val settings = Settings(context)
 
     private val service = ServiceFactory().create(
-        baseUrl = settings.backendUrl
+        baseUrl = BASE_URL
     )
 
     @AfterTest
@@ -29,5 +28,9 @@ internal class EndToEndTest {
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
+    }
+
+    private companion object {
+        private const val BASE_URL = "https://stp-e2e.glitch.me/"
     }
 }
