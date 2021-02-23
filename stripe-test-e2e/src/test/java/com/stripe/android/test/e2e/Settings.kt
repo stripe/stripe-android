@@ -7,7 +7,7 @@ import android.content.pm.PackageManager
  * See [Configure the app](https://github.com/stripe/stripe-android/tree/master/example#configure-the-app)
  * for instructions on how to configure the example app before running it.
  */
-data class Settings(
+internal data class Settings(
     val backendUrl: String,
     val publishableKey: String
 ) {
