@@ -7,6 +7,26 @@ configurations {
     ktlint
 }
 
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return readProperty('STRIPE_END_TO_END_TESTS_BACKEND_URL')
+}
+
+def getPublishableKey() {
+    return readProperty('STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY')
+}
+
+private def readProperty(name) {
+    final String propValue
+    if (hasProperty(name)) {
+        propValue = property(name)
+    } else {
+        propValue = System.getenv(name)
+    }
+
+    return propValue?.trim() ? propValue : ""
+}
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -17,6 +37,11 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        manifestPlaceholders = [
+                BACKEND_URL: getBackendUrl(),
+                PUBLISHABLE_KEY: getPublishableKey()
+        ]
     }
 
     compileOptions {

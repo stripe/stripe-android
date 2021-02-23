@@ -15,9 +15,10 @@ import kotlin.test.Test
 internal class EndToEndTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val settings = Settings(context)
+
     private val service = ServiceFactory().create(
-        // replace with actual value
-        baseUrl = "https://example.com"
+        baseUrl = settings.backendUrl
     )
 
     @AfterTest
