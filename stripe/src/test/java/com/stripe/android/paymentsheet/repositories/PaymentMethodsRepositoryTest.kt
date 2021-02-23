@@ -24,7 +24,7 @@ internal class PaymentMethodsRepositoryTest {
         stripeRepository,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         "acct_123",
-        testDispatcher
+        workContext = testDispatcher
     )
 
     @AfterTest
