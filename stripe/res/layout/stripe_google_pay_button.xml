@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/stripe_paymentsheet_primarybutton_height"
-    android:background="@drawable/stripe_googlepay_button_no_shadow_background_black"
+    android:background="@drawable/stripe_googlepay_button_no_shadow_background"
     android:paddingTop="2sp"
     android:contentDescription="@string/stripe_googlepay_button_content_description">
     <LinearLayout
@@ -18,12 +18,12 @@
             android:layout_height="0dp"
             android:scaleType="fitCenter"
             android:duplicateParentState="true"
-            android:src="@drawable/stripe_googlepay_button_content_black"/>
+            android:src="@drawable/stripe_googlepay_button_content"/>
     </LinearLayout>
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
         android:duplicateParentState="true"
-        android:src="@drawable/stripe_googlepay_button_overlay_black"/>
+        android:src="@drawable/stripe_googlepay_button_overlay"/>
 </RelativeLayout>
