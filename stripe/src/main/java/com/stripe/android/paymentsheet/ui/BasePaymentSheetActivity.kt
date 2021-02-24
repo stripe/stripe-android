@@ -85,7 +85,7 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         }
     }
 
-    protected fun animateOut(
+    protected fun closeSheet(
         result: ResultType
     ) {
         setActivityResult(result)

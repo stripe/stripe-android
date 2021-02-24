@@ -152,7 +152,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         appbar.isInvisible = true
 
         viewModel.fatal.observe(this) {
-            animateOut(
+            closeSheet(
                 PaymentResult.Failed(
                     it,
                     paymentIntent = viewModel.paymentIntent.value
@@ -311,7 +311,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     private fun onActionCompleted(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
-                animateOut(
+                closeSheet(
                     PaymentResult.Completed(paymentIntentResult.intent)
                 )
             }
@@ -330,7 +330,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     }
 
     override fun onUserCancel() {
-        animateOut(
+        closeSheet(
             PaymentResult.Canceled(
                 viewModel.fatal.value,
                 paymentIntent = viewModel.paymentIntent.value
