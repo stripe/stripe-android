@@ -18,7 +18,7 @@ import com.stripe.android.model.PaymentIntent
  * }
  * </pre>
  */
-interface AlipayAuthenticator {
+fun interface AlipayAuthenticator {
     @WorkerThread
     fun onAuthenticationRequest(data: String): Map<String, String>
 }

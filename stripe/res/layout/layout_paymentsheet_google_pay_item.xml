@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toTopOf="@id/label">
         <ImageView
             style="@style/StripePaymentOptionItemCardImage"
-            android:src="@drawable/stripe_ic_paymentsheet_googlepay"
+            android:src="@drawable/stripe_google_pay_mark"
             android:contentDescription="@null" />
     </com.google.android.material.card.MaterialCardView>
 
