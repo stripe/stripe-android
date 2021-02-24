@@ -152,7 +152,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         appbar.isInvisible = true
 
         viewModel.fatal.observe(this) {
-            closeSheet(
+            animateOut(
                 PaymentResult.Failed(
                     it,
                     paymentIntent = viewModel.paymentIntent.value
@@ -199,8 +199,6 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                 }
                 Toolbar.Action.Back -> {
                     onUserBack()
-                }
-                else -> {
                 }
             }
         }
@@ -271,11 +269,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     private fun setupBuyButton() {
         viewBinding.buyButton.completedAnimation.observe(this) { completedState ->
-            completedState?.paymentIntentResult?.let { paymentIntentResult ->
-                viewModel.startAnimateOut().observe(this) {
-                    onActionCompleted(paymentIntentResult)
-                }
-            }
+            completedState?.paymentIntentResult?.let(::onActionCompleted)
         }
 
         viewModel.viewState.observe(this) { state ->
@@ -311,7 +305,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     private fun onActionCompleted(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
-                closeSheet(
+                animateOut(
                     PaymentResult.Completed(paymentIntentResult.intent)
                 )
             }
@@ -330,12 +324,18 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     }
 
     override fun onUserCancel() {
-        closeSheet(
+        animateOut(
             PaymentResult.Canceled(
                 viewModel.fatal.value,
                 paymentIntent = viewModel.paymentIntent.value
             )
         )
+    }
+
+    override fun hideSheet() {
+        viewModel.startAnimateOut().observe(this) {
+            bottomSheetController.hide()
+        }
     }
 
     internal companion object {

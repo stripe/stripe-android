@@ -8,7 +8,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.liveData
 import com.google.android.material.appbar.AppBarLayout
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.BottomSheetController
@@ -30,6 +29,7 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
     abstract val messageView: TextView
 
     abstract fun onUserCancel()
+    abstract fun hideSheet()
     abstract fun setActivityResult(result: ResultType)
 
     private val keyboardController: KeyboardController by lazy {
@@ -86,11 +86,11 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         }
     }
 
-    protected fun closeSheet(
+    protected fun animateOut(
         result: ResultType
     ) {
         setActivityResult(result)
-        bottomSheetController.hide()
+        hideSheet()
     }
 
     private fun updateRootViewClickHandling(isProcessing: Boolean) {
@@ -117,22 +117,8 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         }
     }
 
-    internal fun startAnimateOut() = liveData {
-        delay(ANIMATE_OUT_MILLIS)
-        emit(Unit)
-    }
-
-    fun hideSheet() {
-        startAnimateOut().observe(this) {
-            bottomSheetController.hide()
-        }
-    }
-
-
     internal companion object {
         const val EXTRA_FRAGMENT_CONFIG = "com.stripe.android.paymentsheet.extra_fragment_config"
         const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
-        // the delay before the payment sheet is dismissed
-        private const val ANIMATE_OUT_MILLIS = 1500L
     }
 }

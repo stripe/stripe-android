@@ -59,7 +59,7 @@ dependencies {
     testImplementation "androidx.test:core:$androidTestVersion"
 
     testImplementation "com.squareup.retrofit2:retrofit:2.9.0"
-    testImplementation "com.squareup.retrofit2:converter-moshi:2.9.0"
+    testImplementation "com.squareup.retrofit2:converter-moshi:2.4.0"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
