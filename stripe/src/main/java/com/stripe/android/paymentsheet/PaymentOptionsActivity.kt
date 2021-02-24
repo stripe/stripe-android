@@ -135,12 +135,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                 }
             }
         }
-
-        viewModel.userSelection.observe(this) { paymentSelection ->
-            if (paymentSelection != null) {
-                onActionCompleted(paymentSelection)
-            }
-        }
     }
 
     private fun setupAddButton(addButton: AddButton) {
