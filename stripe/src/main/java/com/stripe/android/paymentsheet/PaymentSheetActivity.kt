@@ -193,13 +193,14 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         }
 
         viewBinding.toolbar.action.observe(this) { action ->
-            @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
             when (action) {
                 Toolbar.Action.Close -> {
                     onUserCancel()
                 }
                 Toolbar.Action.Back -> {
                     onUserBack()
+                }
+                else -> {
                 }
             }
         }

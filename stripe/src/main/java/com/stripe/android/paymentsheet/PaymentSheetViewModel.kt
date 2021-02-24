@@ -340,7 +340,6 @@ internal class PaymentSheetViewModel internal constructor(
                 workContext = Dispatchers.IO
             )
 
-            @Suppress("UNCHECKED_CAST")
             return PaymentSheetViewModel(
                 publishableKey,
                 stripeAccountId,
