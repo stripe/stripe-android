@@ -24,6 +24,9 @@ internal class PaymentOptionsViewModel(
     private val _userSelection = MutableLiveData<PaymentSelection>()
     val userSelection: LiveData<PaymentSelection> = _userSelection
 
+    private val _viewState = MutableLiveData<AddButtonViewState>(null)
+    internal val viewState: LiveData<AddButtonViewState> = _viewState.distinctUntilChanged()
+
     override val newCard = args.newCard
 
     init {
@@ -34,6 +37,7 @@ internal class PaymentOptionsViewModel(
     }
 
     fun onUserSelection() {
+        _viewState.value = AddButtonViewState.Confirming
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
