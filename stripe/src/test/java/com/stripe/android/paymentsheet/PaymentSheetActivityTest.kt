@@ -267,7 +267,6 @@ internal class PaymentSheetActivityTest {
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-            animateOutMillis = 0,
             workContext = testDispatcher
         )
 

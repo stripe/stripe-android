@@ -272,9 +272,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     private fun setupBuyButton() {
         viewBinding.buyButton.completedAnimation.observe(this) { completedState ->
             completedState?.paymentIntentResult?.let { paymentIntentResult ->
-                viewModel.startAnimateOut().observe(this) {
-                    onActionCompleted(paymentIntentResult)
-                }
+                onActionCompleted(paymentIntentResult)
             }
         }
 
