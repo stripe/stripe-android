@@ -109,7 +109,7 @@ android {
     }
 
     dokkaHtml {
-        outputDirectory = "${project.rootDir}/docs/"
+        outputDirectory = new File("${project.rootDir}/docs/")
     }
 
     buildFeatures {

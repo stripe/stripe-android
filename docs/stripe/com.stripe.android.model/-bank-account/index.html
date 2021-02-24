@@ -2,717 +2,566 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>BankAccount</title>
-    <link href="../../../styles/style.css" rel="Stylesheet">
-    <script type="text/javascript" src="../../../scripts/navigationLoader.js" async="async"></script>
-    <script type="text/javascript" src="../../../scripts/platformContentHandler.js" async="async"></script>
-    <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
-    <script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
-    <link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
     <script>var pathToRoot = "../../../";</script>
+    <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+    <link href="../../../styles/style.css" rel="Stylesheet">
+    <link href="../../../styles/logo-styles.css" rel="Stylesheet">
+    <link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+    <link href="../../../styles/main.css" rel="Stylesheet">
+    <script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+    <script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+    <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+    <script type="text/javascript" src="../../../scripts/main.js" async="async"></script>
   </head>
   <body>
     <div id="container">
       <div id="leftColumn">
         <div id="logo"></div>
+        <div id="paneSearch"></div>
         <div id="sideMenu"></div>
       </div>
       <div id="main">
-        <div id="searchBar"></div>
+        <div id="leftToggler"><span class="icon-toggler"></span></div>
         <script type="text/javascript" src="../../../scripts/pages.js"></script>
         <script type="text/javascript" src="../../../scripts/main.js"></script>
-        <div id="content" pageIds="com.stripe.android.model/BankAccount///PointingToDeclaration/">
-          <div class="breadcrumbs">//<a href="../../index.html">stripe</a>/<a href="../index.html">com.stripe.android.model</a>/<a href="index.html">BankAccount</a></div>
+        <div class="main-content" id="content" pageIds="com.stripe.android.model/BankAccount///PointingToDeclaration//-41901590">
+          <div class="navigation-wrapper" id="navigation-wrapper">
+            <div class="breadcrumbs"><a href="../../index.html">stripe</a>/<a href="../index.html">com.stripe.android.model</a>/<a href="index.html">BankAccount</a></div>
+            <div class="pull-right d-flex">
+              <div class="filter-section" id="filter-section"><button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stripe:dokkaHtml/release">androidJvm</button></div>
+              <div id="searchBar"></div>
+            </div>
+          </div>
           <div class="cover ">
-            <h1 class="cover"><a data-name="bankaccount"></a>BankAccount</h1>
-            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="block"><div class="block"><a href="https://stripe.com/docs/api/customer_bank_accounts/object">The bank account object</a></div></div><div class="symbol monospace">data class <a href="index.html">BankAccount</a> : <a href="../-stripe-model/index.html">StripeModel</a>, <a href="../-stripe-payment-source/index.html">StripePaymentSource</a><span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+            <h1 class="cover"><span>Bank</span><wbr></wbr><span>Account</span></h1>
+            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">data class <a href="index.html">BankAccount</a> : <a href="../-stripe-model/index.html">StripeModel</a>, <a href="../-stripe-payment-source/index.html">StripePaymentSource</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph"><a href="https://stripe.com/docs/api/customer_bank_accounts/object">The bank account object</a></p></div></div>
           </div>
           <div class="tabbedcontent">
             <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
             <div class="tabs-section-body">
-              <h2 class=""><a data-name="types"></a>Types</h2>
-              <div class="table" data-togglable="Types"><a data-name="com.stripe.android.model/BankAccount.Status///PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="-status/index.html">Status</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount.Status///PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+              <h2 class="">Types</h2>
+              <div class="table" data-togglable="Types"><a data-name="%5Bcom.stripe.android.model%2FBankAccount.Status%2F%2F%2FPointingToDeclaration%2F%5D%2FClasslikes%2F-41901590" anchor-label="Status" id="%5Bcom.stripe.android.model%2FBankAccount.Status%2F%2F%2FPointingToDeclaration%2F%5D%2FClasslikes%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="-status/index.html">Status</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount.Status%2F%2F%2FPointingToDeclaration%2F%5D%2FClasslikes%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">enum <a href="-status/index.html">Status</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-enum/index.html">Enum</a><span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">enum <a href="-status/index.html">Status</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-enum/index.html">Enum</a>&lt;<a href="-status/index.html">BankAccount.Status</a>&gt; <span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount.Type///PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="-type/index.html">Type</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount.Type///PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount.Type%2F%2F%2FPointingToDeclaration%2F%5D%2FClasslikes%2F-41901590" anchor-label="Type" id="%5Bcom.stripe.android.model%2FBankAccount.Type%2F%2F%2FPointingToDeclaration%2F%5D%2FClasslikes%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="-type/index.html">Type</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount.Type%2F%2F%2FPointingToDeclaration%2F%5D%2FClasslikes%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">enum <a href="-type/index.html">Type</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-enum/index.html">Enum</a><span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">enum <a href="-type/index.html">Type</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-enum/index.html">Enum</a>&lt;<a href="-type/index.html">BankAccount.Type</a>&gt; <span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <h2 class=""><a data-name="functions"></a>Functions</h2>
-              <div class="table" data-togglable="Functions"><a data-name="com.stripe.android.model/BankAccount/component1/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component1.html">component1</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component1/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+              <h2 class="">Functions</h2>
+              <div class="table" data-togglable="Functions"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent1%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component1" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent1%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component1.html">component1</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent1%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component1.html">component1</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component1.html">component1</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component10/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component10.html">component10</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component10/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent10%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component10" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent10%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component10.html">component10</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent10%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component10.html">component10</a>(): <a href="-status/index.html">BankAccount.Status</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component10.html">component10</a>(): <a href="-status/index.html">BankAccount.Status</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component2/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component2.html">component2</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component2/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent2%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component2" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent2%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component2.html">component2</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent2%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component2.html">component2</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component2.html">component2</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component3/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component3.html">component3</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component3/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent3%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component3" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent3%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component3.html">component3</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent3%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component3.html">component3</a>(): <a href="-type/index.html">BankAccount.Type</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component3.html">component3</a>(): <a href="-type/index.html">BankAccount.Type</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component4/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component4.html">component4</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component4/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent4%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component4" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent4%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component4.html">component4</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent4%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component4.html">component4</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component4.html">component4</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component5/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component5.html">component5</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component5/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent5%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component5" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent5%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component5.html">component5</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent5%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component5.html">component5</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component5.html">component5</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component6/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component6.html">component6</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component6/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent6%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component6" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent6%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component6.html">component6</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent6%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component6.html">component6</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component6.html">component6</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component7/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component7.html">component7</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component7/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent7%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component7" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent7%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component7.html">component7</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent7%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component7.html">component7</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component7.html">component7</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component8/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component8.html">component8</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component8/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent8%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component8" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent8%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component8.html">component8</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent8%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component8.html">component8</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component8.html">component8</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/component9/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="component9.html">component9</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/component9/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent9%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="component9" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent9%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="component9.html">component9</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcomponent9%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">operator fun <a href="component9.html">component9</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">operator fun <a href="component9.html">component9</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/copy/#kotlin.String?#kotlin.String?#com.stripe.android.model.BankAccount.Type?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#com.stripe.android.model.BankAccount.Status?/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="copy.html">copy</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/copy/#kotlin.String?#kotlin.String?#com.stripe.android.model.BankAccount.Type?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#kotlin.String?#com.stripe.android.model.BankAccount.Status?/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcopy%2F%23kotlin.String%3F%23kotlin.String%3F%23com.stripe.android.model.BankAccount.Type%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23com.stripe.android.model.BankAccount.Status%3F%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="copy" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcopy%2F%23kotlin.String%3F%23kotlin.String%3F%23com.stripe.android.model.BankAccount.Type%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23com.stripe.android.model.BankAccount.Status%3F%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="copy.html">copy</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcopy%2F%23kotlin.String%3F%23kotlin.String%3F%23com.stripe.android.model.BankAccount.Type%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23kotlin.String%3F%23com.stripe.android.model.BankAccount.Status%3F%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">fun <a href="copy.html">copy</a>(id: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, accountHolderName: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, accountHolderType: <a href="-type/index.html">BankAccount.Type</a>?, bankName: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, countryCode: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, currency: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, fingerprint: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, last4: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, routingNumber: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, status: <a href="-status/index.html">BankAccount.Status</a>?): <a href="index.html">BankAccount</a><span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">fun <a href="copy.html">copy</a>(id: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null, accountHolderName: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null, accountHolderType: <a href="-type/index.html">BankAccount.Type</a>? = null, bankName: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null, countryCode: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null, currency: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null, fingerprint: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null, last4: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null, routingNumber: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null, status: <a href="-status/index.html">BankAccount.Status</a>? = null): <a href="index.html">BankAccount</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="android.os/Parcelable/describeContents/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="https://developer.android.com/reference/android/os/Parcelable.html#describeContents--">describeContents</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="android.os/Parcelable/describeContents/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bandroid.os%2FParcelable%2FdescribeContents%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="describeContents" id="%5Bandroid.os%2FParcelable%2FdescribeContents%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#%5Bandroid.os%2FParcelable%2FdescribeContents%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590">describeContents</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bandroid.os%2FParcelable%2FdescribeContents%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">abstract override fun <a href="https://developer.android.com/reference/android/os/Parcelable.html#describeContents--">describeContents</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">abstract fun <a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#%5Bandroid.os%2FParcelable%2FdescribeContents%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590">describeContents</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/StripeModel/equals/#kotlin.Any?/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="../-stripe-model/equals.html">equals</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/StripeModel/equals/#kotlin.Any?/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FStripeModel%2Fequals%2F%23kotlin.Any%3F%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="equals" id="%5Bcom.stripe.android.model%2FStripeModel%2Fequals%2F%23kotlin.Any%3F%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="../-stripe-model/equals.html">equals</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FStripeModel%2Fequals%2F%23kotlin.Any%3F%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">open operator override fun <a href="../-stripe-model/equals.html">equals</a>(other: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>?): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">open operator override fun <a href="../-stripe-model/equals.html">equals</a>(other: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a>?): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/StripeModel/hashCode/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="../-stripe-model/hash-code.html">hashCode</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/StripeModel/hashCode/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bcom.stripe.android.model%2FStripeModel%2FhashCode%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="hashCode" id="%5Bcom.stripe.android.model%2FStripeModel%2FhashCode%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="../-stripe-model/hash-code.html">hashCode</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FStripeModel%2FhashCode%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">open override fun <a href="../-stripe-model/hash-code.html">hashCode</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">open override fun <a href="../-stripe-model/hash-code.html">hashCode</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="kotlin/Any/toString/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/to-string.html">toString</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="kotlin/Any/toString/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bkotlin%2FAny%2FtoString%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="toString" id="%5Bkotlin%2FAny%2FtoString%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="../../com.stripe.android.view.i18n/-translator-manager/index.html#%5Bkotlin%2FAny%2FtoString%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590">toString</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bkotlin%2FAny%2FtoString%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">open override fun <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/to-string.html">toString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">open override fun <a href="../../com.stripe.android.view.i18n/-translator-manager/index.html#%5Bkotlin%2FAny%2FtoString%2F%23%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590">toString</a>(): <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
-<a data-name="android.os/Parcelable/writeToParcel/#android.os.Parcel#kotlin.Int/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="https://developer.android.com/reference/android/os/Parcelable.html#writeToParcel-android.os.Parcel-kotlin.Int-">writeToParcel</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="android.os/Parcelable/writeToParcel/#android.os.Parcel#kotlin.Int/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title"><div class="divergent-group" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main"><div class="brief-with-platform-tags"><div class="inner-brief-with-platform-tags"></div>
-<span class="pull-right"></span></div>
+<a data-name="%5Bandroid.os%2FParcelable%2FwriteToParcel%2F%23android.os.Parcel%23kotlin.Int%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" anchor-label="writeToParcel" id="%5Bandroid.os%2FParcelable%2FwriteToParcel%2F%23android.os.Parcel%23kotlin.Int%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#%5Bandroid.os%2FParcelable%2FwriteToParcel%2F%23android.os.Parcel%23kotlin.Int%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590">writeToParcel</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bandroid.os%2FParcelable%2FwriteToParcel%2F%23android.os.Parcel%23kotlin.Int%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title"><div class="divergent-group" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
 
-  <div class="main-subrow">
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="symbol monospace">abstract override fun <a href="https://developer.android.com/reference/android/os/Parcelable.html#writeToParcel-android.os.Parcel-kotlin.Int-">writeToParcel</a>(p0: <a href="https://developer.android.com/reference/android/os/Parcel.html">Parcel</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>)<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+  <div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><div class="symbol monospace">abstract fun <a href="../../com.stripe.android.view/-payment-methods-activity-starter/-result/index.html#%5Bandroid.os%2FParcelable%2FwriteToParcel%2F%23android.os.Parcel%23kotlin.Int%2FPointingToDeclaration%2F%5D%2FFunctions%2F-41901590">writeToParcel</a>(p0: <a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a>, p1: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>)<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
   </div>
 </div>
 </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <h2 class=""><a data-name="properties"></a>Properties</h2>
-              <div class="table" data-togglable="Properties"><a data-name="com.stripe.android.model/BankAccount/accountHolderName/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/accountHolderName/#/PointingToDeclaration/">accountHolderName</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/accountHolderName/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">The name of the person or business that owns the bank account.<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-account_holder_name">account_holder_name</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/accountHolderName/#/PointingToDeclaration/">accountHolderName</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+              <h2 class="">Properties</h2>
+              <div class="table" data-togglable="Properties"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="accountHolderName" id="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="account-holder-name.html">accountHolderName</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="accountHolderName" id="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="account-holder-name.html">accountHolderName</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="accountHolderName" id="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>The name of the person or business that owns the bank account.</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/accountHolderType/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/accountHolderType/#/PointingToDeclaration/">accountHolderType</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/accountHolderType/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">The type of entity that holds the account. This can be either individual or company.<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-account_holder_type">account_holder_type</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/accountHolderType/#/PointingToDeclaration/">accountHolderType</a>: <a href="-type/index.html">BankAccount.Type</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderType%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="accountHolderType" id="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderType%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="account-holder-type.html">accountHolderType</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderType%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderType%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="accountHolderType" id="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderType%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="account-holder-type.html">accountHolderType</a>: <a href="-type/index.html">BankAccount.Type</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderType%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="accountHolderType" id="%5Bcom.stripe.android.model%2FBankAccount%2FaccountHolderType%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>The type of entity that holds the account.</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/bankName/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/bankName/#/PointingToDeclaration/">bankName</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/bankName/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">Name of the bank associated with the routing number (e.g., WELLS FARGO).<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-bank_name">bank_name</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/bankName/#/PointingToDeclaration/">bankName</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FbankName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="bankName" id="%5Bcom.stripe.android.model%2FBankAccount%2FbankName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="bank-name.html">bankName</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2FbankName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FbankName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="bankName" id="%5Bcom.stripe.android.model%2FBankAccount%2FbankName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="bank-name.html">bankName</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FbankName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="bankName" id="%5Bcom.stripe.android.model%2FBankAccount%2FbankName%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>Name of the bank associated with the routing number (e.g., WELLS FARGO).</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/countryCode/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/countryCode/#/PointingToDeclaration/">countryCode</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/countryCode/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">Two-letter ISO code representing the country the bank account is located in.<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-country">country</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/countryCode/#/PointingToDeclaration/">countryCode</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FcountryCode%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="countryCode" id="%5Bcom.stripe.android.model%2FBankAccount%2FcountryCode%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="country-code.html">countryCode</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2FcountryCode%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FcountryCode%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="countryCode" id="%5Bcom.stripe.android.model%2FBankAccount%2FcountryCode%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="country-code.html">countryCode</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FcountryCode%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="countryCode" id="%5Bcom.stripe.android.model%2FBankAccount%2FcountryCode%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>Two-letter ISO code representing the country the bank account is located in.</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/currency/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/currency/#/PointingToDeclaration/">currency</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/currency/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">Three-letter ISO code for the currency paid out to the bank account.<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-currency">currency</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/currency/#/PointingToDeclaration/">currency</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcurrency%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="currency" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcurrency%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="currency.html">currency</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fcurrency%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcurrency%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="currency" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcurrency%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="currency.html">currency</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fcurrency%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="currency" id="%5Bcom.stripe.android.model%2FBankAccount%2Fcurrency%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>Three-letter ISO code for the currency paid out to the bank account.</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/fingerprint/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/fingerprint/#/PointingToDeclaration/">fingerprint</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/fingerprint/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">Uniquely identifies this particular bank account. You can use this attribute to check whether two bank accounts are the same.<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-fingerprint">fingerprint</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/fingerprint/#/PointingToDeclaration/">fingerprint</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Ffingerprint%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="fingerprint" id="%5Bcom.stripe.android.model%2FBankAccount%2Ffingerprint%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="fingerprint.html">fingerprint</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Ffingerprint%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Ffingerprint%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="fingerprint" id="%5Bcom.stripe.android.model%2FBankAccount%2Ffingerprint%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="fingerprint.html">fingerprint</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Ffingerprint%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="fingerprint" id="%5Bcom.stripe.android.model%2FBankAccount%2Ffingerprint%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>Uniquely identifies this particular bank account.</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/id/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/id/#/PointingToDeclaration/">id</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/id/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">Unique identifier for the object.<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-id">id</a></div><div class="symbol monospace">open override val <a href="index.html#com.stripe.android.model/BankAccount/id/#/PointingToDeclaration/">id</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fid%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="id" id="%5Bcom.stripe.android.model%2FBankAccount%2Fid%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="id.html">id</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fid%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fid%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="id" id="%5Bcom.stripe.android.model%2FBankAccount%2Fid%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">open override val <a href="id.html">id</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fid%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="id" id="%5Bcom.stripe.android.model%2FBankAccount%2Fid%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>Unique identifier for the object.</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/last4/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/last4/#/PointingToDeclaration/">last4</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/last4/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief "><a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-last4">last4</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/last4/#/PointingToDeclaration/">last4</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Flast4%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="last4" id="%5Bcom.stripe.android.model%2FBankAccount%2Flast4%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="last4.html">last4</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Flast4%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Flast4%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="last4" id="%5Bcom.stripe.android.model%2FBankAccount%2Flast4%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="last4.html">last4</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Flast4%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="last4" id="%5Bcom.stripe.android.model%2FBankAccount%2Flast4%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-last4">last4</a></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/routingNumber/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/routingNumber/#/PointingToDeclaration/">routingNumber</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/routingNumber/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">The routing transit number for the bank account.<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-routing_number">routing_number</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/routingNumber/#/PointingToDeclaration/">routingNumber</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FroutingNumber%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="routingNumber" id="%5Bcom.stripe.android.model%2FBankAccount%2FroutingNumber%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="routing-number.html">routingNumber</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2FroutingNumber%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FroutingNumber%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="routingNumber" id="%5Bcom.stripe.android.model%2FBankAccount%2FroutingNumber%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="routing-number.html">routingNumber</a>: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2FroutingNumber%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="routingNumber" id="%5Bcom.stripe.android.model%2FBankAccount%2FroutingNumber%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>The routing transit number for the bank account.</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-<a data-name="com.stripe.android.model/BankAccount/status/#/PointingToDeclaration/"></a>
-                <div class="table-row" data-filterable-current=":stripe/main" data-filterable-set=":stripe/main">
-                  <div class="main-subrow "><span><a href="index.html#com.stripe.android.model/BankAccount/status/#/PointingToDeclaration/">status</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="com.stripe.android.model/BankAccount/status/#/PointingToDeclaration/"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21.2496 5.3C20.3496 4.5 19.2496 4 18.0496 4C16.8496 4 15.6496 4.5 14.8496 5.3L10.3496 9.8L11.7496 11.2L16.2496 6.7C17.2496 5.7 18.8496 5.7 19.8496 6.7C20.8496 7.7 20.8496 9.3 19.8496 10.3L15.3496 14.8L16.7496 16.2L21.2496 11.7C22.1496 10.8 22.5496 9.7 22.5496 8.5C22.5496 7.3 22.1496 6.2 21.2496 5.3Z"/>
-    <path d="M8.35 16.7998C7.35 17.7998 5.75 17.7998 4.75 16.7998C3.75 15.7998 3.75 14.1998 4.75 13.1998L9.25 8.6998L7.85 7.2998L3.35 11.7998C1.55 13.5998 1.55 16.3998 3.35 18.1998C4.25 19.0998 5.35 19.4998 6.55 19.4998C7.75 19.4998 8.85 19.0998 9.75 18.1998L14.25 13.6998L12.85 12.2998L8.35 16.7998Z"/>
-</svg></span>
-                        <div class="copy-popup-wrapper "><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Link copied to clipboard</span></div>
-                      </span></span></div>
-                  <div class="platform-dependent-row keyValue">
-                    <div></div>
-                    <div class="title">
-                      <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe/main"><div class="brief ">For bank accounts, possible values are <code>new</code>, <code>validated</code>, <code>verified</code>, <code>verification_failed</code>, or <code>errored</code>. A bank account that hasn’t had any activity or validation performed is new. If Stripe can determine that the bank account exists, its status will be <code>validated</code>. Note that there often isn’t enough information to know (e.g., for smaller credit unions), and the validation is not always run. If customer bank account verification has succeeded, the bank account status will be <code>verified</code>. If the verification failed for any reason, such as microdeposit failure, the status will be <code>verification_failed</code>. If a transfer sent to this bank account fails, we’ll set the status to <code>errored</code> and will not continue to send transfers until the bank details are updated.For external accounts, possible values are <code>new</code> and <code>errored</code>. Validations aren’t run against external accounts because they’re only used for payouts. This means the other statuses don’t apply. If a transfer fails, the status is set to <code>errored</code> and transfers are stopped until account details are updated.<a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-status">status</a></div><div class="symbol monospace">val <a href="index.html#com.stripe.android.model/BankAccount/status/#/PointingToDeclaration/">status</a>: <a href="-status/index.html">BankAccount.Status</a>?<span class="top-right-position"><span class="copy-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 4H15V16H5V4ZM17 7H19V18V20H17H8V18H17V7Z" fill="black"/>
-                       </svg></span><div class="copy-popup-wrapper popup-to-left"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 9C18 14 14 18 9 18C4 18 0 14 0 9C0 4 4 0 9 0C14 0 18 4 18 9ZM14.2 6.2L12.8 4.8L7.5 10.1L5.3 7.8L3.8 9.2L7.5 13L14.2 6.2Z" fill="#4DBB5F"/>
-</svg><span>Content copied to clipboard</span></div></span></div></div></div>
+<a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fstatus%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="status" id="%5Bcom.stripe.android.model%2FBankAccount%2Fstatus%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":stripe:dokkaHtml/release" data-filterable-set=":stripe:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex"><a href="status.html">status</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="%5Bcom.stripe.android.model%2FBankAccount%2Fstatus%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="platform-tags ">
+                        <div class="platform-tag jvm-like">androidJvm</div>
+                      </div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe:dokkaHtml/release"><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fstatus%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="status" id="%5Bcom.stripe.android.model%2FBankAccount%2Fstatus%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a><div class="symbol monospace">val <a href="status.html">status</a>: <a href="-status/index.html">BankAccount.Status</a>? = null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="%5Bcom.stripe.android.model%2FBankAccount%2Fstatus%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" anchor-label="status" id="%5Bcom.stripe.android.model%2FBankAccount%2Fstatus%2F%23%2FPointingToDeclaration%2F%5D%2FProperties%2F-41901590" data-filterable-set=":stripe:dokkaHtml/release"></a>For bank accounts, possible values are <code>new</code>, <code>validated</code>, <code>verified</code>, <code>verification_failed</code>, or <code>errored</code>.</div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -720,12 +569,7 @@
             </div>
           </div>
         </div>
-        <div class="footer"><span class="go-to-top-icon"><a href="#container"><svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M11.3337 9.66683H0.666992L6.00033 3.66683L11.3337 9.66683Z" fill="black"/>
-    <path d="M0.666992 0.333496H11.3337V1.66683H0.666992V0.333496Z" fill="black"/>
-</svg></a></span><span>© 2020 Copyright</span><span class="pull-right"><span>Sponsored and developed by dokka</span><a href="https://github.com/Kotlin/dokka"><span class="padded-icon"><svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 0H2.3949L4.84076 2.44586L0 7.28662L0.713376 8L5.55414 3.15924L8 5.6051V0Z" fill="black"/>
-</svg></span></a></span></div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content"></a></span><span>© 2020 Copyright</span><span class="pull-right"><span>Sponsored and developed by dokka</span><a href="https://github.com/Kotlin/dokka"><span class="padded-icon"></span></a></span></div>
       </div>
     </div>
   </body>
