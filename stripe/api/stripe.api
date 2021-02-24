@@ -2660,22 +2660,24 @@ public final class com/stripe/android/model/PaymentMethod$Card : com/stripe/andr
 	public final field country Ljava/lang/String;
 	public final field expiryMonth Ljava/lang/Integer;
 	public final field expiryYear Ljava/lang/Integer;
+	public final field fingerprint Ljava/lang/String;
 	public final field funding Ljava/lang/String;
 	public final field last4 Ljava/lang/String;
 	public final field threeDSecureUsage Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;
 	public final field wallet Lcom/stripe/android/model/wallets/Wallet;
 	public fun <init> ()V
 	public final fun component1 ()Lcom/stripe/android/model/CardBrand;
+	public final fun component10 ()Lcom/stripe/android/model/wallets/Wallet;
 	public final fun component2 ()Lcom/stripe/android/model/PaymentMethod$Card$Checks;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/Integer;
 	public final fun component5 ()Ljava/lang/Integer;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Ljava/lang/String;
-	public final fun component8 ()Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;
-	public final fun component9 ()Lcom/stripe/android/model/wallets/Wallet;
-	public final fun copy (Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/PaymentMethod$Card$Checks;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;Lcom/stripe/android/model/wallets/Wallet;Lcom/stripe/android/model/PaymentMethod$Card$Networks;)Lcom/stripe/android/model/PaymentMethod$Card;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/PaymentMethod$Card$Checks;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;Lcom/stripe/android/model/wallets/Wallet;Lcom/stripe/android/model/PaymentMethod$Card$Networks;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$Card;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;
+	public final fun copy (Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/PaymentMethod$Card$Checks;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;Lcom/stripe/android/model/wallets/Wallet;Lcom/stripe/android/model/PaymentMethod$Card$Networks;)Lcom/stripe/android/model/PaymentMethod$Card;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/PaymentMethod$Card$Checks;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;Lcom/stripe/android/model/wallets/Wallet;Lcom/stripe/android/model/PaymentMethod$Card$Networks;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$Card;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -2692,6 +2694,7 @@ public final class com/stripe/android/model/PaymentMethod$Card$Builder : com/str
 	public final fun setCountry (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
 	public final fun setExpiryMonth (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
 	public final fun setExpiryYear (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
+	public final fun setFingerprint (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
 	public final fun setFunding (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
 	public final fun setLast4 (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
 	public final fun setThreeDSecureUsage (Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;

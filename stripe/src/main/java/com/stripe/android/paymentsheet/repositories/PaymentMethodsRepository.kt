@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.Logger
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
@@ -15,7 +16,7 @@ internal sealed class PaymentMethodsRepository {
     ): List<PaymentMethod>
 
     /**
-     * Retrieve the [PaymentMethod] list from a static source.
+     * A [PaymentMethodsRepository] that uses a pre-determined list of payment methods.
      */
     class Static(
         private val paymentMethods: List<PaymentMethod>
@@ -27,14 +28,21 @@ internal sealed class PaymentMethodsRepository {
     }
 
     /**
-     * Retrieve the [PaymentMethod] list from the API.
+     * A [PaymentMethodsRepository] that uses the Stripe API.
      */
     class Api(
         private val stripeRepository: StripeRepository,
         private val publishableKey: String,
         private val stripeAccountId: String?,
+        enableLogging: Boolean = false,
         private val workContext: CoroutineContext
     ) : PaymentMethodsRepository() {
+        private val logger = Logger.getInstance(enableLogging)
+
+        /**
+         * Retrieve a Customer's payment methods. Silently handle failures by returning an
+         * empty list.
+         */
         override suspend fun get(
             customerConfig: PaymentSheet.CustomerConfiguration,
             type: PaymentMethod.Type
@@ -52,6 +60,8 @@ internal sealed class PaymentMethodsRepository {
                         stripeAccountId
                     )
                 )
+            }.onFailure {
+                logger.error("Failed to retrieve ${customerConfig.id}'s payment methods.", it)
             }.getOrDefault(emptyList())
         }
 
