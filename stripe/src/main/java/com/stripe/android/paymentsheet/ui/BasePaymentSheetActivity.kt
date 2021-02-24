@@ -86,11 +86,11 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
         }
     }
 
-    protected fun animateOut(
+    protected fun closeSheet(
         result: ResultType
     ) {
         setActivityResult(result)
-        hideSheet()
+        bottomSheetController.hide()
     }
 
     private fun updateRootViewClickHandling(isProcessing: Boolean) {

@@ -86,7 +86,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         setContentView(viewBinding.root)
 
         viewModel.fatal.observe(this) {
-            animateOut(
+            closeSheet(
                 PaymentOptionResult.Failed(it)
             )
         }
@@ -145,7 +145,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
 
     private fun setupAddButton(addButton: AddButton) {
         addButton.completedAnimation.observe(this) { completedState ->
-            animateOut(
+            closeSheet(
                     PaymentOptionResult.Succeeded(completedState.paymentSelection)
             )
         }
@@ -212,9 +212,9 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     private fun onActionCompleted(paymentSelection: PaymentSelection) {
-        startAnimateOut().observe(this) {
-            viewBinding.addButton.updateState(AddButtonViewState.Completed(paymentSelection))
-        }
+        closeSheet(
+            PaymentOptionResult.Succeeded(paymentSelection)
+        )
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {
@@ -226,7 +226,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     override fun onUserCancel() {
-        animateOut(viewModel.getPaymentOptionResult())
+        closeSheet(viewModel.getPaymentOptionResult())
     }
 
     internal companion object {
