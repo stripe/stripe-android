@@ -145,7 +145,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                 )
             }
         }
-        addButton.updateState(AddButtonViewState.Ready)
 
         viewModel.viewState.observe(this) { state ->
             if (state != null) {

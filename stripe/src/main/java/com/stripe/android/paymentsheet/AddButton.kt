@@ -22,11 +22,6 @@ internal class AddButton @JvmOverloads constructor(
 ) : PrimaryButton(context, attrs, defStyleAttr) {
     private val animator = PrimaryButtonAnimator(context)
 
-    private val _completedAnimation = MutableLiveData<AddButtonViewState.Completed>()
-    internal val completedAnimation = _completedAnimation.distinctUntilChanged()
-
-    private var viewState: AddButtonViewState? = null
-
     internal val viewBinding = PaymentSheetAddButtonBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -34,23 +29,17 @@ internal class AddButton @JvmOverloads constructor(
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
+    private val _completedAnimation = MutableLiveData<AddButtonViewState.Completed>()
+    internal val completedAnimation = _completedAnimation.distinctUntilChanged()
+
+    private var viewState: AddButtonViewState? = AddButtonViewState.Ready
+
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
 
         isClickable = true
         isEnabled = false
-        isGone = true
-    }
-
-    override fun setEnabled(enabled: Boolean) {
-        super.setEnabled(enabled)
-        viewBinding.lockIcon.isVisible = enabled
-
-        viewBinding.label.alpha = if (isEnabled) {
-            1.0f
-        } else {
-            0.5f
-        }
+        isGone = true // TODO: I don't think this is having any effect
     }
 
     fun onReadyState() {
@@ -81,6 +70,11 @@ internal class AddButton @JvmOverloads constructor(
         }
     }
 
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        viewBinding.lockIcon.isVisible = enabled
+        updateAlpha()
+    }
 
     fun updateState(viewState: AddButtonViewState) {
         this.viewState = viewState
