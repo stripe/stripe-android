@@ -77,23 +77,23 @@ jobs:
           name: unit-test-report
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
 
-    instrumentation-tests:
-      name: Instrumentation tests
-      runs-on: macOS-latest
+  instrumentation-tests:
+    name: Instrumentation tests
+    runs-on: macOS-latest
 
-      steps:
-        - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-        - name: Instrumentation tests
-          uses: reactivecircus/android-emulator-runner@v2
-          with:
-            api-level: 29
-            arch: x86
-            disable-animations: true
-            script: ./gradlew connectedAndroidTest --stacktrace
+      - name: Instrumentation tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86
+          disable-animations: true
+          script: ./gradlew connectedAndroidTest --stacktrace
 
-        - uses: actions/upload-artifact@v2
-          if: failure()
-          with:
-            name: instrumentation-test-report
-            path: example/build/reports/androidTests/connected/flavors/debugAndroidTest/
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: instrumentation-test-report
+          path: example/build/reports/androidTests/connected/flavors/debugAndroidTest/
