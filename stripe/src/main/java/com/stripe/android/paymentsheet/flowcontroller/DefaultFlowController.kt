@@ -149,7 +149,8 @@ internal class DefaultFlowController internal constructor(
                 sessionId = sessionId,
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
-                newCard = viewModel.paymentSelection as? PaymentSelection.New.Card
+                newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
+                statusBarColor = activity.window.statusBarColor
             )
         )
     }

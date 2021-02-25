@@ -10,7 +10,7 @@ import kotlin.test.Test
 class PaymentSheetContractTest {
 
     @Test
-    fun `parseResult() with missing data should return faile result`() {
+    fun `parseResult() with missing data should return failed result`() {
         assertThat(PaymentSheetContract().parseResult(0, Intent()))
             .isInstanceOf(PaymentResult.Failed::class.java)
     }

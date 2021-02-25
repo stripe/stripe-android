@@ -148,6 +148,9 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewModel.updatePaymentMethods()
         viewModel.fetchPaymentIntent()
 
+        starterArgs.statusBarColor?.let {
+            window.statusBarColor = it
+        }
         setContentView(viewBinding.root)
         appbar.isInvisible = true
 
