@@ -28,7 +28,9 @@ internal class BottomSheetController(
 
         lifecycleScope.launch {
             delay(ANIMATE_IN_DELAY)
-            bottomSheetBehavior.state = sheetModeLiveData.value?.behaviourState ?: BottomSheetBehavior.STATE_EXPANDED
+
+            bottomSheetBehavior.state = sheetModeLiveData.value?.behaviourState
+                ?: BottomSheetBehavior.STATE_EXPANDED
             bottomSheetBehavior.addBottomSheetCallback(
                 object : BottomSheetBehavior.BottomSheetCallback() {
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -36,6 +38,8 @@ internal class BottomSheetController(
 
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                            // finish the activity only after the bottom sheet's state has
+                            // transitioned to `BottomSheetBehavior.STATE_HIDDEN`
                             _shouldFinish.value = true
                         }
                     }

@@ -16,6 +16,7 @@ internal object PaymentMethodFixtures {
         country = "US",
         expiryMonth = 8,
         expiryYear = 2022,
+        fingerprint = "fingerprint123",
         funding = "credit",
         last4 = "4242",
         threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
@@ -157,6 +158,7 @@ internal object PaymentMethodFixtures {
                     "exp_month": 8,
                     "exp_year": 2022,
                     "funding": "credit",
+                    "fingerprint": "fingerprint123",
                     "last4": "4242",
                     "three_d_secure_usage": {
                         "supported": true

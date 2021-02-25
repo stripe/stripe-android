@@ -29,10 +29,13 @@ class Settings(context: Context) {
         }
 
     private fun getMetadata(key: String): String? {
-        return appContext.packageManager
-            .getApplicationInfo(appContext.packageName, PackageManager.GET_META_DATA)
-            .metaData
-            .getString(key)
+        return runCatching {
+            appContext.packageManager
+                .getApplicationInfo(appContext.packageName, PackageManager.GET_META_DATA)
+                .metaData
+                .getString(key)
+        }
+            .getOrDefault("")
             .takeIf { it?.isNotBlank() == true }
     }
 

@@ -31,7 +31,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
@@ -176,24 +175,14 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        paymentController.startConfirm(
+        paymentController.startConfirmAlipay(
             confirmPaymentIntentParams,
+            authenticator,
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
             ),
-            object : ApiResultCallback<StripeIntent> {
-                override fun onSuccess(result: StripeIntent) {
-                    paymentController.authenticateAlipay(
-                        result,
-                        stripeAccountId,
-                        authenticator,
-                        callback
-                    )
-                }
-
-                override fun onError(e: Exception) = callback.onError(e)
-            }
+            callback
         )
     }
 
@@ -1668,7 +1657,7 @@ class Stripe internal constructor(
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
-        internal const val VERSION_NAME = "16.2.1"
+        internal const val VERSION_NAME = "16.3.0"
         const val VERSION: String = "AndroidBindings/$VERSION_NAME"
 
         /**

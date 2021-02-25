@@ -201,7 +201,7 @@ internal class PaymentSheetViewModel internal constructor(
                 eventReporter.onPaymentFailure(selection.value)
 
                 val paymentIntent = paymentIntentResult.intent
-                onApiError(paymentIntent.lastPaymentError?.message)
+                onApiError(paymentIntentResult.failureMessage)
                 onPaymentIntentResponse(paymentIntentResult.intent)
             }
         }

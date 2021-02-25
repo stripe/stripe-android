@@ -83,6 +83,9 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             return
         }
 
+        starterArgs.statusBarColor?.let {
+            window.statusBarColor = it
+        }
         setContentView(viewBinding.root)
 
         viewModel.fatal.observe(this) {
