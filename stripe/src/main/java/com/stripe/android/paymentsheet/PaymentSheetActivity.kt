@@ -155,7 +155,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         appbar.isInvisible = true
 
         viewModel.fatal.observe(this) {
-            animateOut(
+            closeSheet(
                 PaymentResult.Failed(
                     it,
                     paymentIntent = viewModel.paymentIntent.value
@@ -202,6 +202,8 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                 }
                 Toolbar.Action.Back -> {
                     onUserBack()
+                }
+                else -> {
                 }
             }
         }
@@ -272,7 +274,9 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     private fun setupBuyButton() {
         viewBinding.buyButton.completedAnimation.observe(this) { completedState ->
-            completedState?.paymentIntentResult?.let(::onActionCompleted)
+            completedState?.paymentIntentResult?.let { paymentIntentResult ->
+                onActionCompleted(paymentIntentResult)
+            }
         }
 
         viewModel.viewState.observe(this) { state ->
@@ -308,7 +312,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     private fun onActionCompleted(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
-                animateOut(
+                closeSheet(
                     PaymentResult.Completed(paymentIntentResult.intent)
                 )
             }
@@ -327,18 +331,12 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     }
 
     override fun onUserCancel() {
-        animateOut(
+        closeSheet(
             PaymentResult.Canceled(
                 viewModel.fatal.value,
                 paymentIntent = viewModel.paymentIntent.value
             )
         )
-    }
-
-    override fun hideSheet() {
-        viewModel.startAnimateOut().observe(this) {
-            bottomSheetController.hide()
-        }
     }
 
     internal companion object {

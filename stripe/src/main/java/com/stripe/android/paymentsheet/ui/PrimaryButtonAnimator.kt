@@ -64,6 +64,24 @@ internal class PrimaryButtonAnimator(
         ).also { animator ->
             animator.duration = slideAnimationDuration
             animator.doOnEnd {
+                delay(view, onAnimationEnd)
+            }
+        }.start()
+    }
+
+    private fun delay(
+        view: View,
+        onAnimationEnd: () -> Unit
+    ) {
+        // This is effectively a no-op for ANIMATE_OUT_MILLIS
+        ObjectAnimator.ofFloat(
+            view,
+            "rotation",
+            0f,
+            0f
+        ).also { animator ->
+            animator.duration = HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION
+            animator.doOnEnd {
                 onAnimationEnd()
             }
         }.start()
@@ -91,5 +109,10 @@ internal class PrimaryButtonAnimator(
                 )
             }
         )
+    }
+
+    private companion object {
+        // the delay before the payment sheet is dismissed
+        private const val HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION = 1500L
     }
 }
