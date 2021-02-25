@@ -18,26 +18,31 @@ ext {
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
-    return readProperty('STRIPE_EXAMPLE_BACKEND_URL')
+    return getValue('STRIPE_EXAMPLE_BACKEND_URL')
 }
 
 def getPublishableKey() {
-    return readProperty('STRIPE_EXAMPLE_PUBLISHABLE_KEY')
+    return getValue('STRIPE_EXAMPLE_PUBLISHABLE_KEY')
 }
 
 def getAccountId() {
-    return readProperty('STRIPE_ACCOUNT_ID')
+    return getValue('STRIPE_ACCOUNT_ID')
 }
 
-private def readProperty(name) {
+private def getValue(key) {
     final String propValue
-    if (hasProperty(name)) {
-        propValue = property(name)
+    if (hasProperty(key)) {
+        propValue = property(key)
     } else {
-        propValue = System.getenv(name)
+        propValue = null
     }
 
-    return propValue?.trim() ? propValue : ""
+    if (propValue?.trim()) {
+        return propValue
+    } else {
+        final String envValue = System.getenv(key)
+        return envValue?.trim() ? envValue : ""
+    }
 }
 
 dependencies {
