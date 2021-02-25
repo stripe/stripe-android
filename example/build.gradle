@@ -30,8 +30,8 @@ def getAccountId() {
 }
 
 private def getValue(key) {
-    println System.getenv()
-    println 'getValue(' + key + ')'
+    // first try to get the value from Gradle properties
+    // see https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties
     final String propValue
     if (hasProperty(key)) {
         propValue = property(key)
@@ -39,13 +39,12 @@ private def getValue(key) {
         propValue = null
     }
 
-    println 'propValue = ' + propValue
-
     if (propValue?.trim()) {
         return propValue
     } else {
+        // Otherwise, get the value from environment variables
+        // see https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_environment_variables
         final String envValue = System.getenv(key)
-        println 'envValue = ' + envValue
         return envValue?.trim() ? envValue : ""
     }
 }
