@@ -75,6 +75,7 @@ internal class PaymentSheetActivityTest {
         PaymentSheetContract.Args(
             "client_secret",
             sessionId = SessionId(),
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             PaymentSheetFixtures.CONFIG_CUSTOMER
         )
     )
@@ -323,6 +324,16 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isTrue()
+        }
+    }
+
+    @Test
+    fun `sets expected statusBarColor`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.window.statusBarColor)
+                .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
+            scenario.moveToState(Lifecycle.State.DESTROYED)
         }
     }
 

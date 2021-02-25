@@ -45,7 +45,8 @@ class PaymentOptionsActivityTest {
             sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
-            newCard = null
+            newCard = null,
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         ),
         prefsRepository = FakePrefsRepository(),
         eventReporter = eventReporter
@@ -136,7 +137,8 @@ class PaymentOptionsActivityTest {
                         sessionId = SessionId(),
                         config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                         isGooglePayReady = false,
-                        newCard = null
+                        newCard = null,
+                        statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
                     )
             )
         )
