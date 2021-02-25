@@ -64,7 +64,6 @@ internal class PaymentSheetActivityTest {
         prefsRepository = FakePrefsRepository(),
         eventReporter = eventReporter,
         args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        animateOutMillis = 0,
         workContext = testDispatcher
     )
 
@@ -75,6 +74,7 @@ internal class PaymentSheetActivityTest {
         PaymentSheetContract.Args(
             "client_secret",
             sessionId = SessionId(),
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             PaymentSheetFixtures.CONFIG_CUSTOMER
         )
     )
@@ -267,7 +267,6 @@ internal class PaymentSheetActivityTest {
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-            animateOutMillis = 0,
             workContext = testDispatcher
         )
 
@@ -323,6 +322,16 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isTrue()
+        }
+    }
+
+    @Test
+    fun `sets expected statusBarColor`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.window.statusBarColor)
+                .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
+            scenario.moveToState(Lifecycle.State.DESTROYED)
         }
     }
 

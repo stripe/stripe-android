@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -175,7 +176,8 @@ class DefaultFlowControllerTest {
                     sessionId = SESSION_ID,
                     config = null,
                     isGooglePayReady = false,
-                    newCard = null
+                    newCard = null,
+                    statusBarColor = ContextCompat.getColor(activity, R.color.stripe_toolbar_color_default_dark)
                 )
             )
     }

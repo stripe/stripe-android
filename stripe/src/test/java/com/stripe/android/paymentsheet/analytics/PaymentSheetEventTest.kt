@@ -3,8 +3,11 @@ package com.stripe.android.paymentsheet.analytics
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
+@RunWith(RobolectricTestRunner::class)
 class PaymentSheetEventTest {
 
     @Test

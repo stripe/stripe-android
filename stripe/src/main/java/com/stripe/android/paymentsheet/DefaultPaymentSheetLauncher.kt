@@ -5,7 +5,8 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.paymentsheet.analytics.SessionId
 
 internal class DefaultPaymentSheetLauncher(
-    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>
+    private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
+    private val statusBarColor: () -> Int?
 ) : PaymentSheetLauncher {
     private val sessionId: SessionId = SessionId()
 
@@ -17,17 +18,21 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract()
         ) {
             callback.onPaymentResult(it)
-        }
+        },
+
+        // lazily access the statusBarColor in case the value changes between when this
+        // class is instantiated and the payment sheet is launched
+        { activity.window.statusBarColor }
     )
 
     override fun present(
         paymentIntentClientSecret: String,
-
         configuration: PaymentSheet.Configuration
     ) = present(
         PaymentSheetContract.Args(
             paymentIntentClientSecret,
             sessionId,
+            statusBarColor(),
             configuration
         )
     )
@@ -38,6 +43,7 @@ internal class DefaultPaymentSheetLauncher(
         PaymentSheetContract.Args(
             paymentIntentClientSecret,
             sessionId,
+            statusBarColor(),
             config = null
         )
     )
