@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
@@ -33,7 +32,6 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,7 +47,6 @@ internal class PaymentSheetViewModel internal constructor(
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
-    private val animateOutMillis: Long,
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     config = args.config,
@@ -200,7 +197,6 @@ internal class PaymentSheetViewModel internal constructor(
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
 
-                val paymentIntent = paymentIntentResult.intent
                 onApiError(paymentIntentResult.failureMessage)
                 onPaymentIntentResponse(paymentIntentResult.intent)
             }
@@ -228,11 +224,6 @@ internal class PaymentSheetViewModel internal constructor(
                 // TODO(mshafrir-stripe): handle error
             }
         }
-    }
-
-    internal fun startAnimateOut() = liveData {
-        delay(animateOutMillis)
-        emit(Unit)
     }
 
     fun onPaymentFlowResult(paymentFlowResult: PaymentFlowResult.Unvalidated) {
@@ -288,17 +279,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args,
-        private val animateOutMillis: Long
     ) : ViewModelProvider.Factory {
-
-        internal constructor(
-            applicationSupplier: () -> Application,
-            starterArgsSupplier: () -> PaymentSheetContract.Args
-        ) : this(
-            applicationSupplier,
-            starterArgsSupplier,
-            animateOutMillis = ANIMATE_OUT_MILLIS
-        )
 
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val application = applicationSupplier()
@@ -361,14 +342,8 @@ internal class PaymentSheetViewModel internal constructor(
                     application
                 ),
                 starterArgs,
-                animateOutMillis,
                 Dispatchers.IO
             ) as T
         }
-    }
-
-    private companion object {
-        // the delay before the payment sheet is dismissed
-        private const val ANIMATE_OUT_MILLIS = 1500L
     }
 }
