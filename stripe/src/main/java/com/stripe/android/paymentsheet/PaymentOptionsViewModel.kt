@@ -10,6 +10,7 @@ import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,35 @@ internal class PaymentOptionsViewModel(
     config = args.config,
     prefsRepository = prefsRepository
 ) {
+    // This is used only for the case where we need to jump straight to the add card when
+    // the last card added was unsaved.  We have this variable so that when you press
+    // the back button it doesn't launch the add card again.
+    private var _trampolinedToCard = true
+
+    fun resolveFinalFragmentOnPaymentSelection(config: FragmentConfig){
+        if(isLastSelectionNewUnsavedCard(newCard)){
+
+            if( _trampolinedToCard) {
+                // If we press the back button we don't want to open the add card again
+                _trampolinedToCard = false
+                transitionTo(
+                    TransitionTarget.AddPaymentMethodFull(config)
+                )
+            }
+        }
+    }
+
+    private fun isLastSelectionNewUnsavedCard(paymentSelection: PaymentSelection.New.Card?) : Boolean {
+        when(paymentSelection){
+            is PaymentSelection.New -> {
+                if(!paymentSelection.shouldSavePaymentMethod){
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     private val _viewState = MutableLiveData<AddButtonViewState>(null)
     internal val viewState: LiveData<AddButtonViewState> = _viewState.distinctUntilChanged()
 

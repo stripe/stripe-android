@@ -22,6 +22,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.databinding.StripeCountryDropdownItemBinding
 import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
 import com.stripe.android.view.CountryAdapter
@@ -352,6 +353,17 @@ internal class BillingAddressView @JvmOverloads constructor(
             PaymentSheet.BillingAddressCollectionLevel.Required -> {
                 viewBinding.address1Layout.requestFocus()
             }
+        }
+    }
+
+    fun populateFromParams(params: PaymentMethodCreateParams) {
+        params.billingDetails?.address?.let { address ->
+            this.countryView.setText(address.country)
+            this.address1View.setText(address.line1)
+            this.address2View.setText(address.line2)
+            this.cityView.setText(address.city)
+            this.postalCodeView.setText(address.postalCode)
+            this.stateView.setText(address.state)
         }
     }
 

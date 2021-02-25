@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -23,6 +25,12 @@ internal class PaymentOptionsListFragment(
     }
 
     override val sheetViewModel: PaymentOptionsViewModel by lazy { activityViewModel }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        activityViewModel.resolveFinalFragmentOnPaymentSelection(config)
+    }
 
     override fun transitionToAddPaymentMethod() {
         activityViewModel.transitionTo(

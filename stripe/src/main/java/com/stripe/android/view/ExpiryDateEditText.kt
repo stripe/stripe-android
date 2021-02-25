@@ -72,6 +72,18 @@ class ExpiryDateEditText @JvmOverloads constructor(
         SEPARATOR_WITHOUT_GAPS
     }
 
+    fun updateUI(expiryMonth: Int?, expiryYear: Int?){
+        val formattedDate = StringBuilder()
+        expiryMonth?.let {
+            formattedDate.append(String.format("%02d", expiryMonth))
+            formattedDate.append(separator)
+        }
+        expiryYear?.let {
+            formattedDate.append(String.format("%02d", (expiryYear  % 100)))
+        }
+        this.editableText.append(formattedDate.toString())
+    }
+
     private fun updateSeparatorUi(
         includeSeparatorGaps: Boolean = INCLUDE_SEPARATOR_GAPS_DEFAULT
     ) {
