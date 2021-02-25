@@ -64,14 +64,13 @@ internal class PrimaryButtonAnimator(
         ).also { animator ->
             animator.duration = slideAnimationDuration
             animator.doOnEnd {
-                hold(view, parentWidth, onAnimationEnd)
+                delay(view, onAnimationEnd)
             }
         }.start()
     }
 
-    private fun hold(
+    private fun delay(
         view: View,
-        parentWidth: Int,
         onAnimationEnd: () -> Unit
     ) {
         // This is effectively a no-op for ANIMATE_OUT_MILLIS
@@ -79,7 +78,7 @@ internal class PrimaryButtonAnimator(
             view,
             "rotation",
             0f,
-            -0f
+            0f
         ).also { animator ->
             animator.duration = HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION
             animator.doOnEnd {
