@@ -10,14 +10,19 @@ class ServiceFactory {
     fun create(
         baseUrl: String
     ): Service {
-        OkHttpClient.Builder()
-            .readTimeout(30, TimeUnit.SECONDS)
-            .connectTimeout(30, TimeUnit.SECONDS)
+        val client = OkHttpClient.Builder()
+            .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build()
         return Retrofit.Builder()
             .baseUrl(baseUrl)
+            .client(client)
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
             .create(Service::class.java)
+    }
+
+    private companion object {
+        private const val TIMEOUT_SECONDS = 30L
     }
 }
