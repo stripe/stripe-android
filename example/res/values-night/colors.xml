@@ -2,6 +2,7 @@
 <resources>
     <color name="primary">#a3acb9</color>
     <color name="primaryDark">#000000</color>
+    <color name="appPrimaryDark">#242424</color>
     <color name="accent">#c1c9d2</color>
     <color name="title">#ffffff</color>
     <color name="textPrimary">@android:color/white</color>
