@@ -6,7 +6,6 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.AddButtonViewState.*
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -37,29 +36,29 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() when selection has been made should emit on userSelection`() {
-        var viewState: AddButtonViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
+        var paymentSelection: PaymentSelection? = null
+        viewModel.userSelection.observeForever {
+            paymentSelection = it
         }
-
         viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
 
         viewModel.onUserSelection()
 
-        assertThat((viewState as Completed).paymentSelection)
+        assertThat(paymentSelection)
             .isEqualTo(SELECTION_SAVED_PAYMENT_METHOD)
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
     @Test
     fun `onUserSelection() when selection has not been made should not emit`() {
-        var viewState: AddButtonViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
+        var paymentSelection: PaymentSelection? = null
+        viewModel.userSelection.observeForever {
+            paymentSelection = it
         }
         viewModel.onUserSelection()
 
-        assertThat(viewState is Ready)
+        assertThat(paymentSelection)
+            .isNull()
     }
 
     @Test

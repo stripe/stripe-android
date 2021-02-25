@@ -138,23 +138,15 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                 }
             }
         }
+
+        viewModel.userSelection.observe(this) { paymentSelection ->
+            if (paymentSelection != null) {
+                onActionCompleted(paymentSelection)
+            }
+        }
     }
 
     private fun setupAddButton(addButton: AddButton) {
-        addButton.completedAnimation.observe(this) { completedState ->
-            completedState?.paymentSelection?.let { paymentSelection ->
-                animateOut(
-                    PaymentOptionResult.Succeeded(paymentSelection)
-                )
-            }
-        }
-
-        viewModel.viewState.observe(this) { state ->
-            if (state != null) {
-                addButton.updateState(state)
-            }
-        }
-
         addButton.setOnClickListener {
             viewModel.onUserSelection()
         }

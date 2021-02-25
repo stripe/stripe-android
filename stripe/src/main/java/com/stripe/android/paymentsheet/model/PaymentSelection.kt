@@ -6,7 +6,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.parcelize.Parcelize
 
-sealed class PaymentSelection : Parcelable {
+internal sealed class PaymentSelection : Parcelable {
     @Parcelize
     object GooglePay : PaymentSelection()
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/stripe_paymentsheet_primarybutton_height">
 
@@ -30,29 +29,4 @@
         android:contentDescription="@null"
         />
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/confirming_icon"
-        android:indeterminate="true"
-        android:layout_gravity="end|center_vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:indicatorSize="@dimen/stripe_paymentsheet_buybutton_icon_size"
-        app:indicatorColor="@color/stripe_paymentsheet_buybutton_confirming_progress"
-        app:trackThickness="1dp"
-        android:layout_marginStart="@dimen/stripe_paymentsheet_buybutton_icon_padding"
-        android:layout_marginEnd="@dimen/stripe_paymentsheet_buybutton_icon_padding"
-        android:visibility="gone"
-        />
-
-    <ImageView
-        android:id="@+id/confirmed_icon"
-        android:layout_width="@dimen/stripe_paymentsheet_buybutton_icon_size"
-        android:layout_height="@dimen/stripe_paymentsheet_buybutton_icon_size"
-        android:src="@drawable/stripe_ic_paymentsheet_buybutton_checkmark"
-        android:layout_marginStart="@dimen/stripe_paymentsheet_buybutton_icon_padding"
-        android:layout_marginEnd="@dimen/stripe_paymentsheet_buybutton_icon_padding"
-        android:layout_gravity="end|center_vertical"
-        android:visibility="invisible"
-        android:contentDescription="@null"
-        />
 </merge>
