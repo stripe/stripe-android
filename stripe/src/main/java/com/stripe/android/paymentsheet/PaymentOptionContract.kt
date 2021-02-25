@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.ColorInt
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.SessionId
@@ -33,7 +34,8 @@ internal class PaymentOptionContract : ActivityResultContract<PaymentOptionContr
         val sessionId: SessionId,
         val config: PaymentSheet.Configuration?,
         val isGooglePayReady: Boolean,
-        val newCard: PaymentSelection.New.Card?
+        val newCard: PaymentSelection.New.Card?,
+        @ColorInt val statusBarColor: Int?
     ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {

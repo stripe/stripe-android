@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.view.ActivityStarter
@@ -33,6 +34,7 @@ internal class PaymentSheetContract : ActivityResultContract<PaymentSheetContrac
     internal data class Args(
         val clientSecret: String,
         val sessionId: SessionId,
+        @ColorInt val statusBarColor: Int?,
         val config: PaymentSheet.Configuration?
     ) : ActivityStarter.Args {
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
