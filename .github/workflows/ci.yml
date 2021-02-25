@@ -91,6 +91,9 @@ jobs:
           arch: x86
           disable-animations: true
           script: ./gradlew connectedAndroidTest --stacktrace
+        env:
+          STRIPE_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_EXAMPLE_BACKEND_URL }}
+          STRIPE_EXAMPLE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_EXAMPLE_PUBLISHABLE_KEY }}
 
       - uses: actions/upload-artifact@v2
         if: failure()
