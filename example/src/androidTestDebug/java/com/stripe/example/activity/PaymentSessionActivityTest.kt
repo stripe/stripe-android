@@ -49,6 +49,8 @@ class PaymentSessionActivityTest {
             .perform(click())
 
         // on PaymentMethodsActivity
+
+        // comment out broken action
 //        Espresso.onView(ViewMatchers.withId(R.id.recycler)).perform(
 //            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
 //        )
