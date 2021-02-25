@@ -35,6 +35,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
     implementation "com.google.android.material:material:$materialVersion"
 
+    // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
+    // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
     implementation "com.stripe:stripe-3ds2-android:5.2.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
