@@ -21,39 +21,17 @@ internal class PaymentOptionsViewModel(
     config = args.config,
     prefsRepository = prefsRepository
 ) {
-    // This is used only for the case where we need to jump straight to the add card when
-    // the last card added was unsaved.  We have this variable so that when you press
-    // the back button it doesn't launch the add card again.
-    private var _trampolinedToCard = true
-
-    fun resolveFinalFragmentOnPaymentSelection(config: FragmentConfig) {
-        if (isLastSelectionNewUnsavedCard(newCard)) {
-
-            if (_trampolinedToCard) {
-                // If we press the back button we don't want to open the add card again
-                _trampolinedToCard = false
-                transitionTo(
-                    TransitionTarget.AddPaymentMethodFull(config)
-                )
-            }
-        }
-    }
-
-    private fun isLastSelectionNewUnsavedCard(paymentSelection: PaymentSelection.New.Card?): Boolean {
-        when (paymentSelection) {
-            is PaymentSelection.New -> {
-                if (!paymentSelection.shouldSavePaymentMethod) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
+    /* TODO: Resolve userSelection, newCard, and _selection in SheetViewModel */
     private val _userSelection = MutableLiveData<PaymentSelection>()
     val userSelection: LiveData<PaymentSelection> = _userSelection
 
     override val newCard = args.newCard
+
+    // This is used in the case where the last card ws new and not saved.  In this scenario
+    // when the payment options is opened it should jump to the add card, but if the user
+    // presses the back button, they shouldn't transition to it again
+    private var transitionedOnceToAddCard = false
+    private var shouldTransitionToAddCard = newCard != null && !newCard.shouldSavePaymentMethod && !transitionedOnceToAddCard
 
     init {
         _isGooglePayReady.value = args.isGooglePayReady
@@ -76,6 +54,15 @@ internal class PaymentOptionsViewModel(
         } ?: PaymentOptionResult.Canceled(
             mostRecentError = fatal.value
         )
+    }
+
+    fun resolveTransitionTarget(config: FragmentConfig) {
+        if (shouldTransitionToAddCard) {
+            transitionedOnceToAddCard = true
+            transitionTo(
+                TransitionTarget.AddPaymentMethodFull(config)
+            )
+        }
     }
 
     internal sealed class TransitionTarget {

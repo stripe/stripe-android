@@ -29,7 +29,7 @@ internal class PaymentOptionsListFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        activityViewModel.resolveFinalFragmentOnPaymentSelection(config)
+        activityViewModel.resolveTransitionTarget(config)
     }
 
     override fun transitionToAddPaymentMethod() {

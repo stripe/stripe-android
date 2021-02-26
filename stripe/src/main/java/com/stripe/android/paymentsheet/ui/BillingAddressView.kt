@@ -356,8 +356,8 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
-    fun populateFromParams(params: PaymentMethodCreateParams) {
-        params.billingDetails?.address?.let { address ->
+    fun populateFromParams(address: Address?) {
+        address?.let { address ->
             this.countryView.setText(address.country)
             this.address1View.setText(address.line1)
             this.address2View.setText(address.line2)
