@@ -72,12 +72,12 @@ class ExpiryDateEditText @JvmOverloads constructor(
         SEPARATOR_WITHOUT_GAPS
     }
 
-    fun setText(expirationDate: ExpirationDate.Validated?) {
-        if (expirationDate != null) {
+    fun setText(expiryMonth: Int?, expiryYear: Int?) {
+        if(expiryMonth != null && expiryYear!= null){
             setText(
                 listOf(
-                    expirationDate.month.toString().padStart(2, '0'),
-                    expirationDate.year.toString().takeLast(2)
+                    expiryMonth.toString().padStart(2, '0'),
+                    expiryYear.toString().takeLast(2)
                 ).joinToString(separator = separator)
             )
         }
@@ -303,7 +303,6 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
         return DateUtils.isExpiryDataValid(inputMonth, inputYear)
     }
-
     private companion object {
         private const val INVALID_INPUT = -1
 

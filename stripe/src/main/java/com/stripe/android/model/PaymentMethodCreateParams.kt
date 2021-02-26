@@ -214,14 +214,6 @@ data class PaymentMethodCreateParams internal constructor(
     ) : StripeParamsModel, Parcelable {
         internal val brand: CardBrand get() = CardUtils.getPossibleCardBrand(number)
         internal val last4: String? get() = number?.takeLast(4)
-        internal val expirationDate: ExpirationDate.Validated?
-            get() {
-                return if (expiryMonth != null && expiryYear != null) {
-                    ExpirationDate.Unvalidated(expiryMonth, expiryYear).validate()
-                } else {
-                    null
-                }
-            }
 
         override fun toParamMap(): Map<String, Any> {
             return listOf(
