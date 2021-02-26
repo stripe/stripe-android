@@ -31,7 +31,8 @@ internal class PaymentOptionsViewModel(
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
     private var transitionedOnceToAddCard = false
-    private var shouldTransitionToAddCard = newCard != null && !newCard.shouldSavePaymentMethod && !transitionedOnceToAddCard
+    private val shouldTransitionToAddCard : Boolean
+        get() = newCard != null && !newCard.shouldSavePaymentMethod && !transitionedOnceToAddCard
 
     init {
         _isGooglePayReady.value = args.isGooglePayReady
