@@ -77,7 +77,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
             setText(
                 listOf(
                     expiryMonth.toString().padStart(2, '0'),
-                    expiryYear.toString().takeLast(2)
+                    expiryYear.toString().takeLast(2).padStart(2, '0')
                 ).joinToString(separator = separator)
             )
         }
