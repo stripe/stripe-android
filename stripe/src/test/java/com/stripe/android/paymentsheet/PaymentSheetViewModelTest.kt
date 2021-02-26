@@ -7,7 +7,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -239,25 +238,6 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(
                 SheetViewModel.UserMessage.Error("Your card was declined.")
             )
-    }
-
-    @Test
-    fun `onGooglePayResult() with successful Google Pay result should emit on googlePayCompletion`() {
-        val paymentIntentResults = mutableListOf<PaymentIntentResult>()
-        viewModel.googlePayCompletion.observeForever { paymentIntentResult ->
-            if (paymentIntentResult != null) {
-                paymentIntentResults.add(paymentIntentResult)
-            }
-        }
-        viewModel.onGooglePayResult(
-            StripeGooglePayContract.Result.PaymentIntent(PAYMENT_INTENT_RESULT)
-        )
-
-        assertThat(paymentIntentResults)
-            .containsExactly(PAYMENT_INTENT_RESULT)
-
-        verify(eventReporter)
-            .onPaymentSuccess(PaymentSelection.GooglePay)
     }
 
     @Test

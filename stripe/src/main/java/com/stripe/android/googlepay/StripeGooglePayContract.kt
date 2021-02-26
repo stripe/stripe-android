@@ -8,7 +8,6 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
 import com.google.android.gms.common.api.Status
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
@@ -34,30 +33,15 @@ internal class StripeGooglePayContract :
         return Result.fromIntent(intent)
     }
 
-    sealed class Args : ActivityStarter.Args {
-        abstract var paymentIntent: PaymentIntent
-        abstract var config: GooglePayConfig
-
-        /**
-         * Args to start [StripeGooglePayActivity] and collect payment data. If successful, the
-         * result will be returned through [Result.PaymentData].
-         */
-        @Parcelize
-        data class PaymentData(
-            override var paymentIntent: PaymentIntent,
-            override var config: GooglePayConfig
-        ) : Args()
-
-        /**
-         * Args to start [StripeGooglePayActivity] and confirm the [paymentIntent] with the
-         * selected payment data. If successful, the result will be returned through
-         * [Result.PaymentIntent].
-         */
-        @Parcelize
-        data class ConfirmPaymentIntent(
-            override var paymentIntent: PaymentIntent,
-            override var config: GooglePayConfig
-        ) : Args()
+    /**
+     * Args to start [StripeGooglePayActivity] and collect payment data. If successful, the
+     * result will be returned through [Result.PaymentData].
+     */
+    @Parcelize
+    data class Args(
+        var paymentIntent: PaymentIntent,
+        var config: GooglePayConfig
+    ) : ActivityStarter.Args {
 
         companion object {
             @JvmSynthetic
@@ -110,14 +94,6 @@ internal class StripeGooglePayContract :
                 }
             }
         }
-
-        /**
-         * See [Args.ConfirmPaymentIntent]
-         */
-        @Parcelize
-        data class PaymentIntent(
-            val paymentIntentResult: PaymentIntentResult
-        ) : Result()
 
         /**
          * See [Args.PaymentData]
