@@ -208,7 +208,7 @@ data class PaymentMethodCreateParams internal constructor(
         internal val expiryMonth: Int? = null,
         internal val expiryYear: Int? = null,
         internal val cvc: String? = null,
-        internal val token: String? = null,
+        private val token: String? = null,
 
         internal val attribution: Set<String>? = null
     ) : StripeParamsModel, Parcelable {
