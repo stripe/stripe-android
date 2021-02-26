@@ -445,10 +445,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         card?.let { createParamsCard ->
             cardNumberEditText.setText(createParamsCard.number)
             cvcEditText.setText(createParamsCard.cvc)
-            expiryDateEditText.updateUI(
-                createParamsCard.expiryMonth,
-                createParamsCard.expiryYear
-            )
+            expiryDateEditText.setText(createParamsCard.expirationDate)
         }
     }
 
