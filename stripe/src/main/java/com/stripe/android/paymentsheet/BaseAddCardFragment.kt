@@ -307,7 +307,7 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget.postalCodeErrorListener = null
     }
 
-    private fun populateFieldsFromNewCard(){
+    private fun populateFieldsFromNewCard() {
         sheetViewModel.newCard?.let { it ->
             it.paymentMethodCreateParams.let { params ->
                 cardMultilineWidget.populateFromParams(params)

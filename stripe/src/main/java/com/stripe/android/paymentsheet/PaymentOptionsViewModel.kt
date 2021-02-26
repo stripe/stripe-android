@@ -26,10 +26,10 @@ internal class PaymentOptionsViewModel(
     // the back button it doesn't launch the add card again.
     private var _trampolinedToCard = true
 
-    fun resolveFinalFragmentOnPaymentSelection(config: FragmentConfig){
-        if(isLastSelectionNewUnsavedCard(newCard)){
+    fun resolveFinalFragmentOnPaymentSelection(config: FragmentConfig) {
+        if (isLastSelectionNewUnsavedCard(newCard)) {
 
-            if( _trampolinedToCard) {
+            if (_trampolinedToCard) {
                 // If we press the back button we don't want to open the add card again
                 _trampolinedToCard = false
                 transitionTo(
@@ -39,10 +39,10 @@ internal class PaymentOptionsViewModel(
         }
     }
 
-    private fun isLastSelectionNewUnsavedCard(paymentSelection: PaymentSelection.New.Card?) : Boolean {
-        when(paymentSelection){
+    private fun isLastSelectionNewUnsavedCard(paymentSelection: PaymentSelection.New.Card?): Boolean {
+        when (paymentSelection) {
             is PaymentSelection.New -> {
-                if(!paymentSelection.shouldSavePaymentMethod){
+                if (!paymentSelection.shouldSavePaymentMethod) {
                     return true
                 }
             }
