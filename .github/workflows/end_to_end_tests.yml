@@ -1,4 +1,4 @@
-name: Daily CI
+name: End-to-end tests
 on:
   schedule:
     # every day at 8am
