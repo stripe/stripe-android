@@ -33,6 +33,8 @@ internal class PaymentOptionsListFragment(
     }
 
     override fun transitionToAddPaymentMethod() {
+        // Only the AddPaymentMethodFull will add the previous fragment to the back stack
+        // creating the needed back button after jumping through the the last unsaved card.
         activityViewModel.transitionTo(
             PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull(config)
         )

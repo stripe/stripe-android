@@ -81,6 +81,17 @@ class PaymentOptionsViewModelTest {
         )
     }
 
+
+    @Test
+    fun `resolveTransitionTarget has NOT transitioned and there is a new unsaved card`() {
+
+    }
+
+    @Test
+    fun `resolveTransitionTarget has transitioned and there is a new unsaved card`() {
+
+    }
+
     private companion object {
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD

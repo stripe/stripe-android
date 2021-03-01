@@ -21,7 +21,10 @@ internal class PaymentOptionsViewModel(
     config = args.config,
     prefsRepository = prefsRepository
 ) {
-    /* TODO: Resolve userSelection, newCard, and _selection in SheetViewModel */
+    // This field is unique from the selection in sheetViewModel, as the one in sheet view model
+    // is updated any time the add card fragment is in a valid state.  This one will
+    // only be updated when the user presses the Add or selects an item in the carousel.
+    // This will also trigger the closing of the sheet.
     private val _userSelection = MutableLiveData<PaymentSelection>()
     val userSelection: LiveData<PaymentSelection> = _userSelection
 
