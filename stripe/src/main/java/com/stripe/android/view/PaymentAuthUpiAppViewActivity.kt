@@ -59,6 +59,18 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (data != null) {
+            super.onActivityResult(requestCode, resultCode, data)
+            if (resultCode == RESULT_OK) {
+                if (requestCode == REQUEST_CODE) {
+                    val paymentResponse = data.getStringExtra("response")
+                    logger.info("Transaction successful with response = ${paymentResponse}")
+                }
+            }
+        }
+    }
+
     private fun cancelIntentSource() {
         finish()
     }
