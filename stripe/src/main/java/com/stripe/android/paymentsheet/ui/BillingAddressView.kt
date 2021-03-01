@@ -315,6 +315,12 @@ internal class BillingAddressView @JvmOverloads constructor(
         } else {
             PostalCodeConfig.Global
         }
+
+        if (country?.code == "US") {
+            viewBinding.postalCodeLayout.hint = resources.getString(R.string.acc_label_zip_short)
+        } else {
+            viewBinding.postalCodeLayout.hint = resources.getString(R.string.address_label_postal_code)
+        }
     }
 
     override fun setEnabled(enabled: Boolean) {
