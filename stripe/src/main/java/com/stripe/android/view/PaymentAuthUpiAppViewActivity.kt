@@ -65,7 +65,7 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
             if (resultCode == RESULT_OK) {
                 if (requestCode == REQUEST_CODE) {
                     val paymentResponse = data.getStringExtra("response")
-                    logger.info("Transaction successful with response = ${paymentResponse}")
+                    logger.info("Transaction successful with response = $paymentResponse")
                 }
             }
         }
