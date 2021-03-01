@@ -581,15 +581,6 @@ internal class StripePaymentController internal constructor(
                         nextActionData
                     )
                 }
-                is StripeIntent.NextActionData.UpiAppRedirect -> {
-                    beginUpiAppAuth(
-                        host,
-                        getRequestCode(stripeIntent),
-                        nextActionData.native_data,
-                        stripeIntent.clientSecret.orEmpty(),
-                        enableLogging = enableLogging
-                    )
-                }
                 else -> bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
             }
         } else {

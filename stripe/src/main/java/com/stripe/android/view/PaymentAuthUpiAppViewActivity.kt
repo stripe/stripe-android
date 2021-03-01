@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthUpiAppViewStarter
 import com.stripe.android.R
+import com.stripe.android.payments.PaymentFlowResult
 import java.nio.charset.Charset
 
 class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
@@ -45,13 +46,21 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
             return
         }
 
+        setResult(
+            Activity.RESULT_OK,
+            Intent().putExtras(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret
+                ).toBundle()
+            )
+        )
+
         logger.debug("PaymentAuthUpiAppViewActivity#onCreate() - PaymentAuthUpiAppView init and loadUrl")
 
         val upiPayIntent = Intent(Intent.ACTION_VIEW)
         upiPayIntent.data = Uri.parse(viewModel.decode(args.nativeData))
 
         val chooser = Intent.createChooser(upiPayIntent, getString(R.string.upi_app_pay_with))
-
         runCatching {
             startActivityForResult(chooser, REQUEST_CODE)
         }.onFailure {
@@ -60,15 +69,8 @@ class PaymentAuthUpiAppViewActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (data != null) {
-            super.onActivityResult(requestCode, resultCode, data)
-            if (resultCode == RESULT_OK) {
-                if (requestCode == REQUEST_CODE) {
-                    val paymentResponse = data.getStringExtra("response")
-                    logger.info("Transaction successful with response = $paymentResponse")
-                }
-            }
-        }
+        super.onActivityResult(requestCode, resultCode, data)
+        finish()
     }
 
     private fun cancelIntentSource() {

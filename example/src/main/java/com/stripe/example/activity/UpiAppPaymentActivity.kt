@@ -1,6 +1,5 @@
 package com.stripe.example.activity
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.Observer
@@ -65,11 +64,7 @@ class UpiAppPaymentActivity : StripeIntentActivity() {
     }
 
     override fun onConfirmSuccess(result: PaymentIntentResult) {
-        val paymentIntent = result.intent
-        startActivity(
-            Intent(this@UpiAppPaymentActivity, UpiWaitingActivity::class.java)
-                .putExtra(EXTRA_CLIENT_SECRET, paymentIntent.clientSecret)
-        )
+        viewModel.status.value += "\n\nStatus after confirmation: " + result.intent.status
     }
 
     override fun onConfirmError(throwable: Throwable) {
