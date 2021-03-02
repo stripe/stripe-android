@@ -63,9 +63,6 @@ internal class PaymentOptionsAdapter(
         savedSelection: SavedSelection
     ): Int {
         return listOfNotNull(
-            // new card
-            items.indexOfFirst { it is Item.NewCard }.takeIf { it != -1 },
-
             // saved selection
             items.indexOfFirst { item ->
                 when (savedSelection) {
@@ -106,7 +103,6 @@ internal class PaymentOptionsAdapter(
             when (newSelectedItem) {
                 Item.AddCard -> null
                 Item.GooglePay -> PaymentSelection.GooglePay
-                is Item.NewCard -> newSelectedItem.newCard
                 is Item.ExistingPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
             }?.let { paymentSelection ->
                 paymentOptionSelectedListener(
@@ -147,9 +143,6 @@ internal class PaymentOptionsAdapter(
             }
 
             when (item) {
-                is Item.NewCard -> {
-                    holder.bindNewCard(item.newCard)
-                }
                 is Item.ExistingPaymentMethod -> {
                     holder.bindPaymentMethod(item.paymentMethod)
                 }
@@ -192,17 +185,6 @@ internal class PaymentOptionsAdapter(
         fun bindPaymentMethod(method: PaymentMethod) {
             // TODO: Communicate error if card data not present
             method.card?.let { card ->
-                bind(
-                    brand = card.brand,
-                    last4 = card.last4
-                )
-            }
-        }
-
-        fun bindNewCard(
-            newCard: PaymentSelection.New.Card
-        ) {
-            newCard.paymentMethodCreateParams.card?.let { card ->
                 bind(
                     brand = card.brand,
                     last4 = card.last4
