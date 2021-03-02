@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
 import com.stripe.android.view.AuthActivityStarter
 import java.util.Currency
@@ -293,7 +294,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    val viewStateObserver: (ViewState.Buy?, DefaultPrimaryButton) -> Unit
+    val viewStateObserver: (ViewState.Buy?, PrimaryButton) -> Unit
         get() = { state, buyButton ->
             buyButton.updateState(state)
             if (state != null) {

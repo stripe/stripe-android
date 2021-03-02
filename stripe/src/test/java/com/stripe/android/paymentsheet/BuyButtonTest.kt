@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.view.ActivityScenarioFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,9 +17,9 @@ import kotlin.test.Test
 class BuyButtonTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
-    private val buyButton: DefaultPrimaryButton by lazy {
+    private val buyButton: PrimaryButton by lazy {
         activityScenarioFactory.createView {
-            DefaultPrimaryButton(it)
+            PrimaryButton(it)
         }
     }
 

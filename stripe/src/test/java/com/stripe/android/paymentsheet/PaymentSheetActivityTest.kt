@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -231,7 +232,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    private val buyButton: DefaultPrimaryButton = mock()
+    private val buyButton: PrimaryButton = mock()
     @Test
     fun `Verify Ready State`() {
         val scenario = activityScenario()

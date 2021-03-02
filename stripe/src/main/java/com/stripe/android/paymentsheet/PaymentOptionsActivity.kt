@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
 
 /**
@@ -147,7 +148,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         )
 
     @VisibleForTesting
-    private val viewStateObserver:  (ViewState.Add?, DefaultPrimaryButton) -> Unit
+    private val viewStateObserver:  (ViewState.Add?, PrimaryButton) -> Unit
         get() = { state, addButton ->
             addButton.updateState(state)
             if (state != null) {
@@ -167,7 +168,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             }
         }
 
-    private fun setupAddButton(addButton: DefaultPrimaryButton) {
+    private fun setupAddButton(addButton: PrimaryButton) {
         addButton.setLabelText(label)
 
         viewModel.viewState.observe(this) { state ->
