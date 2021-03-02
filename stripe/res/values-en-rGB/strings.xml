@@ -5,9 +5,9 @@
     <string name="acc_label_cvc_node">%s, CVC</string>
     <string name="acc_label_expiry_date">Expiry date</string>
     <string name="acc_label_expiry_date_node">%s, Expiry date</string>
-    <string name="acc_label_zip">ZIP Code</string>
+    <string name="acc_label_zip">ZIP Code</string> <!-- unused -->
     <string name="acc_label_zip_short">ZIP</string>
-    <string name="add_card">Add a new debit or credit card to make purchases in this app.</string>
+    <string name="add_card">Add a new debit or credit card to make purchases in this app.</string> <!-- unused -->
     <string name="added">Added %s</string>
     <string name="address_city_required">Please enter your city</string>
     <string name="address_country_invalid">Your country is invalid</string>
@@ -15,10 +15,10 @@
     <string name="address_label_address">Address</string>
     <string name="address_label_address_line1">Address line 1</string>
     <string name="address_label_address_line1_optional">Address line 1 (optional)</string>
-    <string name="address_label_address_line2">Address line 2</string>
+    <string name="address_label_address_line2">Address line 2</string> <!-- unused -->
     <string name="address_label_address_line2_optional">Address line 2 (optional)</string>
     <string name="address_label_address_optional">Address (optional) </string>
-    <string name="address_label_apt">Apt. </string>
+    <string name="address_label_apt">Apt. </string> <!-- unused -->
     <string name="address_label_apt_optional">Apt. (optional)</string>
     <string name="address_label_city">City</string>
     <string name="address_label_city_optional">City (optional)</string>
@@ -26,7 +26,7 @@
     <string name="address_label_county">County</string>
     <string name="address_label_county_optional">County (optional)</string>
     <string name="address_label_name">Name</string>
-    <string name="address_label_name_optional">Name (optional)</string>
+    <string name="address_label_name_optional">Name (optional)</string> <!-- unused -->
     <string name="address_label_phone_number">Phone number</string>
     <string name="address_label_phone_number_optional">Phone number (optional)</string>
     <string name="address_label_postal_code">Postal code</string>
@@ -50,7 +50,7 @@
     <string name="address_province_required">Please enter your province</string>
     <string name="address_region_generic_required">Please enter your State/Province/Region</string>
     <string name="address_required">Please enter your address</string>
-    <string name="address_shipping_address">Shipping Address</string>
+    <string name="address_shipping_address">Shipping Address</string> <!-- unused -->
     <string name="address_state_required">Please enter your state</string>
     <string name="address_zip_invalid">Your ZIP code is invalid.</string>
     <string name="address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
@@ -85,7 +85,7 @@
     <string name="invalid_expiry_year">Your card\'s expiry year is invalid.</string>
     <string name="invalid_shipping_information">Invalid Shipping Address</string>
     <string name="invalid_zip">Your postal code is incomplete.</string>
-    <string name="no_payment_methods">No payment methods.</string>
+    <string name="no_payment_methods">No payment methods.</string> <!-- unused -->
     <string name="payment_method_add_new_card">Add new card…</string>
     <string name="payment_method_add_new_fpx">Select Bank Account (FPX)…</string>
     <string name="price_free">Free</string>
