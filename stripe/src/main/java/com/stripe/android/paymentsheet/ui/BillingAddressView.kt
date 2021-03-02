@@ -22,7 +22,6 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.databinding.StripeCountryDropdownItemBinding
 import com.stripe.android.model.Address
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
 import com.stripe.android.view.CountryAdapter
@@ -358,7 +357,10 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     fun populateFromParams(address: Address?) {
         address?.let { address ->
-            this.countryView.setText(address.country)
+            address.country?.let {
+                this.selectedCountry = CountryUtils.getCountryByCode(address.country)
+                this.countryView.setText(CountryUtils.getDisplayCountry(address.country))
+            }
             this.address1View.setText(address.line1)
             this.address2View.setText(address.line2)
             this.cityView.setText(address.city)

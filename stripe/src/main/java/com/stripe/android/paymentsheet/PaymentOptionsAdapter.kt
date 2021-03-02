@@ -37,10 +37,7 @@ internal class PaymentOptionsAdapter(
     ) {
         val items = listOfNotNull(
             Item.AddCard,
-            Item.GooglePay.takeIf { config.isGooglePayReady },
-            newCard?.let {
-                Item.NewCard(it)
-            }
+            Item.GooglePay.takeIf { config.isGooglePayReady }
         ) + config.sortedPaymentMethods.map {
             Item.ExistingPaymentMethod(it)
         }

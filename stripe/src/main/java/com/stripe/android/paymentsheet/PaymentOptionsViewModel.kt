@@ -65,6 +65,8 @@ internal class PaymentOptionsViewModel(
         if (shouldTransitionToUnsavedCard) {
             hasTransitionToUnsavedCard = true
             transitionTo(
+                // Until we add a flag to the transitionTarget to specify if we want to add the item
+                // to the backstack, we need to use the full sheet.
                 TransitionTarget.AddPaymentMethodFull(config)
             )
         }

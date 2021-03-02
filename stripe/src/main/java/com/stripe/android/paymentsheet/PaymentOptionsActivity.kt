@@ -121,7 +121,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                     // where we also jump to a new unsaved card.  However this move require
                     // the transition target to specify when to and when not to add things to the
                     // backstack.
-                    if (starterArgs.paymentMethods.isEmpty() && starterArgs.newCard == null) {
+                    if (starterArgs.paymentMethods.isEmpty()) {
                         PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                     } else {
                         PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
