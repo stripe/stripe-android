@@ -24,9 +24,16 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : AddPaymentMethodView(activity, attrs, defStyleAttr) {
-    private val fpxAdapter = Adapter(ThemeConfig(activity)) {
-        viewModel.selectedPosition = it
-    }
+
+    private val fpxAdapter = AddPaymentMethodListAdapter(
+        activity,
+        items = FpxBank.values(),
+        paymentMethodListType = PaymentMethodListType.PaymentMethodListTypeFpx
+    )
+
+//    private val fpxAdapter = Adapter(ThemeConfig(activity)) {
+//        viewModel.selectedPosition = it
+//    }
 
     private val viewModel: FpxViewModel by lazy {
         ViewModelProvider(
@@ -37,7 +44,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
     override val createParams: PaymentMethodCreateParams?
         get() {
-            val fpxBank = fpxAdapter.selectedBank ?: return null
+            val fpxBank = FpxBank.values()[fpxAdapter.selectedPosition] ?: return null
 
             return PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Fpx(bank = fpxBank.code)
@@ -61,132 +68,125 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             itemAnimator = DefaultItemAnimator()
         }
 
-        viewModel.getFpxBankStatues()
-            .observe(activity, Observer(::onFpxBankStatusesUpdated))
+//        viewModel.fpxBankStatuses.observe(activity, Observer {
+//            onFpxBankStatusesUpdated(it)
+//        })
+//        viewModel.loadFpxBankStatues()
 
         viewModel.selectedPosition?.let {
-            fpxAdapter.updateSelected(it)
+            // TODO: need to figure out if this logic should move to adapter
+//            fpxAdapter.updateSelected(it)
         }
     }
 
     private fun onFpxBankStatusesUpdated(fpxBankStatuses: FpxBankStatuses?) {
         fpxBankStatuses?.let {
-            fpxAdapter.updateStatuses(it)
+            // TODO: same as above
+//            fpxAdapter.updateStatuses(it)
         }
     }
 
-    private class Adapter constructor(
-        private val themeConfig: ThemeConfig,
-        private val itemSelectedCallback: (Int) -> Unit
-    ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
-        var selectedPosition = RecyclerView.NO_POSITION
-            set(value) {
-                if (value != field) {
-                    if (selectedPosition != RecyclerView.NO_POSITION) {
-                        notifyItemChanged(field)
-                    }
-                    notifyItemChanged(value)
-                    itemSelectedCallback(value)
-                }
-                field = value
-            }
+    class ViewHolder constructor(
+        private val viewBinding: FpxBankItemBinding,
+        private val themeConfig: ThemeConfig
+    ) : RecyclerView.ViewHolder(viewBinding.root) {
+        private val resources: Resources = itemView.resources
 
-        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses()
-
-        val selectedBank: FpxBank?
-            get() = if (selectedPosition == -1) {
-                null
+        fun update(fpxBank: FpxBank, isOnline: Boolean) {
+            viewBinding.name.text = if (isOnline) {
+                fpxBank.displayName
             } else {
-                getItem(selectedPosition)
-            }
-
-        init {
-            setHasStableIds(true)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, i: Int): ViewHolder {
-            return ViewHolder(
-                FpxBankItemBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                ),
-                themeConfig
-            )
-        }
-
-        override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
-            viewHolder.setSelected(i == selectedPosition)
-
-            val fpxBank = getItem(i)
-            viewHolder.update(fpxBank, fpxBankStatuses.isOnline(fpxBank))
-            viewHolder.itemView.setOnClickListener {
-                selectedPosition = viewHolder.adapterPosition
-            }
-        }
-
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
-
-        override fun getItemCount(): Int {
-            return FpxBank.values().size
-        }
-
-        private fun getItem(position: Int): FpxBank {
-            return FpxBank.values()[position]
-        }
-
-        fun updateSelected(position: Int) {
-            selectedPosition = position
-            notifyItemChanged(position)
-        }
-
-        fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
-            this.fpxBankStatuses = fpxBankStatuses
-
-            // flag offline bank
-            FpxBank.values().indices
-                .filterNot { position ->
-                    fpxBankStatuses.isOnline(getItem(position))
-                }
-                .forEach { position ->
-                    notifyItemChanged(position)
-                }
-        }
-
-        private class ViewHolder constructor(
-            private val viewBinding: FpxBankItemBinding,
-            private val themeConfig: ThemeConfig
-        ) : RecyclerView.ViewHolder(viewBinding.root) {
-            private val resources: Resources = itemView.resources
-
-            fun update(fpxBank: FpxBank, isOnline: Boolean) {
-                viewBinding.name.text = if (isOnline) {
+                resources.getString(
+                    R.string.fpx_bank_offline,
                     fpxBank.displayName
-                } else {
-                    resources.getString(
-                        R.string.fpx_bank_offline,
-                        fpxBank.displayName
-                    )
-                }
-                viewBinding.icon.setImageResource(fpxBank.brandIconResId)
-            }
-
-            fun setSelected(isSelected: Boolean) {
-                viewBinding.name.setTextColor(themeConfig.getTextColor(isSelected))
-                ImageViewCompat.setImageTintList(
-                    viewBinding.checkIcon,
-                    ColorStateList.valueOf(themeConfig.getTintColor(isSelected))
                 )
-                viewBinding.checkIcon.visibility = if (isSelected) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
+            }
+            viewBinding.icon.setImageResource(fpxBank.brandIconResId)
+        }
+
+        internal fun setSelected(isSelected: Boolean) {
+            viewBinding.name.setTextColor(themeConfig.getTextColor(isSelected))
+            ImageViewCompat.setImageTintList(
+                viewBinding.checkIcon,
+                ColorStateList.valueOf(themeConfig.getTintColor(isSelected))
+            )
+            viewBinding.checkIcon.visibility = if (isSelected) {
+                View.VISIBLE
+            } else {
+                View.GONE
             }
         }
     }
+
+//    private class Adapter constructor(
+//        private val themeConfig: ThemeConfig,
+//        private val itemSelectedCallback: (Int) -> Unit
+//    ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
+//        var selectedPosition = RecyclerView.NO_POSITION
+//            set(value) {
+//                if (value != field) {
+//                    if (selectedPosition != RecyclerView.NO_POSITION) {
+//                        notifyItemChanged(field)
+//                    }
+//                    notifyItemChanged(value)
+//                    itemSelectedCallback(value)
+//                }
+//                field = value
+//            }
+//
+//        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses()
+//
+//        internal val selectedBank: FpxBank?
+//            get() = if (selectedPosition == -1) {
+//                null
+//            } else {
+//                getItem(selectedPosition)
+//            }
+//
+//        init {
+//            setHasStableIds(true)
+//        }
+//
+//        override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
+//            viewHolder.setSelected(i == selectedPosition)
+//
+//            val fpxBank = getItem(i)
+//            viewHolder.update(fpxBank, fpxBankStatuses.isOnline(fpxBank))
+//            viewHolder.itemView.setOnClickListener {
+//                selectedPosition = viewHolder.adapterPosition
+//            }
+//        }
+//
+//        override fun getItemId(position: Int): Long {
+//            return position.toLong()
+//        }
+//
+//        override fun getItemCount(): Int {
+//            return FpxBank.values().size
+//        }
+//
+//        private fun getItem(position: Int): FpxBank {
+//            return FpxBank.values()[position]
+//        }
+//
+//        internal fun updateSelected(position: Int) {
+//            selectedPosition = position
+//            notifyItemChanged(position)
+//        }
+//
+//        internal fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
+//            this.fpxBankStatuses = fpxBankStatuses
+//
+//            // flag offline bank
+//            FpxBank.values().indices
+//                .filterNot { position ->
+//                    fpxBankStatuses.isOnline(getItem(position))
+//                }
+//                .forEach { position ->
+//                    notifyItemChanged(position)
+//                }
+//        }
+//    }
 
     internal companion object {
         @JvmSynthetic
