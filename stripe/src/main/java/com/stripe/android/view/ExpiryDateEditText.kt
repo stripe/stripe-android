@@ -72,7 +72,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
         SEPARATOR_WITHOUT_GAPS
     }
 
-    fun setText(expiryMonth: Int?, expiryYear: Int?) {
+    internal fun setText(expiryMonth: Int?, expiryYear: Int?) {
         if (expiryMonth != null && expiryYear != null) {
             setText(
                 listOf(

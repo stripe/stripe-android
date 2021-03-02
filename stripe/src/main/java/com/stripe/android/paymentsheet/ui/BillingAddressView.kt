@@ -355,7 +355,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
-    fun populateFromParams(address: Address?) {
+    internal fun populateFromParams(address: Address?) {
         address?.let { address ->
             address.country?.let {
                 this.selectedCountry = CountryUtils.getCountryByCode(address.country)

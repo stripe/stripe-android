@@ -289,12 +289,6 @@ internal class PaymentOptionsAdapter(
             override val viewType: ViewType = ViewType.GooglePay
         }
 
-        data class NewCard(
-            val newCard: PaymentSelection.New.Card
-        ) : Item() {
-            override val viewType: ViewType = ViewType.NewCard
-        }
-
         data class ExistingPaymentMethod(
             val paymentMethod: PaymentMethod
         ) : Item() {
