@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
 import com.stripe.android.paymentsheet.analytics.SessionId
+import org.jetbrains.annotations.TestOnly
 
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
@@ -19,23 +20,6 @@ internal class DefaultPaymentSheetLauncher(
     ) : this(
         activity.registerForActivityResult(
             PaymentSheetContract()
-        ) {
-            callback.onPaymentResult(it)
-        },
-
-        // lazily access the statusBarColor in case the value changes between when this
-        // class is instantiated and the payment sheet is launched
-        { getStatusBarColor(activity) }
-    )
-
-    constructor(
-        activity: ComponentActivity,
-        registry: ActivityResultRegistry,
-        callback: PaymentSheetResultCallback
-    ) : this(
-        activity.registerForActivityResult(
-            PaymentSheetContract(),
-            registry
         ) {
             callback.onPaymentResult(it)
         },
@@ -60,6 +44,7 @@ internal class DefaultPaymentSheetLauncher(
         { getStatusBarColor(fragment.activity) }
     )
 
+    @TestOnly
     constructor(
         fragment: Fragment,
         registry: ActivityResultRegistry,
