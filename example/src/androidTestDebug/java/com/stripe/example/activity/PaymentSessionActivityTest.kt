@@ -48,9 +48,6 @@ class PaymentSessionActivityTest {
         Espresso.onView(ViewMatchers.withId(R.id.select_payment_method_button))
             .perform(click())
 
-        // on PaymentMethodsActivity
-        Espresso.onView(ViewMatchers.withId(R.id.recycler)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
-        )
+        // navigate to PaymentMethodsActivity
     }
 }
