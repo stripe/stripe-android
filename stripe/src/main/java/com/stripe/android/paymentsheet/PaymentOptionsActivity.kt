@@ -140,11 +140,11 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
     }
 
-    private fun setupAddButton(addButton: AddButton) {
+    private fun setupAddButton(addButton: BuyButton) {
         addButton.completedAnimation.observe(this) { completedState ->
-            completedState?.paymentSelection?.let { paymentSelection ->
+            completedState?.result?.let { paymentSelection ->
                 closeSheet(
-                    PaymentOptionResult.Succeeded(paymentSelection)
+                    PaymentOptionResult.Succeeded(paymentSelection as PaymentSelection)
                 )
             }
         }
@@ -207,12 +207,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
         viewBinding.addButton.isVisible = transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
         viewModel.updateMode(transitionTarget.sheetMode)
-    }
-
-    private fun onActionCompleted(paymentSelection: PaymentSelection) {
-        closeSheet(
-            PaymentOptionResult.Succeeded(paymentSelection)
-        )
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {

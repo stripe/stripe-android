@@ -10,6 +10,7 @@ import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,8 +23,8 @@ internal class PaymentOptionsViewModel(
     config = args.config,
     prefsRepository = prefsRepository
 ) {
-    private val _viewState = MutableLiveData<AddButtonViewState>(null)
-    internal val viewState: LiveData<AddButtonViewState> = _viewState.distinctUntilChanged()
+    private val _viewState = MutableLiveData<ViewState>(null)
+    internal val viewState: LiveData<ViewState> = _viewState.distinctUntilChanged()
 
     override val newCard = args.newCard
 
@@ -35,11 +36,11 @@ internal class PaymentOptionsViewModel(
     }
 
     fun onUserSelection() {
-        _viewState.value = AddButtonViewState.Confirming
+        _viewState.value = ViewState.Confirming
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
-            _viewState.value = AddButtonViewState.Completed(paymentSelection)
+            _viewState.value = ViewState.Completed(paymentSelection)
         }
     }
 
