@@ -106,11 +106,11 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     private val currencyFormatter = CurrencyFormatter()
     private fun getLabelText(viewState: ViewState.Buy.Ready): String {
         val currency = Currency.getInstance(
-            viewState.currencyCode.toUpperCase(Locale.ROOT))
+            viewState.currencyCode.toUpperCase(Locale.ROOT)
+        )
 
-        return String.format(
-            "%s %s",
-            buyButtonLabel,
+        return resources.getString(
+            R.string.stripe_paymentsheet_pay_button_amount,
             currencyFormatter.format(viewState.amount, currency)
         )
     }
@@ -296,30 +296,32 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    val viewStateObserver: (ViewState.Buy?, PrimaryButton) -> Unit
-        get() = { viewState, buyButton ->
+    val viewStateObserver: (ViewState.Buy?) -> Unit
+        get() = { viewState ->
             lifecycleScope.launch {
-                buyButton.updateState( when (viewState) {
-                    null -> null
-                    is ViewState.Buy.Ready -> PrimaryButton.State.Ready(
-                        getLabelText(viewState)
-                    )
-                    is ViewState.Buy.Confirming -> PrimaryButton.State.Confirming
-                    is ViewState.Buy.Completed -> PrimaryButton.State.Completed
-                })
+                val buyButton = viewBinding.buyButton
+                buyButton.updateState(
+                    when (viewState) {
+                        null -> null
+                        is ViewState.Buy.Ready -> PrimaryButton.State.Ready(
+                            getLabelText(viewState)
+                        )
+                        is ViewState.Buy.Confirming -> PrimaryButton.State.Confirming
+                        is ViewState.Buy.Completed -> PrimaryButton.State.Completed
+                    }
+                )
 
-                if(viewState is ViewState.Buy.Completed){
+                if (viewState is ViewState.Buy.Completed) {
                     onActionCompleted(viewState.result)
                 }
             }
         }
 
-
     private fun setupBuyButton() {
         viewBinding.buyButton.setLabelText(buyButtonLabel)
 
         viewModel.viewState.observe(this) {
-            viewStateObserver(it, viewBinding.buyButton)
+            viewStateObserver(it)
         }
 
         viewModel.selection.observe(this) { paymentSelection ->

@@ -5,9 +5,9 @@ import com.stripe.android.paymentsheet.PaymentOptionResult
 
 internal sealed class ViewState {
 
-    abstract fun isReady() : Boolean
+    abstract fun isReady(): Boolean
 
-    internal sealed class Buy: ViewState(){
+    internal sealed class Buy : ViewState() {
         data class Ready(
             val amount: Long,
             val currencyCode: String
@@ -26,7 +26,7 @@ internal sealed class ViewState {
         }
     }
 
-    internal sealed class Add: ViewState(){
+    internal sealed class Add : ViewState() {
         object Ready : Add() {
             override fun isReady(): Boolean = true
         }

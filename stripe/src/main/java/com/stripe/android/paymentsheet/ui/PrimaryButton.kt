@@ -42,15 +42,15 @@ internal class PrimaryButton @JvmOverloads constructor(
         isEnabled = false
     }
 
-    fun setLabelText(text: String){
+    fun setLabelText(text: String) {
         viewBinding.label.text = text
     }
 
-    private fun setReady(){
+    private fun setReady() {
         viewBinding.confirmingIcon.isVisible = false
     }
 
-    private fun setConfirm(){
+    private fun setConfirm() {
         viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
 
@@ -66,7 +66,7 @@ internal class PrimaryButton @JvmOverloads constructor(
             }
         }
 
-    private fun setCompleted(onAnimationEnd: () -> Unit){
+    private fun setCompleted(onAnimationEnd: () -> Unit) {
 
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
@@ -111,7 +111,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         }
     }
 
-    private fun setLockVisible(visible: Boolean){
+    private fun setLockVisible(visible: Boolean) {
         viewBinding.lockIcon.isVisible = visible
     }
 }

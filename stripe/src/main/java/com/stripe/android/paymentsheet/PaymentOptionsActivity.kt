@@ -25,8 +25,6 @@ import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
 import kotlinx.coroutines.launch
-import java.util.Currency
-import java.util.Locale
 
 /**
  * An `Activity` for selecting a payment option.
@@ -78,7 +76,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             application
         )
     }
-
 
     private val addButtonLabel: String by lazy {
         resources.getString(
@@ -153,17 +150,20 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     @VisibleForTesting
-    private val viewStateObserver:  (ViewState.Add?, PrimaryButton) -> Unit
-        get() = { viewState, addButton ->
+    private val viewStateObserver: (ViewState.Add?) -> Unit
+        get() = { viewState ->
             lifecycleScope.launch {
-                addButton.updateState( when (viewState) {
-                    null -> null
-                    is ViewState.Add.Ready -> PrimaryButton.State.Ready(addButtonLabel)
-                    is ViewState.Add.Confirming -> PrimaryButton.State.Confirming
-                    is ViewState.Add.Completed -> PrimaryButton.State.Completed
-                })
+                val addButton = viewBinding.addButton
+                addButton.updateState(
+                    when (viewState) {
+                        null -> null
+                        is ViewState.Add.Ready -> PrimaryButton.State.Ready(addButtonLabel)
+                        is ViewState.Add.Confirming -> PrimaryButton.State.Confirming
+                        is ViewState.Add.Completed -> PrimaryButton.State.Completed
+                    }
+                )
 
-                if(viewState is ViewState.Add.Completed){
+                if (viewState is ViewState.Add.Completed) {
                     onActionCompleted(viewState.result)
                 }
             }
@@ -173,7 +173,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         addButton.setLabelText(addButtonLabel)
 
         viewModel.viewState.observe(this) { state ->
-            viewStateObserver(state, viewBinding.addButton)
+            viewStateObserver(state)
         }
 
         addButton.setOnClickListener {

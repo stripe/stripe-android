@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.model.ViewState

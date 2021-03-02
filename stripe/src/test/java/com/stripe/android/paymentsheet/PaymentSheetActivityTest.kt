@@ -270,17 +270,17 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
 
             activity.viewStateObserver(
-                ViewState.Buy.Completed(PaymentIntentResult(
-                    intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
-                    outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-                )),
+                ViewState.Buy.Completed(
+                    PaymentIntentResult(
+                        intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
+                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
+                    )
+                ),
                 buyButton
             )
             idleLooper()
 
-            verify(buyButton).setCompleted {
-
-            }
+            verify(buyButton).setCompleted {}
             idleLooper()
 
             assertThat(activity.bottomSheetBehavior.state)
