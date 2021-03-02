@@ -11,8 +11,6 @@ import com.stripe.android.databinding.PaymentSheetBuyButtonBinding
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
-import java.util.Currency
-import java.util.Locale
 
 /**
  * Buy button for PaymentSheet.
@@ -31,7 +29,7 @@ internal class BuyButton @JvmOverloads constructor(
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
-    private val _completedAnimation = MutableLiveData<ViewState.Completed>()
+    private val _completedAnimation = MutableLiveData<ViewState.Completed<*>>()
     internal val completedAnimation = _completedAnimation.distinctUntilChanged()
 
     private var viewState: ViewState? = null
@@ -60,7 +58,7 @@ internal class BuyButton @JvmOverloads constructor(
         )
     }
 
-    private fun onCompletedState(state: ViewState.Completed) {
+    private fun onCompletedState(state: ViewState.Completed<*>) {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
         animator.fadeOut(viewBinding.label)
@@ -69,7 +67,7 @@ internal class BuyButton @JvmOverloads constructor(
         animateConfirmedIcon(state)
     }
 
-    private fun animateConfirmedIcon(state: ViewState.Completed) {
+    private fun animateConfirmedIcon(state: ViewState.Completed<*>) {
         animator.fadeIn(confirmedIcon, width) {
             _completedAnimation.value = state
         }
@@ -92,7 +90,7 @@ internal class BuyButton @JvmOverloads constructor(
             ViewState.Confirming -> {
                 onConfirmingState()
             }
-            is ViewState.Completed -> {
+            is ViewState.Completed<*> -> {
                 onCompletedState(viewState)
             }
         }
