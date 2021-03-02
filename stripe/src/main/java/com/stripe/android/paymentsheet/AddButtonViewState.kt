@@ -9,6 +9,6 @@ sealed class AddButtonViewState {
     object Confirming : AddButtonViewState()
 
     data class Completed(
-            val paymentSelection: PaymentSelection
+        val paymentSelection: PaymentSelection
     ) : AddButtonViewState()
 }
