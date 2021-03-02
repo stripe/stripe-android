@@ -30,7 +30,6 @@ internal class PaymentOptionsViewModel(
 
     override val newCard = args.newCard
 
-    /** I wonder if this should be in a PaymentOptionsListViewModel **/
     // This is used in the case where the last card ws new and not saved.  In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
