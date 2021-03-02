@@ -274,7 +274,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     private fun setupBuyButton() {
         viewBinding.buyButton.completedAnimation.observe(this) { completedState ->
-            completedState?.paymentIntentResult?.let { paymentIntentResult ->
+            completedState.paymentIntentResult.let { paymentIntentResult ->
                 onActionCompleted(paymentIntentResult)
             }
         }
