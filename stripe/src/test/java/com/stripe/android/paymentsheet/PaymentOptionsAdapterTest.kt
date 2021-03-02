@@ -133,25 +133,6 @@ class PaymentOptionsAdapterTest {
     }
 
     @Test
-    fun `initial selected item should be NewCard when it exists`() {
-        val newCard = PaymentSelection.New.Card(
-            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            CardBrand.Visa,
-            false
-        )
-        val adapter = createConfiguredAdapter(
-            CONFIG.copy(
-                isGooglePayReady = true
-            ),
-            newCard = newCard
-        )
-        assertThat(adapter.selectedItem)
-            .isEqualTo(
-                PaymentOptionsAdapter.Item.NewCard(newCard)
-            )
-    }
-
-    @Test
     fun `initial selected item should be null when the only item is AddCard`() {
         val adapter = createConfiguredAdapter(
             CONFIG.copy(
