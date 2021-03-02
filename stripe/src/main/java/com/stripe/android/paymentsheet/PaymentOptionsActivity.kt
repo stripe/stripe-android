@@ -24,6 +24,9 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
+import kotlinx.coroutines.launch
+import java.util.Currency
+import java.util.Locale
 
 /**
  * An `Activity` for selecting a payment option.
@@ -149,6 +152,10 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
     }
 
+    private fun getLabelText(viewState: ViewState.Add.Ready): String {
+        return addButtonLabel
+    }
+
     @VisibleForTesting
     private val viewStateObserver:  (ViewState.Add?, PrimaryButton) -> Unit
         get() = { state, addButton ->
@@ -156,15 +163,18 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             if (state != null) {
                 when (state) {
                     is ViewState.Add.Ready -> {
+                        addButton.setLabelText(getLabelText(state))
                         addButton.setReady()
                     }
                     ViewState.Add.Confirming -> {
                         addButton.setConfirm()
                     }
                     is ViewState.Add.Completed -> {
-                        addButton.setCompleted {
+                        lifecycleScope.launch {
+                            addButton.setCompletedBlocking()
                             onActionCompleted(state.result)
                         }
+
                     }
                 }
             }

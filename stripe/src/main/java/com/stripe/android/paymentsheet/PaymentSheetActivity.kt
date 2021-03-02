@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
 import com.stripe.android.view.AuthActivityStarter
+import kotlinx.coroutines.launch
 import java.util.Currency
 import java.util.Locale
 
@@ -308,7 +309,8 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                         buyButton.setConfirm()
                     }
                     is ViewState.Buy.Completed -> {
-                        buyButton.setCompleted {
+                        lifecycleScope.launch {
+                            buyButton.setCompletedBlocking()
                             onActionCompleted(state.result)
                         }
                     }

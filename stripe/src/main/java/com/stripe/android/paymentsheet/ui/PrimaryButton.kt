@@ -8,6 +8,8 @@ import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.ViewState
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -50,6 +52,13 @@ internal class PrimaryButton @JvmOverloads constructor(
             R.string.stripe_paymentsheet_pay_button_processing
         )
     }
+
+    suspend fun setCompletedBlocking(): Any =
+        suspendCoroutine { cont ->
+            setCompleted {
+                cont.resume(Any())
+            }
+        }
 
     fun setCompleted(onAnimationEnd: () -> Unit){
 
