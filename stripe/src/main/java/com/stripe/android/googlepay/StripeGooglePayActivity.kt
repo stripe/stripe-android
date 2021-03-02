@@ -17,9 +17,7 @@ import org.json.JSONObject
 
 /**
  * [StripeGooglePayActivity] is used to return the result of a Google Pay operation.
- *
- * When started with [StripeGooglePayContract.Args.PaymentData], the activity
- * will return payment data via [StripeGooglePayContract.Result.PaymentData].
+ * The activity will return payment data via [StripeGooglePayContract.Result.PaymentData].
  *
  * Use [StripeGooglePayContract] to start [StripeGooglePayActivity].
  *
