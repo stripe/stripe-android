@@ -35,8 +35,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Currency
-import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel internal constructor(
@@ -65,8 +63,8 @@ internal class PaymentSheetViewModel internal constructor(
     private val _startConfirm = MutableLiveData<ConfirmPaymentIntentParams>()
     internal val startConfirm: LiveData<ConfirmPaymentIntentParams> = _startConfirm
 
-    private val _viewState = MutableLiveData<ViewState>(null)
-    internal val viewState: LiveData<ViewState> = _viewState.distinctUntilChanged()
+    private val _viewState = MutableLiveData<ViewState.Buy>(null)
+    internal val viewState: LiveData<ViewState.Buy> = _viewState.distinctUntilChanged()
 
     override val newCard: PaymentSelection.New.Card? = null
 
@@ -129,15 +127,11 @@ internal class PaymentSheetViewModel internal constructor(
         )
     }
 
-    private val currencyFormatter = CurrencyFormatter()
     private fun resetViewState(paymentIntent: PaymentIntent) {
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
         if (amount != null && currencyCode != null) {
-            val currency = Currency.getInstance(
-                currencyCode.toUpperCase(Locale.ROOT))
-
-            _viewState.value = ViewState.Ready(currencyFormatter.format(amount, currency))
+            _viewState.value = ViewState.Buy.Ready(amount, currencyCode)
             _processing.value = false
         } else {
             onFatal(
@@ -186,7 +180,7 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            _viewState.value = ViewState.Confirming
+            _viewState.value = ViewState.Buy.Confirming
             _startConfirm.value = confirmParams
         }
     }
@@ -198,7 +192,7 @@ internal class PaymentSheetViewModel internal constructor(
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
 
-                _viewState.value = ViewState.Completed(paymentIntentResult)
+                _viewState.value = ViewState.Buy.Completed(paymentIntentResult)
             }
             else -> {
                 eventReporter.onPaymentFailure(selection.value)

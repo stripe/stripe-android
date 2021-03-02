@@ -21,6 +21,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
+import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentAuthWebViewContract
@@ -32,10 +33,13 @@ import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.Toolbar
 import com.stripe.android.view.AuthActivityStarter
+import java.util.Currency
+import java.util.Locale
 
 internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() {
     @VisibleForTesting
@@ -89,6 +93,23 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     private val paymentConfig: PaymentConfiguration by lazy {
         PaymentConfiguration.getInstance(application)
+    }
+
+    private val buyButtonLabel: String
+        get() = resources.getString(
+            R.string.stripe_paymentsheet_pay_button_amount
+        )
+
+    private val currencyFormatter = CurrencyFormatter()
+    private fun getLabelText(viewState: ViewState.Buy.Ready) : String {
+        val currency = Currency.getInstance(
+            viewState.currencyCode.toUpperCase(Locale.ROOT))
+
+        return String.format(
+            "%s %s",
+            buyButtonLabel,
+            currencyFormatter.format(viewState.amount, currency)
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -272,17 +293,31 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    private fun setupBuyButton() {
-        viewBinding.buyButton.completedAnimation.observe(this) { completedState ->
-            completedState.result.let { result ->
-                onActionCompleted(result as PaymentIntentResult)
+    private val viewStateObserver: (ViewState.Buy?) -> Unit = { state ->
+        viewBinding.buyButton.updateState(state)
+        if (state != null) {
+            when (state) {
+                is ViewState.Buy.Ready -> {
+                    viewBinding.buyButton.setLabelText(getLabelText(state))
+                    viewBinding.buyButton.setReady()
+                }
+                ViewState.Buy.Confirming -> {
+                    viewBinding.buyButton.setConfirm()
+                }
+                is ViewState.Buy.Completed -> {
+                    viewBinding.buyButton.setCompleted {
+                        onActionCompleted(state.result)
+                    }
+                }
             }
         }
+    }
 
-        viewModel.viewState.observe(this) { state ->
-            if (state != null) {
-                viewBinding.buyButton.updateState(state)
-            }
+    private fun setupBuyButton() {
+        viewBinding.buyButton.setLabelText(buyButtonLabel)
+
+        viewModel.viewState.observe(this) {
+            viewStateObserver(it)
         }
 
         viewModel.selection.observe(this) { paymentSelection ->

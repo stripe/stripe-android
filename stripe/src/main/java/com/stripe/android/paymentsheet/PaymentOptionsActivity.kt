@@ -15,10 +15,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.R
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.Toolbar
@@ -140,19 +142,35 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
     }
 
-    private fun setupAddButton(addButton: AddButton) {
-        addButton.completedAnimation.observe(this) { completedState ->
-            completedState?.result?.let { paymentSelection ->
-                closeSheet(
-                    PaymentOptionResult.Succeeded(paymentSelection as PaymentSelection)
-                )
+    private val label: String
+        get() = resources.getString(
+            R.string.stripe_paymentsheet_add_button_label
+        )
+
+    private val viewStateObserver: (ViewState.Add?) -> Unit = { state ->
+        viewBinding.addButton.updateState(state)
+        if (state != null) {
+            when (state) {
+                is ViewState.Add.Ready -> {
+                    viewBinding.addButton.setReady()
+                }
+                ViewState.Add.Confirming -> {
+                    viewBinding.addButton.setConfirm()
+                }
+                is ViewState.Add.Completed -> {
+                    viewBinding.addButton.setCompleted {
+                        onActionCompleted(state.result)
+                    }
+                }
             }
         }
+    }
+
+    private fun setupAddButton(addButton: DefaultPrimaryButton) {
+        addButton.setLabelText(label)
 
         viewModel.viewState.observe(this) { state ->
-            if (state != null) {
-                addButton.updateState(state)
-            }
+            viewStateObserver(state)
         }
 
         addButton.setOnClickListener {
@@ -207,6 +225,12 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
         viewBinding.addButton.isVisible = transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
         viewModel.updateMode(transitionTarget.sheetMode)
+    }
+
+    private fun onActionCompleted(paymentSelection: PaymentSelection) {
+        closeSheet(
+            PaymentOptionResult.Succeeded(paymentSelection)
+        )
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {

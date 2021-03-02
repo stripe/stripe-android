@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.DefaultPrimaryButtonBinding
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 
@@ -14,6 +15,7 @@ internal open class DefaultPrimaryButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : PrimaryButton(context, attrs, defStyleAttr) {
+    private var viewState: ViewState? = null
     private val animator = PrimaryButtonAnimator(context)
 
     internal val viewBinding = DefaultPrimaryButtonBinding.inflate(
@@ -30,7 +32,11 @@ internal open class DefaultPrimaryButton @JvmOverloads constructor(
         isEnabled = false
     }
 
-    fun setReady(text: String){
+    fun setLabelText(text: String){
+        viewBinding.label.text = text
+    }
+
+    fun setReady(){
         viewBinding.confirmingIcon.isVisible = false
     }
 
@@ -55,15 +61,34 @@ internal open class DefaultPrimaryButton @JvmOverloads constructor(
         }
     }
 
-    fun setLabelAlphaLow() {
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        setLockVisible(enabled)
+        updateAlpha()
+    }
+
+    fun updateState(viewState: ViewState?) {
+        this.viewState = viewState
+        updateAlpha()
+    }
+
+    private fun updateAlpha() {
+        if ((viewState == null || viewState!!.isReady()) && !isEnabled) {
+            setLabelAlphaLow()
+        } else {
+            setLabelAlphaHigh()
+        }
+    }
+
+    private fun setLabelAlphaLow() {
         viewBinding.label.alpha = 0.5f
     }
 
-    fun setLabelAlphaHigh() {
+    private fun setLabelAlphaHigh() {
         viewBinding.label.alpha = 1.0f
     }
 
-    fun setLockVisible(visible: Boolean){
+    private fun setLockVisible(visible: Boolean){
         viewBinding.lockIcon.isVisible = visible
     }
 
