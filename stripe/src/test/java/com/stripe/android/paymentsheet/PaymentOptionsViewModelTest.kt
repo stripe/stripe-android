@@ -125,9 +125,9 @@ class PaymentOptionsViewModelTest {
             eventReporter = eventReporter
         )
 
-        var transitionTarget: MutableList<TransitionTarget> = emptyList()
+        var transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
         viewModel.transition.observeForever {
-            transitionTarget = transitionTarget.plus(it)
+            transitionTarget.add(it)
         }
 
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
@@ -149,9 +149,9 @@ class PaymentOptionsViewModelTest {
             eventReporter = eventReporter
         )
 
-        var transitionTarget: MutableList<TransitionTarget> = emptyList()
+        var transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
         viewModel.transition.observeForever {
-            transitionTarget = transitionTarget.plus(it)
+            transitionTarget.add(it)
         }
 
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
@@ -159,7 +159,7 @@ class PaymentOptionsViewModelTest {
         assertThat(transitionTarget.get(1)).isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
 
         viewModel.resolveTransitionTarget(fragmentConfig)
-        assertThat(transitionTarget.size()).isEqualTo(2)
+        assertThat(transitionTarget.size).isEqualTo(2)
     }
 
     private companion object {
