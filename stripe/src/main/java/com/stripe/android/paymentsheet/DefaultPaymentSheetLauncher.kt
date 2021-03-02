@@ -25,7 +25,7 @@ internal class DefaultPaymentSheetLauncher(
 
         // lazily access the statusBarColor in case the value changes between when this
         // class is instantiated and the payment sheet is launched
-        { getStatusColor(activity) }
+        { getStatusBarColor(activity) }
     )
 
     constructor(
@@ -42,7 +42,7 @@ internal class DefaultPaymentSheetLauncher(
 
         // lazily access the statusBarColor in case the value changes between when this
         // class is instantiated and the payment sheet is launched
-        { getStatusColor(activity) }
+        { getStatusBarColor(activity) }
     )
 
     constructor(
@@ -57,7 +57,7 @@ internal class DefaultPaymentSheetLauncher(
 
         // lazily access the statusBarColor in case the value changes between when this
         // class is instantiated and the payment sheet is launched
-        { getStatusColor(fragment.activity) }
+        { getStatusBarColor(fragment.activity) }
     )
 
     constructor(
@@ -74,7 +74,7 @@ internal class DefaultPaymentSheetLauncher(
 
         // lazily access the statusBarColor in case the value changes between when this
         // class is instantiated and the payment sheet is launched
-        { getStatusColor(fragment.activity) }
+        { getStatusBarColor(fragment.activity) }
     )
 
     override fun present(
@@ -105,6 +105,6 @@ internal class DefaultPaymentSheetLauncher(
     }
 
     private companion object {
-        private fun getStatusColor(activity: Activity?) = activity?.window?.statusBarColor
+        private fun getStatusBarColor(activity: Activity?) = activity?.window?.statusBarColor
     }
 }
