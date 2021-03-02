@@ -33,7 +33,7 @@ class BuyButtonTest {
     @Test
     fun `onReadyState() should update label`() {
         buyButton.onReadyState(
-            ViewState.Ready(amount = 1099, currencyCode = "usd")
+            ViewState.Ready("$10.99")
         )
         assertThat(
             buyButton.viewBinding.label.text.toString()
@@ -61,7 +61,7 @@ class BuyButtonTest {
     @Test
     fun `after viewState ready and disabled, label alpha is 50%`() {
         buyButton.onReadyState(
-            ViewState.Ready(amount = 1099, currencyCode = "usd")
+            ViewState.Ready("$10.99")
         )
         assertThat(buyButton.viewBinding.label.alpha)
             .isEqualTo(0.5f)
@@ -70,7 +70,7 @@ class BuyButtonTest {
     @Test
     fun `after viewState ready and enabled, label alpha is 100%`() {
         buyButton.onReadyState(
-            ViewState.Ready(amount = 1099, currencyCode = "usd")
+            ViewState.Ready("$10.99")
         )
         buyButton.isEnabled = true
         assertThat(buyButton.viewBinding.label.alpha)

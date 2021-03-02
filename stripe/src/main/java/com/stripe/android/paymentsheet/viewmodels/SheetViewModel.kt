@@ -53,6 +53,7 @@ internal abstract class SheetViewModel<TransitionTargetType>(
     private val _transition = MutableLiveData<TransitionTargetType?>(null)
     internal val transition: LiveData<TransitionTargetType?> = _transition
 
+    // On payment options this is set every time the add card is determined to be valid (not necessarily selected)
     private val _selection = MutableLiveData<PaymentSelection?>()
     internal val selection: LiveData<PaymentSelection?> = _selection
 

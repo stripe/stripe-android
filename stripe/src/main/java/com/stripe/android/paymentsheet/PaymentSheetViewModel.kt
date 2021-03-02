@@ -35,6 +35,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Currency
+import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel internal constructor(
@@ -127,11 +129,15 @@ internal class PaymentSheetViewModel internal constructor(
         )
     }
 
+    private val currencyFormatter = CurrencyFormatter()
     private fun resetViewState(paymentIntent: PaymentIntent) {
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
         if (amount != null && currencyCode != null) {
-            _viewState.value = ViewState.Ready(amount, currencyCode)
+            val currency = Currency.getInstance(
+                currencyCode.toUpperCase(Locale.ROOT))
+
+            _viewState.value = ViewState.Ready(currencyFormatter.format(amount, currency))
             _processing.value = false
         } else {
             onFatal(

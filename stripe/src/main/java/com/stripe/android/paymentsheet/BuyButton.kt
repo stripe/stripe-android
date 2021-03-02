@@ -31,8 +31,6 @@ internal class BuyButton @JvmOverloads constructor(
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
-    private val currencyFormatter = CurrencyFormatter()
-
     private val _completedAnimation = MutableLiveData<ViewState.Completed>()
     internal val completedAnimation = _completedAnimation.distinctUntilChanged()
 
@@ -48,13 +46,9 @@ internal class BuyButton @JvmOverloads constructor(
     fun onReadyState(state: ViewState.Ready) {
         viewBinding.confirmingIcon.isVisible = false
 
-        val currency = Currency.getInstance(
-            state.currencyCode.toUpperCase(Locale.ROOT)
-        )
         viewBinding.label.text = resources.getString(
             R.string.stripe_paymentsheet_pay_button_amount,
-            currencyFormatter.format(state.amount, currency)
-        )
+            state.append)
     }
 
     fun onConfirmingState() {

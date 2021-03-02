@@ -269,7 +269,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchPaymentIntent()
         assertThat(viewState)
             .isEqualTo(
-                ViewState.Ready(amount = 1099, currencyCode = "usd")
+                ViewState.Ready(append = "$10.99")
             )
     }
 
