@@ -52,7 +52,7 @@
                 style="@style/StripePaymentSheetErrorMessage"/>
         </LinearLayout>
 
-        <com.stripe.android.paymentsheet.BuyButton
+        <com.stripe.android.paymentsheet.AddButton
             android:id="@+id/add_button"
             android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
             android:layout_marginStart="@dimen/stripe_paymentsheet_outer_spacing_horizontal"

@@ -14,7 +14,7 @@ import java.util.Locale
 /**
  * Buy button for PaymentSheet.
  */
-internal class BuyButton @JvmOverloads constructor(
+internal class AddButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
