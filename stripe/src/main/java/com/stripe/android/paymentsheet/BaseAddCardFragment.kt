@@ -311,7 +311,7 @@ internal abstract class BaseAddCardFragment(
         val paymentMethodCreateParams = sheetViewModel.newCard?.paymentMethodCreateParams
         cardMultilineWidget.populateFromParams(paymentMethodCreateParams?.card)
         billingAddressView.populateFromParams(paymentMethodCreateParams?.billingDetails?.address)
-        saveCardCheckbox.isChecked = if(sheetViewModel.newCard != null){
+        saveCardCheckbox.isChecked = if (sheetViewModel.newCard != null) {
             sheetViewModel.newCard?.shouldSavePaymentMethod == true
         } else {
             true

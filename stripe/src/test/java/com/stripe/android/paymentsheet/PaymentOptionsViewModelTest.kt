@@ -24,7 +24,7 @@ class PaymentOptionsViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     private val eventReporter = mock<EventReporter>()
-    private val newCard  = PaymentSelection.New.Card(
+    private val newCard = PaymentSelection.New.Card(
         DEFAULT_CARD,
         CardBrand.Discover,
         false
@@ -118,7 +118,9 @@ class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = args.copy(
                 newCard = newCard.copy(
-                    shouldSavePaymentMethod = true)),
+                    shouldSavePaymentMethod = true
+                )
+            ),
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter
         )
@@ -140,7 +142,9 @@ class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = args.copy(
                 newCard = newCard.copy(
-                    shouldSavePaymentMethod = false)),
+                    shouldSavePaymentMethod = false
+                )
+            ),
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter
         )

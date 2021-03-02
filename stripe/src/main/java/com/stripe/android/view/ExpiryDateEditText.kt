@@ -73,7 +73,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
     }
 
     fun setText(expiryMonth: Int?, expiryYear: Int?) {
-        if(expiryMonth != null && expiryYear!= null){
+        if (expiryMonth != null && expiryYear != null) {
             setText(
                 listOf(
                     expiryMonth.toString().padStart(2, '0'),
@@ -303,6 +303,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
         return DateUtils.isExpiryDataValid(inputMonth, inputYear)
     }
+
     private companion object {
         private const val INVALID_INPUT = -1
 

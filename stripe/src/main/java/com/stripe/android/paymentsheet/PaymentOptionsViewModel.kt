@@ -34,7 +34,7 @@ internal class PaymentOptionsViewModel(
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
     private var hasTransitionToUnsavedCard = false
-    private val shouldTransitionToUnsavedCard : Boolean
+    private val shouldTransitionToUnsavedCard: Boolean
         get() = !hasTransitionToUnsavedCard && newCard != null && !newCard.shouldSavePaymentMethod
 
     init {
