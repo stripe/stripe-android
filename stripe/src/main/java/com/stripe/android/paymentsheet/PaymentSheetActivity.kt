@@ -96,13 +96,14 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         PaymentConfiguration.getInstance(application)
     }
 
-    private val buyButtonLabel: String
-        get() = resources.getString(
+    private val buyButtonLabel: String by lazy {
+        resources.getString(
             R.string.stripe_paymentsheet_pay_button_amount
         )
+    }
 
     private val currencyFormatter = CurrencyFormatter()
-    private fun getLabelText(viewState: ViewState.Buy.Ready) : String {
+    private fun getLabelText(viewState: ViewState.Buy.Ready): String {
         val currency = Currency.getInstance(
             viewState.currencyCode.toUpperCase(Locale.ROOT))
 

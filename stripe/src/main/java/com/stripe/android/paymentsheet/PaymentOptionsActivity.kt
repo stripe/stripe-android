@@ -76,6 +76,13 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         )
     }
 
+
+    private val addButtonLabel: String by lazy {
+        resources.getString(
+            R.string.stripe_paymentsheet_add_button_label
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -142,11 +149,6 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
     }
 
-    private val label: String
-        get() = resources.getString(
-            R.string.stripe_paymentsheet_add_button_label
-        )
-
     @VisibleForTesting
     private val viewStateObserver:  (ViewState.Add?, PrimaryButton) -> Unit
         get() = { state, addButton ->
@@ -169,7 +171,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
 
     private fun setupAddButton(addButton: PrimaryButton) {
-        addButton.setLabelText(label)
+        addButton.setLabelText(addButtonLabel)
 
         viewModel.viewState.observe(this) { state ->
             viewStateObserver(state, viewBinding.addButton)
