@@ -293,31 +293,33 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    private val viewStateObserver: (ViewState.Buy?) -> Unit = { state ->
-        viewBinding.buyButton.updateState(state)
-        if (state != null) {
-            when (state) {
-                is ViewState.Buy.Ready -> {
-                    viewBinding.buyButton.setLabelText(getLabelText(state))
-                    viewBinding.buyButton.setReady()
-                }
-                ViewState.Buy.Confirming -> {
-                    viewBinding.buyButton.setConfirm()
-                }
-                is ViewState.Buy.Completed -> {
-                    viewBinding.buyButton.setCompleted {
-                        onActionCompleted(state.result)
+    val viewStateObserver: (ViewState.Buy?, DefaultPrimaryButton) -> Unit
+        get() = { state, buyButton ->
+            buyButton.updateState(state)
+            if (state != null) {
+                when (state) {
+                    is ViewState.Buy.Ready -> {
+                        buyButton.setLabelText(getLabelText(state))
+                        buyButton.setReady()
+                    }
+                    ViewState.Buy.Confirming -> {
+                        buyButton.setConfirm()
+                    }
+                    is ViewState.Buy.Completed -> {
+                        buyButton.setCompleted {
+                            onActionCompleted(state.result)
+                        }
                     }
                 }
             }
         }
-    }
+
 
     private fun setupBuyButton() {
         viewBinding.buyButton.setLabelText(buyButtonLabel)
 
         viewModel.viewState.observe(this) {
-            viewStateObserver(it)
+            viewStateObserver(it, viewBinding.buyButton)
         }
 
         viewModel.selection.observe(this) { paymentSelection ->

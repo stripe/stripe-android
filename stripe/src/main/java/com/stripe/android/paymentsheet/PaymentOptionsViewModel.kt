@@ -41,7 +41,7 @@ internal class PaymentOptionsViewModel(
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
-            _viewState.value = ViewState.Add.Completed(paymentSelection)
+            _viewState.value = ViewState.Add.Completed(PaymentOptionResult.Succeeded(paymentSelection))
         }
     }
 

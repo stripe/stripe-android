@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.utils.InjectableActivityScenario
@@ -226,6 +228,62 @@ internal class PaymentSheetActivityTest {
                         paymentMethodId = "pm_123456789"
                     )
                 )
+        }
+    }
+
+    private val buyButton: DefaultPrimaryButton = mock()
+    @Test
+    fun `Verify Ready State`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+
+            activity.viewStateObserver(
+                ViewState.Buy.Ready(amount = 1099, currencyCode = "usd"),
+                buyButton
+            )
+            idleLooper()
+
+            verify(buyButton).setLabelText("Pay $10.99")
+            verify(buyButton).setReady()
+        }
+    }
+
+    @Test
+    fun `Verify Confirming state`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+
+            activity.viewStateObserver(
+                ViewState.Buy.Confirming,
+                buyButton
+            )
+            idleLooper()
+
+            verify(buyButton).setConfirm()
+        }
+    }
+
+    @Test
+    fun `Verify Completed state`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+
+            activity.viewStateObserver(
+                ViewState.Buy.Completed(PaymentIntentResult(
+                    intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
+                    outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
+                )),
+                buyButton
+            )
+            idleLooper()
+
+            verify(buyButton).setCompleted {
+
+            }
+            idleLooper()
+
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
 
