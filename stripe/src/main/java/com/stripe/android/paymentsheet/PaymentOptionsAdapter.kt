@@ -32,8 +32,7 @@ internal class PaymentOptionsAdapter(
     }
 
     fun update(
-        config: FragmentConfig,
-        newCard: PaymentSelection.New.Card?,
+        config: FragmentConfig
     ) {
         val items = listOfNotNull(
             Item.AddCard,

@@ -57,8 +57,7 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter.update(
-            config,
-            sheetViewModel.newCard
+            config
         )
 
         eventReporter.onShowExistingPaymentOptions()

@@ -5,8 +5,6 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
-import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -147,11 +145,10 @@ class PaymentOptionsAdapterTest {
     }
 
     private fun createConfiguredAdapter(
-        fragmentConfig: FragmentConfig = CONFIG,
-        newCard: PaymentSelection.New.Card? = null
+        fragmentConfig: FragmentConfig = CONFIG
     ): PaymentOptionsAdapter {
         return createAdapter().also {
-            it.update(fragmentConfig, newCard)
+            it.update(fragmentConfig)
         }
     }
 
