@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.fragment.app.Fragment
 import com.stripe.android.paymentsheet.analytics.SessionId
 
 internal class DefaultPaymentSheetLauncher(
@@ -22,7 +25,56 @@ internal class DefaultPaymentSheetLauncher(
 
         // lazily access the statusBarColor in case the value changes between when this
         // class is instantiated and the payment sheet is launched
-        { activity.window.statusBarColor }
+        { getStatusColor(activity) }
+    )
+
+    constructor(
+        activity: ComponentActivity,
+        registry: ActivityResultRegistry,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        activity.registerForActivityResult(
+            PaymentSheetContract(),
+            registry
+        ) {
+            callback.onPaymentResult(it)
+        },
+
+        // lazily access the statusBarColor in case the value changes between when this
+        // class is instantiated and the payment sheet is launched
+        { getStatusColor(activity) }
+    )
+
+    constructor(
+        fragment: Fragment,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        fragment.registerForActivityResult(
+            PaymentSheetContract()
+        ) {
+            callback.onPaymentResult(it)
+        },
+
+        // lazily access the statusBarColor in case the value changes between when this
+        // class is instantiated and the payment sheet is launched
+        { getStatusColor(fragment.activity) }
+    )
+
+    constructor(
+        fragment: Fragment,
+        registry: ActivityResultRegistry,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        fragment.registerForActivityResult(
+            PaymentSheetContract(),
+            registry
+        ) {
+            callback.onPaymentResult(it)
+        },
+
+        // lazily access the statusBarColor in case the value changes between when this
+        // class is instantiated and the payment sheet is launched
+        { getStatusColor(fragment.activity) }
     )
 
     override fun present(
@@ -50,5 +102,9 @@ internal class DefaultPaymentSheetLauncher(
 
     private fun present(args: PaymentSheetContract.Args) {
         activityResultLauncher.launch(args)
+    }
+
+    private companion object {
+        private fun getStatusColor(activity: Activity?) = activity?.window?.statusBarColor
     }
 }
