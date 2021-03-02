@@ -297,23 +297,19 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     }
 
     val viewStateObserver: (ViewState.Buy?, PrimaryButton) -> Unit
-        get() = { state, buyButton ->
-            buyButton.updateState(state)
-            if (state != null) {
-                when (state) {
-                    is ViewState.Buy.Ready -> {
-                        buyButton.setLabelText(getLabelText(state))
-                        buyButton.setReady()
-                    }
-                    ViewState.Buy.Confirming -> {
-                        buyButton.setConfirm()
-                    }
-                    is ViewState.Buy.Completed -> {
-                        lifecycleScope.launch {
-                            buyButton.setCompletedBlocking()
-                            onActionCompleted(state.result)
-                        }
-                    }
+        get() = { viewState, buyButton ->
+            lifecycleScope.launch {
+                buyButton.updateState( when (viewState) {
+                    null -> null
+                    is ViewState.Buy.Ready -> PrimaryButton.State.Ready(
+                        getLabelText(viewState)
+                    )
+                    is ViewState.Buy.Confirming -> PrimaryButton.State.Confirming
+                    is ViewState.Buy.Completed -> PrimaryButton.State.Completed
+                })
+
+                if(viewState is ViewState.Buy.Completed){
+                    onActionCompleted(viewState.result)
                 }
             }
         }

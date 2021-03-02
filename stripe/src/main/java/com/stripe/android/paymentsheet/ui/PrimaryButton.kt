@@ -7,7 +7,6 @@ import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.PrimaryButtonBinding
-import com.stripe.android.paymentsheet.model.ViewState
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -19,7 +18,14 @@ internal class PrimaryButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    private var viewState: ViewState? = null
+
+    internal sealed class State {
+        data class Ready(val label: String) : State()
+        object Confirming : State()
+        object Completed : State()
+    }
+
+    private var state: State? = null
     private val animator = PrimaryButtonAnimator(context)
 
     internal val viewBinding = PrimaryButtonBinding.inflate(
@@ -40,11 +46,11 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.label.text = text
     }
 
-    fun setReady(){
+    private fun setReady(){
         viewBinding.confirmingIcon.isVisible = false
     }
 
-    fun setConfirm(){
+    private fun setConfirm(){
         viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
 
@@ -53,14 +59,14 @@ internal class PrimaryButton @JvmOverloads constructor(
         )
     }
 
-    suspend fun setCompletedBlocking(): Any =
+    private suspend fun setCompletedBlocking(): Any =
         suspendCoroutine { cont ->
             setCompleted {
                 cont.resume(Any())
             }
         }
 
-    fun setCompleted(onAnimationEnd: () -> Unit){
+    private fun setCompleted(onAnimationEnd: () -> Unit){
 
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
@@ -78,25 +84,31 @@ internal class PrimaryButton @JvmOverloads constructor(
         updateAlpha()
     }
 
-    fun updateState(viewState: ViewState?) {
-        this.viewState = viewState
+    suspend fun updateState(state: State?) {
+        this.state = state
         updateAlpha()
-    }
 
-    private fun updateAlpha() {
-        if ((viewState == null || viewState!!.isReady()) && !isEnabled) {
-            setLabelAlphaLow()
-        } else {
-            setLabelAlphaHigh()
+        when (state) {
+            is State.Ready -> {
+                setLabelText(state.label)
+                setReady()
+            }
+            State.Confirming -> {
+                setConfirm()
+            }
+            is State.Completed -> {
+                setCompletedBlocking()
+            }
         }
     }
 
-    private fun setLabelAlphaLow() {
-        viewBinding.label.alpha = 0.5f
-    }
-
-    private fun setLabelAlphaHigh() {
-        viewBinding.label.alpha = 1.0f
+    private fun updateAlpha() {
+        // if ((viewState == null || viewState is ViewState.Ready) && !isEnabled) {
+        if ((state == null || state is State.Ready) && !isEnabled) {
+            viewBinding.label.alpha = 0.5f
+        } else {
+            viewBinding.label.alpha = 1.0f
+        }
     }
 
     private fun setLockVisible(visible: Boolean){
