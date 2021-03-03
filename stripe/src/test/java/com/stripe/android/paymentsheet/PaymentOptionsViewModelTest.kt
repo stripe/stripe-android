@@ -138,16 +138,17 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `resolveTransitionTarget new card NOT saved`() {
-
+        val newCard = newCard.copy(
+            shouldSavePaymentMethod = false
+        )
         val viewModel = PaymentOptionsViewModel(
             args = args.copy(
-                newCard = newCard.copy(
-                    shouldSavePaymentMethod = false
-                )
+                newCard = newCard
             ),
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter
         )
+        viewModel.updateSelection(newCard)
 
         val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
         viewModel.transition.observeForever {
@@ -156,6 +157,7 @@ class PaymentOptionsViewModelTest {
 
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
         viewModel.resolveTransitionTarget(fragmentConfig)
+        assertThat(transitionTarget).hasSize(2)
         assertThat(transitionTarget[1]).isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
 
         viewModel.resolveTransitionTarget(fragmentConfig)
