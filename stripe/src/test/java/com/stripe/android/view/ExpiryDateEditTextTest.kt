@@ -268,6 +268,17 @@ class ExpiryDateEditTextTest {
     }
 
     @Test
+    fun inputCompleteDate_whenMonthInvalid_showsInvalidMonth() {
+        expiryDateEditText.append("15")
+        expiryDateEditText.append("50")
+
+        assertThat(expiryDateEditText.shouldShowError)
+            .isTrue()
+        assertThat(expiryDateEditText.errorMessage)
+            .isEqualTo(context.getString(R.string.invalid_expiry_month))
+    }
+
+    @Test
     fun validatedDate_whenDataIsValid_returnsExpectedValues() {
         // This test will be invalid if run after the year 2050. Please update the code.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
@@ -288,7 +299,7 @@ class ExpiryDateEditTextTest {
 
     @Test
     fun validatedDate_whenDateIsValidFormatButExpired_returnsNull() {
-        // This test will be invalid if run after the year 2050. Please update the code.
+        // This test will be invalid if run after the year 2080. Please update the code.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2080)
             .isTrue()
 
