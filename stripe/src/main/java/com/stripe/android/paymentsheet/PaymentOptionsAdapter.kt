@@ -53,11 +53,10 @@ internal class PaymentOptionsAdapter(
 
     /**
      * The initial selection position follows this prioritization:
-     * 1. The index of [Item.NewCard] if it exists
-     * 2. The index of [Item.ExistingPaymentMethod] if it matches the [SavedSelection]
-     * 3. The index of [Item.GooglePay] if it exists
-     * 4. The index of the first [Item.ExistingPaymentMethod]
-     * 5. None (-1)
+     * 1. The index of [Item.ExistingPaymentMethod] if it matches the [SavedSelection]
+     * 2. The index of [Item.GooglePay] if it exists
+     * 3. The index of the first [Item.ExistingPaymentMethod]
+     * 4. None (-1)
      */
     private fun findInitialSelectedPosition(
         savedSelection: SavedSelection
@@ -126,7 +125,6 @@ internal class PaymentOptionsAdapter(
                 itemView.setOnClickListener(addCardClickListener)
             }
             ViewType.GooglePay -> GooglePayViewHolder(parent)
-            ViewType.NewCard,
             ViewType.Card -> CardViewHolder(parent)
         }
     }
@@ -256,8 +254,7 @@ internal class PaymentOptionsAdapter(
     internal enum class ViewType {
         Card,
         AddCard,
-        GooglePay,
-        NewCard
+        GooglePay
     }
 
     internal sealed class Item {

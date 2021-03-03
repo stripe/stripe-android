@@ -56,6 +56,10 @@ internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity
                 0f
             }
 
+            // When using commit on the fragments, the fragment transaction happens
+            // at some later time.  In order to get an accurate backstack count
+            // we need to make sure the transactions have completed.
+            supportFragmentManager.executePendingTransactions()
             if (supportFragmentManager.backStackEntryCount == 0) {
                 toolbar.showClose()
             } else {

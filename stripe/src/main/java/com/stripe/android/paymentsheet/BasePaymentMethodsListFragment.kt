@@ -72,6 +72,8 @@ internal abstract class BasePaymentMethodsListFragment(
         paymentSelection: PaymentSelection,
         isClick: Boolean
     ) {
-        sheetViewModel.updateSelection(paymentSelection)
+        if(isClick) {
+            sheetViewModel.updateSelection(paymentSelection)
+        }
     }
 }

@@ -27,17 +27,11 @@ internal class PaymentOptionsListFragment(
     override val sheetViewModel: PaymentOptionsViewModel by lazy { activityViewModel }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // The onViewCreated will set the default selected item on the list, and this
-        // will replace whatever was in the last selection.  However, we need to keep
-        // this selected item if it was a new card, so that we transition to the last
-        // unsaved card details.
-        val lastNewCard = sheetViewModel.newCardSelection
         super.onViewCreated(view, savedInstanceState)
 
-        if (lastNewCard != null) {
-            sheetViewModel.updateSelection(lastNewCard)
-            sheetViewModel.resolveTransitionTarget(config)
-        }
+        // We need to make sure the list fragment is attached before jumping, so the
+        // list is properly added to the backstack.
+        sheetViewModel.resolveTransitionTarget(config)
     }
 
     override fun transitionToAddPaymentMethod() {
