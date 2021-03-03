@@ -265,7 +265,7 @@ internal class PaymentSheetActivityTest {
 //    }
 //
 //    @Test
-//    fun `Verify Completed state`() {
+//    fun `Verify Completed state closes the sheet`() {
 //        val scenario = activityScenario()
 //        scenario.launch(intent).onActivity { activity ->
 //
