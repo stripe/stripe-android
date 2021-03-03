@@ -30,6 +30,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
 
     private val viewModel: SourceViewModel by viewModels()
     private val sourcesAdapter: SourcesAdapter by lazy {
+
         SourcesAdapter()
     }
     private val stripe: Stripe by lazy {

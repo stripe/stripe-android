@@ -168,7 +168,7 @@ internal class DefaultFlowController internal constructor(
         val paymentSelection = viewModel.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
             googlePayLauncher(
-                StripeGooglePayContract.Args.PaymentData(
+                StripeGooglePayContract.Args(
                     paymentIntent = initData.paymentIntent,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
@@ -219,19 +219,6 @@ internal class DefaultFlowController internal constructor(
         googlePayResult: StripeGooglePayContract.Result
     ) {
         when (googlePayResult) {
-            is StripeGooglePayContract.Result.PaymentIntent -> {
-                val paymentIntentResult = googlePayResult.paymentIntentResult
-                val paymentIntent = paymentIntentResult.intent
-
-                if (paymentIntent.status == StripeIntent.Status.Succeeded) {
-                    eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-                } else {
-                    eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                }
-
-                val paymentResult = createPaymentResult(paymentIntentResult)
-                paymentResultCallback.onPaymentResult(paymentResult)
-            }
             is StripeGooglePayContract.Result.PaymentData -> {
                 runCatching {
                     viewModel.initData
