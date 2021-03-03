@@ -124,7 +124,7 @@ internal abstract class BaseAddCardFragment(
             sheetViewModel.updateMode(SheetMode.Full)
         }
 
-        cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+        cardMultilineWidget.setCardValidCallback { isValid, _ ->
             // update selection whenever card details changes
             addCardViewModel.isCardValid = isValid
             updateSelection()
@@ -310,11 +310,7 @@ internal abstract class BaseAddCardFragment(
         val paymentMethodCreateParams = sheetViewModel.newCardSelection?.paymentMethodCreateParams
         cardMultilineWidget.populateFromParams(paymentMethodCreateParams?.card)
         billingAddressView.populateFromParams(paymentMethodCreateParams?.billingDetails?.address)
-        saveCardCheckbox.isChecked = if (sheetViewModel.newCardSelection != null) {
-            sheetViewModel.newCardSelection?.shouldSavePaymentMethod == true
-        } else {
-            true
-        }
+        saveCardCheckbox.isChecked = sheetViewModel.newCardSelection?.shouldSavePaymentMethod ?: true
     }
 
     private fun onCardError(

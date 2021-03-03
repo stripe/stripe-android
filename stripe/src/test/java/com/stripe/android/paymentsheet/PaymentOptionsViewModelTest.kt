@@ -93,7 +93,6 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `resolveTransitionTarget no new card`() {
-
         val viewModel = PaymentOptionsViewModel(
             args = args.copy(newCard = null),
             prefsRepository = FakePrefsRepository(),
@@ -114,7 +113,6 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `resolveTransitionTarget new card saved`() {
-
         val viewModel = PaymentOptionsViewModel(
             args = args.copy(
                 newCard = newCard.copy(

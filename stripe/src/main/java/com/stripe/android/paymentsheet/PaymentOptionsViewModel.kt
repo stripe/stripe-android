@@ -29,15 +29,15 @@ internal class PaymentOptionsViewModel(
     private val _userSelection = MutableLiveData<PaymentSelection>()
     val userSelection: LiveData<PaymentSelection> = _userSelection
 
-    // This is used in the case where the last card ws new and not saved.  In this scenario
+    // This is used in the case where the last card was new and not saved.  In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
     private var hasTransitionToUnsavedCard = false
     private val shouldTransitionToUnsavedCard: Boolean
-        get() = !hasTransitionToUnsavedCard &&
-            selection.value != null &&
-            selection.value is PaymentSelection.New &&
-            !(selection.value as PaymentSelection.New).shouldSavePaymentMethod
+        get() = !hasTransitionToUnsavedCard && (
+            newCardSelection?.let { !it.shouldSavePaymentMethod }
+                ?: false
+            )
 
     init {
         _isGooglePayReady.value = args.isGooglePayReady
@@ -51,7 +51,7 @@ internal class PaymentOptionsViewModel(
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
             _userSelection.value = paymentSelection
-            // Update the returned value with the savedCard rather than the NewCard
+            // TODO: Update the returned value with the savedCard rather than the NewCard
             // so that we don't jump the next time.
         }
     }

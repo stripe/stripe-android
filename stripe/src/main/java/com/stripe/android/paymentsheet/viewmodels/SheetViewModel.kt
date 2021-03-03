@@ -71,14 +71,7 @@ internal abstract class SheetViewModel<TransitionTargetType>(
      * This is a helper to retrieve the user selection if it is a new card otherwise
      * it will return null
      */
-    internal val newCardSelection: PaymentSelection.New?
-        get() {
-            return if (selection.value != null && selection.value is PaymentSelection.New) {
-                selection.value as PaymentSelection.New
-            } else {
-                null
-            }
-        }
+    internal val newCardSelection: PaymentSelection.New? get() = selection.value as? PaymentSelection.New
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         transition.switchMap { transitionTarget ->
