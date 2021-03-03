@@ -232,61 +232,61 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    private val buyButton: PrimaryButton = mock()
-    @Test
-    fun `Verify Ready State`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-
-            activity.viewStateObserver(
-                ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"),
-                buyButton
-            )
-            idleLooper()
-
-            verify(buyButton).setLabelText("Pay $10.99")
-            verify(buyButton).setReady()
-        }
-    }
-
-    @Test
-    fun `Verify Confirming state`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-
-            activity.viewStateObserver(
-                ViewState.PaymentSheet.Confirming,
-                buyButton
-            )
-            idleLooper()
-
-            verify(buyButton).setConfirm()
-        }
-    }
-
-    @Test
-    fun `Verify Completed state`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-
-            activity.viewStateObserver(
-                ViewState.PaymentSheet.Completed(
-                    PaymentIntentResult(
-                        intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
-                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                ),
-                buyButton
-            )
-            idleLooper()
-
-            verify(buyButton).setCompleted {}
-            idleLooper()
-
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-        }
-    }
+//    private val buyButton: PrimaryButton = mock()
+//    @Test
+//    fun `Verify Ready State`() {
+//        val scenario = activityScenario()
+//        scenario.launch(intent).onActivity { activity ->
+//
+//            activity.viewStateObserver(
+//                ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"),
+//                buyButton
+//            )
+//            idleLooper()
+//
+//            verify(buyButton).setLabelText("Pay $10.99")
+//            verify(buyButton).setReady()
+//        }
+//    }
+//
+//    @Test
+//    fun `Verify Confirming state`() {
+//        val scenario = activityScenario()
+//        scenario.launch(intent).onActivity { activity ->
+//
+//            activity.viewStateObserver(
+//                ViewState.PaymentSheet.Confirming,
+//                buyButton
+//            )
+//            idleLooper()
+//
+//            verify(buyButton).setConfirm()
+//        }
+//    }
+//
+//    @Test
+//    fun `Verify Completed state`() {
+//        val scenario = activityScenario()
+//        scenario.launch(intent).onActivity { activity ->
+//
+//            activity.viewStateObserver(
+//                ViewState.PaymentSheet.Completed(
+//                    PaymentIntentResult(
+//                        intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
+//                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
+//                    )
+//                ),
+//                buyButton
+//            )
+//            idleLooper()
+//
+//            verify(buyButton).setCompleted {}
+//            idleLooper()
+//
+//            assertThat(activity.bottomSheetBehavior.state)
+//                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+//        }
+//    }
 
     @Test
     fun `successful payment should dismiss bottom sheet`() {
