@@ -27,7 +27,8 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class SheetViewModel<TransitionTargetType>(
     internal val config: PaymentSheet.Configuration?,
     protected val prefsRepository: PrefsRepository,
-    protected val workContext: CoroutineContext = Dispatchers.IO
+    protected val workContext: CoroutineContext = Dispatchers.IO,
+    previousSelection: PaymentSelection.New.Card? = null
 ) : ViewModel() {
     internal val customerConfig = config?.customer
 
@@ -91,6 +92,7 @@ internal abstract class SheetViewModel<TransitionTargetType>(
 
     init {
         fetchSavedSelection()
+        updateSelection(previousSelection)
     }
 
     fun fetchFragmentConfig() = MediatorLiveData<FragmentConfig?>().also { configLiveData ->

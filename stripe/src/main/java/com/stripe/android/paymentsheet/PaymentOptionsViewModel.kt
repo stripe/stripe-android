@@ -19,7 +19,8 @@ internal class PaymentOptionsViewModel(
     private val eventReporter: EventReporter
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
-    prefsRepository = prefsRepository
+    prefsRepository = prefsRepository,
+    previousSelection = args.newCard
 ) {
     // This field is unique from the selection in sheetViewModel, as the one in sheet view model
     // is updated any time the add card fragment is in a valid state.  This one will

@@ -138,17 +138,15 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `resolveTransitionTarget new card NOT saved`() {
-        val newCard = newCard.copy(
-            shouldSavePaymentMethod = false
-        )
         val viewModel = PaymentOptionsViewModel(
             args = args.copy(
-                newCard = newCard
+                newCard = newCard.copy(
+                    shouldSavePaymentMethod = false
+                )
             ),
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter
         )
-        viewModel.updateSelection(newCard)
 
         val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
         viewModel.transition.observeForever {
