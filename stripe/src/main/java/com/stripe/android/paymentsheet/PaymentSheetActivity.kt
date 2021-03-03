@@ -254,7 +254,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 is PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     replace(
                         fragmentContainerId,
-                        PaymentSheetPaymentMethodsListFragment::class.java,
+                        PaymentSheetListFragment::class.java,
                         fragmentArgs
                     )
                 }
