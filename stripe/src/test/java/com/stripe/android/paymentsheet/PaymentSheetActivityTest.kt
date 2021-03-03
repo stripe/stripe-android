@@ -239,7 +239,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
 
             activity.viewStateObserver(
-                ViewState.Buy.Ready(amount = 1099, currencyCode = "usd"),
+                ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"),
                 buyButton
             )
             idleLooper()
@@ -255,7 +255,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
 
             activity.viewStateObserver(
-                ViewState.Buy.Confirming,
+                ViewState.PaymentSheet.Confirming,
                 buyButton
             )
             idleLooper()
@@ -270,7 +270,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
 
             activity.viewStateObserver(
-                ViewState.Buy.Completed(
+                ViewState.PaymentSheet.Completed(
                     PaymentIntentResult(
                         intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
                         outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED

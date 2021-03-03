@@ -23,8 +23,8 @@ internal class PaymentOptionsViewModel(
     config = args.config,
     prefsRepository = prefsRepository
 ) {
-    private val _viewState = MutableLiveData<ViewState.Add>(ViewState.Add.Ready)
-    internal val viewState: LiveData<ViewState.Add> = _viewState.distinctUntilChanged()
+    private val _viewState = MutableLiveData<ViewState.PaymentOptions>(ViewState.PaymentOptions.Ready)
+    internal val viewState: LiveData<ViewState.PaymentOptions> = _viewState.distinctUntilChanged()
 
     override val newCard = args.newCard
 
@@ -37,11 +37,11 @@ internal class PaymentOptionsViewModel(
 
     fun onUserSelection() {
         // TODO: Only update the state this way if we are saving
-        _viewState.value = ViewState.Add.Confirming
+        _viewState.value = ViewState.PaymentOptions.Confirming
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
-            _viewState.value = ViewState.Add.Completed(PaymentOptionResult.Succeeded(paymentSelection))
+            _viewState.value = ViewState.PaymentOptions.Completed(PaymentOptionResult.Succeeded(paymentSelection))
         }
     }
 

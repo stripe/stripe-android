@@ -201,7 +201,7 @@ internal class PaymentSheetViewModelTest {
         )
         assertThat(viewState)
             .isEqualTo(
-                ViewState.Buy.Completed(PAYMENT_INTENT_RESULT)
+                ViewState.PaymentSheet.Completed(PAYMENT_INTENT_RESULT)
             )
 
         verify(eventReporter)
@@ -269,7 +269,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchPaymentIntent()
         assertThat(viewState)
             .isEqualTo(
-                ViewState.Buy.Ready(amount = 1099, currencyCode = "usd")
+                ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd")
             )
     }
 

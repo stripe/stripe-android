@@ -7,37 +7,37 @@ internal sealed class ViewState {
 
     abstract fun isReady(): Boolean
 
-    internal sealed class Buy : ViewState() {
+    internal sealed class PaymentSheet : ViewState() {
         data class Ready(
             val amount: Long,
             val currencyCode: String
-        ) : Buy() {
+        ) : PaymentSheet() {
             override fun isReady(): Boolean = true
         }
 
-        object Confirming : Buy() {
+        object Confirming : PaymentSheet() {
             override fun isReady(): Boolean = false
         }
 
         data class Completed(
             val result: PaymentIntentResult
-        ) : Buy() {
+        ) : PaymentSheet() {
             override fun isReady(): Boolean = false
         }
     }
 
-    internal sealed class Add : ViewState() {
-        object Ready : Add() {
+    internal sealed class PaymentOptions : ViewState() {
+        object Ready : PaymentOptions() {
             override fun isReady(): Boolean = true
         }
 
-        object Confirming : Add() {
+        object Confirming : PaymentOptions() {
             override fun isReady(): Boolean = false
         }
 
         data class Completed(
             val result: PaymentOptionResult
-        ) : Add() {
+        ) : PaymentOptions() {
             override fun isReady(): Boolean = false
         }
     }

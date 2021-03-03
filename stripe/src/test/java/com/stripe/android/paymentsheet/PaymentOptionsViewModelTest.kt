@@ -46,7 +46,7 @@ class PaymentOptionsViewModelTest {
 
         viewModel.onUserSelection()
 
-        assertThat((viewState as ViewState.Add.Completed).result)
+        assertThat((viewState as ViewState.PaymentOptions.Completed).result)
             .isEqualTo(PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD))
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
@@ -59,7 +59,7 @@ class PaymentOptionsViewModelTest {
         }
         viewModel.onUserSelection()
 
-        assertThat(viewState is ViewState.Add.Ready)
+        assertThat(viewState is ViewState.PaymentOptions.Ready)
     }
 
     @Test

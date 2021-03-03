@@ -104,7 +104,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     }
 
     private val currencyFormatter = CurrencyFormatter()
-    private fun getLabelText(viewState: ViewState.Buy.Ready): String {
+    private fun getLabelText(viewState: ViewState.PaymentSheet.Ready): String {
         val currency = Currency.getInstance(
             viewState.currencyCode.toUpperCase(Locale.ROOT)
         )
@@ -296,22 +296,22 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    val viewStateObserver: (ViewState.Buy?) -> Unit
+    val viewStateObserver: (ViewState.PaymentSheet?) -> Unit
         get() = { viewState ->
             lifecycleScope.launch {
                 val buyButton = viewBinding.buyButton
                 buyButton.updateState(
                     when (viewState) {
                         null -> null
-                        is ViewState.Buy.Ready -> PrimaryButton.State.Ready(
+                        is ViewState.PaymentSheet.Ready -> PrimaryButton.State.Ready(
                             getLabelText(viewState)
                         )
-                        is ViewState.Buy.Confirming -> PrimaryButton.State.Confirming
-                        is ViewState.Buy.Completed -> PrimaryButton.State.Completed
+                        is ViewState.PaymentSheet.Confirming -> PrimaryButton.State.Confirming
+                        is ViewState.PaymentSheet.Completed -> PrimaryButton.State.Completed
                     }
                 )
 
-                if (viewState is ViewState.Buy.Completed) {
+                if (viewState is ViewState.PaymentSheet.Completed) {
                     onActionCompleted(viewState.result)
                 }
             }

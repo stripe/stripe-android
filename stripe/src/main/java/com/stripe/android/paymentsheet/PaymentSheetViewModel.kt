@@ -63,8 +63,8 @@ internal class PaymentSheetViewModel internal constructor(
     private val _startConfirm = MutableLiveData<ConfirmPaymentIntentParams>()
     internal val startConfirm: LiveData<ConfirmPaymentIntentParams> = _startConfirm
 
-    private val _viewState = MutableLiveData<ViewState.Buy>(null)
-    internal val viewState: LiveData<ViewState.Buy> = _viewState.distinctUntilChanged()
+    private val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
+    internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
     override val newCard: PaymentSelection.New.Card? = null
 
@@ -131,7 +131,7 @@ internal class PaymentSheetViewModel internal constructor(
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
         if (amount != null && currencyCode != null) {
-            _viewState.value = ViewState.Buy.Ready(amount, currencyCode)
+            _viewState.value = ViewState.PaymentSheet.Ready(amount, currencyCode)
             _processing.value = false
         } else {
             onFatal(
@@ -180,7 +180,7 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            _viewState.value = ViewState.Buy.Confirming
+            _viewState.value = ViewState.PaymentSheet.Confirming
             _startConfirm.value = confirmParams
         }
     }
@@ -192,7 +192,7 @@ internal class PaymentSheetViewModel internal constructor(
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
 
-                _viewState.value = ViewState.Buy.Completed(paymentIntentResult)
+                _viewState.value = ViewState.PaymentSheet.Completed(paymentIntentResult)
             }
             else -> {
                 eventReporter.onPaymentFailure(selection.value)

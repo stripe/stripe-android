@@ -150,20 +150,20 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     @VisibleForTesting
-    private val viewStateObserver: (ViewState.Add?) -> Unit
+    private val viewStateObserver: (ViewState.PaymentOptions?) -> Unit
         get() = { viewState ->
             lifecycleScope.launch {
                 val addButton = viewBinding.addButton
                 addButton.updateState(
                     when (viewState) {
                         null -> null
-                        is ViewState.Add.Ready -> PrimaryButton.State.Ready(addButtonLabel)
-                        is ViewState.Add.Confirming -> PrimaryButton.State.Confirming
-                        is ViewState.Add.Completed -> PrimaryButton.State.Completed
+                        is ViewState.PaymentOptions.Ready -> PrimaryButton.State.Ready(addButtonLabel)
+                        is ViewState.PaymentOptions.Confirming -> PrimaryButton.State.Confirming
+                        is ViewState.PaymentOptions.Completed -> PrimaryButton.State.Completed
                     }
                 )
 
-                if (viewState is ViewState.Add.Completed) {
+                if (viewState is ViewState.PaymentOptions.Completed) {
                     onActionCompleted(viewState.result)
                 }
             }
