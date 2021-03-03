@@ -66,7 +66,18 @@ internal abstract class SheetViewModel<TransitionTargetType>(
     protected val _userMessage = MutableLiveData<UserMessage?>()
     internal val userMessage: LiveData<UserMessage?> = _userMessage
 
-    abstract val newCard: PaymentSelection.New.Card?
+    /**
+     * This is a helper to retrieve the user selection if it is a new card otherwise
+     * it will return null
+     */
+    internal val newCardSelection: PaymentSelection.New?
+        get() {
+            return if (selection.value != null && selection.value is PaymentSelection.New) {
+                selection.value as PaymentSelection.New
+            } else {
+                null
+            }
+        }
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         transition.switchMap { transitionTarget ->

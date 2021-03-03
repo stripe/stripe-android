@@ -83,6 +83,8 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             return
         }
 
+        viewModel.updateSelection(starterArgs.newCard)
+
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
         }
