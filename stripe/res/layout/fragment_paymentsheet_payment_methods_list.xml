@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:layout_marginTop="@dimen/stripe_paymentsheet_paymentoptions_margin_top"
     android:layout_marginBottom="@dimen/stripe_paymentsheet_paymentoptions_margin_bottom"
-    tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment">
+    tools:context=".paymentsheet.PaymentSheetListFragment">
 
     <TextView
         android:id="@+id/header"
