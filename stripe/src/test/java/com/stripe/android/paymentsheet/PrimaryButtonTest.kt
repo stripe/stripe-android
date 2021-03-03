@@ -33,7 +33,7 @@ class PrimaryButtonTest {
 
     @Test
     fun `onReadyState() should update label`() {
-        runBlocking{
+        runBlocking {
             primaryButton.updateState(
                 PrimaryButton.State.Ready("Pay $10.99")
             )
