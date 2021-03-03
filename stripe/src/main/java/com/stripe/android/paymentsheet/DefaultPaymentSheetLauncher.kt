@@ -1,8 +1,12 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.fragment.app.Fragment
 import com.stripe.android.paymentsheet.analytics.SessionId
+import org.jetbrains.annotations.TestOnly
 
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
@@ -22,7 +26,40 @@ internal class DefaultPaymentSheetLauncher(
 
         // lazily access the statusBarColor in case the value changes between when this
         // class is instantiated and the payment sheet is launched
-        { activity.window.statusBarColor }
+        { getStatusBarColor(activity) }
+    )
+
+    constructor(
+        fragment: Fragment,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        fragment.registerForActivityResult(
+            PaymentSheetContract()
+        ) {
+            callback.onPaymentResult(it)
+        },
+
+        // lazily access the statusBarColor in case the value changes between when this
+        // class is instantiated and the payment sheet is launched
+        { getStatusBarColor(fragment.activity) }
+    )
+
+    @TestOnly
+    constructor(
+        fragment: Fragment,
+        registry: ActivityResultRegistry,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        fragment.registerForActivityResult(
+            PaymentSheetContract(),
+            registry
+        ) {
+            callback.onPaymentResult(it)
+        },
+
+        // lazily access the statusBarColor in case the value changes between when this
+        // class is instantiated and the payment sheet is launched
+        { getStatusBarColor(fragment.activity) }
     )
 
     override fun present(
@@ -50,5 +87,9 @@ internal class DefaultPaymentSheetLauncher(
 
     private fun present(args: PaymentSheetContract.Args) {
         activityResultLauncher.launch(args)
+    }
+
+    private companion object {
+        private fun getStatusBarColor(activity: Activity?) = activity?.window?.statusBarColor
     }
 }

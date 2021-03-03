@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.fragment.app.Fragment
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -15,6 +16,13 @@ class PaymentSheet internal constructor(
         callback: PaymentSheetResultCallback
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
+    )
+
+    internal constructor(
+        fragment: Fragment,
+        callback: PaymentSheetResultCallback
+    ) : this(
+        DefaultPaymentSheetLauncher(fragment, callback)
     )
 
     /**
