@@ -18,7 +18,7 @@ class PaymentSheet internal constructor(
         DefaultPaymentSheetLauncher(activity, callback)
     )
 
-    internal constructor(
+    constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
