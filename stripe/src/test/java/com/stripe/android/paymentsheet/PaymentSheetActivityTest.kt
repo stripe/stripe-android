@@ -151,7 +151,7 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
+                .isInstanceOf(PaymentSheetListFragment::class.java)
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
@@ -173,7 +173,7 @@ internal class PaymentSheetActivityTest {
             activity.onBackPressed()
             idleLooper()
             assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
+                .isInstanceOf(PaymentSheetListFragment::class.java)
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
@@ -223,7 +223,8 @@ internal class PaymentSheetActivityTest {
                 .isEqualTo(
                     ConfirmPaymentIntentParams(
                         clientSecret = "client_secret",
-                        paymentMethodId = "pm_123456789"
+                        paymentMethodId = "pm_123456789",
+                        returnUrl = "stripe://return_url"
                     )
                 )
         }

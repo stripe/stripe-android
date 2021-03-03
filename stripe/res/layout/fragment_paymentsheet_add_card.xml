@@ -11,7 +11,7 @@ is nested in a `BottomSheetBehavior`.
     android:layout_height="match_parent"
     android:layout_marginBottom="@dimen/stripe_paymentsheet_form_bottom_margin"
     android:nestedScrollingEnabled="false"
-    tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment">
+    tools:context=".paymentsheet.PaymentSheetListFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

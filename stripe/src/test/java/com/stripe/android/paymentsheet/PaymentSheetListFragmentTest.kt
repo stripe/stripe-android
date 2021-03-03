@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentSheetPaymentMethodsListFragmentTest {
+class PaymentSheetListFragmentTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
@@ -168,11 +168,11 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         }
     }
 
-    private fun recyclerView(it: PaymentSheetPaymentMethodsListFragment) =
+    private fun recyclerView(it: PaymentSheetListFragment) =
         it.requireView().findViewById<RecyclerView>(R.id.recycler)
 
     private fun activityViewModel(
-        fragment: PaymentSheetPaymentMethodsListFragment
+        fragment: PaymentSheetListFragment
     ): PaymentSheetViewModel {
         return fragment.activityViewModels<PaymentSheetViewModel> {
             PaymentSheetViewModel.Factory(
@@ -184,8 +184,8 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
     private fun createScenario(
         fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG
-    ): FragmentScenario<PaymentSheetPaymentMethodsListFragment> {
-        return launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>(
+    ): FragmentScenario<PaymentSheetListFragment> {
+        return launchFragmentInContainer<PaymentSheetListFragment>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY

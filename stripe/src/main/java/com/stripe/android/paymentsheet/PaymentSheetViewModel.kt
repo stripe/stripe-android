@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.SheetMode
-import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
     workContext: CoroutineContext
-) : SheetViewModel<PaymentSheetViewModel.TransitionTarget>(
+) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepository,
     workContext = workContext

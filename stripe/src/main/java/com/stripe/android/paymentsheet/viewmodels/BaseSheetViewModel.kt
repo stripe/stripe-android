@@ -24,7 +24,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
-internal abstract class SheetViewModel<TransitionTargetType>(
+internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val config: PaymentSheet.Configuration?,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
