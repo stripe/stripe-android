@@ -27,10 +27,10 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
+import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.ui.SheetMode
-import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
 import com.stripe.android.view.StripeEditText
@@ -41,7 +41,7 @@ import com.stripe.android.view.StripeEditText
 internal abstract class BaseAddCardFragment(
     private val eventReporter: EventReporter
 ) : Fragment() {
-    abstract val sheetViewModel: SheetViewModel<*>
+    abstract val sheetViewModel: BaseSheetViewModel<*>
 
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
@@ -90,7 +90,7 @@ internal abstract class BaseAddCardFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val config = arguments?.getParcelable<FragmentConfig>(BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG)
+        val config = arguments?.getParcelable<FragmentConfig>(BaseSheetActivity.EXTRA_FRAGMENT_CONFIG)
         if (activity == null || config == null) {
             sheetViewModel.onFatal(
                 IllegalArgumentException("Failed to start add payment option fragment.")

@@ -9,8 +9,9 @@ internal class ConfirmParamsFactory(
         paymentSelection: PaymentSelection.Saved
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
-            paymentSelection.paymentMethod.id.orEmpty(),
-            clientSecret
+            paymentMethodId = paymentSelection.paymentMethod.id.orEmpty(),
+            clientSecret = clientSecret,
+            returnUrl = RETURN_URL
         )
     }
 
@@ -18,12 +19,19 @@ internal class ConfirmParamsFactory(
         paymentSelection: PaymentSelection.New
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-            paymentSelection.paymentMethodCreateParams,
-            clientSecret,
+            paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
+            clientSecret = clientSecret,
+            returnUrl = RETURN_URL,
             setupFutureUsage = when (paymentSelection.shouldSavePaymentMethod) {
                 true -> ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 false -> null
             }
         )
+    }
+
+    private companion object {
+        // the value of the return URL isn't significant, but a return URL must be specified
+        // to properly handle authentication
+        private const val RETURN_URL = "stripe://return_url"
     }
 }

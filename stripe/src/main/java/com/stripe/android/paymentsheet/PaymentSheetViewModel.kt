@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.SheetMode
-import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
     workContext: CoroutineContext
-) : SheetViewModel<PaymentSheetViewModel.TransitionTarget>(
+) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepository,
     workContext = workContext
@@ -56,9 +56,6 @@ internal class PaymentSheetViewModel internal constructor(
     private val confirmParamsFactory = ConfirmParamsFactory(
         args.clientSecret
     )
-
-    private val _googlePayCompletion = MutableLiveData<PaymentIntentResult>()
-    internal val googlePayCompletion: LiveData<PaymentIntentResult> = _googlePayCompletion
 
     private val _startConfirm = MutableLiveData<ConfirmPaymentIntentParams>()
     internal val startConfirm: LiveData<ConfirmPaymentIntentParams> = _startConfirm
@@ -149,7 +146,7 @@ internal class PaymentSheetViewModel internal constructor(
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
-                _launchGooglePay.value = StripeGooglePayContract.Args.PaymentData(
+                _launchGooglePay.value = StripeGooglePayContract.Args(
                     paymentIntent = paymentIntent,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = when (args.config?.googlePay?.environment) {
@@ -207,10 +204,6 @@ internal class PaymentSheetViewModel internal constructor(
         googlePayResult: StripeGooglePayContract.Result
     ) {
         when (googlePayResult) {
-            is StripeGooglePayContract.Result.PaymentIntent -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-                _googlePayCompletion.value = googlePayResult.paymentIntentResult
-            }
             is StripeGooglePayContract.Result.PaymentData -> {
                 val paymentSelection = PaymentSelection.Saved(
                     googlePayResult.paymentMethod

@@ -7,7 +7,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -28,7 +27,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
-import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -141,7 +140,8 @@ internal class PaymentSheetViewModelTest {
             .containsExactly(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
-                    CLIENT_SECRET
+                    CLIENT_SECRET,
+                    returnUrl = "stripe://return_url"
                 )
             )
     }
@@ -166,6 +166,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,
+                    returnUrl = "stripe://return_url",
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 )
             )
@@ -228,7 +229,7 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentFlowResult() should update emit API errors`() {
         paymentFlowResultProcessor.error = RuntimeException("Your card was declined.")
 
-        var userMessage: SheetViewModel.UserMessage? = null
+        var userMessage: BaseSheetViewModel.UserMessage? = null
         viewModel.userMessage.observeForever {
             userMessage = it
         }
@@ -237,27 +238,8 @@ internal class PaymentSheetViewModelTest {
         )
         assertThat(userMessage)
             .isEqualTo(
-                SheetViewModel.UserMessage.Error("Your card was declined.")
+                BaseSheetViewModel.UserMessage.Error("Your card was declined.")
             )
-    }
-
-    @Test
-    fun `onGooglePayResult() with successful Google Pay result should emit on googlePayCompletion`() {
-        val paymentIntentResults = mutableListOf<PaymentIntentResult>()
-        viewModel.googlePayCompletion.observeForever { paymentIntentResult ->
-            if (paymentIntentResult != null) {
-                paymentIntentResults.add(paymentIntentResult)
-            }
-        }
-        viewModel.onGooglePayResult(
-            StripeGooglePayContract.Result.PaymentIntent(PAYMENT_INTENT_RESULT)
-        )
-
-        assertThat(paymentIntentResults)
-            .containsExactly(PAYMENT_INTENT_RESULT)
-
-        verify(eventReporter)
-            .onPaymentSuccess(PaymentSelection.GooglePay)
     }
 
     @Test
