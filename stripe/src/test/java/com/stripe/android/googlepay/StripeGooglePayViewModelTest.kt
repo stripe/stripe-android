@@ -177,7 +177,7 @@ class StripeGooglePayViewModelTest {
             isEmailRequired = true
         )
 
-        private val ARGS = StripeGooglePayContract.Args.ConfirmPaymentIntent(
+        private val ARGS = StripeGooglePayContract.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             config = CONFIG
         )
