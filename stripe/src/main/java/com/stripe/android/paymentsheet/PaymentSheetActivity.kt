@@ -296,7 +296,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    val viewStateObserver: (ViewState.PaymentSheet?) -> Unit
+    private val viewStateObserver: (ViewState.PaymentSheet?) -> Unit
         get() = { viewState ->
             lifecycleScope.launch {
                 val buyButton = viewBinding.buyButton
