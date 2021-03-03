@@ -32,28 +32,11 @@ class StripeGooglePayActivityTest {
     @Ignore("failing in CI but not locally")
     fun `successful start should return Unavailable result`() {
         createActivity(
-            PAYMENT_DATA_ARGS
+            ARGS
         ) { activityScenario ->
             // Google Pay is only available on a real device
             assertThat(parseResult(activityScenario))
                 .isInstanceOf(StripeGooglePayContract.Result.Unavailable::class.java)
-        }
-    }
-
-    @Test
-    fun `start should ConfirmPaymentIntent args and manual confirmation should finish with Error result`() {
-        createActivity(
-            CONFIRM_ARGS.copy(
-                paymentIntent = PAYMENT_INTENT.copy(
-                    confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
-                )
-            )
-        ) { activityScenario ->
-            val result = parseResult(activityScenario) as StripeGooglePayContract.Result.Error
-            assertThat(result.exception.message)
-                .isEqualTo(
-                    "StripeGooglePayActivity requires a PaymentIntent with automatic confirmation."
-                )
         }
     }
 
@@ -106,12 +89,7 @@ class StripeGooglePayActivityTest {
             confirmationMethod = PaymentIntent.ConfirmationMethod.Automatic
         )
 
-        private val PAYMENT_DATA_ARGS = StripeGooglePayContract.Args.PaymentData(
-            paymentIntent = PAYMENT_INTENT,
-            config = CONFIG
-        )
-
-        private val CONFIRM_ARGS = StripeGooglePayContract.Args.ConfirmPaymentIntent(
+        private val ARGS = StripeGooglePayContract.Args(
             paymentIntent = PAYMENT_INTENT,
             config = CONFIG
         )
