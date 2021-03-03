@@ -22,8 +22,9 @@ class ConfirmParamsFactoryTest {
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                CLIENT_SECRET,
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = CLIENT_SECRET,
+                returnUrl = "stripe://return_url",
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
             )
         )
