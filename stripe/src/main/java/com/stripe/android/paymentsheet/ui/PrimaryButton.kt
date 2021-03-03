@@ -68,7 +68,9 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private fun setCompleted(onAnimationEnd: () -> Unit) {
 
-        setBackgroundResource(R.drawable.stripe_paymentsheet_primary_button_confirmed_background)
+        setBackgroundResource(
+            R.drawable.stripe_paymentsheet_primary_button_confirmed_background
+        )
 
         animator.fadeOut(viewBinding.label)
         animator.fadeOut(viewBinding.confirmingIcon)
@@ -103,7 +105,6 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun updateAlpha() {
-        // if ((viewState == null || viewState is ViewState.Ready) && !isEnabled) {
         if ((state == null || state is State.Ready) && !isEnabled) {
             viewBinding.label.alpha = 0.5f
         } else {

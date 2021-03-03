@@ -36,7 +36,6 @@ internal class PaymentOptionsViewModel(
     }
 
     fun onUserSelection() {
-        // TODO: Only update the state this way if we are saving
         _viewState.value = ViewState.PaymentOptions.Confirming
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)

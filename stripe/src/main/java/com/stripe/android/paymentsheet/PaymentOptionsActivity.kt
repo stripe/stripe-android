@@ -172,9 +172,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     private fun setupAddButton(addButton: PrimaryButton) {
         addButton.setLabelText(addButtonLabel)
 
-        viewModel.viewState.observe(this) { state ->
-            viewStateObserver(state)
-        }
+        viewModel.viewState.observe(this, viewStateObserver)
 
         addButton.setOnClickListener {
             viewModel.onUserSelection()

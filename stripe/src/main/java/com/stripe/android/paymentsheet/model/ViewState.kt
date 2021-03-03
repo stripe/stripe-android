@@ -5,40 +5,26 @@ import com.stripe.android.paymentsheet.PaymentOptionResult
 
 internal sealed class ViewState {
 
-    abstract fun isReady(): Boolean
-
     internal sealed class PaymentSheet : ViewState() {
         data class Ready(
             val amount: Long,
             val currencyCode: String
-        ) : PaymentSheet() {
-            override fun isReady(): Boolean = true
-        }
+        ) : PaymentSheet()
 
-        object Confirming : PaymentSheet() {
-            override fun isReady(): Boolean = false
-        }
+        object Confirming : PaymentSheet()
 
         data class Completed(
             val result: PaymentIntentResult
-        ) : PaymentSheet() {
-            override fun isReady(): Boolean = false
-        }
+        ) : PaymentSheet()
     }
 
     internal sealed class PaymentOptions : ViewState() {
-        object Ready : PaymentOptions() {
-            override fun isReady(): Boolean = true
-        }
+        object Ready : PaymentOptions()
 
-        object Confirming : PaymentOptions() {
-            override fun isReady(): Boolean = false
-        }
+        object Confirming : PaymentOptions()
 
         data class Completed(
             val result: PaymentOptionResult
-        ) : PaymentOptions() {
-            override fun isReady(): Boolean = false
-        }
+        ) : PaymentOptions()
     }
 }

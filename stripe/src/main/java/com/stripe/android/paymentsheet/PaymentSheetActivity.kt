@@ -320,9 +320,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     private fun setupBuyButton() {
         viewBinding.buyButton.setLabelText(buyButtonLabel)
 
-        viewModel.viewState.observe(this) {
-            viewStateObserver(it)
-        }
+        viewModel.viewState.observe(this, viewStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
             val shouldShowGooglePay = paymentSelection == PaymentSelection.GooglePay
