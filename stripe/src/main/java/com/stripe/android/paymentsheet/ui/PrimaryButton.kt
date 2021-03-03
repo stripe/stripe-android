@@ -36,7 +36,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     init {
-        setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
+        setBackgroundResource(R.drawable.stripe_paymentsheet_primary_button_default_background)
 
         isClickable = true
         isEnabled = false
@@ -68,7 +68,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private fun setCompleted(onAnimationEnd: () -> Unit) {
 
-        setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
+        setBackgroundResource(R.drawable.stripe_paymentsheet_primary_button_confirmed_background)
 
         animator.fadeOut(viewBinding.label)
         animator.fadeOut(viewBinding.confirmingIcon)
