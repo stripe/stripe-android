@@ -223,7 +223,8 @@ internal class PaymentSheetActivityTest {
                 .isEqualTo(
                     ConfirmPaymentIntentParams(
                         clientSecret = "client_secret",
-                        paymentMethodId = "pm_123456789"
+                        paymentMethodId = "pm_123456789",
+                        returnUrl = "stripe://return_url"
                     )
                 )
         }
