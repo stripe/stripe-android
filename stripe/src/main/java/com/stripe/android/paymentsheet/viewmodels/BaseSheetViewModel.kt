@@ -55,9 +55,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     /**
      * On [com.stripe.android.paymentsheet.BaseAddCardFragment] this is set every time the add
-     * card is determined to be
-     * valid
-     * (not necessarily selected)
+     * card is determined to be valid (not necessarily selected)
      * On [com.stripe.android.paymentsheet.BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
     private val _selection = MutableLiveData<PaymentSelection?>()
