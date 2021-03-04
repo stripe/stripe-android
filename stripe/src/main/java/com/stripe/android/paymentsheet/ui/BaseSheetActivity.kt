@@ -12,13 +12,13 @@ import com.google.android.material.appbar.AppBarLayout
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.KeyboardController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
-    abstract val viewModel: SheetViewModel<*>
+internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
+    abstract val viewModel: BaseSheetViewModel<*>
     abstract val bottomSheetController: BottomSheetController
     abstract val eventReporter: EventReporter
 

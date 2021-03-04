@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.content.Context
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -16,6 +17,7 @@ import kotlin.test.Test
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpiryDateEditTextTest {
+    private val context: Context = ApplicationProvider.getApplicationContext<Context>()
     private val expiryDateEditText = ExpiryDateEditText(
         ContextThemeWrapper(
             ApplicationProvider.getApplicationContext(),
@@ -185,6 +187,8 @@ class ExpiryDateEditTextTest {
 
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
+        assertThat(expiryDateEditText.errorMessage)
+            .isEqualTo(context.getString(R.string.invalid_expiry_month))
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("14")
     }
@@ -195,6 +199,8 @@ class ExpiryDateEditTextTest {
 
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
+        assertThat(expiryDateEditText.errorMessage)
+            .isEqualTo(context.getString(R.string.invalid_expiry_month))
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("14/3")
     }
@@ -226,6 +232,8 @@ class ExpiryDateEditTextTest {
 
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
+        assertThat(expiryDateEditText.errorMessage)
+            .isEqualTo(context.getString(R.string.invalid_expiry_year))
         assertThat(invocations)
             .isEqualTo(0)
     }
@@ -245,6 +253,8 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.append("12/12")
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
+        assertThat(expiryDateEditText.errorMessage)
+            .isEqualTo(context.getString(R.string.invalid_expiry_year))
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.text.toString())
@@ -255,6 +265,17 @@ class ExpiryDateEditTextTest {
         // The date is no longer "in error", but it still shouldn't have triggered the listener.
         assertThat(invocations)
             .isEqualTo(0)
+    }
+
+    @Test
+    fun inputCompleteDate_whenMonthInvalid_showsInvalidMonth() {
+        expiryDateEditText.append("15")
+        expiryDateEditText.append("50")
+
+        assertThat(expiryDateEditText.shouldShowError)
+            .isTrue()
+        assertThat(expiryDateEditText.errorMessage)
+            .isEqualTo(context.getString(R.string.invalid_expiry_month))
     }
 
     @Test
@@ -278,7 +299,7 @@ class ExpiryDateEditTextTest {
 
     @Test
     fun validatedDate_whenDateIsValidFormatButExpired_returnsNull() {
-        // This test will be invalid if run after the year 2050. Please update the code.
+        // This test will be invalid if run after the year 2080. Please update the code.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2080)
             .isTrue()
 

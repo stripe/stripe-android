@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import java.util.Currency
 import java.util.Locale
 
-internal class PaymentSheetPaymentMethodsListFragment(
+internal class PaymentSheetListFragment(
     eventReporter: EventReporter
 ) : BasePaymentMethodsListFragment(
     canClickSelectedItem = false,
