@@ -23,24 +23,6 @@ object CardFixtures {
         id = "id"
     )
 
-    internal val CARD_NO_EXPIRATION_MONTH = Card(
-        number = CardNumberFixtures.VISA_NO_SPACES,
-        expMonth = null,
-        expYear = 2050,
-        cvc = "123",
-        addressLine1 = AddressFixtures.ADDRESS.line1,
-        addressLine2 = AddressFixtures.ADDRESS.line2,
-        addressCity = AddressFixtures.ADDRESS.city,
-        addressCountry = AddressFixtures.ADDRESS.country,
-        addressState = AddressFixtures.ADDRESS.state,
-        addressZip = AddressFixtures.ADDRESS.postalCode,
-        currency = "USD",
-        name = "Jenny Rosen",
-        brand = CardBrand.Visa,
-        last4 = "4242",
-        id = "id"
-    )
-
     internal val CARD_USD_JSON = JSONObject(
         """
         {
