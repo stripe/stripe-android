@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -34,6 +36,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -333,6 +336,42 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.window.statusBarColor)
                 .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
             scenario.moveToState(Lifecycle.State.DESTROYED)
+        }
+    }
+
+    @Ignore
+    @Test
+    fun `make sure pending fragment transactions complete before looking at the backstack count`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            assertThat(currentFragment(activity))
+                .isInstanceOf(PaymentSheetListFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
+                .isEqualTo(WRAP_CONTENT)
+
+            // Commit a fragment
+//            val fragmentArgs: FragmentConfig = mock()
+//            activity.supportFragmentManager.commit {
+//                addToBackStack(null)
+//                replace(
+//                    1,
+//                    PaymentSheetAddCardFragment::class.java,
+//                    fragmentArgs
+//                )
+//            }
+
+            viewModel.updateMode(SheetMode.Full)
+
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
+
+            assertThat(activity.toolbar.backButton.isVisible).isTrue()
         }
     }
 

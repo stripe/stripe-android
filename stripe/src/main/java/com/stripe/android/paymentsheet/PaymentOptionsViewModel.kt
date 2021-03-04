@@ -39,7 +39,7 @@ internal class PaymentOptionsViewModel(
     private val shouldTransitionToUnsavedCard: Boolean
         get() =
             !hasTransitionToUnsavedCard &&
-                (newCard as? PaymentSelection.New)?.shouldSavePaymentMethod ?: false
+                (newCard as? PaymentSelection.New)?.let { !it.shouldSavePaymentMethod } ?: false
 
     init {
         _isGooglePayReady.value = args.isGooglePayReady
