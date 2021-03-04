@@ -19,12 +19,6 @@ internal class PrimaryButton @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    internal sealed class State {
-        data class Ready(val label: String) : State()
-        object Confirming : State()
-        object Completed : State()
-    }
-
     private var state: State? = null
     private val animator = PrimaryButtonAnimator(context)
 
@@ -46,11 +40,11 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.label.text = text
     }
 
-    private fun setReady() {
+    private fun onReadyState() {
         viewBinding.confirmingIcon.isVisible = false
     }
 
-    private fun setConfirm() {
+    private fun onConfirmState() {
         viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
 
@@ -59,15 +53,14 @@ internal class PrimaryButton @JvmOverloads constructor(
         )
     }
 
-    private suspend fun setCompletedBlocking(): Any =
+    private suspend fun onCompletedStateBlocking(): Any =
         suspendCoroutine { cont ->
-            setCompleted {
+            onCompletedState {
                 cont.resume(Any())
             }
         }
 
-    private fun setCompleted(onAnimationEnd: () -> Unit) {
-
+    private fun onCompletedState(onAnimationEnd: () -> Unit) {
         setBackgroundResource(
             R.drawable.stripe_paymentsheet_primary_button_confirmed_background
         )
@@ -82,7 +75,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-        setLockVisible(enabled)
+        viewBinding.lockIcon.isVisible = enabled
         updateAlpha()
     }
 
@@ -93,13 +86,13 @@ internal class PrimaryButton @JvmOverloads constructor(
         when (state) {
             is State.Ready -> {
                 setLabelText(state.label)
-                setReady()
+                onReadyState()
             }
             State.Confirming -> {
-                setConfirm()
+                onConfirmState()
             }
             is State.Completed -> {
-                setCompletedBlocking()
+                onCompletedStateBlocking()
             }
         }
     }
@@ -112,7 +105,9 @@ internal class PrimaryButton @JvmOverloads constructor(
         }
     }
 
-    private fun setLockVisible(visible: Boolean) {
-        viewBinding.lockIcon.isVisible = visible
+    internal sealed class State {
+        data class Ready(val label: String) : State()
+        object Confirming : State()
+        object Completed : State()
     }
 }
