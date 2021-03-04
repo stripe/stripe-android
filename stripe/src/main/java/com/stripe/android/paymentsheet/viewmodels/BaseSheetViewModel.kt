@@ -27,8 +27,7 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val config: PaymentSheet.Configuration?,
     protected val prefsRepository: PrefsRepository,
-    protected val workContext: CoroutineContext = Dispatchers.IO,
-    previousSelection: PaymentSelection.New.Card? = null
+    protected val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
     internal val customerConfig = config?.customer
 
@@ -67,11 +66,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _userMessage = MutableLiveData<UserMessage?>()
     internal val userMessage: LiveData<UserMessage?> = _userMessage
 
-    /**
-     * This is a helper to retrieve the user selection if it is a new card otherwise
-     * it will return null
-     */
-    internal val newCardSelection: PaymentSelection.New? get() = selection.value as? PaymentSelection.New
+    abstract var newCard: PaymentSelection.New.Card?
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         transition.switchMap { transitionTarget ->
@@ -85,7 +80,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     init {
         fetchSavedSelection()
-        updateSelection(previousSelection)
     }
 
     fun fetchFragmentConfig() = MediatorLiveData<FragmentConfig?>().also { configLiveData ->

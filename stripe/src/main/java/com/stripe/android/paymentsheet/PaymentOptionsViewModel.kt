@@ -19,8 +19,7 @@ internal class PaymentOptionsViewModel(
     private val eventReporter: EventReporter
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
-    prefsRepository = prefsRepository,
-    previousSelection = args.newCard
+    prefsRepository = prefsRepository
 ) {
     // This field is unique from the selection in sheetViewModel, as the one in sheet view model
     // is updated any time the add card fragment is in a valid state.  This one will
@@ -29,15 +28,18 @@ internal class PaymentOptionsViewModel(
     private val _userSelection = MutableLiveData<PaymentSelection>()
     val userSelection: LiveData<PaymentSelection> = _userSelection
 
+    // Only used to determine if we should skip the list and go to the add card view.
+    // and how to populate that view.
+    override var newCard = args.newCard
+
     // This is used in the case where the last card was new and not saved.  In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
     private var hasTransitionToUnsavedCard = false
     private val shouldTransitionToUnsavedCard: Boolean
-        get() = !hasTransitionToUnsavedCard && (
-            newCardSelection?.let { !it.shouldSavePaymentMethod }
-                ?: false
-            )
+        get() =
+            !hasTransitionToUnsavedCard &&
+                (newCard as? PaymentSelection.New)?.shouldSavePaymentMethod ?: false
 
     init {
         _isGooglePayReady.value = args.isGooglePayReady

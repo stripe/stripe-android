@@ -307,10 +307,10 @@ internal abstract class BaseAddCardFragment(
     }
 
     private fun populateFieldsFromNewCard() {
-        val paymentMethodCreateParams = sheetViewModel.newCardSelection?.paymentMethodCreateParams
+        val paymentMethodCreateParams = sheetViewModel.newCard?.paymentMethodCreateParams
         cardMultilineWidget.populateFromParams(paymentMethodCreateParams?.card)
         billingAddressView.populateFromParams(paymentMethodCreateParams?.billingDetails?.address)
-        saveCardCheckbox.isChecked = sheetViewModel.newCardSelection?.shouldSavePaymentMethod ?: true
+        saveCardCheckbox.isChecked = sheetViewModel.newCard?.shouldSavePaymentMethod ?: true
     }
 
     private fun onCardError(
