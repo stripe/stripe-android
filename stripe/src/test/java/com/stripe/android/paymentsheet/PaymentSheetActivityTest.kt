@@ -5,6 +5,8 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -36,7 +38,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -339,7 +340,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore
     @Test
     fun `make sure pending fragment transactions complete before looking at the backstack count`() {
         val scenario = activityScenario()
@@ -355,21 +355,16 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
                 .isEqualTo(WRAP_CONTENT)
 
-            // Commit a fragment
-//            val fragmentArgs: FragmentConfig = mock()
-//            activity.supportFragmentManager.commit {
-//                addToBackStack(null)
-//                replace(
-//                    1,
-//                    PaymentSheetAddCardFragment::class.java,
-//                    fragmentArgs
-//                )
-//            }
+            activity.supportFragmentManager.commit {
+                addToBackStack(null)
+                replace(
+                    activity.viewBinding.fragmentContainer.id,
+                    Fragment(),
+                    "test fragment"
+                )
+            }
 
             viewModel.updateMode(SheetMode.Full)
-
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
             assertThat(activity.toolbar.backButton.isVisible).isTrue()
         }

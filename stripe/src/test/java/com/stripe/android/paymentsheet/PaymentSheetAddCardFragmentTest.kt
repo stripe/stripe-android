@@ -188,6 +188,8 @@ class PaymentSheetAddCardFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isTrue()
+
+            assertThat(fragment.sheetViewModel.newCard?.brand).isEqualTo(CardBrand.Visa)
         }
     }
 
@@ -268,6 +270,28 @@ class PaymentSheetAddCardFragmentTest {
                 .isEmpty()
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
+        }
+    }
+
+    @Test
+    fun `make sure when add card fields are edited newcard is updated`() {
+        createFragment { fragment, viewBinding ->
+            assertThat(viewBinding.cardErrors.isVisible)
+                .isFalse()
+
+            viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
+            viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
+            viewBinding.cardMultilineWidget.setCvcCode("123")
+            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.postalCodeView.setText("94107")
+
+            viewBinding.saveCardCheckbox.isChecked = true
+
+            assertThat(fragment.sheetViewModel.newCard?.brand).isEqualTo(CardBrand.Visa)
+
+            viewBinding.cardMultilineWidget.setCardNumber("378282246310005")
+
+            assertThat(fragment.sheetViewModel.newCard?.brand).isEqualTo(CardBrand.AmericanExpress)
         }
     }
 
