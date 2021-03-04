@@ -5528,7 +5528,6 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public final fun getUsZipCodeRequired ()Z
 	public fun isEnabled ()Z
 	public fun onWindowFocusChanged (Z)V
-	public final fun populateFromParams (Lcom/stripe/android/model/PaymentMethodCreateParams$Card;)V
 	public fun setCardHint (Ljava/lang/String;)V
 	public fun setCardInputListener (Lcom/stripe/android/view/CardInputListener;)V
 	public fun setCardNumber (Ljava/lang/String;)V

@@ -12,7 +12,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -85,6 +87,58 @@ class PaymentSheetAddCardFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isFalse()
+            assertThat(fragment.sheetViewModel.newCard).isEqualTo(paymentSelection)
+        }
+    }
+
+    @Test
+    fun `relaunching the fragment populates the fields`() {
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { fragment, viewBinding ->
+            fragment.sheetViewModel.newCard = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CardBrand.Discover,
+                false
+            )
+
+            viewBinding.saveCardCheckbox.isChecked = false
+
+            var paymentSelection: PaymentSelection? = null
+            fragment.sheetViewModel.selection.observeForever {
+                paymentSelection = it
+            }
+
+            viewBinding.saveCardCheckbox.isChecked = true
+
+            viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
+            viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
+            viewBinding.cardMultilineWidget.setCvcCode("123")
+            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.postalCodeView.setText("94107")
+
+            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
+            assertThat(newPaymentSelection.shouldSavePaymentMethod)
+                .isFalse()
+        }
+
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { fragment, viewBinding ->
+            viewBinding.saveCardCheckbox.isChecked = false
+
+            var paymentSelection: PaymentSelection? = null
+            fragment.sheetViewModel.selection.observeForever {
+                paymentSelection = it
+            }
+
+            viewBinding.saveCardCheckbox.isChecked = true
+
+            viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
+            viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
+            viewBinding.cardMultilineWidget.setCvcCode("123")
+            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.postalCodeView.setText("94107")
+
+            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
+            assertThat(newPaymentSelection.shouldSavePaymentMethod)
+                .isFalse()
         }
     }
 
@@ -109,6 +163,7 @@ class PaymentSheetAddCardFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isTrue()
+            assertThat(fragment.sheetViewModel.newCard).isEqualTo(paymentSelection)
         }
     }
 
