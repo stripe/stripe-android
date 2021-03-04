@@ -182,19 +182,24 @@ internal abstract class BaseAddCardFragment(
     }
 
     private fun updateSelection() {
-        sheetViewModel.updateSelection(
-            if (addCardViewModel.isCardValid) {
-                paymentMethodParams?.let { params ->
-                    PaymentSelection.New.Card(
-                        params,
-                        cardMultilineWidget.brand,
-                        shouldSavePaymentMethod = shouldSaveCard()
-                    )
-                }
-            } else {
-                null
+        val validCard = if (addCardViewModel.isCardValid) {
+            paymentMethodParams?.let { params ->
+                PaymentSelection.New.Card(
+                    params,
+                    cardMultilineWidget.brand,
+                    shouldSavePaymentMethod = shouldSaveCard()
+                )
             }
-        )
+        } else {
+            null
+        }
+
+        // If you open a new unsaved card, edit it, go to the list view and come back the edited
+        // card should be shown, this means that the new card must be updated
+        validCard?.let {
+            sheetViewModel.newCard = validCard
+        }
+        sheetViewModel.updateSelection(validCard)
     }
 
     private fun setupCardWidget() {
