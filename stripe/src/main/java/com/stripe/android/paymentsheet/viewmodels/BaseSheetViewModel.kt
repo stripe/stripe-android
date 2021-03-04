@@ -54,9 +54,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val transition: LiveData<TransitionTargetType?> = _transition
 
     /**
-     * On BaseAddCard this is set every time the add card is determined to be valid
+     * On [com.stripe.android.paymentsheet.BaseAddCardFragment] this is set every time the add
+     * card is determined to be
+     * valid
      * (not necessarily selected)
-     * On BaseListFragment this is set when a user selects one of the options
+     * On [com.stripe.android.paymentsheet.BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
     private val _selection = MutableLiveData<PaymentSelection?>()
     internal val selection: LiveData<PaymentSelection?> = _selection
