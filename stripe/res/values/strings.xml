@@ -196,7 +196,7 @@
 
     <!-- The payment amount (e.g. "Pay $25.00") -->
     <string name="stripe_paymentsheet_pay_button_amount" tools:ignore="MissingTranslation">Pay %s</string>
-    <string name="stripe_paymentsheet_pay_button_processing" tools:ignore="MissingTranslation">Processing…</string>
+    <string name="stripe_paymentsheet_button_processing" tools:ignore="MissingTranslation">Processing…</string>
 
     <string name="stripe_paymentsheet_add_button_label" tools:ignore="MissingTranslation">Add</string>
 

@@ -35,7 +35,9 @@ class PrimaryButtonTest {
     fun `onReadyState() should update label`() {
         runBlocking {
             primaryButton.updateState(
-                PrimaryButton.State.Ready("Pay $10.99")
+                state = PrimaryButton.State.Ready("Pay $10.99"),
+                completeCallback = {
+                }
             )
         }
 
@@ -50,7 +52,11 @@ class PrimaryButtonTest {
     @Test
     fun `onConfirmingState() should update label`() {
         runBlocking {
-            primaryButton.updateState(PrimaryButton.State.Confirming)
+            primaryButton.updateState(
+                state = PrimaryButton.State.Confirming,
+                completeCallback = {
+                }
+            )
             assertThat(
                 primaryButton.viewBinding.label.text.toString()
             ).isEqualTo(
@@ -69,7 +75,9 @@ class PrimaryButtonTest {
     fun `after viewState ready and disabled, label alpha is 50%`() {
         runBlocking {
             primaryButton.updateState(
-                PrimaryButton.State.Ready("$10.99")
+                state = PrimaryButton.State.Ready("$10.99"),
+                completeCallback = {
+                }
             )
             assertThat(primaryButton.viewBinding.label.alpha)
                 .isEqualTo(0.5f)
@@ -80,7 +88,9 @@ class PrimaryButtonTest {
     fun `after viewState ready and enabled, label alpha is 100%`() {
         runBlocking {
             primaryButton.updateState(
-                PrimaryButton.State.Ready("$10.99")
+                state = PrimaryButton.State.Ready("$10.99"),
+                completeCallback = {
+                }
             )
             primaryButton.isEnabled = true
             assertThat(primaryButton.viewBinding.label.alpha)

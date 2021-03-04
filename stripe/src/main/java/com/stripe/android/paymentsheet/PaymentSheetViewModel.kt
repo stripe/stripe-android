@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -60,7 +61,8 @@ internal class PaymentSheetViewModel internal constructor(
     private val _startConfirm = MutableLiveData<ConfirmPaymentIntentParams>()
     internal val startConfirm: LiveData<ConfirmPaymentIntentParams> = _startConfirm
 
-    private val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
+    @VisibleForTesting
+    internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
     internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
     override val newCard: PaymentSelection.New.Card? = null

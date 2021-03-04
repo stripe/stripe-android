@@ -39,7 +39,6 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
 import com.stripe.android.view.AuthActivityStarter
-import kotlinx.coroutines.launch
 import java.util.Currency
 import java.util.Locale
 
@@ -296,23 +295,22 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
     private val viewStateObserver: (ViewState.PaymentSheet?) -> Unit
         get() = { viewState ->
-            lifecycleScope.launch {
-                val buyButton = viewBinding.buyButton
-                buyButton.updateState(
-                    when (viewState) {
-                        null -> null
-                        is ViewState.PaymentSheet.Ready -> PrimaryButton.State.Ready(
-                            getLabelText(viewState)
-                        )
-                        is ViewState.PaymentSheet.Confirming -> PrimaryButton.State.Confirming
-                        is ViewState.PaymentSheet.Completed -> PrimaryButton.State.Completed
-                    }
-                )
-
-                if (viewState is ViewState.PaymentSheet.Completed) {
-                    onActionCompleted(viewState.result)
+            val buyButton = viewBinding.buyButton
+            buyButton.updateState(
+                state = when (viewState) {
+                    null -> null
+                    is ViewState.PaymentSheet.Ready -> PrimaryButton.State.Ready(
+                        getLabelText(viewState)
+                    )
+                    is ViewState.PaymentSheet.Confirming -> PrimaryButton.State.Confirming
+                    is ViewState.PaymentSheet.Completed -> PrimaryButton.State.Completed
+                },
+                completeCallback = {
+                    onActionCompleted(
+                        (viewState as ViewState.PaymentSheet.Completed).result
+                    )
                 }
-            }
+            )
         }
 
     private fun setupBuyButton() {

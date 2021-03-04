@@ -47,6 +47,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
+    /**
+     * Request to retrieve the value from the repository happens when initialize any fragment
+     * and any fragment will re-update when the result comes back.
+     * Represents the user last selects add or buy on the PaymentOptions/PaymentSheet, and
+     * saved/restored from the preferences.
+     */
     private val _savedSelection = MutableLiveData<SavedSelection>()
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 

@@ -1,7 +1,7 @@
-
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -23,7 +23,10 @@ internal class PaymentOptionsViewModel(
     config = args.config,
     prefsRepository = prefsRepository
 ) {
-    private val _viewState = MutableLiveData<ViewState.PaymentOptions>(ViewState.PaymentOptions.Ready)
+    @VisibleForTesting
+    internal val _viewState = MutableLiveData<ViewState.PaymentOptions>(
+        ViewState.PaymentOptions.Ready
+    )
     internal val viewState: LiveData<ViewState.PaymentOptions> = _viewState.distinctUntilChanged()
 
     override val newCard = args.newCard

@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -12,7 +13,9 @@ import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -23,6 +26,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.utils.InjectableActivityScenario
@@ -31,6 +35,8 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -230,61 +236,78 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-//    private val buyButton: PrimaryButton = mock()
-//    @Test
-//    fun `Verify Ready State`() {
-//        val scenario = activityScenario()
-//        scenario.launch(intent).onActivity { activity ->
-//
-//            activity.viewStateObserver(
-//                ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"),
-//                buyButton
-//            )
-//            idleLooper()
-//
-//            verify(buyButton).setLabelText("Pay $10.99")
-//            verify(buyButton).setReady()
-//        }
-//    }
-//
-//    @Test
-//    fun `Verify Confirming state`() {
-//        val scenario = activityScenario()
-//        scenario.launch(intent).onActivity { activity ->
-//
-//            activity.viewStateObserver(
-//                ViewState.PaymentSheet.Confirming,
-//                buyButton
-//            )
-//            idleLooper()
-//
-//            verify(buyButton).setConfirm()
-//        }
-//    }
-//
-//    @Test
-//    fun `Verify Completed state closes the sheet`() {
-//        val scenario = activityScenario()
-//        scenario.launch(intent).onActivity { activity ->
-//
-//            activity.viewStateObserver(
-//                ViewState.PaymentSheet.Completed(
-//                    PaymentIntentResult(
-//                        intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
-//                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-//                    )
-//                ),
-//                buyButton
-//            )
-//            idleLooper()
-//
-//            verify(buyButton).setCompleted {}
-//            idleLooper()
-//
-//            assertThat(activity.bottomSheetBehavior.state)
-//                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-//        }
-//    }
+    @Test
+    fun `Verify Ready State`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            viewModel._viewState.value = ViewState.PaymentSheet.Ready(
+                amount = 1099,
+                currencyCode = "usd"
+            )
+
+            idleLooper()
+
+            val buyBinding = PrimaryButtonBinding.bind(activity.viewBinding.buyButton)
+
+            assertThat(buyBinding.confirmedIcon.isVisible)
+                .isFalse()
+            assertThat(buyBinding.label.text)
+                .isEqualTo("Pay $10.99")
+
+            idleLooper()
+
+            activity.finish()
+        }
+    }
+
+    @Test
+    fun `Verify Confirming state`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            viewModel._viewState.value = ViewState.PaymentSheet.Confirming
+
+            idleLooper()
+
+            val buyBinding = PrimaryButtonBinding.bind(activity.viewBinding.buyButton)
+            assertThat(buyBinding.label.text)
+                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_button_processing))
+        }
+    }
+
+    @Test
+    fun `Verify Completed state closes the sheet`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            viewModel._viewState.value = ViewState.PaymentSheet.Completed(
+                PaymentIntentResult(
+                    intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
+                    outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+
+            idleLooper()
+
+            // wait animate time...
+            runBlocking {
+                delay(1600)
+
+                assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            }
+        }
+    }
 
     @Test
     fun `successful payment should dismiss bottom sheet`() {

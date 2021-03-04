@@ -7,8 +7,6 @@ import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.PrimaryButtonBinding
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -40,7 +38,8 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.label.text = text
     }
 
-    private fun onReadyState() {
+    private fun onReadyState(text: String) {
+        setLabelText(text)
         viewBinding.confirmingIcon.isVisible = false
     }
 
@@ -49,16 +48,9 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.confirmingIcon.isVisible = true
 
         viewBinding.label.text = resources.getString(
-            R.string.stripe_paymentsheet_pay_button_processing
+            R.string.stripe_paymentsheet_button_processing
         )
     }
-
-    private suspend fun onCompletedStateBlocking(): Any =
-        suspendCoroutine { cont ->
-            onCompletedState {
-                cont.resume(Any())
-            }
-        }
 
     private fun onCompletedState(onAnimationEnd: () -> Unit) {
         setBackgroundResource(
@@ -79,20 +71,19 @@ internal class PrimaryButton @JvmOverloads constructor(
         updateAlpha()
     }
 
-    suspend fun updateState(state: State?) {
+    fun updateState(state: State?, completeCallback: () -> Unit) {
         this.state = state
         updateAlpha()
 
         when (state) {
             is State.Ready -> {
-                setLabelText(state.label)
-                onReadyState()
+                onReadyState(state.label)
             }
             State.Confirming -> {
                 onConfirmState()
             }
             is State.Completed -> {
-                onCompletedStateBlocking()
+                onCompletedState(completeCallback)
             }
         }
     }

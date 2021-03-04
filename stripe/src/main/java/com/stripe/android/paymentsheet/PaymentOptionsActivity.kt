@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
-import kotlinx.coroutines.launch
 
 /**
  * An `Activity` for selecting a payment option.
@@ -152,21 +151,20 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     @VisibleForTesting
     private val viewStateObserver: (ViewState.PaymentOptions?) -> Unit
         get() = { viewState ->
-            lifecycleScope.launch {
-                val addButton = viewBinding.addButton
-                addButton.updateState(
-                    when (viewState) {
-                        null -> null
-                        is ViewState.PaymentOptions.Ready -> PrimaryButton.State.Ready(addButtonLabel)
-                        is ViewState.PaymentOptions.Confirming -> PrimaryButton.State.Confirming
-                        is ViewState.PaymentOptions.Completed -> PrimaryButton.State.Completed
-                    }
-                )
-
-                if (viewState is ViewState.PaymentOptions.Completed) {
-                    onActionCompleted(viewState.result)
+            val addButton = viewBinding.addButton
+            addButton.updateState(
+                state = when (viewState) {
+                    null -> null
+                    is ViewState.PaymentOptions.Ready -> PrimaryButton.State.Ready(addButtonLabel)
+                    is ViewState.PaymentOptions.Confirming -> PrimaryButton.State.Confirming
+                    is ViewState.PaymentOptions.Completed -> PrimaryButton.State.Completed
+                },
+                completeCallback = {
+                    onActionCompleted(
+                        (viewState as ViewState.PaymentOptions.Completed).result
+                    )
                 }
-            }
+            )
         }
 
     private fun setupAddButton(addButton: PrimaryButton) {
