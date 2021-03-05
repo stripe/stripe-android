@@ -282,14 +282,35 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify Completed state closes the sheet`() {
+    fun `Verify finishProcessing state`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { _ ->
+            // wait for bottom sheet to animate in
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            var finishProcessingCalled = false
+            viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                finishProcessingCalled = true
+            }
+
+            idleLooper()
+
+            testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+
+            assertThat(finishProcessingCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Verify close state closes the sheet`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
-            viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing(
+            viewModel._viewState.value = ViewState.PaymentSheet.CloseSheet(
                 PaymentIntentResult(
                     intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
                     outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED

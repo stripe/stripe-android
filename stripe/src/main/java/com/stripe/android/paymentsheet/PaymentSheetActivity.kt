@@ -292,9 +292,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         // When using commit on the fragments, the fragment transaction happens
         // at some later time.  In order to get an accurate backstack count
         // we need to make sure the transactions have completed.  In API 24+ you can use commitNow
-        // By using commitNow, only the items in the runnable will be commited,
+        // By using commitNow, only the items in the runnable will be committed,
         // executePendingTransactions will run all the transactions even ones that were not just
-        // commited.
+        // committed.
         supportFragmentManager.executePendingTransactions()
         viewBinding.buyButton.isVisible = true
         appbar.isVisible = true
@@ -302,21 +302,21 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     }
 
     private val viewStateObserver = { viewState: ViewState.PaymentSheet? ->
-        viewBinding.buyButton.updateState(
-            state = when (viewState) {
-                null -> null
-                is ViewState.PaymentSheet.Ready -> PrimaryButton.State.Ready(
-                    getLabelText(viewState)
-                )
-                is ViewState.PaymentSheet.StartProcessing -> PrimaryButton.State.StartProcessing
-                is ViewState.PaymentSheet.FinishProcessing -> PrimaryButton.State.FinishProcessing
-            },
-            completeCallback = {
-                onActionCompleted(
-                    (viewState as ViewState.PaymentSheet.FinishProcessing).result
-                )
-            }
-        )
+
+        when (viewState) {
+            is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.Ready(getLabelText(viewState))
+            )
+            is ViewState.PaymentSheet.StartProcessing -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.StartProcessing
+            )
+            is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
+            )
+            is ViewState.PaymentSheet.CloseSheet -> onActionCompleted(
+                viewState.result
+            )
+        }
     }
 
     private fun setupBuyButton() {

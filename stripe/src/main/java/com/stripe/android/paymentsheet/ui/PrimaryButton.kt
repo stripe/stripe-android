@@ -43,7 +43,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.confirmingIcon.isVisible = false
     }
 
-    private fun onConfirmState() {
+    private fun onStartProcessing() {
         viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
 
@@ -52,7 +52,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         )
     }
 
-    private fun onCompletedState(onAnimationEnd: () -> Unit) {
+    private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
         setBackgroundResource(
             R.drawable.stripe_paymentsheet_primary_buy_confirmed_background
         )
@@ -71,7 +71,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         updateAlpha()
     }
 
-    fun updateState(state: State?, completeCallback: () -> Unit = {}) {
+    fun updateState(state: State?) {
         this.state = state
         updateAlpha()
 
@@ -80,10 +80,10 @@ internal class PrimaryButton @JvmOverloads constructor(
                 onReadyState(state.label)
             }
             State.StartProcessing -> {
-                onConfirmState()
+                onStartProcessing()
             }
             is State.FinishProcessing -> {
-                onCompletedState(completeCallback)
+                onFinishProcessing(state.onComplete)
             }
         }
     }
@@ -99,6 +99,6 @@ internal class PrimaryButton @JvmOverloads constructor(
     internal sealed class State {
         data class Ready(val label: String) : State()
         object StartProcessing : State()
-        object FinishProcessing : State()
+        data class FinishProcessing(val onComplete: () -> Unit) : State()
     }
 }

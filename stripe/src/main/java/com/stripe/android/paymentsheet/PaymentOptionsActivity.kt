@@ -157,18 +157,17 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         val addButton = viewBinding.addButton
         when (viewState) {
             is ViewState.PaymentOptions.Ready -> addButton.updateState(
-                state = PrimaryButton.State.Ready(addButtonLabel)
+                PrimaryButton.State.Ready(addButtonLabel)
             )
             is ViewState.PaymentOptions.StartProcessing -> addButton.updateState(
-                state = PrimaryButton.State.StartProcessing
+                PrimaryButton.State.StartProcessing
             )
             is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
-                state = PrimaryButton.State.FinishProcessing,
-                completeCallback = {
-                    onActionCompleted(viewState.result)
-                }
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentOptions.Finished -> onActionCompleted(viewState.result)
+            is ViewState.PaymentOptions.CloseSheet -> onActionCompleted(
+                viewState.result
+            )
         }
     }
 
@@ -231,11 +230,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         // When using commit on the fragments, the fragment transaction happens
         // at some later time.  In order to get an accurate backstack count
         // we need to make sure the transactions have completed.  In API 24+ you can use commitNow
-        // By using commitNow, only the items in the runnable will be commited,
+        // By using commitNow, only the items in the runnable will be committed,
         // executePendingTransactions will run all the transactions even ones that were not just
-        // commited.
+        // committed.
         supportFragmentManager.executePendingTransactions()
-        viewBinding.addButton.isVisible = transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
+        viewBinding.addButton.isVisible =
+            transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 

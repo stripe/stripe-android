@@ -174,7 +174,7 @@ class PaymentOptionsActivityTest {
             createIntent(emptyList())
         ).onActivity { activity ->
             val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-            viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing(
+            viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
                 PaymentOptionResult.Succeeded(
                     paymentSelectionMock
                 )
@@ -196,7 +196,7 @@ class PaymentOptionsActivityTest {
             createIntent(emptyList())
         ).onActivity { activity ->
             val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-            viewModel._viewState.value = ViewState.PaymentOptions.Finished(
+            viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
                 PaymentOptionResult.Succeeded(
                     paymentSelectionMock
                 )

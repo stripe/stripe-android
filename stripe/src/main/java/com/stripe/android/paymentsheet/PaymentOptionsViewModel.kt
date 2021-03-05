@@ -66,11 +66,13 @@ internal class PaymentOptionsViewModel(
         if (requestSaveNewCard) {
             // TODO: Update the returned value with the savedCard rather than the NewCard
             // so that we don't jump the next time.
-            _viewState.value = ViewState.PaymentOptions.FinishProcessing(
-                PaymentOptionResult.Succeeded(paymentSelection)
-            )
+            _viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                _viewState.value = ViewState.PaymentOptions.CloseSheet(
+                    PaymentOptionResult.Succeeded(paymentSelection)
+                )
+            }
         } else {
-            _viewState.value = ViewState.PaymentOptions.Finished(
+            _viewState.value = ViewState.PaymentOptions.CloseSheet(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )
         }

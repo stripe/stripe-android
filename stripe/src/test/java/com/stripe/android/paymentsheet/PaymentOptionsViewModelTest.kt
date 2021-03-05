@@ -57,7 +57,7 @@ class PaymentOptionsViewModelTest {
 
         viewModel.onUserSelection()
 
-        assertThat((viewState as ViewState.PaymentOptions.Finished).result)
+        assertThat((viewState as ViewState.PaymentOptions.CloseSheet).result)
             .isEqualTo(PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD))
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
@@ -72,7 +72,7 @@ class PaymentOptionsViewModelTest {
 
         viewModel.onUserSelection()
 
-        assertThat((viewState as ViewState.PaymentOptions.Finished).result)
+        assertThat((viewState as ViewState.PaymentOptions.CloseSheet).result)
             .isEqualTo(PaymentOptionResult.Succeeded(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION))
         verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
     }
@@ -89,8 +89,11 @@ class PaymentOptionsViewModelTest {
 
         assertThat(viewState[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
 
+        assertThat(viewState[1]).isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
+        (viewState[1] as ViewState.PaymentOptions.FinishProcessing).onComplete()
+
         val paymentOptionResultSucceeded =
-            (viewState[1] as ViewState.PaymentOptions.FinishProcessing)
+            (viewState[2] as ViewState.PaymentOptions.CloseSheet)
                 .result as PaymentOptionResult.Succeeded
         assertThat((paymentOptionResultSucceeded).paymentSelection)
             .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
