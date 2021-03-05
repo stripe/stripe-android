@@ -59,10 +59,10 @@
     <dimen name="stripe_paymentsheet_outer_spacing_horizontal">20dp</dimen>
     <dimen name="stripe_paymentsheet_button_container_spacing">10dp</dimen>
     <dimen name="stripe_paymentsheet_button_container_spacing_bottom">34dp</dimen>
-    <dimen name="stripe_paymentsheet_primary_button_corner_radius">6dp</dimen>
-    <dimen name="stripe_paymentsheet_primary_button_icon_size">20dp</dimen>
-    <dimen name="stripe_paymentsheet_primary_button_check_padding">5dp</dimen>
-    <dimen name="stripe_paymentsheet_primary_button_icon_padding">8dp</dimen>
+    <dimen name="stripe_paymentsheet_buybutton_corner_radius">6dp</dimen>
+    <dimen name="stripe_paymentsheet_buybutton_icon_size">20dp</dimen>
+    <dimen name="stripe_paymentsheet_buybutton_check_padding">5dp</dimen>
+    <dimen name="stripe_paymentsheet_buybutton_icon_padding">8dp</dimen>
     <dimen name="stripe_paymentsheet_primarybutton_height">48sp</dimen>
     <dimen name="stripe_paymentsheet_primarybutton_margin">3dp</dimen>
     <dimen name="stripe_paymentsheet_card_elevation">2dp</dimen>
