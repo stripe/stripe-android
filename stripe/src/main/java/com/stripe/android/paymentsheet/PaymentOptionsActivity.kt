@@ -201,6 +201,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 }
             }
         }
+
+        // When using commit on the fragments, the fragment transaction happens
+        // at some later time.  In order to get an accurate backstack count
+        // we need to make sure the transactions have completed.  In API 24+ you can use commitNow
         supportFragmentManager.executePendingTransactions()
         viewBinding.addButton.isVisible = transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
         viewModel.updateMode(transitionTarget.sheetMode)
