@@ -12,7 +12,8 @@ internal class CurrencyFormatter {
         currency: Currency
     ): String {
         val currencySymbol = currency.getSymbol(Locale.getDefault())
-        val majorUnitAmount = amount / MAJOR_UNIT_BASE.pow(getDefaultFractionDigits(currency).toDouble())
+        val majorUnitAmount =
+            amount / MAJOR_UNIT_BASE.pow(getDefaultFractionDigits(currency).toDouble())
         val currencyFormat = NumberFormat.getCurrencyInstance()
 
         // We need to cast inside the try catch because most currencies are decimal formats but
