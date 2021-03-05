@@ -35,8 +35,6 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -272,7 +270,7 @@ internal class PaymentSheetActivityTest {
             testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
-            viewModel._viewState.value = ViewState.PaymentSheet.Confirming
+            viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
 
             idleLooper()
 
@@ -290,7 +288,7 @@ internal class PaymentSheetActivityTest {
             testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
-            viewModel._viewState.value = ViewState.PaymentSheet.Completed(
+            viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing(
                 PaymentIntentResult(
                     intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
                     outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
@@ -300,12 +298,10 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // wait animate time...
-            runBlocking {
-                delay(1600)
+            testDispatcher.advanceTimeBy(1600)
 
-                assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            }
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
 

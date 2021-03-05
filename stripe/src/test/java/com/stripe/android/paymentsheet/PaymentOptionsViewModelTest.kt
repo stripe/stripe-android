@@ -79,8 +79,9 @@ class PaymentOptionsViewModelTest {
 
         assertThat(viewState[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
 
-        val paymentOptionResultSucceeded = (viewState[1] as ViewState.PaymentOptions.Completed)
-            .result as PaymentOptionResult.Succeeded
+        val paymentOptionResultSucceeded =
+            (viewState[1] as ViewState.PaymentOptions.FinishProcessing)
+                .result as PaymentOptionResult.Succeeded
         assertThat((paymentOptionResultSucceeded).paymentSelection)
             .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
         verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
@@ -130,7 +131,7 @@ class PaymentOptionsViewModelTest {
         private val NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
             paymentMethodCreateParams,
             CardBrand.Visa,
-            true,
+            false,
         )
     }
 }

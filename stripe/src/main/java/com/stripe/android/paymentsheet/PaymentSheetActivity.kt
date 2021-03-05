@@ -293,24 +293,23 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    private val viewStateObserver: (ViewState.PaymentSheet?) -> Unit
-        get() = { viewState ->
-            viewBinding.buyButton.updateState(
-                state = when (viewState) {
-                    null -> null
-                    is ViewState.PaymentSheet.Ready -> PrimaryButton.State.Ready(
-                        getLabelText(viewState)
-                    )
-                    is ViewState.PaymentSheet.Confirming -> PrimaryButton.State.Confirming
-                    is ViewState.PaymentSheet.Completed -> PrimaryButton.State.Completed
-                },
-                completeCallback = {
-                    onActionCompleted(
-                        (viewState as ViewState.PaymentSheet.Completed).result
-                    )
-                }
-            )
-        }
+    private val viewStateObserver = { viewState: ViewState.PaymentSheet? ->
+        viewBinding.buyButton.updateState(
+            state = when (viewState) {
+                null -> null
+                is ViewState.PaymentSheet.Ready -> PrimaryButton.State.Ready(
+                    getLabelText(viewState)
+                )
+                is ViewState.PaymentSheet.StartProcessing -> PrimaryButton.State.Confirming
+                is ViewState.PaymentSheet.FinishProcessing -> PrimaryButton.State.Completed
+            },
+            completeCallback = {
+                onActionCompleted(
+                    (viewState as ViewState.PaymentSheet.FinishProcessing).result
+                )
+            }
+        )
+    }
 
     private fun setupBuyButton() {
         viewBinding.buyButton.setLabelText(buyButtonLabel)

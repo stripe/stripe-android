@@ -179,7 +179,7 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            _viewState.value = ViewState.PaymentSheet.Confirming
+            _viewState.value = ViewState.PaymentSheet.StartProcessing
             _startConfirm.value = confirmParams
         }
     }
@@ -191,7 +191,7 @@ internal class PaymentSheetViewModel internal constructor(
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
 
-                _viewState.value = ViewState.PaymentSheet.Completed(paymentIntentResult)
+                _viewState.value = ViewState.PaymentSheet.FinishProcessing(paymentIntentResult)
             }
             else -> {
                 eventReporter.onPaymentFailure(selection.value)

@@ -11,9 +11,9 @@ internal sealed class ViewState {
             val currencyCode: String
         ) : PaymentSheet()
 
-        object Confirming : PaymentSheet()
+        object StartProcessing : PaymentSheet()
 
-        data class Completed(
+        data class FinishProcessing(
             val result: PaymentIntentResult
         ) : PaymentSheet()
     }
@@ -21,10 +21,10 @@ internal sealed class ViewState {
     internal sealed class PaymentOptions : ViewState() {
         object Ready : PaymentOptions()
 
-        object Confirming : PaymentOptions()
+        object StartProcessing : PaymentOptions()
 
         // Completed indicates the animation should show it completed
-        data class Completed(
+        data class FinishProcessing(
             val result: PaymentOptionResult
         ) : PaymentOptions()
 

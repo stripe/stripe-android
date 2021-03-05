@@ -52,7 +52,7 @@ internal class PaymentOptionsViewModel(
             ?: false
 
         if (requestSaveNewCard) {
-            _viewState.value = ViewState.PaymentOptions.Completed(
+            _viewState.value = ViewState.PaymentOptions.FinishProcessing(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )
         } else {

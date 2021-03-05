@@ -149,25 +149,24 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     @VisibleForTesting
-    private val viewStateObserver: (ViewState.PaymentOptions?) -> Unit
-        get() = { viewState ->
-            val addButton = viewBinding.addButton
-            when (viewState) {
-                is ViewState.PaymentOptions.Ready -> addButton.updateState(
-                    state = PrimaryButton.State.Ready(addButtonLabel)
-                )
-                is ViewState.PaymentOptions.Confirming -> addButton.updateState(
-                    state = PrimaryButton.State.Confirming
-                )
-                is ViewState.PaymentOptions.Completed -> addButton.updateState(
-                    state = PrimaryButton.State.Completed,
-                    completeCallback = {
-                        onActionCompleted(viewState.result)
-                    }
-                )
-                is ViewState.PaymentOptions.Finished -> onActionCompleted(viewState.result)
-            }
+    private val viewStateObserver = { viewState: ViewState.PaymentOptions? ->
+        val addButton = viewBinding.addButton
+        when (viewState) {
+            is ViewState.PaymentOptions.Ready -> addButton.updateState(
+                state = PrimaryButton.State.Ready(addButtonLabel)
+            )
+            is ViewState.PaymentOptions.StartProcessing -> addButton.updateState(
+                state = PrimaryButton.State.Confirming
+            )
+            is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
+                state = PrimaryButton.State.Completed,
+                completeCallback = {
+                    onActionCompleted(viewState.result)
+                }
+            )
+            is ViewState.PaymentOptions.Finished -> onActionCompleted(viewState.result)
         }
+    }
 
     private fun setupAddButton(addButton: PrimaryButton) {
         addButton.setLabelText(addButtonLabel)

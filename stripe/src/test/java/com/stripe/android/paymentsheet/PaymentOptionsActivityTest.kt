@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -157,7 +158,7 @@ class PaymentOptionsActivityTest {
         scenario.launch(
             createIntent(emptyList())
         ).onActivity { activity ->
-            viewModel._viewState.value = ViewState.PaymentOptions.Confirming
+            viewModel._viewState.value = ViewState.PaymentOptions.StartProcessing
 
             idleLooper()
 
@@ -174,8 +175,8 @@ class PaymentOptionsActivityTest {
         scenario.launch(
             createIntent(emptyList())
         ).onActivity { activity ->
-            val paymentSelectionMock: PaymentSelection = mock()
-            viewModel._viewState.value = ViewState.PaymentOptions.Completed(
+            val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
+            viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing(
                 PaymentOptionResult.Succeeded(
                     paymentSelectionMock
                 )
@@ -183,13 +184,10 @@ class PaymentOptionsActivityTest {
             idleLooper()
 
             // wait animate time...
-            runBlocking {
-                // wait for animation to complete
-                delay(1600)
+            testDispatcher.advanceTimeBy(1600)
 
-                assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            }
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
 
@@ -199,7 +197,7 @@ class PaymentOptionsActivityTest {
         scenario.launch(
             createIntent(emptyList())
         ).onActivity { activity ->
-            val paymentSelectionMock: PaymentSelection = mock()
+            val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
             viewModel._viewState.value = ViewState.PaymentOptions.Finished(
                 PaymentOptionResult.Succeeded(
                     paymentSelectionMock
@@ -210,7 +208,9 @@ class PaymentOptionsActivityTest {
             // wait animate time...
             runBlocking {
                 // wait for animation to complete
-                delay(1600)
+                delay(
+                    PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION
+                )
 
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)

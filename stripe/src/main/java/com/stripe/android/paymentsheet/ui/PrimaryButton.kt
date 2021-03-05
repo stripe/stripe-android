@@ -89,10 +89,10 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun updateAlpha() {
-        if ((state == null || state is State.Ready) && !isEnabled) {
-            viewBinding.label.alpha = 0.5f
+        viewBinding.label.alpha = if ((state == null || state is State.Ready) && !isEnabled) {
+            0.5f
         } else {
-            viewBinding.label.alpha = 1.0f
+            1.0f
         }
     }
 

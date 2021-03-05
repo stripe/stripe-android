@@ -86,15 +86,13 @@ class PrimaryButtonTest {
 
     @Test
     fun `after viewState ready and enabled, label alpha is 100%`() {
-        runBlocking {
-            primaryButton.updateState(
-                state = PrimaryButton.State.Ready("$10.99"),
-                completeCallback = {
-                }
-            )
-            primaryButton.isEnabled = true
-            assertThat(primaryButton.viewBinding.label.alpha)
-                .isEqualTo(1.0f)
-        }
+        primaryButton.updateState(
+            state = PrimaryButton.State.Ready("$10.99"),
+            completeCallback = {
+            }
+        )
+        primaryButton.isEnabled = true
+        assertThat(primaryButton.viewBinding.label.alpha)
+            .isEqualTo(1.0f)
     }
 }
