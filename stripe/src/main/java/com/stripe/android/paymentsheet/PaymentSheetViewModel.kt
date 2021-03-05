@@ -115,15 +115,27 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
-        runCatching {
-            paymentIntentValidator.requireValid(paymentIntent)
-        }.fold(
-            onSuccess = {
-                _paymentIntent.value = paymentIntent
-                resetViewState(paymentIntent)
-            },
-            onFailure = ::onFatal
-        )
+        if (paymentIntent.isConfirmed) {
+            // there's nothing left to be done if the PaymentIntent is confirmed
+            _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                _viewState.value = ViewState.PaymentSheet.ProcessResult(
+                    PaymentIntentResult(
+                        paymentIntent,
+                        StripeIntentResult.Outcome.SUCCEEDED
+                    )
+                )
+            }
+        } else {
+            runCatching {
+                paymentIntentValidator.requireValid(paymentIntent)
+            }.fold(
+                onSuccess = {
+                    _paymentIntent.value = paymentIntent
+                    resetViewState(paymentIntent)
+                },
+                onFailure = ::onFatal
+            )
+        }
     }
 
     private fun resetViewState(paymentIntent: PaymentIntent) {
