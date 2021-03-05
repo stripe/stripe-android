@@ -276,7 +276,7 @@ internal class PaymentSheetActivityTest {
 
             val buyBinding = PrimaryButtonBinding.bind(activity.viewBinding.buyButton)
             assertThat(buyBinding.label.text)
-                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_button_processing))
+                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_pay_button_processing))
         }
     }
 

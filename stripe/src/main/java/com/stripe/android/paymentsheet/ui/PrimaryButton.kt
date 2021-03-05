@@ -48,7 +48,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.confirmingIcon.isVisible = true
 
         viewBinding.label.text = resources.getString(
-            R.string.stripe_paymentsheet_button_processing
+            R.string.stripe_paymentsheet_pay_button_processing
         )
     }
 
