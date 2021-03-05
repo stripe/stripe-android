@@ -10,6 +10,7 @@ import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -39,11 +40,25 @@ internal class PaymentOptionsViewModel(
     }
 
     fun onUserSelection() {
-        _viewState.value = ViewState.PaymentOptions.Confirming
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
-            _viewState.value = ViewState.PaymentOptions.Completed(PaymentOptionResult.Succeeded(paymentSelection))
+            processSelection(paymentSelection)
+        }
+    }
+
+    private fun processSelection(paymentSelection: PaymentSelection) {
+        val requestSaveNewCard = (paymentSelection as? PaymentSelection.New)?.shouldSavePaymentMethod
+            ?: false
+
+        if ((customerConfig != null) && requestSaveNewCard) {
+            _viewState.value = ViewState.PaymentOptions.Completed(
+                PaymentOptionResult.Succeeded(paymentSelection)
+            )
+        } else {
+            _viewState.value = ViewState.PaymentOptions.Finished(
+                PaymentOptionResult.Succeeded(paymentSelection)
+            )
         }
     }
 

@@ -23,7 +23,13 @@ internal sealed class ViewState {
 
         object Confirming : PaymentOptions()
 
+        // Completed indicates the animation should show it completed
         data class Completed(
+            val result: PaymentOptionResult
+        ) : PaymentOptions()
+
+        // Finished indicates the activity should be closed immediately
+        data class Finished(
             val result: PaymentOptionResult
         ) : PaymentOptions()
     }

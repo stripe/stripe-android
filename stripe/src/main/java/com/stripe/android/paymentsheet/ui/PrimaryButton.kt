@@ -71,7 +71,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         updateAlpha()
     }
 
-    fun updateState(state: State?, completeCallback: () -> Unit) {
+    fun updateState(state: State?, completeCallback: () -> Unit = {}) {
         this.state = state
         updateAlpha()
 

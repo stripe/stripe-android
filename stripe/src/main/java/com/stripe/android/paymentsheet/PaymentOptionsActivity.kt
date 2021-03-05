@@ -152,19 +152,21 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     private val viewStateObserver: (ViewState.PaymentOptions?) -> Unit
         get() = { viewState ->
             val addButton = viewBinding.addButton
-            addButton.updateState(
-                state = when (viewState) {
-                    null -> null
-                    is ViewState.PaymentOptions.Ready -> PrimaryButton.State.Ready(addButtonLabel)
-                    is ViewState.PaymentOptions.Confirming -> PrimaryButton.State.Confirming
-                    is ViewState.PaymentOptions.Completed -> PrimaryButton.State.Completed
-                },
-                completeCallback = {
-                    onActionCompleted(
-                        (viewState as ViewState.PaymentOptions.Completed).result
-                    )
-                }
-            )
+            when (viewState) {
+                is ViewState.PaymentOptions.Ready -> addButton.updateState(
+                    state = PrimaryButton.State.Ready(addButtonLabel)
+                )
+                is ViewState.PaymentOptions.Confirming -> addButton.updateState(
+                    state = PrimaryButton.State.Confirming
+                )
+                is ViewState.PaymentOptions.Completed -> addButton.updateState(
+                    state = PrimaryButton.State.Completed,
+                    completeCallback = {
+                        onActionCompleted(viewState.result)
+                    }
+                )
+                is ViewState.PaymentOptions.Finished -> onActionCompleted(viewState.result)
+            }
         }
 
     private fun setupAddButton(addButton: PrimaryButton) {
