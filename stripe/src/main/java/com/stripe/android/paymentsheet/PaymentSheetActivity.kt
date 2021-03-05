@@ -265,6 +265,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 }
             }
         }
+        supportFragmentManager.executePendingTransactions()
         viewBinding.buyButton.isVisible = true
         appbar.isVisible = true
         viewModel.updateMode(transitionTarget.sheetMode)

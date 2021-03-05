@@ -201,6 +201,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 }
             }
         }
+        supportFragmentManager.executePendingTransactions()
         viewBinding.addButton.isVisible = transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
         viewModel.updateMode(transitionTarget.sheetMode)
     }

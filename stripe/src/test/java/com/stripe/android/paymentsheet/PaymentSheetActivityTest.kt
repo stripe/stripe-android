@@ -4,9 +4,6 @@ import android.content.Context
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -28,7 +25,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
-import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -341,7 +337,8 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `make sure pending fragment transactions complete before looking at the backstack count`() {
+    fun `Complete fragment transactions prior to setting the sheet mode and thus the back button`
+        () {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -355,18 +352,20 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
                 .isEqualTo(WRAP_CONTENT)
 
-            activity.supportFragmentManager.commit {
-                addToBackStack(null)
-                replace(
-                    activity.viewBinding.fragmentContainer.id,
-                    Fragment(),
-                    "test fragment"
+            viewModel.transitionTo(
+                PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(
+                    FragmentConfigFixtures.DEFAULT
                 )
-            }
+            )
+            viewModel.transitionTo(
+                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+                    FragmentConfigFixtures.DEFAULT
+                )
+            )
 
-            viewModel.updateMode(SheetMode.Full)
-
-            assertThat(activity.toolbar.backButton.isVisible).isTrue()
+            assertThat(currentFragment(activity))
+                .isInstanceOf(PaymentSheetAddCardFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state)
         }
     }
 
