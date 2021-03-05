@@ -4,11 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -72,7 +72,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     }
 
     override val rootView: View by lazy { viewBinding.root }
-    override val bottomSheet: ConstraintLayout by lazy { viewBinding.bottomSheet }
+    override val bottomSheet: LinearLayout by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: Toolbar by lazy { viewBinding.toolbar }
     override val messageView: TextView by lazy { viewBinding.message }

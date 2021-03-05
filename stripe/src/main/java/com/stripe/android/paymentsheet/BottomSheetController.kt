@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.view.View
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.LinearLayout
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
@@ -12,7 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class BottomSheetController(
-    private val bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>,
+    private val bottomSheetBehavior: BottomSheetBehavior<LinearLayout>,
     private val sheetModeLiveData: LiveData<SheetMode>,
     private val lifecycleScope: CoroutineScope
 ) {
@@ -20,7 +20,6 @@ internal class BottomSheetController(
     internal val shouldFinish = _shouldFinish.distinctUntilChanged()
 
     fun setup() {
-        bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.isDraggable = false
         // Start hidden and then animate in after delay

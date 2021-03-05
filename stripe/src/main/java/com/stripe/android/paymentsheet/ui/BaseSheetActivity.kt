@@ -2,11 +2,10 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.stripe.android.R
@@ -23,7 +22,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val eventReporter: EventReporter
 
     abstract val rootView: View
-    abstract val bottomSheet: ConstraintLayout
+    abstract val bottomSheet: LinearLayout
     abstract val appbar: AppBarLayout
     abstract val toolbar: Toolbar
     abstract val messageView: TextView
@@ -62,7 +61,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 toolbar.showBack()
             }
 
-            bottomSheet.updateLayoutParams { height = mode.height }
             bottomSheetController.updateState(mode)
         }
 

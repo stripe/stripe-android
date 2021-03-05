@@ -28,10 +28,6 @@
     <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
     <style name="StripePaymentSheetAddCardTheme">
-        <!-- Required so that keyboard does not cover bottom sheet -->
-        <item name="android:windowSoftInputMode">adjustResize</item>
-        <item name="android:windowIsFloating">false</item>
-
         <item name="colorOnSurface">@color/stripe_paymentsheet_form</item>
         <item name="colorPrimary">@color/stripe_paymentsheet_form</item>
         <item name="colorAccent">@color/stripe_paymentsheet_form</item>

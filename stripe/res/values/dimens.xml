@@ -77,8 +77,6 @@
     <dimen name="stripe_paymentsheet_cardwidget_margin_vertical">4dp</dimen>
     <dimen name="stripe_paymentsheet_cardwidget_margin_horizontal">12dp</dimen>
     <dimen name="stripe_paymentsheet_add_payment_method_form_stroke_width">0dp</dimen>
-    <!-- Avoid collisions with CTA button -->
-    <dimen name="stripe_paymentsheet_form_bottom_margin">84dp</dimen>
 
     <dimen name="stripe_card_number_text_input_layout_progress_end_margin">14dp</dimen>
     <dimen name="stripe_card_number_text_input_layout_progress_top_margin">10dp</dimen>
