@@ -7,9 +7,12 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import org.junit.Rule
@@ -23,16 +26,22 @@ class PaymentOptionsViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     private val eventReporter = mock<EventReporter>()
+    private val newCard = PaymentSelection.New.Card(
+        DEFAULT_CARD,
+        CardBrand.Discover,
+        false
+    )
+    private val args = PaymentOptionContract.Args(
+        paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        paymentMethods = emptyList(),
+        sessionId = SessionId(),
+        config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+        isGooglePayReady = true,
+        newCard = null,
+        statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+    )
     private val viewModel = PaymentOptionsViewModel(
-        args = PaymentOptionContract.Args(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            sessionId = SessionId(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = true,
-            newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
-        ),
+        args = args,
         prefsRepository = FakePrefsRepository(),
         eventReporter = eventReporter
     )
@@ -116,6 +125,75 @@ class PaymentOptionsViewModelTest {
         ).isEqualTo(
             PaymentOptionResult.Canceled(null)
         )
+    }
+
+    @Test
+    fun `resolveTransitionTarget no new card`() {
+        val viewModel = PaymentOptionsViewModel(
+            args = args.copy(newCard = null),
+            prefsRepository = FakePrefsRepository(),
+            eventReporter = eventReporter
+        )
+
+        var transitionTarget: TransitionTarget? = null
+        viewModel.transition.observeForever {
+            transitionTarget = it
+        }
+
+        // no customer, no new card, no paymentMethods
+        val fragmentConfig = FragmentConfigFixtures.DEFAULT
+        viewModel.resolveTransitionTarget(fragmentConfig)
+
+        assertThat(transitionTarget).isNull()
+    }
+
+    @Test
+    fun `resolveTransitionTarget new card saved`() {
+        val viewModel = PaymentOptionsViewModel(
+            args = args.copy(
+                newCard = newCard.copy(
+                    shouldSavePaymentMethod = true
+                )
+            ),
+            prefsRepository = FakePrefsRepository(),
+            eventReporter = eventReporter
+        )
+
+        val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
+        viewModel.transition.observeForever {
+            transitionTarget.add(it)
+        }
+
+        val fragmentConfig = FragmentConfigFixtures.DEFAULT
+        viewModel.resolveTransitionTarget(fragmentConfig)
+
+        assertThat(transitionTarget).containsExactly(null)
+    }
+
+    @Test
+    fun `resolveTransitionTarget new card NOT saved`() {
+        val viewModel = PaymentOptionsViewModel(
+            args = args.copy(
+                newCard = newCard.copy(
+                    shouldSavePaymentMethod = false
+                )
+            ),
+            prefsRepository = FakePrefsRepository(),
+            eventReporter = eventReporter
+        )
+
+        val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
+        viewModel.transition.observeForever {
+            transitionTarget.add(it)
+        }
+
+        val fragmentConfig = FragmentConfigFixtures.DEFAULT
+        viewModel.resolveTransitionTarget(fragmentConfig)
+        assertThat(transitionTarget).hasSize(2)
+        assertThat(transitionTarget[1]).isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
+
+        viewModel.resolveTransitionTarget(fragmentConfig)
+        assertThat(transitionTarget).hasSize(2)
     }
 
     private companion object {

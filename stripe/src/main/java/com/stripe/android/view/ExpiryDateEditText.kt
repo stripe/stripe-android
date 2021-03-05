@@ -72,6 +72,17 @@ class ExpiryDateEditText @JvmOverloads constructor(
         SEPARATOR_WITHOUT_GAPS
     }
 
+    internal fun setText(expiryMonth: Int?, expiryYear: Int?) {
+        if (expiryMonth != null && expiryYear != null) {
+            setText(
+                listOf(
+                    expiryMonth.toString().padStart(2, '0'),
+                    expiryYear.toString().takeLast(2).padStart(2, '0')
+                ).joinToString(separator = separator)
+            )
+        }
+    }
+
     private fun updateSeparatorUi(
         includeSeparatorGaps: Boolean = INCLUDE_SEPARATOR_GAPS_DEFAULT
     ) {

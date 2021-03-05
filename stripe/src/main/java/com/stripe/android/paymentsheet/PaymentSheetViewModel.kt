@@ -65,7 +65,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
     internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
-    override val newCard: PaymentSelection.New.Card? = null
+    override var newCard: PaymentSelection.New.Card? = null
 
     private val paymentIntentValidator = PaymentIntentValidator()
 

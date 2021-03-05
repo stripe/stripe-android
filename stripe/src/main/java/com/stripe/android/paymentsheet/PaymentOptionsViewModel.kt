@@ -30,7 +30,18 @@ internal class PaymentOptionsViewModel(
     )
     internal val viewState: LiveData<ViewState.PaymentOptions> = _viewState.distinctUntilChanged()
 
-    override val newCard = args.newCard
+    // Only used to determine if we should skip the list and go to the add card view.
+    // and how to populate that view.
+    override var newCard = args.newCard
+
+    // This is used in the case where the last card was new and not saved.  In this scenario
+    // when the payment options is opened it should jump to the add card, but if the user
+    // presses the back button, they shouldn't transition to it again
+    private var hasTransitionToUnsavedCard = false
+    private val shouldTransitionToUnsavedCard: Boolean
+        get() =
+            !hasTransitionToUnsavedCard &&
+                (newCard as? PaymentSelection.New)?.let { !it.shouldSavePaymentMethod } ?: false
 
     init {
         _isGooglePayReady.value = args.isGooglePayReady
@@ -68,6 +79,17 @@ internal class PaymentOptionsViewModel(
         } ?: PaymentOptionResult.Canceled(
             mostRecentError = fatal.value
         )
+    }
+
+    fun resolveTransitionTarget(config: FragmentConfig) {
+        if (shouldTransitionToUnsavedCard) {
+            hasTransitionToUnsavedCard = true
+            transitionTo(
+                // Until we add a flag to the transitionTarget to specify if we want to add the item
+                // to the backstack, we need to use the full sheet.
+                TransitionTarget.AddPaymentMethodFull(config)
+            )
+        }
     }
 
     internal sealed class TransitionTarget {

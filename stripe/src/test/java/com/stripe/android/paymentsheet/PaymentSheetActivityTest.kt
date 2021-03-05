@@ -411,6 +411,38 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `Complete fragment transactions prior to setting the sheet mode and thus the back button`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+            idleLooper()
+
+            assertThat(currentFragment(activity))
+                .isInstanceOf(PaymentSheetListFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
+                .isEqualTo(WRAP_CONTENT)
+
+            viewModel.transitionTo(
+                PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(
+                    FragmentConfigFixtures.DEFAULT
+                )
+            )
+            viewModel.transitionTo(
+                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+                    FragmentConfigFixtures.DEFAULT
+                )
+            )
+
+            assertThat(currentFragment(activity))
+                .isInstanceOf(PaymentSheetAddCardFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state)
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
