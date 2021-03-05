@@ -236,7 +236,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify Ready State`() {
+    fun `Verify ready State updates the buy button text`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -264,7 +264,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify Confirming state`() {
+    fun `Verify processing state updats the buy button label`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
