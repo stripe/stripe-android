@@ -51,7 +51,7 @@ internal class PaymentOptionsViewModel(
         val requestSaveNewCard = (paymentSelection as? PaymentSelection.New)?.shouldSavePaymentMethod
             ?: false
 
-        if ((customerConfig != null) && requestSaveNewCard) {
+        if (requestSaveNewCard) {
             _viewState.value = ViewState.PaymentOptions.Completed(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )

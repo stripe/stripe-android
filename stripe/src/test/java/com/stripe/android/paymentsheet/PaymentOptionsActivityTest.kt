@@ -193,6 +193,31 @@ class PaymentOptionsActivityTest {
         }
     }
 
+    @Test
+    fun `Verify Finished state closes the sheet`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(emptyList())
+        ).onActivity { activity ->
+            val paymentSelectionMock: PaymentSelection = mock()
+            viewModel._viewState.value = ViewState.PaymentOptions.Finished(
+                PaymentOptionResult.Succeeded(
+                    paymentSelectionMock
+                )
+            )
+            idleLooper()
+
+            // wait animate time...
+            runBlocking {
+                // wait for animation to complete
+                delay(1600)
+
+                assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            }
+        }
+    }
+
     private fun createIntent(
         paymentMethods: List<PaymentMethod>
     ): Intent {
