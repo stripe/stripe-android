@@ -7,7 +7,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.view.ActivityScenarioFactory
-import kotlinx.coroutines.runBlocking
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -33,13 +32,10 @@ class PrimaryButtonTest {
 
     @Test
     fun `onReadyState() should update label`() {
-        runBlocking {
-            primaryButton.updateState(
-                state = PrimaryButton.State.Ready("Pay $10.99"),
-                completeCallback = {
-                }
-            )
-        }
+        primaryButton.updateState(
+            state = PrimaryButton.State.Ready("Pay $10.99"),
+            completeCallback = {}
+        )
 
         // THe logic tested here is in the PaymentActivity now and needs to be tested around that observable
         assertThat(
@@ -53,8 +49,7 @@ class PrimaryButtonTest {
     fun `onConfirmingState() should update label`() {
         primaryButton.updateState(
             state = PrimaryButton.State.StartProcessing,
-            completeCallback = {
-            }
+            completeCallback = {}
         )
         assertThat(
             primaryButton.viewBinding.label.text.toString()
@@ -73,8 +68,7 @@ class PrimaryButtonTest {
     fun `after viewState ready and disabled, label alpha is 50%`() {
         primaryButton.updateState(
             state = PrimaryButton.State.Ready("$10.99"),
-            completeCallback = {
-            }
+            completeCallback = {}
         )
         assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(0.5f)
@@ -84,8 +78,7 @@ class PrimaryButtonTest {
     fun `after viewState ready and enabled, label alpha is 100%`() {
         primaryButton.updateState(
             state = PrimaryButton.State.Ready("$10.99"),
-            completeCallback = {
-            }
+            completeCallback = {}
         )
         primaryButton.isEnabled = true
         assertThat(primaryButton.viewBinding.label.alpha)
