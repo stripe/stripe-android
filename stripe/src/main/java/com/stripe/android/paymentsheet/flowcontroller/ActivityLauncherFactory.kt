@@ -6,7 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.Fragment
 
-sealed class ActivityLauncherFactory {
+internal sealed class ActivityLauncherFactory {
     /**
      * Registers a [callback] to handle the [contract] and returns an [ActivityResultLauncher].
      */
@@ -15,7 +15,7 @@ sealed class ActivityLauncherFactory {
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I>
 
-    class ActivityHost(
+    internal class ActivityHost(
         private val activity: ComponentActivity
     ) : ActivityLauncherFactory() {
         override fun <I, O> create(
@@ -29,7 +29,7 @@ sealed class ActivityLauncherFactory {
         }
     }
 
-    class FragmentHost(
+    internal class FragmentHost(
         private val fragment: Fragment
     ) : ActivityLauncherFactory() {
         override fun <I, O> create(

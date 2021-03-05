@@ -38,9 +38,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 
 internal class DefaultFlowController internal constructor(
-    private val viewModelStoreOwner: ViewModelStoreOwner,
+    viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleScope: CoroutineScope,
-    private val activityLauncherFactory: ActivityLauncherFactory,
+    activityLauncherFactory: ActivityLauncherFactory,
     private val statusBarColor: () -> Int?,
     private val authHostSupplier: () -> AuthActivityStarter.Host,
     private val paymentOptionFactory: PaymentOptionFactory,
