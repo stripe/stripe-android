@@ -37,7 +37,7 @@ class AddPaymentMethodListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         // TODO Switch on paymentMethodListType, figure out a default
-        return AddPaymentMethodFpxView.ViewHolder(
+        return AddPaymentMethodFpxView.BankViewHolder(
             FpxBankItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
@@ -53,12 +53,20 @@ class AddPaymentMethodListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
-//        holder.update(item)
 
         holder.itemView.setOnClickListener {
             Log.d("Ali click", item.toString())
             selectedPosition = position
         }
+
+        val bankViewHolder = holder as AddPaymentMethodFpxView.BankViewHolder
+        bankViewHolder.setSelected(position == selectedPosition)
+        bankViewHolder.update(fpxBank = item, isOnline = true)
+
+        // TODO: I'm not clear on what this is supposed to do
+//        viewHolder.itemView.setOnClickListener {
+//                selectedPosition = viewHolder.adapterPosition
+//        }
     }
 
     internal fun updateSelected(position: Int) {

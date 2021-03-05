@@ -86,7 +86,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
     }
 
-    class ViewHolder constructor(
+    class BankViewHolder constructor(
         private val viewBinding: FpxBankItemBinding,
         private val themeConfig: ThemeConfig
     ) : RecyclerView.ViewHolder(viewBinding.root) {
