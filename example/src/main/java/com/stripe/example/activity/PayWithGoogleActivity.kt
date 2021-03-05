@@ -103,7 +103,8 @@ class PayWithGoogleActivity : AppCompatActivity() {
                         transactionInfo = GooglePayJsonFactory.TransactionInfo(
                             currencyCode = "USD",
                             totalPrice = 10000,
-                            totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
+                            totalPriceStatus = GooglePayJsonFactory
+                                .TransactionInfo.TotalPriceStatus.Final
                         ),
                         merchantInfo = GooglePayJsonFactory.MerchantInfo(
                             merchantName = "Widget Store"

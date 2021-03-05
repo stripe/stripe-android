@@ -97,7 +97,12 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 private var newCursorPosition: Int? = null
                 private var formattedDate: String? = null
 
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
                     if (ignoreChanges) {
                         return
                     }
@@ -210,6 +215,16 @@ class ExpiryDateEditText @JvmOverloads constructor(
                         isDateValid = false
                     }
 
+                    setErrorMessage(
+                        resources.getString(
+                            if (!expirationDate.isMonthValid) {
+                                R.string.invalid_expiry_month
+                            } else {
+                                R.string.invalid_expiry_year
+                            }
+                        )
+                    )
+
                     this@ExpiryDateEditText.shouldShowError = shouldShowError
 
                     formattedDate = null
@@ -223,7 +238,6 @@ class ExpiryDateEditText @JvmOverloads constructor(
         inputType = InputType.TYPE_CLASS_NUMBER
         updateSeparatorUi()
 
-        setErrorMessage(resources.getString(R.string.invalid_expiry_year))
         listenForTextChanges()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

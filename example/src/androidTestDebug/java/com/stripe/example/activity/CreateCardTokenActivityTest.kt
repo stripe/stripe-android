@@ -59,6 +59,11 @@ class CreateCardTokenActivityTest {
 
         // check that card token info has been added to the tokens list
         onView(withId(R.id.tokens_list))
-            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+            .perform(
+                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                    0,
+                    click()
+                )
+            )
     }
 }
