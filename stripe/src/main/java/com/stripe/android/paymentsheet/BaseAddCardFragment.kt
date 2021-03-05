@@ -90,8 +90,9 @@ internal abstract class BaseAddCardFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val config =
-            arguments?.getParcelable<FragmentConfig>(BaseSheetActivity.EXTRA_FRAGMENT_CONFIG)
+        val config = arguments?.getParcelable<FragmentConfig>(
+            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
+        )
         if (activity == null || config == null) {
             sheetViewModel.onFatal(
                 IllegalArgumentException("Failed to start add payment option fragment.")
