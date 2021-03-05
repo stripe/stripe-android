@@ -87,7 +87,8 @@ class PaymentSheetAddCardFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isFalse()
-            assertThat(fragment.sheetViewModel.newCard).isEqualTo(paymentSelection)
+            assertThat(fragment.sheetViewModel.newCard)
+                .isEqualTo(paymentSelection)
         }
     }
 
@@ -163,7 +164,8 @@ class PaymentSheetAddCardFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isTrue()
-            assertThat(fragment.sheetViewModel.newCard).isEqualTo(paymentSelection)
+            assertThat(fragment.sheetViewModel.newCard)
+                .isEqualTo(paymentSelection)
         }
     }
 
@@ -189,7 +191,8 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isTrue()
 
-            assertThat(fragment.sheetViewModel.newCard?.brand).isEqualTo(CardBrand.Visa)
+            assertThat(fragment.sheetViewModel.newCard?.brand)
+                .isEqualTo(CardBrand.Visa)
         }
     }
 
@@ -287,11 +290,13 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.saveCardCheckbox.isChecked = true
 
-            assertThat(fragment.sheetViewModel.newCard?.brand).isEqualTo(CardBrand.Visa)
+            assertThat(fragment.sheetViewModel.newCard?.brand)
+                .isEqualTo(CardBrand.Visa)
 
             viewBinding.cardMultilineWidget.setCardNumber("378282246310005")
 
-            assertThat(fragment.sheetViewModel.newCard?.brand).isEqualTo(CardBrand.AmericanExpress)
+            assertThat(fragment.sheetViewModel.newCard?.brand)
+                .isEqualTo(CardBrand.AmericanExpress)
         }
     }
 
