@@ -59,10 +59,13 @@ internal class PaymentOptionsViewModel(
     }
 
     private fun processSelection(paymentSelection: PaymentSelection) {
-        val requestSaveNewCard = (paymentSelection as? PaymentSelection.New)?.shouldSavePaymentMethod
-            ?: false
+        val requestSaveNewCard =
+            (paymentSelection as? PaymentSelection.New)?.shouldSavePaymentMethod
+                ?: false
 
         if (requestSaveNewCard) {
+            // TODO: Update the returned value with the savedCard rather than the NewCard
+            // so that we don't jump the next time.
             _viewState.value = ViewState.PaymentOptions.FinishProcessing(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )

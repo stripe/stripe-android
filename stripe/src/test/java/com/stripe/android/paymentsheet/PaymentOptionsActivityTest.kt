@@ -27,8 +27,6 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -206,15 +204,10 @@ class PaymentOptionsActivityTest {
             idleLooper()
 
             // wait animate time...
-            runBlocking {
-                // wait for animation to complete
-                delay(
-                    PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION
-                )
+            testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
 
-                assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            }
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
 

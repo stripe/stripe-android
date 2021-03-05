@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
 class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
-    internal constructor(
+    constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
@@ -28,7 +28,7 @@ class PaymentSheet internal constructor(
     /**
      * Create PaymentSheet with a Customer
      */
-    internal fun present(
+    fun present(
         paymentIntentClientSecret: String,
         configuration: Configuration
     ) {
@@ -38,7 +38,7 @@ class PaymentSheet internal constructor(
     /**
      * Create PaymentSheet without a Customer
      */
-    internal fun present(
+    fun present(
         paymentIntentClientSecret: String
     ) {
         paymentSheetLauncher.present(paymentIntentClientSecret)
@@ -119,7 +119,7 @@ class PaymentSheet internal constructor(
         }
     }
 
-    internal interface FlowController {
+    interface FlowController {
         fun getPaymentOption(): PaymentOption?
 
         fun configure(
