@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.os.Parcelable
-import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
@@ -38,7 +38,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 
 internal class DefaultFlowController internal constructor(
-    private val activity: ComponentActivity,
+    private val viewModelStoreOwner: ViewModelStoreOwner,
+    private val lifecycleScope: CoroutineScope,
+    private val activityLauncherFactory: ActivityLauncherFactory,
+    private val statusBarColor: () -> Int?,
+    private val authHostSupplier: () -> AuthActivityStarter.Host,
+    private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
     private val paymentFlowResultProcessor: PaymentFlowResultProcessor,
@@ -46,19 +51,17 @@ internal class DefaultFlowController internal constructor(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val sessionId: SessionId,
-    private val initScope: CoroutineScope,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback
 ) : PaymentSheet.FlowController {
-    private val paymentOptionFactory = PaymentOptionFactory(activity.resources)
 
-    private val paymentOptionActivityLauncher = activity.registerForActivityResult(
+    private val paymentOptionActivityLauncher = activityLauncherFactory.create(
         PaymentOptionContract()
     ) { paymentOptionResult ->
         onPaymentOptionResult(paymentOptionResult)
     }
 
-    private val googlePayActivityLauncher = activity.registerForActivityResult(
+    private val googlePayActivityLauncher = activityLauncherFactory.create(
         StripeGooglePayContract()
     ) { result ->
         onGooglePayResult(result)
@@ -72,25 +75,25 @@ internal class DefaultFlowController internal constructor(
         googlePayActivityLauncher.launch(args)
     }
 
-    private val paymentRelayLauncher = activity.registerForActivityResult(
+    private val paymentRelayLauncher = activityLauncherFactory.create(
         PaymentRelayContract()
     ) { result ->
         onPaymentFlowResult(result)
     }
 
-    private val paymentAuthWebViewLauncher = activity.registerForActivityResult(
+    private val paymentAuthWebViewLauncher = activityLauncherFactory.create(
         PaymentAuthWebViewContract()
     ) { result ->
         onPaymentFlowResult(result)
     }
 
-    private val stripe3ds2ChallengeLauncher = activity.registerForActivityResult(
+    private val stripe3ds2ChallengeLauncher = activityLauncherFactory.create(
         Stripe3ds2CompletionContract()
     ) { result ->
         onPaymentFlowResult(result)
     }
 
-    private val viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
+    private val viewModel = ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
 
     private val paymentController = paymentControllerFactory.create(
         paymentRelayLauncher = paymentRelayLauncher,
@@ -103,7 +106,7 @@ internal class DefaultFlowController internal constructor(
         configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        initScope.launch {
+        lifecycleScope.launch {
             val result = flowControllerInitializer.init(
                 paymentIntentClientSecret,
                 configuration
@@ -116,7 +119,7 @@ internal class DefaultFlowController internal constructor(
         paymentIntentClientSecret: String,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        initScope.launch {
+        lifecycleScope.launch {
             val result = flowControllerInitializer.init(paymentIntentClientSecret)
 
             if (isActive) {
@@ -150,7 +153,7 @@ internal class DefaultFlowController internal constructor(
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
-                statusBarColor = activity.window.statusBarColor
+                statusBarColor = statusBarColor()
             )
         )
     }
@@ -204,7 +207,7 @@ internal class DefaultFlowController internal constructor(
             else -> null
         }?.let { confirmParams ->
             paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
+                authHostSupplier(),
                 confirmParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -324,7 +327,7 @@ internal class DefaultFlowController internal constructor(
     internal fun onPaymentFlowResult(
         paymentFlowResult: PaymentFlowResult.Unvalidated
     ) {
-        activity.lifecycleScope.launch {
+        lifecycleScope.launch {
             runCatching {
                 paymentFlowResultProcessor.processPaymentIntent(paymentFlowResult)
             }.fold(

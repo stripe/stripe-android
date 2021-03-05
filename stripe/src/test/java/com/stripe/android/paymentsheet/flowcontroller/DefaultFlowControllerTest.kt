@@ -37,9 +37,11 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.view.ActivityScenarioFactory
+import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -412,6 +414,11 @@ class DefaultFlowControllerTest {
     ): DefaultFlowController {
         return DefaultFlowController(
             activity,
+            testScope,
+            ActivityLauncherFactory.ActivityHost(activity),
+            statusBarColor = { activity.window.statusBarColor },
+            authHostSupplier = { AuthActivityStarter.Host.create(activity) },
+            paymentOptionFactory = PaymentOptionFactory(activity.resources),
             flowControllerInitializer,
             { _, _, _ -> paymentController },
             paymentFlowResultProcessor,
@@ -419,7 +426,6 @@ class DefaultFlowControllerTest {
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
             sessionId = SESSION_ID,
-            testScope,
             paymentOptionCallback,
             paymentResultCallback
         )
