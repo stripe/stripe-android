@@ -338,7 +338,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Complete fragment transactions prior to setting the sheet mode and thus the back button`
-        () {
+    () {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
