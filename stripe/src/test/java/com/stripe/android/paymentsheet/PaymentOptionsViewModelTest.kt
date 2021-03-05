@@ -41,7 +41,6 @@ class PaymentOptionsViewModelTest {
         viewModel.viewState.observeForever {
             viewState = it
         }
-
         viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
 
         viewModel.onUserSelection()
@@ -59,7 +58,7 @@ class PaymentOptionsViewModelTest {
         }
         viewModel.onUserSelection()
 
-        assertThat(viewState is ViewState.PaymentOptions.Ready)
+        assertThat(viewState).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
     }
 
     @Test

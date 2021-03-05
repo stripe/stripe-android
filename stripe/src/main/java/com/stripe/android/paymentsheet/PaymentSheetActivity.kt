@@ -295,8 +295,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
     private val viewStateObserver: (ViewState.PaymentSheet?) -> Unit
         get() = { viewState ->
-            val buyButton = viewBinding.buyButton
-            buyButton.updateState(
+            viewBinding.buyButton.updateState(
                 state = when (viewState) {
                     null -> null
                     is ViewState.PaymentSheet.Ready -> PrimaryButton.State.Ready(
