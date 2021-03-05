@@ -370,4 +370,18 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.fieldText)
             .isEqualTo("12 ")
     }
+
+    @Test
+    fun `test setText with null month`() {
+        expiryDateEditText.setText(null as Int?, null as Int?)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("")
+    }
+
+    @Test
+    fun `test setText with month and year`() {
+        expiryDateEditText.setText(3, 4)
+        assertThat(expiryDateEditText.fieldText)
+            .isEqualTo("03/04")
+    }
 }
