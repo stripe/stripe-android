@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -298,7 +299,9 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // wait animate time...
-            testDispatcher.advanceTimeBy(1600)
+            testDispatcher.advanceTimeBy(
+                PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION
+            )
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)

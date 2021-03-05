@@ -308,8 +308,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 is ViewState.PaymentSheet.Ready -> PrimaryButton.State.Ready(
                     getLabelText(viewState)
                 )
-                is ViewState.PaymentSheet.StartProcessing -> PrimaryButton.State.Confirming
-                is ViewState.PaymentSheet.FinishProcessing -> PrimaryButton.State.Completed
+                is ViewState.PaymentSheet.StartProcessing -> PrimaryButton.State.StartProcessing
+                is ViewState.PaymentSheet.FinishProcessing -> PrimaryButton.State.FinishProcessing
             },
             completeCallback = {
                 onActionCompleted(

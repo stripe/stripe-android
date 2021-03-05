@@ -79,10 +79,10 @@ internal class PrimaryButton @JvmOverloads constructor(
             is State.Ready -> {
                 onReadyState(state.label)
             }
-            State.Confirming -> {
+            State.StartProcessing -> {
                 onConfirmState()
             }
-            is State.Completed -> {
+            is State.FinishProcessing -> {
                 onCompletedState(completeCallback)
             }
         }
@@ -98,7 +98,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     internal sealed class State {
         data class Ready(val label: String) : State()
-        object Confirming : State()
-        object Completed : State()
+        object StartProcessing : State()
+        object FinishProcessing : State()
     }
 }

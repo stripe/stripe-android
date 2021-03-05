@@ -160,10 +160,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 state = PrimaryButton.State.Ready(addButtonLabel)
             )
             is ViewState.PaymentOptions.StartProcessing -> addButton.updateState(
-                state = PrimaryButton.State.Confirming
+                state = PrimaryButton.State.StartProcessing
             )
             is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
-                state = PrimaryButton.State.Completed,
+                state = PrimaryButton.State.FinishProcessing,
                 completeCallback = {
                     onActionCompleted(viewState.result)
                 }

@@ -105,7 +105,8 @@ class PaymentOptionsViewModelTest {
         }
         viewModel.onUserSelection()
 
-        assertThat(viewState is ViewState.PaymentOptions.Ready)
+        assertThat(viewState)
+            .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
     }
 
     @Test
