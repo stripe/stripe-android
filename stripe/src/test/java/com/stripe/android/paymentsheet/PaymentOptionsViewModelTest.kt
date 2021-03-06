@@ -204,16 +204,16 @@ class PaymentOptionsViewModelTest {
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
-        private val paymentMethodCreateParams: PaymentMethodCreateParams =
+        private val DEFAULT_PAYMENT_METHOD_CREATE_PARAMS: PaymentMethodCreateParams =
             DEFAULT_CARD
 
         private val NEW_REQUEST_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
-            paymentMethodCreateParams,
+            DEFAULT_PAYMENT_METHOD_CREATE_PARAMS,
             CardBrand.Visa,
             true,
         )
         private val NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
-            paymentMethodCreateParams,
+            DEFAULT_PAYMENT_METHOD_CREATE_PARAMS,
             CardBrand.Visa,
             false,
         )
