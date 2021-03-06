@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.view.View
-import android.widget.LinearLayout
+import android.view.ViewGroup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
@@ -12,7 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class BottomSheetController(
-    private val bottomSheetBehavior: BottomSheetBehavior<LinearLayout>,
+    private val bottomSheetBehavior: BottomSheetBehavior<ViewGroup>,
     private val sheetModeLiveData: LiveData<SheetMode>,
     private val lifecycleScope: CoroutineScope
 ) {
