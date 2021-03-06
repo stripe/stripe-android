@@ -291,12 +291,13 @@ internal class PaymentSheetViewModel internal constructor(
 
             val starterArgs = starterArgsSupplier()
 
-            val googlePayRepository = starterArgs.config?.googlePay?.environment?.let { environment ->
-                DefaultGooglePayRepository(
-                    application,
-                    environment
-                )
-            } ?: GooglePayRepository.Disabled
+            val googlePayRepository =
+                starterArgs.config?.googlePay?.environment?.let { environment ->
+                    DefaultGooglePayRepository(
+                        application,
+                        environment
+                    )
+                } ?: GooglePayRepository.Disabled
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(

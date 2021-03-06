@@ -26,7 +26,9 @@ internal abstract class BasePaymentMethodsListFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val nullableConfig = arguments?.getParcelable<FragmentConfig>(BaseSheetActivity.EXTRA_FRAGMENT_CONFIG)
+        val nullableConfig = arguments?.getParcelable<FragmentConfig>(
+            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
+        )
         if (nullableConfig == null) {
             sheetViewModel.onFatal(
                 IllegalArgumentException("Failed to start existing payment options fragment.")

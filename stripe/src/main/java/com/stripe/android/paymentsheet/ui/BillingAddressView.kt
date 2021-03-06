@@ -306,7 +306,8 @@ internal class BillingAddressView @JvmOverloads constructor(
             CountryUtils.doesCountryUsePostalCode(country.code)
         postalCodeLayout.isVisible = shouldShowPostalCode
 
-        val shouldShowPostalCodeContainer = level == PaymentSheet.BillingAddressCollectionLevel.Required || shouldShowPostalCode
+        val shouldShowPostalCodeContainer =
+            level == PaymentSheet.BillingAddressCollectionLevel.Required || shouldShowPostalCode
         viewBinding.cityPostalDivider.isVisible = shouldShowPostalCodeContainer
         viewBinding.cityPostalContainer.isVisible = shouldShowPostalCodeContainer
 
