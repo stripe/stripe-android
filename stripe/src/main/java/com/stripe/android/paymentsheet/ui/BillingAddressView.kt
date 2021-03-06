@@ -363,6 +363,20 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
+    internal fun populateFromParams(address: Address?) {
+        address?.let { address ->
+            address.country?.let {
+                this.selectedCountry = CountryUtils.getCountryByCode(address.country)
+                this.countryView.setText(CountryUtils.getDisplayCountry(address.country))
+            }
+            this.address1View.setText(address.line1)
+            this.address2View.setText(address.line2)
+            this.cityView.setText(address.city)
+            this.postalCodeView.setText(address.postalCode)
+            this.stateView.setText(address.state)
+        }
+    }
+
     private val EditText.value: String?
         get() {
             return takeIf { it.isVisible }?.text?.toString().takeUnless {

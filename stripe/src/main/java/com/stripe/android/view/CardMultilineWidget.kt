@@ -32,6 +32,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.view.CardMultilineWidget.CardBrandIconSupplier
 import kotlin.properties.Delegates
 
 /**
@@ -439,6 +440,14 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     override fun setCardHint(cardHint: String) {
         cardNumberTextInputLayout.placeholderText = cardHint
+    }
+
+    internal fun populateFromParams(card: PaymentMethodCreateParams.Card?) {
+        card?.let { createParamsCard ->
+            cardNumberEditText.setText(createParamsCard.number)
+            cvcEditText.setText(createParamsCard.cvc)
+            expiryDateEditText.setText(createParamsCard.expiryMonth, createParamsCard.expiryYear)
+        }
     }
 
     /**

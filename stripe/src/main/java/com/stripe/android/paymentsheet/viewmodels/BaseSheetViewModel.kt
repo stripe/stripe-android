@@ -66,7 +66,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _userMessage = MutableLiveData<UserMessage?>()
     internal val userMessage: LiveData<UserMessage?> = _userMessage
 
-    abstract val newCard: PaymentSelection.New.Card?
+    /**
+     * This should be initialized from the starter args, and then from that
+     * point forward it will be the last valid card seen or entered in the add card view.
+     * In contrast to selection, this field will not be updated by the list fragment.
+     */
+    abstract var newCard: PaymentSelection.New.Card?
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         transition.switchMap { transitionTarget ->

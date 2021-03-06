@@ -109,6 +109,9 @@ internal abstract class BaseAddCardFragment(
         billingAddressView.level = sheetViewModel.config?.billingAddressCollection
             ?: PaymentSheet.BillingAddressCollectionLevel.Automatic
 
+        // This must be done prior to setting up the card widget or the save card checkbox won't
+        // populate correctly.
+        populateFieldsFromNewCard()
         setupCardWidget()
 
         cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
@@ -181,19 +184,24 @@ internal abstract class BaseAddCardFragment(
     }
 
     private fun updateSelection() {
-        sheetViewModel.updateSelection(
-            if (addCardViewModel.isCardValid) {
-                paymentMethodParams?.let { params ->
-                    PaymentSelection.New.Card(
-                        params,
-                        cardMultilineWidget.brand,
-                        shouldSavePaymentMethod = shouldSaveCard()
-                    )
-                }
-            } else {
-                null
+        val validCard = if (addCardViewModel.isCardValid) {
+            paymentMethodParams?.let { params ->
+                PaymentSelection.New.Card(
+                    params,
+                    cardMultilineWidget.brand,
+                    shouldSavePaymentMethod = shouldSaveCard()
+                )
             }
-        )
+        } else {
+            null
+        }
+
+        // If you open a new unsaved card, edit it, go to the list view and come back the edited
+        // card should be shown, this means that the new card must be updated
+        validCard?.let {
+            sheetViewModel.newCard = validCard
+        }
+        sheetViewModel.updateSelection(validCard)
     }
 
     private fun setupCardWidget() {
@@ -305,6 +313,13 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget.postalCodeErrorListener = null
     }
 
+    private fun populateFieldsFromNewCard() {
+        val paymentMethodCreateParams = sheetViewModel.newCard?.paymentMethodCreateParams
+        saveCardCheckbox.isChecked = sheetViewModel.newCard?.shouldSavePaymentMethod ?: true
+        cardMultilineWidget.populateFromParams(paymentMethodCreateParams?.card)
+        billingAddressView.populateFromParams(paymentMethodCreateParams?.billingDetails?.address)
+    }
+
     private fun onCardError(
         field: AddCardViewModel.Field,
         errorMessage: String?
@@ -337,9 +352,9 @@ internal abstract class BaseAddCardFragment(
     private fun onSaveCardCheckboxChanged() {
         val selection = sheetViewModel.selection.value
         if (selection is PaymentSelection.New.Card) {
-            sheetViewModel.updateSelection(
-                selection.copy(shouldSavePaymentMethod = shouldSaveCard())
-            )
+            val newCardSelection = selection.copy(shouldSavePaymentMethod = shouldSaveCard())
+            sheetViewModel.updateSelection(newCardSelection)
+            sheetViewModel.newCard = newCardSelection
         }
     }
 
