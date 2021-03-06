@@ -52,7 +52,6 @@ class PaymentOptionsViewModelTest {
         viewModel.viewState.observeForever {
             viewState = it
         }
-
         viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
 
         viewModel.onUserSelection()
@@ -63,7 +62,7 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `onUserSelection() when new card selection with no save should be finished view state`() {
+    fun `onUserSelection() when new card selection with no save should set the view state to close sheet`() {
         var viewState: ViewState? = null
         viewModel.viewState.observeForever {
             viewState = it
@@ -78,7 +77,7 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `onUserSelection() when new card selection with save view state should be confirm - save`() {
+    fun `onUserSelection() new card with save should be finish processing and close the sheet`() {
         val viewState: MutableList<ViewState?> = mutableListOf()
         viewModel.viewState.observeForever {
             viewState.add(it)

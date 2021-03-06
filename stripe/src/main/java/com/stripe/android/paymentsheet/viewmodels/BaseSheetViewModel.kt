@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.BaseAddCardFragment
+import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -50,7 +52,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
      * and any fragment will re-update when the result comes back.
-     * Represents the user last selects add or buy on the PaymentOptions/PaymentSheet, and
+     * Represents what the user last selects (add or buy) on the PaymentOptions/PaymentSheet, and
      * saved/restored from the preferences.
      */
     private val _savedSelection = MutableLiveData<SavedSelection>()
@@ -60,9 +62,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val transition: LiveData<TransitionTargetType?> = _transition
 
     /**
-     * On [com.stripe.android.paymentsheet.BaseAddCardFragment] this is set every time the add
+     * On [BaseAddCardFragment] this is set every time the add
      * card is determined to be valid (not necessarily selected)
-     * On [com.stripe.android.paymentsheet.BasePaymentMethodsListFragment] this is set when a user selects one of the options
+     * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
     private val _selection = MutableLiveData<PaymentSelection?>()
     internal val selection: LiveData<PaymentSelection?> = _selection

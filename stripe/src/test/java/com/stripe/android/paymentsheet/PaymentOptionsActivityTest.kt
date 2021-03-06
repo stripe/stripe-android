@@ -129,7 +129,7 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify Ready State`() {
+    fun `Verify Ready State updates the add button label`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
@@ -151,7 +151,7 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify Confirming state`() {
+    fun `Verify processing state updates the add button label`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
@@ -168,43 +168,37 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify Successfully completed state closes the sheet`() {
+    fun `Verify finishing state calls the callback`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
         ).onActivity { activity ->
-            val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-            viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
-                PaymentOptionResult.Succeeded(
-                    paymentSelectionMock
-                )
-            )
-            idleLooper()
-
-            // wait animate time...
-            testDispatcher.advanceTimeBy(1600)
-
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-        }
-    }
-
-    @Test
-    fun `Verify Finished state closes the sheet`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent(emptyList())
-        ).onActivity { activity ->
-            val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-            viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
-                PaymentOptionResult.Succeeded(
-                    paymentSelectionMock
-                )
-            )
+            var callbackCalled = false
+            viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                callbackCalled = true
+            }
             idleLooper()
 
             // wait animate time...
             testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+
+            assertThat(callbackCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Verify CloseSheet state closes the sheet`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(emptyList())
+        ).onActivity { activity ->
+            val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
+            viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
+                PaymentOptionResult.Succeeded(
+                    paymentSelectionMock
+                )
+            )
+            idleLooper()
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)

@@ -33,10 +33,8 @@ class PrimaryButtonTest {
     @Test
     fun `onReadyState() should update label`() {
         primaryButton.updateState(
-            PrimaryButton.State.Ready("Pay $10.99"),
+            PrimaryButton.State.Ready("Pay $10.99")
         )
-
-        // THe logic tested here is in the PaymentActivity now and needs to be tested around that observable
         assertThat(
             primaryButton.viewBinding.label.text.toString()
         ).isEqualTo(
@@ -65,7 +63,7 @@ class PrimaryButtonTest {
     @Test
     fun `after viewState ready and disabled, label alpha is 50%`() {
         primaryButton.updateState(
-            PrimaryButton.State.Ready("$10.99"),
+            PrimaryButton.State.Ready("$10.99")
         )
         assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(0.5f)
@@ -74,7 +72,7 @@ class PrimaryButtonTest {
     @Test
     fun `after viewState ready and enabled, label alpha is 100%`() {
         primaryButton.updateState(
-            PrimaryButton.State.Ready("$10.99"),
+            PrimaryButton.State.Ready("$10.99")
         )
         primaryButton.isEnabled = true
         assertThat(primaryButton.viewBinding.label.alpha)
