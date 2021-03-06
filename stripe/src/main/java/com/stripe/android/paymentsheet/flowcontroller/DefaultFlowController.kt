@@ -313,7 +313,8 @@ internal class DefaultFlowController internal constructor(
     internal fun onPaymentOptionResult(
         paymentOptionResult: PaymentOptionResult?
     ) {
-        val paymentSelection = (paymentOptionResult as? PaymentOptionResult.Succeeded)?.paymentSelection
+        val paymentSelection =
+            (paymentOptionResult as? PaymentOptionResult.Succeeded)?.paymentSelection
         viewModel.paymentSelection = paymentSelection
         paymentOptionCallback.onPaymentOption(
             paymentSelection?.let(paymentOptionFactory::create)
