@@ -90,7 +90,9 @@ internal abstract class BaseAddCardFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val config = arguments?.getParcelable<FragmentConfig>(BaseSheetActivity.EXTRA_FRAGMENT_CONFIG)
+        val config = arguments?.getParcelable<FragmentConfig>(
+            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
+        )
         if (activity == null || config == null) {
             sheetViewModel.onFatal(
                 IllegalArgumentException("Failed to start add payment option fragment.")
@@ -109,6 +111,9 @@ internal abstract class BaseAddCardFragment(
         billingAddressView.level = sheetViewModel.config?.billingAddressCollection
             ?: PaymentSheet.BillingAddressCollectionLevel.Automatic
 
+        // This must be done prior to setting up the card widget or the save card checkbox won't
+        // populate correctly.
+        populateFieldsFromNewCard()
         setupCardWidget()
 
         cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
@@ -150,7 +155,10 @@ internal abstract class BaseAddCardFragment(
         if (sheetViewModel.sheetMode.value == SheetMode.Full) {
             cardMultilineWidget.cardNumberEditText.requestFocus()
             getSystemService(requireContext(), InputMethodManager::class.java)?.apply {
-                showSoftInput(cardMultilineWidget.cardNumberEditText, InputMethodManager.SHOW_IMPLICIT)
+                showSoftInput(
+                    cardMultilineWidget.cardNumberEditText,
+                    InputMethodManager.SHOW_IMPLICIT
+                )
             }
         }
 
@@ -181,19 +189,24 @@ internal abstract class BaseAddCardFragment(
     }
 
     private fun updateSelection() {
-        sheetViewModel.updateSelection(
-            if (addCardViewModel.isCardValid) {
-                paymentMethodParams?.let { params ->
-                    PaymentSelection.New.Card(
-                        params,
-                        cardMultilineWidget.brand,
-                        shouldSavePaymentMethod = shouldSaveCard()
-                    )
-                }
-            } else {
-                null
+        val validCard = if (addCardViewModel.isCardValid) {
+            paymentMethodParams?.let { params ->
+                PaymentSelection.New.Card(
+                    params,
+                    cardMultilineWidget.brand,
+                    shouldSavePaymentMethod = shouldSaveCard()
+                )
             }
-        )
+        } else {
+            null
+        }
+
+        // If you open a new unsaved card, edit it, go to the list view and come back the edited
+        // card should be shown, this means that the new card must be updated
+        validCard?.let {
+            sheetViewModel.newCard = validCard
+        }
+        sheetViewModel.updateSelection(validCard)
     }
 
     private fun setupCardWidget() {
@@ -221,7 +234,8 @@ internal abstract class BaseAddCardFragment(
         }
 
         cardMultilineWidget.expirationDatePlaceholderRes = null
-        cardMultilineWidget.expiryTextInputLayout.hint = getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.expiryTextInputLayout.hint =
+            getString(R.string.stripe_paymentsheet_expiration_date_hint)
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
@@ -246,8 +260,10 @@ internal abstract class BaseAddCardFragment(
             1
         )
 
-        val layoutMarginHorizontal = resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_horizontal)
-        val layoutMarginVertical = resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_vertical)
+        val layoutMarginHorizontal =
+            resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_horizontal)
+        val layoutMarginVertical =
+            resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_vertical)
         setOf(
             cardMultilineWidget.cardNumberTextInputLayout,
             cardMultilineWidget.expiryTextInputLayout,
@@ -305,6 +321,13 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget.postalCodeErrorListener = null
     }
 
+    private fun populateFieldsFromNewCard() {
+        val paymentMethodCreateParams = sheetViewModel.newCard?.paymentMethodCreateParams
+        saveCardCheckbox.isChecked = sheetViewModel.newCard?.shouldSavePaymentMethod ?: true
+        cardMultilineWidget.populateFromParams(paymentMethodCreateParams?.card)
+        billingAddressView.populateFromParams(paymentMethodCreateParams?.billingDetails?.address)
+    }
+
     private fun onCardError(
         field: AddCardViewModel.Field,
         errorMessage: String?
@@ -337,9 +360,9 @@ internal abstract class BaseAddCardFragment(
     private fun onSaveCardCheckboxChanged() {
         val selection = sheetViewModel.selection.value
         if (selection is PaymentSelection.New.Card) {
-            sheetViewModel.updateSelection(
-                selection.copy(shouldSavePaymentMethod = shouldSaveCard())
-            )
+            val newCardSelection = selection.copy(shouldSavePaymentMethod = shouldSaveCard())
+            sheetViewModel.updateSelection(newCardSelection)
+            sheetViewModel.newCard = newCardSelection
         }
     }
 

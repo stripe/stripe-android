@@ -81,17 +81,18 @@ internal class FlowControllerFactory(
             config.publishableKey
         )
 
-        val paymentControllerFactory = PaymentControllerFactory { paymentRelayLauncher, paymentAuthWebViewLauncher, stripe3ds2ChallengeLauncher ->
-            StripePaymentController(
-                appContext,
-                config.publishableKey,
-                stripeRepository,
-                enableLogging = true,
-                paymentRelayLauncher = paymentRelayLauncher,
-                paymentAuthWebViewLauncher = paymentAuthWebViewLauncher,
-                stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
-            )
-        }
+        val paymentControllerFactory =
+            PaymentControllerFactory { paymentRelayLauncher, paymentAuthWebViewLauncher, stripe3ds2ChallengeLauncher ->
+                StripePaymentController(
+                    appContext,
+                    config.publishableKey,
+                    stripeRepository,
+                    enableLogging = true,
+                    paymentRelayLauncher = paymentRelayLauncher,
+                    paymentAuthWebViewLauncher = paymentAuthWebViewLauncher,
+                    stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
+                )
+            }
 
         val paymentFlowResultProcessor = DefaultPaymentFlowResultProcessor(
             appContext,
@@ -101,15 +102,16 @@ internal class FlowControllerFactory(
             Dispatchers.IO
         )
 
-        val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean = { environment ->
-            val googlePayRepository = environment?.let {
-                DefaultGooglePayRepository(
-                    appContext,
-                    it
-                )
-            } ?: GooglePayRepository.Disabled
-            googlePayRepository.isReady().first()
-        }
+        val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean =
+            { environment ->
+                val googlePayRepository = environment?.let {
+                    DefaultGooglePayRepository(
+                        appContext,
+                        it
+                    )
+                } ?: GooglePayRepository.Disabled
+                googlePayRepository.isReady().first()
+            }
 
         val prefsRepositoryFactory = { customerId: String, isGooglePayReady: Boolean ->
             DefaultPrefsRepository(

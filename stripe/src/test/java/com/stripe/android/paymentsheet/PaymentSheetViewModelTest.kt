@@ -110,13 +110,14 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should not attempt to confirm when no payment selection has been mode`() = testDispatcher.runBlockingTest {
-        viewModel.checkout()
-        assertThat(prefsRepository.paymentSelectionArgs)
-            .containsExactly(null)
-        assertThat(prefsRepository.getSavedSelection())
-            .isEqualTo(SavedSelection.None)
-    }
+    fun `checkout() should not attempt to confirm when no payment selection has been mode`() =
+        testDispatcher.runBlockingTest {
+            viewModel.checkout()
+            assertThat(prefsRepository.paymentSelectionArgs)
+                .containsExactly(null)
+            assertThat(prefsRepository.getSavedSelection())
+                .isEqualTo(SavedSelection.None)
+        }
 
     @Test
     fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
@@ -384,8 +385,12 @@ internal class PaymentSheetViewModelTest {
 
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        paymentIntentRepository: PaymentIntentRepository = PaymentIntentRepository.Static(PAYMENT_INTENT),
-        paymentMethodsRepository: PaymentMethodsRepository = PaymentMethodsRepository.Static(PAYMENT_METHODS)
+        paymentIntentRepository: PaymentIntentRepository = PaymentIntentRepository.Static(
+            PAYMENT_INTENT
+        ),
+        paymentMethodsRepository: PaymentMethodsRepository = PaymentMethodsRepository.Static(
+            PAYMENT_METHODS
+        )
     ): PaymentSheetViewModel {
         return PaymentSheetViewModel(
             "publishable_key",

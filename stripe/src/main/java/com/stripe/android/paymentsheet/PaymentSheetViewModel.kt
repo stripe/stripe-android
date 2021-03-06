@@ -63,7 +63,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val _viewState = MutableLiveData<ViewState>(null)
     internal val viewState: LiveData<ViewState> = _viewState.distinctUntilChanged()
 
-    override val newCard: PaymentSelection.New.Card? = null
+    override var newCard: PaymentSelection.New.Card? = null
 
     private val paymentIntentValidator = PaymentIntentValidator()
 
@@ -286,12 +286,13 @@ internal class PaymentSheetViewModel internal constructor(
 
             val starterArgs = starterArgsSupplier()
 
-            val googlePayRepository = starterArgs.config?.googlePay?.environment?.let { environment ->
-                DefaultGooglePayRepository(
-                    application,
-                    environment
-                )
-            } ?: GooglePayRepository.Disabled
+            val googlePayRepository =
+                starterArgs.config?.googlePay?.environment?.let { environment ->
+                    DefaultGooglePayRepository(
+                        application,
+                        environment
+                    )
+                } ?: GooglePayRepository.Disabled
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(

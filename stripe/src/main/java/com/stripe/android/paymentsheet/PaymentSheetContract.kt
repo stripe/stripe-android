@@ -10,7 +10,8 @@ import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentSheetContract : ActivityResultContract<PaymentSheetContract.Args, PaymentResult>() {
+internal class PaymentSheetContract :
+    ActivityResultContract<PaymentSheetContract.Args, PaymentResult>() {
     override fun createIntent(
         context: Context,
         input: Args
@@ -57,7 +58,9 @@ internal class PaymentSheetContract : ActivityResultContract<PaymentSheetContrac
     }
 
     private companion object {
-        private const val EXTRA_ARGS = "com.stripe.android.paymentsheet.PaymentSheetContract.extra_args"
-        private const val EXTRA_RESULT = "com.stripe.android.paymentsheet.PaymentSheetContract.extra_result"
+        private const val EXTRA_ARGS =
+            "com.stripe.android.paymentsheet.PaymentSheetContract.extra_args"
+        private const val EXTRA_RESULT =
+            "com.stripe.android.paymentsheet.PaymentSheetContract.extra_result"
     }
 }

@@ -180,7 +180,10 @@ class DefaultFlowControllerTest {
                     config = null,
                     isGooglePayReady = false,
                     newCard = null,
-                    statusBarColor = ContextCompat.getColor(activity, R.color.stripe_toolbar_color_default_dark)
+                    statusBarColor = ContextCompat.getColor(
+                        activity,
+                        R.color.stripe_toolbar_color_default_dark
+                    )
                 )
             )
     }

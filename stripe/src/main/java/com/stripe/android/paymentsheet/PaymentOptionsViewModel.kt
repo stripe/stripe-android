@@ -21,10 +21,25 @@ internal class PaymentOptionsViewModel(
     config = args.config,
     prefsRepository = prefsRepository
 ) {
+    // This field is unique from the selection in sheetViewModel, as the one in sheet view model
+    // is updated any time the add card fragment is in a valid state.  This one will
+    // only be updated when the user presses the Add or selects an item in the carousel.
+    // This will also trigger the closing of the sheet.
     private val _userSelection = MutableLiveData<PaymentSelection>()
     val userSelection: LiveData<PaymentSelection> = _userSelection
 
-    override val newCard = args.newCard
+    // Only used to determine if we should skip the list and go to the add card view.
+    // and how to populate that view.
+    override var newCard = args.newCard
+
+    // This is used in the case where the last card was new and not saved.  In this scenario
+    // when the payment options is opened it should jump to the add card, but if the user
+    // presses the back button, they shouldn't transition to it again
+    private var hasTransitionToUnsavedCard = false
+    private val shouldTransitionToUnsavedCard: Boolean
+        get() =
+            !hasTransitionToUnsavedCard &&
+                (newCard as? PaymentSelection.New)?.let { !it.shouldSavePaymentMethod } ?: false
 
     init {
         _isGooglePayReady.value = args.isGooglePayReady
@@ -38,6 +53,8 @@ internal class PaymentOptionsViewModel(
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
             _userSelection.value = paymentSelection
+            // TODO: Update the returned value with the savedCard rather than the NewCard
+            // so that we don't jump the next time.
         }
     }
 
@@ -47,6 +64,17 @@ internal class PaymentOptionsViewModel(
         } ?: PaymentOptionResult.Canceled(
             mostRecentError = fatal.value
         )
+    }
+
+    fun resolveTransitionTarget(config: FragmentConfig) {
+        if (shouldTransitionToUnsavedCard) {
+            hasTransitionToUnsavedCard = true
+            transitionTo(
+                // Until we add a flag to the transitionTarget to specify if we want to add the item
+                // to the backstack, we need to use the full sheet.
+                TransitionTarget.AddPaymentMethodFull(config)
+            )
+        }
     }
 
     internal sealed class TransitionTarget {
