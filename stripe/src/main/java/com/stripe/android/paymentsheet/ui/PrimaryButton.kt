@@ -28,7 +28,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     init {
-        setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
+        setBackgroundResource(R.drawable.stripe_paymentsheet_primary_button_default_background)
 
         viewBinding.label.text = getTextAttributeValue(attrs)
 
@@ -59,13 +59,13 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.confirmingIcon.isVisible = true
 
         viewBinding.label.text = resources.getString(
-            R.string.stripe_paymentsheet_pay_button_processing
+            R.string.stripe_paymentsheet_primary_button_processing
         )
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
         setBackgroundResource(
-            R.drawable.stripe_paymentsheet_primary_buy_confirmed_background
+            R.drawable.stripe_paymentsheet_primary_button_confirmed_background
         )
 
         animator.fadeOut(viewBinding.label)

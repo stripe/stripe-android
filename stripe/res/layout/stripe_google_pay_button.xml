@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/stripe_paymentsheet_primarybutton_height"
+    android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
     android:background="@drawable/stripe_googlepay_button_no_shadow_background"
     android:paddingTop="2sp"
     android:contentDescription="@string/stripe_googlepay_button_content_description">
