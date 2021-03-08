@@ -237,16 +237,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             is PaymentOptionResult.Succeeded -> {
                 closeSheet(result)
             }
-            is PaymentOptionResult.Failed -> {
-                Toast.makeText(
-                    this,
-                    "Got error: ${result.error.localizedMessage}",
-                    Toast.LENGTH_LONG
-                ).show()
-                Log.e("APP", "Error saving intent", result.error.cause)
-            }
             else -> {
-                // TODO(mshafrir-stripe): handle other outcomes
+                // TODO(michelleb-stripe): handle other outcomes
             }
         }
     }

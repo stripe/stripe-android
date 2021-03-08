@@ -106,9 +106,7 @@ internal class PaymentOptionsViewModel(
                     }
                 },
                 onFailure = {
-                    _viewState.value =
-                        ViewState.PaymentOptions.CloseSheet(PaymentOptionResult.Failed(it))
-                    _viewState.value = ViewState.PaymentOptions.Ready
+                    // TODO(michelleb-stripe): Handle failure cases
                 }
             )
         }
