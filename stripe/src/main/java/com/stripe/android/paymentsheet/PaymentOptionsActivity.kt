@@ -18,9 +18,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
 
 /**
@@ -74,6 +75,25 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
+    @VisibleForTesting
+    private val viewStateObserver = { viewState: ViewState.PaymentOptions? ->
+        val addButton = viewBinding.addButton
+        when (viewState) {
+            is ViewState.PaymentOptions.Ready -> addButton.updateState(
+                PrimaryButton.State.Ready()
+            )
+            is ViewState.PaymentOptions.StartProcessing -> addButton.updateState(
+                PrimaryButton.State.StartProcessing
+            )
+            is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
+            )
+            is ViewState.PaymentOptions.CloseSheet -> handleResult(
+                viewState.result
+            )
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -118,7 +138,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             if (config != null) {
                 viewModel.transitionTo(
                     // It would be nice to see this condition move into the PaymentOptionsListFragment
-                    // where we also jump to a new unsaved card.  However this move require
+                    // where we also jump to a new unsaved card. However this move require
                     // the transition target to specify when to and when not to add things to the
                     // backstack.
                     if (starterArgs.paymentMethods.isEmpty()) {
@@ -142,15 +162,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 }
             }
         }
-
-        viewModel.userSelection.observe(this) { paymentSelection ->
-            if (paymentSelection != null) {
-                onActionCompleted(paymentSelection)
-            }
-        }
     }
 
-    private fun setupAddButton(addButton: AddButton) {
+    private fun setupAddButton(addButton: PrimaryButton) {
+        viewModel.viewState.observe(this, viewStateObserver)
+
         addButton.setOnClickListener {
             viewModel.onUserSelection()
         }
@@ -203,20 +219,19 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         // When using commit on the fragments, the fragment transaction happens
-        // at some later time.  In order to get an accurate backstack count
-        // we need to make sure the transactions have completed.  In API 24+ you can use commitNow
-        // By using commitNow, only the items in the runnable will be commited,
+        // at some later time. In order to get an accurate backstack count
+        // we need to make sure the transactions have completed. In API 24+ you can use commitNow
+        // By using commitNow, only the items in the runnable will be committed,
         // executePendingTransactions will run all the transactions even ones that were not just
-        // commited.
+        // committed.
         supportFragmentManager.executePendingTransactions()
-        viewBinding.addButton.isVisible = transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
+        viewBinding.addButton.isVisible =
+            transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    private fun onActionCompleted(paymentSelection: PaymentSelection) {
-        closeSheet(
-            PaymentOptionResult.Succeeded(paymentSelection)
-        )
+    private fun handleResult(result: PaymentOptionResult) {
+        closeSheet(result)
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {

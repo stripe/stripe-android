@@ -111,8 +111,8 @@ internal class PrimaryButtonAnimator(
         )
     }
 
-    private companion object {
+    internal companion object {
         // the delay before the payment sheet is dismissed
-        private const val HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION = 1500L
+        const val HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION = 1500L
     }
 }

@@ -59,11 +59,12 @@
                     android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                     android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom">
 
-                    <com.stripe.android.paymentsheet.BuyButton
+                    <com.stripe.android.paymentsheet.ui.PrimaryButton
                         android:id="@+id/buy_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/stripe_paymentsheet_primarybutton_margin"
+                        android:layout_margin="@dimen/stripe_paymentsheet_primary_button_margin"
+                        android:text="@string/stripe_paymentsheet_pay_button_label"
                         android:visibility="gone" />
 
                     <com.stripe.android.paymentsheet.ui.GooglePayButton

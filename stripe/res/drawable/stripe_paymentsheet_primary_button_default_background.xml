@@ -1,0 +1,14 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="@color/stripe_paymentsheet_primary_button_default_background" />
+
+    <padding
+        android:bottom="@dimen/stripe_paymentsheet_primary_button_corner_radius"
+        android:left="@dimen/stripe_paymentsheet_primary_button_corner_radius"
+        android:right="@dimen/stripe_paymentsheet_primary_button_corner_radius"
+        android:top="@dimen/stripe_paymentsheet_primary_button_corner_radius" />
+
+    <corners android:radius="@dimen/stripe_paymentsheet_primary_button_corner_radius" />
+
+</shape>

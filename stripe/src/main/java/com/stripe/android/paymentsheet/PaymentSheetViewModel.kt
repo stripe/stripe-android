@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -60,8 +61,9 @@ internal class PaymentSheetViewModel internal constructor(
     private val _startConfirm = MutableLiveData<ConfirmPaymentIntentParams>()
     internal val startConfirm: LiveData<ConfirmPaymentIntentParams> = _startConfirm
 
-    private val _viewState = MutableLiveData<ViewState>(null)
-    internal val viewState: LiveData<ViewState> = _viewState.distinctUntilChanged()
+    @VisibleForTesting
+    internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
+    internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
     override var newCard: PaymentSelection.New.Card? = null
 
@@ -128,7 +130,7 @@ internal class PaymentSheetViewModel internal constructor(
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
         if (amount != null && currencyCode != null) {
-            _viewState.value = ViewState.Ready(amount, currencyCode)
+            _viewState.value = ViewState.PaymentSheet.Ready(amount, currencyCode)
             _processing.value = false
         } else {
             onFatal(
@@ -177,7 +179,7 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            _viewState.value = ViewState.Confirming
+            _viewState.value = ViewState.PaymentSheet.StartProcessing
             _startConfirm.value = confirmParams
         }
     }
@@ -189,7 +191,9 @@ internal class PaymentSheetViewModel internal constructor(
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
 
-                _viewState.value = ViewState.Completed(paymentIntentResult)
+                _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                    _viewState.value = ViewState.PaymentSheet.CloseSheet(paymentIntentResult)
+                }
             }
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
@@ -286,12 +290,13 @@ internal class PaymentSheetViewModel internal constructor(
 
             val starterArgs = starterArgsSupplier()
 
-            val googlePayRepository = starterArgs.config?.googlePay?.environment?.let { environment ->
-                DefaultGooglePayRepository(
-                    application,
-                    environment
-                )
-            } ?: GooglePayRepository.Disabled
+            val googlePayRepository =
+                starterArgs.config?.googlePay?.environment?.let { environment ->
+                    DefaultGooglePayRepository(
+                        application,
+                        environment
+                    )
+                } ?: GooglePayRepository.Disabled
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(

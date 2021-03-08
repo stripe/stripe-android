@@ -110,13 +110,14 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should not attempt to confirm when no payment selection has been mode`() = testDispatcher.runBlockingTest {
-        viewModel.checkout()
-        assertThat(prefsRepository.paymentSelectionArgs)
-            .containsExactly(null)
-        assertThat(prefsRepository.getSavedSelection())
-            .isEqualTo(SavedSelection.None)
-    }
+    fun `checkout() should not attempt to confirm when no payment selection has been mode`() =
+        testDispatcher.runBlockingTest {
+            viewModel.checkout()
+            assertThat(prefsRepository.paymentSelectionArgs)
+                .containsExactly(null)
+            assertThat(prefsRepository.getSavedSelection())
+                .isEqualTo(SavedSelection.None)
+        }
 
     @Test
     fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
@@ -189,9 +190,9 @@ internal class PaymentSheetViewModelTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
-        var viewState: ViewState? = null
+        val viewState: MutableList<ViewState?> = mutableListOf()
         viewModel.viewState.observeForever {
-            viewState = it
+            viewState.add(it)
         }
 
         viewModel.onPaymentFlowResult(
@@ -200,10 +201,13 @@ internal class PaymentSheetViewModelTest {
                 StripeIntentResult.Outcome.SUCCEEDED
             )
         )
-        assertThat(viewState)
-            .isEqualTo(
-                ViewState.Completed(PAYMENT_INTENT_RESULT)
-            )
+        assertThat(viewState[1])
+            .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+
+        (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
+
+        assertThat((viewState[2] as ViewState.PaymentSheet.CloseSheet).result)
+            .isEqualTo(PAYMENT_INTENT_RESULT)
 
         verify(eventReporter)
             .onPaymentSuccess(selection)
@@ -251,7 +255,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchPaymentIntent()
         assertThat(viewState)
             .isEqualTo(
-                ViewState.Ready(amount = 1099, currencyCode = "usd")
+                ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd")
             )
     }
 
@@ -384,8 +388,12 @@ internal class PaymentSheetViewModelTest {
 
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        paymentIntentRepository: PaymentIntentRepository = PaymentIntentRepository.Static(PAYMENT_INTENT),
-        paymentMethodsRepository: PaymentMethodsRepository = PaymentMethodsRepository.Static(PAYMENT_METHODS)
+        paymentIntentRepository: PaymentIntentRepository = PaymentIntentRepository.Static(
+            PAYMENT_INTENT
+        ),
+        paymentMethodsRepository: PaymentMethodsRepository = PaymentMethodsRepository.Static(
+            PAYMENT_METHODS
+        )
     ): PaymentSheetViewModel {
         return PaymentSheetViewModel(
             "publishable_key",
