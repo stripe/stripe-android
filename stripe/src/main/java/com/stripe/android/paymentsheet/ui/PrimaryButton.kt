@@ -30,13 +30,13 @@ internal class PrimaryButton @JvmOverloads constructor(
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
 
-        viewBinding.label.text = getText(attrs)
+        viewBinding.label.text = getTextAttributeValue(attrs)
 
         isClickable = true
         isEnabled = false
     }
 
-    private fun getText(attrs: AttributeSet?): CharSequence? {
+    private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
         var text: CharSequence? = null
         context.withStyledAttributes(
             attrs,
@@ -108,6 +108,9 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     internal sealed class State {
+        /**
+         * The label will be applied if the value is not null.
+         */
         data class Ready(val label: String? = null) : State()
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
