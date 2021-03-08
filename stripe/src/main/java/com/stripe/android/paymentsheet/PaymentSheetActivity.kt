@@ -119,7 +119,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentSheet.CloseSheet -> handleResult(
+            is ViewState.PaymentSheet.ProcessResult -> handleResult(
                 viewState.result
             )
         }

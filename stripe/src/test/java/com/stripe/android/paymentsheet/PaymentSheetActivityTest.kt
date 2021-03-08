@@ -325,7 +325,7 @@ internal class PaymentSheetActivityTest {
                 testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
-                viewModel._viewState.value = ViewState.PaymentSheet.CloseSheet(
+                viewModel._viewState.value = ViewState.PaymentSheet.ProcessResult(
                     PaymentIntentResult(
                         intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
                         outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED

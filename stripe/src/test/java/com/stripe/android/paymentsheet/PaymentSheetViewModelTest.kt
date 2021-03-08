@@ -206,7 +206,7 @@ internal class PaymentSheetViewModelTest {
 
         (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
 
-        assertThat((viewState[2] as ViewState.PaymentSheet.CloseSheet).result)
+        assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult).result)
             .isEqualTo(PAYMENT_INTENT_RESULT)
 
         verify(eventReporter)

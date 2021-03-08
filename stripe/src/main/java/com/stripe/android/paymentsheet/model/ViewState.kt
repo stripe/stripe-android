@@ -22,7 +22,7 @@ internal sealed class ViewState {
             val onComplete: () -> Unit
         ) : PaymentSheet()
 
-        data class CloseSheet(
+        data class ProcessResult(
             val result: PaymentIntentResult
         ) : PaymentSheet()
     }
@@ -41,7 +41,7 @@ internal sealed class ViewState {
             val onComplete: () -> Unit
         ) : PaymentOptions()
 
-        data class CloseSheet(
+        data class ProcessResult(
             val result: PaymentOptionResult
         ) : PaymentOptions()
     }

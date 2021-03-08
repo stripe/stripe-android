@@ -88,7 +88,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentOptions.CloseSheet -> handleResult(
+            is ViewState.PaymentOptions.ProcessResult -> handleResult(
                 viewState.result
             )
         }
