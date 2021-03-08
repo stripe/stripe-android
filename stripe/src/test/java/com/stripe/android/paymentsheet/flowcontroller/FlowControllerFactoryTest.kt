@@ -2,6 +2,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -12,6 +15,7 @@ import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -26,9 +30,6 @@ class FlowControllerFactoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val activityScenarioFactory = ActivityScenarioFactory(context)
-    private val factory: FlowControllerFactory by lazy {
-        createFactory()
-    }
 
     private lateinit var activityScenario: ActivityScenario<*>
     private lateinit var activity: ComponentActivity
@@ -51,21 +52,51 @@ class FlowControllerFactoryTest {
 
     @AfterTest
     fun cleanup() {
+        Dispatchers.resetMain()
         testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
     fun `create() should return a FlowController instance`() {
+        val factory = createFactory(activity)
         assertThat(factory.create())
             .isNotNull()
     }
 
-    private fun createFactory(): FlowControllerFactory {
+    @Test
+    fun `create() with Fragment should return a FlowController instance`() {
+        with(
+            launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
+                TestFragment()
+            }
+        ) {
+            onFragment { fragment ->
+                val factory = createFactory(fragment)
+                assertThat(factory.create())
+                    .isNotNull()
+            }
+        }
+    }
+
+    private fun createFactory(
+        activity: ComponentActivity
+    ): FlowControllerFactory {
         return FlowControllerFactory(
             activity,
-            PaymentConfiguration.getInstance(context),
             mock(),
             mock()
         )
     }
+
+    private fun createFactory(
+        fragment: Fragment
+    ): FlowControllerFactory {
+        return FlowControllerFactory(
+            fragment,
+            mock(),
+            mock()
+        )
+    }
+
+    internal class TestFragment : Fragment()
 }

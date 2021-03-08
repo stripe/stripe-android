@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.parcelize.Parcelize
@@ -161,7 +160,19 @@ class PaymentSheet internal constructor(
             ): FlowController {
                 return FlowControllerFactory(
                     activity,
-                    PaymentConfiguration.getInstance(activity),
+                    paymentOptionCallback,
+                    paymentResultCallback
+                ).create()
+            }
+
+            @JvmStatic
+            fun create(
+                fragment: Fragment,
+                paymentOptionCallback: PaymentOptionCallback,
+                paymentResultCallback: PaymentSheetResultCallback
+            ): FlowController {
+                return FlowControllerFactory(
+                    fragment,
                     paymentOptionCallback,
                     paymentResultCallback
                 ).create()

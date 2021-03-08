@@ -1,14 +1,17 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,18 +24,17 @@ internal class PaymentOptionsViewModel(
     config = args.config,
     prefsRepository = prefsRepository
 ) {
-    // This field is unique from the selection in sheetViewModel, as the one in sheet view model
-    // is updated any time the add card fragment is in a valid state.  This one will
-    // only be updated when the user presses the Add or selects an item in the carousel.
-    // This will also trigger the closing of the sheet.
-    private val _userSelection = MutableLiveData<PaymentSelection>()
-    val userSelection: LiveData<PaymentSelection> = _userSelection
+    @VisibleForTesting
+    internal val _viewState = MutableLiveData<ViewState.PaymentOptions>(
+        ViewState.PaymentOptions.Ready
+    )
+    internal val viewState: LiveData<ViewState.PaymentOptions> = _viewState.distinctUntilChanged()
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newCard = args.newCard
 
-    // This is used in the case where the last card was new and not saved.  In this scenario
+    // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
     private var hasTransitionToUnsavedCard = false
@@ -52,9 +54,27 @@ internal class PaymentOptionsViewModel(
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             prefsRepository.savePaymentSelection(paymentSelection)
-            _userSelection.value = paymentSelection
+            processSelection(paymentSelection)
+        }
+    }
+
+    private fun processSelection(paymentSelection: PaymentSelection) {
+        val requestSaveNewCard =
+            (paymentSelection as? PaymentSelection.New)?.shouldSavePaymentMethod
+                ?: false
+
+        if (requestSaveNewCard) {
             // TODO: Update the returned value with the savedCard rather than the NewCard
             // so that we don't jump the next time.
+            _viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                _viewState.value = ViewState.PaymentOptions.CloseSheet(
+                    PaymentOptionResult.Succeeded(paymentSelection)
+                )
+            }
+        } else {
+            _viewState.value = ViewState.PaymentOptions.CloseSheet(
+                PaymentOptionResult.Succeeded(paymentSelection)
+            )
         }
     }
 

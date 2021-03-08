@@ -5287,37 +5287,6 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract class com/stripe/android/paymentsheet/model/ViewState {
-}
-
-public final class com/stripe/android/paymentsheet/model/ViewState$Completed : com/stripe/android/paymentsheet/model/ViewState {
-	public fun <init> (Lcom/stripe/android/PaymentIntentResult;)V
-	public final fun component1 ()Lcom/stripe/android/PaymentIntentResult;
-	public final fun copy (Lcom/stripe/android/PaymentIntentResult;)Lcom/stripe/android/paymentsheet/model/ViewState$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/ViewState$Completed;Lcom/stripe/android/PaymentIntentResult;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/ViewState$Completed;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getPaymentIntentResult ()Lcom/stripe/android/PaymentIntentResult;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/paymentsheet/model/ViewState$Confirming : com/stripe/android/paymentsheet/model/ViewState {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/model/ViewState$Confirming;
-}
-
-public final class com/stripe/android/paymentsheet/model/ViewState$Ready : com/stripe/android/paymentsheet/model/ViewState {
-	public fun <init> (JLjava/lang/String;)V
-	public final fun component1 ()J
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (JLjava/lang/String;)Lcom/stripe/android/paymentsheet/model/ViewState$Ready;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/ViewState$Ready;JLjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/ViewState$Ready;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAmount ()J
-	public final fun getCurrencyCode ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/paymentsheet/ui/GooglePayButton : android/widget/FrameLayout {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
