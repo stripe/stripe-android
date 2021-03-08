@@ -2,8 +2,10 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
@@ -231,18 +233,25 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun handleResult(result: PaymentOptionResult) {
-        closeSheet(result)
-    }
-
-    override fun setActivityResult(result: PaymentOptionResult) {
         when (result) {
             is PaymentOptionResult.Succeeded -> {
                 closeSheet(result)
+            }
+            is PaymentOptionResult.Failed -> {
+                Toast.makeText(
+                    this,
+                    "Got error: ${result.error.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
+                Log.e("APP", "Error saving intent", result.error.cause)
             }
             else -> {
                 // TODO(mshafrir-stripe): handle other outcomes
             }
         }
+    }
+
+    override fun setActivityResult(result: PaymentOptionResult) {
         setResult(
             result.resultCode,
             Intent()

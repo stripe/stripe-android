@@ -58,6 +58,10 @@ internal class PaymentOptionsViewModel(
 
     fun onUserSelection() {
         selection.value?.let { paymentSelection ->
+            // TODO: Should the payment selection in teh event be the saved or new item?
+            eventReporter.onSelectPaymentOption(paymentSelection)
+            // TODO: Should not need to update _paymentMethods?
+            prefsRepository.savePaymentSelection(paymentSelection)
             processSelection(paymentSelection)
         }
     }
@@ -71,13 +75,10 @@ internal class PaymentOptionsViewModel(
             _viewState.value = ViewState.PaymentOptions.StartProcessing
             savePaymentSelection(paymentSelection as PaymentSelection.New)
         } else {
-            // TODO: Should the payment selection in teh event be the saved or new item?
-            eventReporter.onSelectPaymentOption(paymentSelection)
-            // TODO: Should not need to update _paymentMethods?
-            prefsRepository.savePaymentSelection(paymentSelection)
             _viewState.value = ViewState.PaymentOptions.CloseSheet(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )
+            _viewState.value = ViewState.PaymentOptions.Ready
         }
     }
 
@@ -108,6 +109,7 @@ internal class PaymentOptionsViewModel(
                     _viewState.value = ViewState.PaymentOptions.FinishProcessing {
                         _viewState.value =
                             ViewState.PaymentOptions.CloseSheet(PaymentOptionResult.Failed(it))
+                        _viewState.value = ViewState.PaymentOptions.Ready
                     }
                 }
             )

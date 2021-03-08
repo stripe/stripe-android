@@ -87,7 +87,7 @@ internal sealed class PaymentMethodsRepository {
                     stripeRepository.createPaymentMethod(
                         paymentMethodCreateParams,
                         ApiRequest.Options(
-                            customerConfig.ephemeralKeySecret,
+                            publishableKey,
                             stripeAccountId
                         )
                     )?.let { paymentMethod ->
