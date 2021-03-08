@@ -18,7 +18,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".view.PaymentRelayActivity"
-            android:theme="@style/StripeDefaultTheme" />
+            android:theme="@style/StripeTransparentTheme" />
         <activity
             android:name=".view.Stripe3ds2CompletionActivity"
             android:theme="@style/StripeDefaultTheme" />

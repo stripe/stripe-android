@@ -12,6 +12,16 @@
     <style name="StripeDefaultTheme" parent="StripeBaseTheme"/>
     <style name="StripeDefault3DS2Theme" parent="BaseStripe3DS2Theme" />
 
+<!-- Theme used by Activities that do not show any UI, so the activity underneath them is still fully visible -->
+    <style name="StripeTransparentTheme" parent="Theme.AppCompat">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <style name="StripePaymentSheetBaseTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
