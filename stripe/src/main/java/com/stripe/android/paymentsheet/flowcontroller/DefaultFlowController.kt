@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
