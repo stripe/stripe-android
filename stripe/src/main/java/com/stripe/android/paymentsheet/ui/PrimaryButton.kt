@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.PrimaryButtonBinding
@@ -29,16 +30,27 @@ internal class PrimaryButton @JvmOverloads constructor(
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_primary_button_default_background)
 
+        viewBinding.label.text = getTextAttributeValue(attrs)
+
         isClickable = true
         isEnabled = false
     }
 
-    fun setLabelText(text: String) {
-        viewBinding.label.text = text
+    private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
+        var text: CharSequence? = null
+        context.withStyledAttributes(
+            attrs,
+            listOf(android.R.attr.text).toIntArray()
+        ) {
+            text = getText(0)
+        }
+        return text
     }
 
-    private fun onReadyState(text: String) {
-        setLabelText(text)
+    private fun onReadyState(text: String?) {
+        text?.let {
+            viewBinding.label.text = text
+        }
         viewBinding.confirmingIcon.isVisible = false
     }
 
@@ -96,7 +108,10 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     internal sealed class State {
-        data class Ready(val label: String) : State()
+        /**
+         * The label will be applied if the value is not null.
+         */
+        data class Ready(val label: String? = null) : State()
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
     }
