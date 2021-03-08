@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.view.ActivityScenarioFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -13,12 +13,12 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class BuyButtonTest {
+class PrimaryButtonTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
-    private val buyButton: BuyButton by lazy {
+    private val primaryButton: PrimaryButton by lazy {
         activityScenarioFactory.createView {
-            BuyButton(it)
+            PrimaryButton(it)
         }
     }
 
@@ -32,11 +32,11 @@ class BuyButtonTest {
 
     @Test
     fun `onReadyState() should update label`() {
-        buyButton.onReadyState(
-            ViewState.Ready(amount = 1099, currencyCode = "usd")
+        primaryButton.updateState(
+            PrimaryButton.State.Ready("Pay $10.99")
         )
         assertThat(
-            buyButton.viewBinding.label.text.toString()
+            primaryButton.viewBinding.label.text.toString()
         ).isEqualTo(
             "Pay $10.99"
         )
@@ -44,9 +44,11 @@ class BuyButtonTest {
 
     @Test
     fun `onConfirmingState() should update label`() {
-        buyButton.onConfirmingState()
+        primaryButton.updateState(
+            PrimaryButton.State.StartProcessing,
+        )
         assertThat(
-            buyButton.viewBinding.label.text.toString()
+            primaryButton.viewBinding.label.text.toString()
         ).isEqualTo(
             "Processing…"
         )
@@ -54,26 +56,26 @@ class BuyButtonTest {
 
     @Test
     fun `label alpha is initially 50%`() {
-        assertThat(buyButton.viewBinding.label.alpha)
+        assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(0.5f)
     }
 
     @Test
     fun `after viewState ready and disabled, label alpha is 50%`() {
-        buyButton.onReadyState(
-            ViewState.Ready(amount = 1099, currencyCode = "usd")
+        primaryButton.updateState(
+            PrimaryButton.State.Ready("$10.99")
         )
-        assertThat(buyButton.viewBinding.label.alpha)
+        assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(0.5f)
     }
 
     @Test
     fun `after viewState ready and enabled, label alpha is 100%`() {
-        buyButton.onReadyState(
-            ViewState.Ready(amount = 1099, currencyCode = "usd")
+        primaryButton.updateState(
+            PrimaryButton.State.Ready("$10.99")
         )
-        buyButton.isEnabled = true
-        assertThat(buyButton.viewBinding.label.alpha)
+        primaryButton.isEnabled = true
+        assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(1.0f)
     }
 }

@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
@@ -13,6 +14,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -46,29 +48,69 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() when selection has been made should emit on userSelection`() {
-        var paymentSelection: PaymentSelection? = null
-        viewModel.userSelection.observeForever {
-            paymentSelection = it
+        var viewState: ViewState? = null
+        viewModel.viewState.observeForever {
+            viewState = it
         }
         viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
 
         viewModel.onUserSelection()
 
-        assertThat(paymentSelection)
-            .isEqualTo(SELECTION_SAVED_PAYMENT_METHOD)
+        assertThat((viewState as ViewState.PaymentOptions.CloseSheet).result)
+            .isEqualTo(PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD))
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
     @Test
+    fun `onUserSelection() when new card selection with no save should set the view state to close sheet`() {
+        var viewState: ViewState? = null
+        viewModel.viewState.observeForever {
+            viewState = it
+        }
+        viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
+
+        viewModel.onUserSelection()
+
+        assertThat((viewState as ViewState.PaymentOptions.CloseSheet).result)
+            .isEqualTo(PaymentOptionResult.Succeeded(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION))
+        verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `onUserSelection() new card with save should be finish processing and close the sheet`() {
+        val viewState: MutableList<ViewState?> = mutableListOf()
+        viewModel.viewState.observeForever {
+            viewState.add(it)
+        }
+        viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+
+        viewModel.onUserSelection()
+
+        assertThat(viewState[0])
+            .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+        assertThat(viewState[1])
+            .isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
+
+        (viewState[1] as ViewState.PaymentOptions.FinishProcessing).onComplete()
+
+        val paymentOptionResultSucceeded =
+            (viewState[2] as ViewState.PaymentOptions.CloseSheet)
+                .result as PaymentOptionResult.Succeeded
+        assertThat((paymentOptionResultSucceeded).paymentSelection)
+            .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+        verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
+    }
+
+    @Test
     fun `onUserSelection() when selection has not been made should not emit`() {
-        var paymentSelection: PaymentSelection? = null
-        viewModel.userSelection.observeForever {
-            paymentSelection = it
+        var viewState: ViewState? = null
+        viewModel.viewState.observeForever {
+            viewState = it
         }
         viewModel.onUserSelection()
 
-        assertThat(paymentSelection)
-            .isNull()
+        assertThat(viewState)
+            .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
     }
 
     @Test
@@ -163,6 +205,19 @@ class PaymentOptionsViewModelTest {
     private companion object {
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+        private val DEFAULT_PAYMENT_METHOD_CREATE_PARAMS: PaymentMethodCreateParams =
+            DEFAULT_CARD
+
+        private val NEW_REQUEST_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
+            DEFAULT_PAYMENT_METHOD_CREATE_PARAMS,
+            CardBrand.Visa,
+            true,
+        )
+        private val NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
+            DEFAULT_PAYMENT_METHOD_CREATE_PARAMS,
+            CardBrand.Visa,
+            false,
         )
     }
 }

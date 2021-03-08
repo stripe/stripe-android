@@ -5,15 +5,21 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
+import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -119,6 +125,83 @@ class PaymentOptionsActivityTest {
 
             assertThat(activity.viewBinding.addButton.isVisible)
                 .isTrue()
+        }
+    }
+
+    @Test
+    fun `Verify Ready state updates the add button label`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(emptyList())
+        ).onActivity { activity ->
+            viewModel._viewState.value = ViewState.PaymentOptions.Ready
+
+            idleLooper()
+
+            val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
+
+            assertThat(addBinding.confirmedIcon.isVisible)
+                .isFalse()
+
+            assertThat(addBinding.label.text)
+                .isEqualTo("Add")
+
+            activity.finish()
+        }
+    }
+
+    @Test
+    fun `Verify StartProcessing state updates the add button label`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(emptyList())
+        ).onActivity { activity ->
+            viewModel._viewState.value = ViewState.PaymentOptions.StartProcessing
+
+            idleLooper()
+
+            val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
+
+            assertThat(addBinding.label.text)
+                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_pay_button_processing))
+        }
+    }
+
+    @Test
+    fun `Verify FinishProcessing state calls the callback`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(emptyList())
+        ).onActivity { activity ->
+            var callbackCalled = false
+            viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                callbackCalled = true
+            }
+            idleLooper()
+
+            // wait animate time...
+            testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+
+            assertThat(callbackCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Verify CloseSheet state closes the sheet`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(emptyList())
+        ).onActivity { activity ->
+            val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
+            viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
+                PaymentOptionResult.Succeeded(
+                    paymentSelectionMock
+                )
+            )
+            idleLooper()
+
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
         }
     }
 
