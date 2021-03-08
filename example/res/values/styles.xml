@@ -22,16 +22,4 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:background">?android:attr/listDivider</item>
     </style>
-
-    <style name="FlickerAppTheme" parent="Theme.AppCompat">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:backgroundDimAmount">0.8</item>
-        <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:windowActivityTransitions">true</item>
-        <item name="android:windowTransitionBackgroundFadeDuration">200</item>
-    </style>
 </resources>
