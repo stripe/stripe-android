@@ -82,6 +82,25 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
+    @VisibleForTesting
+    private val viewStateObserver = { viewState: ViewState.PaymentOptions? ->
+        val addButton = viewBinding.addButton
+        when (viewState) {
+            is ViewState.PaymentOptions.Ready -> addButton.updateState(
+                PrimaryButton.State.Ready(addButtonLabel)
+            )
+            is ViewState.PaymentOptions.StartProcessing -> addButton.updateState(
+                PrimaryButton.State.StartProcessing
+            )
+            is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
+            )
+            is ViewState.PaymentOptions.CloseSheet -> onActionCompleted(
+                viewState.result
+            )
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -149,25 +168,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                     }
                 }
             }
-        }
-    }
-
-    @VisibleForTesting
-    private val viewStateObserver = { viewState: ViewState.PaymentOptions? ->
-        val addButton = viewBinding.addButton
-        when (viewState) {
-            is ViewState.PaymentOptions.Ready -> addButton.updateState(
-                PrimaryButton.State.Ready(addButtonLabel)
-            )
-            is ViewState.PaymentOptions.StartProcessing -> addButton.updateState(
-                PrimaryButton.State.StartProcessing
-            )
-            is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
-                PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            )
-            is ViewState.PaymentOptions.CloseSheet -> onActionCompleted(
-                viewState.result
-            )
         }
     }
 

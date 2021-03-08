@@ -114,6 +114,24 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         )
     }
 
+    private val viewStateObserver = { viewState: ViewState.PaymentSheet? ->
+
+        when (viewState) {
+            is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.Ready(getLabelText(viewState))
+            )
+            is ViewState.PaymentSheet.StartProcessing -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.StartProcessing
+            )
+            is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
+            )
+            is ViewState.PaymentSheet.CloseSheet -> handleIntent(
+                viewState.result
+            )
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -301,24 +319,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    private val viewStateObserver = { viewState: ViewState.PaymentSheet? ->
-
-        when (viewState) {
-            is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
-                PrimaryButton.State.Ready(getLabelText(viewState))
-            )
-            is ViewState.PaymentSheet.StartProcessing -> viewBinding.buyButton.updateState(
-                PrimaryButton.State.StartProcessing
-            )
-            is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
-                PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            )
-            is ViewState.PaymentSheet.CloseSheet -> onActionCompleted(
-                viewState.result
-            )
-        }
-    }
-
     private fun setupBuyButton() {
         viewBinding.buyButton.setLabelText(buyButtonLabel)
 
@@ -348,7 +348,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
     }
 
-    private fun onActionCompleted(paymentIntentResult: PaymentIntentResult) {
+    private fun handleIntent(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 closeSheet(
