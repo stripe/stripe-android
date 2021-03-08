@@ -34,7 +34,7 @@ internal class PaymentOptionsViewModel(
     // and how to populate that view.
     override var newCard = args.newCard
 
-    // This is used in the case where the last card was new and not saved.  In this scenario
+    // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
     private var hasTransitionToUnsavedCard = false

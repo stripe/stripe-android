@@ -64,8 +64,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val transition: LiveData<TransitionTargetType?> = _transition
 
     /**
-     * On [BaseAddCardFragment] this is set every time the add
-     * card is determined to be valid (not necessarily selected)
+     * On [BaseAddCardFragment] this is set every time the details in the add
+     * card fragment is determined to be valid (not necessarily selected)
      * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
     private val _selection = MutableLiveData<PaymentSelection?>()
@@ -84,9 +84,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     /**
      * This should be initialized from the starter args, and then from that
      * point forward it will be the last valid card seen or entered in the add card view.
-     * In contrast to selection, this field will not be updated by the list fragment.  On the
+     * In contrast to selection, this field will not be updated by the list fragment. On the
      * Payment Sheet it is used to save a new card that is added for when you go back to the list
-     * and reopen the card view.  It is used on the Payment Options sheet similar to what is
+     * and reopen the card view. It is used on the Payment Options sheet similar to what is
      * described above, and when you have an unsaved card.
      */
     abstract var newCard: PaymentSelection.New.Card?

@@ -28,7 +28,7 @@ internal sealed class ViewState {
     }
 
     /**
-     * The PaymentOptions may or may not go through a processing state.  The possible state transitions are:
+     * The PaymentOptions may or may not go through a processing state. The possible state transitions are:
      * Ready -> CloseSheet, if no save card is required
      * Ready -> StartProcessing -> FinishProcessing -> CloseSheet, if requested to save a new card
      */

@@ -145,7 +145,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             if (config != null) {
                 viewModel.transitionTo(
                     // It would be nice to see this condition move into the PaymentOptionsListFragment
-                    // where we also jump to a new unsaved card.  However this move require
+                    // where we also jump to a new unsaved card. However this move require
                     // the transition target to specify when to and when not to add things to the
                     // backstack.
                     if (starterArgs.paymentMethods.isEmpty()) {
@@ -228,8 +228,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         // When using commit on the fragments, the fragment transaction happens
-        // at some later time.  In order to get an accurate backstack count
-        // we need to make sure the transactions have completed.  In API 24+ you can use commitNow
+        // at some later time. In order to get an accurate backstack count
+        // we need to make sure the transactions have completed. In API 24+ you can use commitNow
         // By using commitNow, only the items in the runnable will be committed,
         // executePendingTransactions will run all the transactions even ones that were not just
         // committed.
