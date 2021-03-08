@@ -115,7 +115,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     }
 
     private val viewStateObserver = { viewState: ViewState.PaymentSheet? ->
-
         when (viewState) {
             is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.Ready(getLabelText(viewState))
@@ -126,7 +125,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentSheet.CloseSheet -> handleIntent(
+            is ViewState.PaymentSheet.CloseSheet -> handleResult(
                 viewState.result
             )
         }
@@ -348,7 +347,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
     }
 
-    private fun handleIntent(paymentIntentResult: PaymentIntentResult) {
+    private fun handleResult(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 closeSheet(

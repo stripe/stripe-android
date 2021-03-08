@@ -95,7 +95,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentOptions.CloseSheet -> onActionCompleted(
+            is ViewState.PaymentOptions.CloseSheet -> handleResult(
                 viewState.result
             )
         }
@@ -239,7 +239,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    private fun onActionCompleted(result: PaymentOptionResult) {
+    private fun handleResult(result: PaymentOptionResult) {
         closeSheet(result)
     }
 

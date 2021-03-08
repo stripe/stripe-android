@@ -86,9 +86,11 @@ class PaymentOptionsViewModelTest {
 
         viewModel.onUserSelection()
 
-        assertThat(viewState[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+        assertThat(viewState[0])
+            .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+        assertThat(viewState[1])
+            .isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
 
-        assertThat(viewState[1]).isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
         (viewState[1] as ViewState.PaymentOptions.FinishProcessing).onComplete()
 
         val paymentOptionResultSucceeded =

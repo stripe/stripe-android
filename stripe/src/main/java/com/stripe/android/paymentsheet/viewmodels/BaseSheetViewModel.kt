@@ -12,7 +12,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.BaseAddCardFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
+import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -52,8 +54,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
      * and any fragment will re-update when the result comes back.
-     * Represents what the user last selects (add or buy) on the PaymentOptions/PaymentSheet, and
-     * saved/restored from the preferences.
+     * Represents what the user last selects (add or buy) on the
+     * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
      */
     private val _savedSelection = MutableLiveData<SavedSelection>()
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
@@ -82,7 +84,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     /**
      * This should be initialized from the starter args, and then from that
      * point forward it will be the last valid card seen or entered in the add card view.
-     * In contrast to selection, this field will not be updated by the list fragment.
+     * In contrast to selection, this field will not be updated by the list fragment.  On the
+     * Payment Sheet it is used to save a new card that is added for when you go back to the list
+     * and reopen the card view.  It is used on the Payment Options sheet similar to what is
+     * described above, and when you have an unsaved card.
      */
     abstract var newCard: PaymentSelection.New.Card?
 

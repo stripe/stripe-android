@@ -129,7 +129,7 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify Ready State updates the add button label`() {
+    fun `Verify Ready state updates the add button label`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
@@ -151,7 +151,7 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify processing state updates the add button label`() {
+    fun `Verify StartProcessing state updates the add button label`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
@@ -168,7 +168,7 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify finishing state calls the callback`() {
+    fun `Verify FinishProcessing state calls the callback`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())

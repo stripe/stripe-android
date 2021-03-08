@@ -201,8 +201,11 @@ internal class PaymentSheetViewModelTest {
                 StripeIntentResult.Outcome.SUCCEEDED
             )
         )
-        assertThat(viewState[1]).isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+        assertThat(viewState[1])
+            .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+
         (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
+
         assertThat((viewState[2] as ViewState.PaymentSheet.CloseSheet).result)
             .isEqualTo(PAYMENT_INTENT_RESULT)
 
