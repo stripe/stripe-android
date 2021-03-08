@@ -7,18 +7,24 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
     prefsRepository: PrefsRepository,
+    private val paymentMethodsRepository: PaymentMethodsRepository,
     private val eventReporter: EventReporter
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
@@ -64,16 +70,43 @@ internal class PaymentOptionsViewModel(
                 ?: false
 
         if (requestSaveNewCard) {
+            // TODO: Need the WorkContext here!
             // TODO: Update the returned value with the savedCard rather than the NewCard
-            // so that we don't jump the next time.
-            _viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                _viewState.value = ViewState.PaymentOptions.CloseSheet(
-                    PaymentOptionResult.Succeeded(paymentSelection)
-                )
-            }
+            // so that we don't jump the next time
+            _viewState.value = ViewState.PaymentOptions.StartProcessing
+            savePaymentSelection(paymentSelection as PaymentSelection.New)
         } else {
             _viewState.value = ViewState.PaymentOptions.CloseSheet(
                 PaymentOptionResult.Succeeded(paymentSelection)
+            )
+        }
+    }
+
+    private fun savePaymentSelection(
+        paymentSelection: PaymentSelection.New
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                paymentMethodsRepository.save(
+                    customerConfig!!,
+                    paymentSelection.paymentMethodCreateParams
+                )
+            }.fold(
+                onSuccess = {
+                    // TODO: Do we need to add the saved item to _paymentMethods?
+                    _viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                        _viewState.value = ViewState.PaymentOptions.CloseSheet(
+                            PaymentOptionResult.Succeeded(paymentSelection)
+                        )
+                    }
+                },
+                onFailure = {
+                    // TODO: WHAT SHOULD BE SHOWN IN THIS CASE??
+                    _viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                        _viewState.value =
+                            ViewState.PaymentOptions.CloseSheet(PaymentOptionResult.Failed(it))
+                    }
+                }
             )
         }
     }
@@ -127,10 +160,16 @@ internal class PaymentOptionsViewModel(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentOptionContract.Args
     ) : ViewModelProvider.Factory {
-
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val starterArgs = starterArgsSupplier()
             val application = applicationSupplier()
+            val config = PaymentConfiguration.getInstance(application)
+            val publishableKey = config.publishableKey
+            val stripeAccountId = config.stripeAccountId
+            val stripeRepository = StripeApiRepository(
+                application,
+                publishableKey
+            )
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
@@ -141,9 +180,17 @@ internal class PaymentOptionsViewModel(
                 )
             } ?: PrefsRepository.Noop()
 
+            val paymentMethodsRepository = PaymentMethodsRepository.Api(
+                stripeRepository = stripeRepository,
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+                workContext = Dispatchers.IO
+            )
+
             return PaymentOptionsViewModel(
                 starterArgs,
                 prefsRepository,
+                paymentMethodsRepository,
                 DefaultEventReporter(
                     mode = EventReporter.Mode.Custom,
                     starterArgs.sessionId,

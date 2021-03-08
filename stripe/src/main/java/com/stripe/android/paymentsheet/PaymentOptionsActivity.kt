@@ -244,6 +244,14 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {
+        when (result) {
+            is PaymentOptionResult.Succeeded -> {
+                closeSheet(result)
+            }
+            else -> {
+                // TODO(mshafrir-stripe): handle other outcomes
+            }
+        }
         setResult(
             result.resultCode,
             Intent()
