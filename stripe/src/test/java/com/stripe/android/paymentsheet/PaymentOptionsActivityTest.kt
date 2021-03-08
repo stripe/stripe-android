@@ -172,7 +172,7 @@ class PaymentOptionsActivityTest {
                 val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
 
                 assertThat(addBinding.label.text)
-                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_pay_button_processing))
+                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
             }
         }
     }
