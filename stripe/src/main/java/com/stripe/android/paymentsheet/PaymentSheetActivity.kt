@@ -96,12 +96,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         PaymentConfiguration.getInstance(application)
     }
 
-    private val buyButtonLabel: String by lazy {
-        resources.getString(
-            R.string.stripe_paymentsheet_pay_button_amount
-        )
-    }
-
     private val currencyFormatter = CurrencyFormatter()
     private fun getLabelText(viewState: ViewState.PaymentSheet.Ready): String {
         val currency = Currency.getInstance(
@@ -319,8 +313,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     }
 
     private fun setupBuyButton() {
-        viewBinding.buyButton.setLabelText(buyButtonLabel)
-
         viewModel.viewState.observe(this, viewStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->

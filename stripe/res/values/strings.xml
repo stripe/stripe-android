@@ -195,6 +195,7 @@
     <string name="stripe_paymentsheet_expiration_date_hint" tools:ignore="MissingTranslation">MM / YY</string>
 
     <!-- The payment amount (e.g. "Pay $25.00") -->
+    <string name="stripe_paymentsheet_pay_button_label" tools:ignore="MissingTranslation">Pay</string>
     <string name="stripe_paymentsheet_pay_button_amount" tools:ignore="MissingTranslation">Pay %s</string>
     <string name="stripe_paymentsheet_pay_button_processing" tools:ignore="MissingTranslation">Processing…</string>
 

@@ -60,6 +60,7 @@
             android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/stripe_paymentsheet_add_button_label"
             app:layout_constraintVertical_bias="1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
