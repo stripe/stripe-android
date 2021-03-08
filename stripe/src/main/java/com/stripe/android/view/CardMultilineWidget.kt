@@ -442,7 +442,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberTextInputLayout.placeholderText = cardHint
     }
 
-    internal fun populateFromParams(card: PaymentMethodCreateParams.Card?) {
+    internal fun populate(card: PaymentMethodCreateParams.Card?) {
         card?.let { createParamsCard ->
             cardNumberEditText.setText(createParamsCard.number)
             cvcEditText.setText(createParamsCard.cvc)
