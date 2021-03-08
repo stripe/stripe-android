@@ -163,16 +163,16 @@ internal class PaymentSheetActivityTest {
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
+                viewModel.transitionTo(
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+                        FragmentConfigFixtures.DEFAULT
+                    )
                 )
-            )
-            idleLooper()
-            assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetAddCardFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
+                idleLooper()
+                assertThat(currentFragment(activity))
+                    .isInstanceOf(PaymentSheetAddCardFragment::class.java)
+                assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
                 activity.onBackPressed()
                 idleLooper()

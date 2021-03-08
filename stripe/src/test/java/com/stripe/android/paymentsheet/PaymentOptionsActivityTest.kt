@@ -82,8 +82,8 @@ class PaymentOptionsActivityTest {
                 idleLooper()
 
                 activity.viewBinding.root.performClick()
-            activity.finish()
-        }
+                activity.finish()
+            }
 
             assertThat(
                 PaymentOptionResult.fromIntent(scenario.getResult().resultData)
@@ -105,7 +105,8 @@ class PaymentOptionsActivityTest {
                 idleLooper()
 
                 assertThat(activity.viewBinding.addButton.isVisible)
-                .isFalse()}
+                    .isFalse()
+            }
         }
     }
 
@@ -121,7 +122,8 @@ class PaymentOptionsActivityTest {
                 idleLooper()
 
                 assertThat(activity.viewBinding.addButton.isVisible)
-                .isTrue()}
+                    .isTrue()
+            }
         }
     }
 
