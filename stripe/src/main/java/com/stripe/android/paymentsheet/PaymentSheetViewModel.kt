@@ -277,7 +277,6 @@ internal class PaymentSheetViewModel internal constructor(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args,
     ) : ViewModelProvider.Factory {
-
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val application = applicationSupplier()
             val config = PaymentConfiguration.getInstance(application)

@@ -47,7 +47,7 @@ class PaymentOptionsViewModelTest {
     )
 
     @Test
-    fun `onUserSelection() when selection has been made should emit on userSelection`() {
+    fun `onUserSelection() when selection has been made should set the view state to process result`() {
         var viewState: ViewState? = null
         viewModel.viewState.observeForever {
             viewState = it
@@ -62,7 +62,7 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `onUserSelection() when new card selection with no save should set the view state to close sheet`() {
+    fun `onUserSelection() when new card selection with no save should set the view state to process result`() {
         var viewState: ViewState? = null
         viewModel.viewState.observeForever {
             viewState = it
@@ -77,7 +77,7 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `onUserSelection() new card with save should be finish processing and close the sheet`() {
+    fun `onUserSelection() new card with save should finish processing, and when called back, process the result`() {
         val viewState: MutableList<ViewState?> = mutableListOf()
         viewModel.viewState.observeForever {
             viewState.add(it)

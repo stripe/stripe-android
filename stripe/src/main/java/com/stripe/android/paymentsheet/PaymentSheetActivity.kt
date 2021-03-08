@@ -119,7 +119,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentSheet.ProcessResult -> handleResult(
+            is ViewState.PaymentSheet.ProcessResult -> processResult(
                 viewState.result
             )
         }
@@ -339,7 +339,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
     }
 
-    private fun handleResult(paymentIntentResult: PaymentIntentResult) {
+    private fun processResult(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 closeSheet(

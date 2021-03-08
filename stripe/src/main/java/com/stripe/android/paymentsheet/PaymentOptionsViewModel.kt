@@ -127,7 +127,6 @@ internal class PaymentOptionsViewModel(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentOptionContract.Args
     ) : ViewModelProvider.Factory {
-
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val starterArgs = starterArgsSupplier()
             val application = applicationSupplier()

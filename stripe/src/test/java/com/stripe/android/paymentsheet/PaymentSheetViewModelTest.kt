@@ -179,7 +179,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `onPaymentFlowResult() should update ViewState LiveData`() {
+    fun `onPaymentFlowResult() should update ViewState`() {
         paymentFlowResultProcessor.paymentIntentResult = PAYMENT_INTENT_RESULT
 
         val confirmParams = mutableListOf<ConfirmPaymentIntentParams>()

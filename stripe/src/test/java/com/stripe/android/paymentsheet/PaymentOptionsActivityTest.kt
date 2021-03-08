@@ -199,7 +199,7 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify CloseSheet state closes the sheet`() {
+    fun `Verify ProcessResult state closes the sheet`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
