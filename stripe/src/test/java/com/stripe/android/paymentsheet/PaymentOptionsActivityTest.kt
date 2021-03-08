@@ -76,22 +76,24 @@ class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
-        ).onActivity { activity ->
-            // wait for bottom sheet to animate in
-            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-            idleLooper()
+        ).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
 
-            viewModel.updateMode(SheetMode.Wrapped)
+                viewModel.updateMode(SheetMode.Wrapped)
 
-            activity.viewBinding.root.performClick()
-            activity.finish()
+                activity.viewBinding.root.performClick()
+                activity.finish()
+            }
+
+            assertThat(
+                PaymentOptionResult.fromIntent(scenario.getResult().resultData)
+            ).isEqualTo(
+                PaymentOptionResult.Canceled(null)
+            )
         }
-
-        assertThat(
-            PaymentOptionResult.fromIntent(scenario.getResult().resultData)
-        ).isEqualTo(
-            PaymentOptionResult.Canceled(null)
-        )
     }
 
     @Test
@@ -99,15 +101,17 @@ class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(PaymentMethodFixtures.createCards(5))
-        ).onActivity { activity ->
-            // wait for bottom sheet to animate in
-            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-            idleLooper()
+        ).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
 
-            viewModel.updateMode(SheetMode.Wrapped)
+                viewModel.updateMode(SheetMode.Wrapped)
 
-            assertThat(activity.viewBinding.addButton.isVisible)
-                .isFalse()
+                assertThat(activity.viewBinding.addButton.isVisible)
+                    .isFalse()
+            }
         }
     }
 
@@ -116,15 +120,17 @@ class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
-        ).onActivity { activity ->
-            // wait for bottom sheet to animate in
-            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-            idleLooper()
+        ).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
 
-            viewModel.updateMode(SheetMode.Wrapped)
+                viewModel.updateMode(SheetMode.Wrapped)
 
-            assertThat(activity.viewBinding.addButton.isVisible)
-                .isTrue()
+                assertThat(activity.viewBinding.addButton.isVisible)
+                    .isTrue()
+            }
         }
     }
 
@@ -133,20 +139,22 @@ class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
-        ).onActivity { activity ->
-            viewModel._viewState.value = ViewState.PaymentOptions.Ready
+        ).use {
+            it.onActivity { activity ->
+                viewModel._viewState.value = ViewState.PaymentOptions.Ready
 
-            idleLooper()
+                idleLooper()
 
-            val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
+                val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
 
-            assertThat(addBinding.confirmedIcon.isVisible)
-                .isFalse()
+                assertThat(addBinding.confirmedIcon.isVisible)
+                    .isFalse()
 
-            assertThat(addBinding.label.text)
-                .isEqualTo("Add")
+                assertThat(addBinding.label.text)
+                    .isEqualTo("Add")
 
-            activity.finish()
+                activity.finish()
+            }
         }
     }
 
@@ -155,15 +163,17 @@ class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
-        ).onActivity { activity ->
-            viewModel._viewState.value = ViewState.PaymentOptions.StartProcessing
+        ).use {
+            it.onActivity { activity ->
+                viewModel._viewState.value = ViewState.PaymentOptions.StartProcessing
 
-            idleLooper()
+                idleLooper()
 
-            val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
+                val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
 
-            assertThat(addBinding.label.text)
-                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_pay_button_processing))
+                assertThat(addBinding.label.text)
+                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_pay_button_processing))
+            }
         }
     }
 
@@ -172,17 +182,19 @@ class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
-        ).onActivity { activity ->
-            var callbackCalled = false
-            viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                callbackCalled = true
+        ).use {
+            it.onActivity {
+                var callbackCalled = false
+                viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                    callbackCalled = true
+                }
+                idleLooper()
+
+                // wait animate time...
+                testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+
+                assertThat(callbackCalled).isTrue()
             }
-            idleLooper()
-
-            // wait animate time...
-            testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
-
-            assertThat(callbackCalled).isTrue()
         }
     }
 
@@ -191,17 +203,19 @@ class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
-        ).onActivity { activity ->
-            val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-            viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
-                PaymentOptionResult.Succeeded(
-                    paymentSelectionMock
+        ).use {
+            it.onActivity { activity ->
+                val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
+                viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
+                    PaymentOptionResult.Succeeded(
+                        paymentSelectionMock
+                    )
                 )
-            )
-            idleLooper()
+                idleLooper()
 
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+                assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            }
         }
     }
 
