@@ -11,7 +11,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentOptionContract : ActivityResultContract<PaymentOptionContract.Args, PaymentOptionResult?>() {
+internal class PaymentOptionContract :
+    ActivityResultContract<PaymentOptionContract.Args, PaymentOptionResult?>() {
     override fun createIntent(
         context: Context,
         input: Args

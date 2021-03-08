@@ -209,7 +209,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         // executePendingTransactions will run all the transactions even ones that were not just
         // commited.
         supportFragmentManager.executePendingTransactions()
-        viewBinding.addButton.isVisible = transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
+        viewBinding.addButton.isVisible =
+            transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
