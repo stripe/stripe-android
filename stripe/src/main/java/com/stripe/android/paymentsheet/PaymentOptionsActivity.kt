@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.stripe.android.R
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -76,18 +75,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    private val addButtonLabel: String by lazy {
-        resources.getString(
-            R.string.stripe_paymentsheet_add_button_label
-        )
-    }
-
     @VisibleForTesting
     private val viewStateObserver = { viewState: ViewState.PaymentOptions? ->
         val addButton = viewBinding.addButton
         when (viewState) {
             is ViewState.PaymentOptions.Ready -> addButton.updateState(
-                PrimaryButton.State.Ready(addButtonLabel)
+                PrimaryButton.State.Ready()
             )
             is ViewState.PaymentOptions.StartProcessing -> addButton.updateState(
                 PrimaryButton.State.StartProcessing
@@ -172,8 +165,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun setupAddButton(addButton: PrimaryButton) {
-        addButton.setLabelText(addButtonLabel)
-
         viewModel.viewState.observe(this, viewStateObserver)
 
         addButton.setOnClickListener {
