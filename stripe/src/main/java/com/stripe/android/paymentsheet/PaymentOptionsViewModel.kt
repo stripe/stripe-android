@@ -58,8 +58,6 @@ internal class PaymentOptionsViewModel(
 
     fun onUserSelection() {
         selection.value?.let { paymentSelection ->
-            eventReporter.onSelectPaymentOption(paymentSelection)
-            prefsRepository.savePaymentSelection(paymentSelection)
             processSelection(paymentSelection)
         }
     }
@@ -70,12 +68,13 @@ internal class PaymentOptionsViewModel(
                 ?: false
 
         if (requestSaveNewCard) {
-            // TODO: Need the WorkContext here!
-            // TODO: Update the returned value with the savedCard rather than the NewCard
-            // so that we don't jump the next time
             _viewState.value = ViewState.PaymentOptions.StartProcessing
             savePaymentSelection(paymentSelection as PaymentSelection.New)
         } else {
+            // TODO: Should the payment selection in teh event be the saved or new item?
+            eventReporter.onSelectPaymentOption(paymentSelection)
+            // TODO: Should not need to update _paymentMethods?
+            prefsRepository.savePaymentSelection(paymentSelection)
             _viewState.value = ViewState.PaymentOptions.CloseSheet(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )
@@ -93,7 +92,12 @@ internal class PaymentOptionsViewModel(
                 )
             }.fold(
                 onSuccess = {
-                    // TODO: Do we need to add the saved item to _paymentMethods?
+                    // TODO: Update the returned value with the savedCard rather than the NewCard
+                    // so that we don't jump the next time
+                    // The returned value doesn't need to have the saved card because
+                    // new card will be passed back to the default flow controller, and in the
+                    // trampoline it will see that it was saved and ignore it.
+
                     _viewState.value = ViewState.PaymentOptions.FinishProcessing {
                         _viewState.value = ViewState.PaymentOptions.CloseSheet(
                             PaymentOptionResult.Succeeded(paymentSelection)
@@ -101,7 +105,6 @@ internal class PaymentOptionsViewModel(
                     }
                 },
                 onFailure = {
-                    // TODO: WHAT SHOULD BE SHOWN IN THIS CASE??
                     _viewState.value = ViewState.PaymentOptions.FinishProcessing {
                         _viewState.value =
                             ViewState.PaymentOptions.CloseSheet(PaymentOptionResult.Failed(it))

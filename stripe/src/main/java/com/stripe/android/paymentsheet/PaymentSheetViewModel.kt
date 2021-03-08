@@ -167,9 +167,7 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun confirmPaymentSelection(
-        paymentSelection: PaymentSelection?
-    ) {
+    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)
@@ -184,9 +182,7 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun onPaymentIntentResult(
-        paymentIntentResult: PaymentIntentResult
-    ) {
+    private fun onPaymentIntentResult(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
@@ -277,7 +273,6 @@ internal class PaymentSheetViewModel internal constructor(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args,
     ) : ViewModelProvider.Factory {
-
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val application = applicationSupplier()
             val config = PaymentConfiguration.getInstance(application)
