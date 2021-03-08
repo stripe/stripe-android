@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal abstract class BasePaymentMethodsListFragment(
@@ -34,6 +35,9 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         this.config = nullableConfig
+
+        // reset the mode in case we're returning from the back stack
+        sheetViewModel.updateMode(SheetMode.Wrapped)
 
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         viewBinding.recycler.layoutManager = LinearLayoutManager(
