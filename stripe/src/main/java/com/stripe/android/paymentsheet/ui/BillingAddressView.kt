@@ -364,17 +364,17 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
-    internal fun populateFromParams(address: Address?) {
-        address?.let { address ->
-            address.country?.let {
-                this.selectedCountry = CountryUtils.getCountryByCode(address.country)
-                this.countryView.setText(CountryUtils.getDisplayCountry(address.country))
+    internal fun populate(address: Address?) {
+        address?.let { it ->
+            it.country?.let { countryCode ->
+                this.selectedCountry = CountryUtils.getCountryByCode(countryCode)
+                this.countryView.setText(CountryUtils.getDisplayCountry(countryCode))
             }
-            this.address1View.setText(address.line1)
-            this.address2View.setText(address.line2)
-            this.cityView.setText(address.city)
-            this.postalCodeView.setText(address.postalCode)
-            this.stateView.setText(address.state)
+            this.address1View.setText(it.line1)
+            this.address2View.setText(it.line2)
+            this.cityView.setText(it.city)
+            this.postalCodeView.setText(it.postalCode)
+            this.stateView.setText(it.state)
         }
     }
 
