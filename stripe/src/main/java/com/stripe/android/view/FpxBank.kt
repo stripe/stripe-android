@@ -6,7 +6,7 @@ class FpxBank(
     override var id: String,
     override var code: String,
     override var displayName: String,
-    val brandIconResId: Int
+    override var brandIconResId: Int?
     ) : Bank() {
 
     companion object {

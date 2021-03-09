@@ -1,22 +1,21 @@
 package com.stripe.android.view
 
+import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.databinding.FpxBankItemBinding
-
-enum class PaymentMethodListType {
-    PaymentMethodListTypeFpx,
-    PaymentMethodListTypeNetbanking,
-}
+import com.stripe.android.R
+import com.stripe.android.databinding.BankItemBinding
 
 class AddPaymentMethodListAdapter constructor (
     var activity: FragmentActivity,
-    var items : Array<FpxBank>,
+    var items : Array<Bank>,
     val itemSelectedCallback: (Int) -> Unit,
-    var paymentMethodListType : PaymentMethodListType
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private lateinit var statuses : Array<Boolean>
@@ -42,8 +41,8 @@ class AddPaymentMethodListAdapter constructor (
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         // TODO Switch on paymentMethodListType, figure out a default
-        return AddPaymentMethodFpxView.BankViewHolder(
-            FpxBankItemBinding.inflate(
+        return BankViewHolder(
+            BankItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
@@ -68,10 +67,10 @@ class AddPaymentMethodListAdapter constructor (
             selectedPosition = holder.adapterPosition
         }
 
-        val bankViewHolder = holder as AddPaymentMethodFpxView.BankViewHolder
+        val bankViewHolder = holder as BankViewHolder
         bankViewHolder.setSelected(position == selectedPosition)
         // TODO: figure out bank statuses
-        bankViewHolder.update(fpxBank = item, isOnline = true)
+        bankViewHolder.update(bank = item, isOnline = true)
     }
 
     internal fun updateSelected(position: Int) {
@@ -81,5 +80,40 @@ class AddPaymentMethodListAdapter constructor (
 
     fun notifyAdapterItemChanged(position: Int) {
         notifyItemChanged(position)
+    }
+
+    internal class BankViewHolder constructor(
+        private val viewBinding: BankItemBinding,
+        private val themeConfig: ThemeConfig
+    ) : RecyclerView.ViewHolder(viewBinding.root) {
+        private val resources: Resources = itemView.resources
+
+        fun update(bank: Bank, isOnline: Boolean) {
+            viewBinding.name.text = if (isOnline) {
+                bank.displayName
+            } else {
+                resources.getString(
+                    R.string.fpx_bank_offline,
+                    bank.displayName
+                )
+            }
+
+            bank.brandIconResId?.let {
+                viewBinding.icon.setImageResource(it)
+            }
+        }
+
+        internal fun setSelected(isSelected: Boolean) {
+            viewBinding.name.setTextColor(themeConfig.getTextColor(isSelected))
+            ImageViewCompat.setImageTintList(
+                viewBinding.checkIcon,
+                ColorStateList.valueOf(themeConfig.getTintColor(isSelected))
+            )
+            viewBinding.checkIcon.visibility = if (isSelected) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        }
     }
 }
