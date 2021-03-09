@@ -386,6 +386,41 @@ internal class PaymentSheetViewModelTest {
             .isTrue()
     }
 
+    @Test
+    fun `viewState should emit FinishProcessing and ProcessResult if PaymentIntent is confirmed`() {
+        val viewModel = createViewModel(
+            paymentIntentRepository = PaymentIntentRepository.Static(
+                PaymentIntentFixtures.PI_SUCCEEDED
+            )
+        )
+
+        val viewStates = mutableListOf<ViewState>()
+        viewModel.viewState.observeForever { viewState ->
+            if (viewState is ViewState.PaymentSheet.FinishProcessing) {
+                // force `onComplete` to be called
+                viewState.onComplete()
+            }
+            viewState?.let {
+                viewStates.add(it)
+            }
+        }
+        viewModel.fetchPaymentIntent()
+
+        assertThat(viewStates)
+            .hasSize(2)
+        assertThat(viewStates[0])
+            .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+        assertThat(viewStates[1])
+            .isEqualTo(
+                ViewState.PaymentSheet.ProcessResult(
+                    PaymentIntentResult(
+                        PaymentIntentFixtures.PI_SUCCEEDED,
+                        StripeIntentResult.Outcome.SUCCEEDED
+                    )
+                )
+            )
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         paymentIntentRepository: PaymentIntentRepository = PaymentIntentRepository.Static(
