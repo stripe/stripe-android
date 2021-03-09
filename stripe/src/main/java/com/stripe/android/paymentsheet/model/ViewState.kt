@@ -17,9 +17,20 @@ internal sealed class ViewState {
 
         object StartProcessing : PaymentSheet()
 
-        data class FinishProcessing(
+        class FinishProcessing(
             val onComplete: () -> Unit
-        ) : PaymentSheet()
+        ) : PaymentSheet() {
+            /**
+             * Do not compare [onComplete] as part of [equals].
+             */
+            override fun equals(other: Any?): Boolean {
+                return other is FinishProcessing
+            }
+
+            override fun hashCode(): Int {
+                return onComplete.hashCode()
+            }
+        }
 
         data class ProcessResult(
             val result: PaymentIntentResult
@@ -36,9 +47,20 @@ internal sealed class ViewState {
 
         object StartProcessing : PaymentOptions()
 
-        data class FinishProcessing(
+        class FinishProcessing(
             val onComplete: () -> Unit
-        ) : PaymentOptions()
+        ) : PaymentOptions() {
+            /**
+             * Do not compare [onComplete] as part of [equals].
+             */
+            override fun equals(other: Any?): Boolean {
+                return other is FinishProcessing
+            }
+
+            override fun hashCode(): Int {
+                return onComplete.hashCode()
+            }
+        }
 
         data class ProcessResult(
             val result: PaymentOptionResult
