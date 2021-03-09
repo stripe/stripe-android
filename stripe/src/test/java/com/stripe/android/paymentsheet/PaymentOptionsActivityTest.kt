@@ -185,7 +185,9 @@ class PaymentOptionsActivityTest {
         ).use {
             it.onActivity {
                 var callbackCalled = false
-                viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing.create(
+                    PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+                ) {
                     callbackCalled = true
                 }
                 idleLooper()

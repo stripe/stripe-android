@@ -18,8 +18,23 @@ internal sealed class ViewState {
         object StartProcessing : PaymentSheet()
 
         data class FinishProcessing(
-            val onComplete: () -> Unit
-        ) : PaymentSheet()
+            val result: PaymentIntentResult
+        ) : PaymentSheet() {
+            var onComplete: () -> Unit = {}
+
+            internal companion object {
+                fun create(
+                    result: PaymentIntentResult,
+                    onComplete: () -> Unit
+                ): FinishProcessing {
+                    return FinishProcessing(
+                        result
+                    ).also {
+                        it.onComplete = onComplete
+                    }
+                }
+            }
+        }
 
         data class ProcessResult(
             val result: PaymentIntentResult
@@ -37,8 +52,23 @@ internal sealed class ViewState {
         object StartProcessing : PaymentOptions()
 
         data class FinishProcessing(
-            val onComplete: () -> Unit
-        ) : PaymentOptions()
+            val result: PaymentOptionResult
+        ) : PaymentOptions() {
+            var onComplete: () -> Unit = {}
+
+            internal companion object {
+                fun create(
+                    result: PaymentOptionResult,
+                    onComplete: () -> Unit
+                ): FinishProcessing {
+                    return FinishProcessing(
+                        result
+                    ).also {
+                        it.onComplete = onComplete
+                    }
+                }
+            }
+        }
 
         data class ProcessResult(
             val result: PaymentOptionResult

@@ -64,17 +64,25 @@ internal class PaymentOptionsViewModel(
                 ?: false
 
         if (requestSaveNewCard) {
-            // TODO: Update the returned value with the savedCard rather than the NewCard
-            // so that we don't jump the next time.
-            _viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                _viewState.value = ViewState.PaymentOptions.ProcessResult(
-                    PaymentOptionResult.Succeeded(paymentSelection)
-                )
-            }
+            onSaveNewCard(
+                PaymentOptionResult.Succeeded(paymentSelection)
+            )
         } else {
             _viewState.value = ViewState.PaymentOptions.ProcessResult(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )
+        }
+    }
+
+    private fun onSaveNewCard(
+        result: PaymentOptionResult
+    ) {
+        // TODO: Update the returned value with the savedCard rather than the NewCard
+        // so that we don't jump the next time.
+        _viewState.value = ViewState.PaymentOptions.FinishProcessing.create(
+            result
+        ) {
+            _viewState.value = ViewState.PaymentOptions.ProcessResult(result)
         }
     }
 

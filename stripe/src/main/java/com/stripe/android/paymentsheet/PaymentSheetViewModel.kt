@@ -190,10 +190,7 @@ internal class PaymentSheetViewModel internal constructor(
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
-
-                _viewState.value = ViewState.PaymentSheet.FinishProcessing {
-                    _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
-                }
+                finishProcessing(paymentIntentResult)
             }
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
@@ -201,6 +198,14 @@ internal class PaymentSheetViewModel internal constructor(
                 onApiError(paymentIntentResult.failureMessage)
                 onPaymentIntentResponse(paymentIntentResult.intent)
             }
+        }
+    }
+
+    private fun finishProcessing(paymentIntentResult: PaymentIntentResult) {
+        _viewState.value = ViewState.PaymentSheet.FinishProcessing.create(
+            paymentIntentResult
+        ) {
+            _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
         }
     }
 

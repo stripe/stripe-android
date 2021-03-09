@@ -293,7 +293,9 @@ internal class PaymentSheetActivityTest {
                 idleLooper()
 
                 var finishProcessingCalled = false
-                viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing.create(
+                    PaymentIntentResult(PaymentIntentFixtures.PI_SUCCEEDED)
+                ) {
                     finishProcessingCalled = true
                 }
 
@@ -337,8 +339,9 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `successful payment should dismiss bottom sheet`() {
+        val paymentIntentResult = PaymentIntentResult(PaymentIntentFixtures.PI_SUCCEEDED)
         val viewModel = createViewModel(
-            paymentIntentResult = PaymentIntentResult(PaymentIntentFixtures.PI_SUCCEEDED)
+            paymentIntentResult = paymentIntentResult
         )
 
         val scenario = activityScenario(viewModel)
@@ -348,6 +351,11 @@ internal class PaymentSheetActivityTest {
                 testDispatcher.advanceTimeBy(500)
                 idleLooper()
 
+                val viewStates = mutableListOf<ViewState?>()
+                viewModel.viewState.observeForever { viewState ->
+                    viewStates.add(viewState)
+                }
+
                 viewModel.onPaymentFlowResult(
                     PaymentFlowResult.Unvalidated(
                         "client_secret",
@@ -355,6 +363,15 @@ internal class PaymentSheetActivityTest {
                     )
                 )
                 idleLooper()
+
+                assertThat(viewStates)
+                    .isEqualTo(
+                        listOf(
+                            ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"),
+                            ViewState.PaymentSheet.FinishProcessing(result = paymentIntentResult),
+                            ViewState.PaymentSheet.ProcessResult(result = paymentIntentResult)
+                        )
+                    )
 
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
