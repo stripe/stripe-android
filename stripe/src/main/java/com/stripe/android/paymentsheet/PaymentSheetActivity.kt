@@ -301,13 +301,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             }
         }
 
-        // When using commit on the fragments, the fragment transaction happens
-        // at some later time. In order to get an accurate backstack count
-        // we need to make sure the transactions have completed. In API 24+ you can use commitNow
-        // By using commitNow, only the items in the runnable will be committed,
-        // executePendingTransactions will run all the transactions even ones that were not just
-        // committed.
-        supportFragmentManager.executePendingTransactions()
         viewBinding.buyButton.isVisible = true
         appbar.isVisible = true
     }

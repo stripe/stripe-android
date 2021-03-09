@@ -35,6 +35,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         supportFragmentManager.fragmentFactory = PaymentSheetFragmentFactory(eventReporter)
+
+        super.onCreate(savedInstanceState)
+
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0) {
                 toolbar.showClose()
@@ -50,8 +53,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 0f
             }
         }
-
-        super.onCreate(savedInstanceState)
 
         viewModel.userMessage.observe(this) { userMessage ->
             messageView.isVisible = userMessage != null
