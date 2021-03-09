@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
@@ -64,6 +65,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: Toolbar by lazy { viewBinding.toolbar }
+    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
 
     override val eventReporter: EventReporter by lazy {

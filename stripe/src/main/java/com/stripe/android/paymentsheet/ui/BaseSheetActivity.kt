@@ -3,10 +3,12 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
+import com.stripe.android.R
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -20,6 +22,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val rootView: View
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
+    abstract val scrollView: ScrollView
     abstract val toolbar: Toolbar
     abstract val messageView: TextView
 
@@ -37,6 +40,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 toolbar.showClose()
             } else {
                 toolbar.showBack()
+            }
+        }
+
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            appbar.elevation = if (scrollView.scrollY > 0) {
+                resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
+            } else {
+                0f
             }
         }
 
