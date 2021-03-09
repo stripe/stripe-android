@@ -89,7 +89,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentOptions.CloseSheet -> handleResult(
+            is ViewState.PaymentOptions.ProcessResult -> processResult(
                 viewState.result
             )
         }
@@ -230,7 +230,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
     }
 
-    private fun handleResult(result: PaymentOptionResult) {
+    private fun processResult(result: PaymentOptionResult) {
         closeSheet(result)
     }
 

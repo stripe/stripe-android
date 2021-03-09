@@ -66,12 +66,12 @@ internal class PaymentOptionsViewModel(
             // TODO: Update the returned value with the savedCard rather than the NewCard
             // so that we don't jump the next time.
             _viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                _viewState.value = ViewState.PaymentOptions.CloseSheet(
+                _viewState.value = ViewState.PaymentOptions.ProcessResult(
                     PaymentOptionResult.Succeeded(paymentSelection)
                 )
             }
         } else {
-            _viewState.value = ViewState.PaymentOptions.CloseSheet(
+            _viewState.value = ViewState.PaymentOptions.ProcessResult(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )
         }
@@ -119,7 +119,6 @@ internal class PaymentOptionsViewModel(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentOptionContract.Args
     ) : ViewModelProvider.Factory {
-
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val starterArgs = starterArgsSupplier()
             val application = applicationSupplier()
