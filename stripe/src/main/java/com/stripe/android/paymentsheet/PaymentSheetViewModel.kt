@@ -366,7 +366,6 @@ internal class PaymentSheetViewModel internal constructor(
                     application
                 ),
                 starterArgs,
-                Logger.real(),
                 Dispatchers.IO
             ) as T
         }
