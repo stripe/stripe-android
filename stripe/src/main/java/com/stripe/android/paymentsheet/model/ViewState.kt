@@ -23,13 +23,9 @@ internal sealed class ViewState {
             /**
              * Do not compare [onComplete] as part of [equals].
              */
-            override fun equals(other: Any?): Boolean {
-                return other is FinishProcessing
-            }
+            override fun equals(other: Any?): Boolean = other is FinishProcessing
 
-            override fun hashCode(): Int {
-                return onComplete.hashCode()
-            }
+            override fun hashCode(): Int = onComplete.hashCode()
         }
 
         data class ProcessResult(
@@ -53,13 +49,9 @@ internal sealed class ViewState {
             /**
              * Do not compare [onComplete] as part of [equals].
              */
-            override fun equals(other: Any?): Boolean {
-                return other is FinishProcessing
-            }
+            override fun equals(other: Any?): Boolean = other is FinishProcessing
 
-            override fun hashCode(): Int {
-                return onComplete.hashCode()
-            }
+            override fun hashCode(): Int = onComplete.hashCode()
         }
 
         data class ProcessResult(
