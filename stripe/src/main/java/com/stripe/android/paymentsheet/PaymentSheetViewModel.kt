@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
@@ -48,6 +49,7 @@ internal class PaymentSheetViewModel internal constructor(
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
+    private val logger: Logger = Logger.noop(),
     workContext: CoroutineContext
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     config = args.config,
@@ -116,6 +118,11 @@ internal class PaymentSheetViewModel internal constructor(
 
     private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
         if (paymentIntent.isConfirmed) {
+            logger.info(
+                """
+                PaymentIntent with id=${paymentIntent.id}" has already been confirmed.
+                """.trimIndent()
+            )
             // there's nothing left to be done if the PaymentIntent is confirmed
             _viewState.value = ViewState.PaymentSheet.FinishProcessing {
                 _viewState.value = ViewState.PaymentSheet.ProcessResult(
@@ -351,6 +358,7 @@ internal class PaymentSheetViewModel internal constructor(
                     application
                 ),
                 starterArgs,
+                Logger.real(),
                 Dispatchers.IO
             ) as T
         }
