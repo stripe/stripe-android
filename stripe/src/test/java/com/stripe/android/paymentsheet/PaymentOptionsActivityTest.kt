@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
-import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -82,8 +81,6 @@ class PaymentOptionsActivityTest {
                 testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
-                viewModel.updateMode(SheetMode.Wrapped)
-
                 activity.viewBinding.root.performClick()
                 activity.finish()
             }
@@ -107,8 +104,6 @@ class PaymentOptionsActivityTest {
                 testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
-                viewModel.updateMode(SheetMode.Wrapped)
-
                 assertThat(activity.viewBinding.addButton.isVisible)
                     .isFalse()
             }
@@ -125,8 +120,6 @@ class PaymentOptionsActivityTest {
                 // wait for bottom sheet to animate in
                 testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
-
-                viewModel.updateMode(SheetMode.Wrapped)
 
                 assertThat(activity.viewBinding.addButton.isVisible)
                     .isTrue()

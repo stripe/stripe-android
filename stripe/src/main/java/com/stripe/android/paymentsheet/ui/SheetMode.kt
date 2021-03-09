@@ -14,11 +14,11 @@ internal enum class SheetMode(
 
     FullCollapsed(
         ViewGroup.LayoutParams.MATCH_PARENT,
-        BottomSheetBehavior.STATE_COLLAPSED
+        BottomSheetBehavior.STATE_EXPANDED
     ),
 
     Wrapped(
         ViewGroup.LayoutParams.WRAP_CONTENT,
-        BottomSheetBehavior.STATE_COLLAPSED
+        BottomSheetBehavior.STATE_EXPANDED
     )
 }

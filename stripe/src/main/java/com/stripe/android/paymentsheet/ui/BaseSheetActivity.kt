@@ -2,20 +2,16 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.KeyboardController
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: BaseSheetViewModel<*>
@@ -23,7 +19,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val eventReporter: EventReporter
 
     abstract val rootView: View
-    abstract val bottomSheet: ConstraintLayout
+    abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
     abstract val toolbar: Toolbar
     abstract val messageView: TextView
@@ -62,7 +58,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 toolbar.showBack()
             }
 
-            bottomSheet.updateLayoutParams { height = mode.height }
             bottomSheetController.updateState(mode)
         }
 
@@ -106,14 +101,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     protected fun onUserBack() {
         keyboardController.hide()
-        lifecycleScope.launch {
-            // add the smallest possible delay before invoking `onBackPressed()` to prevent
-            // layout issues
-            delay(1)
-            rootView.post {
-                onBackPressed()
-            }
-        }
+        onBackPressed()
     }
 
     internal companion object {

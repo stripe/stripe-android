@@ -3,11 +3,11 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
@@ -62,7 +62,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         get() = viewBinding.fragmentContainer.id
 
     override val rootView: View by lazy { viewBinding.root }
-    override val bottomSheet: ConstraintLayout by lazy { viewBinding.bottomSheet }
+    override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: Toolbar by lazy { viewBinding.toolbar }
     override val messageView: TextView by lazy { viewBinding.message }
