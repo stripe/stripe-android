@@ -366,8 +366,8 @@ internal class PaymentSheetViewModel internal constructor(
                     application
                 ),
                 starterArgs,
-                logger =Logger.noop(),
-                Dispatchers.IO
+                logger = Logger.noop(),
+                workContext = Dispatchers.IO
             ) as T
         }
     }
