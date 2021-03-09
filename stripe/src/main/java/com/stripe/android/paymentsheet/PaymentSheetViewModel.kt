@@ -192,7 +192,7 @@ internal class PaymentSheetViewModel internal constructor(
                 eventReporter.onPaymentSuccess(selection.value)
 
                 _viewState.value = ViewState.PaymentSheet.FinishProcessing {
-                    _viewState.value = ViewState.PaymentSheet.CloseSheet(paymentIntentResult)
+                    _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
                 }
             }
             else -> {
@@ -277,7 +277,6 @@ internal class PaymentSheetViewModel internal constructor(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args,
     ) : ViewModelProvider.Factory {
-
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val application = applicationSupplier()
             val config = PaymentConfiguration.getInstance(application)
