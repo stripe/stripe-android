@@ -480,10 +480,12 @@ internal class PaymentSheetActivityTest {
                 paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED
             )
         )
-        scenario.launch(intent).onActivity { activity ->
-            // wait for bottom sheet to animate in
-            testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-            activity.finish()
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                activity.finish()
+            }
         }
 
         assertThat(
