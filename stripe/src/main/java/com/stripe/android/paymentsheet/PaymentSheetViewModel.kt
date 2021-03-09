@@ -118,20 +118,7 @@ internal class PaymentSheetViewModel internal constructor(
 
     private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
         if (paymentIntent.isConfirmed) {
-            logger.info(
-                """
-                PaymentIntent with id=${paymentIntent.id}" has already been confirmed.
-                """.trimIndent()
-            )
-            // there's nothing left to be done if the PaymentIntent is confirmed
-            _viewState.value = ViewState.PaymentSheet.FinishProcessing {
-                _viewState.value = ViewState.PaymentSheet.ProcessResult(
-                    PaymentIntentResult(
-                        paymentIntent,
-                        StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                )
-            }
+            onConfirmedPaymentIntent(paymentIntent)
         } else {
             runCatching {
                 paymentIntentValidator.requireValid(paymentIntent)
@@ -141,6 +128,27 @@ internal class PaymentSheetViewModel internal constructor(
                     resetViewState(paymentIntent)
                 },
                 onFailure = ::onFatal
+            )
+        }
+    }
+
+    /**
+     * There's nothing left to be done in payment sheet if the PaymentIntent is confirmed.
+     *
+     * See [How intents work](https://stripe.com/docs/payments/intents) for more details.
+     */
+    private fun onConfirmedPaymentIntent(paymentIntent: PaymentIntent) {
+        logger.info(
+            """
+            PaymentIntent with id=${paymentIntent.id}" has already been confirmed.
+            """.trimIndent()
+        )
+        _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+            _viewState.value = ViewState.PaymentSheet.ProcessResult(
+                PaymentIntentResult(
+                    paymentIntent,
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
             )
         }
     }
