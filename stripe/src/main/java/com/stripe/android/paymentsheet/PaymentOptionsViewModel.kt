@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -75,6 +76,7 @@ internal class PaymentOptionsViewModel(
             _viewState.value = ViewState.PaymentOptions.StartProcessing
             savePaymentSelection(paymentSelection as PaymentSelection.New)
         } else {
+            prefsRepository.savePaymentSelection(paymentSelection)
             _viewState.value = ViewState.PaymentOptions.ProcessResult(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )
@@ -86,19 +88,17 @@ internal class PaymentOptionsViewModel(
         paymentSelection: PaymentSelection.New
     ) {
         viewModelScope.launch {
-            runCatching {
+            runCatching<PaymentMethod?> {
                 paymentMethodsRepository.save(
                     customerConfig!!,
                     paymentSelection.paymentMethodCreateParams
                 )
             }.fold(
-                onSuccess = {
-                    // TODO: Update the returned value with the savedCard rather than the NewCard
-                    // so that we don't jump the next time
-                    // The returned value doesn't need to have the saved card because
-                    // new card will be passed back to the default flow controller, and in the
-                    // trampoline it will see that it was saved and ignore it.
-
+                onSuccess = { paymentMethod ->
+                    // TODO: In what case would it be null, it is success and it is saving...??
+                    paymentMethod?.let {
+                        prefsRepository.savePaymentSelection(PaymentSelection.Saved(paymentMethod))
+                    }
                     _viewState.value = ViewState.PaymentOptions.FinishProcessing {
                         _viewState.value = ViewState.PaymentOptions.ProcessResult(
                             PaymentOptionResult.Succeeded(paymentSelection)

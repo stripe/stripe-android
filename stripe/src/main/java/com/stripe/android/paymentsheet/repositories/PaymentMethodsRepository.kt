@@ -19,7 +19,7 @@ internal sealed class PaymentMethodsRepository {
     abstract suspend fun save(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-    ): Any?
+    ): PaymentMethod?
 
     /**
      * A [PaymentMethodsRepository] that uses a pre-determined list of payment methods.
@@ -35,7 +35,7 @@ internal sealed class PaymentMethodsRepository {
         override suspend fun save(
             customerConfig: PaymentSheet.CustomerConfiguration,
             paymentMethodCreateParams: PaymentMethodCreateParams
-        ) {
+        ): PaymentMethod? {
             TODO("Not yet implemented")
         }
     }
@@ -81,38 +81,36 @@ internal sealed class PaymentMethodsRepository {
         override suspend fun save(
             customerConfig: PaymentSheet.CustomerConfiguration,
             paymentMethodCreateParams: PaymentMethodCreateParams
-        ) {
-            withContext(workContext) {
-                runCatching {
-                    stripeRepository.createPaymentMethod(
-                        paymentMethodCreateParams,
-                        ApiRequest.Options(
+        ): PaymentMethod? = withContext(workContext) {
+            runCatching {
+                stripeRepository.createPaymentMethod(
+                    paymentMethodCreateParams,
+                    ApiRequest.Options(
+                        publishableKey,
+                        stripeAccountId
+                    )
+                )?.let { paymentMethod ->
+                    paymentMethod.id?.let {
+                        stripeRepository.attachPaymentMethod(
+                            customerConfig.id,
                             publishableKey,
-                            stripeAccountId
-                        )
-                    )?.let { paymentMethod ->
-                        paymentMethod.id?.let {
-                            stripeRepository.attachPaymentMethod(
-                                customerConfig.id,
-                                publishableKey,
-                                PRODUCT_USAGE,
-                                paymentMethod.id,
-                                ApiRequest.Options(
-                                    customerConfig.ephemeralKeySecret,
-                                    stripeAccountId
-                                )
+                            PRODUCT_USAGE,
+                            paymentMethod.id,
+                            ApiRequest.Options(
+                                customerConfig.ephemeralKeySecret,
+                                stripeAccountId
                             )
-                        }
+                        )
                     }
-                }.onFailure {
-                    logger.error("Failed to save ${customerConfig.id}'s payment methods.", it)
-                    throw it
                 }
-            }
+            }.onFailure {
+                logger.error("Failed to save ${customerConfig.id}'s payment methods.", it)
+                throw it
+            }.getOrNull()
         }
+    }
 
-        private companion object {
-            private val PRODUCT_USAGE = setOf("PaymentSheet")
-        }
+    private companion object {
+        private val PRODUCT_USAGE = setOf("PaymentSheet")
     }
 }
