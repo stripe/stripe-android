@@ -7,7 +7,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
-import com.stripe.android.R
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -33,6 +32,13 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         supportFragmentManager.fragmentFactory = PaymentSheetFragmentFactory(eventReporter)
+        supportFragmentManager.addOnBackStackChangedListener {
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                toolbar.showClose()
+            } else {
+                toolbar.showBack()
+            }
+        }
 
         super.onCreate(savedInstanceState)
 
@@ -43,22 +49,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         viewModel.processing.observe(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
-        }
-
-        viewModel.sheetMode.observe(this) { mode ->
-            appbar.elevation = if (mode == SheetMode.Full) {
-                resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
-            } else {
-                0f
-            }
-
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                toolbar.showClose()
-            } else {
-                toolbar.showBack()
-            }
-
-            bottomSheetController.updateState(mode)
         }
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering

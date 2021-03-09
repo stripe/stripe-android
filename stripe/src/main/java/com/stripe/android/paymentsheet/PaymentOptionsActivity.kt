@@ -52,8 +52,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(
             bottomSheetBehavior = bottomSheetBehavior,
-            sheetModeLiveData = viewModel.sheetMode,
-            lifecycleScope
+            lifecycleScope = lifecycleScope
         )
     }
 
@@ -227,7 +226,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         supportFragmentManager.executePendingTransactions()
         viewBinding.addButton.isVisible =
             transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
-        viewModel.updateMode(transitionTarget.sheetMode)
     }
 
     private fun handleResult(result: PaymentOptionResult) {

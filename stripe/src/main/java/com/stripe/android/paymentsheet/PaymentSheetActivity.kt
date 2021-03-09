@@ -56,8 +56,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(
             bottomSheetBehavior = bottomSheetBehavior,
-            sheetModeLiveData = viewModel.sheetMode,
-            lifecycleScope
+            lifecycleScope = lifecycleScope
         )
     }
 
@@ -309,7 +308,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         supportFragmentManager.executePendingTransactions()
         viewBinding.buyButton.isVisible = true
         appbar.isVisible = true
-        viewModel.updateMode(transitionTarget.sheetMode)
     }
 
     private fun setupBuyButton() {

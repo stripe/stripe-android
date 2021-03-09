@@ -2,18 +2,15 @@ package com.stripe.android.paymentsheet
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.stripe.android.paymentsheet.ui.SheetMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class BottomSheetController(
     private val bottomSheetBehavior: BottomSheetBehavior<ViewGroup>,
-    private val sheetModeLiveData: LiveData<SheetMode>,
     private val lifecycleScope: CoroutineScope
 ) {
     private val _shouldFinish = MutableLiveData(false)
@@ -28,8 +25,7 @@ internal class BottomSheetController(
         lifecycleScope.launch {
             delay(ANIMATE_IN_DELAY)
 
-            bottomSheetBehavior.state = sheetModeLiveData.value?.behaviourState
-                ?: BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetBehavior.addBottomSheetCallback(
                 object : BottomSheetBehavior.BottomSheetCallback() {
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -44,12 +40,6 @@ internal class BottomSheetController(
                     }
                 }
             )
-        }
-    }
-
-    fun updateState(sheetMode: SheetMode) {
-        if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
-            bottomSheetBehavior.state = sheetMode.behaviourState
         }
     }
 

@@ -28,6 +28,7 @@ internal class Toolbar @JvmOverloads constructor(
     init {
         closeButton.setOnClickListener { _action.value = Action.Close }
         backButton.setOnClickListener { _action.value = Action.Back }
+        showClose()
     }
 
     fun showClose() {
