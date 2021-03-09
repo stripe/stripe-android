@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.utils.InjectableActivityScenario
@@ -55,6 +56,7 @@ class PaymentOptionsActivityTest {
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         ),
         prefsRepository = FakePrefsRepository(),
+        paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
         eventReporter = eventReporter
     )
 
@@ -199,14 +201,14 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify CloseSheet state closes the sheet`() {
+    fun `Verify ProcessResult state closes the sheet`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
         ).use {
             it.onActivity { activity ->
                 val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-                viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
+                viewModel._viewState.value = ViewState.PaymentOptions.ProcessResult(
                     PaymentOptionResult.Succeeded(
                         paymentSelectionMock
                     )

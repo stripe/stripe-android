@@ -47,7 +47,7 @@ class PaymentOptionsViewModelTest {
     )
 
     @Test
-    fun `onUserSelection() when selection has been made should emit on userSelection`() {
+    fun `onUserSelection() when selection has been made should set the view state to process result`() {
         var viewState: ViewState? = null
         viewModel.viewState.observeForever {
             viewState = it
@@ -56,13 +56,13 @@ class PaymentOptionsViewModelTest {
 
         viewModel.onUserSelection()
 
-        assertThat((viewState as ViewState.PaymentOptions.CloseSheet).result)
+        assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
             .isEqualTo(PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD))
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
     @Test
-    fun `onUserSelection() when new card selection with no save should set the view state to close sheet`() {
+    fun `onUserSelection() when new card selection with no save should set the view state to process result`() {
         var viewState: ViewState? = null
         viewModel.viewState.observeForever {
             viewState = it
@@ -71,13 +71,13 @@ class PaymentOptionsViewModelTest {
 
         viewModel.onUserSelection()
 
-        assertThat((viewState as ViewState.PaymentOptions.CloseSheet).result)
+        assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
             .isEqualTo(PaymentOptionResult.Succeeded(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION))
         verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
     }
 
     @Test
-    fun `onUserSelection() new card with save should be finish processing and close the sheet`() {
+    fun `onUserSelection() new card with save should finish processing, and when called back, process the result`() {
         val viewState: MutableList<ViewState?> = mutableListOf()
         viewModel.viewState.observeForever {
             viewState.add(it)
@@ -94,7 +94,7 @@ class PaymentOptionsViewModelTest {
         (viewState[1] as ViewState.PaymentOptions.FinishProcessing).onComplete()
 
         val paymentOptionResultSucceeded =
-            (viewState[2] as ViewState.PaymentOptions.CloseSheet)
+            (viewState[2] as ViewState.PaymentOptions.ProcessResult)
                 .result as PaymentOptionResult.Succeeded
         assertThat((paymentOptionResultSucceeded).paymentSelection)
             .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)

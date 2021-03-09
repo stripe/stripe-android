@@ -75,7 +75,7 @@ internal class PaymentOptionsViewModel(
             _viewState.value = ViewState.PaymentOptions.StartProcessing
             savePaymentSelection(paymentSelection as PaymentSelection.New)
         } else {
-            _viewState.value = ViewState.PaymentOptions.CloseSheet(
+            _viewState.value = ViewState.PaymentOptions.ProcessResult(
                 PaymentOptionResult.Succeeded(paymentSelection)
             )
             _viewState.value = ViewState.PaymentOptions.Ready
@@ -100,7 +100,7 @@ internal class PaymentOptionsViewModel(
                     // trampoline it will see that it was saved and ignore it.
 
                     _viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                        _viewState.value = ViewState.PaymentOptions.CloseSheet(
+                        _viewState.value = ViewState.PaymentOptions.ProcessResult(
                             PaymentOptionResult.Succeeded(paymentSelection)
                         )
                     }

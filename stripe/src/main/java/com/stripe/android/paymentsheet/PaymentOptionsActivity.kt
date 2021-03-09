@@ -2,10 +2,8 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
@@ -90,7 +88,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentOptions.CloseSheet -> handleResult(
+            is ViewState.PaymentOptions.ProcessResult -> processResult(
                 viewState.result
             )
         }
@@ -232,7 +230,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    private fun handleResult(result: PaymentOptionResult) {
+    private fun processResult(result: PaymentOptionResult) {
         when (result) {
             is PaymentOptionResult.Succeeded -> {
                 closeSheet(result)
