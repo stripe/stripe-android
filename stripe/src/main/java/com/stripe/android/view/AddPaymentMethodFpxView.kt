@@ -3,12 +3,9 @@ package com.stripe.android.view
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,15 +22,16 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     defStyleAttr: Int = 0
 ) : AddPaymentMethodView(activity, attrs, defStyleAttr) {
 
+    private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses()
+
     private val fpxAdapter = AddPaymentMethodListAdapter(
         activity,
         items = FpxBank.values(),
-        paymentMethodListType = PaymentMethodListType.PaymentMethodListTypeFpx
+        paymentMethodListType = PaymentMethodListType.PaymentMethodListTypeFpx,
+        itemSelectedCallback = {
+            viewModel.selectedPosition = it
+        }
     )
-
-//    private val fpxAdapter = Adapter(ThemeConfig(activity)) {
-//        viewModel.selectedPosition = it
-//    }
 
     private val viewModel: FpxViewModel by lazy {
         ViewModelProvider(
@@ -75,15 +73,32 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
         viewModel.selectedPosition?.let {
             // TODO: need to figure out if this logic should move to adapter
-//            fpxAdapter.updateSelected(it)
+            fpxAdapter.updateSelected(it)
         }
     }
 
     private fun onFpxBankStatusesUpdated(fpxBankStatuses: FpxBankStatuses?) {
         fpxBankStatuses?.let {
             // TODO: same as above
-//            fpxAdapter.updateStatuses(it)
+            updateStatuses(it)
         }
+    }
+
+    internal fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
+        this.fpxBankStatuses = fpxBankStatuses
+
+        // flag offline bank
+        FpxBank.values().indices
+            .filterNot { position ->
+                fpxBankStatuses.isOnline(getItem(position))
+            }
+            .forEach { position ->
+                fpxAdapter.notifyAdapterItemChanged(position)
+            }
+    }
+
+    private fun getItem(position: Int): FpxBank {
+        return FpxBank.values()[position]
     }
 
     class BankViewHolder constructor(
@@ -157,35 +172,10 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 //            }
 //        }
 //
-//        override fun getItemId(position: Int): Long {
-//            return position.toLong()
-//        }
 //
-//        override fun getItemCount(): Int {
-//            return FpxBank.values().size
-//        }
 //
-//        private fun getItem(position: Int): FpxBank {
-//            return FpxBank.values()[position]
-//        }
 //
-//        internal fun updateSelected(position: Int) {
-//            selectedPosition = position
-//            notifyItemChanged(position)
-//        }
 //
-//        internal fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
-//            this.fpxBankStatuses = fpxBankStatuses
-//
-//            // flag offline bank
-//            FpxBank.values().indices
-//                .filterNot { position ->
-//                    fpxBankStatuses.isOnline(getItem(position))
-//                }
-//                .forEach { position ->
-//                    notifyItemChanged(position)
-//                }
-//        }
 //    }
 
     internal companion object {

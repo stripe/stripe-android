@@ -12,24 +12,38 @@ enum class PaymentMethodListType {
     PaymentMethodListTypeNetbanking,
 }
 
-class AddPaymentMethodListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    lateinit  var activity: FragmentActivity
+class AddPaymentMethodListAdapter constructor (
+    var activity: FragmentActivity,
+    var items : Array<FpxBank>,
+    val itemSelectedCallback: (Int) -> Unit,
+    var paymentMethodListType : PaymentMethodListType
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
 
     // TODO: use a generic type, <Any> doesn't seem to work
-    var items : Array<FpxBank>
-    var selectedPosition : Int = 0
+
+    var selectedPosition = RecyclerView.NO_POSITION
+        set(value) {
+            if (value != field) {
+                if (selectedPosition != RecyclerView.NO_POSITION) {
+                    notifyItemChanged(field)
+                }
+                notifyItemChanged(value)
+                itemSelectedCallback(value)
+            }
+            field = value
+        }
 
     // TODO: use PaymentMethod.Type
-    lateinit var paymentMethodListType : PaymentMethodListType
-
-    constructor(
-        activity: FragmentActivity,
-        paymentMethodListType: PaymentMethodListType,
-        items : Array<FpxBank>) {
-        this.activity = activity
-        this.paymentMethodListType = paymentMethodListType
-        this.items = items
-    }
+//
+//    constructor(
+//        activity: FragmentActivity,
+//        paymentMethodListType: PaymentMethodListType,
+//        items : Array<FpxBank>) {
+//        this.activity = activity,
+//        this.paymentMethodListType = paymentMethodListType,
+//        this.items = items,
+//    }
 
     init {
         setHasStableIds(true)
@@ -49,6 +63,10 @@ class AddPaymentMethodListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder
 
     override fun getItemCount(): Int {
         return items.size
+    }
+
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -71,6 +89,10 @@ class AddPaymentMethodListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder
 
     internal fun updateSelected(position: Int) {
         selectedPosition = position
+        notifyItemChanged(position)
+    }
+
+    fun notifyAdapterItemChanged(position: Int) {
         notifyItemChanged(position)
     }
 }
