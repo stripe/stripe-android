@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -99,7 +97,7 @@ internal class PaymentSheetActivityTest {
                 testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
                 assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
                 activity.viewBinding.root.performClick()
                 idleLooper()
@@ -153,9 +151,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(currentFragment(activity))
                     .isInstanceOf(PaymentSheetListFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
-                assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
-                    .isEqualTo(WRAP_CONTENT)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
                 viewModel.transitionTo(
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
@@ -167,17 +163,13 @@ internal class PaymentSheetActivityTest {
                     .isInstanceOf(PaymentSheetAddCardFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
-                assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
-                    .isEqualTo(MATCH_PARENT)
 
                 activity.onBackPressed()
                 idleLooper()
                 assertThat(currentFragment(activity))
                     .isInstanceOf(PaymentSheetListFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
-                assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
-                    .isEqualTo(WRAP_CONTENT)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
                 activity.onBackPressed()
                 idleLooper()
@@ -378,9 +370,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(currentFragment(activity))
                     .isInstanceOf(PaymentSheetAddCardFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
-                assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
-                    .isEqualTo(MATCH_PARENT)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
                 // make sure loading fragment isn't in back stack
                 activity.onBackPressed()
@@ -451,9 +441,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(currentFragment(activity))
                     .isInstanceOf(PaymentSheetListFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
-                    .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
-                assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
-                    .isEqualTo(WRAP_CONTENT)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
                 viewModel.transitionTo(
                     PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(
