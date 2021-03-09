@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -66,20 +67,16 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             itemAnimator = DefaultItemAnimator()
         }
 
-//        viewModel.fpxBankStatuses.observe(activity, Observer {
-//            onFpxBankStatusesUpdated(it)
-//        })
-//        viewModel.loadFpxBankStatues()
+        viewModel.getFpxBankStatues()
+            .observe(activity, Observer(::onFpxBankStatusesUpdated))
 
         viewModel.selectedPosition?.let {
-            // TODO: need to figure out if this logic should move to adapter
             fpxAdapter.updateSelected(it)
         }
     }
 
     private fun onFpxBankStatusesUpdated(fpxBankStatuses: FpxBankStatuses?) {
         fpxBankStatuses?.let {
-            // TODO: same as above
             updateStatuses(it)
         }
     }
@@ -132,51 +129,6 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             }
         }
     }
-
-//    private class Adapter constructor(
-//        private val themeConfig: ThemeConfig,
-//        private val itemSelectedCallback: (Int) -> Unit
-//    ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
-//        var selectedPosition = RecyclerView.NO_POSITION
-//            set(value) {
-//                if (value != field) {
-//                    if (selectedPosition != RecyclerView.NO_POSITION) {
-//                        notifyItemChanged(field)
-//                    }
-//                    notifyItemChanged(value)
-//                    itemSelectedCallback(value)
-//                }
-//                field = value
-//            }
-//
-//        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses()
-//
-//        internal val selectedBank: FpxBank?
-//            get() = if (selectedPosition == -1) {
-//                null
-//            } else {
-//                getItem(selectedPosition)
-//            }
-//
-//        init {
-//            setHasStableIds(true)
-//        }
-//
-//        override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
-//            viewHolder.setSelected(i == selectedPosition)
-//
-//            val fpxBank = getItem(i)
-//            viewHolder.update(fpxBank, fpxBankStatuses.isOnline(fpxBank))
-//            viewHolder.itemView.setOnClickListener {
-//                selectedPosition = viewHolder.adapterPosition
-//            }
-//        }
-//
-//
-//
-//
-//
-//    }
 
     internal companion object {
         @JvmSynthetic

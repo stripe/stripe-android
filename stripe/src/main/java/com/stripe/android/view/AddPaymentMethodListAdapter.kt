@@ -19,6 +19,7 @@ class AddPaymentMethodListAdapter constructor (
     var paymentMethodListType : PaymentMethodListType
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private lateinit var statuses : Array<Boolean>
 
     // TODO: use a generic type, <Any> doesn't seem to work
 
@@ -35,16 +36,6 @@ class AddPaymentMethodListAdapter constructor (
         }
 
     // TODO: use PaymentMethod.Type
-//
-//    constructor(
-//        activity: FragmentActivity,
-//        paymentMethodListType: PaymentMethodListType,
-//        items : Array<FpxBank>) {
-//        this.activity = activity,
-//        this.paymentMethodListType = paymentMethodListType,
-//        this.items = items,
-//    }
-
     init {
         setHasStableIds(true)
     }
@@ -74,17 +65,13 @@ class AddPaymentMethodListAdapter constructor (
 
         holder.itemView.setOnClickListener {
             Log.d("Ali click", item.toString())
-            selectedPosition = position
+            selectedPosition = holder.adapterPosition
         }
 
         val bankViewHolder = holder as AddPaymentMethodFpxView.BankViewHolder
         bankViewHolder.setSelected(position == selectedPosition)
+        // TODO: figure out bank statuses
         bankViewHolder.update(fpxBank = item, isOnline = true)
-
-        // TODO: I'm not clear on what this is supposed to do
-//        viewHolder.itemView.setOnClickListener {
-//                selectedPosition = viewHolder.adapterPosition
-//        }
     }
 
     internal fun updateSelected(position: Int) {
