@@ -199,14 +199,14 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify CloseSheet state closes the sheet`() {
+    fun `Verify ProcessResult state closes the sheet`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(emptyList())
         ).use {
             it.onActivity { activity ->
                 val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-                viewModel._viewState.value = ViewState.PaymentOptions.CloseSheet(
+                viewModel._viewState.value = ViewState.PaymentOptions.ProcessResult(
                     PaymentOptionResult.Succeeded(
                         paymentSelectionMock
                     )

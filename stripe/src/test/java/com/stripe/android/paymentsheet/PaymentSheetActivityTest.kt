@@ -307,7 +307,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify CloseSheet state closes the sheet`() {
+    fun `Verify ProcessResult state closes the sheet`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
@@ -315,7 +315,7 @@ internal class PaymentSheetActivityTest {
                 testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
-                viewModel._viewState.value = ViewState.PaymentSheet.CloseSheet(
+                viewModel._viewState.value = ViewState.PaymentSheet.ProcessResult(
                     PaymentIntentResult(
                         intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
                         outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
