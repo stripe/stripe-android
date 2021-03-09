@@ -11,7 +11,7 @@ class ViewStateTest {
     }
 
     @Test
-    fun `FinishProcessing equals() with not FinishProcessing param should return true`() {
+    fun `FinishProcessing equals() with not FinishProcessing param should return false`() {
         assertThat(ViewState.PaymentSheet.FinishProcessing {})
             .isNotEqualTo(ViewState.PaymentSheet.StartProcessing)
     }
