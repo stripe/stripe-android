@@ -454,6 +454,8 @@ internal class PaymentSheetActivityTest {
                     )
                 )
 
+                idleLooper()
+
                 assertThat(currentFragment(activity))
                     .isInstanceOf(PaymentSheetAddCardFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
