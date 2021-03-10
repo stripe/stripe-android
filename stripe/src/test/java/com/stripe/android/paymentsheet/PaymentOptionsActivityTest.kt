@@ -56,7 +56,8 @@ class PaymentOptionsActivityTest {
         ),
         prefsRepository = FakePrefsRepository(),
         paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
-        eventReporter = eventReporter
+        eventReporter = eventReporter,
+        workContext = testDispatcher
     )
 
     @BeforeTest

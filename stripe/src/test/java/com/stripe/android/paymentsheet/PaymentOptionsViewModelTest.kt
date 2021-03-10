@@ -14,16 +14,26 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentOptionsViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val newCard = PaymentSelection.New.Card(
@@ -31,20 +41,36 @@ class PaymentOptionsViewModelTest {
         CardBrand.Discover,
         false
     )
+    private val prefsRepository = FakePrefsRepository()
     private val args = PaymentOptionContract.Args(
         paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         paymentMethods = emptyList(),
         sessionId = SessionId(),
-        config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+        config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         isGooglePayReady = true,
         newCard = null,
         statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
     )
+    private val paymentMethodRepositoryItems = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    private val paymentMethodRepository: PaymentMethodsRepository.Static = PaymentMethodsRepository.Static(paymentMethodRepositoryItems)
     private val viewModel = PaymentOptionsViewModel(
         args = args,
-        prefsRepository = FakePrefsRepository(),
-        eventReporter = eventReporter
+        prefsRepository = prefsRepository,
+        paymentMethodsRepository = paymentMethodRepository,
+        eventReporter = eventReporter,
+        workContext = testDispatcher
     )
+
+    @BeforeTest
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @AfterTest
+    fun cleanup() {
+        Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() {
@@ -62,7 +88,7 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `onUserSelection() when new card selection with no save should set the view state to process result`() {
+    fun `onUserSelection() when new card selection with no save should set the view state to process result`() = testDispatcher.runBlockingTest {
         var viewState: ViewState? = null
         viewModel.viewState.observeForever {
             viewState = it
@@ -74,14 +100,20 @@ class PaymentOptionsViewModelTest {
         assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
             .isEqualTo(PaymentOptionResult.Succeeded(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION))
         verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
+
+        assertThat(prefsRepository.getSavedSelection())
+            .isEqualTo(SavedSelection.None)
     }
 
     @Test
-    fun `onUserSelection() new card with save should finish processing, and when called back, process the result`() {
+    fun `onUserSelection() new card with save should complete with succeeded view state`() = testDispatcher.runBlockingTest {
+        val savedPaymentMethodResult = paymentMethodRepositoryItems[0]
+
         val viewState: MutableList<ViewState?> = mutableListOf()
         viewModel.viewState.observeForever {
             viewState.add(it)
         }
+
         viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
 
         viewModel.onUserSelection()
@@ -89,16 +121,22 @@ class PaymentOptionsViewModelTest {
         assertThat(viewState[0])
             .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
         assertThat(viewState[1])
+            .isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
+
+        assertThat(viewState[2])
             .isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
 
-        (viewState[1] as ViewState.PaymentOptions.FinishProcessing).onComplete()
+        (viewState[2] as ViewState.PaymentOptions.FinishProcessing).onComplete()
 
         val paymentOptionResultSucceeded =
-            (viewState[2] as ViewState.PaymentOptions.ProcessResult)
+            (viewState[3] as ViewState.PaymentOptions.ProcessResult)
                 .result as PaymentOptionResult.Succeeded
         assertThat((paymentOptionResultSucceeded).paymentSelection)
             .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
         verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
+
+        assertThat((prefsRepository.getSavedSelection() as SavedSelection.PaymentMethod).id)
+            .isEqualTo(savedPaymentMethodResult.id!!)
     }
 
     @Test
@@ -138,7 +176,9 @@ class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = args.copy(newCard = null),
             prefsRepository = FakePrefsRepository(),
-            eventReporter = eventReporter
+            paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
+            eventReporter = eventReporter,
+            workContext = testDispatcher
         )
 
         var transitionTarget: TransitionTarget? = null
@@ -162,7 +202,9 @@ class PaymentOptionsViewModelTest {
                 )
             ),
             prefsRepository = FakePrefsRepository(),
-            eventReporter = eventReporter
+            paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
+            eventReporter = eventReporter,
+            workContext = testDispatcher
         )
 
         val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
@@ -185,7 +227,9 @@ class PaymentOptionsViewModelTest {
                 )
             ),
             prefsRepository = FakePrefsRepository(),
-            eventReporter = eventReporter
+            paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
+            eventReporter = eventReporter,
+            workContext = testDispatcher
         )
 
         val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()

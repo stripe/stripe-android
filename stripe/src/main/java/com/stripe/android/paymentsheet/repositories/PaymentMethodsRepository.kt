@@ -19,7 +19,7 @@ internal sealed class PaymentMethodsRepository {
     abstract suspend fun save(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-    ): PaymentMethod?
+    ): PaymentMethod
 
     /**
      * A [PaymentMethodsRepository] that uses a pre-determined list of payment methods.
@@ -27,6 +27,7 @@ internal sealed class PaymentMethodsRepository {
     class Static(
         private val paymentMethods: List<PaymentMethod>
     ) : PaymentMethodsRepository() {
+        var error: Throwable? = null
         override suspend fun get(
             customerConfig: PaymentSheet.CustomerConfiguration,
             type: PaymentMethod.Type
@@ -35,15 +36,18 @@ internal sealed class PaymentMethodsRepository {
         override suspend fun save(
             customerConfig: PaymentSheet.CustomerConfiguration,
             paymentMethodCreateParams: PaymentMethodCreateParams
-        ): PaymentMethod? {
-            TODO("Not yet implemented")
+        ): PaymentMethod {
+            // TODO: Do this right?
+            return error?.let {
+                throw it
+            } ?: paymentMethods[0]
         }
     }
 
     /**
      * A [PaymentMethodsRepository] that uses the Stripe API.
      */
-    class Api(
+    internal class Api(
         private val stripeRepository: StripeRepository,
         private val publishableKey: String,
         private val stripeAccountId: String?,
@@ -81,7 +85,7 @@ internal sealed class PaymentMethodsRepository {
         override suspend fun save(
             customerConfig: PaymentSheet.CustomerConfiguration,
             paymentMethodCreateParams: PaymentMethodCreateParams
-        ): PaymentMethod? = withContext(workContext) {
+        ): PaymentMethod = withContext(workContext) {
             runCatching {
                 stripeRepository.createPaymentMethod(
                     paymentMethodCreateParams,
@@ -101,12 +105,12 @@ internal sealed class PaymentMethodsRepository {
                                 stripeAccountId
                             )
                         )
-                    }
-                }
+                    } ?: throw Exception("Payment method could not be attached")
+                } ?: throw Exception("Payment method could not be created")
             }.onFailure {
                 logger.error("Failed to save ${customerConfig.id}'s payment methods.", it)
                 throw it
-            }.getOrNull()
+            }.getOrThrow()
         }
     }
 

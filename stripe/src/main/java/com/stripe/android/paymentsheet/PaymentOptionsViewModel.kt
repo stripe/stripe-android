@@ -21,15 +21,19 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
     prefsRepository: PrefsRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
-    private val eventReporter: EventReporter
+    private val eventReporter: EventReporter,
+    workContext: CoroutineContext
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
-    prefsRepository = prefsRepository
+    prefsRepository = prefsRepository,
+    workContext = workContext
 ) {
     @VisibleForTesting
     internal val _viewState = MutableLiveData<ViewState.PaymentOptions>(
@@ -61,54 +65,61 @@ internal class PaymentOptionsViewModel(
         selection.value?.let { paymentSelection ->
             // TODO: Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
-            // TODO: Should not need to update _paymentMethods?
-            prefsRepository.savePaymentSelection(paymentSelection)
-            processSelection(paymentSelection)
+
+            val requestSaveNewCard =
+                (paymentSelection as? PaymentSelection.New)?.shouldSavePaymentMethod
+                    ?: false
+            if (requestSaveNewCard) {
+                processSaveNewCard(paymentSelection)
+            } else {
+                processUnsavedNewCard(paymentSelection)
+            }
         }
     }
 
-    private fun processSelection(paymentSelection: PaymentSelection) {
-        val requestSaveNewCard =
-            (paymentSelection as? PaymentSelection.New)?.shouldSavePaymentMethod
-                ?: false
+    private fun processUnsavedNewCard(paymentSelection: PaymentSelection) {
+        _viewState.value = ViewState.PaymentOptions.Ready
+        prefsRepository.savePaymentSelection(paymentSelection)
+        _viewState.value = ViewState.PaymentOptions.ProcessResult(
+            PaymentOptionResult.Succeeded(paymentSelection)
+        )
+    }
 
-        if (requestSaveNewCard) {
-            _viewState.value = ViewState.PaymentOptions.StartProcessing
-            savePaymentSelection(paymentSelection as PaymentSelection.New)
-        } else {
-            prefsRepository.savePaymentSelection(paymentSelection)
-            _viewState.value = ViewState.PaymentOptions.ProcessResult(
-                PaymentOptionResult.Succeeded(paymentSelection)
-            )
-            _viewState.value = ViewState.PaymentOptions.Ready
-        }
+    private fun processSaveNewCard(paymentSelection: PaymentSelection) {
+        _viewState.value = ViewState.PaymentOptions.StartProcessing
+        savePaymentSelection(
+            paymentSelection as PaymentSelection.New,
+            onSuccess = { paymentMethod ->
+                // If the payment method is null we will just ignore the fact that the save
+                // didn't happen, the important thing is that the card is saved and now usable
+                prefsRepository.savePaymentSelection(PaymentSelection.Saved(paymentMethod))
+
+                _viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                    _viewState.value = ViewState.PaymentOptions.ProcessResult(
+                        PaymentOptionResult.Succeeded(paymentSelection)
+                    )
+                }
+            },
+            onFailure = {
+                // TODO(michelleb-stripe): Handle failure cases
+            }
+        )
     }
 
     private fun savePaymentSelection(
-        paymentSelection: PaymentSelection.New
+        paymentSelection: PaymentSelection.New,
+        onSuccess: (PaymentMethod) -> Unit,
+        onFailure: (Throwable) -> Unit
     ) {
         viewModelScope.launch {
-            runCatching<PaymentMethod?> {
-                paymentMethodsRepository.save(
-                    customerConfig!!,
-                    paymentSelection.paymentMethodCreateParams
-                )
-            }.fold(
-                onSuccess = { paymentMethod ->
-                    // TODO: In what case would it be null, it is success and it is saving...??
-                    paymentMethod?.let {
-                        prefsRepository.savePaymentSelection(PaymentSelection.Saved(paymentMethod))
-                    }
-                    _viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                        _viewState.value = ViewState.PaymentOptions.ProcessResult(
-                            PaymentOptionResult.Succeeded(paymentSelection)
-                        )
-                    }
-                },
-                onFailure = {
-                    // TODO(michelleb-stripe): Handle failure cases
+            runCatching {
+                withContext(workContext) {
+                    paymentMethodsRepository.save(
+                        customerConfig!!,
+                        paymentSelection.paymentMethodCreateParams
+                    )
                 }
-            )
+            }.fold(onSuccess, onFailure)
         }
     }
 
@@ -196,7 +207,8 @@ internal class PaymentOptionsViewModel(
                     mode = EventReporter.Mode.Custom,
                     starterArgs.sessionId,
                     application
-                )
+                ),
+                workContext = Dispatchers.IO
             ) as T
         }
     }
