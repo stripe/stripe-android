@@ -449,8 +449,8 @@ class NetbankingBank(
          * The bank code should be obtained from [PaymentMethod.Netbanking.bank].
          */
         @JvmStatic
-        fun get(bankCode: String?): FpxBank? {
-            return FpxBank.values().firstOrNull { it.code == bankCode }
+        fun get(bankCode: String?): NetbankingBank? {
+            return NetbankingBank.values().firstOrNull { it.code == bankCode }
         }
     }
 }
