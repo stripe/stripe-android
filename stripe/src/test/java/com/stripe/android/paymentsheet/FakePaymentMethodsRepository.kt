@@ -18,7 +18,6 @@ class FakePaymentMethodsRepository(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): PaymentMethod {
-        // TODO(michelleb-stripe): What would be the proper payment method to return?
         return error?.let {
             throw it
         } ?: savedPaymentMethod
