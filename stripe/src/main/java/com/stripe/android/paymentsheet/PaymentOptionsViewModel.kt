@@ -90,8 +90,6 @@ internal class PaymentOptionsViewModel(
         savePaymentSelection(
             paymentSelection as PaymentSelection.New,
             onSuccess = { paymentMethod ->
-                // If the payment method is null we will just ignore the fact that the save
-                // didn't happen, the important thing is that the card is saved and now usable
                 prefsRepository.savePaymentSelection(PaymentSelection.Saved(paymentMethod))
 
                 _viewState.value = ViewState.PaymentOptions.FinishProcessing {

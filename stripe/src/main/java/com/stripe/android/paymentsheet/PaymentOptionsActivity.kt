@@ -231,14 +231,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun processResult(result: PaymentOptionResult) {
-        when (result) {
-            is PaymentOptionResult.Succeeded -> {
-                closeSheet(result)
-            }
-            else -> {
-                // TODO(michelleb-stripe): handle other outcomes
-            }
-        }
+        closeSheet(result)
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {
