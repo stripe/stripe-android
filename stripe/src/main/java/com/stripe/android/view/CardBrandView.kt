@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.doOnNextLayout
 import com.stripe.android.databinding.CardBrandViewBinding
 import com.stripe.android.model.CardBrand
 import kotlin.properties.Delegates
@@ -66,12 +67,10 @@ internal class CardBrandView @JvmOverloads constructor(
     init {
         isClickable = false
         isFocusable = false
-    }
 
-    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
-        super.onWindowFocusChanged(hasWindowFocus)
-        // needed to tint CardBrand.Unknown icon
-        updateIcon()
+        doOnNextLayout {
+            updateIcon()
+        }
     }
 
     private fun updateIcon() {
