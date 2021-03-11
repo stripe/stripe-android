@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Logger
+import com.stripe.android.exception.APIException
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -37,7 +38,7 @@ internal sealed class PaymentMethodsRepository {
             customerConfig: PaymentSheet.CustomerConfiguration,
             paymentMethodCreateParams: PaymentMethodCreateParams
         ): PaymentMethod {
-            // TODO: Do this right?
+            // TODO(michelleb-stripe): What would be the proper payment method to return?
             return error?.let {
                 throw it
             } ?: paymentMethods[0]
@@ -105,8 +106,8 @@ internal sealed class PaymentMethodsRepository {
                                 stripeAccountId
                             )
                         )
-                    } ?: throw Exception("Payment method could not be attached")
-                } ?: throw Exception("Payment method could not be created")
+                    } ?: throw APIException(message = "Payment method could not be attached")
+                } ?: throw APIException(message = "Payment method could not be created")
             }.onFailure {
                 logger.error("Failed to save ${customerConfig.id}'s payment methods.", it)
                 throw it
