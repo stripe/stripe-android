@@ -854,15 +854,15 @@ class CardInputWidget @JvmOverloads constructor(
         ) {
             postalCodeEnabled = getBoolean(
                 R.styleable.CardElement_shouldShowPostalCode,
-                CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+                postalCodeEnabled
             )
             postalCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequirePostalCode,
-                CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+                postalCodeRequired
             )
             usZipCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequireUsZipCode,
-                CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
+                usZipCodeRequired
             )
         }
     }
