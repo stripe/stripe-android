@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.parcelize.Parcelize
@@ -25,7 +26,10 @@ class PaymentSheet internal constructor(
     )
 
     /**
-     * Create PaymentSheet with a Customer
+     * Create PaymentSheet with a [Configuration].
+     *
+     * If [paymentIntentClientSecret] represents a [PaymentIntent] that is already confirmed,
+     * [PaymentSheetResultCallback] will be invoked with [PaymentResult.Completed].
      */
     fun present(
         paymentIntentClientSecret: String,
@@ -35,7 +39,10 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Create PaymentSheet without a Customer
+     * Create PaymentSheet without a [Configuration].
+     *
+     * If [paymentIntentClientSecret] represents a [PaymentIntent] that is already confirmed,
+     * [PaymentSheetResultCallback] will be invoked with [PaymentResult.Completed].
      */
     fun present(
         paymentIntentClientSecret: String

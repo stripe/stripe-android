@@ -461,6 +461,31 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `if fetched PaymentIntent is confirmed then should return Completed result`() {
+        val scenario = activityScenario(
+            createViewModel(
+                paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED
+            )
+        )
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                activity.finish()
+            }
+        }
+
+        assertThat(
+            contract.parseResult(
+                scenario.getResult().resultCode,
+                scenario.getResult().resultData
+            )
+        ).isEqualTo(
+            PaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 

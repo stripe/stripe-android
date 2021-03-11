@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
@@ -48,6 +49,7 @@ internal class PaymentSheetViewModel internal constructor(
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
+    private val logger: Logger = Logger.noop(),
     workContext: CoroutineContext
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     config = args.config,
@@ -115,15 +117,40 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
-        runCatching {
-            paymentIntentValidator.requireValid(paymentIntent)
-        }.fold(
-            onSuccess = {
-                _paymentIntent.value = paymentIntent
-                resetViewState(paymentIntent)
-            },
-            onFailure = ::onFatal
+        if (paymentIntent.isConfirmed) {
+            onConfirmedPaymentIntent(paymentIntent)
+        } else {
+            runCatching {
+                paymentIntentValidator.requireValid(paymentIntent)
+            }.fold(
+                onSuccess = {
+                    _paymentIntent.value = paymentIntent
+                    resetViewState(paymentIntent)
+                },
+                onFailure = ::onFatal
+            )
+        }
+    }
+
+    /**
+     * There's nothing left to be done in payment sheet if the PaymentIntent is confirmed.
+     *
+     * See [How intents work](https://stripe.com/docs/payments/intents) for more details.
+     */
+    private fun onConfirmedPaymentIntent(paymentIntent: PaymentIntent) {
+        logger.info(
+            """
+            PaymentIntent with id=${paymentIntent.id}" has already been confirmed.
+            """.trimIndent()
         )
+        _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+            _viewState.value = ViewState.PaymentSheet.ProcessResult(
+                PaymentIntentResult(
+                    paymentIntent,
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+        }
     }
 
     private fun resetViewState(paymentIntent: PaymentIntent) {
@@ -339,7 +366,8 @@ internal class PaymentSheetViewModel internal constructor(
                     application
                 ),
                 starterArgs,
-                Dispatchers.IO
+                logger = Logger.noop(),
+                workContext = Dispatchers.IO
             ) as T
         }
     }
