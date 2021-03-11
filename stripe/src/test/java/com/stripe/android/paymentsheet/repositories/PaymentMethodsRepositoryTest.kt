@@ -2,11 +2,6 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.CardException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -63,8 +58,6 @@ internal class PaymentMethodsRepositoryTest {
 
     @Test
     fun `createMethod should throw an exception on null`() = testDispatcher.runBlockingTest {
-        stripeRepository.createPaymentMethod = null
-
         val exception = assertFailsWith<Exception>(
             "Payment method could not be created"
         ) {
@@ -74,12 +67,12 @@ internal class PaymentMethodsRepositoryTest {
             )
         }
         assertThat(exception.message)
+            .isEqualTo("Payment method could not be created")
     }
 
     @Test
     fun `attachMethod should throw an exception on null`() = testDispatcher.runBlockingTest {
         stripeRepository.createPaymentMethod = CARD_PAYMENT_METHOD
-        stripeRepository.attachPaymentMethod = null
 
         val exception = assertFailsWith<Exception>(
             "Payment method could not be attached"
@@ -90,6 +83,7 @@ internal class PaymentMethodsRepositoryTest {
             )
         }
         assertThat(exception.message)
+            .isEqualTo("Payment method could not be attached")
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
@@ -110,12 +104,6 @@ internal class PaymentMethodsRepositoryTest {
             return paymentMethods
         }
 
-        @Throws(
-            AuthenticationException::class,
-            InvalidRequestException::class,
-            APIConnectionException::class,
-            APIException::class
-        )
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
@@ -123,13 +111,6 @@ internal class PaymentMethodsRepositoryTest {
             return createPaymentMethod
         }
 
-        @Throws(
-            AuthenticationException::class,
-            InvalidRequestException::class,
-            APIConnectionException::class,
-            APIException::class,
-            CardException::class
-        )
         override suspend fun attachPaymentMethod(
             customerId: String,
             publishableKey: String,

@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentOptionsViewModel(
@@ -111,12 +110,10 @@ internal class PaymentOptionsViewModel(
     ) {
         viewModelScope.launch {
             runCatching {
-                withContext(workContext) {
-                    paymentMethodsRepository.save(
-                        customerConfig!!,
-                        paymentSelection.paymentMethodCreateParams
-                    )
-                }
+                paymentMethodsRepository.save(
+                    customerConfig!!,
+                    paymentSelection.paymentMethodCreateParams
+                )
             }.fold(onSuccess, onFailure)
         }
     }

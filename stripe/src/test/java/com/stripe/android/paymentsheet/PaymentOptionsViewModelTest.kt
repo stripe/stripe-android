@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
@@ -29,6 +30,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentOptionsViewModelTest {
     @get:Rule
@@ -36,25 +38,11 @@ class PaymentOptionsViewModelTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val newCard = PaymentSelection.New.Card(
-        DEFAULT_CARD,
-        CardBrand.Discover,
-        false
-    )
     private val prefsRepository = FakePrefsRepository()
-    private val args = PaymentOptionContract.Args(
-        paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        paymentMethods = emptyList(),
-        sessionId = SessionId(),
-        config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-        isGooglePayReady = true,
-        newCard = null,
-        statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
-    )
-    private val paymentMethodRepositoryItems = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-    private val paymentMethodRepository: PaymentMethodsRepository.Static = PaymentMethodsRepository.Static(paymentMethodRepositoryItems)
+    private val paymentMethodRepository = PaymentMethodsRepository.Static(PAYMENT_METHOD_REPOSITORY_PARAMS)
+
     private val viewModel = PaymentOptionsViewModel(
-        args = args,
+        args = PAYMENT_OPTION_CONTRACT_ARGS,
         prefsRepository = prefsRepository,
         paymentMethodsRepository = paymentMethodRepository,
         eventReporter = eventReporter,
@@ -107,7 +95,7 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() new card with save should complete with succeeded view state`() = testDispatcher.runBlockingTest {
-        val savedPaymentMethodResult = paymentMethodRepositoryItems[0]
+        val savedPaymentMethodResult = PAYMENT_METHOD_REPOSITORY_PARAMS[0]
 
         val viewState: MutableList<ViewState?> = mutableListOf()
         viewModel.viewState.observeForever {
@@ -174,7 +162,7 @@ class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget no new card`() {
         val viewModel = PaymentOptionsViewModel(
-            args = args.copy(newCard = null),
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newCard = null),
             prefsRepository = FakePrefsRepository(),
             paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
             eventReporter = eventReporter,
@@ -196,8 +184,8 @@ class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget new card saved`() {
         val viewModel = PaymentOptionsViewModel(
-            args = args.copy(
-                newCard = newCard.copy(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+                newCard = NEW_CARD_PAYMENT_SELECTION.copy(
                     shouldSavePaymentMethod = true
                 )
             ),
@@ -221,8 +209,8 @@ class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget new card NOT saved`() {
         val viewModel = PaymentOptionsViewModel(
-            args = args.copy(
-                newCard = newCard.copy(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+                newCard = NEW_CARD_PAYMENT_SELECTION.copy(
                     shouldSavePaymentMethod = false
                 )
             ),
@@ -263,5 +251,20 @@ class PaymentOptionsViewModelTest {
             CardBrand.Visa,
             false,
         )
+        private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
+            DEFAULT_CARD,
+            CardBrand.Discover,
+            false
+        )
+        private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            paymentMethods = emptyList(),
+            sessionId = SessionId(),
+            config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            isGooglePayReady = true,
+            newCard = null,
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+        )
+        private val PAYMENT_METHOD_REPOSITORY_PARAMS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 }
