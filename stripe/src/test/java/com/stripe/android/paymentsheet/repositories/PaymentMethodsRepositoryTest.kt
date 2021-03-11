@@ -57,33 +57,43 @@ internal class PaymentMethodsRepositoryTest {
     }
 
     @Test
+    fun `save should return a paymentMethod`() = testDispatcher.runBlockingTest {
+        stripeRepository.createPaymentMethod = CARD_PAYMENT_METHOD
+        stripeRepository.attachPaymentMethod = CARD_PAYMENT_METHOD
+
+        val paymentMethod = repository.save(
+            PaymentSheetFixtures.CONFIG_CUSTOMER.customer!!,
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+        )
+
+        assertThat(paymentMethod)
+            .isEqualTo(stripeRepository.attachPaymentMethod)
+    }
+
+    @Test
     fun `createMethod should throw an exception on null`() = testDispatcher.runBlockingTest {
-        val exception = assertFailsWith<Exception>(
-            "Payment method could not be created"
-        ) {
+        val exception = assertFailsWith<Exception>(ERROR_MSG) {
             repository.save(
                 PaymentSheetFixtures.CONFIG_CUSTOMER.customer!!,
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
             )
         }
         assertThat(exception.message)
-            .isEqualTo("Payment method could not be created")
+            .isEqualTo(ERROR_MSG)
     }
 
     @Test
     fun `attachMethod should throw an exception on null`() = testDispatcher.runBlockingTest {
         stripeRepository.createPaymentMethod = CARD_PAYMENT_METHOD
 
-        val exception = assertFailsWith<Exception>(
-            "Payment method could not be attached"
-        ) {
+        val exception = assertFailsWith<Exception>(ERROR_MSG) {
             repository.save(
                 PaymentSheetFixtures.CONFIG_CUSTOMER.customer!!,
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
             )
         }
         assertThat(exception.message)
-            .isEqualTo("Payment method could not be attached")
+            .isEqualTo(ERROR_MSG)
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
@@ -120,5 +130,9 @@ internal class PaymentMethodsRepositoryTest {
         ): PaymentMethod? {
             return attachPaymentMethod
         }
+    }
+
+    private companion object {
+        val ERROR_MSG = "Could not parse PaymentMethod."
     }
 }

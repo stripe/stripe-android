@@ -63,7 +63,7 @@ internal class PaymentOptionsViewModel(
 
     fun onUserSelection() {
         selection.value?.let { paymentSelection ->
-            // TODO: Should the payment selection in the event be the saved or new item?
+            // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
 
             val requestSaveNewCard =
@@ -107,10 +107,10 @@ internal class PaymentOptionsViewModel(
 
     private fun savePaymentSelection(
         paymentSelection: PaymentSelection.New,
-        callback: (Result<PaymentMethod>) -> Unit
+        onResult: (Result<PaymentMethod>) -> Unit
     ) {
         viewModelScope.launch {
-            callback(
+            onResult(
                 runCatching {
                     paymentMethodsRepository.save(
                         customerConfig!!,

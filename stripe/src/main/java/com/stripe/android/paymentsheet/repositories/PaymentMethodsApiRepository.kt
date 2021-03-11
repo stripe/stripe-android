@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Logger
-import com.stripe.android.exception.APIException
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -54,26 +53,36 @@ internal class PaymentMethodsApiRepository(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): PaymentMethod = withContext(workContext) {
         runCatching {
-            stripeRepository.createPaymentMethod(
-                paymentMethodCreateParams,
-                ApiRequest.Options(
-                    publishableKey,
-                    stripeAccountId
-                )
-            )?.let { paymentMethod ->
-                paymentMethod.id?.let {
-                    stripeRepository.attachPaymentMethod(
-                        customerConfig.id,
+            val paymentMethod = requireNotNull(
+                stripeRepository.createPaymentMethod(
+                    paymentMethodCreateParams,
+                    ApiRequest.Options(
                         publishableKey,
-                        PRODUCT_USAGE,
-                        paymentMethod.id,
-                        ApiRequest.Options(
-                            customerConfig.ephemeralKeySecret,
-                            stripeAccountId
-                        )
+                        stripeAccountId
                     )
-                } ?: throw APIException(message = "Payment method could not be attached")
-            } ?: throw APIException(message = "Payment method could not be created")
+                )
+            ) {
+                ERROR_MSG
+            }
+
+            requireNotNull(paymentMethod.id) {
+                ERROR_MSG
+            }
+
+            requireNotNull(
+                stripeRepository.attachPaymentMethod(
+                    customerConfig.id,
+                    publishableKey,
+                    PRODUCT_USAGE,
+                    paymentMethod.id,
+                    ApiRequest.Options(
+                        customerConfig.ephemeralKeySecret,
+                        stripeAccountId
+                    )
+                )
+            ) {
+                ERROR_MSG
+            }
         }.onFailure {
             logger.error("Failed to save ${customerConfig.id}'s payment methods.", it)
             throw it
@@ -82,5 +91,6 @@ internal class PaymentMethodsApiRepository(
 
     private companion object {
         private val PRODUCT_USAGE = setOf("PaymentSheet")
+        private val ERROR_MSG = "Could not parse PaymentMethod."
     }
 }
