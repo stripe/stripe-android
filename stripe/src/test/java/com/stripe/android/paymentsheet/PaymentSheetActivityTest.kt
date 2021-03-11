@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -512,7 +511,7 @@ internal class PaymentSheetActivityTest {
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = null,
             paymentIntentRepository = PaymentIntentRepository.Static(paymentIntent),
-            paymentMethodsRepository = PaymentMethodsRepository.Static(paymentMethods),
+            paymentMethodsRepository = FakePaymentMethodsRepository(paymentMethods),
             paymentFlowResultProcessor = paymentFlowResultProcessor,
             googlePayRepository = googlePayRepository,
             prefsRepository = FakePrefsRepository(),

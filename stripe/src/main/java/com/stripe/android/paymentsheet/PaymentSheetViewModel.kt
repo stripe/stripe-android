@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -339,7 +340,7 @@ internal class PaymentSheetViewModel internal constructor(
                 workContext = Dispatchers.IO
             )
 
-            val paymentMethodsRepository = PaymentMethodsRepository.Api(
+            val paymentMethodsRepository = PaymentMethodsApiRepository(
                 stripeRepository = stripeRepository,
                 publishableKey = publishableKey,
                 stripeAccountId = stripeAccountId,
