@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
@@ -81,7 +82,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() {
         val viewModel = createViewModel(
-            paymentMethodsRepository = PaymentMethodsRepository.Api(
+            paymentMethodsRepository = PaymentMethodsApiRepository(
                 stripeRepository = FailingStripeRepository(),
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = null,
@@ -426,7 +427,7 @@ internal class PaymentSheetViewModelTest {
         paymentIntentRepository: PaymentIntentRepository = PaymentIntentRepository.Static(
             PAYMENT_INTENT
         ),
-        paymentMethodsRepository: PaymentMethodsRepository = PaymentMethodsRepository.Static(
+        paymentMethodsRepository: PaymentMethodsRepository = FakePaymentMethodsRepository(
             PAYMENT_METHODS
         )
     ): PaymentSheetViewModel {

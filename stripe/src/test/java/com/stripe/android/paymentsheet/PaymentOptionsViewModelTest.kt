@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -39,7 +38,8 @@ class PaymentOptionsViewModelTest {
 
     private val eventReporter = mock<EventReporter>()
     private val prefsRepository = FakePrefsRepository()
-    private val paymentMethodRepository = PaymentMethodsRepository.Static(PAYMENT_METHOD_REPOSITORY_PARAMS)
+    private val paymentMethodRepository =
+        FakePaymentMethodsRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
 
     private val viewModel = PaymentOptionsViewModel(
         args = PAYMENT_OPTION_CONTRACT_ARGS,
@@ -76,56 +76,58 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `onUserSelection() when new card selection with no save should set the view state to process result`() = testDispatcher.runBlockingTest {
-        var viewState: ViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
+    fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
+        testDispatcher.runBlockingTest {
+            var viewState: ViewState? = null
+            viewModel.viewState.observeForever {
+                viewState = it
+            }
+            viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
+
+            viewModel.onUserSelection()
+
+            assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
+                .isEqualTo(PaymentOptionResult.Succeeded(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION))
+            verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
+
+            assertThat(prefsRepository.getSavedSelection())
+                .isEqualTo(SavedSelection.None)
         }
-        viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
-
-        viewModel.onUserSelection()
-
-        assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
-            .isEqualTo(PaymentOptionResult.Succeeded(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION))
-        verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
-
-        assertThat(prefsRepository.getSavedSelection())
-            .isEqualTo(SavedSelection.None)
-    }
 
     @Test
-    fun `onUserSelection() new card with save should complete with succeeded view state`() = testDispatcher.runBlockingTest {
-        val savedPaymentMethodResult = PAYMENT_METHOD_REPOSITORY_PARAMS[0]
+    fun `onUserSelection() new card with save should complete with succeeded view state`() =
+        testDispatcher.runBlockingTest {
+            paymentMethodRepository.savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-        val viewState: MutableList<ViewState?> = mutableListOf()
-        viewModel.viewState.observeForever {
-            viewState.add(it)
+            val viewState: MutableList<ViewState?> = mutableListOf()
+            viewModel.viewState.observeForever {
+                viewState.add(it)
+            }
+
+            viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+
+            viewModel.onUserSelection()
+
+            assertThat(viewState[0])
+                .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+            assertThat(viewState[1])
+                .isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
+
+            assertThat(viewState[2])
+                .isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
+
+            (viewState[2] as ViewState.PaymentOptions.FinishProcessing).onComplete()
+
+            val paymentOptionResultSucceeded =
+                (viewState[3] as ViewState.PaymentOptions.ProcessResult)
+                    .result as PaymentOptionResult.Succeeded
+            assertThat((paymentOptionResultSucceeded).paymentSelection)
+                .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+            verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
+
+            assertThat((prefsRepository.getSavedSelection() as SavedSelection.PaymentMethod).id)
+                .isEqualTo(paymentMethodRepository.savedPaymentMethod.id!!)
         }
-
-        viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-
-        viewModel.onUserSelection()
-
-        assertThat(viewState[0])
-            .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-        assertThat(viewState[1])
-            .isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
-
-        assertThat(viewState[2])
-            .isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
-
-        (viewState[2] as ViewState.PaymentOptions.FinishProcessing).onComplete()
-
-        val paymentOptionResultSucceeded =
-            (viewState[3] as ViewState.PaymentOptions.ProcessResult)
-                .result as PaymentOptionResult.Succeeded
-        assertThat((paymentOptionResultSucceeded).paymentSelection)
-            .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-        verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
-
-        assertThat((prefsRepository.getSavedSelection() as SavedSelection.PaymentMethod).id)
-            .isEqualTo(savedPaymentMethodResult.id!!)
-    }
 
     @Test
     fun `onUserSelection() when selection has not been made should not emit`() {
@@ -164,7 +166,7 @@ class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newCard = null),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
+            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher
         )
@@ -190,7 +192,7 @@ class PaymentOptionsViewModelTest {
                 )
             ),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
+            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher
         )
@@ -215,7 +217,7 @@ class PaymentOptionsViewModelTest {
                 )
             ),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
+            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher
         )
@@ -265,6 +267,7 @@ class PaymentOptionsViewModelTest {
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         )
-        private val PAYMENT_METHOD_REPOSITORY_PARAMS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        private val PAYMENT_METHOD_REPOSITORY_PARAMS =
+            listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 }

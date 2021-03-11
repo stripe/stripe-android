@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -55,7 +54,7 @@ class PaymentOptionsActivityTest {
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         ),
         prefsRepository = FakePrefsRepository(),
-        paymentMethodsRepository = PaymentMethodsRepository.Static(emptyList()),
+        paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
         eventReporter = eventReporter,
         workContext = testDispatcher
     )

@@ -25,7 +25,7 @@ import kotlin.test.assertFailsWith
 internal class PaymentMethodsRepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val stripeRepository = FakeStripeRepository()
-    private val repository = PaymentMethodsRepository.Api(
+    private val repository = PaymentMethodsApiRepository(
         stripeRepository,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         "acct_123",

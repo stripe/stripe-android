@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -86,35 +87,37 @@ internal class PaymentOptionsViewModel(
 
     private fun processSaveNewCard(paymentSelection: PaymentSelection) {
         _viewState.value = ViewState.PaymentOptions.StartProcessing
-        savePaymentSelection(
-            paymentSelection as PaymentSelection.New,
-            onSuccess = { paymentMethod ->
-                prefsRepository.savePaymentSelection(PaymentSelection.Saved(paymentMethod))
+        savePaymentSelection(paymentSelection as PaymentSelection.New) { result ->
+            result.fold(
+                onSuccess = { paymentMethod ->
+                    prefsRepository.savePaymentSelection(PaymentSelection.Saved(paymentMethod))
 
-                _viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                    _viewState.value = ViewState.PaymentOptions.ProcessResult(
-                        PaymentOptionResult.Succeeded(paymentSelection)
-                    )
+                    _viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                        _viewState.value = ViewState.PaymentOptions.ProcessResult(
+                            PaymentOptionResult.Succeeded(paymentSelection)
+                        )
+                    }
+                },
+                onFailure = {
+                    // TODO(michelleb-stripe): Handle failure cases
                 }
-            },
-            onFailure = {
-                // TODO(michelleb-stripe): Handle failure cases
-            }
-        )
+            )
+        }
     }
 
     private fun savePaymentSelection(
         paymentSelection: PaymentSelection.New,
-        onSuccess: (PaymentMethod) -> Unit,
-        onFailure: (Throwable) -> Unit
+        callback: (Result<PaymentMethod>) -> Unit
     ) {
         viewModelScope.launch {
-            runCatching {
-                paymentMethodsRepository.save(
-                    customerConfig!!,
-                    paymentSelection.paymentMethodCreateParams
-                )
-            }.fold(onSuccess, onFailure)
+            callback(
+                runCatching {
+                    paymentMethodsRepository.save(
+                        customerConfig!!,
+                        paymentSelection.paymentMethodCreateParams
+                    )
+                }
+            )
         }
     }
 
@@ -187,7 +190,7 @@ internal class PaymentOptionsViewModel(
                 )
             } ?: PrefsRepository.Noop()
 
-            val paymentMethodsRepository = PaymentMethodsRepository.Api(
+            val paymentMethodsRepository = PaymentMethodsApiRepository(
                 stripeRepository = stripeRepository,
                 publishableKey = publishableKey,
                 stripeAccountId = stripeAccountId,
