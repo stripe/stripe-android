@@ -627,15 +627,15 @@ class CardMultilineWidget @JvmOverloads constructor(
         ) {
             shouldShowPostalCode = getBoolean(
                 R.styleable.CardElement_shouldShowPostalCode,
-                CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+                shouldShowPostalCode
             )
             postalCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequirePostalCode,
-                CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+                postalCodeRequired
             )
             usZipCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequireUsZipCode,
-                CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
+                usZipCodeRequired
             )
         }
     }
