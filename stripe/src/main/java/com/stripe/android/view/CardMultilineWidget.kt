@@ -17,6 +17,7 @@ import androidx.annotation.IntRange
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
+import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
@@ -340,7 +341,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         // This sets the value of shouldShowPostalCode
-        attrs?.let { checkAttributeSet(it) }
+        checkAttributeSet(attrs)
 
         initTextInputLayoutErrorHandlers()
 
@@ -619,29 +620,23 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
     }
 
-    private fun checkAttributeSet(attrs: AttributeSet) {
-        val a = context.theme.obtainStyledAttributes(
+    private fun checkAttributeSet(attrs: AttributeSet?) {
+        context.withStyledAttributes(
             attrs,
-            R.styleable.CardElement,
-            0,
-            0
-        )
-
-        try {
-            shouldShowPostalCode = a.getBoolean(
+            R.styleable.CardElement
+        ) {
+            shouldShowPostalCode = getBoolean(
                 R.styleable.CardElement_shouldShowPostalCode,
                 CardWidget.DEFAULT_POSTAL_CODE_ENABLED
             )
-            postalCodeRequired = a.getBoolean(
+            postalCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequirePostalCode,
                 CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
             )
-            usZipCodeRequired = a.getBoolean(
+            usZipCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequireUsZipCode,
                 CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
             )
-        } finally {
-            a.recycle()
         }
     }
 
