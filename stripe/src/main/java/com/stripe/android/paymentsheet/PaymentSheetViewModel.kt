@@ -195,9 +195,7 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun confirmPaymentSelection(
-        paymentSelection: PaymentSelection?
-    ) {
+    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)
@@ -212,9 +210,7 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun onPaymentIntentResult(
-        paymentIntentResult: PaymentIntentResult
-    ) {
+    private fun onPaymentIntentResult(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
