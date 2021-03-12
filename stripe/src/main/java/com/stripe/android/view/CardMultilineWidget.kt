@@ -444,9 +444,12 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     internal fun populate(card: PaymentMethodCreateParams.Card?) {
         card?.let { createParamsCard ->
+            // Keep track of currently focused view to return focus to it after populating
+            val focusedView = findFocus()
             cardNumberEditText.setText(createParamsCard.number)
             cvcEditText.setText(createParamsCard.cvc)
             expiryDateEditText.setText(createParamsCard.expiryMonth, createParamsCard.expiryYear)
+            focusedView?.requestFocus() ?: findFocus()?.clearFocus()
         }
     }
 
