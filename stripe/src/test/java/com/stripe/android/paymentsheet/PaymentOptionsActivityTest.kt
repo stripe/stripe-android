@@ -54,7 +54,9 @@ class PaymentOptionsActivityTest {
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         ),
         prefsRepository = FakePrefsRepository(),
-        eventReporter = eventReporter
+        paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
+        eventReporter = eventReporter,
+        workContext = testDispatcher
     )
 
     @BeforeTest
