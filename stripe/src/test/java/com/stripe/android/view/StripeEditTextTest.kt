@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.content.res.ColorStateList
 import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
@@ -102,6 +103,32 @@ internal class StripeEditTextTest {
         val currentColorInt = editText.textColors.defaultColor
         assertThat(currentColorInt)
             .isEqualTo(blueError)
+    }
+
+    @Test
+    fun setTextColor() {
+        editText.setTextColor(
+            ColorStateList.valueOf(
+                ContextCompat.getColor(
+                    context,
+                    android.R.color.holo_red_dark
+                )
+            )
+        )
+
+        // The field state must be toggled to show an error
+        editText.shouldShowError = true
+        editText.shouldShowError = false
+
+        assertThat(editText.textColors)
+            .isEqualTo(
+                ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        context,
+                        android.R.color.holo_red_dark
+                    )
+                )
+            )
     }
 
     @Test

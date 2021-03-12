@@ -30,7 +30,7 @@ open class StripeEditText @JvmOverloads constructor(
 
     private var afterTextChangedListener: AfterTextChangedListener? = null
     private var deleteEmptyListener: DeleteEmptyListener? = null
-    var cachedColorStateList: ColorStateList? = null
+    var cachedColorStateList: ColorStateList
         private set
 
     /**
@@ -89,11 +89,18 @@ open class StripeEditText @JvmOverloads constructor(
         maxLines = 1
         listenForTextChanges()
         listenForDeleteEmpty()
-        determineDefaultErrorColor()
         cachedColorStateList = textColors
+        determineDefaultErrorColor()
     }
 
     protected open val accessibilityText: String? = null
+
+    override fun setTextColor(colors: ColorStateList?) {
+        super.setTextColor(colors)
+
+        // This will only use textColors and not colors because textColor is never null
+        cachedColorStateList = textColors
+    }
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
         val inputConnection = super.onCreateInputConnection(outAttrs)
@@ -146,10 +153,9 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun determineDefaultErrorColor() {
-        cachedColorStateList = textColors
         defaultErrorColor = ContextCompat.getColor(
             context,
-            if (StripeColorUtils.isColorDark(textColors.defaultColor)) {
+            if (StripeColorUtils.isColorDark(cachedColorStateList.defaultColor)) {
                 // Note: if the _text_ color is dark, then this is a
                 // light theme, and vice-versa.
                 R.color.stripe_error_text_light_theme
