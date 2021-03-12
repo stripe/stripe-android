@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.core.content.withStyledAttributes
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.R
 import com.stripe.android.databinding.BecsDebitWidgetBinding
@@ -156,7 +157,7 @@ class BecsDebitWidget @JvmOverloads constructor(
         companyName.takeIf { it.isNotBlank() }?.let {
             viewBinding.mandateAcceptanceTextView.companyName = it
         }
-        attrs?.let { applyAttributes(it) }
+        applyAttributes(attrs)
 
         verifyCompanyName()
     }
@@ -169,23 +170,16 @@ class BecsDebitWidget @JvmOverloads constructor(
         }
     }
 
-    private fun applyAttributes(attrs: AttributeSet) {
-        val typedArray = context.theme.obtainStyledAttributes(
+    private fun applyAttributes(attrs: AttributeSet?) {
+        context.withStyledAttributes(
             attrs,
-            R.styleable.BecsDebitWidget,
-            0,
-            0
-        )
-
-        try {
-            val companyName = typedArray.getString(
+            R.styleable.BecsDebitWidget
+        ) {
+            getString(
                 R.styleable.BecsDebitWidget_companyName
-            )
-            companyName?.let {
-                viewBinding.mandateAcceptanceTextView.companyName = it
+            )?.let { companyName ->
+                viewBinding.mandateAcceptanceTextView.companyName = companyName
             }
-        } finally {
-            typedArray.recycle()
         }
     }
 
