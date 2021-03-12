@@ -6,12 +6,12 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.FakePaymentMethodsRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -147,7 +147,7 @@ internal class DefaultFlowControllerInitializerTest {
     ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
             PaymentIntentRepository.Static(paymentIntent),
-            PaymentMethodsRepository.Static(PAYMENT_METHODS),
+            FakePaymentMethodsRepository(PAYMENT_METHODS),
             { _, _ -> prefsRepository },
             { true },
             testDispatcher

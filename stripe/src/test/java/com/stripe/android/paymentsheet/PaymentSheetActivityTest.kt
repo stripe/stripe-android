@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -463,6 +462,31 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `if fetched PaymentIntent is confirmed then should return Completed result`() {
+        val scenario = activityScenario(
+            createViewModel(
+                paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED
+            )
+        )
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                activity.finish()
+            }
+        }
+
+        assertThat(
+            contract.parseResult(
+                scenario.getResult().resultCode,
+                scenario.getResult().resultData
+            )
+        ).isEqualTo(
+            PaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
@@ -489,7 +513,7 @@ internal class PaymentSheetActivityTest {
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = null,
             paymentIntentRepository = PaymentIntentRepository.Static(paymentIntent),
-            paymentMethodsRepository = PaymentMethodsRepository.Static(paymentMethods),
+            paymentMethodsRepository = FakePaymentMethodsRepository(paymentMethods),
             paymentFlowResultProcessor = paymentFlowResultProcessor,
             googlePayRepository = googlePayRepository,
             prefsRepository = FakePrefsRepository(),

@@ -153,6 +153,16 @@ data class PaymentIntent internal constructor(
     }
 
     /**
+     * Confirmation has succeeded and all required actions have been handled.
+     */
+    internal val isConfirmed: Boolean
+        get() = setOf(
+            StripeIntent.Status.Processing,
+            StripeIntent.Status.RequiresCapture,
+            StripeIntent.Status.Succeeded
+        ).contains(status)
+
+    /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
      *
      * See [last_payment_error](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-last_payment_error).
