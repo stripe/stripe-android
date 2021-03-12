@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.ui.SheetMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,9 +69,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      */
     private val _selection = MutableLiveData<PaymentSelection?>()
     internal val selection: LiveData<PaymentSelection?> = _selection
-
-    private val _sheetMode = MutableLiveData<SheetMode>()
-    val sheetMode: LiveData<SheetMode> = _sheetMode.distinctUntilChanged()
 
     protected val _processing = MutableLiveData(true)
     val processing: LiveData<Boolean> = _processing
@@ -139,10 +135,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         } else {
             null
         }
-    }
-
-    fun updateMode(mode: SheetMode) {
-        _sheetMode.postValue(mode)
     }
 
     fun transitionTo(target: TransitionTargetType) {

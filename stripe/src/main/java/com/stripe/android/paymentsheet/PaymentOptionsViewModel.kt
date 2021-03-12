@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
-import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -142,28 +141,21 @@ internal class PaymentOptionsViewModel(
 
     internal sealed class TransitionTarget {
         abstract val fragmentConfig: FragmentConfig
-        abstract val sheetMode: SheetMode
 
         // User has saved PM's and is selected
         data class SelectSavedPaymentMethod(
             override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget() {
-            override val sheetMode = SheetMode.Wrapped
-        }
+        ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
         data class AddPaymentMethodFull(
             override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget() {
-            override val sheetMode = SheetMode.Full
-        }
+        ) : TransitionTarget()
 
         // User has no saved PM's
         data class AddPaymentMethodSheet(
             override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget() {
-            override val sheetMode = SheetMode.FullCollapsed
-        }
+        ) : TransitionTarget()
     }
 
     internal class Factory(

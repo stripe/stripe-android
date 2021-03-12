@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -21,6 +22,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val rootView: View
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
+    abstract val scrollView: ScrollView
     abstract val toolbar: Toolbar
     abstract val messageView: TextView
 
@@ -36,6 +38,22 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+        supportFragmentManager.addOnBackStackChangedListener {
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                toolbar.showClose()
+            } else {
+                toolbar.showBack()
+            }
+        }
+
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            appbar.elevation = if (scrollView.scrollY > 0) {
+                resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
+            } else {
+                0f
+            }
+        }
+
         viewModel.userMessage.observe(this) { userMessage ->
             messageView.isVisible = userMessage != null
             messageView.text = userMessage?.message
@@ -43,22 +61,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         viewModel.processing.observe(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
-        }
-
-        viewModel.sheetMode.observe(this) { mode ->
-            appbar.elevation = if (mode == SheetMode.Full) {
-                resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
-            } else {
-                0f
-            }
-
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                toolbar.showClose()
-            } else {
-                toolbar.showBack()
-            }
-
-            bottomSheetController.updateState(mode)
         }
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
