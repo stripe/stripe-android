@@ -10,6 +10,8 @@ import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -162,6 +164,15 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 }
             }
         }
+
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
+                    viewBinding.addButton.isVisible = fragment !is PaymentOptionsListFragment
+                }
+            },
+            false
+        )
     }
 
     private fun setupAddButton(addButton: PrimaryButton) {
@@ -217,11 +228,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 }
             }
         }
-
-        // Execute transaction right away to avoid a two-step UI update
-        supportFragmentManager.executePendingTransactions()
-        viewBinding.addButton.isVisible =
-            transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
     }
 
     private fun processResult(result: PaymentOptionResult) {
