@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.res.ColorStateList
 import android.content.res.Resources
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,8 +19,6 @@ class AddPaymentMethodListAdapter constructor (
 
     private lateinit var statuses : Array<Boolean>
 
-    // TODO: use a generic type, <Any> doesn't seem to work
-
     var selectedPosition = RecyclerView.NO_POSITION
         set(value) {
             if (value != field) {
@@ -34,13 +31,11 @@ class AddPaymentMethodListAdapter constructor (
             field = value
         }
 
-    // TODO: use PaymentMethod.Type
     init {
         setHasStableIds(true)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        // TODO Switch on paymentMethodListType, figure out a default
         return BankViewHolder(
             BankItemBinding.inflate(
                 LayoutInflater.from(parent.context),
@@ -63,7 +58,6 @@ class AddPaymentMethodListAdapter constructor (
         val item = items[position]
 
         holder.itemView.setOnClickListener {
-            Log.d("Ali click", item.toString())
             selectedPosition = holder.adapterPosition
         }
 
