@@ -16,19 +16,19 @@ import com.stripe.android.view.AddPaymentMethodActivityStarter;
 import com.stripe.android.view.NetbankingBank;
 import com.stripe.example.R;
 import com.stripe.example.Settings;
-import com.stripe.example.databinding.FpxPaymentActivityBinding;
+import com.stripe.example.databinding.BankSelectorPaymentActivityBinding;
 
 import java.util.Objects;
 
 public class NetbankingListPaymentActivity extends AppCompatActivity {
 
-    private FpxPaymentActivityBinding viewBinding;
+    private BankSelectorPaymentActivityBinding viewBinding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        viewBinding = FpxPaymentActivityBinding.inflate(getLayoutInflater());
+        viewBinding = BankSelectorPaymentActivityBinding.inflate(getLayoutInflater());
 
         setContentView(viewBinding.getRoot());
         setTitle(R.string.netbanking_payment_example);
@@ -74,18 +74,18 @@ public class NetbankingListPaymentActivity extends AppCompatActivity {
 
         final NetbankingBank netbankingBank = NetbankingBank.get(netbankingCode);
         if (netbankingBank != null) {
-            viewBinding.fpxBankInfo.setVisibility(View.VISIBLE);
+            viewBinding.bankInfo.setVisibility(View.VISIBLE);
             if (netbankingBank.getBrandIconResId() != null) {
-                viewBinding.fpxBankInfo.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                viewBinding.bankInfo.setCompoundDrawablesRelativeWithIntrinsicBounds(
                         ContextCompat.getDrawable(this, netbankingBank.getBrandIconResId()),
                         null,
                         null,
                         null
                 );
             }
-            viewBinding.fpxBankInfo.setText(netbankingBank.getDisplayName());
+            viewBinding.bankInfo.setText(netbankingBank.getDisplayName());
         } else {
-            viewBinding.fpxBankInfo.setVisibility(View.GONE);
+            viewBinding.bankInfo.setVisibility(View.GONE);
         }
     }
 }
