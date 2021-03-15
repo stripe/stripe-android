@@ -182,10 +182,8 @@
     <!-- Payment Sheet -->
     <string name="stripe_paymentsheet_back" tools:ignore="MissingTranslation">Back</string>
     <string name="stripe_paymentsheet_close" tools:ignore="MissingTranslation">Close</string>
-    <string name="stripe_paymentsheet_pay_using" tools:ignore="MissingTranslation">Pay using</string>
-    <string name="stripe_paymentsheet_pay_using_with_amount" tools:ignore="MissingTranslation">Pay %s using</string>
-    <string name="stripe_paymentsheet_select_payment_method" tools:ignore="MissingTranslation">Select a payment method</string>
-    <string name="stripe_paymentsheet_add_payment_method_title" tools:ignore="MissingTranslation">Add a payment method</string>
+    <string name="stripe_paymentsheet_select_payment_method" tools:ignore="MissingTranslation">Select your payment method</string>
+    <string name="stripe_paymentsheet_add_payment_method_title" tools:ignore="MissingTranslation">Add your payment information</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information" tools:ignore="MissingTranslation">Card information</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region" tools:ignore="MissingTranslation">Country or region</string>
     <string name="stripe_paymentsheet_new_card_button_label" tools:ignore="MissingTranslation">+ New card</string>

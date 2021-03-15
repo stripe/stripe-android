@@ -67,7 +67,6 @@ internal abstract class BaseAddCardFragment(
     private val addCardViewModel: AddCardViewModel by viewModels()
 
     abstract fun onGooglePaySelected()
-    abstract fun createHeaderText(config: FragmentConfig): String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -154,7 +153,6 @@ internal abstract class BaseAddCardFragment(
         googlePayButton.isVisible = shouldShowGooglePayButton
         viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
         addCardHeader.isVisible = !shouldShowGooglePayButton
-        addCardHeader.text = createHeaderText(config)
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
