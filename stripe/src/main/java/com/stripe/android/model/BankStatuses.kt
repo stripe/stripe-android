@@ -1,11 +1,11 @@
 package com.stripe.android.model
 
-import com.stripe.android.view.FpxBank
+import com.stripe.android.view.Bank
 import kotlinx.parcelize.Parcelize
 import org.jetbrains.annotations.TestOnly
 
 @Parcelize
-internal data class FpxBankStatuses internal constructor(
+data class BankStatuses internal constructor(
     private val statuses: Map<String, Boolean> = emptyMap()
 ) : StripeModel {
     @TestOnly
@@ -15,7 +15,7 @@ internal data class FpxBankStatuses internal constructor(
      * Defaults to `true` if statuses aren't available.
      */
     @JvmSynthetic
-    internal fun isOnline(bank: FpxBank): Boolean {
+    internal fun isOnline(bank: Bank): Boolean {
         return statuses[bank.id] ?: true
     }
 }

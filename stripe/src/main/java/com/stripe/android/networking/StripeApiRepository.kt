@@ -21,7 +21,7 @@ import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.FpxBankStatuses
+import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -832,7 +832,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ): FpxBankStatuses {
+    ): BankStatuses {
         return runCatching {
             val fpxBankStatuses = fetchStripeModel(
                 apiRequestFactory.createGet(
@@ -852,7 +852,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             }
 
             requireNotNull(fpxBankStatuses)
-        }.getOrDefault(FpxBankStatuses())
+        }.getOrDefault(BankStatuses())
     }
 
     override suspend fun getCardMetadata(

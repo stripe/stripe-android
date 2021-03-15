@@ -10,7 +10,7 @@ import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.FpxBankStatuses
+import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -299,7 +299,7 @@ internal interface StripeRepository {
         ephemeralKeySecret: String
     )
 
-    suspend fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses
+    suspend fun getFpxBankStatus(options: ApiRequest.Options): BankStatuses
 
     suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): CardMetadata?
 

@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.databinding.BankItemBinding
+import com.stripe.android.model.BankStatuses
 
 class AddPaymentMethodListAdapter constructor (
     var activity: FragmentActivity,
@@ -17,7 +18,7 @@ class AddPaymentMethodListAdapter constructor (
     val itemSelectedCallback: (Int) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private lateinit var statuses : Array<Boolean>
+    var bankStatuses : BankStatuses? = null
 
     var selectedPosition = RecyclerView.NO_POSITION
         set(value) {
@@ -63,8 +64,8 @@ class AddPaymentMethodListAdapter constructor (
 
         val bankViewHolder = holder as BankViewHolder
         bankViewHolder.setSelected(position == selectedPosition)
-        // TODO: figure out bank statuses
-        bankViewHolder.update(bank = item, isOnline = true)
+
+        bankViewHolder.update(bank = item, isOnline = bankStatuses?.isOnline(item) ?: true)
     }
 
     internal fun updateSelected(position: Int) {

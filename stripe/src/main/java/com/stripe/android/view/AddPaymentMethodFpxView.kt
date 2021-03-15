@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FpxPaymentMethodBinding
-import com.stripe.android.model.FpxBankStatuses
+import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
 
 internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
@@ -17,7 +17,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     defStyleAttr: Int = 0
 ) : AddPaymentMethodView(activity, attrs, defStyleAttr) {
 
-    private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses()
+    private var fpxBankStatuses: BankStatuses = BankStatuses()
 
     private val fpxAdapter = AddPaymentMethodListAdapter(
         activity,
@@ -53,6 +53,9 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         // an id is required for state to be saved
         id = R.id.stripe_payment_methods_add_fpx
 
+        viewModel.getFpxBankStatues()
+            .observe(activity, Observer(::onFpxBankStatusesUpdated))
+
         viewBinding.fpxList.run {
             adapter = fpxAdapter
             setHasFixedSize(true)
@@ -60,22 +63,20 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             itemAnimator = DefaultItemAnimator()
         }
 
-        viewModel.getFpxBankStatues()
-            .observe(activity, Observer(::onFpxBankStatusesUpdated))
-
         viewModel.selectedPosition?.let {
             fpxAdapter.updateSelected(it)
         }
     }
 
-    private fun onFpxBankStatusesUpdated(fpxBankStatuses: FpxBankStatuses?) {
+    private fun onFpxBankStatusesUpdated(fpxBankStatuses: BankStatuses?) {
         fpxBankStatuses?.let {
             updateStatuses(it)
         }
     }
 
-    internal fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
+    internal fun updateStatuses(fpxBankStatuses: BankStatuses) {
         this.fpxBankStatuses = fpxBankStatuses
+        this.fpxAdapter.bankStatuses = fpxBankStatuses
 
         // flag offline bank
         FpxBank.values().indices
