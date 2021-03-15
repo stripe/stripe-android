@@ -130,6 +130,42 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
+    fun `AddButton should be hidden when returning to payment options`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(PaymentMethodFixtures.createCards(5))
+        ).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
+
+                assertThat(activity.viewBinding.addButton.isVisible)
+                    .isFalse()
+
+                // Navigate to "Add Payment Method" fragment
+                with(
+                    activity.supportFragmentManager.findFragmentById(R.id.fragment_container)
+                        as PaymentOptionsListFragment
+                ) {
+                    transitionToAddPaymentMethod()
+                }
+                idleLooper()
+
+                assertThat(activity.viewBinding.addButton.isVisible)
+                    .isTrue()
+
+                // Navigate back to payment options list
+                activity.onBackPressed()
+                idleLooper()
+
+                assertThat(activity.viewBinding.addButton.isVisible)
+                    .isFalse()
+            }
+        }
+    }
+
+    @Test
     fun `Verify Ready state updates the add button label`() {
         val scenario = activityScenario()
         scenario.launch(
