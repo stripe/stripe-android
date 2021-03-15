@@ -36,7 +36,7 @@ class FpxViewModelTest {
             bankStatuses = it
         }
 
-        assertThat(bankStatuses?.isOnline(FpxBank.AffinBank))
+        assertThat(FpxBank.get("affin_bank")?.let { bankStatuses?.isOnline(it) })
             .isTrue()
     }
 

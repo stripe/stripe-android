@@ -8,7 +8,10 @@ import kotlin.test.assertNull
 class FpxBankTest {
     @Test
     fun testGet_withValidBank() {
-        assertEquals(FpxBank.Hsbc, FpxBank.get("hsbc"))
+        val expectedBank = FpxBank.values().first()
+        val actualBank = FpxBank.get("maybank2u")
+        assertEquals(expectedBank.code, actualBank?.code)
+        assertEquals(expectedBank.displayName, actualBank?.displayName)
     }
 
     @Test
