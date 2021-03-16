@@ -64,9 +64,15 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
     private fun onPaymentOption(paymentOption: PaymentOption?) {
         when (paymentOption) {
-            is PaymentOption.Succeeded -> handlePaymentOptionSuccess(paymentOption)
-            is PaymentOption.Failed -> handlePaymentOptionFailure(paymentOption.error.localizedMessage)
-            is PaymentOption.Canceled -> handlePaymentOptionFailure(paymentOption.mostRecentError?.localizedMessage)
+            is PaymentOption.Succeeded -> handlePaymentOptionSuccess(
+                paymentOption
+            )
+            is PaymentOption.Failed -> handlePaymentOptionFailure(
+                paymentOption.error.localizedMessage
+            )
+            is PaymentOption.Canceled -> handlePaymentOptionFailure(
+                paymentOption.mostRecentError?.localizedMessage
+            )
             // TODO(michelleb-stripe): This is not a handled card type, or nothing has ever been selected
             // See DefaultFlowController.getPaymentOption and PaymentOptionFactory.create
             null -> handlePaymentOptionFailure(null)

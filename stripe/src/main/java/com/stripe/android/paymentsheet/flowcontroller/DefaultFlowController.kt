@@ -341,7 +341,6 @@ internal class DefaultFlowController internal constructor(
                         )
                     )
                 }
-
             }
         )
         viewModel.paymentSelection = receivedPaymentSelection
