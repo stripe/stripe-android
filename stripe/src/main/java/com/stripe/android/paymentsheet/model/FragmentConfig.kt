@@ -17,8 +17,6 @@ internal data class FragmentConfig(
     val isGooglePayReady: Boolean,
     val savedSelection: SavedSelection
 ) : Parcelable {
-    val shouldShowGooglePayButton: Boolean
-        get() = isGooglePayReady && paymentMethods.isEmpty()
 
     val sortedPaymentMethods: List<PaymentMethod>
         get() {
