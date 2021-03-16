@@ -113,8 +113,6 @@ internal abstract class BaseAddCardFragment(
         populateFieldsFromNewCard()
         setupCardWidget()
 
-        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
-
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
             updateSelection()
@@ -210,9 +208,12 @@ internal abstract class BaseAddCardFragment(
             )
         }
 
+        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
         cardMultilineWidget.expiryTextInputLayout.hint =
             getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
+        cardMultilineWidget.setCvcPlaceholderText("")
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
