@@ -95,6 +95,13 @@ class CvcEditText @JvmOverloads constructor(
 
         if (textInputLayout != null) {
             textInputLayout.hint = hintText
+
+            textInputLayout.placeholderText = resources.getString(
+                when (cardBrand) {
+                    CardBrand.AmericanExpress -> R.string.cvc_multiline_helper_amex
+                    else -> R.string.cvc_multiline_helper
+                }
+            )
         } else {
             this.hint = hintText
         }
