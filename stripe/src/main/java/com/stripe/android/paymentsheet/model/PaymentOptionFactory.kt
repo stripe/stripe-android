@@ -8,7 +8,7 @@ import com.stripe.android.model.PaymentMethod
 internal class PaymentOptionFactory(
     private val resources: Resources
 ) {
-    fun create(selection: PaymentSelection): PaymentOption {
+    fun create(selection: PaymentSelection): PaymentOption? {
         return when (selection) {
             PaymentSelection.GooglePay -> {
                 // TODO(mshafrir-stripe): update values
@@ -18,17 +18,20 @@ internal class PaymentOptionFactory(
                 )
             }
             is PaymentSelection.Saved -> {
-                var drawableResourceId = R.drawable.stripe_ic_unknown
-                var label = selection.paymentMethod.type?.name ?: ""
-
-                if (selection.paymentMethod.type == PaymentMethod.Type.Card) {
-                    selection.paymentMethod.card?.let { card ->
-                        drawableResourceId = getIcon(card.brand)
-                        label = createCardLabel(card.last4)
+                when (selection.paymentMethod.type) {
+                    PaymentMethod.Type.Card -> {
+                        selection.paymentMethod.card?.let { card ->
+                            PaymentOption.Succeeded(
+                                drawableResourceId = getIcon(card.brand),
+                                label = createCardLabel(card.last4)
+                            )
+                        }
+                    }
+                    else -> {
+                        // TODO(mshafrir-stripe): handle other types
+                        null
                     }
                 }
-
-                PaymentOption.Succeeded(drawableResourceId, label)
             }
             is PaymentSelection.New.Card -> {
                 val brand = selection.brand
