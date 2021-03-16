@@ -19,10 +19,6 @@ internal class PaymentOptionsAddCardFragment(
         )
     }
 
-    override fun onGooglePaySelected() {
-        sheetViewModel.onUserSelection()
-    }
-
     override fun createHeaderText(
         config: FragmentConfig
     ): String {
