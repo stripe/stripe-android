@@ -27,7 +27,6 @@ internal class PaymentSheetAddCardFragment(
         )
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val config = arguments?.getParcelable<FragmentConfig>(

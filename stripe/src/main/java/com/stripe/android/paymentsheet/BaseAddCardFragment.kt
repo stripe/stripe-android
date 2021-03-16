@@ -146,7 +146,6 @@ internal abstract class BaseAddCardFragment(
 
         addCardHeader.text = createHeaderText(config)
 
-
         eventReporter.onShowNewPaymentOptionForm()
     }
 
