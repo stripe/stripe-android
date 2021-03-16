@@ -123,7 +123,11 @@ class PaymentOptionsActivityTest {
     fun `AddButton should be hidden when returning to payment options`() {
         val scenario = activityScenario()
         scenario.launch(
-            createIntent(PaymentMethodFixtures.createCards(5))
+            createIntent(
+                PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    paymentMethods = PaymentMethodFixtures.createCards(5)
+                )
+            )
         ).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
