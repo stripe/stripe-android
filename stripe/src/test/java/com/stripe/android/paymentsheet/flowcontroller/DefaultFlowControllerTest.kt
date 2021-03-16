@@ -8,7 +8,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argWhere
-import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
@@ -132,7 +131,7 @@ class DefaultFlowControllerTest {
         }
         assertThat(flowController.getPaymentOption())
             .isEqualTo(
-                PaymentOption(
+                PaymentOption.Succeeded(
                     drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
                     label = "····$last4"
                 )
@@ -226,7 +225,9 @@ class DefaultFlowControllerTest {
             PaymentOptionResult.Canceled(null)
         )
 
-        verify(paymentOptionCallback).onPaymentOption(isNull())
+        verify(paymentOptionCallback).onPaymentOption(
+            PaymentOption.Canceled(null)
+        )
     }
 
     @Test
@@ -495,7 +496,7 @@ class DefaultFlowControllerTest {
     private companion object {
         private val SESSION_ID = SessionId()
 
-        private val VISA_PAYMENT_OPTION = PaymentOption(
+        private val VISA_PAYMENT_OPTION = PaymentOption.Succeeded(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
             label = "····4242"
         )

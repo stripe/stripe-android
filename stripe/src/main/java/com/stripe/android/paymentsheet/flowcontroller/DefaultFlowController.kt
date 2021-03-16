@@ -315,12 +315,35 @@ internal class DefaultFlowController internal constructor(
     internal fun onPaymentOptionResult(
         paymentOptionResult: PaymentOptionResult?
     ) {
-        val paymentSelection =
-            (paymentOptionResult as? PaymentOptionResult.Succeeded)?.paymentSelection
-        viewModel.paymentSelection = paymentSelection
+        var receivedPaymentSelection: PaymentSelection? = null
+        // Convert from viewModel paymentOptionResult to external paymentOptionResult
         paymentOptionCallback.onPaymentOption(
-            paymentSelection?.let(paymentOptionFactory::create)
+            when (paymentOptionResult) {
+                is PaymentOptionResult.Succeeded -> {
+                    receivedPaymentSelection = paymentOptionResult.paymentSelection
+                    paymentOptionFactory.create(paymentOptionResult.paymentSelection)
+                }
+                is PaymentOptionResult.Failed -> {
+                    PaymentOption.Failed(
+                        paymentOptionResult.error
+                    )
+                }
+                is PaymentOptionResult.Canceled -> {
+                    PaymentOption.Canceled(
+                        paymentOptionResult.mostRecentError
+                    )
+                }
+                null -> {
+                    PaymentOption.Failed(
+                        Exception(
+                            "This should be removed when PaymentResultFactory handles" +
+                                "other payment types."
+                        )
+                    )
+                }
+            }
         )
+        viewModel.paymentSelection = receivedPaymentSelection
     }
 
     @VisibleForTesting

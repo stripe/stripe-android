@@ -12,7 +12,7 @@ internal class PaymentOptionFactory(
         return when (selection) {
             PaymentSelection.GooglePay -> {
                 // TODO(mshafrir-stripe): update values
-                PaymentOption(
+                PaymentOption.Succeeded(
                     drawableResourceId = R.drawable.stripe_google_pay_mark,
                     label = "Google Pay"
                 )
@@ -21,7 +21,7 @@ internal class PaymentOptionFactory(
                 when (selection.paymentMethod.type) {
                     PaymentMethod.Type.Card -> {
                         selection.paymentMethod.card?.let { card ->
-                            PaymentOption(
+                            PaymentOption.Succeeded(
                                 drawableResourceId = getIcon(card.brand),
                                 label = createCardLabel(card.last4)
                             )
@@ -35,7 +35,7 @@ internal class PaymentOptionFactory(
             }
             is PaymentSelection.New.Card -> {
                 val brand = selection.brand
-                PaymentOption(
+                PaymentOption.Succeeded(
                     drawableResourceId = getIcon(brand),
                     label = createCardLabel(selection.paymentMethodCreateParams.card?.last4)
                 )

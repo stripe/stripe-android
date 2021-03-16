@@ -5240,12 +5240,37 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheetResu
 	public abstract fun onPaymentResult (Lcom/stripe/android/paymentsheet/PaymentResult;)V
 }
 
-public final class com/stripe/android/paymentsheet/model/PaymentOption {
+public abstract class com/stripe/android/paymentsheet/model/PaymentOption {
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentOption$Canceled : com/stripe/android/paymentsheet/model/PaymentOption {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/paymentsheet/model/PaymentOption$Canceled;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption$Canceled;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption$Canceled;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMostRecentError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentOption$Failed : com/stripe/android/paymentsheet/model/PaymentOption {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/paymentsheet/model/PaymentOption$Failed;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentOption$Succeeded : com/stripe/android/paymentsheet/model/PaymentOption {
 	public fun <init> (ILjava/lang/String;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public final fun copy (ILjava/lang/String;)Lcom/stripe/android/paymentsheet/model/PaymentOption$Succeeded;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption$Succeeded;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption$Succeeded;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDrawableResourceId ()I
 	public final fun getLabel ()Ljava/lang/String;
