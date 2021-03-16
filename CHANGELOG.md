@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 16.3.1 - unreleased
+* [#3381](https://github.com/stripe/stripe-android/pull/3381) Add `fingerprint` property to `PaymentMethod.Card`
+* [#3401](https://github.com/stripe/stripe-android/pull/3401) Upgrade Gradle to `6.8.3`
+* [#3429](https://github.com/stripe/stripe-android/pull/3429) Fix `ExpiryDateEditText` error messages
+* [#3436](https://github.com/stripe/stripe-android/pull/3436) Upgrade `kotlin-coroutines` to `1.4.3`
+* [#3438](https://github.com/stripe/stripe-android/pull/3438) Upgrade Kotlin to `1.4.31`
+* [#3443](https://github.com/stripe/stripe-android/pull/3443) Create new transparent theme for invisible activities
+* [#3456](https://github.com/stripe/stripe-android/pull/3456) Fix tint flicker in `CardBrandView`
+* [#3460](https://github.com/stripe/stripe-android/pull/3460) Upgrade `activity-ktx` to `1.2.1`
+
 ## 16.3.0 - 2021-02-11
 * [#3334](https://github.com/stripe/stripe-android/pull/3334) Upgrade Kotlin to `1.4.30`
 * [#3346](https://github.com/stripe/stripe-android/pull/3346) Upgrade Gradle to `6.8.2`

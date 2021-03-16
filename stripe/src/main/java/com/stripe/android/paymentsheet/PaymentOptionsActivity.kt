@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -11,6 +10,8 @@ import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -61,7 +62,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         @IdRes
         get() = viewBinding.fragmentContainer.id
 
-    override val rootView: View by lazy { viewBinding.root }
+    override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: Toolbar by lazy { viewBinding.toolbar }
@@ -163,6 +164,15 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 }
             }
         }
+
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
+                    viewBinding.addButton.isVisible = fragment is PaymentOptionsAddCardFragment
+                }
+            },
+            false
+        )
     }
 
     private fun setupAddButton(addButton: PrimaryButton) {
@@ -218,9 +228,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 }
             }
         }
-
-        viewBinding.addButton.isVisible =
-            transitionTarget !is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
     }
 
     private fun processResult(result: PaymentOptionResult) {
