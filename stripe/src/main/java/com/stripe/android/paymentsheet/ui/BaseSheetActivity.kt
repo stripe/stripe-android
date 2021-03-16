@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.os.Bundle
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -19,7 +18,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val bottomSheetController: BottomSheetController
     abstract val eventReporter: EventReporter
 
-    abstract val rootView: View
+    abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
     abstract val scrollView: ScrollView

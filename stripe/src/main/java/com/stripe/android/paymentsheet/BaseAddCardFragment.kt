@@ -43,7 +43,6 @@ internal abstract class BaseAddCardFragment(
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
     private lateinit var cardErrors: TextView
-    private lateinit var googlePayButton: View
     private lateinit var saveCardCheckbox: CheckBox
     private lateinit var addCardHeader: TextView
 
@@ -66,7 +65,6 @@ internal abstract class BaseAddCardFragment(
 
     private val addCardViewModel: AddCardViewModel by viewModels()
 
-    abstract fun onGooglePaySelected()
     abstract fun createHeaderText(config: FragmentConfig): String
 
     override fun onCreateView(
@@ -101,7 +99,6 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget = viewBinding.cardMultilineWidget
         billingAddressView = viewBinding.billingAddress
         cardErrors = viewBinding.cardErrors
-        googlePayButton = viewBinding.googlePayButton
         saveCardCheckbox = viewBinding.saveCardCheckbox
         addCardHeader = viewBinding.addCardHeader
 
@@ -147,20 +144,7 @@ internal abstract class BaseAddCardFragment(
 
         setupSaveCardCheckbox(saveCardCheckbox)
 
-        val shouldShowGooglePayButton = config.shouldShowGooglePayButton
-        googlePayButton.setOnClickListener {
-            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
-        }
-        googlePayButton.isVisible = shouldShowGooglePayButton
-        viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
-        addCardHeader.isVisible = !shouldShowGooglePayButton
         addCardHeader.text = createHeaderText(config)
-
-        sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
-            if (paymentSelection == PaymentSelection.GooglePay) {
-                onGooglePaySelected()
-            }
-        }
 
         eventReporter.onShowNewPaymentOptionForm()
     }
