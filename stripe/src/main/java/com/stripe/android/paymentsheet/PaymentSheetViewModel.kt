@@ -210,6 +210,7 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private fun onPaymentIntentResult(paymentIntentResult: PaymentIntentResult) {
+        val paymentIntent = paymentIntentResult.intent
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
@@ -222,7 +223,17 @@ internal class PaymentSheetViewModel internal constructor(
                 eventReporter.onPaymentFailure(selection.value)
 
                 onApiError(paymentIntentResult.failureMessage)
-                onPaymentIntentResponse(paymentIntentResult.intent)
+                runCatching {
+                    paymentIntentValidator.requireValid(paymentIntent)
+                }.fold(
+                    onSuccess = {
+                        // We don't want to save the payment intent or it will
+                        // reload the fragment and go to the list fragment.
+                        resetViewState(paymentIntent)
+                        ::onFatal
+                    },
+                    onFailure = ::onFatal
+                )
             }
         }
     }
