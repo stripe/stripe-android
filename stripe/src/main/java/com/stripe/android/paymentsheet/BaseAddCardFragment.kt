@@ -6,13 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
@@ -29,7 +27,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.BillingAddressView
-import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
@@ -123,11 +120,6 @@ internal abstract class BaseAddCardFragment(
             updateSelection()
         }
 
-        billingAddressView.onFocus = {
-            // If the user focuses on the billing address view, expand to full screen
-            sheetViewModel.updateMode(SheetMode.Full)
-        }
-
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
             // update selection whenever card details changes
             addCardViewModel.isCardValid = isValid
@@ -135,10 +127,7 @@ internal abstract class BaseAddCardFragment(
         }
 
         cardMultilineWidget.setCardInputListener(object : CardInputListener {
-            override fun onFocusChange(focusField: CardInputListener.FocusField) {
-                // If the user focuses any card field, expand to full screen
-                sheetViewModel.updateMode(SheetMode.Full)
-            }
+            override fun onFocusChange(focusField: CardInputListener.FocusField) {}
 
             override fun onCardComplete() {}
 
@@ -149,18 +138,6 @@ internal abstract class BaseAddCardFragment(
                 billingAddressView.focusFirstField()
             }
         })
-
-        // If we're launched in full expanded mode, focus the card number field
-        // and show the keyboard automatically
-        if (sheetViewModel.sheetMode.value == SheetMode.Full) {
-            cardMultilineWidget.cardNumberEditText.requestFocus()
-            getSystemService(requireContext(), InputMethodManager::class.java)?.apply {
-                showSoftInput(
-                    cardMultilineWidget.cardNumberEditText,
-                    InputMethodManager.SHOW_IMPLICIT
-                )
-            }
-        }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             saveCardCheckbox.isEnabled = !isProcessing

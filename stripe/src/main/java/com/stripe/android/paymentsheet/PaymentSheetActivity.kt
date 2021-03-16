@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
@@ -56,8 +57,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(
             bottomSheetBehavior = bottomSheetBehavior,
-            sheetModeLiveData = viewModel.sheetMode,
-            lifecycleScope
+            lifecycleScope = lifecycleScope
         )
     }
 
@@ -80,6 +80,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: Toolbar by lazy { viewBinding.toolbar }
+    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
 
     override val eventReporter: EventReporter by lazy {
@@ -300,16 +301,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             }
         }
 
-        // When using commit on the fragments, the fragment transaction happens
-        // at some later time. In order to get an accurate backstack count
-        // we need to make sure the transactions have completed. In API 24+ you can use commitNow
-        // By using commitNow, only the items in the runnable will be committed,
-        // executePendingTransactions will run all the transactions even ones that were not just
-        // committed.
-        supportFragmentManager.executePendingTransactions()
         viewBinding.buyButton.isVisible = true
         appbar.isVisible = true
-        viewModel.updateMode(transitionTarget.sheetMode)
     }
 
     private fun setupBuyButton() {
