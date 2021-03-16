@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.3.1 - unreleased
+## 16.3.1 - 2021-03-16
 * [#3381](https://github.com/stripe/stripe-android/pull/3381) Add `fingerprint` property to `PaymentMethod.Card`
 * [#3401](https://github.com/stripe/stripe-android/pull/3401) Upgrade Gradle to `6.8.3`
 * [#3429](https://github.com/stripe/stripe-android/pull/3429) Fix `ExpiryDateEditText` error messages
