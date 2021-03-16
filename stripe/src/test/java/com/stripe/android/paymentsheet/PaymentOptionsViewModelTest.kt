@@ -71,7 +71,7 @@ class PaymentOptionsViewModelTest {
         viewModel.onUserSelection()
 
         assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
-            .isEqualTo(PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD))
+            .isEqualTo(PaymentOptionResult.Succeeded.Existing(SELECTION_SAVED_PAYMENT_METHOD))
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
@@ -87,7 +87,11 @@ class PaymentOptionsViewModelTest {
             viewModel.onUserSelection()
 
             assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
-                .isEqualTo(PaymentOptionResult.Succeeded(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION))
+                .isEqualTo(
+                    PaymentOptionResult.Succeeded.Unsaved(
+                        NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION
+                    )
+                )
             verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
 
             assertThat(prefsRepository.getSavedSelection())
@@ -120,9 +124,11 @@ class PaymentOptionsViewModelTest {
 
             val paymentOptionResultSucceeded =
                 (viewState[3] as ViewState.PaymentOptions.ProcessResult)
-                    .result as PaymentOptionResult.Succeeded
+                    .result as PaymentOptionResult.Succeeded.NewlySaved
             assertThat((paymentOptionResultSucceeded).paymentSelection)
                 .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+            assertThat((paymentOptionResultSucceeded).newSavedPaymentMethod)
+                .isEqualTo(paymentMethodRepository.savedPaymentMethod)
             verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
 
             assertThat((prefsRepository.getSavedSelection() as SavedSelection.PaymentMethod).id)
@@ -148,7 +154,7 @@ class PaymentOptionsViewModelTest {
         assertThat(
             viewModel.getPaymentOptionResult()
         ).isEqualTo(
-            PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD)
+            PaymentOptionResult.Succeeded.Existing(SELECTION_SAVED_PAYMENT_METHOD)
         )
     }
 

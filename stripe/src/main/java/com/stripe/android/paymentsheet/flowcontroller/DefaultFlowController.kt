@@ -92,7 +92,8 @@ internal class DefaultFlowController internal constructor(
         onPaymentFlowResult(result)
     }
 
-    private val viewModel = ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
+    private val viewModel =
+        ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
 
     private val paymentController = paymentControllerFactory.create(
         paymentRelayLauncher = paymentRelayLauncher,
@@ -147,7 +148,7 @@ internal class DefaultFlowController internal constructor(
         paymentOptionLauncher(
             PaymentOptionContract.Args(
                 paymentIntent = initData.paymentIntent,
-                paymentMethods = initData.paymentMethods,
+                paymentMethods = viewModel.newlySavedPaymentMethods.plus(initData.paymentMethods),
                 sessionId = sessionId,
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
@@ -320,6 +321,11 @@ internal class DefaultFlowController internal constructor(
         paymentOptionCallback.onPaymentOption(
             when (paymentOptionResult) {
                 is PaymentOptionResult.Succeeded -> {
+                    if (paymentOptionResult is PaymentOptionResult.Succeeded.NewlySaved) {
+                        viewModel.newlySavedPaymentMethods.add(
+                            paymentOptionResult.newSavedPaymentMethod
+                        )
+                    }
                     receivedPaymentSelection = paymentOptionResult.paymentSelection
                     paymentOptionFactory.create(paymentOptionResult.paymentSelection)
                 }
@@ -343,6 +349,7 @@ internal class DefaultFlowController internal constructor(
                 }
             }
         )
+
         viewModel.paymentSelection = receivedPaymentSelection
     }
 

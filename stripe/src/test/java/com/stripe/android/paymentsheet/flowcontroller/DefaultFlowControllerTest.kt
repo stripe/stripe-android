@@ -20,9 +20,11 @@ import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
@@ -203,7 +205,7 @@ class DefaultFlowControllerTest {
         }
 
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(
+            PaymentOptionResult.Succeeded.Existing(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
         )
@@ -211,6 +213,45 @@ class DefaultFlowControllerTest {
         verify(paymentOptionCallback).onPaymentOption(VISA_PAYMENT_OPTION)
         assertThat(flowController.getPaymentOption())
             .isEqualTo(VISA_PAYMENT_OPTION)
+    }
+
+    @Test
+    fun `onPaymentOptionResult() adds payment method which is added on next open`() {
+        // Create a default flow controller with the paymentMethods initialized with cards.
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(5)
+        val flowController = createFlowController(
+            paymentMethods = initialPaymentMethods,
+            savedSelection = SavedSelection.PaymentMethod(
+                requireNotNull(initialPaymentMethods.first().id)
+            )
+        )
+        flowController.configure(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+
+        // Add a saved card payment method so that we can make sure it is added when we open
+        // up the payment option launcher
+        val newSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded.NewlySaved(
+                SAVE_NEW_CARD_SELECTION,
+                newSavedPaymentMethod
+            )
+        )
+
+        // Save off the actual launch arguments when paymentOptionLauncher is called
+        var launchArgs: PaymentOptionContract.Args? = null
+        flowController.paymentOptionLauncher = {
+            launchArgs = it
+        }
+
+        flowController.presentPaymentOptions()
+
+        // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
+        assertThat(launchArgs!!.paymentMethods)
+            .isEqualTo(listOf(newSavedPaymentMethod).plus(initialPaymentMethods))
     }
 
     @Test
@@ -254,7 +295,7 @@ class DefaultFlowControllerTest {
         ) { _, _ ->
         }
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+            PaymentOptionResult.Succeeded.Existing(PaymentSelection.GooglePay)
         )
         flowController.confirmPayment()
         assertThat(launchArgs)
@@ -499,6 +540,12 @@ class DefaultFlowControllerTest {
         private val VISA_PAYMENT_OPTION = PaymentOption.Succeeded(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
             label = "····4242"
+        )
+
+        private val SAVE_NEW_CARD_SELECTION = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            shouldSavePaymentMethod = true
         )
     }
 }
