@@ -97,8 +97,14 @@ internal class PaymentOptionsViewModel(
                         )
                     }
                 },
-                onFailure = {
-                    // TODO(michelleb-stripe): Handle failure cases
+                onFailure = { throwable ->
+                    // TODO(michelleb-stripe): Failed to create payment method or attach it to the payment should we report it as success anyway?
+
+                    _viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                        _viewState.value = ViewState.PaymentOptions.ProcessResult(
+                            PaymentOptionResult.Failed(throwable)
+                        )
+                    }
                 }
             )
         }

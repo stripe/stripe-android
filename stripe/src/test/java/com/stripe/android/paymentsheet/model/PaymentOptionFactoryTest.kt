@@ -25,7 +25,7 @@ class PaymentOptionFactoryTest {
                 PaymentSelection.GooglePay
             )
         ).isEqualTo(
-            PaymentOption(
+            PaymentOption.Succeeded(
                 R.drawable.stripe_google_pay_mark,
                 "Google Pay"
             )
@@ -39,7 +39,7 @@ class PaymentOptionFactoryTest {
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
         ).isEqualTo(
-            PaymentOption(
+            PaymentOption.Succeeded(
                 R.drawable.stripe_ic_paymentsheet_card_visa,
                 "····4242"
             )
@@ -66,7 +66,7 @@ class PaymentOptionFactoryTest {
                 )
             )
         ).isEqualTo(
-            PaymentOption(
+            PaymentOption.Succeeded(
                 R.drawable.stripe_ic_paymentsheet_card_visa,
                 "····4242"
             )

@@ -63,24 +63,39 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
     }
 
     private fun onPaymentOption(paymentOption: PaymentOption?) {
-        if (paymentOption != null) {
-            viewBinding.paymentMethod.text = paymentOption.label
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                paymentOption.drawableResourceId,
-                0,
-                0,
-                0
-            )
-            viewBinding.buyButton.isEnabled = true
-        } else {
-            viewBinding.paymentMethod.text = "Select"
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                null,
-                null,
-                null,
-                null
-            )
-            viewBinding.buyButton.isEnabled = false
+        when (paymentOption) {
+            is PaymentOption.Succeeded -> handlePaymentOptionSuccess(paymentOption)
+            is PaymentOption.Failed -> handlePaymentOptionFailure(paymentOption.error.localizedMessage)
+            is PaymentOption.Canceled -> handlePaymentOptionFailure(paymentOption.mostRecentError?.localizedMessage)
+            // TODO(michelleb-stripe): This is not a handled card type, or nothing has ever been selected
+            // See DefaultFlowController.getPaymentOption and PaymentOptionFactory.create
+            null -> handlePaymentOptionFailure(null)
+        }
+    }
+
+    private fun handlePaymentOptionSuccess(paymentOption: PaymentOption.Succeeded) {
+        viewBinding.paymentMethod.text = paymentOption.label
+        viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            paymentOption.drawableResourceId,
+            0,
+            0,
+            0
+        )
+        viewBinding.buyButton.isEnabled = true
+    }
+
+    private fun handlePaymentOptionFailure(failureMessage: String?) {
+        viewBinding.paymentMethod.text = "Select"
+        viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            null,
+            null,
+            null,
+            null
+        )
+        viewBinding.buyButton.isEnabled = false
+
+        failureMessage?.let {
+            viewBinding.status.text = it
         }
     }
 

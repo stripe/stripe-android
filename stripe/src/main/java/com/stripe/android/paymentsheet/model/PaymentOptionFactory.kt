@@ -8,34 +8,31 @@ import com.stripe.android.model.PaymentMethod
 internal class PaymentOptionFactory(
     private val resources: Resources
 ) {
-    fun create(selection: PaymentSelection): PaymentOption? {
+    fun create(selection: PaymentSelection): PaymentOption {
         return when (selection) {
             PaymentSelection.GooglePay -> {
                 // TODO(mshafrir-stripe): update values
-                PaymentOption(
+                PaymentOption.Succeeded(
                     drawableResourceId = R.drawable.stripe_google_pay_mark,
                     label = "Google Pay"
                 )
             }
             is PaymentSelection.Saved -> {
-                when (selection.paymentMethod.type) {
-                    PaymentMethod.Type.Card -> {
-                        selection.paymentMethod.card?.let { card ->
-                            PaymentOption(
-                                drawableResourceId = getIcon(card.brand),
-                                label = createCardLabel(card.last4)
-                            )
-                        }
-                    }
-                    else -> {
-                        // TODO(mshafrir-stripe): handle other types
-                        null
+                var drawableResourceId = R.drawable.stripe_ic_unknown
+                var label = selection.paymentMethod.type?.name ?: ""
+
+                if (selection.paymentMethod.type == PaymentMethod.Type.Card) {
+                    selection.paymentMethod.card?.let { card ->
+                        drawableResourceId = getIcon(card.brand)
+                        label = createCardLabel(card.last4)
                     }
                 }
+
+                PaymentOption.Succeeded(drawableResourceId, label)
             }
             is PaymentSelection.New.Card -> {
                 val brand = selection.brand
-                PaymentOption(
+                PaymentOption.Succeeded(
                     drawableResourceId = getIcon(brand),
                     label = createCardLabel(selection.paymentMethodCreateParams.card?.last4)
                 )
