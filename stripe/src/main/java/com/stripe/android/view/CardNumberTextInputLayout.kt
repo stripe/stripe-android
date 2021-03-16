@@ -37,8 +37,6 @@ internal class CardNumberTextInputLayout @JvmOverloads constructor(
         doOnNextLayout {
             attachProgressView()
         }
-
-        placeholderText = resources.getString(R.string.card_number_hint)
     }
 
     private fun attachProgressView() {
