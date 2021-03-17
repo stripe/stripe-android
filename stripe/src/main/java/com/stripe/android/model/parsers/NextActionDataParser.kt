@@ -18,6 +18,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
+            StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
             else -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
@@ -141,6 +142,14 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val FIELD_STRIPE_JS = "stripe_js"
         }
     }
+
+    internal class BlikAuthorizeParser :
+        ModelJsonParser<StripeIntent.NextActionData.BlikAuthorize> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.BlikAuthorize {
+            return StripeIntent.NextActionData.BlikAuthorize
+        }
+    }
+
 
     private companion object {
         private const val FIELD_NEXT_ACTION_TYPE = "type"

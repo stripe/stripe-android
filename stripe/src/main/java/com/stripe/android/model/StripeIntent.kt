@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.net.Uri
+import android.os.Parcel
 import android.os.Parcelable
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.parcelize.Parcelize
@@ -61,7 +62,8 @@ interface StripeIntent : StripeModel {
         RedirectToUrl("redirect_to_url"),
         UseStripeSdk("use_stripe_sdk"),
         DisplayOxxoDetails("display_oxxo_details"),
-        AlipayRedirect("alipay_handle_redirect");
+        AlipayRedirect("alipay_handle_redirect"),
+        BlikAuthorize("blik_authorize");
 
         override fun toString(): String {
             return code
@@ -130,7 +132,10 @@ interface StripeIntent : StripeModel {
         }
     }
 
-    sealed class NextActionData : StripeModel {
+    sealed class NextActionData() : StripeModel {
+        constructor(parcel: Parcel) : this() {
+        }
+
         @Parcelize
         data class DisplayOxxoDetails(
             /**
@@ -218,6 +223,16 @@ interface StripeIntent : StripeModel {
                     val rootCertsData: List<String>,
                     val keyId: String?
                 ) : Parcelable
+            }
+        }
+
+        @Parcelize
+        object BlikAuthorize : NextActionData() {
+            override fun hashCode(): Int {
+                return 0
+            }
+            override fun equals(other: Any?): Boolean {
+                return true
             }
         }
     }
