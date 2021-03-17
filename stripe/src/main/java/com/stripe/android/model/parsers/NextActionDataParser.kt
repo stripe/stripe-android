@@ -90,23 +90,23 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
         private fun parseDirectoryServerEncryption(json: JSONObject):
             StripeIntent.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption {
-                val rootCert =
-                    StripeJsonUtils.jsonArrayToList(json.optJSONArray(FIELD_ROOT_CAS))
-                        ?.fold(emptyList<String>()) { acc, entry ->
-                            if (entry is String) {
-                                acc.plus(entry)
-                            } else {
-                                acc
-                            }
-                        } ?: emptyList()
+            val rootCert =
+                StripeJsonUtils.jsonArrayToList(json.optJSONArray(FIELD_ROOT_CAS))
+                    ?.fold(emptyList<String>()) { acc, entry ->
+                        if (entry is String) {
+                            acc.plus(entry)
+                        } else {
+                            acc
+                        }
+                    } ?: emptyList()
 
-                return StripeIntent.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption(
-                    json.optString(FIELD_DIRECTORY_SERVER_ID),
-                    json.optString(FIELD_CERTIFICATE),
-                    rootCert,
-                    json.optString(FIELD_KEY_ID)
-                )
-            }
+            return StripeIntent.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption(
+                json.optString(FIELD_DIRECTORY_SERVER_ID),
+                json.optString(FIELD_CERTIFICATE),
+                rootCert,
+                json.optString(FIELD_KEY_ID)
+            )
+        }
 
         private companion object {
             private const val FIELD_TYPE = "type"
