@@ -11,12 +11,9 @@ import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 /**
@@ -32,8 +29,6 @@ class PaymentMethodsAdapterTest {
         ApplicationProvider.getApplicationContext(),
         R.style.StripeDefaultTheme
     )
-    private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
 
     private val parentView = FrameLayout(context)
 
@@ -41,12 +36,6 @@ class PaymentMethodsAdapterTest {
         ARGS
     ).also {
         it.registerAdapterDataObserver(adapterDataObserver)
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testScope.cleanupTestCoroutines()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
