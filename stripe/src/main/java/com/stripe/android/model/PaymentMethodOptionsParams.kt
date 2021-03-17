@@ -50,7 +50,7 @@ sealed class PaymentMethodOptionsParams(
             )
         }
 
-        companion object {
+        internal companion object {
             const val PARAM_CODE = "code"
         }
     }
