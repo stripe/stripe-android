@@ -42,7 +42,7 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     data class Blik(
-        var code: String? = null,
+        var code: String,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
