@@ -95,6 +95,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private var isEnabled: Boolean = false
     private var customCvcLabel: String? = null
+    private var customCvcPlaceholderText: String? = null
 
     private var cardBrand: CardBrand = CardBrand.Unknown
 
@@ -483,6 +484,14 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     /**
+     * Set an optional CVC placeholder text to override defaults, or `null` to use defaults.
+     */
+    internal fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
+        customCvcPlaceholderText = cvcPlaceholderText
+        updateCvc()
+    }
+
+    /**
      * Set an optional CVC field label to override defaults, or `null` to use defaults.
      */
     fun setCvcLabel(cvcLabel: String?) {
@@ -732,7 +741,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun updateCvc() {
-        cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcInputLayout)
+        cvcEditText.updateBrand(cardBrand, customCvcLabel, customCvcPlaceholderText, cvcInputLayout)
     }
 
     private fun updateCardNumberIcon(
