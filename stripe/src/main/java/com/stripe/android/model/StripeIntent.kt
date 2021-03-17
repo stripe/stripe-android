@@ -131,7 +131,7 @@ interface StripeIntent : StripeModel {
         }
     }
 
-    sealed class NextActionData() : StripeModel {
+    sealed class NextActionData : StripeModel {
 
         @Parcelize
         data class DisplayOxxoDetails(

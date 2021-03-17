@@ -521,23 +521,5 @@ data class ConfirmPaymentIntentParams internal constructor(
                 returnUrl = "stripe://return_url"
             )
         }
-
-        /**
-         * Create the parameters necessary for confirming a [PaymentIntent] with Blik
-         *
-         * @param blikCode code generated from blik mobile banking app
-         * @param clientSecret client secret from the PaymentIntent that is to be confirmed
-         *
-         */
-        @JvmStatic
-        fun createBlik(
-            blikCode: String,
-            clientSecret: String
-        ): ConfirmPaymentIntentParams {
-            return ConfirmPaymentIntentParams(
-                clientSecret = clientSecret,
-                paymentMethodCreateParams = PaymentMethodCreateParams.createBlik(),
-            )
-        }
     }
 }
