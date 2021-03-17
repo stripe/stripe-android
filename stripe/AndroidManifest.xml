@@ -25,17 +25,14 @@
 
         <activity
             android:name=".paymentsheet.PaymentSheetActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:screenOrientation="portrait" />
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name=".paymentsheet.PaymentOptionsActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:screenOrientation="portrait" />
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
 
         <activity
             android:name=".googlepay.StripeGooglePayActivity"
-            android:theme="@style/StripeGooglePayDefaultTheme"
-            android:screenOrientation="portrait" />
+            android:theme="@style/StripeGooglePayDefaultTheme" />
     </application>
 
 </manifest>
