@@ -17,7 +17,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentAuthWebViewTest {
+class PaymentAuthWebViewClientTest {
 
     private lateinit var activity: Activity
     private lateinit var webView: WebView
@@ -214,8 +214,8 @@ class PaymentAuthWebViewTest {
         activityStarter: (Intent) -> Unit = {},
         activityFinisher: () -> Unit = { activity.finish() },
         returnUrl: String? = null
-    ): PaymentAuthWebView.PaymentAuthWebViewClient {
-        return PaymentAuthWebView.PaymentAuthWebViewClient(
+    ): PaymentAuthWebViewClient {
+        return PaymentAuthWebViewClient(
             activityStarter,
             activityFinisher,
             FakeLogger(),

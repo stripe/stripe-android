@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
+import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.R
@@ -66,18 +67,27 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
 
-        viewBinding.webView.isPageLoaded.observe(this) { shouldHide ->
+        val isPagedLoaded = MutableLiveData(false)
+        isPagedLoaded.observe(this) { shouldHide ->
             if (shouldHide) {
                 viewBinding.progressBar.isGone = true
             }
         }
 
-        viewBinding.webView.init(
-            this,
+        val webViewClient = PaymentAuthWebViewClient(
+            { intent -> startActivity(intent) },
+            { finish() },
             logger,
+            isPagedLoaded,
             clientSecret,
             args.returnUrl
         )
+        viewBinding.webView.onLoadBlank = {
+            webViewClient.hasLoadedBlank = true
+        }
+        viewBinding.webView.webViewClient = webViewClient
+        viewBinding.webView.webChromeClient = PaymentAuthWebChromeClient(this, logger)
+
         viewBinding.webView.loadUrl(args.url)
     }
 
