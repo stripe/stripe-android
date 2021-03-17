@@ -230,7 +230,7 @@ interface StripeIntent : StripeModel {
                 return 0
             }
             override fun equals(other: Any?): Boolean {
-                return true
+                return this === other
             }
         }
     }
