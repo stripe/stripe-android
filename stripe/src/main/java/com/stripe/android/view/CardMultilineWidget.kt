@@ -486,7 +486,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     /**
      * Set an optional CVC placeholder text to override defaults, or `null` to use defaults.
      */
-    fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
+    internal fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
         customCvcPlaceholderText = cvcPlaceholderText
         updateCvc()
     }

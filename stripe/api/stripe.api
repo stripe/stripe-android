@@ -5505,7 +5505,6 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public fun setCvcCode (Ljava/lang/String;)V
 	public final fun setCvcLabel (Ljava/lang/String;)V
 	public fun setCvcNumberTextWatcher (Landroid/text/TextWatcher;)V
-	public final fun setCvcPlaceholderText (Ljava/lang/String;)V
 	public fun setEnabled (Z)V
 	public fun setExpiryDate (II)V
 	public fun setExpiryDateTextWatcher (Landroid/text/TextWatcher;)V
