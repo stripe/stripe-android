@@ -522,7 +522,6 @@ data class ConfirmPaymentIntentParams internal constructor(
             )
         }
 
-
         /**
          * Create the parameters necessary for confirming a [PaymentIntent] with Blik
          *

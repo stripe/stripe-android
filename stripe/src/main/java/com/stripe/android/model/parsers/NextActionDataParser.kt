@@ -150,7 +150,6 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         }
     }
 
-
     private companion object {
         private const val FIELD_NEXT_ACTION_TYPE = "type"
     }
