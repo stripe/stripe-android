@@ -33,7 +33,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
     private var webViewClient: PaymentAuthWebViewClient? = null
 
     private val _isPageLoaded = MutableLiveData(false)
-    val isLoadedPage = _isPageLoaded.distinctUntilChanged()
+    val isPageLoaded = _isPageLoaded.distinctUntilChanged()
 
     init {
         configureSettings()

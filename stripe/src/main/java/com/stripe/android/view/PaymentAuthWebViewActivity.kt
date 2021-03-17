@@ -66,7 +66,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
 
-        viewBinding.webView.isLoadedPage.observe(this) { shouldHide ->
+        viewBinding.webView.isPageLoaded.observe(this) { shouldHide ->
             if (shouldHide) {
                 viewBinding.progressBar.isGone = true
             }
