@@ -92,7 +92,8 @@ internal class DefaultFlowController internal constructor(
         onPaymentFlowResult(result)
     }
 
-    private val viewModel = ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
+    private val viewModel =
+        ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
 
     private val paymentController = paymentControllerFactory.create(
         paymentRelayLauncher = paymentRelayLauncher,
@@ -147,7 +148,7 @@ internal class DefaultFlowController internal constructor(
         paymentOptionLauncher(
             PaymentOptionContract.Args(
                 paymentIntent = initData.paymentIntent,
-                paymentMethods = initData.paymentMethods,
+                paymentMethods = viewModel.newlySavedPaymentMethods.plus(initData.paymentMethods),
                 sessionId = sessionId,
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
@@ -315,12 +316,25 @@ internal class DefaultFlowController internal constructor(
     internal fun onPaymentOptionResult(
         paymentOptionResult: PaymentOptionResult?
     ) {
-        val paymentSelection =
-            (paymentOptionResult as? PaymentOptionResult.Succeeded)?.paymentSelection
-        viewModel.paymentSelection = paymentSelection
-        paymentOptionCallback.onPaymentOption(
-            paymentSelection?.let(paymentOptionFactory::create)
-        )
+        when (paymentOptionResult) {
+            is PaymentOptionResult.Succeeded -> {
+                val paymentSelection = paymentOptionResult.paymentSelection
+                viewModel.paymentSelection = paymentSelection
+
+                (paymentOptionResult as? PaymentOptionResult.Succeeded.NewlySaved)?.let {
+                    viewModel.newlySavedPaymentMethods.add(it.newSavedPaymentMethod)
+                }
+
+                paymentOptionCallback.onPaymentOption(
+                    paymentOptionFactory.create(
+                        paymentSelection
+                    )
+                )
+            }
+            else -> {
+                paymentOptionCallback.onPaymentOption(null)
+            }
+        }
     }
 
     @VisibleForTesting

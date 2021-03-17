@@ -274,7 +274,7 @@ class PaymentOptionsActivityTest {
             it.onActivity { activity ->
                 val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
                 viewModel._viewState.value = ViewState.PaymentOptions.ProcessResult(
-                    PaymentOptionResult.Succeeded(
+                    PaymentOptionResult.Succeeded.Unsaved(
                         paymentSelectionMock
                     )
                 )
@@ -307,7 +307,9 @@ class PaymentOptionsActivityTest {
         }
     }
 
-    private fun createViewModel(args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS): PaymentOptionsViewModel {
+    private fun createViewModel(
+        args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
+    ): PaymentOptionsViewModel {
         return PaymentOptionsViewModel(
             args = args,
             prefsRepository = FakePrefsRepository(),

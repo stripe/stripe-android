@@ -143,7 +143,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                     // where we also jump to a new unsaved card. However this move require
                     // the transition target to specify when to and when not to add things to the
                     // backstack.
-                    if (starterArgs.paymentMethods.isEmpty() && viewModel.isGooglePayReady.value?.not() == true) {
+                    if (starterArgs.paymentMethods.isEmpty() && !config.isGooglePayReady) {
                         PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                     } else {
                         PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
