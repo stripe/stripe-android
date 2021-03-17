@@ -10,16 +10,13 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 /**
@@ -36,23 +33,19 @@ class PaymentMethodsAdapterTest {
         R.style.StripeDefaultTheme
     )
     private val testDispatcher = TestCoroutineDispatcher()
+    private val testScope = TestCoroutineScope(testDispatcher)
 
     private val parentView = FrameLayout(context)
 
     private val paymentMethodsAdapter = PaymentMethodsAdapter(
-        ARGS,
-        workContext = testDispatcher
-    )
-
-    @BeforeTest
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-        paymentMethodsAdapter.registerAdapterDataObserver(adapterDataObserver)
+        ARGS
+    ).also {
+        it.registerAdapterDataObserver(adapterDataObserver)
     }
 
     @AfterTest
     fun cleanup() {
-        Dispatchers.resetMain()
+        testScope.cleanupTestCoroutines()
         testDispatcher.cleanupTestCoroutines()
     }
 
@@ -103,7 +96,8 @@ class PaymentMethodsAdapterTest {
         paymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         assertThat(paymentMethodsAdapter.itemCount)
             .isEqualTo(4)
-        paymentMethodsAdapter.selectedPaymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id
+        paymentMethodsAdapter.selectedPaymentMethodId =
+            PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id
         assertThat(paymentMethodsAdapter.selectedPaymentMethod)
             .isNotNull()
 
@@ -127,8 +121,7 @@ class PaymentMethodsAdapterTest {
         val adapter = PaymentMethodsAdapter(
             intentArgs = PaymentMethodsActivityStarter.Args.Builder()
                 .build(),
-            initiallySelectedPaymentMethodId = "pm_1000",
-            workContext = testDispatcher
+            initiallySelectedPaymentMethodId = "pm_1000"
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         assertThat(adapter.selectedPaymentMethod?.id)
@@ -140,8 +133,7 @@ class PaymentMethodsAdapterTest {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             addableTypes = listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx),
-            shouldShowGooglePay = true,
-            workContext = testDispatcher
+            shouldShowGooglePay = true
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
@@ -167,8 +159,7 @@ class PaymentMethodsAdapterTest {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             addableTypes = listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx),
-            shouldShowGooglePay = true,
-            workContext = testDispatcher
+            shouldShowGooglePay = true
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
@@ -190,8 +181,7 @@ class PaymentMethodsAdapterTest {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             addableTypes = listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx),
-            shouldShowGooglePay = false,
-            workContext = testDispatcher
+            shouldShowGooglePay = false
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
@@ -211,8 +201,7 @@ class PaymentMethodsAdapterTest {
     fun testGooglePayRowClick_shouldCallListener() {
         val adapter = PaymentMethodsAdapter(
             ARGS,
-            shouldShowGooglePay = true,
-            workContext = testDispatcher
+            shouldShowGooglePay = true
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         adapter.listener = listener
@@ -227,8 +216,7 @@ class PaymentMethodsAdapterTest {
     @Test
     fun `onPositionClicked() should call listener's onPaymentMethodClick()`() {
         val adapter = PaymentMethodsAdapter(
-            ARGS,
-            workContext = testDispatcher
+            ARGS
         )
 
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
@@ -242,8 +230,7 @@ class PaymentMethodsAdapterTest {
     fun getPosition_withValidPaymentMethod_returnsPosition() {
         val adapter = PaymentMethodsAdapter(
             ARGS,
-            shouldShowGooglePay = true,
-            workContext = testDispatcher
+            shouldShowGooglePay = true
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
@@ -255,8 +242,7 @@ class PaymentMethodsAdapterTest {
     fun getPosition_withInvalidPaymentMethod_returnsNull() {
         val adapter = PaymentMethodsAdapter(
             ARGS,
-            shouldShowGooglePay = true,
-            workContext = testDispatcher
+            shouldShowGooglePay = true
         )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
@@ -266,7 +252,10 @@ class PaymentMethodsAdapterTest {
 
     @Test
     fun deletePaymentMethod_withValidPaymentMethod_removesPaymentMethod() {
-        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+        val adapter = PaymentMethodsAdapter(
+            ARGS,
+            shouldShowGooglePay = true
+        )
         adapter.registerAdapterDataObserver(adapterDataObserver)
 
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
@@ -279,14 +268,15 @@ class PaymentMethodsAdapterTest {
     }
 
     @Test
-    fun `multiple clicks on add card view should emit single args`() {
-        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+    fun `click on add card view should emit args`() {
+        val adapter = PaymentMethodsAdapter(
+            ARGS,
+            shouldShowGooglePay = true
+        )
 
-        val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args>()
+        val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args?>()
         adapter.addPaymentMethodArgs.observeForever { args ->
-            if (args != null) {
-                argsList.add(args)
-            }
+            argsList.add(args)
         }
 
         val viewHolder = adapter.createViewHolder(
@@ -295,16 +285,17 @@ class PaymentMethodsAdapterTest {
         )
         adapter.onBindViewHolder(viewHolder, 0)
         viewHolder.itemView.performClick()
-        viewHolder.itemView.performClick()
-        viewHolder.itemView.performClick()
 
-        assertThat(argsList)
+        assertThat(argsList.filterNotNull())
             .containsExactly(adapter.addCardArgs)
     }
 
     @Test
-    fun `multiple clicks on add FPX view should emit single args`() {
-        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+    fun `click on add FPX view should emit args`() {
+        val adapter = PaymentMethodsAdapter(
+            ARGS,
+            shouldShowGooglePay = true
+        )
 
         val argsList = mutableListOf<AddPaymentMethodActivityStarter.Args>()
         adapter.addPaymentMethodArgs.observeForever { args ->
@@ -318,8 +309,6 @@ class PaymentMethodsAdapterTest {
             PaymentMethodsAdapter.ViewType.AddFpx.ordinal
         )
         adapter.onBindViewHolder(viewHolder, 0)
-        viewHolder.itemView.performClick()
-        viewHolder.itemView.performClick()
         viewHolder.itemView.performClick()
 
         assertThat(argsList)
