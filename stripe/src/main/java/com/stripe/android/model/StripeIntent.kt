@@ -133,8 +133,6 @@ interface StripeIntent : StripeModel {
     }
 
     sealed class NextActionData() : StripeModel {
-        constructor(parcel: Parcel) : this() {
-        }
 
         @Parcelize
         data class DisplayOxxoDetails(
