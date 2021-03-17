@@ -7,33 +7,26 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.distinctUntilChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.databinding.AddPaymentMethodRowBinding
 import com.stripe.android.databinding.GooglePayRowBinding
 import com.stripe.android.databinding.MaskedCardRowBinding
 import com.stripe.android.model.PaymentMethod
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 
 /**
  * A [RecyclerView.Adapter] that holds a set of [MaskedCardView] items for a given set
  * of [PaymentMethod] objects.
  */
 internal class PaymentMethodsAdapter constructor(
-    private val intentArgs: PaymentMethodsActivityStarter.Args,
+    intentArgs: PaymentMethodsActivityStarter.Args,
     private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     initiallySelectedPaymentMethodId: String? = null,
     private val shouldShowGooglePay: Boolean = false,
     private val useGooglePay: Boolean = false,
-    private val canDeletePaymentMethods: Boolean = true,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val canDeletePaymentMethods: Boolean = true
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = mutableListOf<PaymentMethod>()
@@ -49,7 +42,7 @@ internal class PaymentMethodsAdapter constructor(
     private val googlePayCount = 1.takeIf { shouldShowGooglePay } ?: 0
 
     private val _addPaymentMethodArgs = MutableLiveData<AddPaymentMethodActivityStarter.Args>()
-    internal val addPaymentMethodArgs = _addPaymentMethodArgs.distinctUntilChanged()
+    val addPaymentMethodArgs: LiveData<AddPaymentMethodActivityStarter.Args> = _addPaymentMethodArgs
 
     internal val addCardArgs = AddPaymentMethodActivityStarter.Args.Builder()
         .setBillingAddressFields(intentArgs.billingAddressFields)
@@ -165,13 +158,7 @@ internal class PaymentMethodsAdapter constructor(
     @JvmSynthetic
     internal fun onPositionClicked(position: Int) {
         updateSelectedPaymentMethod(position)
-        CoroutineScope(workContext).launch {
-            delay(0)
-
-            withContext(Dispatchers.Main) {
-                listener?.onPaymentMethodClick(getPaymentMethodAtPosition(position))
-            }
-        }
+        listener?.onPaymentMethodClick(getPaymentMethodAtPosition(position))
     }
 
     private fun updateSelectedPaymentMethod(position: Int) {
@@ -296,8 +283,10 @@ internal class PaymentMethodsAdapter constructor(
 
             init {
                 itemView.id = R.id.stripe_payment_methods_add_card
-                itemView.contentDescription = itemView.resources.getString(R.string.payment_method_add_new_card)
-                viewBinding.label.text = itemView.resources.getString(R.string.payment_method_add_new_card)
+                itemView.contentDescription =
+                    itemView.resources.getString(R.string.payment_method_add_new_card)
+                viewBinding.label.text =
+                    itemView.resources.getString(R.string.payment_method_add_new_card)
             }
         }
 
@@ -314,8 +303,10 @@ internal class PaymentMethodsAdapter constructor(
 
             init {
                 itemView.id = R.id.stripe_payment_methods_add_fpx
-                itemView.contentDescription = itemView.resources.getString(R.string.payment_method_add_new_fpx)
-                viewBinding.label.text = itemView.resources.getString(R.string.payment_method_add_new_fpx)
+                itemView.contentDescription =
+                    itemView.resources.getString(R.string.payment_method_add_new_fpx)
+                viewBinding.label.text =
+                    itemView.resources.getString(R.string.payment_method_add_new_fpx)
             }
         }
 
