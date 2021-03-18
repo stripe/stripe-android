@@ -222,7 +222,12 @@ internal class PaymentSheetViewModel internal constructor(
                 eventReporter.onPaymentFailure(selection.value)
 
                 onApiError(paymentIntentResult.failureMessage)
-                onPaymentIntentResponse(paymentIntentResult.intent)
+                runCatching {
+                    paymentIntentValidator.requireValid(paymentIntentResult.intent)
+                }.fold(
+                    onSuccess = ::resetViewState,
+                    onFailure = ::onFatal
+                )
             }
         }
     }
