@@ -48,9 +48,9 @@ open class StripeEditText @JvmOverloads constructor(
             if (field != shouldShowError) {
                 // only update the view's UI if the property's value is changing
                 if (shouldShowError) {
-                    setTextColor(errorColor ?: defaultErrorColor)
+                    super.setTextColor(errorColor ?: defaultErrorColor)
                 } else {
-                    setTextColor(cachedColorStateList)
+                    super.setTextColor(cachedColorStateList)
                 }
                 refreshDrawableState()
             }
@@ -100,6 +100,13 @@ open class StripeEditText @JvmOverloads constructor(
 
         // This will only use textColors and not colors because textColor is never null
         cachedColorStateList = textColors
+    }
+
+    override fun setTextColor(color: Int) {
+        super.setTextColor(color)
+
+        // This will only use textColors and not colors because textColor is never null
+        cachedColorStateList = ColorStateList.valueOf(color)
     }
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
