@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.AnalyticsEvent
+import com.stripe.android.CardUtils.getPossibleCardBrand
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -165,6 +166,15 @@ class CardNumberEditText internal constructor(
         inputType = InputType.TYPE_CLASS_NUMBER
         setErrorMessage(resources.getString(R.string.invalid_card_number))
         addTextChangedListener(CardNumberTextWatcher())
+
+        initParentOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus
+                && (unvalidatedCardNumber.length != panLength)
+                && (unvalidatedCardNumber.length > 0)
+            ) {
+                shouldShowError = true
+            }
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
@@ -395,9 +405,17 @@ class CardNumberEditText internal constructor(
                 if (isComplete(wasCardNumberValid)) {
                     completionCallback()
                 }
+            }
+            // Partial card and brand is unknown.  CardBrand is set if we know definitively
+            // we want to see if there are any possible cards that would match
+            else if ((unvalidatedCardNumber.length > 0)
+                && (getPossibleCardBrand(unvalidatedCardNumber.normalized) == CardBrand.Unknown)
+            ) {
+                isCardNumberValid = isValid
+                shouldShowError = true
             } else {
                 isCardNumberValid = isValid
-                // Don't show errors if we aren't full-length.
+                // Don't show errors if we aren't full-length and the brand is known.
                 shouldShowError = false
             }
         }

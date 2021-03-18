@@ -405,7 +405,7 @@ internal class CardNumberEditTextTest {
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
 
-        updateCardNumberAndIdle("123")
+        updateCardNumberAndIdle("424")
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
     }
@@ -743,6 +743,32 @@ internal class CardNumberEditTextTest {
         updateCardNumberAndIdle("4")
         assertThat(lastBrandChangeCallbackInvocation)
             .isEqualTo(CardBrand.Visa)
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isFalse()
+    }
+
+    @Test
+    fun `when first digit matches multiple accounts, don't show an error`() {
+        // matches Amex and diners
+        updateCardNumberAndIdle("3")
+        assertThat(lastBrandChangeCallbackInvocation)
+            .isEqualTo(CardBrand.Unknown)
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isFalse()
+    }
+
+    @Test
+    fun `when first digit doesn't match a single account, show error`() {
+        // matches Visa
+        updateCardNumberAndIdle("0")
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isTrue()
     }
 
     @Test
@@ -751,6 +777,16 @@ internal class CardNumberEditTextTest {
         updateCardNumberAndIdle("6")
         assertThat(lastBrandChangeCallbackInvocation)
             .isEqualTo(CardBrand.Unknown)
+    }
+
+    @Test
+    fun `when lose focus and card is not complete, show error`() {
+        updateCardNumberAndIdle("3")
+        cardNumberEditText.onFocusChangeListener.onFocusChange(cardNumberEditText, false)
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isTrue()
     }
 
     @Test

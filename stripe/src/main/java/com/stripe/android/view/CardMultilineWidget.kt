@@ -192,7 +192,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     @Deprecated("Use cardParams", ReplaceWith("cardParams"))
     override val card: Card?
         get() {
-            return cardBuilder?.build()
+            return cardParams?.build()
         }
 
     /**
@@ -684,7 +684,8 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-        expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        expiryDateEditText.setClientOnFocusChangeListener { _, hasFocus ->
+            // TODO: Why is this only called when have focus?
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             }
