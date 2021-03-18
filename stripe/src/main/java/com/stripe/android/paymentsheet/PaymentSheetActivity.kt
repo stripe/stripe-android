@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -76,7 +75,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         PaymentSheetContract.Args.fromIntent(intent)
     }
 
-    override val rootView: View by lazy { viewBinding.root }
+    override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: Toolbar by lazy { viewBinding.toolbar }
@@ -301,6 +300,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             }
         }
 
+        // Execute transaction right away to avoid a two-step UI update
+        supportFragmentManager.executePendingTransactions()
         viewBinding.buyButton.isVisible = true
         appbar.isVisible = true
     }

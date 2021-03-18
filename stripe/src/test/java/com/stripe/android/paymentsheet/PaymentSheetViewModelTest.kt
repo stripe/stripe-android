@@ -223,11 +223,18 @@ internal class PaymentSheetViewModelTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
+        var paymentIntent: PaymentIntent? = null
+        viewModel.paymentIntent.observeForever {
+            paymentIntent = it
+        }
+
         viewModel.onPaymentFlowResult(
             PaymentFlowResult.Unvalidated()
         )
         verify(eventReporter)
             .onPaymentFailure(selection)
+
+        assertThat(paymentIntent).isNull()
     }
 
     @Test

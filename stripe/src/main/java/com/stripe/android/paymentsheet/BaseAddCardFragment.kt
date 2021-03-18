@@ -43,7 +43,6 @@ internal abstract class BaseAddCardFragment(
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
     private lateinit var cardErrors: TextView
-    private lateinit var googlePayButton: View
     private lateinit var saveCardCheckbox: CheckBox
     private lateinit var addCardHeader: TextView
 
@@ -65,8 +64,6 @@ internal abstract class BaseAddCardFragment(
         }
 
     private val addCardViewModel: AddCardViewModel by viewModels()
-
-    abstract fun onGooglePaySelected()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,7 +97,6 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget = viewBinding.cardMultilineWidget
         billingAddressView = viewBinding.billingAddress
         cardErrors = viewBinding.cardErrors
-        googlePayButton = viewBinding.googlePayButton
         saveCardCheckbox = viewBinding.saveCardCheckbox
         addCardHeader = viewBinding.addCardHeader
 
@@ -111,8 +107,6 @@ internal abstract class BaseAddCardFragment(
         // populate correctly.
         populateFieldsFromNewCard()
         setupCardWidget()
-
-        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
 
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
@@ -145,20 +139,6 @@ internal abstract class BaseAddCardFragment(
         }
 
         setupSaveCardCheckbox(saveCardCheckbox)
-
-        val shouldShowGooglePayButton = config.shouldShowGooglePayButton
-        googlePayButton.setOnClickListener {
-            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
-        }
-        googlePayButton.isVisible = shouldShowGooglePayButton
-        viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
-        addCardHeader.isVisible = !shouldShowGooglePayButton
-
-        sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
-            if (paymentSelection == PaymentSelection.GooglePay) {
-                onGooglePaySelected()
-            }
-        }
 
         eventReporter.onShowNewPaymentOptionForm()
     }
@@ -208,9 +188,12 @@ internal abstract class BaseAddCardFragment(
             )
         }
 
+        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
         cardMultilineWidget.expiryTextInputLayout.hint =
             getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
+        cardMultilineWidget.setCvcPlaceholderText("")
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)

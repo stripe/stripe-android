@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.content.pm.ActivityInfo
+import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -19,7 +20,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val bottomSheetController: BottomSheetController
     abstract val eventReporter: EventReporter
 
-    abstract val rootView: View
+    abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
     abstract val scrollView: ScrollView
@@ -37,6 +38,11 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         supportFragmentManager.fragmentFactory = PaymentSheetFragmentFactory(eventReporter)
 
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
+            // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
+            // orientation. See https://stackoverflow.com/a/50832408/11103900
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
 
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0) {

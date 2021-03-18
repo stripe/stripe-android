@@ -16,8 +16,4 @@ internal class PaymentOptionsAddCardFragment(
             }
         )
     }
-
-    override fun onGooglePaySelected() {
-        sheetViewModel.onUserSelection()
-    }
 }
