@@ -39,4 +39,19 @@ sealed class PaymentMethodOptionsParams(
             private const val PARAM_NETWORK = "network"
         }
     }
+
+    @Parcelize
+    data class Blik(
+        var code: String,
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_CODE to code,
+            )
+        }
+
+        internal companion object {
+            const val PARAM_CODE = "code"
+        }
+    }
 }

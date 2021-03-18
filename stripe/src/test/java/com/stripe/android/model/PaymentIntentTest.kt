@@ -19,7 +19,7 @@ class PaymentIntentTest {
     }
 
     @Test
-    fun parsePaymentIntentWithPaymentMethods() {
+    fun parsePaymentIntentWith3DS2PaymentMethods() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         assertThat(paymentIntent.requiresAction())
             .isTrue()
@@ -37,6 +37,15 @@ class PaymentIntentTest {
             .isEqualTo("jenny@example.com")
         assertThat(paymentIntent.cancellationReason)
             .isNull()
+    }
+
+    @Test
+    fun parsePaymentIntentWithBlikPaymentMethods() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE
+        assertThat(paymentIntent.requiresAction())
+            .isTrue()
+        assertThat(paymentIntent.paymentMethodTypes)
+            .containsExactly("blik")
     }
 
     @Test
@@ -72,6 +81,13 @@ class PaymentIntentTest {
             )
         assertThat(redirectData.returnUrl)
             .isEqualTo("stripe://deeplink")
+    }
+
+    @Test
+    fun getNextActionData_whenBlikAuthorize() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE
+        assertThat(paymentIntent.nextActionData)
+            .isInstanceOf(StripeIntent.NextActionData.BlikAuthorize::class.java)
     }
 
     @Test
