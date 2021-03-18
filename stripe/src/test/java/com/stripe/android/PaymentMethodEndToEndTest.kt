@@ -314,4 +314,14 @@ internal class PaymentMethodEndToEndTest {
         assertThat(missingAddressException.message)
             .isEqualTo("Missing required param: billing_details[address][line1].")
     }
+
+    @Test
+    fun createPaymentMethod_withBlik_shouldCreateObject() {
+        val params = PaymentMethodCreateParams.createBlik()
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.BLIK_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Blik)
+    }
 }
