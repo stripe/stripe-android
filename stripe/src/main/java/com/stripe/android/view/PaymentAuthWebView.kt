@@ -15,9 +15,9 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isGone
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.Logger
 import com.stripe.android.R
 import com.stripe.android.view.PaymentAuthWebView.PaymentAuthWebViewClient.Companion.BLANK_PAGE
@@ -32,6 +32,9 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
 ) : WebView(context, attrs, defStyleAttr) {
     private var webViewClient: PaymentAuthWebViewClient? = null
 
+    private val _isPageLoaded = MutableLiveData(false)
+    val isPageLoaded = _isPageLoaded.distinctUntilChanged()
+
     init {
         configureSettings()
     }
@@ -39,14 +42,14 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
     fun init(
         activity: Activity,
         logger: Logger,
-        progressBar: ProgressBar,
         clientSecret: String,
         returnUrl: String? = null
     ) {
         val webViewClient = PaymentAuthWebViewClient(
-            activity,
+            { intent -> activity.startActivity(intent) },
+            { activity.finish() },
             logger,
-            progressBar,
+            _isPageLoaded,
             clientSecret,
             returnUrl
         )
@@ -107,9 +110,10 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
     }
 
     internal class PaymentAuthWebViewClient(
-        private val activity: Activity,
+        private val activityStarter: (Intent) -> Unit,
+        private val activityFinisher: () -> Unit,
         private val logger: Logger,
-        private val progressBar: ProgressBar,
+        private val isPageLoaded: MutableLiveData<Boolean>,
         private val clientSecret: String,
         returnUrl: String?
     ) : WebViewClient() {
@@ -138,7 +142,8 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
 
         private fun hideProgressBar() {
             logger.debug("PaymentAuthWebViewClient#hideProgressBar()")
-            progressBar.isGone = true
+
+            isPageLoaded.value = true
         }
 
         private fun isAuthenticateUrl(url: String) = isAllowedUrl(url, AUTHENTICATE_URLS)
@@ -195,7 +200,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             logger.debug("PaymentAuthWebViewClient#openIntent()")
 
             runCatching {
-                activity.startActivity(intent)
+                activityStarter(intent)
             }.onFailure {
                 logger.error("Failed to start Intent.", it)
 
@@ -273,7 +278,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
 
         private fun onAuthCompleted() {
             logger.debug("PaymentAuthWebViewClient#onAuthCompleted()")
-            activity.finish()
+            activityFinisher()
         }
 
         internal companion object {

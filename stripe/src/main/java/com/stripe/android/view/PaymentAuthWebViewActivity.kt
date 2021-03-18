@@ -9,6 +9,7 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.R
@@ -64,10 +65,16 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         }
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
+
+        viewBinding.webView.isPageLoaded.observe(this) { shouldHide ->
+            if (shouldHide) {
+                viewBinding.progressBar.isGone = true
+            }
+        }
+
         viewBinding.webView.init(
             this,
             logger,
-            viewBinding.progressBar,
             clientSecret,
             args.returnUrl
         )
