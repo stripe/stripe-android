@@ -13,8 +13,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         ActivityPaymentSheetCustomBinding.inflate(layoutInflater)
     }
 
-    private lateinit var flowController: PaymentSheet.FlowController
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -26,18 +24,17 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             onPaymentSheetResult(paymentResult)
         }
 
-        flowController = PaymentSheet.FlowController.create(
-            this,
-            paymentOptionCallback,
-            paymentResultCallback
-        )
-
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
         }
         viewModel.status.observe(this) {
             viewBinding.status.text = it
         }
+
+        viewBinding.buyButton.setOnClickListener {
+            // TODO(mshafrir-stripe): handle click
+        }
+        fetchEphemeralKey()
     }
 
     private fun createPaymentSheetFlowController(
@@ -62,33 +59,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         paymentIntentClientSecret: String,
         customerConfig: PaymentSheet.CustomerConfiguration? = null
     ) {
-        flowController.configure(
-            paymentIntentClientSecret = paymentIntentClientSecret,
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = merchantName,
-                customer = customerConfig,
-                googlePay = googlePayConfig,
-                billingAddressCollection = billingAddressCollection
-            )
-        ) { isReady, error ->
-            if (isReady) {
-                onFlowControllerReady()
-            } else {
-                viewModel.status.postValue(
-                    "Failed to create PaymentSheetFlowController: ${error?.message}"
-                )
-            }
-        }
-    }
-
-    private fun onFlowControllerReady() {
-        viewBinding.paymentMethod.setOnClickListener {
-            flowController.presentPaymentOptions()
-        }
-        viewBinding.buyButton.setOnClickListener {
-            flowController.confirmPayment()
-        }
-        onPaymentOption(flowController.getPaymentOption())
+        // handle result
     }
 
     private fun onPaymentOption(paymentOption: PaymentOption?) {
