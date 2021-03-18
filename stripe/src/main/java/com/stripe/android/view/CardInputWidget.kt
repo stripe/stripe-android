@@ -828,7 +828,7 @@ class CardInputWidget @JvmOverloads constructor(
     /**
      * Set an optional CVC placeholder text to override defaults, or `null` to use defaults.
      */
-    internal fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
+    fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
         customCvcPlaceholderText = cvcPlaceholderText
         updateCvc()
     }
