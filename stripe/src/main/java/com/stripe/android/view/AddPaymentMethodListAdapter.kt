@@ -14,7 +14,7 @@ import com.stripe.android.model.BankStatuses
 
 class AddPaymentMethodListAdapter constructor (
     var activity: FragmentActivity,
-    var items : Array<Bank>,
+    var items : List<Bank>,
     val itemSelectedCallback: (Int) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 

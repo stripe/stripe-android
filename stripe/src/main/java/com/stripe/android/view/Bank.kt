@@ -1,8 +1,8 @@
 package com.stripe.android.view
 
-open class Bank {
-    open lateinit var id: String
-    open lateinit var displayName: String
-    open lateinit var code: String
-    open var brandIconResId: Int? = null
+interface Bank {
+    var id: String
+    var code: String
+    var displayName: String
+    var brandIconResId: Int?
 }

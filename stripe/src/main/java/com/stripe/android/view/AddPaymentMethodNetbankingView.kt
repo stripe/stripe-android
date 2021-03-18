@@ -17,7 +17,7 @@ internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor
 
     private val netbankingAdapter = AddPaymentMethodListAdapter(
         activity,
-        items = NetbankingBank.values() as Array<Bank>,
+        items = NetbankingBank.values().asList() as List<Bank>,
         itemSelectedCallback = {
             this.selectedPosition = it
         }
