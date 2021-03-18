@@ -232,7 +232,7 @@ open class StripeEditText @JvmOverloads constructor(
      * }
      * parentFocusChangeListener.setClientFocusListener(l)
      */
-    override fun setOnFocusChangeListener(l: OnFocusChangeListener) {
+    internal fun setClientOnFocusChangeListener(l: OnFocusChangeListener) {
         (onFocusChangeListener as? ParentOnFocusChangeListener)?.setClientFocusListener(l)
             ?: super.setOnFocusChangeListener(l)
     }
