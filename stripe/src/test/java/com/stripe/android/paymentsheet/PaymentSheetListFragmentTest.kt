@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.widget.TextView
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.children
@@ -139,15 +138,6 @@ class PaymentSheetListFragmentTest {
 
             assertThat(activityViewModel.selection.value)
                 .isEqualTo(PaymentSelection.GooglePay)
-        }
-    }
-
-    @Test
-    fun `updateHeader() should update header view`() {
-        createScenario().onFragment { fragment ->
-            val header = requireNotNull(fragment.view?.findViewById<TextView>(R.id.header))
-            assertThat(header.text.toString())
-                .isEqualTo("Pay $10.99 using")
         }
     }
 
