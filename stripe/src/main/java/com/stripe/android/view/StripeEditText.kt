@@ -220,6 +220,7 @@ open class StripeEditText @JvmOverloads constructor(
 
             externalFocusChangeListener?.onFocusChange(view, hasFocus)
         }
+
         externalFocusChangeListener = listener
     }
 

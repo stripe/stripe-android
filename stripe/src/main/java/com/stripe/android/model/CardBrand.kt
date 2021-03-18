@@ -303,6 +303,19 @@ enum class CardBrand(
                 } ?: Unknown
         }
 
+        internal fun getCardBrands(cardNumber: String?): List<CardBrand> {
+            if (cardNumber.isNullOrBlank()) {
+                return listOf(Unknown)
+            }
+
+            return values().filter { cardBrand ->
+                cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)
+                    ?.matches() == true
+            }.takeIf {
+                it.isNotEmpty()
+            } ?: listOf(Unknown)
+        }
+
         /**
          * @param code a brand code, such as `Visa` or `American Express`.
          * See [PaymentMethod.Card.brand].

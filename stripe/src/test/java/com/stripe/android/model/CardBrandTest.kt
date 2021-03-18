@@ -299,7 +299,7 @@ class CardBrandTest {
     @Test
     fun fromCardNumber_shouldUsePartialPatternsIfAvailable() {
         assertThat(CardBrand.fromCardNumber("3"))
-            .isEqualTo(CardBrand.AmericanExpress)
+            .isEqualTo(CardBrand.Unknown)
         assertThat(CardBrand.fromCardNumber("35"))
             .isEqualTo(CardBrand.JCB)
         assertThat(CardBrand.fromCardNumber("352"))

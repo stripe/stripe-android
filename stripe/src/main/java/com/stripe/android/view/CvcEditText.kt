@@ -102,7 +102,7 @@ class CvcEditText @JvmOverloads constructor(
             }
 
         // Only show an error when we update the branch if text is entered
-        // and the length is less than the max
+        // and the Cvc does not match
         if (unvalidatedCvc.normalized.length > 1) {
             shouldShowError = unvalidatedCvc.validate(cardBrand.maxCvcLength) == null
         }

@@ -9,7 +9,6 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.AnalyticsEvent
-import com.stripe.android.CardUtils.getPossibleCardBrand
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -169,7 +168,7 @@ class CardNumberEditText internal constructor(
 
         internalFocusChangeListeners.add { _, hasFocus ->
             if (!hasFocus &&
-                (unvalidatedCardNumber.length != panLength) &&
+                !isCardNumberValid &&
                 (unvalidatedCardNumber.length > 0)
             ) {
                 shouldShowError = true
@@ -409,7 +408,10 @@ class CardNumberEditText internal constructor(
             // Partial card and brand is unknown.  CardBrand is set if we know definitively
             // we want to see if there are any possible cards that would match
             else if ((unvalidatedCardNumber.length > 0) &&
-                (getPossibleCardBrand(unvalidatedCardNumber.normalized) == CardBrand.Unknown)
+                (
+                    CardBrand.getCardBrands(unvalidatedCardNumber.normalized)
+                        .first() != CardBrand.Unknown
+                    )
             ) {
                 isCardNumberValid = isValid
                 shouldShowError = true
