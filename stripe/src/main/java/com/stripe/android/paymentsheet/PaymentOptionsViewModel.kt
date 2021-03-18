@@ -97,6 +97,7 @@ internal class PaymentOptionsViewModel(
     }
 
     private fun processSaveNewCard(paymentSelection: PaymentSelection) {
+        _processing.value = true
         _viewState.value = ViewState.PaymentOptions.StartProcessing
         savePaymentSelection(paymentSelection as PaymentSelection.New) { result ->
             result.fold(
@@ -104,6 +105,7 @@ internal class PaymentOptionsViewModel(
                     prefsRepository.savePaymentSelection(PaymentSelection.Saved(paymentMethod))
 
                     _viewState.value = ViewState.PaymentOptions.FinishProcessing {
+                        _processing.value = false
                         _viewState.value = ViewState.PaymentOptions.ProcessResult(
                             PaymentOptionResult.Succeeded.NewlySaved(
                                 paymentSelection,
