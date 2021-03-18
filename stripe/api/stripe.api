@@ -5505,6 +5505,7 @@ public final class com/stripe/android/view/CardInputWidget : android/widget/Line
 	public fun setCardNumberTextWatcher (Landroid/text/TextWatcher;)V
 	public fun setCardValidCallback (Lcom/stripe/android/view/CardValidCallback;)V
 	public fun setCvcCode (Ljava/lang/String;)V
+	public final fun setCvcLabel (Ljava/lang/String;)V
 	public fun setCvcNumberTextWatcher (Landroid/text/TextWatcher;)V
 	public fun setEnabled (Z)V
 	public fun setExpiryDate (II)V
