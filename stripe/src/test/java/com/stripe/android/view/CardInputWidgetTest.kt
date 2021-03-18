@@ -1577,6 +1577,13 @@ internal class CardInputWidgetTest {
             )
     }
 
+    @Test
+    fun `setCvcLabel is not reset when card number entered`() {
+        cardInputWidget.setCvcLabel("123")
+        assertThat(cardInputWidget.cvcEditText.hint)
+            .isEqualTo("123")
+    }
+
     private fun updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
         idleLooper()
