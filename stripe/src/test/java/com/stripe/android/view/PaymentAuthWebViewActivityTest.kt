@@ -33,7 +33,7 @@ class PaymentAuthWebViewActivityTest {
 
     @Test
     fun `setResult is expected value with default args`() {
-        createActivityScenario { activityScenario ->
+        runOnActivityScenario { activityScenario ->
             activityScenario.onActivity {
                 it.finish()
             }
@@ -48,7 +48,7 @@ class PaymentAuthWebViewActivityTest {
         }
     }
 
-    private fun createActivityScenario(
+    private fun runOnActivityScenario(
         onActivityScenario: (ActivityScenario<PaymentAuthWebViewActivity>) -> Unit
     ) {
         ActivityScenario.launch<PaymentAuthWebViewActivity>(
