@@ -6,13 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
@@ -29,7 +27,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.BillingAddressView
-import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
@@ -46,7 +43,6 @@ internal abstract class BaseAddCardFragment(
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
     private lateinit var cardErrors: TextView
-    private lateinit var googlePayButton: View
     private lateinit var saveCardCheckbox: CheckBox
     private lateinit var addCardHeader: TextView
 
@@ -69,7 +65,6 @@ internal abstract class BaseAddCardFragment(
 
     private val addCardViewModel: AddCardViewModel by viewModels()
 
-    abstract fun onGooglePaySelected()
     abstract fun createHeaderText(config: FragmentConfig): String
 
     override fun onCreateView(
@@ -104,7 +99,6 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget = viewBinding.cardMultilineWidget
         billingAddressView = viewBinding.billingAddress
         cardErrors = viewBinding.cardErrors
-        googlePayButton = viewBinding.googlePayButton
         saveCardCheckbox = viewBinding.saveCardCheckbox
         addCardHeader = viewBinding.addCardHeader
 
@@ -116,16 +110,9 @@ internal abstract class BaseAddCardFragment(
         populateFieldsFromNewCard()
         setupCardWidget()
 
-        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
-
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
             updateSelection()
-        }
-
-        billingAddressView.onFocus = {
-            // If the user focuses on the billing address view, expand to full screen
-            sheetViewModel.updateMode(SheetMode.Full)
         }
 
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
@@ -135,10 +122,7 @@ internal abstract class BaseAddCardFragment(
         }
 
         cardMultilineWidget.setCardInputListener(object : CardInputListener {
-            override fun onFocusChange(focusField: CardInputListener.FocusField) {
-                // If the user focuses any card field, expand to full screen
-                sheetViewModel.updateMode(SheetMode.Full)
-            }
+            override fun onFocusChange(focusField: CardInputListener.FocusField) {}
 
             override fun onCardComplete() {}
 
@@ -150,18 +134,6 @@ internal abstract class BaseAddCardFragment(
             }
         })
 
-        // If we're launched in full expanded mode, focus the card number field
-        // and show the keyboard automatically
-        if (sheetViewModel.sheetMode.value == SheetMode.Full) {
-            cardMultilineWidget.cardNumberEditText.requestFocus()
-            getSystemService(requireContext(), InputMethodManager::class.java)?.apply {
-                showSoftInput(
-                    cardMultilineWidget.cardNumberEditText,
-                    InputMethodManager.SHOW_IMPLICIT
-                )
-            }
-        }
-
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             saveCardCheckbox.isEnabled = !isProcessing
             cardMultilineWidget.isEnabled = !isProcessing
@@ -170,20 +142,7 @@ internal abstract class BaseAddCardFragment(
 
         setupSaveCardCheckbox(saveCardCheckbox)
 
-        val shouldShowGooglePayButton = config.shouldShowGooglePayButton
-        googlePayButton.setOnClickListener {
-            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
-        }
-        googlePayButton.isVisible = shouldShowGooglePayButton
-        viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
-        addCardHeader.isVisible = !shouldShowGooglePayButton
         addCardHeader.text = createHeaderText(config)
-
-        sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
-            if (paymentSelection == PaymentSelection.GooglePay) {
-                onGooglePaySelected()
-            }
-        }
 
         eventReporter.onShowNewPaymentOptionForm()
     }
@@ -233,9 +192,12 @@ internal abstract class BaseAddCardFragment(
             )
         }
 
+        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
         cardMultilineWidget.expiryTextInputLayout.hint =
             getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
+        cardMultilineWidget.setCvcPlaceholderText("")
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)

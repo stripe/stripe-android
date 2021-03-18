@@ -13,8 +13,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -43,19 +43,7 @@ class PaymentOptionsActivityTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val viewModel = PaymentOptionsViewModel(
-        args = PaymentOptionContract.Args(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            sessionId = SessionId(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = false,
-            newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
-        ),
-        prefsRepository = FakePrefsRepository(),
-        eventReporter = eventReporter
-    )
+    private val viewModel = createViewModel()
 
     @BeforeTest
     fun setup() {
@@ -74,7 +62,7 @@ class PaymentOptionsActivityTest {
     fun `click outside of bottom sheet should return cancel result`() {
         val scenario = activityScenario()
         scenario.launch(
-            createIntent(emptyList())
+            createIntent()
         ).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
@@ -97,7 +85,11 @@ class PaymentOptionsActivityTest {
     fun `AddButton should be hidden when showing payment options`() {
         val scenario = activityScenario()
         scenario.launch(
-            createIntent(PaymentMethodFixtures.createCards(5))
+            createIntent(
+                PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    paymentMethods = PaymentMethodFixtures.createCards(5)
+                )
+            )
         ).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
@@ -114,7 +106,7 @@ class PaymentOptionsActivityTest {
     fun `AddButton should be visible when showing add payment method form`() {
         val scenario = activityScenario()
         scenario.launch(
-            createIntent(emptyList())
+            createIntent()
         ).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
@@ -128,10 +120,50 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
+    fun `AddButton should be hidden when returning to payment options`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent(
+                PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    paymentMethods = PaymentMethodFixtures.createCards(5)
+                )
+            )
+        ).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
+
+                assertThat(activity.viewBinding.addButton.isVisible)
+                    .isFalse()
+
+                // Navigate to "Add Payment Method" fragment
+                with(
+                    activity.supportFragmentManager.findFragmentById(R.id.fragment_container)
+                        as PaymentOptionsListFragment
+                ) {
+                    transitionToAddPaymentMethod()
+                }
+                idleLooper()
+
+                assertThat(activity.viewBinding.addButton.isVisible)
+                    .isTrue()
+
+                // Navigate back to payment options list
+                activity.onBackPressed()
+                idleLooper()
+
+                assertThat(activity.viewBinding.addButton.isVisible)
+                    .isFalse()
+            }
+        }
+    }
+
+    @Test
     fun `Verify Ready state updates the add button label`() {
         val scenario = activityScenario()
         scenario.launch(
-            createIntent(emptyList())
+            createIntent()
         ).use {
             it.onActivity { activity ->
                 viewModel._viewState.value = ViewState.PaymentOptions.Ready
@@ -155,7 +187,7 @@ class PaymentOptionsActivityTest {
     fun `Verify StartProcessing state updates the add button label`() {
         val scenario = activityScenario()
         scenario.launch(
-            createIntent(emptyList())
+            createIntent()
         ).use {
             it.onActivity { activity ->
                 viewModel._viewState.value = ViewState.PaymentOptions.StartProcessing
@@ -174,7 +206,7 @@ class PaymentOptionsActivityTest {
     fun `Verify FinishProcessing state calls the callback`() {
         val scenario = activityScenario()
         scenario.launch(
-            createIntent(emptyList())
+            createIntent()
         ).use {
             it.onActivity {
                 var callbackCalled = false
@@ -192,15 +224,57 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
+    fun `Verify if google pay is ready, stay on the select saved payment method`() {
+        val viewModel = createViewModel(
+            PAYMENT_OPTIONS_CONTRACT_ARGS.copy(isGooglePayReady = true)
+        )
+        val transitionTarget = mutableListOf<TransitionTarget?>()
+        viewModel.transition.observeForever {
+            transitionTarget.add(it)
+        }
+        val scenario = activityScenario(viewModel)
+        scenario.launch(
+            createIntent()
+        ).use {
+            idleLooper()
+            assertThat(transitionTarget[1])
+                .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
+        }
+    }
+
+    @Test
+    fun `Verify if payment methods is not empty select, saved payment method`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+            isGooglePayReady = false,
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        val viewModel = createViewModel(args)
+        val transitionTarget = mutableListOf<TransitionTarget?>()
+        viewModel.transition.observeForever {
+            transitionTarget.add(it)
+        }
+
+        val scenario = activityScenario(viewModel)
+        scenario.launch(
+            createIntent(args)
+        ).use {
+            idleLooper()
+            assertThat(transitionTarget[1])
+                .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
+        }
+    }
+
+    @Test
     fun `Verify ProcessResult state closes the sheet`() {
         val scenario = activityScenario()
         scenario.launch(
-            createIntent(emptyList())
+            createIntent()
         ).use {
             it.onActivity { activity ->
                 val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
                 viewModel._viewState.value = ViewState.PaymentOptions.ProcessResult(
-                    PaymentOptionResult.Succeeded(
+                    PaymentOptionResult.Succeeded.Unsaved(
                         paymentSelectionMock
                     )
                 )
@@ -213,24 +287,13 @@ class PaymentOptionsActivityTest {
     }
 
     private fun createIntent(
-        paymentMethods: List<PaymentMethod>
+        args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
     ): Intent {
         return Intent(
             ApplicationProvider.getApplicationContext(),
             PaymentOptionsActivity::class.java
         ).putExtras(
-            bundleOf(
-                ActivityStarter.Args.EXTRA to
-                    PaymentOptionContract.Args(
-                        paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        paymentMethods = paymentMethods,
-                        sessionId = SessionId(),
-                        config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-                        isGooglePayReady = false,
-                        newCard = null,
-                        statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
-                    )
-            )
+            bundleOf(ActivityStarter.Args.EXTRA to args)
         )
     }
 
@@ -242,5 +305,29 @@ class PaymentOptionsActivityTest {
                 viewModelFactory = viewModelFactoryFor(viewModel)
             }
         }
+    }
+
+    private fun createViewModel(
+        args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
+    ): PaymentOptionsViewModel {
+        return PaymentOptionsViewModel(
+            args = args,
+            prefsRepository = FakePrefsRepository(),
+            paymentMethodsRepository = FakePaymentMethodsRepository(args.paymentMethods),
+            eventReporter = eventReporter,
+            workContext = testDispatcher
+        )
+    }
+
+    private companion object {
+        private val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
+            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            paymentMethods = emptyList(),
+            sessionId = SessionId(),
+            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+            isGooglePayReady = false,
+            newCard = null,
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+        )
     }
 }

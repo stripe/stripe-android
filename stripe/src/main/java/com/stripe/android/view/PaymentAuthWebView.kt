@@ -182,6 +182,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             runCatching {
                 openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
             }.onFailure {
+                logger.error("Failed to start Intent.", it)
                 onAuthCompleted()
             }
         }
@@ -196,6 +197,8 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             runCatching {
                 activity.startActivity(intent)
             }.onFailure {
+                logger.error("Failed to start Intent.", it)
+
                 if (intent.scheme != "alipays") {
                     // complete auth if the deep-link can't be opened unless it is Alipay.
                     // The Alipay web view tries to open the Alipay app as soon as it is opened

@@ -545,6 +545,17 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
+    fun setCvcPlaceholderText_shouldShowCustomPlaceholderTextIfPresent() {
+        cardMultilineWidget.setCvcPlaceholderText("my cool placeholder")
+        assertThat(fullGroup.cvcInputLayout.placeholderText)
+            .isEqualTo("my cool placeholder")
+
+        cardMultilineWidget.setCvcPlaceholderText(null)
+        assertThat(fullGroup.cvcInputLayout.placeholderText)
+            .isEqualTo("123")
+    }
+
+    @Test
     fun initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() {
         assertThat(fullGroup.postalCodeInputLayout.visibility)
             .isEqualTo(View.VISIBLE)

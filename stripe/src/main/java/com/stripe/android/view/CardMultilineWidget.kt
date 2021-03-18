@@ -17,6 +17,7 @@ import androidx.annotation.IntRange
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
+import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
@@ -94,6 +95,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private var isEnabled: Boolean = false
     private var customCvcLabel: String? = null
+    private var customCvcPlaceholderText: String? = null
 
     private var cardBrand: CardBrand = CardBrand.Unknown
 
@@ -340,7 +342,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         // This sets the value of shouldShowPostalCode
-        attrs?.let { checkAttributeSet(it) }
+        checkAttributeSet(attrs)
 
         initTextInputLayoutErrorHandlers()
 
@@ -444,9 +446,12 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     internal fun populate(card: PaymentMethodCreateParams.Card?) {
         card?.let { createParamsCard ->
+            // Keep track of currently focused view to return focus to it after populating
+            val focusedView = findFocus()
             cardNumberEditText.setText(createParamsCard.number)
             cvcEditText.setText(createParamsCard.cvc)
             expiryDateEditText.setText(createParamsCard.expiryMonth, createParamsCard.expiryYear)
+            focusedView?.requestFocus() ?: findFocus()?.clearFocus()
         }
     }
 
@@ -476,6 +481,14 @@ class CardMultilineWidget @JvmOverloads constructor(
         if (hasWindowFocus) {
             updateBrandUi()
         }
+    }
+
+    /**
+     * Set an optional CVC placeholder text to override defaults, or `null` to use defaults.
+     */
+    internal fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
+        customCvcPlaceholderText = cvcPlaceholderText
+        updateCvc()
     }
 
     /**
@@ -619,29 +632,23 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
     }
 
-    private fun checkAttributeSet(attrs: AttributeSet) {
-        val a = context.theme.obtainStyledAttributes(
+    private fun checkAttributeSet(attrs: AttributeSet?) {
+        context.withStyledAttributes(
             attrs,
-            R.styleable.CardElement,
-            0,
-            0
-        )
-
-        try {
-            shouldShowPostalCode = a.getBoolean(
+            R.styleable.CardElement
+        ) {
+            shouldShowPostalCode = getBoolean(
                 R.styleable.CardElement_shouldShowPostalCode,
-                CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+                shouldShowPostalCode
             )
-            postalCodeRequired = a.getBoolean(
+            postalCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequirePostalCode,
-                CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+                postalCodeRequired
             )
-            usZipCodeRequired = a.getBoolean(
+            usZipCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequireUsZipCode,
-                CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
+                usZipCodeRequired
             )
-        } finally {
-            a.recycle()
         }
     }
 
@@ -734,7 +741,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun updateCvc() {
-        cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcInputLayout)
+        cvcEditText.updateBrand(cardBrand, customCvcLabel, customCvcPlaceholderText, cvcInputLayout)
     }
 
     private fun updateCardNumberIcon(
