@@ -54,7 +54,7 @@ class AddNetbankingPaymentMethodText {
             .perform(click())
 
         // click on first bank in the list
-        onView(withId(R.id.fpx_list)).perform(
+        onView(withId(R.id.bank_list)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
         )
     }
