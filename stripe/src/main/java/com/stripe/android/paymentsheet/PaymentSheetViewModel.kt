@@ -225,7 +225,7 @@ internal class PaymentSheetViewModel internal constructor(
                 runCatching {
                     paymentIntentValidator.requireValid(paymentIntentResult.intent)
                 }.fold(
-                    onSuccess = { resetViewState(paymentIntentResult.intent) },
+                    onSuccess = ::resetViewState,
                     onFailure = ::onFatal
                 )
             }
