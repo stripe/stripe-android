@@ -57,6 +57,8 @@ class CardInputWidget @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
+    private var customCvcPlaceholderText: String? = null
+    private var customCvcLabel: String? = null
     private val viewBinding = CardInputWidgetBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -794,7 +796,7 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.brandChangeCallback = { brand ->
             cardBrandView.brand = brand
             hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
-            cvcEditText.updateBrand(brand)
+            updateCvc()
         }
 
         expiryDateEditText.completionCallback = {
@@ -821,6 +823,31 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.isLoadingCallback = {
             cardBrandView.isLoading = it
         }
+    }
+
+    /**
+     * Set an optional CVC placeholder text to override defaults, or `null` to use defaults.
+     */
+    internal fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
+        customCvcPlaceholderText = cvcPlaceholderText
+        updateCvc()
+    }
+
+    /**
+     * Set an optional CVC field label to override defaults, or `null` to use defaults.
+     */
+    fun setCvcLabel(cvcLabel: String?) {
+        customCvcLabel = cvcLabel
+        updateCvc()
+    }
+
+    private fun updateCvc() {
+        cvcEditText.updateBrand(
+            cardBrandView.brand,
+            customCvcLabel,
+            customCvcPlaceholderText,
+            cvcNumberTextInputLayout
+        )
     }
 
     /**
