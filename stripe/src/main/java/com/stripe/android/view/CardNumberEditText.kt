@@ -167,7 +167,7 @@ class CardNumberEditText internal constructor(
         setErrorMessage(resources.getString(R.string.invalid_card_number))
         addTextChangedListener(CardNumberTextWatcher())
 
-        initParentOnFocusChangeListener { _, hasFocus ->
+        internalFocusChangeListener.add { _, hasFocus ->
             if (!hasFocus &&
                 (unvalidatedCardNumber.length != panLength) &&
                 (unvalidatedCardNumber.length > 0)

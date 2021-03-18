@@ -11,7 +11,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.OnFocusChangeListener
 import android.view.animation.Animation
 import android.view.animation.AnimationSet
 import android.view.animation.Transformation
@@ -753,14 +752,14 @@ class CardInputWidget @JvmOverloads constructor(
 
         currentFields.forEach { it.setErrorColor(errorColorInt) }
 
-        cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cardNumberEditText.internalFocusChangeListener.add { _, hasFocus ->
             if (hasFocus) {
                 scrollStart()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
 
-        expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        expiryDateEditText.internalFocusChangeListener.add { _, hasFocus ->
             if (hasFocus) {
                 scrollEnd()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
@@ -771,7 +770,7 @@ class CardInputWidget @JvmOverloads constructor(
         cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
         postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
 
-        cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cvcEditText.internalFocusChangeListener.add { _, hasFocus ->
             cardBrandView.shouldShowCvc = hasFocus
 
             if (hasFocus) {

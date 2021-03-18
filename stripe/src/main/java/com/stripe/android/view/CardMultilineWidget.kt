@@ -7,7 +7,6 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
@@ -687,20 +686,20 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun initFocusChangeListeners() {
-        cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cardNumberEditText.internalFocusChangeListener.add { _, hasFocus ->
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
 
-        expiryDateEditText.setClientOnFocusChangeListener { _, hasFocus ->
+        expiryDateEditText.internalFocusChangeListener.add { _, hasFocus ->
             // TODO: Why is this only called when have focus?
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             }
         }
 
-        cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cvcEditText.internalFocusChangeListener.add { _, hasFocus ->
             if (hasFocus) {
                 if (!showCvcIconInCvcField) {
                     flipToCvcIconIfNotFinished()
@@ -711,7 +710,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-        postalCodeEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        postalCodeEditText.internalFocusChangeListener.add { _, hasFocus ->
             if (shouldShowPostalCode && hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
             }

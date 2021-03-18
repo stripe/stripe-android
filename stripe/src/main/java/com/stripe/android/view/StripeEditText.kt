@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.KeyEvent
-import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -92,6 +91,9 @@ open class StripeEditText @JvmOverloads constructor(
         listenForDeleteEmpty()
         determineDefaultErrorColor()
         cachedColorStateList = textColors
+
+        // This will initialize a listener that calls the internal listeners then the external one
+        onFocusChangeListener = null
     }
 
     protected open val accessibilityText: String? = null
@@ -207,48 +209,21 @@ open class StripeEditText @JvmOverloads constructor(
         }
     }
 
-    /**
-     * This will set the parent OnFocusChangeListener that cannot be overwritten by clients.
-     * It should be the first listener set
-     */
-    internal fun initParentOnFocusChangeListener(l: OnFocusChangeListener) {
-        super.setOnFocusChangeListener(ParentOnFocusChangeListener(l))
+    internal val internalFocusChangeListener = mutableListOf<OnFocusChangeListener>()
+    private var externalFocusChangeListener: OnFocusChangeListener? = null
+
+    final override fun setOnFocusChangeListener(listener: OnFocusChangeListener?) {
+        super.setOnFocusChangeListener { view, hasFocus ->
+            internalFocusChangeListener.forEach {
+                it.onFocusChange(view, hasFocus)
+            }
+
+            externalFocusChangeListener?.onFocusChange(view, hasFocus)
+        }
+        externalFocusChangeListener = listener
     }
 
-    /**
-     * If the focus listener is a [ParentOnFocusChangeListener] then set the client
-     * listener.  Otherwise set the super onFocusChangeListener.
-     *
-     * Calling initParentOnFocusChangeListener will overwrite this listener
-     *
-     * An improvement on this function would be to make sure the [ParentOnFocusChangeListener]
-     * is always set as the change listener, if any change listener is set.  Then
-     * you can always update the parent and/or client focus listeners.  However this was
-     * decided against at this time do to the large impact it would have on multiple code paths
-     * val parentFocusChangeListener = onFocusChangeListener
-     * if(parentFocusChangeListener == null){
-     *     parentFocusChangeListener = ParentOnFocusChangeListener()
-     *     super.setOnFocusChangeListener(parentFocusChangeListener)
-     * }
-     * parentFocusChangeListener.setClientFocusListener(l)
-     */
-    internal fun setClientOnFocusChangeListener(l: OnFocusChangeListener) {
-        (onFocusChangeListener as? ParentOnFocusChangeListener)?.setClientFocusListener(l)
-            ?: super.setOnFocusChangeListener(l)
-    }
-
-    internal class ParentOnFocusChangeListener(
-        private val parentFocusListener: OnFocusChangeListener
-    ) : OnFocusChangeListener {
-        private var clientFocusListener: OnFocusChangeListener? = null
-
-        override fun onFocusChange(view: View?, hasFocus: Boolean) {
-            parentFocusListener.onFocusChange(view, hasFocus)
-            clientFocusListener?.onFocusChange(view, hasFocus)
-        }
-
-        fun setClientFocusListener(l: OnFocusChangeListener) {
-            clientFocusListener = l
-        }
+    override fun getOnFocusChangeListener(): OnFocusChangeListener? {
+        return externalFocusChangeListener
     }
 }

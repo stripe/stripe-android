@@ -70,7 +70,7 @@ class CardUtilsTest {
     fun getPossibleCardBrand_withNonsenseNumber_returnsUnknown() {
         assertThat(CardUtils.getPossibleCardBrand("1234567890123456")).isEqualTo(CardBrand.Unknown)
         assertThat(CardUtils.getPossibleCardBrand("9999 9999 9999 9999")).isEqualTo(CardBrand.Unknown)
-        assertThat(CardUtils.getPossibleCardBrand("3")).isEqualTo(CardBrand.Unknown)
+        assertThat(CardUtils.getPossibleCardBrand("3")).isEqualTo(CardBrand.AmericanExpress)
     }
 
     @Test
