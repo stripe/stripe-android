@@ -693,7 +693,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         expiryDateEditText.internalFocusChangeListeners.add { _, hasFocus ->
-            // TODO: Why is this only called when have focus?
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             }
