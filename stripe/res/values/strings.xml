@@ -94,7 +94,7 @@
     <!--Error text indicating that phone number is required, used for all addresses-->
     <string name="address_phone_number_required">Please enter your phone number</string>
     <!--Used to display masked card numbers. %1$s is a card brand, and %2$s is a partial call number, e.g. "Visa ending in 4242"-->
-    <string name="card_ending_in">%1$s ending in %2$s</string>
+    <string name="card_ending_in" tools:ignore="MissingTranslation">%1$s ending in %2$s</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">Expiry</string>
     <string name="invalid_card_number">Your card\'s number is invalid.</string>
@@ -128,12 +128,6 @@
     <string name="delete_payment_method" tools:ignore="MissingTranslation">Delete payment method</string>
     <!-- Label that will show that an FPX bank is offline. For example, "AmBank - Offline" -->
     <string name="fpx_bank_offline">%s - Offline</string>
-
-    <!--
-    Google Pay brand guidelines specify that the text should not be translated
-    https://developers.google.com/pay/api/android/guides/brand-guidelines#using-pay-in-text
-    -->
-    <string name="google_pay" tools:ignore="MissingTranslation">Google Pay</string>
 
     <!-- BECS Debit Widget - name field - label -->
     <string name="becs_widget_name">Name</string>
