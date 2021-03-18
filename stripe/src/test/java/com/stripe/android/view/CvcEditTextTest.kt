@@ -111,4 +111,13 @@ class CvcEditTextTest {
         cvcEditText.setText("1234")
         assertTrue(hasCompleted)
     }
+
+    @Test
+    fun `when lose focus and cvc length is wrong, show error`() {
+        cvcEditText.setText("12")
+        cvcEditText.updateBrand(CardBrand.AmericanExpress)
+        cvcEditText.onFocusChangeListener.onFocusChange(cvcEditText, false)
+        assertThat(cvcEditText.shouldShowError)
+            .isTrue()
+    }
 }

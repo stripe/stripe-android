@@ -64,6 +64,14 @@ class CvcEditText @JvmOverloads constructor(
                 completionCallback()
             }
         }
+
+        initParentOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus && unvalidatedCvc.normalized.length > 1) {
+                shouldShowError = unvalidatedCvc.validate(
+                    cardBrand.maxCvcLength
+                )?.let { false } ?: true
+            }
+        }
     }
 
     override val accessibilityText: String?
@@ -92,6 +100,14 @@ class CvcEditText @JvmOverloads constructor(
             } else {
                 resources.getString(R.string.cvc_number_hint)
             }
+
+        // Only show an error when we update the branch if text is entered
+        // and the length is less than the max
+        if (unvalidatedCvc.normalized.length > 1) {
+            shouldShowError = unvalidatedCvc.validate(
+                cardBrand.maxCvcLength
+            )?.let { false } ?: true
+        }
 
         if (textInputLayout != null) {
             textInputLayout.hint = hintText
