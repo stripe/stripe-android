@@ -226,12 +226,7 @@ internal class PaymentSheetViewModel internal constructor(
                 runCatching {
                     paymentIntentValidator.requireValid(paymentIntent)
                 }.fold(
-                    onSuccess = {
-                        // We don't want to save the payment intent or it will
-                        // reload the fragment and go to the list fragment.
-                        resetViewState(paymentIntent)
-                        ::onFatal
-                    },
+                    onSuccess = {resetViewState(paymentIntent)},
                     onFailure = ::onFatal
                 )
             }
