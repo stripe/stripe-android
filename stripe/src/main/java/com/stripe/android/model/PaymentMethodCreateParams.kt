@@ -199,7 +199,8 @@ data class PaymentMethodCreateParams internal constructor(
         PayPal("paypal"),
         AfterpayClearpay("afterpay_clearpay"),
         Upi("upi"),
-        Netbanking("netbanking")
+        Netbanking("netbanking"),
+        Blik("blik")
     }
 
     @Parcelize
@@ -750,6 +751,19 @@ data class PaymentMethodCreateParams internal constructor(
                     email = googlePayResult.email,
                     phone = googlePayResult.phoneNumber
                 )
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createBlik(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.Blik,
+                billingDetails = billingDetails,
+                metadata = metadata
             )
         }
     }
