@@ -65,22 +65,34 @@ internal class PaymentOptionsViewModel(
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
 
-            val requestSaveNewCard =
-                (paymentSelection as? PaymentSelection.New)?.shouldSavePaymentMethod
-                    ?: false
-            if (requestSaveNewCard) {
-                processSaveNewCard(paymentSelection)
-            } else {
-                processUnsavedNewCard(paymentSelection)
+            when (paymentSelection) {
+                is PaymentSelection.Saved, PaymentSelection.GooglePay -> processExistingCard(
+                    paymentSelection
+                )
+                is PaymentSelection.New -> {
+                    if (paymentSelection.shouldSavePaymentMethod) {
+                        processSaveNewCard(paymentSelection)
+                    } else {
+                        processUnsavedNewCard(paymentSelection)
+                    }
+                }
             }
         }
+    }
+
+    private fun processExistingCard(paymentSelection: PaymentSelection) {
+        _viewState.value = ViewState.PaymentOptions.Ready
+        prefsRepository.savePaymentSelection(paymentSelection)
+        _viewState.value = ViewState.PaymentOptions.ProcessResult(
+            PaymentOptionResult.Succeeded.Existing(paymentSelection)
+        )
     }
 
     private fun processUnsavedNewCard(paymentSelection: PaymentSelection) {
         _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
         _viewState.value = ViewState.PaymentOptions.ProcessResult(
-            PaymentOptionResult.Succeeded(paymentSelection)
+            PaymentOptionResult.Succeeded.Unsaved(paymentSelection)
         )
     }
 
@@ -93,7 +105,10 @@ internal class PaymentOptionsViewModel(
 
                     _viewState.value = ViewState.PaymentOptions.FinishProcessing {
                         _viewState.value = ViewState.PaymentOptions.ProcessResult(
-                            PaymentOptionResult.Succeeded(paymentSelection)
+                            PaymentOptionResult.Succeeded.NewlySaved(
+                                paymentSelection,
+                                paymentMethod
+                            )
                         )
                     }
                 },
@@ -121,11 +136,19 @@ internal class PaymentOptionsViewModel(
     }
 
     fun getPaymentOptionResult(): PaymentOptionResult {
-        return selection.value?.let {
-            PaymentOptionResult.Succeeded(it)
-        } ?: PaymentOptionResult.Canceled(
-            mostRecentError = fatal.value
-        )
+        return when (val paymentSelection = selection.value) {
+            is PaymentSelection.Saved, PaymentSelection.GooglePay -> {
+                PaymentOptionResult.Succeeded.Existing(paymentSelection)
+            }
+            is PaymentSelection.New -> {
+                PaymentOptionResult.Succeeded.Unsaved(paymentSelection)
+            }
+            null -> {
+                PaymentOptionResult.Canceled(
+                    mostRecentError = fatal.value
+                )
+            }
+        }
     }
 
     fun resolveTransitionTarget(config: FragmentConfig) {
