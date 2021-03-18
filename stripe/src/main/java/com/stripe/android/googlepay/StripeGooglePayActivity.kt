@@ -1,6 +1,8 @@
 package com.stripe.android.googlepay
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +45,12 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
+            // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
+            // orientation. See https://stackoverflow.com/a/50832408/11103900
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+
         overridePendingTransition(0, 0)
         setResult(
             RESULT_OK,
