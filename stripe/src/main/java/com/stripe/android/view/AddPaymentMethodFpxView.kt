@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
-import com.stripe.android.databinding.FpxPaymentMethodBinding
+import com.stripe.android.databinding.BankListPaymentMethodBinding
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
 
@@ -20,7 +20,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     private var fpxBankStatuses: BankStatuses = BankStatuses()
 
     private val fpxAdapter = AddPaymentMethodListAdapter(
-        activity,
+        ThemeConfig(activity),
         items = FpxBank.values().asList() as List<Bank>,
         itemSelectedCallback = {
             viewModel.selectedPosition = it
@@ -44,7 +44,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
 
     init {
-        val viewBinding = FpxPaymentMethodBinding.inflate(
+        val viewBinding = BankListPaymentMethodBinding.inflate(
             activity.layoutInflater,
             this,
             true
@@ -56,7 +56,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         viewModel.getFpxBankStatues()
             .observe(activity, Observer(::onFpxBankStatusesUpdated))
 
-        viewBinding.fpxList.run {
+        with(viewBinding.bankList) {
             adapter = fpxAdapter
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)

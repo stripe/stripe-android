@@ -6,19 +6,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.ImageViewCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.databinding.BankItemBinding
 import com.stripe.android.model.BankStatuses
 
-class AddPaymentMethodListAdapter constructor (
-    var activity: FragmentActivity,
+internal class AddPaymentMethodListAdapter constructor (
+    var themeConfig: ThemeConfig,
     var items : List<Bank>,
     val itemSelectedCallback: (Int) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var bankStatuses : BankStatuses? = null
+    internal var bankStatuses : BankStatuses? = null
 
     var selectedPosition = RecyclerView.NO_POSITION
         set(value) {
@@ -43,7 +42,7 @@ class AddPaymentMethodListAdapter constructor (
                 parent,
                 false
             ),
-            ThemeConfig(activity)
+            themeConfig
         )
     }
 

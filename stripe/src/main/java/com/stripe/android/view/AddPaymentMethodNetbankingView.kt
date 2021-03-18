@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
-import com.stripe.android.databinding.FpxPaymentMethodBinding
+import com.stripe.android.databinding.BankListPaymentMethodBinding
 import com.stripe.android.model.PaymentMethodCreateParams
 
 internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor(
@@ -16,7 +16,7 @@ internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor
     private var selectedPosition : Int? = null
 
     private val netbankingAdapter = AddPaymentMethodListAdapter(
-        activity,
+        ThemeConfig(activity),
         items = NetbankingBank.values().asList() as List<Bank>,
         itemSelectedCallback = {
             this.selectedPosition = it
@@ -33,7 +33,7 @@ internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor
         }
 
     init {
-        val viewBinding = FpxPaymentMethodBinding.inflate(
+        val viewBinding = BankListPaymentMethodBinding.inflate(
             activity.layoutInflater,
             this,
             true
@@ -41,7 +41,7 @@ internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor
 
         id = R.id.stripe_payment_methods_add_netbanking
 
-        viewBinding.fpxList.run {
+        with(viewBinding.bankList) {
             adapter = netbankingAdapter
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)

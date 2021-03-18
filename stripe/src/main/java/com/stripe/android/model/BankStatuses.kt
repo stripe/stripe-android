@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 import org.jetbrains.annotations.TestOnly
 
 @Parcelize
-data class BankStatuses internal constructor(
+internal data class BankStatuses internal constructor(
     private val statuses: Map<String, Boolean> = emptyMap()
 ) : StripeModel {
     @TestOnly
