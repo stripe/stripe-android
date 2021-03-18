@@ -18,7 +18,7 @@ class PaymentAuthWebChromeClientTest {
     )
 
     @Test
-    fun foo() {
+    fun `onConsoleMessage should write to logger`() {
         webChromeClient.onConsoleMessage(
             ConsoleMessage("hello world", "", 0, ConsoleMessage.MessageLevel.DEBUG)
         )
