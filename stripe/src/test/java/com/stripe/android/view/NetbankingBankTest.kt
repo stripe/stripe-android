@@ -8,15 +8,12 @@ import kotlin.test.assertNull
 class NetbankingBankText {
     @Test
     fun testGet_withValidBank() {
-        val expectedBank = NetbankingBank.values().first()
-        val actualBank = NetbankingBank.get("kotak")
-        assertEquals(expectedBank.code, actualBank?.code)
-        assertEquals(expectedBank.displayName, actualBank?.displayName)
+        assertThat(NetbankingBank.AirtelBank).isEqualTo(NetbankingBank.get("airtel"))
     }
 
     @Test
     fun testGet_withInvalidBank() {
-        assertNull(FpxBank.get("not_a_bank"))
+        assertThat(FpxBank.get("not_a_bank")).isNull()
     }
 
 }
