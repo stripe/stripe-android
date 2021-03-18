@@ -3418,9 +3418,6 @@ public final class com/stripe/android/model/PaymentMethodOptionsParams$Blik : co
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PaymentMethodOptionsParams$Blik$Companion {
-}
-
 public class com/stripe/android/model/PaymentMethodOptionsParams$Blik$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodOptionsParams$Blik;
