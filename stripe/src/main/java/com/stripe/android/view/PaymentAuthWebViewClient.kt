@@ -13,7 +13,7 @@ import com.stripe.android.Logger
 
 internal class PaymentAuthWebViewClient(
     private val activityStarter: (Intent) -> Unit,
-    private val activityFinisher: () -> Unit,
+    private val activityFinisher: (Throwable?) -> Unit,
     private val logger: Logger,
     private val isPageLoaded: MutableLiveData<Boolean>,
     private val clientSecret: String,
@@ -90,7 +90,7 @@ internal class PaymentAuthWebViewClient(
             openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
         }.onFailure {
             logger.error("Failed to start Intent.", it)
-            onAuthCompleted()
+            onAuthCompleted(it)
         }
     }
 
@@ -112,7 +112,7 @@ internal class PaymentAuthWebViewClient(
                 // irrespective of whether or not the app is installed.
                 // If this intent fails to resolve, we should still let the user
                 // continue on the mobile site.
-                onAuthCompleted()
+                onAuthCompleted(it)
             }
         }
     }
@@ -178,9 +178,11 @@ internal class PaymentAuthWebViewClient(
         return "stripejs://use_stripe_sdk/return_url" == uri.toString()
     }
 
-    private fun onAuthCompleted() {
+    private fun onAuthCompleted(
+        error: Throwable? = null
+    ) {
         logger.debug("PaymentAuthWebViewClient#onAuthCompleted()")
-        activityFinisher()
+        activityFinisher(error)
     }
 
     internal companion object {

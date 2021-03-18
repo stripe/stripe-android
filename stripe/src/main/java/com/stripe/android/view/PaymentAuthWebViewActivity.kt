@@ -14,8 +14,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.R
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
+import com.stripe.android.exception.StripeException
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
 
@@ -76,7 +78,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
         val webViewClient = PaymentAuthWebViewClient(
             { intent -> startActivity(intent) },
-            { finish() },
+            ::onAuthComplete,
             logger,
             isPagedLoaded,
             clientSecret,
@@ -89,6 +91,24 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         viewBinding.webView.webChromeClient = PaymentAuthWebChromeClient(this, logger)
 
         viewBinding.webView.loadUrl(args.url)
+    }
+
+    private fun onAuthComplete(error: Throwable?) {
+        if (error != null) {
+            setResult(
+                Activity.RESULT_OK,
+                Intent().putExtras(
+                    viewModel.paymentResult
+                        .copy(
+                            flowOutcome = StripeIntentResult.Outcome.FAILED,
+                            exception = StripeException.create(error),
+                            shouldCancelSource = true
+                        )
+                        .toBundle()
+                )
+            )
+        }
+        finish()
     }
 
     override fun onDestroy() {
