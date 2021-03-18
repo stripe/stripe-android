@@ -297,10 +297,13 @@ enum class CardBrand(
                 return Unknown
             }
 
-            return values()
-                .firstOrNull { cardBrand ->
-                    cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)?.matches() == true
-                } ?: Unknown
+            // Only return a card brand if we know exactly which one, if there is more than
+            // one possibility return unknown
+            return (values().filter { cardBrand ->
+                cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)?.matches() == true
+            }.takeIf {
+                it.size == 1
+            } ?: listOf(Unknown)).first()
         }
 
         internal fun getCardBrands(cardNumber: String?): List<CardBrand> {

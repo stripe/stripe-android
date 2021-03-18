@@ -66,7 +66,7 @@ class CvcEditText @JvmOverloads constructor(
         }
 
         internalFocusChangeListeners.add { _, hasFocus ->
-            if (!hasFocus && unvalidatedCvc.normalized.length > 1) {
+            if (!hasFocus && unvalidatedCvc.normalized.isNotBlank()) {
                 shouldShowError = unvalidatedCvc.validate(cardBrand.maxCvcLength) == null
             }
         }

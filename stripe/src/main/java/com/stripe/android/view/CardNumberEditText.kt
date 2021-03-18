@@ -169,7 +169,7 @@ class CardNumberEditText internal constructor(
         internalFocusChangeListeners.add { _, hasFocus ->
             if (!hasFocus &&
                 !isCardNumberValid &&
-                (unvalidatedCardNumber.length > 0)
+                (unvalidatedCardNumber.normalized.isNotBlank())
             ) {
                 shouldShowError = true
             }
@@ -407,10 +407,10 @@ class CardNumberEditText internal constructor(
             }
             // Partial card and brand is unknown.  CardBrand is set if we know definitively
             // we want to see if there are any possible cards that would match
-            else if ((unvalidatedCardNumber.length > 0) &&
+            else if ((unvalidatedCardNumber.normalized.isNotBlank()) &&
                 (
                     CardBrand.getCardBrands(unvalidatedCardNumber.normalized)
-                        .first() != CardBrand.Unknown
+                        .first() == CardBrand.Unknown
                     )
             ) {
                 isCardNumberValid = isValid
