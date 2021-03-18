@@ -39,7 +39,7 @@ enum class CardBrand(
      * Patterns for discrete lengths
      */
     @Deprecated("Will be removed in upcoming major release.")
-    private val partialPatterns: Map<Int, Pattern> = emptyMap(),
+    private val partialPatterns: Map<Int, Pattern>,
 
     /**
      * The position of spaces in a formatted card number. For example, "4242424242424242" is
@@ -157,7 +157,8 @@ enum class CardBrand(
         "unknown",
         "Unknown",
         R.drawable.stripe_ic_unknown,
-        cvcLength = setOf(3, 4)
+        cvcLength = setOf(3, 4),
+        partialPatterns = emptyMap()
     );
 
     @Deprecated("Will be removed in upcoming major release.")

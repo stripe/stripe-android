@@ -318,7 +318,7 @@ internal class CardNumberEditTextTest {
 
                 override fun filter(
                     cardNumber: CardNumber.Unvalidated
-                ) = emptyList<AccountRange> ()
+                ) = emptyList<AccountRange>()
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
@@ -790,7 +790,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun `when lose focus and card is not complete, show error`() {
         updateCardNumberAndIdle("3")
-        cardNumberEditText.internalFocusChangeListener
+        cardNumberEditText.internalFocusChangeListeners
             .forEach {
                 it.onFocusChange(cardNumberEditText, false)
             }

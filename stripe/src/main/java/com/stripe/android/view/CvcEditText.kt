@@ -65,11 +65,9 @@ class CvcEditText @JvmOverloads constructor(
             }
         }
 
-        internalFocusChangeListener.add { _, hasFocus ->
+        internalFocusChangeListeners.add { _, hasFocus ->
             if (!hasFocus && unvalidatedCvc.normalized.length > 1) {
-                shouldShowError = unvalidatedCvc.validate(
-                    cardBrand.maxCvcLength
-                )?.let { false } ?: true
+                shouldShowError = unvalidatedCvc.validate(cardBrand.maxCvcLength) == null
             }
         }
     }
@@ -106,9 +104,7 @@ class CvcEditText @JvmOverloads constructor(
         // Only show an error when we update the branch if text is entered
         // and the length is less than the max
         if (unvalidatedCvc.normalized.length > 1) {
-            shouldShowError = unvalidatedCvc.validate(
-                cardBrand.maxCvcLength
-            )?.let { false } ?: true
+            shouldShowError = unvalidatedCvc.validate(cardBrand.maxCvcLength) == null
         }
 
         if (textInputLayout != null) {

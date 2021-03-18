@@ -686,20 +686,20 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun initFocusChangeListeners() {
-        cardNumberEditText.internalFocusChangeListener.add { _, hasFocus ->
+        cardNumberEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
 
-        expiryDateEditText.internalFocusChangeListener.add { _, hasFocus ->
+        expiryDateEditText.internalFocusChangeListeners.add { _, hasFocus ->
             // TODO: Why is this only called when have focus?
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             }
         }
 
-        cvcEditText.internalFocusChangeListener.add { _, hasFocus ->
+        cvcEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 if (!showCvcIconInCvcField) {
                     flipToCvcIconIfNotFinished()
@@ -710,7 +710,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-        postalCodeEditText.internalFocusChangeListener.add { _, hasFocus ->
+        postalCodeEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (shouldShowPostalCode && hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
             }

@@ -209,12 +209,12 @@ open class StripeEditText @JvmOverloads constructor(
         }
     }
 
-    internal val internalFocusChangeListener = mutableListOf<OnFocusChangeListener>()
+    internal val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
     private var externalFocusChangeListener: OnFocusChangeListener? = null
 
     final override fun setOnFocusChangeListener(listener: OnFocusChangeListener?) {
         super.setOnFocusChangeListener { view, hasFocus ->
-            internalFocusChangeListener.forEach {
+            internalFocusChangeListeners.forEach {
                 it.onFocusChange(view, hasFocus)
             }
 

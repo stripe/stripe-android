@@ -752,14 +752,14 @@ class CardInputWidget @JvmOverloads constructor(
 
         currentFields.forEach { it.setErrorColor(errorColorInt) }
 
-        cardNumberEditText.internalFocusChangeListener.add { _, hasFocus ->
+        cardNumberEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 scrollStart()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
 
-        expiryDateEditText.internalFocusChangeListener.add { _, hasFocus ->
+        expiryDateEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 scrollEnd()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
@@ -770,7 +770,7 @@ class CardInputWidget @JvmOverloads constructor(
         cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
         postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
 
-        cvcEditText.internalFocusChangeListener.add { _, hasFocus ->
+        cvcEditText.internalFocusChangeListeners.add { _, hasFocus ->
             cardBrandView.shouldShowCvc = hasFocus
 
             if (hasFocus) {
