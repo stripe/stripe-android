@@ -193,7 +193,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     @Deprecated("Use cardParams", ReplaceWith("cardParams"))
     override val card: Card?
         get() {
-            return cardParams?.build()
+            return cardBuilder?.build()
         }
 
     /**

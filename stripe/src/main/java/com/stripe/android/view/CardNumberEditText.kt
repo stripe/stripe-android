@@ -168,9 +168,9 @@ class CardNumberEditText internal constructor(
         addTextChangedListener(CardNumberTextWatcher())
 
         initParentOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus
-                && (unvalidatedCardNumber.length != panLength)
-                && (unvalidatedCardNumber.length > 0)
+            if (!hasFocus &&
+                (unvalidatedCardNumber.length != panLength) &&
+                (unvalidatedCardNumber.length > 0)
             ) {
                 shouldShowError = true
             }
@@ -408,8 +408,8 @@ class CardNumberEditText internal constructor(
             }
             // Partial card and brand is unknown.  CardBrand is set if we know definitively
             // we want to see if there are any possible cards that would match
-            else if ((unvalidatedCardNumber.length > 0)
-                && (getPossibleCardBrand(unvalidatedCardNumber.normalized) == CardBrand.Unknown)
+            else if ((unvalidatedCardNumber.length > 0) &&
+                (getPossibleCardBrand(unvalidatedCardNumber.normalized) == CardBrand.Unknown)
             ) {
                 isCardNumberValid = isValid
                 shouldShowError = true
