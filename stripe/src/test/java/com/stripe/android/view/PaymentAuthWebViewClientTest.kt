@@ -17,7 +17,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentAuthWebViewTest {
+class PaymentAuthWebViewClientTest {
 
     private lateinit var activity: Activity
     private lateinit var webView: WebView
