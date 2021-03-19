@@ -63,6 +63,7 @@ class PaymentAuthWebViewStarterTest {
 
     private companion object {
         private val DATA = PaymentAuthWebViewContract.Args(
+            objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = 50000,
             clientSecret = "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k",
             url = "https://hooks.stripe.com/",

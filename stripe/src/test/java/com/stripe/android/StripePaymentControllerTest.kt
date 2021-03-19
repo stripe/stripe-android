@@ -937,6 +937,7 @@ internal class StripePaymentControllerTest {
         assertThat(launcher.launchArgs)
             .containsExactly(
                 PaymentAuthWebViewContract.Args(
+                    objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
                     requestCode = 50000,
                     clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
                     stripeAccountId = ACCOUNT_ID,
