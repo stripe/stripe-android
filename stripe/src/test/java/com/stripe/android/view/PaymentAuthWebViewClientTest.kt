@@ -15,11 +15,7 @@ import kotlin.test.Test
 class PaymentAuthWebViewClientTest {
 
     private val isPageLoaded = MutableLiveData(false)
-
     private var activityFinished = false
-    private val activityFinisher: () -> Unit = {
-        activityFinished = true
-    }
 
     private val webView = WebView(ApplicationProvider.getApplicationContext())
 
@@ -263,7 +259,7 @@ class PaymentAuthWebViewClientTest {
     ): PaymentAuthWebViewClient {
         return PaymentAuthWebViewClient(
             activityStarter,
-            activityFinisher,
+            { activityFinished = true },
             FakeLogger(),
             isPageLoaded,
             clientSecret,
