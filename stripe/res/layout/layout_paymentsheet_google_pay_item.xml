@@ -23,7 +23,7 @@
     <TextView
         android:id="@+id/label"
         style="@style/StripePaymentSheetPaymentMethodsLabel"
-        android:text="@string/stripe_googlepay_button_content_description"
+        android:text="@string/google_pay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="@+id/card"
