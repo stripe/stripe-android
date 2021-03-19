@@ -115,6 +115,8 @@ internal class PaymentOptionsViewModel(
                     }
                 },
                 onFailure = {
+                    _processing.value = false
+                    _viewState.value = ViewState.PaymentOptions.Ready
                     // TODO(michelleb-stripe): Handle failure cases
                 }
             )
