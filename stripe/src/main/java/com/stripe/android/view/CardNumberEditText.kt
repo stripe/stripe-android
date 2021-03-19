@@ -402,9 +402,8 @@ class CardNumberEditText internal constructor(
                     completionCallback()
                 }
             }
-            // Partial card and brand is unknown.  CardBrand is set if we know definitively
-            // we want to see if there are any possible cards that would match
-            else if (isPossible(unvalidatedCardNumber.normalized)) {
+            // Partial card number entered and brand is not yet determine, but possible.
+            else if (isPossibleCardBrand(unvalidatedCardNumber.normalized)) {
                 isCardNumberValid = isValid
                 shouldShowError = true
             } else {
@@ -415,7 +414,7 @@ class CardNumberEditText internal constructor(
             }
         }
 
-        private fun isPossible(cardNumber: String): Boolean {
+        private fun isPossibleCardBrand(cardNumber: String): Boolean {
             return cardNumber.isNotBlank() &&
                 CardBrand.getCardBrands(cardNumber).first() == CardBrand.Unknown
         }
