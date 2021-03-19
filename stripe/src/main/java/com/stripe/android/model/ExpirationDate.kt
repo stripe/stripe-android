@@ -54,6 +54,16 @@ sealed class ExpirationDate {
             ).joinToString(separator = "")
         }
 
+        internal val complete: Boolean
+            get() {
+                return (month.length + year.length) == 4
+            }
+
+        internal val isIncomplete: Boolean
+            get() {
+                return !complete && ((month.length + year.length) > 0)
+            }
+
         internal companion object {
             /**
              * Converts raw string input of the format MMYY into a [ExpirationDate.Unvalidated].

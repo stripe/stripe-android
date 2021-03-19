@@ -93,11 +93,7 @@ open class StripeEditText @JvmOverloads constructor(
         cachedColorStateList = textColors
 
         // This will initialize a listener that calls the internal listeners then the external one
-        super.setOnFocusChangeListener { view, hasFocus ->
-            internalFocusChangeListeners.forEach {
-                it.onFocusChange(view, hasFocus)
-            }
-        }
+        onFocusChangeListener = null
     }
 
     protected open val accessibilityText: String? = null
