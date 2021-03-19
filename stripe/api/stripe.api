@@ -5859,7 +5859,7 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected fun getAccessibilityText ()Ljava/lang/String;
-	public final fun getDefaultColorState ()Landroid/content/res/ColorStateList;
+	public final fun getCachedColorStateList ()Landroid/content/res/ColorStateList;
 	public final fun getDefaultErrorColorInt ()I
 	public final fun getShouldShowError ()Z
 	protected final fun isLastKeyDelete ()Z
