@@ -9,6 +9,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
@@ -32,7 +33,8 @@ open class StripeEditText @JvmOverloads constructor(
     private var deleteEmptyListener: DeleteEmptyListener? = null
 
     var defaultColorState: ColorStateList
-        private set
+        @VisibleForTesting
+        internal set
     private var externalColorState: ColorStateList? = null
     @ColorInt
     private var defaultErrorColor: Int = 0

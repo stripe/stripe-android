@@ -82,7 +82,7 @@ internal class StripeEditTextTest {
 
     @Test
     fun getDefaultErrorColorInt_onDarkTheme_returnsDarkError() {
-        editText.setTextColor(ContextCompat.getColor(context, android.R.color.primary_text_dark))
+        editText.defaultColorState = ColorStateList.valueOf(ContextCompat.getColor(context, android.R.color.primary_text_dark))
         assertThat(editText.defaultErrorColorInt)
             .isEqualTo(ContextCompat.getColor(context, R.color.stripe_error_text_dark_theme))
     }
