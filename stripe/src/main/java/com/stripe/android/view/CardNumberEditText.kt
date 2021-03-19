@@ -167,7 +167,7 @@ class CardNumberEditText internal constructor(
         addTextChangedListener(CardNumberTextWatcher())
 
         internalFocusChangeListeners.add { _, hasFocus ->
-            if (!hasFocus && isIncomplete(unvalidatedCardNumber.normalized)) {
+            if (!hasFocus && unvalidatedCardNumber.isIncomplete(panLength)) {
                 shouldShowError = true
             }
         }
@@ -177,10 +177,6 @@ class CardNumberEditText internal constructor(
         }
 
         updateLengthFilter()
-    }
-
-    private fun isIncomplete(cardNumber: String): Boolean {
-        return (cardNumber.length != panLength) && cardNumber.isNotBlank()
     }
 
     override fun onAttachedToWindow() {

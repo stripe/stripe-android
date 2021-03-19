@@ -78,6 +78,10 @@ internal sealed class CardNumber {
                 .joinToString(" ")
         }
 
+        internal fun isIncomplete(panLength: Int): Boolean {
+            return (normalized.length != panLength) && normalized.isNotBlank()
+        }
+
         private companion object {
             // characters to remove from a denormalized number to make it normalized
             private val REJECT_CHARS = setOf('-', ' ')

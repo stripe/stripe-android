@@ -67,7 +67,7 @@ class CvcEditText @JvmOverloads constructor(
 
         internalFocusChangeListeners.add { _, hasFocus ->
             if (!hasFocus && unvalidatedCvc.isIncomplete(cardBrand.maxCvcLength)) {
-                // TODO (michelleb-stripe) Should set error message to incomplete, and should truncate CVC on a brand name change.
+                // TODO (michelleb-stripe) Should set error message to incomplete
                 shouldShowError = true
             }
         }
@@ -106,6 +106,7 @@ class CvcEditText @JvmOverloads constructor(
         // and the Cvc does not validate
         if (unvalidatedCvc.normalized.isNotEmpty()) {
             shouldShowError = unvalidatedCvc.validate(cardBrand.maxCvcLength) == null
+            // TODO(michelleb-stripe): Should truncate CVC on a brand name change.
         }
 
         if (textInputLayout != null) {
