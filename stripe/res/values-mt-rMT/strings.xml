@@ -15,7 +15,6 @@
     <string name="address_label_address">Indirizz</string>
     <string name="address_label_address_line1">Indirizz linja 1</string>
     <string name="address_label_address_line1_optional">Indirizz linja 1 (mhux obbligatorju)</string>
-    <string name="address_label_address_line2">Indirizz linja 2</string>
     <string name="address_label_address_line2_optional">Indirizz linja 2 (mhux obbligatorju)</string>
     <string name="address_label_address_optional">Indirizz (mhux obbligatorju)</string>
     <string name="address_label_apt">Appartament</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Kontea</string>
     <string name="address_label_county_optional">Kontea (mhux obbligatorja)</string>
     <string name="address_label_name">Isem</string>
-    <string name="address_label_name_optional">L-Isem (mhux obbligatorju)</string>
     <string name="address_label_phone_number">In-numru tat-telefon</string>
     <string name="address_label_phone_number_optional">Numru tat-telefon (mhux obbligatorju)</string>
     <string name="address_label_postal_code">Kodiċi postali</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">XX/SS</string>
     <string name="expiry_label_short">Skadenza</string>
     <string name="fpx_bank_offline">%s - Offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">In-numru tal-kard tiegħek mhux validu.</string>
     <string name="invalid_cvc">Il-kodiċi tas-sigurtà tal-kard tiegħek mhux validu.</string>
     <string name="invalid_expiry_month">Ix-xahar tal-iskadenza tal-kard tiegħek mhux validu.</string>

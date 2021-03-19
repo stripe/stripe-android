@@ -15,7 +15,6 @@
     <string name="address_label_address">Adres</string>
     <string name="address_label_address_line1">Adresregel 1</string>
     <string name="address_label_address_line1_optional">Adresregel 1 (optioneel)</string>
-    <string name="address_label_address_line2">Adresregel 2</string>
     <string name="address_label_address_line2_optional">Adresregel 2 (optioneel)</string>
     <string name="address_label_address_optional">Adres (optioneel) </string>
     <string name="address_label_apt">App.</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Graafschap</string>
     <string name="address_label_county_optional">Graafschap (optioneel)</string>
     <string name="address_label_name">Naam</string>
-    <string name="address_label_name_optional">Naam (optioneel)</string>
     <string name="address_label_phone_number">Telefoonnummer</string>
     <string name="address_label_phone_number_optional">Telefoonnummer (optioneel)</string>
     <string name="address_label_postal_code">Postcode</string>
@@ -79,7 +77,6 @@
     <string name="expiry_date_hint">MM/JJ</string>
     <string name="expiry_label_short">Vervaldatum</string>
     <string name="fpx_bank_offline">%s - offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Het kaartnummer is ongeldig.</string>
     <string name="invalid_cvc">De beveiligingscode van je kaart is ongeldig.</string>
     <string name="invalid_expiry_month">De vervalmaand van de kaart is ongeldig.</string>

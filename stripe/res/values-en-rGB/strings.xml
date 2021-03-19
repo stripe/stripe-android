@@ -15,7 +15,6 @@
     <string name="address_label_address">Address</string>
     <string name="address_label_address_line1">Address line 1</string>
     <string name="address_label_address_line1_optional">Address line 1 (optional)</string>
-    <string name="address_label_address_line2">Address line 2</string> <!-- unused -->
     <string name="address_label_address_line2_optional">Address line 2 (optional)</string>
     <string name="address_label_address_optional">Address (optional) </string>
     <string name="address_label_apt">Apt. </string> <!-- unused -->
@@ -26,7 +25,6 @@
     <string name="address_label_county">County</string>
     <string name="address_label_county_optional">County (optional)</string>
     <string name="address_label_name">Name</string>
-    <string name="address_label_name_optional">Name (optional)</string> <!-- unused -->
     <string name="address_label_phone_number">Phone number</string>
     <string name="address_label_phone_number_optional">Phone number (optional)</string>
     <string name="address_label_postal_code">Postal code</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">Expiry</string>
     <string name="fpx_bank_offline">%s - Offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Your card number is invalid.</string>
     <string name="invalid_cvc">Your card\'s security code is invalid.</string>
     <string name="invalid_expiry_month">Your card expiry month is invalid.</string>

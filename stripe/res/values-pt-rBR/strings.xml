@@ -15,7 +15,6 @@
     <string name="address_label_address">Endereço</string>
     <string name="address_label_address_line1">Endereço – Linha 1</string>
     <string name="address_label_address_line1_optional">Endereço – Linha 1 (opcional)</string>
-    <string name="address_label_address_line2">Endereço – Linha 2</string>
     <string name="address_label_address_line2_optional">Endereço – Linha 2 (opcional)</string>
     <string name="address_label_address_optional">Endereço (opcional)</string>
     <string name="address_label_apt">Apt.</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Condado</string>
     <string name="address_label_county_optional">País (opcional)</string>
     <string name="address_label_name">Nome</string>
-    <string name="address_label_name_optional">Nome (opcional)</string>
     <string name="address_label_phone_number">Telefone</string>
     <string name="address_label_phone_number_optional">Telefone (opcional)</string>
     <string name="address_label_postal_code">Código postal</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Validade</string>
     <string name="fpx_bank_offline">%s – Offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Número do cartão inválido.</string>
     <string name="invalid_cvc">Código de segurança inválido.</string>
     <string name="invalid_expiry_month">O mês de validade do cartão é inválido.</string>

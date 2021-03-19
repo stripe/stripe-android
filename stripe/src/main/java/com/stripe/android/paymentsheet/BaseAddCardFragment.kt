@@ -65,8 +65,6 @@ internal abstract class BaseAddCardFragment(
 
     private val addCardViewModel: AddCardViewModel by viewModels()
 
-    abstract fun createHeaderText(config: FragmentConfig): String
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -141,8 +139,6 @@ internal abstract class BaseAddCardFragment(
         }
 
         setupSaveCardCheckbox(saveCardCheckbox)
-
-        addCardHeader.text = createHeaderText(config)
 
         eventReporter.onShowNewPaymentOptionForm()
     }

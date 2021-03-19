@@ -15,7 +15,6 @@
     <string name="address_label_address">Adres</string>
     <string name="address_label_address_line1">Adres satırı 1</string>
     <string name="address_label_address_line1_optional">Adres satırı 1</string>
-    <string name="address_label_address_line2">Adres satırı 2</string>
     <string name="address_label_address_line2_optional">Adres satırı 2 (steğe bağlı)</string>
     <string name="address_label_address_optional">Adres (isteğe bağlı)</string>
     <string name="address_label_apt">Apt.</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Ülke</string>
     <string name="address_label_county_optional">Ülke (isteğe bağlı)</string>
     <string name="address_label_name">Adı</string>
-    <string name="address_label_name_optional">Adı (isteğe bağlı)</string>
     <string name="address_label_phone_number">Telefon numarası</string>
     <string name="address_label_phone_number_optional">Telefon numarası (isteğe bağlı)</string>
     <string name="address_label_postal_code">Posta kodu</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">AA/YY</string>
     <string name="expiry_label_short">Son kullanma</string>
     <string name="fpx_bank_offline">%s - Çevrimdışı</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Kart numaranız geçersiz.</string>
     <string name="invalid_cvc">Kartınızın güvenlik kodu geçersiz</string>
     <string name="invalid_expiry_month">Kartınızın son kullanma ayı geçersiz.</string>

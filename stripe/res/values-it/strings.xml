@@ -15,7 +15,6 @@
     <string name="address_label_address">Indirizzo</string>
     <string name="address_label_address_line1">Indirizzo riga 1</string>
     <string name="address_label_address_line1_optional">Indirizzo riga 1 (facoltativo)</string>
-    <string name="address_label_address_line2">Indirizzo riga 2</string>
     <string name="address_label_address_line2_optional">Indirizzo riga 2 (facoltativo)</string>
     <string name="address_label_address_optional">Indirizzo (facoltativo) </string>
     <string name="address_label_apt">Interno</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Contea</string>
     <string name="address_label_county_optional">Contea (facoltativo)</string>
     <string name="address_label_name">Nome</string>
-    <string name="address_label_name_optional">Nome (facoltativo)</string>
     <string name="address_label_phone_number">Numero di telefono</string>
     <string name="address_label_phone_number_optional">Numero di telefono (facoltativo)</string>
     <string name="address_label_postal_code">Cod. postale</string>
@@ -79,7 +77,6 @@
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Scadenza</string>
     <string name="fpx_bank_offline">%s - Offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Il numero della carta non è valido.</string>
     <string name="invalid_cvc">Il codice di sicurezza della carta non è valido.</string>
     <string name="invalid_expiry_month">Il mese di scadenza della carta non è valido.</string>

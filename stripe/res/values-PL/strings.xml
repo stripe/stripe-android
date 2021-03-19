@@ -15,7 +15,6 @@
     <string name="address_label_address">Adres</string>
     <string name="address_label_address_line1">Linia adresu 1</string>
     <string name="address_label_address_line1_optional">Linia adresu 1 (opcja)</string>
-    <string name="address_label_address_line2">Linia adresu 2</string>
     <string name="address_label_address_line2_optional">Linia adresu 2 (opcja)</string>
     <string name="address_label_address_optional">Adres (opcja)</string>
     <string name="address_label_apt">Nr lokalu</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Hrabstwo</string>
     <string name="address_label_county_optional">Hrabstwo (opcja)</string>
     <string name="address_label_name">Imię i nazwisko</string>
-    <string name="address_label_name_optional">Imię i nazwisko (opcja)</string>
     <string name="address_label_phone_number">Nr telefonu</string>
     <string name="address_label_phone_number_optional">Nr telefonu (opcja)</string>
     <string name="address_label_postal_code">Kod pocztowy</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">MM/RR</string>
     <string name="expiry_label_short">Data ważności</string>
     <string name="fpx_bank_offline">%s – offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Nieprawidłowy nr karty.</string>
     <string name="invalid_cvc">Kod bezpieczeństwa karty jest nieprawidłowy.</string>
     <string name="invalid_expiry_month">Miesiąc daty ważności karty jest nieprawidłowy.</string>

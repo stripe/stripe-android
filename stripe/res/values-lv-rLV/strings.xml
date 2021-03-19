@@ -15,7 +15,6 @@
     <string name="address_label_address">Adrese</string>
     <string name="address_label_address_line1">1. adreses rindiņa</string>
     <string name="address_label_address_line1_optional">1. adreses rindiņa (nav obligāti)</string>
-    <string name="address_label_address_line2">2. adreses rindiņa</string>
     <string name="address_label_address_line2_optional">2. adreses rindiņa (nav obligāti)</string>
     <string name="address_label_address_optional">Adrese (nav obligāti) </string>
     <string name="address_label_apt">Dzīv. </string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Apriņķis</string>
     <string name="address_label_county_optional">Apriņķis (nav obligāti)</string>
     <string name="address_label_name">Vārds, uzvārds</string>
-    <string name="address_label_name_optional">Vārds un uzvārds (nav obligāti)</string>
     <string name="address_label_phone_number">Tālruņa numurs</string>
     <string name="address_label_phone_number_optional">Tālruņa numurs (nav obligāti)</string>
     <string name="address_label_postal_code">Pasta indekss</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">MM/GG</string>
     <string name="expiry_label_short">Derīguma termiņš</string>
     <string name="fpx_bank_offline">%s — bezsaistē</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Kartes numurs nav derīgs.</string>
     <string name="invalid_cvc">Kartes drošības kods nav derīgs.</string>
     <string name="invalid_expiry_month">Kartes derīguma termiņa mēnesis nav derīgs.</string>

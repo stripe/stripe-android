@@ -15,7 +15,6 @@
     <string name="address_label_address">Adress</string>
     <string name="address_label_address_line1">Adressrad 1</string>
     <string name="address_label_address_line1_optional">Adressrad 1 (valfritt)</string>
-    <string name="address_label_address_line2">Adressrad 2</string>
     <string name="address_label_address_line2_optional">Adressrad 2 (valfritt)</string>
     <string name="address_label_address_optional">Adress (valfritt)</string>
     <string name="address_label_apt">Lgh. </string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Grevskap</string>
     <string name="address_label_county_optional">Region (valfritt)</string>
     <string name="address_label_name">Namn</string>
-    <string name="address_label_name_optional">Namn (valfritt)</string>
     <string name="address_label_phone_number">Telefonnummer</string>
     <string name="address_label_phone_number_optional">Telefonnummer (valfritt)</string>
     <string name="address_label_postal_code">Postnummer</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">MM/ÅÅ</string>
     <string name="expiry_label_short">Giltighetstid</string>
     <string name="fpx_bank_offline">%s - offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Kortnumret är ogiltigt.</string>
     <string name="invalid_cvc">Kortets säkerhetskod är ogiltig.</string>
     <string name="invalid_expiry_month">Kortets utgångsmånad är ogiltig.</string>

@@ -15,7 +15,6 @@
     <string name="address_label_address">Osoite</string>
     <string name="address_label_address_line1">Osoiterivi 1</string>
     <string name="address_label_address_line1_optional">Osoiterivi 1 (valinnainen)</string>
-    <string name="address_label_address_line2">Osoiterivi 2</string>
     <string name="address_label_address_line2_optional">Osoiterivi 2 (valinnainen)</string>
     <string name="address_label_address_optional">Osoite (valinnainen) </string>
     <string name="address_label_apt">Asunto </string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Lääni</string>
     <string name="address_label_county_optional">Lääni (valinnainen)</string>
     <string name="address_label_name">Nimi</string>
-    <string name="address_label_name_optional">Nimi (valinnainen)</string>
     <string name="address_label_phone_number">Puhelinnumero</string>
     <string name="address_label_phone_number_optional">Puhelinnumero (valinnainen)</string>
     <string name="address_label_postal_code">Postinumero</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">KK/VV</string>
     <string name="expiry_label_short">Vanheneminen</string>
     <string name="fpx_bank_offline">%s - Offline-tilassa</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Kortin numero ei kelpaa.</string>
     <string name="invalid_cvc">Kortin turvakoodi ei kelpaa.</string>
     <string name="invalid_expiry_month">Kortin erääntymiskuukausi ei kelpaa.</string>

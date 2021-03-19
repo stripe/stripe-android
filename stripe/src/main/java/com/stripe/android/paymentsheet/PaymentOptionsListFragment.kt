@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
@@ -44,8 +43,6 @@ internal class PaymentOptionsListFragment(
             PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull(config)
         )
     }
-
-    override fun createHeaderText() = getString(R.string.stripe_paymentsheet_select_payment_method)
 
     override fun onPaymentOptionSelected(
         paymentSelection: PaymentSelection,
