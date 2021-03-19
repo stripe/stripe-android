@@ -167,10 +167,7 @@ class CardNumberEditText internal constructor(
         addTextChangedListener(CardNumberTextWatcher())
 
         internalFocusChangeListeners.add { _, hasFocus ->
-            if (!hasFocus &&
-                !isCardNumberValid &&
-                (unvalidatedCardNumber.normalized.isNotBlank())
-            ) {
+            if (!hasFocus && unvalidatedCardNumber.isIncomplete(panLength)) {
                 shouldShowError = true
             }
         }
@@ -407,12 +404,7 @@ class CardNumberEditText internal constructor(
             }
             // Partial card and brand is unknown.  CardBrand is set if we know definitively
             // we want to see if there are any possible cards that would match
-            else if ((unvalidatedCardNumber.normalized.isNotBlank()) &&
-                (
-                    CardBrand.getCardBrands(unvalidatedCardNumber.normalized)
-                        .first() == CardBrand.Unknown
-                    )
-            ) {
+            else if (isPossible(unvalidatedCardNumber.normalized)) {
                 isCardNumberValid = isValid
                 shouldShowError = true
             } else {
@@ -421,6 +413,11 @@ class CardNumberEditText internal constructor(
                 // TODO (michelleb-stripe) Should set error message to incomplete, then in focus change if it isn't complete it will update it.
                 shouldShowError = false
             }
+        }
+
+        private fun isPossible(cardNumber: String): Boolean {
+            return cardNumber.isNotBlank() &&
+                CardBrand.getCardBrands(cardNumber).first() == CardBrand.Unknown
         }
 
         private val shouldUpdateAfterChange: Boolean

@@ -9,6 +9,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
@@ -30,8 +31,21 @@ open class StripeEditText @JvmOverloads constructor(
 
     private var afterTextChangedListener: AfterTextChangedListener? = null
     private var deleteEmptyListener: DeleteEmptyListener? = null
-    var cachedColorStateList: ColorStateList? = null
-        private set
+
+    internal var defaultColorStateList: ColorStateList
+        @VisibleForTesting
+        internal set
+
+    @Deprecated("Will be removed in upcoming major release.")
+    val cachedColorStateList: ColorStateList
+        get() = defaultColorStateList
+    private var externalColorStateList: ColorStateList? = null
+
+    @ColorInt
+    private var defaultErrorColor: Int = 0
+
+    @ColorInt
+    private var externalErrorColor: Int? = null
 
     /**
      * Gets whether or not the text should be displayed in error mode.
@@ -48,9 +62,9 @@ open class StripeEditText @JvmOverloads constructor(
             if (field != shouldShowError) {
                 // only update the view's UI if the property's value is changing
                 if (shouldShowError) {
-                    setTextColor(errorColor ?: defaultErrorColor)
+                    super.setTextColor(externalErrorColor ?: defaultErrorColor)
                 } else {
-                    setTextColor(cachedColorStateList)
+                    super.setTextColor(externalColorStateList ?: defaultColorStateList)
                 }
                 refreshDrawableState()
             }
@@ -64,12 +78,6 @@ open class StripeEditText @JvmOverloads constructor(
         get() {
             return text?.toString().orEmpty()
         }
-
-    @ColorInt
-    private var defaultErrorColor: Int = 0
-
-    @ColorInt
-    private var errorColor: Int? = null
 
     private var errorMessageListener: ErrorMessageListener? = null
 
@@ -89,18 +97,26 @@ open class StripeEditText @JvmOverloads constructor(
         maxLines = 1
         listenForTextChanges()
         listenForDeleteEmpty()
+        defaultColorStateList = textColors
         determineDefaultErrorColor()
-        cachedColorStateList = textColors
 
         // This will initialize a listener that calls the internal listeners then the external one
-        super.setOnFocusChangeListener { view, hasFocus ->
-            internalFocusChangeListeners.forEach {
-                it.onFocusChange(view, hasFocus)
-            }
-        }
+        onFocusChangeListener = null
     }
 
+    internal val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
+    private var externalFocusChangeListener: OnFocusChangeListener? = null
+
     protected open val accessibilityText: String? = null
+
+    override fun setTextColor(colors: ColorStateList?) {
+        super.setTextColor(colors)
+
+        // This will only use textColors and not colors because textColor is never null
+        externalColorStateList = textColors
+    }
+
+    override fun setTextColor(color: Int) = setTextColor(ColorStateList.valueOf(color))
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
         val inputConnection = super.onCreateInputConnection(outAttrs)
@@ -142,7 +158,7 @@ open class StripeEditText @JvmOverloads constructor(
      * @param errorColor a [ColorInt]
      */
     fun setErrorColor(@ColorInt errorColor: Int) {
-        this.errorColor = errorColor
+        this.externalErrorColor = errorColor
     }
 
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
@@ -153,10 +169,9 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun determineDefaultErrorColor() {
-        cachedColorStateList = textColors
         defaultErrorColor = ContextCompat.getColor(
             context,
-            if (StripeColorUtils.isColorDark(textColors.defaultColor)) {
+            if (StripeColorUtils.isColorDark(defaultColorStateList.defaultColor)) {
                 // Note: if the _text_ color is dark, then this is a
                 // light theme, and vice-versa.
                 R.color.stripe_error_text_light_theme
@@ -213,9 +228,6 @@ open class StripeEditText @JvmOverloads constructor(
         }
     }
 
-    internal val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
-    private var externalFocusChangeListener: OnFocusChangeListener? = null
-
     final override fun setOnFocusChangeListener(listener: OnFocusChangeListener?) {
         super.setOnFocusChangeListener { view, hasFocus ->
             internalFocusChangeListeners.forEach {
@@ -228,7 +240,8 @@ open class StripeEditText @JvmOverloads constructor(
         externalFocusChangeListener = listener
     }
 
-    override fun getOnFocusChangeListener(): OnFocusChangeListener? {
-        return externalFocusChangeListener
-    }
+    override fun getOnFocusChangeListener() = externalFocusChangeListener
+
+    @VisibleForTesting
+    internal fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
 }

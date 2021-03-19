@@ -11,12 +11,17 @@ internal sealed class Cvc {
         internal val normalized = denormalized.filter { it.isDigit() }
 
         fun validate(maxLength: Int): Validated? {
-            return if (setOf(COMMON_LENGTH, maxLength).contains(normalized.length)) {
+            return if (isComplete(maxLength)) {
                 Validated(normalized)
             } else {
                 null
             }
         }
+
+        private fun isComplete(maxLength: Int) =
+            setOf(COMMON_LENGTH, maxLength).contains(normalized.length)
+
+        fun isIncomplete(maxLength: Int) = normalized.isNotBlank() && !isComplete(maxLength)
     }
 
     /**
