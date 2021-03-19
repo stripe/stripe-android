@@ -128,7 +128,7 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <com.stripe.android.view.StripeEditText
                         android:id="@+id/postal_code"
                         style="@style/StripePaymentSheetTextInputEditText"
                         android:inputType="textPostalAddress"
