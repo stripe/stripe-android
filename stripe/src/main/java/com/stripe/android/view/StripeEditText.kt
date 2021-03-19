@@ -30,8 +30,14 @@ open class StripeEditText @JvmOverloads constructor(
 
     private var afterTextChangedListener: AfterTextChangedListener? = null
     private var deleteEmptyListener: DeleteEmptyListener? = null
-    var cachedColorStateList: ColorStateList
+
+    var defaultColorState: ColorStateList
         private set
+    private var externalColorState: ColorStateList? = null
+    @ColorInt
+    private var defaultErrorColor: Int = 0
+    @ColorInt
+    private var externalErrorColor: Int? = null
 
     /**
      * Gets whether or not the text should be displayed in error mode.
@@ -48,9 +54,9 @@ open class StripeEditText @JvmOverloads constructor(
             if (field != shouldShowError) {
                 // only update the view's UI if the property's value is changing
                 if (shouldShowError) {
-                    super.setTextColor(errorColor ?: defaultErrorColor)
+                    super.setTextColor(externalErrorColor ?: defaultErrorColor)
                 } else {
-                    super.setTextColor(cachedColorStateList)
+                    super.setTextColor(externalColorState ?: defaultColorState)
                 }
                 refreshDrawableState()
             }
@@ -64,12 +70,6 @@ open class StripeEditText @JvmOverloads constructor(
         get() {
             return text?.toString().orEmpty()
         }
-
-    @ColorInt
-    private var defaultErrorColor: Int = 0
-
-    @ColorInt
-    private var errorColor: Int? = null
 
     private var errorMessageListener: ErrorMessageListener? = null
 
@@ -89,7 +89,7 @@ open class StripeEditText @JvmOverloads constructor(
         maxLines = 1
         listenForTextChanges()
         listenForDeleteEmpty()
-        cachedColorStateList = textColors
+        defaultColorState = textColors
         determineDefaultErrorColor()
     }
 
@@ -99,14 +99,14 @@ open class StripeEditText @JvmOverloads constructor(
         super.setTextColor(colors)
 
         // This will only use textColors and not colors because textColor is never null
-        cachedColorStateList = textColors
+        externalColorState = textColors
     }
 
     override fun setTextColor(color: Int) {
         super.setTextColor(color)
 
         // This will only use textColors and not colors because textColor is never null
-        cachedColorStateList = ColorStateList.valueOf(color)
+        externalColorState = ColorStateList.valueOf(color)
     }
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
@@ -149,7 +149,7 @@ open class StripeEditText @JvmOverloads constructor(
      * @param errorColor a [ColorInt]
      */
     fun setErrorColor(@ColorInt errorColor: Int) {
-        this.errorColor = errorColor
+        this.externalErrorColor = errorColor
     }
 
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
@@ -162,7 +162,7 @@ open class StripeEditText @JvmOverloads constructor(
     private fun determineDefaultErrorColor() {
         defaultErrorColor = ContextCompat.getColor(
             context,
-            if (StripeColorUtils.isColorDark(cachedColorStateList.defaultColor)) {
+            if (StripeColorUtils.isColorDark(defaultColorState.defaultColor)) {
                 // Note: if the _text_ color is dark, then this is a
                 // light theme, and vice-versa.
                 R.color.stripe_error_text_light_theme

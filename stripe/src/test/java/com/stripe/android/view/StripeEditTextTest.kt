@@ -133,7 +133,7 @@ internal class StripeEditTextTest {
 
     @Test
     fun getCachedColorStateList_afterInit_returnsNotNull() {
-        assertThat(editText.cachedColorStateList)
+        assertThat(editText.defaultColorState)
             .isNotNull()
     }
 
