@@ -32,10 +32,13 @@ open class StripeEditText @JvmOverloads constructor(
     private var afterTextChangedListener: AfterTextChangedListener? = null
     private var deleteEmptyListener: DeleteEmptyListener? = null
 
-    var defaultColorState: ColorStateList
+    internal var defaultColorStateList: ColorStateList
         @VisibleForTesting
         internal set
-    private var externalColorState: ColorStateList? = null
+    @Deprecated("Will be removed in upcoming major release.")
+    val cachedColorStateList: ColorStateList
+        get() = defaultColorStateList
+    private var externalColorStateList: ColorStateList? = null
     @ColorInt
     private var defaultErrorColor: Int = 0
     @ColorInt
@@ -58,7 +61,7 @@ open class StripeEditText @JvmOverloads constructor(
                 if (shouldShowError) {
                     super.setTextColor(externalErrorColor ?: defaultErrorColor)
                 } else {
-                    super.setTextColor(externalColorState ?: defaultColorState)
+                    super.setTextColor(externalColorStateList ?: defaultColorStateList)
                 }
                 refreshDrawableState()
             }
@@ -91,7 +94,7 @@ open class StripeEditText @JvmOverloads constructor(
         maxLines = 1
         listenForTextChanges()
         listenForDeleteEmpty()
-        defaultColorState = textColors
+        defaultColorStateList = textColors
         determineDefaultErrorColor()
     }
 
@@ -101,15 +104,10 @@ open class StripeEditText @JvmOverloads constructor(
         super.setTextColor(colors)
 
         // This will only use textColors and not colors because textColor is never null
-        externalColorState = textColors
+        externalColorStateList = textColors
     }
 
-    override fun setTextColor(color: Int) {
-        super.setTextColor(color)
-
-        // This will only use textColors and not colors because textColor is never null
-        externalColorState = ColorStateList.valueOf(color)
-    }
+    override fun setTextColor(color: Int) = setTextColor(ColorStateList.valueOf(color))
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
         val inputConnection = super.onCreateInputConnection(outAttrs)
@@ -164,7 +162,7 @@ open class StripeEditText @JvmOverloads constructor(
     private fun determineDefaultErrorColor() {
         defaultErrorColor = ContextCompat.getColor(
             context,
-            if (StripeColorUtils.isColorDark(defaultColorState.defaultColor)) {
+            if (StripeColorUtils.isColorDark(defaultColorStateList.defaultColor)) {
                 // Note: if the _text_ color is dark, then this is a
                 // light theme, and vice-versa.
                 R.color.stripe_error_text_light_theme
