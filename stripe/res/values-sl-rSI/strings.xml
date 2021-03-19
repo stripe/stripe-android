@@ -15,7 +15,6 @@
     <string name="address_label_address">Naslov</string>
     <string name="address_label_address_line1">Naslov 1</string>
     <string name="address_label_address_line1_optional">Naslov 1 (izbirno)</string>
-    <string name="address_label_address_line2">Naslov 2</string>
     <string name="address_label_address_line2_optional">Naslov 2 (izbirno)</string>
     <string name="address_label_address_optional">Naslov (izbirno)</string>
     <string name="address_label_apt">Stanovanje</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Okraj</string>
     <string name="address_label_county_optional">Država (izbirno)</string>
     <string name="address_label_name">Ime</string>
-    <string name="address_label_name_optional">Ime (izbirno)</string>
     <string name="address_label_phone_number">Telefonska številka</string>
     <string name="address_label_phone_number_optional">Telefonska številka (izbirno)</string>
     <string name="address_label_postal_code">Poštna številka</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">MM/LL</string>
     <string name="expiry_label_short">Potek</string>
     <string name="fpx_bank_offline">%s – ni dosegljiva</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Številka vaše kartice ni veljavna.</string>
     <string name="invalid_cvc">Varnostna koda vaše kartice ni veljavna.</string>
     <string name="invalid_expiry_month">Mesec poteka vaše kartice ni veljaven.</string>

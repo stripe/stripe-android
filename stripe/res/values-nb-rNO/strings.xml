@@ -15,7 +15,6 @@
     <string name="address_label_address">Adresse</string>
     <string name="address_label_address_line1">Adresselinje 1</string>
     <string name="address_label_address_line1_optional">Adresselinje 1 (valgfritt)</string>
-    <string name="address_label_address_line2">Adresselinje 2</string>
     <string name="address_label_address_line2_optional">Adresselinje 2 (valgfritt)</string>
     <string name="address_label_address_optional">Adresse (valgfritt)</string>
     <string name="address_label_apt">Leil.</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Fylke</string>
     <string name="address_label_county_optional">Fylke (valgfritt)</string>
     <string name="address_label_name">Navn</string>
-    <string name="address_label_name_optional">Navn (valgfritt)</string>
     <string name="address_label_phone_number">Telefonnummer</string>
     <string name="address_label_phone_number_optional">Telefonnummer (valgfritt)</string>
     <string name="address_label_postal_code">Postnummer</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">MM/ÅÅ</string>
     <string name="expiry_label_short">Utløp</string>
     <string name="fpx_bank_offline">%s – frakoblet</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Kortnummeret er ugyldig.</string>
     <string name="invalid_cvc">Kortets sikkerhetskode er ugyldig.</string>
     <string name="invalid_expiry_month">Kortets utløpsmåned er ugyldig.</string>

@@ -68,8 +68,6 @@ internal abstract class BasePaymentMethodsListFragment(
 
         eventReporter.onShowExistingPaymentOptions()
 
-        viewBinding.header.text = createHeaderText()
-
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             adapter.interactionEnabled = !isProcessing
             layoutManager.canScroll = !isProcessing
@@ -77,7 +75,6 @@ internal abstract class BasePaymentMethodsListFragment(
     }
 
     abstract fun transitionToAddPaymentMethod()
-    abstract fun createHeaderText(): String
 
     open fun onPaymentOptionSelected(
         paymentSelection: PaymentSelection,

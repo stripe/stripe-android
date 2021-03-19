@@ -15,7 +15,6 @@
     <string name="address_label_address">Адрес</string>
     <string name="address_label_address_line1">Адрес (строка 1)</string>
     <string name="address_label_address_line1_optional">Адрес (строка 1) (необязательно)</string>
-    <string name="address_label_address_line2">Адрес (строка 2)</string>
     <string name="address_label_address_line2_optional">Адрес (строка 2) (необязательно)</string>
     <string name="address_label_address_optional">Адрес (необязательно)</string>
     <string name="address_label_apt">Кв.</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Графство</string>
     <string name="address_label_county_optional">Графство (необязательно)</string>
     <string name="address_label_name">Имя</string>
-    <string name="address_label_name_optional">Имя (необязательно)</string>
     <string name="address_label_phone_number">Номер телефона</string>
     <string name="address_label_phone_number_optional">Номер телефона (необязательно)</string>
     <string name="address_label_postal_code">Почтовый индекс</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">ММ/ГГ</string>
     <string name="expiry_label_short">Истечение срока действия</string>
     <string name="fpx_bank_offline">%s - не в сети</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Номер карты недействителен.</string>
     <string name="invalid_cvc">Код CVV/CVC карты недействителен.</string>
     <string name="invalid_expiry_month">Недопустимый месяц окончания действия карты.</string>

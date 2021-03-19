@@ -15,7 +15,6 @@
     <string name="address_label_address">Адрес</string>
     <string name="address_label_address_line1">Ред 1 на адреса</string>
     <string name="address_label_address_line1_optional">Ред 1 на адреса (по желание)</string>
-    <string name="address_label_address_line2">Ред 2 на адреса</string>
     <string name="address_label_address_line2_optional">Ред 2 на адреса (по желание)</string>
     <string name="address_label_address_optional">Адрес (по желание)</string>
     <string name="address_label_apt">Ап.</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Окръг</string>
     <string name="address_label_county_optional">Окръг (по желание)</string>
     <string name="address_label_name">Име</string>
-    <string name="address_label_name_optional">Име (по желание)</string>
     <string name="address_label_phone_number">Телефонен номер</string>
     <string name="address_label_phone_number_optional">Телефонен номер (по желание)</string>
     <string name="address_label_postal_code">Пощенски код</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">ММ/ГГ</string>
     <string name="expiry_label_short">Валидност</string>
     <string name="fpx_bank_offline">%s - офлайн</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Номерът на Вашата карта е невалиден.</string>
     <string name="invalid_cvc">Кодът за сигурност на Вашата карта е невалиден.</string>
     <string name="invalid_expiry_month">Месецът на валидност на Вашата карта е невалиден.</string>

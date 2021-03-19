@@ -15,7 +15,6 @@
     <string name="address_label_address">住所</string>
     <string name="address_label_address_line1">住所 (1 行目)</string>
     <string name="address_label_address_line1_optional">住所 (1 行目、省略可)</string>
-    <string name="address_label_address_line2">住所 (2 行目)</string>
     <string name="address_label_address_line2_optional">住所 (2 行目、省略可)</string>
     <string name="address_label_address_optional">住所 (省略可)</string>
     <string name="address_label_apt">アパート / マンション名など</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">群</string>
     <string name="address_label_county_optional">群 (省略可)</string>
     <string name="address_label_name">名称</string>
-    <string name="address_label_name_optional">名称 (省略可)</string>
     <string name="address_label_phone_number">電話番号</string>
     <string name="address_label_phone_number_optional">電話番号 (省略可)</string>
     <string name="address_label_postal_code">郵便番号</string>
@@ -79,7 +77,6 @@
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">有効期限</string>
     <string name="fpx_bank_offline">%s - オフライン</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">カードの番号が無効です。</string>
     <string name="invalid_cvc">カードのセキュリティコードが無効です。</string>
     <string name="invalid_expiry_month">カードの有効期限の月が無効です。</string>
