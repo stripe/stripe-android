@@ -21,6 +21,22 @@ class PaymentMethodOptionsParamsTest {
     }
 
     @Test
+    fun blikToParamMap_withCode_includeCode() {
+        val blikCode = "123456"
+        assertThat(
+            PaymentMethodOptionsParams.Blik(
+                code = blikCode
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                PaymentMethod.Type.Blik.code to mapOf(
+                    PaymentMethodOptionsParams.Blik.PARAM_CODE to blikCode
+                )
+            )
+        )
+    }
+
+    @Test
     fun cardToParamMap_withNoData_shouldHaveEmptyParams() {
         assertThat(
             PaymentMethodOptionsParams.Card()
