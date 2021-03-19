@@ -106,6 +106,7 @@
     <string name="expiry_label_short">Expiry</string>
     <string name="invalid_card_number">Your card\'s number is invalid.</string>
     <string name="invalid_expiry_month">Your card\'s expiration month is invalid.</string>
+    <string name="incomplete_expiry_date" tools:ignore="MissingTranslation">Your card\'s expiration date is incomplete.</string>
     <string name="invalid_expiry_year">Your card\'s expiration year is invalid.</string>
     <string name="invalid_cvc">Your card\'s security code is invalid.</string>
     <string name="invalid_zip">Your postal code is incomplete.</string>

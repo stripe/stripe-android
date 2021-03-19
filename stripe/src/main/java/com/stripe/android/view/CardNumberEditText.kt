@@ -418,6 +418,7 @@ class CardNumberEditText internal constructor(
             } else {
                 isCardNumberValid = isValid
                 // Don't show errors if we aren't full-length and the brand is known.
+                // TODO (michelleb-stripe) Should set error message to incomplete, then in focus change if it isn't complete it will update it.
                 shouldShowError = false
             }
         }

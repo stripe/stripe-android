@@ -228,7 +228,10 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
                     setErrorMessage(
                         resources.getString(
-                            if (!expirationDate.isMonthValid) {
+                            if(expirationDate.month.length + expirationDate.year.length < 4){
+                                R.string.incomplete_expiry_date
+                            }
+                            else if (!expirationDate.isMonthValid) {
                                 R.string.invalid_expiry_month
                             } else {
                                 R.string.invalid_expiry_year
@@ -253,6 +256,12 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
+        }
+
+        internalFocusChangeListeners.add { _, hasFocus ->
+            if(!hasFocus && !isDateValid){
+                shouldShowError = true
+            }
         }
     }
 

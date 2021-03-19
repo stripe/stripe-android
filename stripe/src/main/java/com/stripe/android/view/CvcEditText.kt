@@ -66,8 +66,12 @@ class CvcEditText @JvmOverloads constructor(
         }
 
         internalFocusChangeListeners.add { _, hasFocus ->
-            if (!hasFocus && unvalidatedCvc.normalized.isNotBlank()) {
-                shouldShowError = unvalidatedCvc.validate(cardBrand.maxCvcLength) == null
+            if (!hasFocus &&
+                unvalidatedCvc.normalized.isNotBlank() &&
+                unvalidatedCvc.validate(cardBrand.maxCvcLength) == null
+            ) {
+                // TODO (michelleb-stripe) Should set error message to incomplete, and should truncate CVC on a brand name change.
+                shouldShowError = true
             }
         }
     }
