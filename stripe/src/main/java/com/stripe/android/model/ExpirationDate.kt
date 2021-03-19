@@ -54,15 +54,9 @@ sealed class ExpirationDate {
             ).joinToString(separator = "")
         }
 
-        internal val complete: Boolean
-            get() {
-                return (month.length + year.length) == 4
-            }
+        private val isComplete = (month.length + year.length) == 4
 
-        internal val isIncomplete: Boolean
-            get() {
-                return !complete && ((month.length + year.length) > 0)
-            }
+        internal val isIncomplete = !isComplete && ((month.length + year.length) > 0)
 
         internal companion object {
             /**

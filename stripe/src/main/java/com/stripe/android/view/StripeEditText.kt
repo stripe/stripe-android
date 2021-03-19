@@ -35,12 +35,15 @@ open class StripeEditText @JvmOverloads constructor(
     internal var defaultColorStateList: ColorStateList
         @VisibleForTesting
         internal set
+
     @Deprecated("Will be removed in upcoming major release.")
     val cachedColorStateList: ColorStateList
         get() = defaultColorStateList
     private var externalColorStateList: ColorStateList? = null
+
     @ColorInt
     private var defaultErrorColor: Int = 0
+
     @ColorInt
     private var externalErrorColor: Int? = null
 
@@ -100,6 +103,9 @@ open class StripeEditText @JvmOverloads constructor(
         // This will initialize a listener that calls the internal listeners then the external one
         onFocusChangeListener = null
     }
+
+    internal val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
+    private var externalFocusChangeListener: OnFocusChangeListener? = null
 
     protected open val accessibilityText: String? = null
 
@@ -222,9 +228,6 @@ open class StripeEditText @JvmOverloads constructor(
         }
     }
 
-    internal val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
-    private var externalFocusChangeListener: OnFocusChangeListener? = null
-
     final override fun setOnFocusChangeListener(listener: OnFocusChangeListener?) {
         super.setOnFocusChangeListener { view, hasFocus ->
             internalFocusChangeListeners.forEach {
@@ -237,7 +240,8 @@ open class StripeEditText @JvmOverloads constructor(
         externalFocusChangeListener = listener
     }
 
-    override fun getOnFocusChangeListener(): OnFocusChangeListener? {
-        return externalFocusChangeListener
-    }
+    override fun getOnFocusChangeListener() = externalFocusChangeListener
+
+    @VisibleForTesting
+    internal fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
 }

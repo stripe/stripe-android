@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.view.View
 import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
@@ -30,6 +31,14 @@ internal class StripeEditTextTest {
     ).also {
         it.setDeleteEmptyListener(deleteEmptyListener)
         it.setAfterTextChangedListener(afterTextChangedListener)
+    }
+
+    @Test
+    fun onFocusListenerSetupCalledOnInit() {
+        val onFocusListener = mock<View.OnFocusChangeListener>()
+        editText.internalFocusChangeListeners.add(onFocusListener)
+        editText.getParentOnFocusChangeListener()!!.onFocusChange(editText, false)
+        verify(onFocusListener).onFocusChange(editText, false)
     }
 
     @Test
