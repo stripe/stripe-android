@@ -228,10 +228,9 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
                     setErrorMessage(
                         resources.getString(
-                            if(expirationDate.month.length + expirationDate.year.length < 4){
+                            if (expirationDate.month.length + expirationDate.year.length < 4) {
                                 R.string.incomplete_expiry_date
-                            }
-                            else if (!expirationDate.isMonthValid) {
+                            } else if (!expirationDate.isMonthValid) {
                                 R.string.invalid_expiry_month
                             } else {
                                 R.string.invalid_expiry_year
@@ -259,7 +258,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
         }
 
         internalFocusChangeListeners.add { _, hasFocus ->
-            if(!hasFocus && !isDateValid){
+            if (!hasFocus && !isDateValid) {
                 shouldShowError = true
             }
         }
