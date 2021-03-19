@@ -217,14 +217,6 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
-    fun `onConfigReady() should update header text`() {
-        createFragment { _, viewBinding ->
-            assertThat(viewBinding.addCardHeader.text.toString())
-                .isEqualTo("Pay $10.99 using")
-        }
-    }
-
-    @Test
     fun `checkbox text should reflect merchant display name`() {
         createFragment { _, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.text)

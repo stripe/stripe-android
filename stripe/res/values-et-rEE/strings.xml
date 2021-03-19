@@ -15,7 +15,6 @@
     <string name="address_label_address">Aadress</string>
     <string name="address_label_address_line1">Aadressirida 1</string>
     <string name="address_label_address_line1_optional">Aadressirida 1 (valikuline)</string>
-    <string name="address_label_address_line2">Aadressirida 2</string>
     <string name="address_label_address_line2_optional">Aadressirida 2 (valikuline)</string>
     <string name="address_label_address_optional">Aadress (valikuline)</string>
     <string name="address_label_apt">Korter</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Maakond</string>
     <string name="address_label_county_optional">Maakond (valikuline)</string>
     <string name="address_label_name">Nimi</string>
-    <string name="address_label_name_optional">Nimi (valikuline)</string>
     <string name="address_label_phone_number">Telefoninumber</string>
     <string name="address_label_phone_number_optional">Telefoninumber (valikuline)</string>
     <string name="address_label_postal_code">Sihtnumber</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">KK/AA</string>
     <string name="expiry_label_short">Aegumine</string>
     <string name="fpx_bank_offline">%s - võrguühenduseta</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Kaardi number on kehtetu.</string>
     <string name="invalid_cvc">Kaardi turvakood on kehtetu.</string>
     <string name="invalid_expiry_month">Kaardi aegumiskuu on kehtetu.</string>

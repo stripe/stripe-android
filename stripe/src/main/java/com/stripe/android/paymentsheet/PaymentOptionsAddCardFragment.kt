@@ -1,9 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfig
 
 internal class PaymentOptionsAddCardFragment(
     eventReporter: EventReporter
@@ -17,11 +15,5 @@ internal class PaymentOptionsAddCardFragment(
                 )
             }
         )
-    }
-
-    override fun createHeaderText(
-        config: FragmentConfig
-    ): String {
-        return getString(R.string.stripe_paymentsheet_add_payment_method_title)
     }
 }

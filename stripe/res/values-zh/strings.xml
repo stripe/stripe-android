@@ -15,7 +15,6 @@
     <string name="address_label_address">地址</string>
     <string name="address_label_address_line1">第 1 行地址</string>
     <string name="address_label_address_line1_optional">第 1 行地址 (可选)</string>
-    <string name="address_label_address_line2">第 2 行地址</string>
     <string name="address_label_address_line2_optional">第 2 行地址 (可选)</string>
     <string name="address_label_address_optional">地址 (可选)</string>
     <string name="address_label_apt">公寓号码 </string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">县</string>
     <string name="address_label_county_optional">县（可选）</string>
     <string name="address_label_name">姓名</string>
-    <string name="address_label_name_optional">姓名 (可选)</string>
     <string name="address_label_phone_number">电话号码</string>
     <string name="address_label_phone_number_optional">电话号码（可选）</string>
     <string name="address_label_postal_code">邮政编码</string>
@@ -79,7 +77,6 @@
     <string name="expiry_date_hint">月月/年年</string>
     <string name="expiry_label_short">有效期</string>
     <string name="fpx_bank_offline">%s - 线下</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">您的卡号无效。</string>
     <string name="invalid_cvc">您银行卡的安全码无效。</string>
     <string name="invalid_expiry_month">您银行卡的到期月份无效。</string>

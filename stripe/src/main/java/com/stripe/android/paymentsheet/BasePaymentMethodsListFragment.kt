@@ -59,12 +59,9 @@ internal abstract class BasePaymentMethodsListFragment(
         )
 
         eventReporter.onShowExistingPaymentOptions()
-
-        viewBinding.header.text = createHeaderText()
     }
 
     abstract fun transitionToAddPaymentMethod()
-    abstract fun createHeaderText(): String
 
     open fun onPaymentOptionSelected(
         paymentSelection: PaymentSelection,

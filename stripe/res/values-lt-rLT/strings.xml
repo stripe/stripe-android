@@ -15,7 +15,6 @@
     <string name="address_label_address">Adresas</string>
     <string name="address_label_address_line1">1 adreso eilutė</string>
     <string name="address_label_address_line1_optional">1 adreso eilutė (pasirenkama)</string>
-    <string name="address_label_address_line2">2 adreso eilutė</string>
     <string name="address_label_address_line2_optional">2 adreso eilutė (pasirenkama)</string>
     <string name="address_label_address_optional">Adresas (pasirenkamas)</string>
     <string name="address_label_apt">But.</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Apygarda</string>
     <string name="address_label_county_optional">Apygarda (pasirenkama)</string>
     <string name="address_label_name">Vardas, pavardė</string>
-    <string name="address_label_name_optional">Vardas, pavardė (pasirenkami)</string>
     <string name="address_label_phone_number">Telefono numeris</string>
     <string name="address_label_phone_number_optional">Telefono numeris (pasirenkamas)</string>
     <string name="address_label_postal_code">Pašto kodas</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">mm / MM</string>
     <string name="expiry_label_short">Galiojimo pabaigos data</string>
     <string name="fpx_bank_offline">%s – neprisijungęs</string>
-    <string name="google_pay">„Google Pay“</string>
     <string name="invalid_card_number">Negaliojantis kortelės numeris.</string>
     <string name="invalid_cvc">Kortelės saugos kodas negalioja.</string>
     <string name="invalid_expiry_month">Negaliojantis kortelės galiojimo pabaigos mėnuo.</string>

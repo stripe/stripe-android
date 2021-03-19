@@ -4,7 +4,7 @@
     android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
     android:background="@drawable/stripe_googlepay_button_no_shadow_background"
     android:paddingTop="2sp"
-    android:contentDescription="@string/stripe_googlepay_button_content_description">
+    android:contentDescription="@string/google_pay">
     <LinearLayout
         android:duplicateParentState="true"
         android:layout_width="match_parent"

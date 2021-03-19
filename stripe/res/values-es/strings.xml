@@ -15,7 +15,6 @@
     <string name="address_label_address">Dirección</string>
     <string name="address_label_address_line1">Primera línea de la dirección</string>
     <string name="address_label_address_line1_optional">Primera línea de la dirección (opcional)</string>
-    <string name="address_label_address_line2">Segunda línea de la dirección</string>
     <string name="address_label_address_line2_optional">Segunda línea de la dirección (opcional)</string>
     <string name="address_label_address_optional">Dirección (opcional) </string>
     <string name="address_label_apt">Piso</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Condado</string>
     <string name="address_label_county_optional">Condado (opcional)</string>
     <string name="address_label_name">Nombre</string>
-    <string name="address_label_name_optional">Nombre (opcional)</string>
     <string name="address_label_phone_number">Número de teléfono</string>
     <string name="address_label_phone_number_optional">Número de teléfono (opcional)</string>
     <string name="address_label_postal_code">Código postal</string>
@@ -79,7 +77,6 @@
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Caducidad</string>
     <string name="fpx_bank_offline">%s - Fuera de línea</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">El número de tarjeta no es válido.</string>
     <string name="invalid_cvc">El código de seguridad de tu tarjeta no es válido.</string>
     <string name="invalid_expiry_month">El mes de caducidad de la tarjeta no es válido.</string>

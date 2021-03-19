@@ -15,7 +15,6 @@
     <string name="address_label_address">Adresa</string>
     <string name="address_label_address_line1">1. řádek adresy</string>
     <string name="address_label_address_line1_optional">1. řádek adresy (volitelně)</string>
-    <string name="address_label_address_line2">2. řádek adresy</string>
     <string name="address_label_address_line2_optional">2. řádek adresy (volitelně)</string>
     <string name="address_label_address_optional">Adresa(volitelně) </string>
     <string name="address_label_apt">Byt </string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Okres</string>
     <string name="address_label_county_optional">Okres (volitelně)</string>
     <string name="address_label_name">Jméno</string>
-    <string name="address_label_name_optional">Jméno (volitelně)</string>
     <string name="address_label_phone_number">Telefonní číslo</string>
     <string name="address_label_phone_number_optional">Telefonní číslo (volitelně)</string>
     <string name="address_label_postal_code">Poštovní směrovací číslo</string>
@@ -78,7 +76,6 @@
     <string name="expiry_date_hint">MM/RR</string>
     <string name="expiry_label_short">Konec platnosti</string>
     <string name="fpx_bank_offline">%s - Offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Číslo vaší karty je neplatné.</string>
     <string name="invalid_cvc">Bezpečnostní kód vaší karty je neplatný.</string>
     <string name="invalid_expiry_month">Rok konce platnosti vaší karty je neplatný.</string>
