@@ -97,7 +97,7 @@
     <string name="stripe_paymentsheet_back">Atgal</string>
     <string name="stripe_paymentsheet_close">Užverti</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ Nauja kortelė</string>
-    <string name="stripe_paymentsheet_pay_button_amount">Mokėti</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Mokėti %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Mokėti</string>
     <string name="stripe_paymentsheet_save_this_card">Išsaugoti kortelę vėlesniems mokėjimams</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Išsaugoti kortelę vėlesniems %s mokėjimams</string>
