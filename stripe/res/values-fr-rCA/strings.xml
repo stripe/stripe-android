@@ -62,16 +62,19 @@
     autorisé du compte désigné ci-dessus.
     </string>
     <string name="becs_widget_account_number">Numéro de compte</string>
+    <string name="becs_widget_account_number_incomplete">Votre numéro de compte est incomplet.</string>
     <string name="becs_widget_account_number_required">Votre numéro de compte est obligatoire.</string>
     <string name="becs_widget_bsb">BSB</string>
     <string name="becs_widget_bsb_incomplete">Le numéro BSB que vous avez saisi est incomplet.</string>
     <string name="becs_widget_bsb_invalid">Le numéro BSB que vous avez saisi n\'est pas valide.</string>
     <string name="becs_widget_email">Adresse électronique</string>
+    <string name="becs_widget_email_invalid">Votre adresse de courriel n\'est pas valide.</string>
     <string name="becs_widget_email_required">Votre adresse électronique est obligatoire.</string>
     <string name="becs_widget_name">Nom</string>
     <string name="becs_widget_name_required">Votre nom est obligatoire.</string>
+    <string name="card_ending_in">%1$s se terminant par %2$s</string>
     <string name="close">Fermer</string>
-    <string name="delete_payment_method">Supprimer le moyen de paiement?</string>
+    <string name="delete_payment_method">Supprimer le moyen de paiement</string>
     <string name="delete_payment_method_prompt_title">Supprimer le moyen de paiement?</string>
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Expiration</string>
@@ -88,6 +91,23 @@
     <string name="price_free">Gratuit</string>
     <string name="removed">%s supprimé</string>
     <string name="secure_checkout">Paiement sécurisé</string>
+    <string name="stripe_failure_reason_authentication">Nous ne sommes pas en mesure d\'identifier votre moyen de paiement. Veuillez sélectionner un autre moyen de paiement et réessayer.</string>
+    <string name="stripe_failure_reason_timed_out">Le délai d\'authentification de votre moyen de paiement est dépassé, veuillez réessayer.</string>
+    <string name="stripe_paymentsheet_add_button_label">Ajouter</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Informations de la carte</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Pays ou région</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">Ajoutez vos informations de paiement</string>
+    <string name="stripe_paymentsheet_back">Retour</string>
+    <string name="stripe_paymentsheet_close">Fermer</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">MM/AA</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Nouvelle carte</string>
+    <string name="stripe_paymentsheet_or_pay_with">Ou payez par carte</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Payer %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Payer</string>
+    <string name="stripe_paymentsheet_primary_button_processing">Traitement en cours...</string>
+    <string name="stripe_paymentsheet_save_this_card">Enregistrer cette carte pour les prochains achats</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Enregistrer cette carte pour vos prochains achats chez %s</string>
+    <string name="stripe_paymentsheet_select_payment_method">Sélectionnez votre moyen de paiement</string>
     <string name="title_add_a_card">Ajouter une carte</string>
     <string name="title_add_an_address">Définir l\'adresse</string>
     <string name="title_bank_account">Compte bancaire</string>
