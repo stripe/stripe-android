@@ -8,7 +8,7 @@
     <string name="acc_label_zip">Cod poștal</string>
     <string name="acc_label_zip_short">Cod poștal</string>
     <string name="add_card">Adăugați un nou card de debit sau de credit pentru a face achiziții în această aplicație.</string>
-    <string name="added">%s adăugat</string>
+    <string name="added">%s a fost adăugat</string>
     <string name="address_city_required">Introduceți orașul în care locuiți</string>
     <string name="address_country_invalid">Țara dvs. nu este validă</string>
     <string name="address_county_required">Introduceți județul în care locuiți</string>
@@ -62,16 +62,19 @@
     autorizat în contul enumerat mai sus.
     </string>
     <string name="becs_widget_account_number">Număr cont</string>
+    <string name="becs_widget_account_number_incomplete">Numărul contului dvs. nu este complet.</string>
     <string name="becs_widget_account_number_required">Este necesar numărul dvs. de cont.</string>
     <string name="becs_widget_bsb">Număr BSB</string>
     <string name="becs_widget_bsb_incomplete">Numărul BSB pe care l-ați introdus nu este complet.</string>
     <string name="becs_widget_bsb_invalid">Numărul BSB pe care l-ați introdus nu este valid.</string>
     <string name="becs_widget_email">Adresa de e-mail</string>
+    <string name="becs_widget_email_invalid">Adresa dvs. de e-mail nu este validă.</string>
     <string name="becs_widget_email_required">Este necesară adresa dvs. de e-mail.</string>
     <string name="becs_widget_name">Nume</string>
     <string name="becs_widget_name_required">Este necesar numele dvs.</string>
+    <string name="card_ending_in">%1$s se termină în %2$s</string>
     <string name="close">Închidere</string>
-    <string name="delete_payment_method">Ștergeți metoda de plată?</string>
+    <string name="delete_payment_method">Ștergeți metoda de plată</string>
     <string name="delete_payment_method_prompt_title">Ștergeți metoda de plată?</string>
     <string name="expiry_date_hint">LL/AA</string>
     <string name="expiry_label_short">Data de expirare</string>
@@ -85,9 +88,19 @@
     <string name="no_payment_methods">Nu există metode de plată.</string>
     <string name="payment_method_add_new_card">Adăugare card nou...</string>
     <string name="payment_method_add_new_fpx">Selectare cont bancar (FPX)…</string>
-    <string name="price_free">Gratis</string>
-    <string name="removed">%s eliminat</string>
+    <string name="price_free">Expediere gratuită</string>
+    <string name="removed">%s a fost eliminat</string>
     <string name="secure_checkout">Validare securizată</string>
+    <string name="stripe_failure_reason_authentication">Nu vă putem autentifica metoda de plată. Alegeți o altă metodă de plată și încercați din nou.</string>
+    <string name="stripe_failure_reason_timed_out">Timpul de autentificare a metodei dvs. de plată a expirat -- încercați din nou</string>
+    <string name="stripe_paymentsheet_add_button_label">Adăugare</string>
+    <string name="stripe_paymentsheet_back">Înapoi</string>
+    <string name="stripe_paymentsheet_close">Închidere</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Card nou</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Plătiți %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Plătiți</string>
+    <string name="stripe_paymentsheet_save_this_card">Salvați acest card pentru plăți viitoare</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salvați acest card pentru plăți viitoare către %s</string>
     <string name="title_add_a_card">Adăugare card</string>
     <string name="title_add_an_address">Adăugare adresă</string>
     <string name="title_bank_account">Cont bancar</string>

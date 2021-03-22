@@ -94,7 +94,7 @@
     <!--Error text indicating that phone number is required, used for all addresses-->
     <string name="address_phone_number_required">Please enter your phone number</string>
     <!--Used to display masked card numbers. %1$s is a card brand, and %2$s is a partial call number, e.g. "Visa ending in 4242"-->
-    <string name="card_ending_in" tools:ignore="MissingTranslation">%1$s ending in %2$s</string>
+    <string name="card_ending_in">%1$s ending in %2$s</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">Expiry</string>
     <string name="invalid_card_number">Your card\'s number is invalid.</string>
@@ -126,7 +126,7 @@
     <string name="removed">Removed %s</string>
 
     <string name="delete_payment_method_prompt_title">Delete payment method?</string>
-    <string name="delete_payment_method" tools:ignore="MissingTranslation">Delete payment method</string>
+    <string name="delete_payment_method">Delete payment method</string>
     <!-- Label that will show that an FPX bank is offline. For example, "AmBank - Offline" -->
     <string name="fpx_bank_offline">%s - Offline</string>
 
@@ -145,13 +145,13 @@
     <!-- BECS Debit Widget - account number field - required error message -->
     <string name="becs_widget_account_number_required">Your account number is required.</string>
     <!-- BECS Debit Widget - account number field - incomplete error message -->
-    <string name="becs_widget_account_number_incomplete" tools:ignore="MissingTranslation">Your account number is incomplete.</string>
+    <string name="becs_widget_account_number_incomplete">Your account number is incomplete.</string>
     <!-- BECS Debit Widget - name field - required error message -->
     <string name="becs_widget_name_required">Your name is required.</string>
     <!-- BECS Debit Widget - email address field - required error message -->
     <string name="becs_widget_email_required">Your email address is required.</string>
     <!-- BECS Debit Widget - email address field - invalid error message -->
-    <string name="becs_widget_email_invalid" tools:ignore="MissingTranslation">Your email address is invalid.</string>
+    <string name="becs_widget_email_invalid">Your email address is invalid.</string>
     <!-- BECS Debit Widget - mandate acceptance -->
     <string name="becs_mandate_acceptance">
     By providing your bank account details and confirming this payment, you agree to this
@@ -165,26 +165,26 @@
     </string>
 
     <!-- Payment Sheet -->
-    <string name="stripe_paymentsheet_back" tools:ignore="MissingTranslation">Back</string>
-    <string name="stripe_paymentsheet_close" tools:ignore="MissingTranslation">Close</string>
+    <string name="stripe_paymentsheet_back">Back</string>
+    <string name="stripe_paymentsheet_close">Close</string>
     <string name="stripe_paymentsheet_select_payment_method" tools:ignore="MissingTranslation">Select your payment method</string>
     <string name="stripe_paymentsheet_add_payment_method_title" tools:ignore="MissingTranslation">Add your payment information</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information" tools:ignore="MissingTranslation">Card information</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region" tools:ignore="MissingTranslation">Country or region</string>
-    <string name="stripe_paymentsheet_new_card_button_label" tools:ignore="MissingTranslation">+ New card</string>
-    <string name="stripe_paymentsheet_save_this_card" tools:ignore="MissingTranslation">Save this card for future payments</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name" tools:ignore="MissingTranslation">Save this card for future %s payments</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ New card</string>
+    <string name="stripe_paymentsheet_save_this_card">Save this card for future payments</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
     <string name="stripe_paymentsheet_or_pay_with" tools:ignore="MissingTranslation">Or pay with a card</string>
     <string name="stripe_paymentsheet_expiration_date_hint" tools:ignore="MissingTranslation">MM / YY</string>
 
     <!-- The payment amount (e.g. "Pay $25.00") -->
-    <string name="stripe_paymentsheet_pay_button_label" tools:ignore="MissingTranslation">Pay</string>
-    <string name="stripe_paymentsheet_pay_button_amount" tools:ignore="MissingTranslation">Pay %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Pay</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
     <string name="stripe_paymentsheet_primary_button_processing" tools:ignore="MissingTranslation">Processing…</string>
 
-    <string name="stripe_paymentsheet_add_button_label" tools:ignore="MissingTranslation">Add</string>
+    <string name="stripe_paymentsheet_add_button_label">Add</string>
 
     <!-- Failure Reason -->
-    <string name="stripe_failure_reason_authentication" tools:ignore="MissingTranslation">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
-    <string name="stripe_failure_reason_timed_out" tools:ignore="MissingTranslation">Timed out authenticating your payment method -- try again</string>
+    <string name="stripe_failure_reason_authentication">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
+    <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method -- try again</string>
 </resources>

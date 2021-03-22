@@ -38,11 +38,19 @@ internal abstract class BasePaymentMethodsListFragment(
         this.config = nullableConfig
 
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
-        viewBinding.recycler.layoutManager = LinearLayoutManager(
+        val layoutManager = object : LinearLayoutManager(
             activity,
-            LinearLayoutManager.HORIZONTAL,
+            HORIZONTAL,
             false
-        )
+        ) {
+            var canScroll = true
+
+            override fun canScrollHorizontally(): Boolean {
+                return canScroll && super.canScrollHorizontally()
+            }
+        }.also {
+            viewBinding.recycler.layoutManager = it
+        }
 
         val adapter = PaymentOptionsAdapter(
             canClickSelectedItem,
@@ -59,6 +67,11 @@ internal abstract class BasePaymentMethodsListFragment(
         )
 
         eventReporter.onShowExistingPaymentOptions()
+
+        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            adapter.interactionEnabled = !isProcessing
+            layoutManager.canScroll = !isProcessing
+        }
     }
 
     abstract fun transitionToAddPaymentMethod()

@@ -6,7 +6,7 @@
     <string name="acc_label_expiry_date">Derīguma termiņš</string>
     <string name="acc_label_expiry_date_node">%s, derīguma termiņš</string>
     <string name="acc_label_zip">Pasta indekss</string>
-    <string name="acc_label_zip_short">Pasta indekss</string>
+    <string name="acc_label_zip_short">Pasta ind.</string>
     <string name="add_card">Lai varētu veikt iegādi ar šo lietotni, pievienojiet jaunu debetkarti vai kredītkarti.</string>
     <string name="added">%s pievienots</string>
     <string name="address_city_required">Ievadiet pilsētu</string>
@@ -33,7 +33,7 @@
     <string name="address_label_postcode_optional">Pasta indekss (nav obligāti)</string>
     <string name="address_label_province">Province</string>
     <string name="address_label_province_optional">Province (nav obligāti)</string>
-    <string name="address_label_region_generic"> Novads/štats/province/reģions</string>
+    <string name="address_label_region_generic">Novads/štats/province/reģions</string>
     <string name="address_label_region_generic_optional">Novads/štats/province/reģions (nav obligāti)</string>
     <string name="address_label_state">Novads/štats</string>
     <string name="address_label_state_optional">Novads/štats (nav obligāti)</string>
@@ -62,16 +62,19 @@
     iepriekš minētā konta īpašnieks, vai tā pilnvarota persona ar paraksta tiesībām.
     </string>
     <string name="becs_widget_account_number">Konta numurs</string>
+    <string name="becs_widget_account_number_incomplete">Konta numurs nav pilnīgs.</string>
     <string name="becs_widget_account_number_required">Jānorāda konta numurs.</string>
     <string name="becs_widget_bsb">BSB</string>
     <string name="becs_widget_bsb_incomplete">Ievadītais BSB ir nepilnīgs.</string>
     <string name="becs_widget_bsb_invalid">Ievadītais BSB nav derīgs.</string>
     <string name="becs_widget_email">E-pasta adrese</string>
+    <string name="becs_widget_email_invalid">E-pasta adrese nav derīga.</string>
     <string name="becs_widget_email_required">Jānorāda e-pasta adrese.</string>
     <string name="becs_widget_name">Vārds, uzvārds</string>
     <string name="becs_widget_name_required">Jānorāda vārds/nosaukums.</string>
+    <string name="card_ending_in">%1$s, kuras numura pēdējie cipari ir %2$s</string>
     <string name="close">Aizvērt</string>
-    <string name="delete_payment_method">Vai dzēst maksājuma metodi?</string>
+    <string name="delete_payment_method">Dzēst maksājuma metodi</string>
     <string name="delete_payment_method_prompt_title">Vai dzēst maksājuma metodi?</string>
     <string name="expiry_date_hint">MM/GG</string>
     <string name="expiry_label_short">Derīguma termiņš</string>
@@ -88,7 +91,17 @@
     <string name="price_free">Bezmaksas</string>
     <string name="removed">%s noņemts</string>
     <string name="secure_checkout">Droša norēķināšanās</string>
-    <string name="title_add_a_card">Pievienojiet karti</string>
+    <string name="stripe_failure_reason_authentication">Nevaram autentificēt jūsu maksājuma metodi. Lūdzu, izvēlieties citu maksājuma metodi un mēģiniet vēlreiz.</string>
+    <string name="stripe_failure_reason_timed_out">Autentificējot jūsu maksājuma metodi, iestājās noildze — mēģiniet vēlreiz</string>
+    <string name="stripe_paymentsheet_add_button_label">Pievienot</string>
+    <string name="stripe_paymentsheet_back">Atpakaļ</string>
+    <string name="stripe_paymentsheet_close">Aizvērt</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Jauna karte</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Maksāt%s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Maksāt</string>
+    <string name="stripe_paymentsheet_save_this_card">Saglabāt šo karti maksājumiem nākotnē</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Saglabāt šo karti %s maksājumiem nākotnē</string>
+    <string name="title_add_a_card">Kartes pievienošana</string>
     <string name="title_add_an_address">Iestatiet adresi</string>
     <string name="title_bank_account">Bankas konts</string>
     <string name="title_payment_method">Maksājuma metode</string>
