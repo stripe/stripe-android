@@ -15,7 +15,6 @@
     <string name="address_label_address">Indirizz</string>
     <string name="address_label_address_line1">Indirizz linja 1</string>
     <string name="address_label_address_line1_optional">Indirizz linja 1 (mhux obbligatorju)</string>
-    <string name="address_label_address_line2">Indirizz linja 2</string>
     <string name="address_label_address_line2_optional">Indirizz linja 2 (mhux obbligatorju)</string>
     <string name="address_label_address_optional">Indirizz (mhux obbligatorju)</string>
     <string name="address_label_apt">Appartament</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Kontea</string>
     <string name="address_label_county_optional">Kontea (mhux obbligatorja)</string>
     <string name="address_label_name">Isem</string>
-    <string name="address_label_name_optional">L-Isem (mhux obbligatorju)</string>
     <string name="address_label_phone_number">In-numru tat-telefon</string>
     <string name="address_label_phone_number_optional">Numru tat-telefon (mhux obbligatorju)</string>
     <string name="address_label_postal_code">Kodiċi postali</string>
@@ -64,21 +62,23 @@
     Inti tiċċertifika li inti detentur ta\' kont jew li inti firmatarju awtorizzat fil-kont elenkat hawn fuq.
     </string>
     <string name="becs_widget_account_number">In-numru tal-kont</string>
+    <string name="becs_widget_account_number_incomplete">In-numru tal-kont tiegħek mhux komplut.</string>
     <string name="becs_widget_account_number_required">In-numru tal-kont tiegħek huwa meħtieġ.</string>
     <string name="becs_widget_bsb">BSB</string>
     <string name="becs_widget_bsb_incomplete">Il-BSB li daħħalt mhux komplut.</string>
     <string name="becs_widget_bsb_invalid">Il-BSB li daħħalt mhux validu.</string>
     <string name="becs_widget_email">Indirizz Elettroniku</string>
+    <string name="becs_widget_email_invalid">L-indirizz elettroniku tiegħek huwa invalidu.</string>
     <string name="becs_widget_email_required">L-indirizz elettroniku tiegħek huwa meħtieġ.</string>
     <string name="becs_widget_name">Isem</string>
     <string name="becs_widget_name_required">Ismek huwa meħtieġ.</string>
+    <string name="card_ending_in">%1$s li jispiċċa %2$s</string>
     <string name="close">Agħlaq</string>
-    <string name="delete_payment_method">Tħassar il-Metodu tal-Ħlas?</string>
+    <string name="delete_payment_method">Ħassar il-Metodu tal-Ħlas</string>
     <string name="delete_payment_method_prompt_title">Tħassar il-metodu tal-ħlas?</string>
     <string name="expiry_date_hint">XX/SS</string>
     <string name="expiry_label_short">Skadenza</string>
     <string name="fpx_bank_offline">%s - Offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">In-numru tal-kard tiegħek mhux validu.</string>
     <string name="invalid_cvc">Il-kodiċi tas-sigurtà tal-kard tiegħek mhux validu.</string>
     <string name="invalid_expiry_month">Ix-xahar tal-iskadenza tal-kard tiegħek mhux validu.</string>
@@ -91,9 +91,26 @@
     <string name="price_free">Bla ħlas</string>
     <string name="removed">Imneħħi %s</string>
     <string name="secure_checkout">Checkout Sigur</string>
+    <string name="stripe_failure_reason_authentication">Ma nistgħux nawtentikaw il-metodu tal-ħlas tiegħek. Jekk jogħġbok agħżel metodu tal-ħlas differenti u erġa\' pprova.</string>
+    <string name="stripe_failure_reason_timed_out">Skada l-ħin tal-awtentikazzjoni tal-metodu tal-ħlas tiegħek -- erġa\' pprova</string>
+    <string name="stripe_paymentsheet_add_button_label">Żid</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">L-informazzjoni tal-kard</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Pajjiż jew reġjun</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">Żid l-informazzjoni dwar il-pagament tiegħek</string>
+    <string name="stripe_paymentsheet_back">Lura</string>
+    <string name="stripe_paymentsheet_close">Agħlaq</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">XX / SS</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Kard Ġdida</string>
+    <string name="stripe_paymentsheet_or_pay_with">Jew ħallas bil-kard</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Ħallas %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Ħallas</string>
+    <string name="stripe_paymentsheet_primary_button_processing">Qed jiġi pproċessat...</string>
+    <string name="stripe_paymentsheet_save_this_card">Erfa\' din il-kard għal pagamenti futuri</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Erfa\' din il-kard għal pagamenti futuri %s</string>
+    <string name="stripe_paymentsheet_select_payment_method">Agħżel il-metodu tal-ħlas tiegħek</string>
     <string name="title_add_a_card">Żid Kard</string>
     <string name="title_add_an_address">Issettja l-Indirizz</string>
-    <string name="title_bank_account">Kont Bankarju</string>
+    <string name="title_bank_account">Kont bankarju</string>
     <string name="title_payment_method">Metodu tal-Ħlas</string>
     <string name="title_select_shipping_method">Agħżel il-Mod tat-Trasport tal-Merkanzija</string>
 </resources>

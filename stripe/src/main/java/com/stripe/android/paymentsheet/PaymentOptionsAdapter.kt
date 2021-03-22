@@ -26,6 +26,7 @@ internal class PaymentOptionsAdapter(
     private var selectedItemPosition: Int = NO_POSITION
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
+    internal var interactionEnabled = true
 
     init {
         setHasStableIds(true)
@@ -90,7 +91,10 @@ internal class PaymentOptionsAdapter(
         position: Int,
         isClick: Boolean
     ) {
-        if (position != NO_POSITION && (canClickSelectedItem || position != selectedItemPosition)) {
+        if (interactionEnabled &&
+            position != NO_POSITION &&
+            (canClickSelectedItem || position != selectedItemPosition)
+        ) {
             val previousSelectedIndex = selectedItemPosition
             selectedItemPosition = position
 

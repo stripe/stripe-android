@@ -6,7 +6,7 @@
     <string name="acc_label_expiry_date">Data ważności</string>
     <string name="acc_label_expiry_date_node">%s, data ważności</string>
     <string name="acc_label_zip">Kod pocztowy</string>
-    <string name="acc_label_zip_short">Kod pocztowy</string>
+    <string name="acc_label_zip_short">Kod p</string>
     <string name="add_card">Aby dokonywać zakupów w tej aplikacji, dodaj nową kartę debetową lub kredytową.</string>
     <string name="added">Dodano: %s</string>
     <string name="address_city_required">Podaj miejscowość</string>
@@ -15,7 +15,6 @@
     <string name="address_label_address">Adres</string>
     <string name="address_label_address_line1">Linia adresu 1</string>
     <string name="address_label_address_line1_optional">Linia adresu 1 (opcja)</string>
-    <string name="address_label_address_line2">Linia adresu 2</string>
     <string name="address_label_address_line2_optional">Linia adresu 2 (opcja)</string>
     <string name="address_label_address_optional">Adres (opcja)</string>
     <string name="address_label_apt">Nr lokalu</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Hrabstwo</string>
     <string name="address_label_county_optional">Hrabstwo (opcja)</string>
     <string name="address_label_name">Imię i nazwisko</string>
-    <string name="address_label_name_optional">Imię i nazwisko (opcja)</string>
     <string name="address_label_phone_number">Nr telefonu</string>
     <string name="address_label_phone_number_optional">Nr telefonu (opcja)</string>
     <string name="address_label_postal_code">Kod pocztowy</string>
@@ -64,21 +62,23 @@
     osobą podpisującą, reprezentującą wyżej wymienione konto.
     </string>
     <string name="becs_widget_account_number">Numer konta</string>
+    <string name="becs_widget_account_number_incomplete">Numer konta jest niekompletny.</string>
     <string name="becs_widget_account_number_required">Wymagany jest numer konta.</string>
     <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">Numer BSB jest niepełny.</string>
-    <string name="becs_widget_bsb_invalid">Numer BSB jest nieprawidłowy.</string>
+    <string name="becs_widget_bsb_incomplete">Wprowadzony numer BSB jest niepełny.</string>
+    <string name="becs_widget_bsb_invalid">Wprowadzony numer BSB jest nieprawidłowy.</string>
     <string name="becs_widget_email">Adres e-mail</string>
+    <string name="becs_widget_email_invalid">Twój adres e-mail jest nieprawidłowy.</string>
     <string name="becs_widget_email_required">Wymagany jest adres e-mail.</string>
     <string name="becs_widget_name">Imię i nazwisko</string>
     <string name="becs_widget_name_required">Wymagane jest imię i nazwisko.</string>
+    <string name="card_ending_in">%1$s kończy się %2$s</string>
     <string name="close">Zamknij</string>
-    <string name="delete_payment_method">Czy usunąć metodę płatności?</string>
+    <string name="delete_payment_method">Usuń metodę płatności</string>
     <string name="delete_payment_method_prompt_title">Czy usunąć metodę płatności?</string>
     <string name="expiry_date_hint">MM/RR</string>
     <string name="expiry_label_short">Data ważności</string>
     <string name="fpx_bank_offline">%s – offline</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Nieprawidłowy nr karty.</string>
     <string name="invalid_cvc">Kod bezpieczeństwa karty jest nieprawidłowy.</string>
     <string name="invalid_expiry_month">Miesiąc daty ważności karty jest nieprawidłowy.</string>
@@ -89,8 +89,18 @@
     <string name="payment_method_add_new_card">Dodaj nową kartę…</string>
     <string name="payment_method_add_new_fpx">Wybierz konto bankowe (FPX)…</string>
     <string name="price_free">Bezpłatnie</string>
-    <string name="removed">Usunięto %s</string>
+    <string name="removed">Usunięto: %s</string>
     <string name="secure_checkout">Bezpieczna płatność</string>
+    <string name="stripe_failure_reason_authentication">Nie możemy wykonać uwierzytelnienia Twojej metody płatności. Wybierz inną metodę i spróbuj ponownie.</string>
+    <string name="stripe_failure_reason_timed_out">Przekroczono czas uwierzytelnienia metody płatności – spróbuj ponownie</string>
+    <string name="stripe_paymentsheet_add_button_label">Dodaj</string>
+    <string name="stripe_paymentsheet_back">Wstecz</string>
+    <string name="stripe_paymentsheet_close">Zamknij</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ nowa karta</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Zapłać %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Zapłać</string>
+    <string name="stripe_paymentsheet_save_this_card">Zapisz dane tej karty do przyszłych płatności</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Zapisz dane tej karty do przyszłych płatności %s</string>
     <string name="title_add_a_card">Dodaj kartę</string>
     <string name="title_add_an_address">Ustaw adres</string>
     <string name="title_bank_account">Konto bankowe</string>

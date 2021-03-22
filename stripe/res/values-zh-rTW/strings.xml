@@ -15,7 +15,6 @@
     <string name="address_label_address">地址</string>
     <string name="address_label_address_line1">地址行 1</string>
     <string name="address_label_address_line1_optional">地址行 1（可選）</string>
-    <string name="address_label_address_line2">地址行 2</string>
     <string name="address_label_address_line2_optional">地址行 2（可選）</string>
     <string name="address_label_address_optional">地址（可選）</string>
     <string name="address_label_apt">公寓</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">縣</string>
     <string name="address_label_county_optional">縣（可選）</string>
     <string name="address_label_name">姓名</string>
-    <string name="address_label_name_optional">姓名（可選）</string>
     <string name="address_label_phone_number">電話號碼</string>
     <string name="address_label_phone_number_optional">電話號碼（可選）</string>
     <string name="address_label_postal_code">郵遞區號</string>
@@ -64,21 +62,23 @@
     
     </string>
     <string name="becs_widget_account_number">帳號</string>
+    <string name="becs_widget_account_number_incomplete">您的帳號不完整。</string>
     <string name="becs_widget_account_number_required">您需要填寫帳號。</string>
     <string name="becs_widget_bsb">BSB</string>
     <string name="becs_widget_bsb_incomplete">您輸入的 BSB 不完整。</string>
     <string name="becs_widget_bsb_invalid">您輸入的 BSB 無效。</string>
-    <string name="becs_widget_email">郵件地址</string>
-    <string name="becs_widget_email_required">您需要填寫電子郵件地址。</string>
+    <string name="becs_widget_email">電郵地址</string>
+    <string name="becs_widget_email_invalid">您的電郵地址無效。</string>
+    <string name="becs_widget_email_required">您需要填寫電郵地址。</string>
     <string name="becs_widget_name">姓名</string>
     <string name="becs_widget_name_required">您需要填寫姓名。</string>
+    <string name="card_ending_in">%1$s 尾號 %2$s</string>
     <string name="close">關閉</string>
-    <string name="delete_payment_method">刪除付款方式？</string>
+    <string name="delete_payment_method">刪除付款方式</string>
     <string name="delete_payment_method_prompt_title">刪除支付方式</string>
-    <string name="expiry_date_hint">MM/YY</string>
+    <string name="expiry_date_hint">月月/年年</string>
     <string name="expiry_label_short">有效期</string>
     <string name="fpx_bank_offline">%s - 線下</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">您的卡號無效。</string>
     <string name="invalid_cvc">您卡的安全代碼無效。</string>
     <string name="invalid_expiry_month">您卡的到期月份無效。</string>
@@ -91,6 +91,16 @@
     <string name="price_free">免費</string>
     <string name="removed">已移除 %s</string>
     <string name="secure_checkout">安全結帳</string>
+    <string name="stripe_failure_reason_authentication">我們無法驗證您的付款方式。請選擇其他付款方式，然後再試一次。</string>
+    <string name="stripe_failure_reason_timed_out">驗證您的付款方式時逾時 -- 請重試</string>
+    <string name="stripe_paymentsheet_add_button_label">添加</string>
+    <string name="stripe_paymentsheet_back">上一步</string>
+    <string name="stripe_paymentsheet_close">關閉</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ 新卡</string>
+    <string name="stripe_paymentsheet_pay_button_amount">支付 %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">支付</string>
+    <string name="stripe_paymentsheet_save_this_card">保存該卡，用於未來的付款。</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存該卡，用於未來的 %s 付款。</string>
     <string name="title_add_a_card">新增一張卡</string>
     <string name="title_add_an_address">設置地址</string>
     <string name="title_bank_account">銀行帳戶</string>
