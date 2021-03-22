@@ -72,6 +72,10 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         }
         args = nullableArgs
 
+        args.statusBarColor?.let {
+            window.statusBarColor = it
+        }
+
         viewModel.googlePayResult.observe(this) { googlePayResult ->
             googlePayResult?.let(::finishWithResult)
         }

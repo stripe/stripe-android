@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
+import android.graphics.Color
 import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -305,7 +306,8 @@ class DefaultFlowControllerTest {
                         environment = StripeGooglePayEnvironment.Test,
                         countryCode = "US",
                         merchantName = "Widget Store"
-                    )
+                    ),
+                    statusBarColor = Color.RED
                 )
             )
     }
