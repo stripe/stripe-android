@@ -161,6 +161,17 @@ internal class BillingAddressView @JvmOverloads constructor(
                 }
             }
         }
+
+        postalCodeView.internalFocusChangeListeners.add { _, hasFocus ->
+            val isPostalValid = selectedCountry?.code?.let { countryCode ->
+                postalCodeValidator.isValid(
+                    postalCode = postalCodeView.value.orEmpty(),
+                    countryCode = countryCode
+                )
+            } ?: false
+
+            postalCodeView.shouldShowError = !hasFocus && !postalCodeView.value.isNullOrBlank() && !isPostalValid
+        }
     }
 
     private fun configureCountryAutoComplete() {
@@ -212,6 +223,10 @@ internal class BillingAddressView @JvmOverloads constructor(
     private fun updatedSelectedCountryCode(country: Country) {
         if (selectedCountry != country) {
             selectedCountry = country
+            postalCodeView.shouldShowError = !postalCodeValidator.isValid(
+                postalCode = postalCodeView.value.orEmpty(),
+                countryCode = country.code
+            )
         }
     }
 
