@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -55,7 +56,10 @@ class PaymentAuthWebViewActivityTest {
     fun `setResult is expected value when onAuthComplete is invoked with error`() {
         runOnActivityScenario { activityScenario ->
             activityScenario.onActivity {
-                it.onAuthComplete(ActivityNotFoundException())
+                it.onAuthComplete(
+                    Uri.parse("https://example.com"),
+                    ActivityNotFoundException()
+                )
                 it.finish()
             }
 
@@ -90,6 +94,7 @@ class PaymentAuthWebViewActivityTest {
         private const val CLIENT_SECRET = "client_secret"
 
         private val ARGS = PaymentAuthWebViewContract.Args(
+            objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = REQUEST_CODE,
             clientSecret = CLIENT_SECRET,
             url = "https://example.com"
