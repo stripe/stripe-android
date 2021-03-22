@@ -56,7 +56,7 @@ sealed class ExpirationDate {
 
         private val isComplete = (month.length + year.length) == 4
 
-        internal val isIncomplete = !isComplete && ((month.length + year.length) > 0)
+        internal val isPartialEntry = !isComplete && ((month.length + year.length) > 0)
 
         internal companion object {
             /**

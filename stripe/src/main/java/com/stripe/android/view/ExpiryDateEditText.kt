@@ -228,7 +228,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
                     setErrorMessage(
                         resources.getString(
-                            if (expirationDate.isIncomplete) {
+                            if (expirationDate.isPartialEntry) {
                                 R.string.incomplete_expiry_date
                             } else if (!expirationDate.isMonthValid) {
                                 R.string.invalid_expiry_month

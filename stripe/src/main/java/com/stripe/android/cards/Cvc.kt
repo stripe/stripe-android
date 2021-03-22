@@ -21,7 +21,7 @@ internal sealed class Cvc {
         private fun isComplete(maxLength: Int) =
             setOf(COMMON_LENGTH, maxLength).contains(normalized.length)
 
-        fun isIncomplete(maxLength: Int) = normalized.isNotBlank() && !isComplete(maxLength)
+        fun isPartialEntry(maxLength: Int) = normalized.isNotBlank() && !isComplete(maxLength)
     }
 
     /**

@@ -66,7 +66,7 @@ class CvcEditText @JvmOverloads constructor(
         }
 
         internalFocusChangeListeners.add { _, hasFocus ->
-            if (!hasFocus && unvalidatedCvc.isIncomplete(cardBrand.maxCvcLength)) {
+            if (!hasFocus && unvalidatedCvc.isPartialEntry(cardBrand.maxCvcLength)) {
                 // TODO (michelleb-stripe) Should set error message to incomplete
                 shouldShowError = true
             }
