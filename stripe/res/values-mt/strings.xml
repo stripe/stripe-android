@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">XX/SS</string>
     <string name="expiry_label_short">Skadenza</string>
     <string name="fpx_bank_offline">%s - Offline</string>
+    <string name="incomplete_expiry_date">Id-data tal-iskadenza tal-kard tiegħek mhijiex kompluta.</string>
     <string name="invalid_card_number">In-numru tal-kard tiegħek mhux validu.</string>
     <string name="invalid_cvc">Il-kodiċi tas-sigurtà tal-kard tiegħek mhux validu.</string>
     <string name="invalid_expiry_month">Ix-xahar tal-iskadenza tal-kard tiegħek mhux validu.</string>

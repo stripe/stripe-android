@@ -38,6 +38,7 @@ internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWe
 
     @Parcelize
     internal data class Args(
+        val objectId: String,
         val requestCode: Int,
         val clientSecret: String,
         val url: String,
