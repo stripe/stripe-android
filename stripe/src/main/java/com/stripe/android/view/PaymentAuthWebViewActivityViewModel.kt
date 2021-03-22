@@ -88,8 +88,8 @@ internal class PaymentAuthWebViewActivityViewModel(
                 args.objectId
             ).plus(
                 mapOf(
-                    "error_message" to error.message.orEmpty(),
-                    "error_stacktrace" to error.stackTraceToString()
+                    FIELD_ERROR_MESSAGE to error.message.orEmpty(),
+                    FIELD_ERROR_STACKTRACE to error.stackTraceToString()
                 )
             ),
             uri
@@ -123,7 +123,7 @@ internal class PaymentAuthWebViewActivityViewModel(
             analyticsRequestFactory.create(
                 event
                     .plus(
-                        mapOf("challenge_uri" to sanitizedUri)
+                        mapOf(FIELD_CHALLENGE_URI to sanitizedUri)
                     )
             )
         )
@@ -149,5 +149,11 @@ internal class PaymentAuthWebViewActivityViewModel(
                 AnalyticsDataFactory(application, publishableKey)
             ) as T
         }
+    }
+
+    private companion object {
+        private const val FIELD_CHALLENGE_URI = "challenge_uri"
+        private const val FIELD_ERROR_MESSAGE = "error_message"
+        private const val FIELD_ERROR_STACKTRACE = "error_stacktrace"
     }
 }
