@@ -8,7 +8,7 @@
     <string name="acc_label_zip">PSČ</string>
     <string name="acc_label_zip_short">PSČ</string>
     <string name="add_card">Pridajte novú debetnú alebo kreditnú kartu, aby ste mohli nakupovať v tejto aplikácii.</string>
-    <string name="added">Pridané %s</string>
+    <string name="added">Spôsob platby %s pridaný</string>
     <string name="address_city_required">Zadajte vaše mesto</string>
     <string name="address_country_invalid">Vaša krajina je neplatná.</string>
     <string name="address_county_required">Zadajte váš kraj</string>
@@ -62,16 +62,19 @@
     autorizovaným signatárom na vyššie uvedenom účte.
     </string>
     <string name="becs_widget_account_number">Číslo účtu</string>
+    <string name="becs_widget_account_number_incomplete">Číslo vášho účtu je neúplné.</string>
     <string name="becs_widget_account_number_required">Vyžaduje sa vaše číslo účtu.</string>
     <string name="becs_widget_bsb">BSB</string>
     <string name="becs_widget_bsb_incomplete">Zadané BSB je neúplné.</string>
     <string name="becs_widget_bsb_invalid">Zadané BSB je neplatné.</string>
     <string name="becs_widget_email">E-mailová adresa</string>
+    <string name="becs_widget_email_invalid">Vaša e-mailová adresa je neplatná.</string>
     <string name="becs_widget_email_required">Vyžaduje sa vaša e-mailová adresa.</string>
     <string name="becs_widget_name">Meno</string>
     <string name="becs_widget_name_required">Vyžaduje sa vaše meno.</string>
+    <string name="card_ending_in">Karta %1$s s poslednými štyrmi číslami %2$s</string>
     <string name="close">Zatvoriť</string>
-    <string name="delete_payment_method">Vymazať spôsob platby?</string>
+    <string name="delete_payment_method">Odstrániť spôsob platby</string>
     <string name="delete_payment_method_prompt_title">Vymazať spôsob platby?</string>
     <string name="expiry_date_hint">MM/RR</string>
     <string name="expiry_label_short">Ukončenie platnosti</string>
@@ -83,11 +86,21 @@
     <string name="invalid_shipping_information">Neplatná dodacia adresa</string>
     <string name="invalid_zip">Vaše poštové smerovacie číslo je neúplné.</string>
     <string name="no_payment_methods">Žiadne spôsoby platby.</string>
-    <string name="payment_method_add_new_card">Pridať novú kartu...</string>
-    <string name="payment_method_add_new_fpx">Zvoľte bankový účet (FPX)...</string>
+    <string name="payment_method_add_new_card">Pridať novú kartu…</string>
+    <string name="payment_method_add_new_fpx">Zvoľte bankový účet (FPX)…</string>
     <string name="price_free">Zdarma</string>
-    <string name="removed">Odstránené %s</string>
+    <string name="removed">Spôsob platby %s odstránený</string>
     <string name="secure_checkout">Bezpečná pokladňa</string>
+    <string name="stripe_failure_reason_authentication">Nemôžeme overiť váš spôsob platby. Vyberte iný spôsob platby a skúste to znova.</string>
+    <string name="stripe_failure_reason_timed_out">Vypršal čas autentifikácie vášho spôsobu platby -- skúste znova</string>
+    <string name="stripe_paymentsheet_add_button_label">Pridať</string>
+    <string name="stripe_paymentsheet_back">Späť</string>
+    <string name="stripe_paymentsheet_close">Zatvoriť</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Nová karta</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Zaplatiť %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Zaplatiť</string>
+    <string name="stripe_paymentsheet_save_this_card">Uložiť túto kartu pre budúce platby</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložiť túto kartu pre budúce platby obchodníkovi %s</string>
     <string name="title_add_a_card">Pridať kartu</string>
     <string name="title_add_an_address">Zadajte adresu</string>
     <string name="title_bank_account">Bankový účet</string>

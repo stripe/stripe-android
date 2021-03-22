@@ -62,16 +62,19 @@
     лице, имащо правото да подписва.
     </string>
     <string name="becs_widget_account_number">Номер на сметката</string>
+    <string name="becs_widget_account_number_incomplete">Номерът на Вашата сметка е непълен.</string>
     <string name="becs_widget_account_number_required">Номерът на Вашата сметка е задължителен.</string>
     <string name="becs_widget_bsb">BSB</string>
     <string name="becs_widget_bsb_incomplete">BSB, който сте въвели, е непълен.</string>
     <string name="becs_widget_bsb_invalid">BSB, който сте въвели, е невалиден.</string>
     <string name="becs_widget_email">Имейл адрес</string>
+    <string name="becs_widget_email_invalid">Вашият имейл е невалиден.</string>
     <string name="becs_widget_email_required">Вашият имейл адрес е задължителен.</string>
     <string name="becs_widget_name">Име</string>
     <string name="becs_widget_name_required">Вашето име е задължително.</string>
+    <string name="card_ending_in">%1$s завършващо на %2$s</string>
     <string name="close">Затваряне</string>
-    <string name="delete_payment_method">Изтриване на метода на плащане?</string>
+    <string name="delete_payment_method">Изтриване на метода на плащане</string>
     <string name="delete_payment_method_prompt_title">Изтриване на метода на плащане?</string>
     <string name="expiry_date_hint">ММ/ГГ</string>
     <string name="expiry_label_short">Валидност</string>
@@ -88,6 +91,16 @@
     <string name="price_free">Безплатно</string>
     <string name="removed">%s е премахнато</string>
     <string name="secure_checkout">Защитено финализиране</string>
+    <string name="stripe_failure_reason_authentication">Не можем да удостоверим Вашия метод на плащане. Моля, изберете различен метод на плащане и опитайте отново.</string>
+    <string name="stripe_failure_reason_timed_out">Времето на изчакване на удостоверяването на Вашия метод на плащане изтече -- опитайте отново</string>
+    <string name="stripe_paymentsheet_add_button_label">Добавяне</string>
+    <string name="stripe_paymentsheet_back">Назад</string>
+    <string name="stripe_paymentsheet_close">Затваряне</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Нова карта</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Плащане %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Плащане</string>
+    <string name="stripe_paymentsheet_save_this_card">Запазете тази карта за следващи плащания</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Запазете тази карта за следващи %s плащания</string>
     <string name="title_add_a_card">Добавяне на карта</string>
     <string name="title_add_an_address">Задаване на адрес</string>
     <string name="title_bank_account">Банкова сметка</string>
