@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">ММ/ГГ</string>
     <string name="expiry_label_short">Истечение срока действия</string>
     <string name="fpx_bank_offline">%s - не в сети</string>
+    <string name="incomplete_expiry_date">Дата истечения срока действия карты введена не полностью.</string>
     <string name="invalid_card_number">Номер карты недействителен.</string>
     <string name="invalid_cvc">Код CVV/CVC карты недействителен.</string>
     <string name="invalid_expiry_month">Недопустимый месяц окончания действия карты.</string>

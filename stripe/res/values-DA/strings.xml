@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">MM/ÅÅ</string>
     <string name="expiry_label_short">Udløbsdato</string>
     <string name="fpx_bank_offline">%s -Offline</string>
+    <string name="incomplete_expiry_date">Dit korts udløbsdato er ikke fuldendt.</string>
     <string name="invalid_card_number">Nummeret på dit kort er ugyldigt.</string>
     <string name="invalid_cvc">Dit korts sikkerhedskode er ugyldig.</string>
     <string name="invalid_expiry_month">Kortets udløbsmåned er ugyldig.</string>
