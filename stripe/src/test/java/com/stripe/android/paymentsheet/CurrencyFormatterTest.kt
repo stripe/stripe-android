@@ -20,14 +20,14 @@ class CurrencyFormatterTest {
 
         val euro = Currency.getInstance(Locale.GERMANY)
         assertThat(currencyFormatter.format(12300L, euro))
-            .isEqualTo("EUR123.00")
+            .isEqualTo("€123.00")
 
         val canadianDollar = Currency.getInstance(Locale.CANADA)
         assertThat(currencyFormatter.format(12300L, canadianDollar))
-            .isEqualTo("CAD123.00")
+            .isEqualTo("CA$123.00")
 
         val britishPound = Currency.getInstance(Locale.UK)
         assertThat(currencyFormatter.format(10000L, britishPound))
-            .isEqualTo("GBP100.00")
+            .isEqualTo("£100.00")
     }
 }
