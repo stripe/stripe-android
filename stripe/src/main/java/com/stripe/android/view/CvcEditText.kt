@@ -64,6 +64,13 @@ class CvcEditText @JvmOverloads constructor(
                 completionCallback()
             }
         }
+
+        internalFocusChangeListeners.add { _, hasFocus ->
+            if (!hasFocus && unvalidatedCvc.isPartialEntry(cardBrand.maxCvcLength)) {
+                // TODO (michelleb-stripe) Should set error message to incomplete
+                shouldShowError = true
+            }
+        }
     }
 
     override val accessibilityText: String?
@@ -94,6 +101,13 @@ class CvcEditText @JvmOverloads constructor(
             } else {
                 resources.getString(R.string.cvc_number_hint)
             }
+
+        // Only show an error when we update the branch if text is entered
+        // and the Cvc does not validate
+        if (unvalidatedCvc.normalized.isNotEmpty()) {
+            shouldShowError = unvalidatedCvc.validate(cardBrand.maxCvcLength) == null
+            // TODO(michelleb-stripe): Should truncate CVC on a brand name change.
+        }
 
         if (textInputLayout != null) {
             textInputLayout.hint = hintText

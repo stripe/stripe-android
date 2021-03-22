@@ -5897,6 +5897,7 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	protected fun getAccessibilityText ()Ljava/lang/String;
 	public final fun getCachedColorStateList ()Landroid/content/res/ColorStateList;
 	public final fun getDefaultErrorColorInt ()I
+	public fun getOnFocusChangeListener ()Landroid/view/View$OnFocusChangeListener;
 	public final fun getShouldShowError ()Z
 	protected final fun isLastKeyDelete ()Z
 	public fun onCreateInputConnection (Landroid/view/inputmethod/EditorInfo;)Landroid/view/inputmethod/InputConnection;
@@ -5907,6 +5908,7 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public final fun setErrorMessage (Ljava/lang/String;)V
 	public final fun setErrorMessageListener (Lcom/stripe/android/view/StripeEditText$ErrorMessageListener;)V
 	protected final fun setLastKeyDelete (Z)V
+	public final fun setOnFocusChangeListener (Landroid/view/View$OnFocusChangeListener;)V
 	public final fun setShouldShowError (Z)V
 	public fun setTextColor (I)V
 	public fun setTextColor (Landroid/content/res/ColorStateList;)V

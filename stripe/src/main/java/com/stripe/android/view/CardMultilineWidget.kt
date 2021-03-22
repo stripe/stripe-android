@@ -7,7 +7,6 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
@@ -687,19 +686,19 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun initFocusChangeListeners() {
-        cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cardNumberEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
 
-        expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        expiryDateEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             }
         }
 
-        cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cvcEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 if (!showCvcIconInCvcField) {
                     flipToCvcIconIfNotFinished()
@@ -710,7 +709,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-        postalCodeEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        postalCodeEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (shouldShowPostalCode && hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
             }

@@ -79,7 +79,8 @@ internal class CardNumberEditTextTest {
 
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
     private val analyticsRequestFactory = AnalyticsRequest.Factory()
-    private val analyticsDataFactory = AnalyticsDataFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+    private val analyticsDataFactory =
+        AnalyticsDataFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
     private val cardNumberEditText = CardNumberEditText(
         context,
@@ -100,100 +101,107 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun calculateCursorPosition_whenVisa_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
-        // Adding 1 character, starting at position 4, with a final string length 6
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(6, 4, 1)
-        ).isEqualTo(6)
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(8, 4, 1)
-        ).isEqualTo(6)
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(11, 9, 1)
-        ).isEqualTo(11)
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(16, 14, 1)
-        ).isEqualTo(16)
-    }
+    fun calculateCursorPosition_whenVisa_increasesIndexWhenGoingPastTheSpaces() =
+        testDispatcher.runBlockingTest {
+            // Adding 1 character, starting at position 4, with a final string length 6
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(6, 4, 1)
+            ).isEqualTo(6)
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(8, 4, 1)
+            ).isEqualTo(6)
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(11, 9, 1)
+            ).isEqualTo(11)
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(16, 14, 1)
+            ).isEqualTo(16)
+        }
 
     @Test
-    fun `calculateCursorPosition() when pasting 19 digit number should return expected value`() = testDispatcher.runBlockingTest {
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(
-                newFormattedLength = 23,
-                start = 0,
-                addedDigits = 19,
-                panLength = 19
+    fun `calculateCursorPosition() when pasting 19 digit number should return expected value`() =
+        testDispatcher.runBlockingTest {
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(
+                    newFormattedLength = 23,
+                    start = 0,
+                    addedDigits = 19,
+                    panLength = 19
+                )
+            ).isEqualTo(23)
+        }
+
+    @Test
+    fun calculateCursorPosition_whenAmEx_increasesIndexWhenGoingPastTheSpaces() =
+        testDispatcher.runBlockingTest {
+            cardNumberEditText.onAccountRangeResult(
+                AccountRangeFixtures.AMERICANEXPRESS
             )
-        ).isEqualTo(23)
-    }
+
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(6, 4, 1)
+            ).isEqualTo(6)
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(13, 11, 1)
+            ).isEqualTo(13)
+        }
 
     @Test
-    fun calculateCursorPosition_whenAmEx_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
-        cardNumberEditText.onAccountRangeResult(
-            AccountRangeFixtures.AMERICANEXPRESS
-        )
+    fun calculateCursorPosition_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() =
+        testDispatcher.runBlockingTest {
+            cardNumberEditText.onAccountRangeResult(
+                AccountRangeFixtures.DINERSCLUB16
+            )
 
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(6, 4, 1)
-        ).isEqualTo(6)
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(13, 11, 1)
-        ).isEqualTo(13)
-    }
-
-    @Test
-    fun calculateCursorPosition_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
-        cardNumberEditText.onAccountRangeResult(
-            AccountRangeFixtures.DINERSCLUB16
-        )
-
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(6, 5, 0)
-        ).isEqualTo(4)
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(13, 10, 0)
-        ).isEqualTo(9)
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(17, 15, 0)
-        ).isEqualTo(14)
-    }
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(6, 5, 0)
+            ).isEqualTo(4)
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(13, 10, 0)
+            ).isEqualTo(9)
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(17, 15, 0)
+            ).isEqualTo(14)
+        }
 
     @Test
-    fun calculateCursorPosition_whenDeletingNotOnGaps_doesNotDecreaseIndex() = testDispatcher.runBlockingTest {
-        cardNumberEditText.onAccountRangeResult(
-            AccountRangeFixtures.DINERSCLUB14
-        )
+    fun calculateCursorPosition_whenDeletingNotOnGaps_doesNotDecreaseIndex() =
+        testDispatcher.runBlockingTest {
+            cardNumberEditText.onAccountRangeResult(
+                AccountRangeFixtures.DINERSCLUB14
+            )
 
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(12, 7, 0)
-        ).isEqualTo(7)
-    }
-
-    @Test
-    fun calculateCursorPosition_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
-        cardNumberEditText.onAccountRangeResult(
-            AccountRangeFixtures.AMERICANEXPRESS
-        )
-
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(10, 5, 0)
-        ).isEqualTo(4)
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(13, 12, 0)
-        ).isEqualTo(11)
-    }
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(12, 7, 0)
+            ).isEqualTo(7)
+        }
 
     @Test
-    fun calculateCursorPosition_whenSelectionInTheMiddle_increasesIndexOverASpace() = testDispatcher.runBlockingTest {
-        cardNumberEditText.onAccountRangeResult(
-            AccountRangeFixtures.VISA
-        )
+    fun calculateCursorPosition_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() =
+        testDispatcher.runBlockingTest {
+            cardNumberEditText.onAccountRangeResult(
+                AccountRangeFixtures.AMERICANEXPRESS
+            )
 
-        assertThat(
-            cardNumberEditText.calculateCursorPosition(10, 4, 1)
-        ).isEqualTo(6)
-    }
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(10, 5, 0)
+            ).isEqualTo(4)
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(13, 12, 0)
+            ).isEqualTo(11)
+        }
+
+    @Test
+    fun calculateCursorPosition_whenSelectionInTheMiddle_increasesIndexOverASpace() =
+        testDispatcher.runBlockingTest {
+            cardNumberEditText.onAccountRangeResult(
+                AccountRangeFixtures.VISA
+            )
+
+            assertThat(
+                cardNumberEditText.calculateCursorPosition(10, 4, 1)
+            ).isEqualTo(6)
+        }
 
     @Test
     fun calculateCursorPosition_whenPastingIntoAGap_includesTheGapJump() {
@@ -274,11 +282,11 @@ internal class CardNumberEditTextTest {
             staticCardAccountRanges = object : StaticCardAccountRanges {
                 override fun first(
                     cardNumber: CardNumber.Unvalidated
-                ): AccountRange? = AccountRangeFixtures.UNIONPAY19
+                ): AccountRange = AccountRangeFixtures.UNIONPAY19
 
                 override fun filter(
                     cardNumber: CardNumber.Unvalidated
-                ): List<AccountRange> = listOf(AccountRangeFixtures.UNIONPAY19)
+                ) = listOf(AccountRangeFixtures.UNIONPAY19)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
@@ -310,7 +318,7 @@ internal class CardNumberEditTextTest {
 
                 override fun filter(
                     cardNumber: CardNumber.Unvalidated
-                ): List<AccountRange> = emptyList()
+                ) = emptyList<AccountRange>()
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
@@ -405,7 +413,7 @@ internal class CardNumberEditTextTest {
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
 
-        updateCardNumberAndIdle("123")
+        updateCardNumberAndIdle("424")
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
     }
@@ -743,6 +751,32 @@ internal class CardNumberEditTextTest {
         updateCardNumberAndIdle("4")
         assertThat(lastBrandChangeCallbackInvocation)
             .isEqualTo(CardBrand.Visa)
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isFalse()
+    }
+
+    @Test
+    fun `when first digit matches multiple accounts, don't show an error`() {
+        // matches Amex and diners
+        updateCardNumberAndIdle("3")
+        assertThat(lastBrandChangeCallbackInvocation)
+            .isEqualTo(CardBrand.Unknown)
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isFalse()
+    }
+
+    @Test
+    fun `when first digit doesn't match a single account, show error`() {
+        // matches Visa
+        updateCardNumberAndIdle("0")
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isTrue()
     }
 
     @Test
@@ -751,6 +785,19 @@ internal class CardNumberEditTextTest {
         updateCardNumberAndIdle("6")
         assertThat(lastBrandChangeCallbackInvocation)
             .isEqualTo(CardBrand.Unknown)
+    }
+
+    @Test
+    fun `when lose focus and card is not complete, show error`() {
+        updateCardNumberAndIdle("3")
+        cardNumberEditText.internalFocusChangeListeners
+            .forEach {
+                it.onFocusChange(cardNumberEditText, false)
+            }
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isTrue()
     }
 
     @Test

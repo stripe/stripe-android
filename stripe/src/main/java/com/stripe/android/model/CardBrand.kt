@@ -39,7 +39,7 @@ enum class CardBrand(
      * Patterns for discrete lengths
      */
     @Deprecated("Will be removed in upcoming major release.")
-    private val partialPatterns: Map<Int, Pattern> = emptyMap(),
+    private val partialPatterns: Map<Int, Pattern>,
 
     /**
      * The position of spaces in a formatted card number. For example, "4242424242424242" is
@@ -66,6 +66,9 @@ enum class CardBrand(
         cvcLength = setOf(3, 4),
         defaultMaxLength = 15,
         pattern = Pattern.compile("^(34|37)[0-9]*$"),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^3$")
+        ),
         defaultSpacePositions = setOf(4, 11)
     ),
 
@@ -73,7 +76,10 @@ enum class CardBrand(
         "discover",
         "Discover",
         R.drawable.stripe_ic_discover,
-        pattern = Pattern.compile("^(60|64|65)[0-9]*$")
+        pattern = Pattern.compile("^(60|64|65)[0-9]*$"),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^6$")
+        ),
     ),
 
     /**
@@ -87,6 +93,7 @@ enum class CardBrand(
         R.drawable.stripe_ic_jcb,
         pattern = Pattern.compile("^(352[89]|35[3-8][0-9])[0-9]*$"),
         partialPatterns = mapOf(
+            1 to Pattern.compile("^3$"),
             2 to Pattern.compile("^(35)$"),
             3 to Pattern.compile("^(35[2-8])$")
         )
@@ -104,6 +111,9 @@ enum class CardBrand(
         R.drawable.stripe_ic_diners,
         defaultMaxLength = 16,
         pattern = Pattern.compile("^(36|30|38|39)[0-9]*$"),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^3$")
+        ),
         variantMaxLength = mapOf(
             Pattern.compile("^(36)[0-9]*$") to 14
         ),
@@ -116,7 +126,10 @@ enum class CardBrand(
         "visa",
         "Visa",
         R.drawable.stripe_ic_visa,
-        pattern = Pattern.compile("^(4)[0-9]*$")
+        pattern = Pattern.compile("^(4)[0-9]*$"),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^4$")
+        ),
     ),
 
     MasterCard(
@@ -125,6 +138,7 @@ enum class CardBrand(
         R.drawable.stripe_ic_mastercard,
         pattern = Pattern.compile("^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|227|228|229|23|24|25|26|270|271|2720|50|51|52|53|54|55|56|57|58|59|67)[0-9]*$"),
         partialPatterns = mapOf(
+            1 to Pattern.compile("^2|5|6$"),
             2 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
         )
     ),
@@ -133,14 +147,18 @@ enum class CardBrand(
         "unionpay",
         "UnionPay",
         R.drawable.stripe_ic_unionpay,
-        pattern = Pattern.compile("^(62|81)[0-9]*$")
+        pattern = Pattern.compile("^(62|81)[0-9]*$"),
+        partialPatterns = mapOf(
+            1 to Pattern.compile("^6|8$"),
+        )
     ),
 
     Unknown(
         "unknown",
         "Unknown",
         R.drawable.stripe_ic_unknown,
-        cvcLength = setOf(3, 4)
+        cvcLength = setOf(3, 4),
+        partialPatterns = emptyMap()
     );
 
     @Deprecated("Will be removed in upcoming major release.")
@@ -279,10 +297,28 @@ enum class CardBrand(
                 return Unknown
             }
 
-            return values()
-                .firstOrNull { cardBrand ->
-                    cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)?.matches() == true
-                } ?: Unknown
+            // Only return a card brand if we know exactly which one, if there is more than
+            // one possibility return unknown
+            return (
+                getMatchingCards(cardNumber).takeIf {
+                    it.size == 1
+                } ?: listOf(Unknown)
+                ).first()
+        }
+
+        internal fun getCardBrands(cardNumber: String?): List<CardBrand> {
+            if (cardNumber.isNullOrBlank()) {
+                return listOf(Unknown)
+            }
+
+            return getMatchingCards(cardNumber).takeIf {
+                it.isNotEmpty()
+            } ?: listOf(Unknown)
+        }
+
+        private fun getMatchingCards(cardNumber: String) = values().filter { cardBrand ->
+            cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)
+                ?.matches() == true
         }
 
         /**
