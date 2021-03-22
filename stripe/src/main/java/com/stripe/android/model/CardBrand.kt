@@ -299,9 +299,10 @@ enum class CardBrand(
 
             // Only return a card brand if we know exactly which one, if there is more than
             // one possibility return unknown
-            return (getMatchingCards(cardNumber).takeIf {
-                it.size == 1
-            } ?: listOf(Unknown)
+            return (
+                getMatchingCards(cardNumber).takeIf {
+                    it.size == 1
+                } ?: listOf(Unknown)
                 ).first()
         }
 

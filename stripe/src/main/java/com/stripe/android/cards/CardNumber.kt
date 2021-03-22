@@ -82,7 +82,6 @@ internal sealed class CardNumber {
         internal fun isPartialEntry(panLength: Int) =
             (normalized.length != panLength) && normalized.isNotBlank()
 
-
         internal fun isPossibleCardBrand(): Boolean {
             return normalized.isNotBlank() &&
                 CardBrand.getCardBrands(normalized).first() != CardBrand.Unknown
