@@ -35,7 +35,7 @@ class FingerprintRequestParamsFactoryTest {
             .hasSize(4)
 
         assertThat(getSingleValue(firstMap, "d"))
-            .isEqualTo("Android 9 REL 28")
+            .isEqualTo("Android 11 REL 30")
         assertThat(getSingleValue(firstMap, "g"))
             .isEqualTo("-5")
 

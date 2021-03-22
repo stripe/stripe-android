@@ -62,16 +62,19 @@
     signatářem na výše uvedeném účtu.
     </string>
     <string name="becs_widget_account_number">Číslo účtu</string>
+    <string name="becs_widget_account_number_incomplete">Vaše číslo účtu je neúplné.</string>
     <string name="becs_widget_account_number_required">Vašečíslo účtu je povinný údaj.</string>
     <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">Hodnota BSB, kterou jste zadali, je neúplná.</string>
-    <string name="becs_widget_bsb_invalid">Hodnota BSB, kterou jste zadali, je neplatná.</string>
+    <string name="becs_widget_bsb_incomplete">Zadaný BSB je neúplný.</string>
+    <string name="becs_widget_bsb_invalid">Zadaný BSB je neplatný.</string>
     <string name="becs_widget_email">E-mailová adresa</string>
+    <string name="becs_widget_email_invalid">Vaše e-mailová adresa není platná.</string>
     <string name="becs_widget_email_required">Vaše e-mailová adresa je povinný údaj.</string>
     <string name="becs_widget_name">Jméno</string>
     <string name="becs_widget_name_required">Vaše jméno je povinný údaj.</string>
+    <string name="card_ending_in">%1$s končící za %2$s</string>
     <string name="close">Zavřít</string>
-    <string name="delete_payment_method">Odstranit způsob platby?</string>
+    <string name="delete_payment_method">Odstranit způsob platby</string>
     <string name="delete_payment_method_prompt_title">Odstranit způsob platby?</string>
     <string name="expiry_date_hint">MM/RR</string>
     <string name="expiry_label_short">Konec platnosti</string>
@@ -88,6 +91,16 @@
     <string name="price_free">Zdarma</string>
     <string name="removed">Odebráno %s</string>
     <string name="secure_checkout">Bezpečné dokončení platby</string>
+    <string name="stripe_failure_reason_authentication">Nemůžeme ověřit Váš způsob platby. Vyberte si jiný způsob platby a zkuste to znovu.</string>
+    <string name="stripe_failure_reason_timed_out">Časový limit ověření Vašeho způsobu platby uplynul -- zkuste to znovu</string>
+    <string name="stripe_paymentsheet_add_button_label">Přidat</string>
+    <string name="stripe_paymentsheet_back">Zpět</string>
+    <string name="stripe_paymentsheet_close">Zavřít</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Nová karta</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Zaplatit %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Zaplatit</string>
+    <string name="stripe_paymentsheet_save_this_card">Uložit tuto kartu pro budoucí platby</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložit tuto kartu pro budoucí platby %s</string>
     <string name="title_add_a_card">Přidat kartu</string>
     <string name="title_add_an_address">Nastavit adresu</string>
     <string name="title_bank_account">Bankovní účet</string>

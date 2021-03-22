@@ -12,12 +12,12 @@ import androidx.lifecycle.MutableLiveData
 import com.stripe.android.Logger
 
 internal class PaymentAuthWebViewClient(
-    private val activityStarter: (Intent) -> Unit,
-    private val activityFinisher: () -> Unit,
     private val logger: Logger,
     private val isPageLoaded: MutableLiveData<Boolean>,
     private val clientSecret: String,
-    returnUrl: String?
+    returnUrl: String?,
+    private val activityStarter: (Intent) -> Unit,
+    private val activityFinisher: (Throwable?) -> Unit
 ) : WebViewClient() {
     // user-specified return URL
     private val userReturnUri: Uri? = returnUrl?.let { Uri.parse(it) }
@@ -88,9 +88,9 @@ internal class PaymentAuthWebViewClient(
         logger.debug("PaymentAuthWebViewClient#openIntentScheme()")
         runCatching {
             openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
-        }.onFailure {
-            logger.error("Failed to start Intent.", it)
-            onAuthCompleted()
+        }.onFailure { error ->
+            logger.error("Failed to start Intent.", error)
+            onAuthCompleted(error)
         }
     }
 
@@ -103,8 +103,8 @@ internal class PaymentAuthWebViewClient(
 
         runCatching {
             activityStarter(intent)
-        }.onFailure {
-            logger.error("Failed to start Intent.", it)
+        }.onFailure { error ->
+            logger.error("Failed to start Intent.", error)
 
             if (intent.scheme != "alipays") {
                 // complete auth if the deep-link can't be opened unless it is Alipay.
@@ -112,7 +112,7 @@ internal class PaymentAuthWebViewClient(
                 // irrespective of whether or not the app is installed.
                 // If this intent fails to resolve, we should still let the user
                 // continue on the mobile site.
-                onAuthCompleted()
+                onAuthCompleted(error)
             }
         }
     }
@@ -178,9 +178,14 @@ internal class PaymentAuthWebViewClient(
         return "stripejs://use_stripe_sdk/return_url" == uri.toString()
     }
 
-    private fun onAuthCompleted() {
+    /**
+     * Invoked when authentication flow has completed, whether succeeded or failed.
+     */
+    private fun onAuthCompleted(
+        error: Throwable? = null
+    ) {
         logger.debug("PaymentAuthWebViewClient#onAuthCompleted()")
-        activityFinisher()
+        activityFinisher(error)
     }
 
     internal companion object {
