@@ -54,6 +54,10 @@ sealed class ExpirationDate {
             ).joinToString(separator = "")
         }
 
+        private val isComplete = (month.length + year.length) == 4
+
+        internal val isPartialEntry = !isComplete && ((month.length + year.length) > 0)
+
         internal companion object {
             /**
              * Converts raw string input of the format MMYY into a [ExpirationDate.Unvalidated].

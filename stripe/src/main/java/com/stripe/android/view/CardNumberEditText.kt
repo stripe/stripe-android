@@ -166,6 +166,12 @@ class CardNumberEditText internal constructor(
         setErrorMessage(resources.getString(R.string.invalid_card_number))
         addTextChangedListener(CardNumberTextWatcher())
 
+        internalFocusChangeListeners.add { _, hasFocus ->
+            if (!hasFocus && unvalidatedCardNumber.isPartialEntry(panLength)) {
+                shouldShowError = true
+            }
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
         }
@@ -395,9 +401,14 @@ class CardNumberEditText internal constructor(
                 if (isComplete(wasCardNumberValid)) {
                     completionCallback()
                 }
+            } else if (!unvalidatedCardNumber.isPossibleCardBrand()) {
+                // Partial card number entered and brand is not yet determine, but possible.
+                isCardNumberValid = isValid
+                shouldShowError = true
             } else {
                 isCardNumberValid = isValid
-                // Don't show errors if we aren't full-length.
+                // Don't show errors if we aren't full-length and the brand is known.
+                // TODO (michelleb-stripe) Should set error message to incomplete, then in focus change if it isn't complete it will update it.
                 shouldShowError = false
             }
         }

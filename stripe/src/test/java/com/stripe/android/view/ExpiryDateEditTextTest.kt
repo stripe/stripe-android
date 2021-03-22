@@ -188,7 +188,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.invalid_expiry_month))
+            .isEqualTo(context.getString(R.string.incomplete_expiry_date))
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("14")
     }
@@ -200,7 +200,7 @@ class ExpiryDateEditTextTest {
         assertThat(expiryDateEditText.shouldShowError)
             .isTrue()
         assertThat(expiryDateEditText.errorMessage)
-            .isEqualTo(context.getString(R.string.invalid_expiry_month))
+            .isEqualTo(context.getString(R.string.incomplete_expiry_date))
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("14/3")
     }

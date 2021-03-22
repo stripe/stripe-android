@@ -1,6 +1,7 @@
 package com.stripe.android.cards
 
 import com.stripe.android.CardUtils
+import com.stripe.android.model.CardBrand
 
 internal sealed class CardNumber {
 
@@ -76,6 +77,14 @@ internal sealed class CardNumber {
             return groups
                 .takeWhile { it != null }
                 .joinToString(" ")
+        }
+
+        internal fun isPartialEntry(panLength: Int) =
+            (normalized.length != panLength) && normalized.isNotBlank()
+
+        internal fun isPossibleCardBrand(): Boolean {
+            return normalized.isNotBlank() &&
+                CardBrand.getCardBrands(normalized).first() != CardBrand.Unknown
         }
 
         private companion object {
