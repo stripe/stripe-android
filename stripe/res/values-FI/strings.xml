@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">KK/VV</string>
     <string name="expiry_label_short">Vanheneminen</string>
     <string name="fpx_bank_offline">%s - Offline-tilassa</string>
+    <string name="incomplete_expiry_date">Kortin voimassaoloaika on puutteellinen.</string>
     <string name="invalid_card_number">Kortin numero ei kelpaa.</string>
     <string name="invalid_cvc">Kortin turvakoodi on virheellinen.</string>
     <string name="invalid_expiry_month">Kortin erääntymiskuukausi ei kelpaa.</string>

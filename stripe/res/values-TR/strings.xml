@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">AA/YY</string>
     <string name="expiry_label_short">Son kullanma</string>
     <string name="fpx_bank_offline">%s - Çevrimdışı</string>
+    <string name="incomplete_expiry_date">Kartınızın son kullanma tarihi eksik.</string>
     <string name="invalid_card_number">Kart numaranız geçersiz.</string>
     <string name="invalid_cvc">Kartınızın güvenlik kodu geçersiz.</string>
     <string name="invalid_expiry_month">Kartınızın son kullanma ayı geçersiz.</string>

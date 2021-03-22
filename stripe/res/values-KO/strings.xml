@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">만료</string>
     <string name="fpx_bank_offline">%s - 오프라인</string>
+    <string name="incomplete_expiry_date">카드의 만료 날짜가 불완전합니다.</string>
     <string name="invalid_card_number">카드 번호가 잘못되었습니다.</string>
     <string name="invalid_cvc">카드의 보안 코드가 유효하지 않습니다.</string>
     <string name="invalid_expiry_month">카드의 만료 월이 유효하지 않습니다.</string>
