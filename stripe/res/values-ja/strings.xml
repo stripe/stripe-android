@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">有効期限</string>
     <string name="fpx_bank_offline">%s - オフライン</string>
+    <string name="incomplete_expiry_date">カードの有効期限の日付に不備があります。</string>
     <string name="invalid_card_number">カードの番号が無効です。</string>
     <string name="invalid_cvc">カードのセキュリティコードが無効です。</string>
     <string name="invalid_expiry_month">カードの有効期限の月が無効です。</string>

@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Scadenza</string>
     <string name="fpx_bank_offline">%s - Offline</string>
+    <string name="incomplete_expiry_date">La data di scadenza della carta è incompleta.</string>
     <string name="invalid_card_number">Il numero della carta non è valido.</string>
     <string name="invalid_cvc">Il codice di sicurezza della carta non è valido.</string>
     <string name="invalid_expiry_month">Il mese di scadenza della carta non è valido.</string>
