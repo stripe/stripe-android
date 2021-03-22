@@ -78,6 +78,7 @@
     <string name="expiry_date_hint">ΜΜ/ΕΕ</string>
     <string name="expiry_label_short">Λήξη</string>
     <string name="fpx_bank_offline">%s - Εκτός σύνδεσης</string>
+    <string name="incomplete_expiry_date">Η ημερομηνία λήξης της κάρτας σας είναι ελλιπής.</string>
     <string name="invalid_card_number">Ο αριθμός της κάρτας σας δεν είναι έγκυρος.</string>
     <string name="invalid_cvc">Ο κωδικός ασφαλείας της κάρτας σας δεν είναι έγκυρος.</string>
     <string name="invalid_expiry_month">Ο μήνας λήξης της κάρτας σας δεν είναι έγκυρος.</string>

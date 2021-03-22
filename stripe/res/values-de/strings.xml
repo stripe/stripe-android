@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">MM/JJ</string>
     <string name="expiry_label_short">Ablauf</string>
     <string name="fpx_bank_offline">%s ─ offline</string>
+    <string name="incomplete_expiry_date">Ablaufdatum der Karte ist unvollständig.</string>
     <string name="invalid_card_number">Die Kartennummer ist ungültig.</string>
     <string name="invalid_cvc">Sicherheitscode der Karte ist ungültig.</string>
     <string name="invalid_expiry_month">Der Ablaufmonat Ihrer Karte ist ungültig.</string>
