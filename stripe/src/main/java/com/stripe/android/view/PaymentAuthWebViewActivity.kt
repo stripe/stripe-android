@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -37,7 +38,11 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         Logger.getInstance(_args?.enableLogging == true)
     }
     private val viewModel: PaymentAuthWebViewActivityViewModel by viewModels {
-        PaymentAuthWebViewActivityViewModel.Factory(requireNotNull(_args))
+        PaymentAuthWebViewActivityViewModel.Factory(
+            application,
+            logger,
+            requireNotNull(_args),
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,12 +97,19 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         viewBinding.webView.webViewClient = webViewClient
         viewBinding.webView.webChromeClient = PaymentAuthWebChromeClient(this, logger)
 
+        viewModel.logStart(
+            runCatching { Uri.parse(args.url) }.getOrNull()
+        )
         viewBinding.webView.loadUrl(args.url)
     }
 
     @VisibleForTesting
-    internal fun onAuthComplete(error: Throwable?) {
+    internal fun onAuthComplete(
+        uri: Uri?,
+        error: Throwable?
+    ) {
         if (error != null) {
+            viewModel.logError(uri, error)
             setResult(
                 Activity.RESULT_OK,
                 createResultIntent(
@@ -109,6 +121,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
                         )
                 )
             )
+        } else {
+            viewModel.logComplete(uri)
         }
         finish()
     }
