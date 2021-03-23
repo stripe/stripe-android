@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.FpxBankStatuses
+import com.stripe.android.model.BankStatuses
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -23,7 +23,7 @@ internal class FpxViewModel internal constructor(
         emit(
             runCatching {
                 stripeRepository.getFpxBankStatus(ApiRequest.Options(publishableKey))
-            }.getOrDefault(FpxBankStatuses())
+            }.getOrDefault(BankStatuses())
         )
     }
 

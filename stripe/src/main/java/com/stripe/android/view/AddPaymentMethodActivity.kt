@@ -76,6 +76,9 @@ class AddPaymentMethodActivity : StripeActivity() {
                 PaymentMethod.Type.Fpx -> {
                     R.string.title_bank_account
                 }
+                PaymentMethod.Type.Netbanking -> {
+                    R.string.title_bank_account
+                }
                 else -> {
                     throw IllegalArgumentException(
                         "Unsupported Payment Method type: ${paymentMethodType.code}"
@@ -135,6 +138,9 @@ class AddPaymentMethodActivity : StripeActivity() {
             }
             PaymentMethod.Type.Fpx -> {
                 AddPaymentMethodFpxView.create(this)
+            }
+            PaymentMethod.Type.Netbanking -> {
+                AddPaymentMethodNetbankingView.create(this)
             }
             else -> {
                 throw IllegalArgumentException(
