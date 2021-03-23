@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             app:elevation="0dp">
 
-            <com.stripe.android.paymentsheet.ui.Toolbar
+            <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 style="@style/Widget.MaterialComponents.Toolbar.Primary"
                 android:layout_width="match_parent"

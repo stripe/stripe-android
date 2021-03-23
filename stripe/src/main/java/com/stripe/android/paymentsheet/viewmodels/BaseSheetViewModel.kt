@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -70,7 +71,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _selection = MutableLiveData<PaymentSelection?>()
     internal val selection: LiveData<PaymentSelection?> = _selection
 
-    protected val _processing = MutableLiveData(true)
+    @VisibleForTesting
+    internal val _processing = MutableLiveData(true)
     val processing: LiveData<Boolean> = _processing
 
     // a message shown to the user

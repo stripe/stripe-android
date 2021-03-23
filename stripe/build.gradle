@@ -101,7 +101,6 @@ android {
             // Note: without this, all Robolectric tests using BuildConfig will fail.
             includeAndroidResources = true
         }
-        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
     productFlavors {
     }

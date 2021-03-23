@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
@@ -78,6 +79,45 @@ class PaymentOptionsActivityTest {
             ).isEqualTo(
                 PaymentOptionResult.Canceled(null)
             )
+        }
+    }
+
+    @Test
+    fun `updates navigation button`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
+
+                assertThat(activity.toolbar.navigationContentDescription)
+                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_close))
+
+                viewModel.transitionTo(
+                    TransitionTarget.AddPaymentMethodFull(
+                        FragmentConfigFixtures.DEFAULT
+                    )
+                )
+                idleLooper()
+
+                assertThat(activity.toolbar.navigationContentDescription)
+                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_back))
+
+                activity.onBackPressed()
+                idleLooper()
+
+                assertThat(activity.toolbar.navigationContentDescription)
+                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_close))
+
+                activity.onBackPressed()
+                idleLooper()
+                // animating out
+                assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            }
         }
     }
 
@@ -179,6 +219,26 @@ class PaymentOptionsActivityTest {
                     .isEqualTo("Add")
 
                 activity.finish()
+            }
+        }
+    }
+
+    @Test
+    fun `Verify processing state disables toolbar`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
+
+                viewModel._processing.value = true
+
+                idleLooper()
+
+                assertThat(activity.toolbar.isEnabled).isFalse()
             }
         }
     }
