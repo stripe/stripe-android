@@ -21,7 +21,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
     private val fpxAdapter = AddPaymentMethodListAdapter(
         ThemeConfig(activity),
-        items = FpxBank.values().asList() as List<Bank>,
+        items = FpxBank.values().toList(),
         itemSelectedCallback = {
             viewModel.selectedPosition = it
         }
