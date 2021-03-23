@@ -221,6 +221,39 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withIdealPaymentMethodParams_shouldUseDefaultMandateDataIfNotSpecified() {
+        assertThat(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParams.Ideal(bank = "my_bank")
+                ),
+                savePaymentMethod = false
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "client_secret" to CLIENT_SECRET,
+                "save_payment_method" to false,
+                "use_stripe_sdk" to false,
+                "mandate_data" to mapOf(
+                    "customer_acceptance" to mapOf(
+                        "type" to "online",
+                        "online" to mapOf(
+                            "infer_from_client" to true
+                        )
+                    )
+                ),
+                "payment_method_data" to mapOf(
+                    "type" to "ideal",
+                    "ideal" to mapOf(
+                        "bank" to "my_bank"
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun toParamMap_withSepaDebitPaymentMethodParams_shouldUseMandateDataIfSpecified() {
         assertThat(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
