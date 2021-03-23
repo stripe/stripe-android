@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -28,11 +29,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetAddCardFragmentTest {
     private val eventReporter = mock<EventReporter>()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
     fun setup() {
         PaymentConfiguration.init(
-            ApplicationProvider.getApplicationContext(),
+            context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
@@ -289,6 +291,27 @@ class PaymentSheetAddCardFragmentTest {
 
             assertThat(fragment.sheetViewModel.newCard?.brand)
                 .isEqualTo(CardBrand.AmericanExpress)
+        }
+    }
+
+    @Test
+    fun `empty merchant display name shows correct message`() {
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { _, viewBinding ->
+            assertThat(viewBinding.saveCardCheckbox.text)
+                .isEqualTo(context.getString(R.string.stripe_paymentsheet_save_this_card))
+        }
+    }
+
+    @Test
+    fun `non-empty merchant display name shows correct message`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY) { _, viewBinding ->
+            assertThat(viewBinding.saveCardCheckbox.text)
+                .isEqualTo(
+                    context.getString(
+                        R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
+                        PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
+                    )
+                )
         }
     }
 
