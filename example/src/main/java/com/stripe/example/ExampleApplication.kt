@@ -51,6 +51,6 @@ class ExampleApplication : Application() {
     }
 
     private companion object {
-        private val IS_PENALTY_DEATH_ENABLED = false
+        private const val IS_PENALTY_DEATH_ENABLED = false
     }
 }
