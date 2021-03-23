@@ -56,7 +56,9 @@ internal abstract class BasePaymentMethodsListFragment(
             canClickSelectedItem,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             addCardClickListener = {
-                transitionToAddPaymentMethod()
+                if (sheetViewModel.processing.value == false) {
+                    transitionToAddPaymentMethod()
+                }
             }
         ).also {
             viewBinding.recycler.adapter = it
