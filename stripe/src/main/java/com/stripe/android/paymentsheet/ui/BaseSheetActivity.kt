@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -107,14 +109,20 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     private fun updateToolbarButton(isStackEmpty: Boolean) {
-        val assets = if (isStackEmpty) {
-            Pair(R.drawable.stripe_paymentsheet_toolbar_close, R.string.stripe_paymentsheet_close)
+        val toolbarResources = if (isStackEmpty) {
+            ToolbarResources(
+                R.drawable.stripe_paymentsheet_toolbar_close,
+                R.string.stripe_paymentsheet_close
+            )
         } else {
-            Pair(R.drawable.stripe_paymentsheet_toolbar_back, R.string.stripe_paymentsheet_back)
+            ToolbarResources(
+                R.drawable.stripe_paymentsheet_toolbar_back,
+                R.string.stripe_paymentsheet_back
+            )
         }
 
-        toolbar.navigationIcon = ContextCompat.getDrawable(this, assets.first)
-        toolbar.navigationContentDescription = resources.getString(assets.second)
+        toolbar.navigationIcon = ContextCompat.getDrawable(this, toolbarResources.icon)
+        toolbar.navigationContentDescription = resources.getString(toolbarResources.description)
     }
 
     private fun updateRootViewClickHandling(isProcessing: Boolean) {
@@ -138,4 +146,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         const val EXTRA_FRAGMENT_CONFIG = "com.stripe.android.paymentsheet.extra_fragment_config"
         const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
     }
+
+    internal data class ToolbarResources(
+        @DrawableRes val icon: Int,
+        @StringRes val description: Int
+    )
 }
