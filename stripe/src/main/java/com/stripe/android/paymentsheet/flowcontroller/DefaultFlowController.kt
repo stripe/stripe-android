@@ -182,7 +182,8 @@ internal class DefaultFlowController internal constructor(
                         },
                         countryCode = config?.googlePay?.countryCode.orEmpty(),
                         merchantName = config?.merchantDisplayName
-                    )
+                    ),
+                    statusBarColor = statusBarColor()
                 )
             )
         } else {
