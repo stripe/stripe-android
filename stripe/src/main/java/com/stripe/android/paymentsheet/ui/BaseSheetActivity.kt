@@ -107,17 +107,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     private fun updateToolbarButton(isStackEmpty: Boolean) {
-        if (isStackEmpty) {
-            toolbar.navigationIcon =
-                ContextCompat.getDrawable(this, R.drawable.stripe_paymentsheet_toolbar_close)
-            toolbar.navigationContentDescription =
-                resources.getString(R.string.stripe_paymentsheet_close)
+        val assets = if (isStackEmpty) {
+            Pair(R.drawable.stripe_paymentsheet_toolbar_close, R.string.stripe_paymentsheet_close)
         } else {
-            toolbar.navigationIcon =
-                ContextCompat.getDrawable(this, R.drawable.stripe_paymentsheet_toolbar_back)
-            toolbar.navigationContentDescription =
-                resources.getString(R.string.stripe_paymentsheet_back)
+            Pair(R.drawable.stripe_paymentsheet_toolbar_back, R.string.stripe_paymentsheet_back)
         }
+
+        toolbar.navigationIcon = ContextCompat.getDrawable(this, assets.first)
+        toolbar.navigationContentDescription = resources.getString(assets.second)
     }
 
     private fun updateRootViewClickHandling(isProcessing: Boolean) {
