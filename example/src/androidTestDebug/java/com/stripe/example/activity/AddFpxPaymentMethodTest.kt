@@ -12,8 +12,6 @@ import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.stripe.android.CustomerSession
-import com.stripe.android.EphemeralKeyProvider
-import com.stripe.android.EphemeralKeyUpdateListener
 import com.stripe.example.R
 import org.junit.Before
 import org.junit.Rule
@@ -32,12 +30,8 @@ class AddFpxPaymentMethodTest {
     fun setup() {
         CustomerSession.initCustomerSession(
             context,
-            object : EphemeralKeyProvider {
-                override fun createEphemeralKey(
-                    apiVersion: String,
-                    keyUpdateListener: EphemeralKeyUpdateListener
-                ) {
-                }
+            ephemeralKeyProvider = { _, _ ->
+                // noop
             }
         )
     }
