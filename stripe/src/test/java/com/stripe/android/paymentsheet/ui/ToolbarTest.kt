@@ -2,9 +2,13 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.view.ActivityScenarioFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -28,20 +32,36 @@ class ToolbarTest {
     }
 
     @Test
-    fun `buttons are enabled by default`() {
-        assertThat(toolbar.closeButton.isEnabled)
-            .isTrue()
-        assertThat(toolbar.backButton.isEnabled)
+    fun `toolbar is enabled by default`() {
+        assertThat(toolbar.isEnabled)
             .isTrue()
     }
 
     @Test
-    fun `buttons are disabled when processing`() {
+    fun `button is disabled when processing`() {
+        var count = 0
+        toolbar.action.observeForever {
+            count++
+        }
+
         toolbar.updateProcessing(true)
-        assertThat(toolbar.closeButton.isEnabled)
+        assertThat(toolbar.isEnabled)
             .isFalse()
-        assertThat(toolbar.backButton.isEnabled)
-            .isFalse()
+
+        onView(withContentDescription(R.string.stripe_paymentsheet_close)).perform(click())
+        assertThat(count).isEqualTo(0)
+    }
+
+    @Test
+    fun `action emits Close when close button is clicked`() {
+        var action: Toolbar.Action? = null
+        toolbar.action.observeForever {
+            action = it
+        }
+        // Should show close by default
+        onView(withContentDescription(R.string.stripe_paymentsheet_close)).perform(click())
+        assertThat(action)
+            .isEqualTo(Toolbar.Action.Close)
     }
 
     @Test
@@ -50,7 +70,8 @@ class ToolbarTest {
         toolbar.action.observeForever {
             action = it
         }
-        toolbar.backButton.performClick()
+        toolbar.showBack()
+        onView(withContentDescription(R.string.stripe_paymentsheet_back)).perform(click())
         assertThat(action)
             .isEqualTo(Toolbar.Action.Back)
     }

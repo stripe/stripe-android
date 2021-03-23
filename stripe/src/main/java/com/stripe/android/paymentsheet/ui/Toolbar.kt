@@ -2,12 +2,11 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import androidx.core.view.isVisible
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.appbar.MaterialToolbar
-import com.stripe.android.databinding.StripePaymentSheetToolbarBinding
+import com.stripe.android.R
 
 internal class Toolbar @JvmOverloads constructor(
     context: Context,
@@ -18,32 +17,33 @@ internal class Toolbar @JvmOverloads constructor(
     private val _action = MutableLiveData<Action>()
     internal val action: LiveData<Action> = _action
 
-    private val viewBinding = StripePaymentSheetToolbarBinding.inflate(
-        LayoutInflater.from(context),
-        this
-    )
-    internal val closeButton = viewBinding.close
-    internal val backButton = viewBinding.back
+    private lateinit var navigationAction: Action
 
     init {
-        closeButton.setOnClickListener { _action.value = Action.Close }
-        backButton.setOnClickListener { _action.value = Action.Back }
+        setNavigationOnClickListener {
+            if (isEnabled) {
+                _action.value = navigationAction
+            }
+        }
         showClose()
     }
 
     fun showClose() {
-        closeButton.isVisible = true
-        backButton.isVisible = false
+        navigationIcon =
+            ContextCompat.getDrawable(context, R.drawable.stripe_paymentsheet_toolbar_close)
+        navigationContentDescription = resources.getString(R.string.stripe_paymentsheet_close)
+        navigationAction = Action.Close
     }
 
     fun showBack() {
-        closeButton.isVisible = false
-        backButton.isVisible = true
+        navigationIcon =
+            ContextCompat.getDrawable(context, R.drawable.stripe_paymentsheet_toolbar_back)
+        navigationContentDescription = resources.getString(R.string.stripe_paymentsheet_back)
+        navigationAction = Action.Back
     }
 
     fun updateProcessing(isProcessing: Boolean) {
-        closeButton.isEnabled = !isProcessing
-        backButton.isEnabled = !isProcessing
+        isEnabled = !isProcessing
     }
 
     enum class Action {
