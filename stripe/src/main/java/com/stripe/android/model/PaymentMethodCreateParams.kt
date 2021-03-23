@@ -181,13 +181,16 @@ data class PaymentMethodCreateParams internal constructor(
             }.orEmpty()
         }
 
-    internal enum class Type(internal val code: String, val hasMandate: Boolean = false) {
+    internal enum class Type(
+        internal val code: String,
+        val hasMandate: Boolean = false
+    ) {
         Card("card"),
         Ideal("ideal", hasMandate = true),
         Fpx("fpx"),
-        SepaDebit("sepa_debit", true),
-        AuBecsDebit("au_becs_debit", true),
-        BacsDebit("bacs_debit", true),
+        SepaDebit("sepa_debit", hasMandate = true),
+        AuBecsDebit("au_becs_debit", hasMandate = true),
+        BacsDebit("bacs_debit", hasMandate = true),
         Sofort("sofort", hasMandate = true),
         P24("p24"),
         Bancontact("bancontact", hasMandate = true),
