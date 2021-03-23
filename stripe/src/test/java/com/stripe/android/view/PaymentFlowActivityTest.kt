@@ -2,8 +2,11 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.content.Context
-import android.view.View
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
@@ -17,19 +20,18 @@ import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.utils.TestUtils.idleLooper
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentFlowActivityTest {
+    @get:Rule
+    val rule = InstantTaskExecutorRule()
 
     private val ephemeralKeyProvider: EphemeralKeyProvider = mock()
     private val shippingInformationValidator: PaymentSessionConfig.ShippingInformationValidator = mock()
@@ -57,8 +59,10 @@ class PaymentFlowActivityTest {
             )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
-                assertNull(getShippingInfoWidget(paymentFlowActivity))
-                assertNotNull(getShippingMethodWidget(paymentFlowActivity))
+                assertThat(getShippingInfoWidget(paymentFlowActivity))
+                    .isNull()
+                assertThat(getShippingMethodWidget(paymentFlowActivity))
+                    .isNotNull()
             }
         }
     }
@@ -69,9 +73,11 @@ class PaymentFlowActivityTest {
             PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
-                assertNotNull(getShippingInfoWidget(paymentFlowActivity))
+                assertThat(getShippingInfoWidget(paymentFlowActivity))
+                    .isNotNull()
                 paymentFlowActivity.onActionSave()
-                assertFalse(paymentFlowActivity.isFinishing)
+                assertThat(paymentFlowActivity.isFinishing)
+                    .isFalse()
             }
         }
     }
@@ -82,10 +88,13 @@ class PaymentFlowActivityTest {
             PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
-                assertNotNull(getShippingInfoWidget(paymentFlowActivity))
+                assertThat(getShippingInfoWidget(paymentFlowActivity))
+                    .isNotNull()
                 paymentFlowActivity.onActionSave()
-                assertFalse(paymentFlowActivity.isFinishing)
-                assertNotNull(getShippingInfoWidget(paymentFlowActivity))
+                assertThat(paymentFlowActivity.isFinishing)
+                    .isFalse()
+                assertThat(getShippingInfoWidget(paymentFlowActivity))
+                    .isNotNull()
             }
         }
     }
@@ -103,10 +112,11 @@ class PaymentFlowActivityTest {
                 // valid result
                 paymentFlowActivity.onActionSave()
 
-                assertEquals(View.VISIBLE, paymentFlowActivity.progressBar.visibility)
-
+                assertThat(paymentFlowActivity.progressBar.isVisible)
+                    .isTrue()
                 paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO, SHIPPING_METHODS)
-                assertEquals(View.GONE, paymentFlowActivity.progressBar.visibility)
+                assertThat(paymentFlowActivity.progressBar.isGone)
+                    .isTrue()
             }
         }
     }
@@ -126,14 +136,17 @@ class PaymentFlowActivityTest {
                 paymentFlowActivity.onActionSave()
 
                 paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO)
-                assertTrue(paymentFlowActivity.isFinishing)
+                assertThat(paymentFlowActivity.isFinishing)
+                    .isTrue()
 
-                assertEquals(activityScenario.result.resultCode, Activity.RESULT_OK)
+                assertThat(activityScenario.result.resultCode)
+                    .isEqualTo(Activity.RESULT_OK)
                 val resultData = activityScenario.result.resultData
 
                 val resultSessionData: PaymentSessionData? =
                     resultData.extras?.getParcelable(EXTRA_PAYMENT_SESSION_DATA)
-                assertEquals(resultSessionData?.shippingInformation, SHIPPING_INFO)
+                assertThat(resultSessionData?.shippingInformation)
+                    .isEqualTo(SHIPPING_INFO)
             }
         }
     }
@@ -155,9 +168,14 @@ class PaymentFlowActivityTest {
             activityScenario.onActivity { paymentFlowActivity ->
                 // valid result
                 paymentFlowActivity.onActionSave()
-                assertEquals(View.VISIBLE, paymentFlowActivity.progressBar.visibility)
+                idleLooper()
+
+                assertThat(paymentFlowActivity.progressBar.isVisible)
+                    .isTrue()
                 paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO, SHIPPING_METHODS)
-                assertEquals(View.GONE, paymentFlowActivity.progressBar.visibility)
+                idleLooper()
+                assertThat(paymentFlowActivity.progressBar.isGone)
+                    .isTrue()
 
                 verify(shippingInformationValidator).isValid(SHIPPING_INFO)
                 verify(shippingInformationValidator, never()).getErrorMessage(SHIPPING_INFO)
