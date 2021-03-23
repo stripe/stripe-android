@@ -7,7 +7,6 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
@@ -17,6 +16,7 @@ import androidx.annotation.IntRange
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
+import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
@@ -32,6 +32,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.view.CardMultilineWidget.CardBrandIconSupplier
 import kotlin.properties.Delegates
 
 /**
@@ -93,6 +94,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private var isEnabled: Boolean = false
     private var customCvcLabel: String? = null
+    private var customCvcPlaceholderText: String? = null
 
     private var cardBrand: CardBrand = CardBrand.Unknown
 
@@ -339,7 +341,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         // This sets the value of shouldShowPostalCode
-        attrs?.let { checkAttributeSet(it) }
+        checkAttributeSet(attrs)
 
         initTextInputLayoutErrorHandlers()
 
@@ -441,6 +443,17 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberTextInputLayout.placeholderText = cardHint
     }
 
+    internal fun populate(card: PaymentMethodCreateParams.Card?) {
+        card?.let { createParamsCard ->
+            // Keep track of currently focused view to return focus to it after populating
+            val focusedView = findFocus()
+            cardNumberEditText.setText(createParamsCard.number)
+            cvcEditText.setText(createParamsCard.cvc)
+            expiryDateEditText.setText(createParamsCard.expiryMonth, createParamsCard.expiryYear)
+            focusedView?.requestFocus() ?: findFocus()?.clearFocus()
+        }
+    }
+
     /**
      * Validates all fields and shows error messages if appropriate.
      *
@@ -467,6 +480,14 @@ class CardMultilineWidget @JvmOverloads constructor(
         if (hasWindowFocus) {
             updateBrandUi()
         }
+    }
+
+    /**
+     * Set an optional CVC placeholder text to override defaults, or `null` to use defaults.
+     */
+    internal fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
+        customCvcPlaceholderText = cvcPlaceholderText
+        updateCvc()
     }
 
     /**
@@ -610,29 +631,23 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
     }
 
-    private fun checkAttributeSet(attrs: AttributeSet) {
-        val a = context.theme.obtainStyledAttributes(
+    private fun checkAttributeSet(attrs: AttributeSet?) {
+        context.withStyledAttributes(
             attrs,
-            R.styleable.CardElement,
-            0,
-            0
-        )
-
-        try {
-            shouldShowPostalCode = a.getBoolean(
+            R.styleable.CardElement
+        ) {
+            shouldShowPostalCode = getBoolean(
                 R.styleable.CardElement_shouldShowPostalCode,
-                CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+                shouldShowPostalCode
             )
-            postalCodeRequired = a.getBoolean(
+            postalCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequirePostalCode,
-                CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+                postalCodeRequired
             )
-            usZipCodeRequired = a.getBoolean(
+            usZipCodeRequired = getBoolean(
                 R.styleable.CardElement_shouldRequireUsZipCode,
-                CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
+                usZipCodeRequired
             )
-        } finally {
-            a.recycle()
         }
     }
 
@@ -671,19 +686,19 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun initFocusChangeListeners() {
-        cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cardNumberEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
 
-        expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        expiryDateEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             }
         }
 
-        cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cvcEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
                 if (!showCvcIconInCvcField) {
                     flipToCvcIconIfNotFinished()
@@ -694,7 +709,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-        postalCodeEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        postalCodeEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (shouldShowPostalCode && hasFocus) {
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
             }
@@ -725,7 +740,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun updateCvc() {
-        cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcInputLayout)
+        cvcEditText.updateBrand(cardBrand, customCvcLabel, customCvcPlaceholderText, cvcInputLayout)
     }
 
     private fun updateCardNumberIcon(

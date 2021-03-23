@@ -80,6 +80,47 @@ class BillingAddressViewTest {
     }
 
     @Test
+    fun `changing selectedCountry to US should show postal code view and set shouldShowError to true`() {
+        billingAddressView.postalCodeView.setText("123")
+
+        // This will have the effect of switching the country selected
+        billingAddressView.selectedCountry = GB
+        billingAddressView.updateUiForCountryEntered(USA.name)
+        idleLooper()
+
+        assertThat(billingAddressView.postalCodeLayout.isVisible)
+            .isTrue()
+        assertThat(billingAddressView.postalCodeView.shouldShowError)
+            .isTrue()
+    }
+
+    @Test
+    fun `changing selectedCountry to UK should show postal code view and set shouldShowError to true`() {
+        billingAddressView.postalCodeView.setText("123")
+        billingAddressView.selectedCountry = GB
+        idleLooper()
+        assertThat(billingAddressView.postalCodeLayout.isVisible)
+            .isTrue()
+        assertThat(billingAddressView.postalCodeView.shouldShowError)
+            .isFalse()
+    }
+
+    @Test
+    fun `when focus is lost and zip code is incomplete it should show error`() {
+        billingAddressView.postalCodeView.setText("123")
+        billingAddressView.selectedCountry = USA
+        idleLooper()
+        billingAddressView.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+            billingAddressView.postalCodeView,
+            false
+        )
+        assertThat(billingAddressView.postalCodeLayout.isVisible)
+            .isTrue()
+        assertThat(billingAddressView.postalCodeView.shouldShowError)
+            .isTrue()
+    }
+
+    @Test
     fun `when selectedCountry is null should show postal code view`() {
         billingAddressView.selectedCountry = null
         idleLooper()
@@ -204,6 +245,7 @@ class BillingAddressViewTest {
 
     private companion object {
         private val USA = Country("US", "United States")
+        private val GB = Country("GB", "United Kingdom")
         private val FRANCE = Country("FR", "France")
         private val ZIMBABWE = Country("ZW", "Zimbabwe")
         private val MEXICO = Country("MX", "Mexico")

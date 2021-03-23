@@ -124,12 +124,11 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/postal_code_layout"
                     style="@style/StripePaymentSheetTextInputLayout"
-                    android:hint="@string/acc_label_zip_short"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <com.stripe.android.view.StripeEditText
                         android:id="@+id/postal_code"
                         style="@style/StripePaymentSheetTextInputEditText"
                         android:inputType="textPostalAddress"

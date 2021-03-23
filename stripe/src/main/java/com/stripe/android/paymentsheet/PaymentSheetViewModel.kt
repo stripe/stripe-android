@@ -1,12 +1,14 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
@@ -28,9 +30,9 @@ import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
-import com.stripe.android.paymentsheet.ui.SheetMode
-import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -47,8 +49,9 @@ internal class PaymentSheetViewModel internal constructor(
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
+    private val logger: Logger = Logger.noop(),
     workContext: CoroutineContext
-) : SheetViewModel<PaymentSheetViewModel.TransitionTarget>(
+) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepository,
     workContext = workContext
@@ -57,16 +60,14 @@ internal class PaymentSheetViewModel internal constructor(
         args.clientSecret
     )
 
-    private val _googlePayCompletion = MutableLiveData<PaymentIntentResult>()
-    internal val googlePayCompletion: LiveData<PaymentIntentResult> = _googlePayCompletion
-
     private val _startConfirm = MutableLiveData<ConfirmPaymentIntentParams>()
     internal val startConfirm: LiveData<ConfirmPaymentIntentParams> = _startConfirm
 
-    private val _viewState = MutableLiveData<ViewState>(null)
-    internal val viewState: LiveData<ViewState> = _viewState.distinctUntilChanged()
+    @VisibleForTesting
+    internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
+    internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
-    override val newCard: PaymentSelection.New.Card? = null
+    override var newCard: PaymentSelection.New.Card? = null
 
     private val paymentIntentValidator = PaymentIntentValidator()
 
@@ -116,22 +117,47 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
-        runCatching {
-            paymentIntentValidator.requireValid(paymentIntent)
-        }.fold(
-            onSuccess = {
-                _paymentIntent.value = paymentIntent
-                resetViewState(paymentIntent)
-            },
-            onFailure = ::onFatal
+        if (paymentIntent.isConfirmed) {
+            onConfirmedPaymentIntent(paymentIntent)
+        } else {
+            runCatching {
+                paymentIntentValidator.requireValid(paymentIntent)
+            }.fold(
+                onSuccess = {
+                    _paymentIntent.value = paymentIntent
+                    resetViewState(paymentIntent)
+                },
+                onFailure = ::onFatal
+            )
+        }
+    }
+
+    /**
+     * There's nothing left to be done in payment sheet if the PaymentIntent is confirmed.
+     *
+     * See [How intents work](https://stripe.com/docs/payments/intents) for more details.
+     */
+    private fun onConfirmedPaymentIntent(paymentIntent: PaymentIntent) {
+        logger.info(
+            """
+            PaymentIntent with id=${paymentIntent.id}" has already been confirmed.
+            """.trimIndent()
         )
+        _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+            _viewState.value = ViewState.PaymentSheet.ProcessResult(
+                PaymentIntentResult(
+                    paymentIntent,
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+        }
     }
 
     private fun resetViewState(paymentIntent: PaymentIntent) {
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
         if (amount != null && currencyCode != null) {
-            _viewState.value = ViewState.Ready(amount, currencyCode)
+            _viewState.value = ViewState.PaymentSheet.Ready(amount, currencyCode)
             _processing.value = false
         } else {
             onFatal(
@@ -149,7 +175,7 @@ internal class PaymentSheetViewModel internal constructor(
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
-                _launchGooglePay.value = StripeGooglePayContract.Args.PaymentData(
+                _launchGooglePay.value = StripeGooglePayContract.Args(
                     paymentIntent = paymentIntent,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = when (args.config?.googlePay?.environment) {
@@ -160,7 +186,8 @@ internal class PaymentSheetViewModel internal constructor(
                         },
                         countryCode = args.googlePayConfig?.countryCode.orEmpty(),
                         merchantName = args.config?.merchantDisplayName
-                    )
+                    ),
+                    statusBarColor = args.statusBarColor
                 )
             }
         } else {
@@ -168,9 +195,7 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun confirmPaymentSelection(
-        paymentSelection: PaymentSelection?
-    ) {
+    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)
@@ -180,25 +205,30 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            _viewState.value = ViewState.Confirming
+            _viewState.value = ViewState.PaymentSheet.StartProcessing
             _startConfirm.value = confirmParams
         }
     }
 
-    private fun onPaymentIntentResult(
-        paymentIntentResult: PaymentIntentResult
-    ) {
+    private fun onPaymentIntentResult(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
 
-                _viewState.value = ViewState.Completed(paymentIntentResult)
+                _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                    _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
+                }
             }
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
 
                 onApiError(paymentIntentResult.failureMessage)
-                onPaymentIntentResponse(paymentIntentResult.intent)
+                runCatching {
+                    paymentIntentValidator.requireValid(paymentIntentResult.intent)
+                }.fold(
+                    onSuccess = ::resetViewState,
+                    onFailure = ::onFatal
+                )
             }
         }
     }
@@ -207,10 +237,6 @@ internal class PaymentSheetViewModel internal constructor(
         googlePayResult: StripeGooglePayContract.Result
     ) {
         when (googlePayResult) {
-            is StripeGooglePayContract.Result.PaymentIntent -> {
-                eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
-                _googlePayCompletion.value = googlePayResult.paymentIntentResult
-            }
             is StripeGooglePayContract.Result.PaymentData -> {
                 val paymentSelection = PaymentSelection.Saved(
                     googlePayResult.paymentMethod
@@ -252,35 +278,27 @@ internal class PaymentSheetViewModel internal constructor(
 
     internal sealed class TransitionTarget {
         abstract val fragmentConfig: FragmentConfig
-        abstract val sheetMode: SheetMode
 
         // User has saved PM's and is selected
         data class SelectSavedPaymentMethod(
             override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget() {
-            override val sheetMode = SheetMode.Wrapped
-        }
+        ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
         data class AddPaymentMethodFull(
             override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget() {
-            override val sheetMode = SheetMode.Full
-        }
+        ) : TransitionTarget()
 
         // User has no saved PM's
         data class AddPaymentMethodSheet(
             override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget() {
-            override val sheetMode = SheetMode.FullCollapsed
-        }
+        ) : TransitionTarget()
     }
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args,
     ) : ViewModelProvider.Factory {
-
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val application = applicationSupplier()
             val config = PaymentConfiguration.getInstance(application)
@@ -293,12 +311,13 @@ internal class PaymentSheetViewModel internal constructor(
 
             val starterArgs = starterArgsSupplier()
 
-            val googlePayRepository = starterArgs.config?.googlePay?.environment?.let { environment ->
-                DefaultGooglePayRepository(
-                    application,
-                    environment
-                )
-            } ?: GooglePayRepository.Disabled
+            val googlePayRepository =
+                starterArgs.config?.googlePay?.environment?.let { environment ->
+                    DefaultGooglePayRepository(
+                        application,
+                        environment
+                    )
+                } ?: GooglePayRepository.Disabled
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
@@ -315,7 +334,7 @@ internal class PaymentSheetViewModel internal constructor(
                 workContext = Dispatchers.IO
             )
 
-            val paymentMethodsRepository = PaymentMethodsRepository.Api(
+            val paymentMethodsRepository = PaymentMethodsApiRepository(
                 stripeRepository = stripeRepository,
                 publishableKey = publishableKey,
                 stripeAccountId = stripeAccountId,
@@ -342,7 +361,8 @@ internal class PaymentSheetViewModel internal constructor(
                     application
                 ),
                 starterArgs,
-                Dispatchers.IO
+                logger = Logger.noop(),
+                workContext = Dispatchers.IO
             ) as T
         }
     }

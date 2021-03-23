@@ -2,6 +2,7 @@ package com.stripe.android.googlepay
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -32,28 +33,11 @@ class StripeGooglePayActivityTest {
     @Ignore("failing in CI but not locally")
     fun `successful start should return Unavailable result`() {
         createActivity(
-            PAYMENT_DATA_ARGS
+            ARGS
         ) { activityScenario ->
             // Google Pay is only available on a real device
             assertThat(parseResult(activityScenario))
                 .isInstanceOf(StripeGooglePayContract.Result.Unavailable::class.java)
-        }
-    }
-
-    @Test
-    fun `start should ConfirmPaymentIntent args and manual confirmation should finish with Error result`() {
-        createActivity(
-            CONFIRM_ARGS.copy(
-                paymentIntent = PAYMENT_INTENT.copy(
-                    confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
-                )
-            )
-        ) { activityScenario ->
-            val result = parseResult(activityScenario) as StripeGooglePayContract.Result.Error
-            assertThat(result.exception.message)
-                .isEqualTo(
-                    "StripeGooglePayActivity requires a PaymentIntent with automatic confirmation."
-                )
         }
     }
 
@@ -72,20 +56,40 @@ class StripeGooglePayActivityTest {
         }
     }
 
+    @Test
+    fun `should update statusBarColor`() {
+        runOnActivityScenario(ARGS) { activityScenario ->
+            activityScenario.onActivity { activity ->
+                assertThat(activity.window.statusBarColor)
+                    .isEqualTo(Color.RED)
+                activity.finish()
+            }
+        }
+    }
+
     private fun createActivity(
         args: StripeGooglePayContract.Args,
-        onCreated: (ActivityScenario<StripeGooglePayActivity>) -> Unit
+        onActivityScenario: (ActivityScenario<StripeGooglePayActivity>) -> Unit
+    ) {
+        runOnActivityScenario(args) { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.finish()
+            }
+            onActivityScenario(activityScenario)
+        }
+    }
+
+    private fun runOnActivityScenario(
+        args: StripeGooglePayContract.Args,
+        onActivityScenario: (ActivityScenario<StripeGooglePayActivity>) -> Unit
     ) {
         ActivityScenario.launch<StripeGooglePayActivity>(
             contract.createIntent(
                 context,
                 args
             )
-        ).use { activityScenario ->
-            activityScenario.onActivity { activity ->
-                activity.finish()
-            }
-            onCreated(activityScenario)
+        ).use {
+            onActivityScenario(it)
         }
     }
 
@@ -106,14 +110,10 @@ class StripeGooglePayActivityTest {
             confirmationMethod = PaymentIntent.ConfirmationMethod.Automatic
         )
 
-        private val PAYMENT_DATA_ARGS = StripeGooglePayContract.Args.PaymentData(
+        private val ARGS = StripeGooglePayContract.Args(
             paymentIntent = PAYMENT_INTENT,
-            config = CONFIG
-        )
-
-        private val CONFIRM_ARGS = StripeGooglePayContract.Args.ConfirmPaymentIntent(
-            paymentIntent = PAYMENT_INTENT,
-            config = CONFIG
+            config = CONFIG,
+            statusBarColor = Color.RED
         )
     }
 }

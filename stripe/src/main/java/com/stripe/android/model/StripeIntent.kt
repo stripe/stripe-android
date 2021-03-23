@@ -61,7 +61,8 @@ interface StripeIntent : StripeModel {
         RedirectToUrl("redirect_to_url"),
         UseStripeSdk("use_stripe_sdk"),
         DisplayOxxoDetails("display_oxxo_details"),
-        AlipayRedirect("alipay_handle_redirect");
+        AlipayRedirect("alipay_handle_redirect"),
+        BlikAuthorize("blik_authorize");
 
         override fun toString(): String {
             return code
@@ -131,6 +132,7 @@ interface StripeIntent : StripeModel {
     }
 
     sealed class NextActionData : StripeModel {
+
         @Parcelize
         data class DisplayOxxoDetails(
             /**
@@ -218,6 +220,16 @@ interface StripeIntent : StripeModel {
                     val rootCertsData: List<String>,
                     val keyId: String?
                 ) : Parcelable
+            }
+        }
+
+        @Parcelize
+        object BlikAuthorize : NextActionData() {
+            override fun hashCode(): Int {
+                return 0
+            }
+            override fun equals(other: Any?): Boolean {
+                return this === other
             }
         }
     }

@@ -6,7 +6,7 @@
     <string name="acc_label_expiry_date">Aegumiskuupäev</string>
     <string name="acc_label_expiry_date_node">%s, aegumiskuupäev</string>
     <string name="acc_label_zip">Sihtnumber</string>
-    <string name="acc_label_zip_short">Sihtnumber</string>
+    <string name="acc_label_zip_short">Sihtnr</string>
     <string name="add_card">Selles rakenduses ostude tegemiseks peate lisama uue deebet- või krediitkaardi.</string>
     <string name="added">Lisati %s</string>
     <string name="address_city_required">Sisestage linn</string>
@@ -15,7 +15,6 @@
     <string name="address_label_address">Aadress</string>
     <string name="address_label_address_line1">Aadressirida 1</string>
     <string name="address_label_address_line1_optional">Aadressirida 1 (valikuline)</string>
-    <string name="address_label_address_line2">Aadressirida 2</string>
     <string name="address_label_address_line2_optional">Aadressirida 2 (valikuline)</string>
     <string name="address_label_address_optional">Aadress (valikuline)</string>
     <string name="address_label_apt">Korter</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Maakond</string>
     <string name="address_label_county_optional">Maakond (valikuline)</string>
     <string name="address_label_name">Nimi</string>
-    <string name="address_label_name_optional">Nimi (valikuline)</string>
     <string name="address_label_phone_number">Telefoninumber</string>
     <string name="address_label_phone_number_optional">Telefoninumber (valikuline)</string>
     <string name="address_label_postal_code">Sihtnumber</string>
@@ -64,21 +62,23 @@
     omanik või volitatud allkirjaõiguslik isik.
     </string>
     <string name="becs_widget_account_number">Kontonumber</string>
+    <string name="becs_widget_account_number_incomplete">Teie kontonumber on puudulik.</string>
     <string name="becs_widget_account_number_required">Kontonumbri esitamine on kohustuslik.</string>
     <string name="becs_widget_bsb">BSB</string>
     <string name="becs_widget_bsb_incomplete">Sisestatud BSB-number on puudulik.</string>
     <string name="becs_widget_bsb_invalid">Sisestatud BSB-number ei ole kehtiv.</string>
     <string name="becs_widget_email">Meiliaadress</string>
+    <string name="becs_widget_email_invalid">Teie meiliaadress on kehtetu.</string>
     <string name="becs_widget_email_required">Meiliaadressi esitamine kohustuslik.</string>
     <string name="becs_widget_name">Nimi</string>
     <string name="becs_widget_name_required">Nime esitamine on kohustuslik.</string>
+    <string name="card_ending_in">%1$s, lõpeb nr-ga %2$s</string>
     <string name="close">Sulge</string>
-    <string name="delete_payment_method">Kas kustutada makseviis?</string>
+    <string name="delete_payment_method">Kustuta makseviis</string>
     <string name="delete_payment_method_prompt_title">Kas kustutada makseviis?</string>
     <string name="expiry_date_hint">KK/AA</string>
     <string name="expiry_label_short">Aegumine</string>
     <string name="fpx_bank_offline">%s - võrguühenduseta</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Kaardi number on kehtetu.</string>
     <string name="invalid_cvc">Kaardi turvakood on kehtetu.</string>
     <string name="invalid_expiry_month">Kaardi aegumiskuu on kehtetu.</string>
@@ -91,6 +91,16 @@
     <string name="price_free">Tasuta</string>
     <string name="removed">Eemaldati %s</string>
     <string name="secure_checkout">Turvaline maksmine</string>
+    <string name="stripe_failure_reason_authentication">Makseviisi ei õnnestunud autentida. Palun valige muu makseviis ja proovige uuesti.</string>
+    <string name="stripe_failure_reason_timed_out">Makseviisi autentimise toiming aegus – proovige uuesti</string>
+    <string name="stripe_paymentsheet_add_button_label">Lisa</string>
+    <string name="stripe_paymentsheet_back">Tagasi</string>
+    <string name="stripe_paymentsheet_close">Sulge</string>
+    <string name="stripe_paymentsheet_new_card_button_label">Lisa uus kaart</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Maksa %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Maksa</string>
+    <string name="stripe_paymentsheet_save_this_card">Salvestage see kaart tulevasteks makseteks</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salvestage see kaart tulevasteks makseteks teenuses %s</string>
     <string name="title_add_a_card">Kaardi lisamine</string>
     <string name="title_add_an_address">Määrake aadress</string>
     <string name="title_bank_account">Pangakonto</string>

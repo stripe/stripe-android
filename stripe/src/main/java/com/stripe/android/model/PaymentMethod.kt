@@ -143,7 +143,8 @@ data class PaymentMethod internal constructor(
         GrabPay("grabpay", isReusable = false),
         PayPal("paypal", isReusable = false),
         AfterpayClearpay("afterpay_clearpay", isReusable = false),
-        Netbanking("netbanking", isReusable = false);
+        Netbanking("netbanking", isReusable = false),
+        Blik("blik", isReusable = false);
 
         override fun toString(): String {
             return code

@@ -72,6 +72,17 @@ class ExpiryDateEditText @JvmOverloads constructor(
         SEPARATOR_WITHOUT_GAPS
     }
 
+    internal fun setText(expiryMonth: Int?, expiryYear: Int?) {
+        if (expiryMonth != null && expiryYear != null) {
+            setText(
+                listOf(
+                    expiryMonth.toString().padStart(2, '0'),
+                    expiryYear.toString().takeLast(2).padStart(2, '0')
+                ).joinToString(separator = separator)
+            )
+        }
+    }
+
     private fun updateSeparatorUi(
         includeSeparatorGaps: Boolean = INCLUDE_SEPARATOR_GAPS_DEFAULT
     ) {
@@ -97,7 +108,12 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 private var newCursorPosition: Int? = null
                 private var formattedDate: String? = null
 
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
                     if (ignoreChanges) {
                         return
                     }
@@ -210,6 +226,18 @@ class ExpiryDateEditText @JvmOverloads constructor(
                         isDateValid = false
                     }
 
+                    setErrorMessage(
+                        resources.getString(
+                            if (expirationDate.isPartialEntry) {
+                                R.string.incomplete_expiry_date
+                            } else if (!expirationDate.isMonthValid) {
+                                R.string.invalid_expiry_month
+                            } else {
+                                R.string.invalid_expiry_year
+                            }
+                        )
+                    )
+
                     this@ExpiryDateEditText.shouldShowError = shouldShowError
 
                     formattedDate = null
@@ -223,11 +251,16 @@ class ExpiryDateEditText @JvmOverloads constructor(
         inputType = InputType.TYPE_CLASS_NUMBER
         updateSeparatorUi()
 
-        setErrorMessage(resources.getString(R.string.invalid_expiry_year))
         listenForTextChanges()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
+        }
+
+        internalFocusChangeListeners.add { _, hasFocus ->
+            if (!hasFocus && !isDateValid) {
+                shouldShowError = true
+            }
         }
     }
 

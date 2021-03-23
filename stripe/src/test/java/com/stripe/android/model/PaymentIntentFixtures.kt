@@ -8,6 +8,35 @@ internal object PaymentIntentFixtures {
 
     const val KEY_ID = "7c4debe3f4af7f9d1569a2ffea4343c2566826ee"
 
+    private val PI_SUCCEEDED_JSON = JSONObject(
+        """
+        {
+            "id": "pi_1IRg6VCRMbs6F",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1IRg6VCRMbs6F_secret_7oH5g4v8GaCrHfsGYS6kiSnwF",
+            "confirmation_method": "automatic",
+            "created": 1614960135,
+            "currency": "usd",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": null,
+            "payment_method": "pm_1IJs3ZCRMbs",
+            "payment_method_types": ["card"],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "succeeded"
+        }
+        """.trimIndent()
+    )
+    val PI_SUCCEEDED = requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
+
     val PI_REQUIRES_MASTERCARD_3DS2_JSON = JSONObject(
         """
         {
@@ -843,4 +872,70 @@ internal object PaymentIntentFixtures {
     )
 
     val ALIPAY_TEST_MODE = PARSER.parse(ALIPAY_TEST_MODE_JSON)!!
+
+    val PI_REQUIRES_BLIK_AUTHORIZE_JSON = JSONObject(
+        """
+        {
+          "id": "pi_1IVmwXFY0qyl6XeWwxGWA04D",
+          "object": "payment_intent",
+          "amount": 1099,
+          "amount_capturable": 0,
+          "amount_received": 0,
+          "amount_subtotal": 1099,
+          "application": null,
+          "application_fee_amount": null,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "charges": {
+            "object": "list",
+            "data": [
+        
+            ],
+            "has_more": false,
+            "total_count": 0,
+            "url": "/v1/charges?payment_intent=pi_1IVmwXFY0qyl6XeWwxGWA04D"
+          },
+          "client_secret": "pi_1IVmwXFY0qyl6XeWwxGWA04D_secret_4U8cSCdPefr8LHtPsKvA3mcQz",
+          "confirmation_method": "automatic",
+          "created": 1615939737,
+          "currency": "pln",
+          "customer": null,
+          "description": null,
+          "invoice": null,
+          "last_payment_error": null,
+          "livemode": false,
+          "metadata": {
+          },
+          "next_action": {
+            "type": "blik_authorize"
+          },
+          "on_behalf_of": null,
+          "payment_method": "pm_1IVnI3FY0qyl6XeWxJFdBh2g",
+          "payment_method_options": {
+            "blik": {
+            }
+          },
+          "payment_method_types": [
+            "blik"
+          ],
+          "receipt_email": null,
+          "review": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "statement_descriptor": null,
+          "statement_descriptor_suffix": null,
+          "status": "requires_action",
+          "total_details": {
+            "amount_discount": 0,
+            "amount_tax": 0
+          },
+          "transfer_data": null,
+          "transfer_group": null
+        }
+        """.trimIndent()
+    )
+
+    val PI_REQUIRES_BLIK_AUTHORIZE = PARSER.parse(PI_REQUIRES_BLIK_AUTHORIZE_JSON)!!
 }

@@ -26,21 +26,18 @@ internal class PaymentOptionsAdapter(
     private var selectedItemPosition: Int = NO_POSITION
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
+    internal var interactionEnabled = true
 
     init {
         setHasStableIds(true)
     }
 
     fun update(
-        config: FragmentConfig,
-        newCard: PaymentSelection.New.Card?,
+        config: FragmentConfig
     ) {
         val items = listOfNotNull(
             Item.AddCard,
-            Item.GooglePay.takeIf { config.isGooglePayReady },
-            newCard?.let {
-                Item.NewCard(it)
-            }
+            Item.GooglePay.takeIf { config.isGooglePayReady }
         ) + config.sortedPaymentMethods.map {
             Item.ExistingPaymentMethod(it)
         }
@@ -57,19 +54,15 @@ internal class PaymentOptionsAdapter(
 
     /**
      * The initial selection position follows this prioritization:
-     * 1. The index of [Item.NewCard] if it exists
-     * 2. The index of [Item.ExistingPaymentMethod] if it matches the [SavedSelection]
-     * 3. The index of [Item.GooglePay] if it exists
-     * 4. The index of the first [Item.ExistingPaymentMethod]
-     * 5. None (-1)
+     * 1. The index of [Item.ExistingPaymentMethod] if it matches the [SavedSelection]
+     * 2. The index of [Item.GooglePay] if it exists
+     * 3. The index of the first [Item.ExistingPaymentMethod]
+     * 4. None (-1)
      */
     private fun findInitialSelectedPosition(
         savedSelection: SavedSelection
     ): Int {
         return listOfNotNull(
-            // new card
-            items.indexOfFirst { it is Item.NewCard }.takeIf { it != -1 },
-
             // saved selection
             items.indexOfFirst { item ->
                 when (savedSelection) {
@@ -98,7 +91,10 @@ internal class PaymentOptionsAdapter(
         position: Int,
         isClick: Boolean
     ) {
-        if (position != NO_POSITION && (canClickSelectedItem || position != selectedItemPosition)) {
+        if (interactionEnabled &&
+            position != NO_POSITION &&
+            (canClickSelectedItem || position != selectedItemPosition)
+        ) {
             val previousSelectedIndex = selectedItemPosition
             selectedItemPosition = position
 
@@ -110,7 +106,6 @@ internal class PaymentOptionsAdapter(
             when (newSelectedItem) {
                 Item.AddCard -> null
                 Item.GooglePay -> PaymentSelection.GooglePay
-                is Item.NewCard -> newSelectedItem.newCard
                 is Item.ExistingPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
             }?.let { paymentSelection ->
                 paymentOptionSelectedListener(
@@ -134,7 +129,6 @@ internal class PaymentOptionsAdapter(
                 itemView.setOnClickListener(addCardClickListener)
             }
             ViewType.GooglePay -> GooglePayViewHolder(parent)
-            ViewType.NewCard,
             ViewType.Card -> CardViewHolder(parent)
         }
     }
@@ -151,9 +145,6 @@ internal class PaymentOptionsAdapter(
             }
 
             when (item) {
-                is Item.NewCard -> {
-                    holder.bindNewCard(item.newCard)
-                }
                 is Item.ExistingPaymentMethod -> {
                     holder.bindPaymentMethod(item.paymentMethod)
                 }
@@ -196,17 +187,6 @@ internal class PaymentOptionsAdapter(
         fun bindPaymentMethod(method: PaymentMethod) {
             // TODO: Communicate error if card data not present
             method.card?.let { card ->
-                bind(
-                    brand = card.brand,
-                    last4 = card.last4
-                )
-            }
-        }
-
-        fun bindNewCard(
-            newCard: PaymentSelection.New.Card
-        ) {
-            newCard.paymentMethodCreateParams.card?.let { card ->
                 bind(
                     brand = card.brand,
                     last4 = card.last4
@@ -278,8 +258,7 @@ internal class PaymentOptionsAdapter(
     internal enum class ViewType {
         Card,
         AddCard,
-        GooglePay,
-        NewCard
+        GooglePay
     }
 
     internal sealed class Item {
@@ -291,12 +270,6 @@ internal class PaymentOptionsAdapter(
 
         object GooglePay : Item() {
             override val viewType: ViewType = ViewType.GooglePay
-        }
-
-        data class NewCard(
-            val newCard: PaymentSelection.New.Card
-        ) : Item() {
-            override val viewType: ViewType = ViewType.NewCard
         }
 
         data class ExistingPaymentMethod(

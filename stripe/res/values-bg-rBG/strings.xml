@@ -15,7 +15,6 @@
     <string name="address_label_address">Адрес</string>
     <string name="address_label_address_line1">Ред 1 на адреса</string>
     <string name="address_label_address_line1_optional">Ред 1 на адреса (по желание)</string>
-    <string name="address_label_address_line2">Ред 2 на адреса</string>
     <string name="address_label_address_line2_optional">Ред 2 на адреса (по желание)</string>
     <string name="address_label_address_optional">Адрес (по желание)</string>
     <string name="address_label_apt">Ап.</string>
@@ -26,7 +25,6 @@
     <string name="address_label_county">Окръг</string>
     <string name="address_label_county_optional">Окръг (по желание)</string>
     <string name="address_label_name">Име</string>
-    <string name="address_label_name_optional">Име (по желание)</string>
     <string name="address_label_phone_number">Телефонен номер</string>
     <string name="address_label_phone_number_optional">Телефонен номер (по желание)</string>
     <string name="address_label_postal_code">Пощенски код</string>
@@ -64,21 +62,23 @@
     лице, имащо правото да подписва.
     </string>
     <string name="becs_widget_account_number">Номер на сметката</string>
+    <string name="becs_widget_account_number_incomplete">Номерът на Вашата сметка е непълен.</string>
     <string name="becs_widget_account_number_required">Номерът на Вашата сметка е задължителен.</string>
     <string name="becs_widget_bsb">BSB</string>
     <string name="becs_widget_bsb_incomplete">BSB, който сте въвели, е непълен.</string>
     <string name="becs_widget_bsb_invalid">BSB, който сте въвели, е невалиден.</string>
     <string name="becs_widget_email">Имейл адрес</string>
+    <string name="becs_widget_email_invalid">Вашият имейл е невалиден.</string>
     <string name="becs_widget_email_required">Вашият имейл адрес е задължителен.</string>
     <string name="becs_widget_name">Име</string>
     <string name="becs_widget_name_required">Вашето име е задължително.</string>
+    <string name="card_ending_in">%1$s завършващо на %2$s</string>
     <string name="close">Затваряне</string>
-    <string name="delete_payment_method">Изтриване на метода на плащане?</string>
+    <string name="delete_payment_method">Изтриване на метода на плащане</string>
     <string name="delete_payment_method_prompt_title">Изтриване на метода на плащане?</string>
     <string name="expiry_date_hint">ММ/ГГ</string>
     <string name="expiry_label_short">Валидност</string>
     <string name="fpx_bank_offline">%s - офлайн</string>
-    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">Номерът на Вашата карта е невалиден.</string>
     <string name="invalid_cvc">Кодът за сигурност на Вашата карта е невалиден.</string>
     <string name="invalid_expiry_month">Месецът на валидност на Вашата карта е невалиден.</string>
@@ -91,6 +91,16 @@
     <string name="price_free">Безплатно</string>
     <string name="removed">%s е премахнато</string>
     <string name="secure_checkout">Защитено финализиране</string>
+    <string name="stripe_failure_reason_authentication">Не можем да удостоверим Вашия метод на плащане. Моля, изберете различен метод на плащане и опитайте отново.</string>
+    <string name="stripe_failure_reason_timed_out">Времето на изчакване на удостоверяването на Вашия метод на плащане изтече -- опитайте отново</string>
+    <string name="stripe_paymentsheet_add_button_label">Добавяне</string>
+    <string name="stripe_paymentsheet_back">Назад</string>
+    <string name="stripe_paymentsheet_close">Затваряне</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Нова карта</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Плащане %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Плащане</string>
+    <string name="stripe_paymentsheet_save_this_card">Запазете тази карта за следващи плащания</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Запазете тази карта за следващи %s плащания</string>
     <string name="title_add_a_card">Добавяне на карта</string>
     <string name="title_add_an_address">Задаване на адрес</string>
     <string name="title_bank_account">Банкова сметка</string>

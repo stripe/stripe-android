@@ -31,7 +31,7 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation "androidx.activity:activity-ktx:1.2.0"
+    implementation "androidx.activity:activity-ktx:1.2.1"
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
     implementation "com.google.android.material:material:$materialVersion"
 
@@ -51,7 +51,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.8.0"
     testImplementation 'org.robolectric:robolectric:4.5.1'
     testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation 'org.json:json:20201115'
+    testImplementation 'org.json:json:20210307'
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"

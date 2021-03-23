@@ -161,6 +161,17 @@ internal class BillingAddressView @JvmOverloads constructor(
                 }
             }
         }
+
+        postalCodeView.internalFocusChangeListeners.add { _, hasFocus ->
+            val isPostalValid = selectedCountry?.code?.let { countryCode ->
+                postalCodeValidator.isValid(
+                    postalCode = postalCodeView.value.orEmpty(),
+                    countryCode = countryCode
+                )
+            } ?: false
+
+            postalCodeView.shouldShowError = !hasFocus && !postalCodeView.value.isNullOrBlank() && !isPostalValid
+        }
     }
 
     private fun configureCountryAutoComplete() {
@@ -212,6 +223,10 @@ internal class BillingAddressView @JvmOverloads constructor(
     private fun updatedSelectedCountryCode(country: Country) {
         if (selectedCountry != country) {
             selectedCountry = country
+            postalCodeView.shouldShowError = !postalCodeValidator.isValid(
+                postalCode = postalCodeView.value.orEmpty(),
+                countryCode = country.code
+            )
         }
     }
 
@@ -306,7 +321,8 @@ internal class BillingAddressView @JvmOverloads constructor(
             CountryUtils.doesCountryUsePostalCode(country.code)
         postalCodeLayout.isVisible = shouldShowPostalCode
 
-        val shouldShowPostalCodeContainer = level == PaymentSheet.BillingAddressCollectionLevel.Required || shouldShowPostalCode
+        val shouldShowPostalCodeContainer =
+            level == PaymentSheet.BillingAddressCollectionLevel.Required || shouldShowPostalCode
         viewBinding.cityPostalDivider.isVisible = shouldShowPostalCodeContainer
         viewBinding.cityPostalContainer.isVisible = shouldShowPostalCodeContainer
 
@@ -315,6 +331,14 @@ internal class BillingAddressView @JvmOverloads constructor(
         } else {
             PostalCodeConfig.Global
         }
+
+        viewBinding.postalCodeLayout.hint = resources.getString(
+            if (country?.code == "US") {
+                R.string.acc_label_zip_short
+            } else {
+                R.string.address_label_postal_code
+            }
+        )
     }
 
     override fun setEnabled(enabled: Boolean) {
@@ -352,6 +376,20 @@ internal class BillingAddressView @JvmOverloads constructor(
             PaymentSheet.BillingAddressCollectionLevel.Required -> {
                 viewBinding.address1Layout.requestFocus()
             }
+        }
+    }
+
+    internal fun populate(address: Address?) {
+        address?.let { it ->
+            it.country?.let { countryCode ->
+                this.selectedCountry = CountryUtils.getCountryByCode(countryCode)
+                this.countryView.setText(CountryUtils.getDisplayCountry(countryCode))
+            }
+            this.address1View.setText(it.line1)
+            this.address2View.setText(it.line2)
+            this.cityView.setText(it.city)
+            this.postalCodeView.setText(it.postalCode)
+            this.stateView.setText(it.state)
         }
     }
 

@@ -3,12 +3,12 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import android.view.ViewGroup
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -21,6 +21,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
+import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentAuthWebViewContract
@@ -32,12 +33,16 @@ import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
-import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
+import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.Toolbar
 import com.stripe.android.view.AuthActivityStarter
+import java.util.Currency
+import java.util.Locale
 
-internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() {
+internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
@@ -51,8 +56,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(
             bottomSheetBehavior = bottomSheetBehavior,
-            sheetModeLiveData = viewModel.sheetMode,
-            lifecycleScope
+            lifecycleScope = lifecycleScope
         )
     }
 
@@ -71,10 +75,11 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         PaymentSheetContract.Args.fromIntent(intent)
     }
 
-    override val rootView: View by lazy { viewBinding.root }
-    override val bottomSheet: ConstraintLayout by lazy { viewBinding.bottomSheet }
+    override val rootView: ViewGroup by lazy { viewBinding.root }
+    override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
     override val toolbar: Toolbar by lazy { viewBinding.toolbar }
+    override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
 
     override val eventReporter: EventReporter by lazy {
@@ -89,6 +94,35 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
 
     private val paymentConfig: PaymentConfiguration by lazy {
         PaymentConfiguration.getInstance(application)
+    }
+
+    private val currencyFormatter = CurrencyFormatter()
+    private fun getLabelText(viewState: ViewState.PaymentSheet.Ready): String {
+        val currency = Currency.getInstance(
+            viewState.currencyCode.toUpperCase(Locale.ROOT)
+        )
+
+        return resources.getString(
+            R.string.stripe_paymentsheet_pay_button_amount,
+            currencyFormatter.format(viewState.amount, currency)
+        )
+    }
+
+    private val viewStateObserver = { viewState: ViewState.PaymentSheet? ->
+        when (viewState) {
+            is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.Ready(getLabelText(viewState))
+            )
+            is ViewState.PaymentSheet.StartProcessing -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.StartProcessing
+            )
+            is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
+            )
+            is ViewState.PaymentSheet.ProcessResult -> processResult(
+                viewState.result
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -169,8 +203,6 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             }
         }
         bottomSheetController.setup()
-
-        viewModel.googlePayCompletion.observe(this, ::onActionCompleted)
 
         setupBuyButton()
         supportFragmentManager.commit {
@@ -254,7 +286,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                 is PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     replace(
                         fragmentContainerId,
-                        PaymentSheetPaymentMethodsListFragment::class.java,
+                        PaymentSheetListFragment::class.java,
                         fragmentArgs
                     )
                 }
@@ -267,23 +299,15 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                 }
             }
         }
+
+        // Execute transaction right away to avoid a two-step UI update
+        supportFragmentManager.executePendingTransactions()
         viewBinding.buyButton.isVisible = true
         appbar.isVisible = true
-        viewModel.updateMode(transitionTarget.sheetMode)
     }
 
     private fun setupBuyButton() {
-        viewBinding.buyButton.completedAnimation.observe(this) { completedState ->
-            completedState?.paymentIntentResult?.let { paymentIntentResult ->
-                onActionCompleted(paymentIntentResult)
-            }
-        }
-
-        viewModel.viewState.observe(this) { state ->
-            if (state != null) {
-                viewBinding.buyButton.updateState(state)
-            }
-        }
+        viewModel.viewState.observe(this, viewStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
             val shouldShowGooglePay = paymentSelection == PaymentSelection.GooglePay
@@ -309,7 +333,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         }
     }
 
-    private fun onActionCompleted(paymentIntentResult: PaymentIntentResult) {
+    private fun processResult(paymentIntentResult: PaymentIntentResult) {
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 closeSheet(
@@ -340,7 +364,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
     }
 
     internal companion object {
-        internal const val EXTRA_FRAGMENT_CONFIG = BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG
-        internal const val EXTRA_STARTER_ARGS = BasePaymentSheetActivity.EXTRA_STARTER_ARGS
+        internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
+        internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
     }
 }

@@ -1,4 +1,5 @@
 package com.stripe.example.activity
+
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
@@ -20,7 +21,11 @@ class NetbankingPaymentActivity : StripeIntentActivity() {
         viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListOf("HDFC", "ICICI", "SBI", "Axis")).also { adapter ->
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            arrayListOf("HDFC", "ICICI", "SBI", "Axis")
+        ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
 

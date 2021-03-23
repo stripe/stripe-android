@@ -9,9 +9,8 @@ import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBind
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
-import com.stripe.android.paymentsheet.ui.SheetMode
-import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal abstract class BasePaymentMethodsListFragment(
     private val canClickSelectedItem: Boolean,
@@ -19,14 +18,16 @@ internal abstract class BasePaymentMethodsListFragment(
 ) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
-    abstract val sheetViewModel: SheetViewModel<*>
+    abstract val sheetViewModel: BaseSheetViewModel<*>
 
     protected lateinit var config: FragmentConfig
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val nullableConfig = arguments?.getParcelable<FragmentConfig>(BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG)
+        val nullableConfig = arguments?.getParcelable<FragmentConfig>(
+            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
+        )
         if (nullableConfig == null) {
             sheetViewModel.onFatal(
                 IllegalArgumentException("Failed to start existing payment options fragment.")
@@ -36,15 +37,20 @@ internal abstract class BasePaymentMethodsListFragment(
 
         this.config = nullableConfig
 
-        // reset the mode in case we're returning from the back stack
-        sheetViewModel.updateMode(SheetMode.Wrapped)
-
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
-        viewBinding.recycler.layoutManager = LinearLayoutManager(
+        val layoutManager = object : LinearLayoutManager(
             activity,
-            LinearLayoutManager.HORIZONTAL,
+            HORIZONTAL,
             false
-        )
+        ) {
+            var canScroll = true
+
+            override fun canScrollHorizontally(): Boolean {
+                return canScroll && super.canScrollHorizontally()
+            }
+        }.also {
+            viewBinding.recycler.layoutManager = it
+        }
 
         val adapter = PaymentOptionsAdapter(
             canClickSelectedItem,
@@ -57,17 +63,18 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter.update(
-            config,
-            sheetViewModel.newCard
+            config
         )
 
         eventReporter.onShowExistingPaymentOptions()
 
-        viewBinding.header.text = createHeaderText()
+        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            adapter.interactionEnabled = !isProcessing
+            layoutManager.canScroll = !isProcessing
+        }
     }
 
     abstract fun transitionToAddPaymentMethod()
-    abstract fun createHeaderText(): String
 
     open fun onPaymentOptionSelected(
         paymentSelection: PaymentSelection,

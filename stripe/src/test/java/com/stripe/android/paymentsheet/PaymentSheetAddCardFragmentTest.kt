@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -12,7 +13,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -26,11 +29,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetAddCardFragmentTest {
     private val eventReporter = mock<EventReporter>()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
     fun setup() {
         PaymentConfiguration.init(
-            ApplicationProvider.getApplicationContext(),
+            context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
@@ -85,6 +89,59 @@ class PaymentSheetAddCardFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isFalse()
+            assertThat(fragment.sheetViewModel.newCard)
+                .isEqualTo(paymentSelection)
+        }
+    }
+
+    @Test
+    fun `relaunching the fragment populates the fields`() {
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { fragment, viewBinding ->
+            fragment.sheetViewModel.newCard = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CardBrand.Discover,
+                false
+            )
+
+            viewBinding.saveCardCheckbox.isChecked = false
+
+            var paymentSelection: PaymentSelection? = null
+            fragment.sheetViewModel.selection.observeForever {
+                paymentSelection = it
+            }
+
+            viewBinding.saveCardCheckbox.isChecked = true
+
+            viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
+            viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
+            viewBinding.cardMultilineWidget.setCvcCode("123")
+            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.postalCodeView.setText("94107")
+
+            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
+            assertThat(newPaymentSelection.shouldSavePaymentMethod)
+                .isFalse()
+        }
+
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { fragment, viewBinding ->
+            viewBinding.saveCardCheckbox.isChecked = false
+
+            var paymentSelection: PaymentSelection? = null
+            fragment.sheetViewModel.selection.observeForever {
+                paymentSelection = it
+            }
+
+            viewBinding.saveCardCheckbox.isChecked = true
+
+            viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
+            viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
+            viewBinding.cardMultilineWidget.setCvcCode("123")
+            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.postalCodeView.setText("94107")
+
+            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
+            assertThat(newPaymentSelection.shouldSavePaymentMethod)
+                .isFalse()
         }
     }
 
@@ -109,6 +166,8 @@ class PaymentSheetAddCardFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isTrue()
+            assertThat(fragment.sheetViewModel.newCard)
+                .isEqualTo(paymentSelection)
         }
     }
 
@@ -133,6 +192,9 @@ class PaymentSheetAddCardFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isTrue()
+
+            assertThat(fragment.sheetViewModel.newCard?.brand)
+                .isEqualTo(CardBrand.Visa)
         }
     }
 
@@ -153,14 +215,6 @@ class PaymentSheetAddCardFragmentTest {
 
             assertThat(paymentSelections)
                 .containsExactly(PaymentSelection.GooglePay)
-        }
-    }
-
-    @Test
-    fun `onConfigReady() should update header text`() {
-        createFragment { _, viewBinding ->
-            assertThat(viewBinding.addCardHeader.text.toString())
-                .isEqualTo("Pay $10.99 using")
         }
     }
 
@@ -213,6 +267,51 @@ class PaymentSheetAddCardFragmentTest {
                 .isEmpty()
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
+        }
+    }
+
+    @Test
+    fun `make sure when add card fields are edited newcard is updated`() {
+        createFragment { fragment, viewBinding ->
+            assertThat(viewBinding.cardErrors.isVisible)
+                .isFalse()
+
+            viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
+            viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
+            viewBinding.cardMultilineWidget.setCvcCode("123")
+            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.postalCodeView.setText("94107")
+
+            viewBinding.saveCardCheckbox.isChecked = true
+
+            assertThat(fragment.sheetViewModel.newCard?.brand)
+                .isEqualTo(CardBrand.Visa)
+
+            viewBinding.cardMultilineWidget.setCardNumber("378282246310005")
+
+            assertThat(fragment.sheetViewModel.newCard?.brand)
+                .isEqualTo(CardBrand.AmericanExpress)
+        }
+    }
+
+    @Test
+    fun `empty merchant display name shows correct message`() {
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { _, viewBinding ->
+            assertThat(viewBinding.saveCardCheckbox.text)
+                .isEqualTo(context.getString(R.string.stripe_paymentsheet_save_this_card))
+        }
+    }
+
+    @Test
+    fun `non-empty merchant display name shows correct message`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY) { _, viewBinding ->
+            assertThat(viewBinding.saveCardCheckbox.text)
+                .isEqualTo(
+                    context.getString(
+                        R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
+                        PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
+                    )
+                )
         }
     }
 

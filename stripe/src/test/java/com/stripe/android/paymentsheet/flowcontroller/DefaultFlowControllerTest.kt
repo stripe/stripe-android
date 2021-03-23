@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argWhere
 import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
@@ -20,10 +21,12 @@ import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -36,9 +39,11 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.view.ActivityScenarioFactory
+import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -177,7 +182,10 @@ class DefaultFlowControllerTest {
                     config = null,
                     isGooglePayReady = false,
                     newCard = null,
-                    statusBarColor = ContextCompat.getColor(activity, R.color.stripe_toolbar_color_default_dark)
+                    statusBarColor = ContextCompat.getColor(
+                        activity,
+                        R.color.stripe_toolbar_color_default_dark
+                    )
                 )
             )
     }
@@ -198,7 +206,7 @@ class DefaultFlowControllerTest {
         }
 
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(
+            PaymentOptionResult.Succeeded.Existing(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
         )
@@ -206,6 +214,45 @@ class DefaultFlowControllerTest {
         verify(paymentOptionCallback).onPaymentOption(VISA_PAYMENT_OPTION)
         assertThat(flowController.getPaymentOption())
             .isEqualTo(VISA_PAYMENT_OPTION)
+    }
+
+    @Test
+    fun `onPaymentOptionResult() adds payment method which is added on next open`() {
+        // Create a default flow controller with the paymentMethods initialized with cards.
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(5)
+        val flowController = createFlowController(
+            paymentMethods = initialPaymentMethods,
+            savedSelection = SavedSelection.PaymentMethod(
+                requireNotNull(initialPaymentMethods.first().id)
+            )
+        )
+        flowController.configure(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+
+        // Add a saved card payment method so that we can make sure it is added when we open
+        // up the payment option launcher
+        val newSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded.NewlySaved(
+                SAVE_NEW_CARD_SELECTION,
+                newSavedPaymentMethod
+            )
+        )
+
+        // Save off the actual launch arguments when paymentOptionLauncher is called
+        var launchArgs: PaymentOptionContract.Args? = null
+        flowController.paymentOptionLauncher = {
+            launchArgs = it
+        }
+
+        flowController.presentPaymentOptions()
+
+        // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
+        assertThat(launchArgs!!.paymentMethods)
+            .isEqualTo(listOf(newSavedPaymentMethod).plus(initialPaymentMethods))
     }
 
     @Test
@@ -247,17 +294,21 @@ class DefaultFlowControllerTest {
         ) { _, _ ->
         }
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+            PaymentOptionResult.Succeeded.Existing(PaymentSelection.GooglePay)
         )
         flowController.confirmPayment()
         assertThat(launchArgs)
             .isEqualTo(
-                StripeGooglePayContract.Args.PaymentData(
+                StripeGooglePayContract.Args(
                     paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = StripeGooglePayEnvironment.Test,
                         countryCode = "US",
                         merchantName = "Widget Store"
+                    ),
+                    statusBarColor = ContextCompat.getColor(
+                        activity,
+                        R.color.stripe_toolbar_color_default_dark
                     )
                 )
             )
@@ -283,58 +334,27 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onGooglePayResult() when payment intent result should invoke callback with Completed result`() {
+    fun `onGooglePayResult() when PaymentData result should invoke startConfirmAndAuth() with expected params`() {
         flowController.configure(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
         }
 
-        val paymentIntent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded)
         flowController.onGooglePayResult(
-            StripeGooglePayContract.Result.PaymentIntent(
-                PaymentIntentResult(
-                    intent = paymentIntent,
-                    outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-                )
+            StripeGooglePayContract.Result.PaymentData(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                shippingInformation = null
             )
         )
 
-        verify(eventReporter).onPaymentSuccess(PaymentSelection.GooglePay)
-        verify(paymentResultCallback).onPaymentResult(
-            PaymentResult.Completed(paymentIntent)
-        )
-    }
-
-    @Test
-    fun `onGooglePayResult() when payment intent result has lastPaymentError should invoke callback with failure result`() {
-        flowController.configure(
-            PaymentSheetFixtures.CLIENT_SECRET,
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { _, _ ->
-        }
-
-        val paymentIntent = PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
-        flowController.onGooglePayResult(
-            StripeGooglePayContract.Result.PaymentIntent(
-                PaymentIntentResult(
-                    intent = paymentIntent,
-                    outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-                )
-            )
-        )
-
-        verify(eventReporter).onPaymentFailure(PaymentSelection.GooglePay)
-        verify(paymentResultCallback).onPaymentResult(
-            argWhere { paymentResult ->
-                when (paymentResult) {
-                    is PaymentResult.Failed -> {
-                        paymentResult.error.message == "Failed to confirm PaymentIntent. The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again." &&
-                            paymentResult.paymentIntent == PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
-                    }
-                    else -> false
-                }
-            }
+        verify(paymentController).startConfirmAndAuth(
+            any(),
+            argWhere {
+                val params = (it as ConfirmPaymentIntentParams)
+                params.paymentMethodId == "pm_123456789"
+            },
+            any()
         )
     }
 
@@ -442,6 +462,11 @@ class DefaultFlowControllerTest {
     ): DefaultFlowController {
         return DefaultFlowController(
             activity,
+            testScope,
+            ActivityLauncherFactory.ActivityHost(activity),
+            statusBarColor = { activity.window.statusBarColor },
+            authHostSupplier = { AuthActivityStarter.Host.create(activity) },
+            paymentOptionFactory = PaymentOptionFactory(activity.resources),
             flowControllerInitializer,
             { _, _, _ -> paymentController },
             paymentFlowResultProcessor,
@@ -449,7 +474,6 @@ class DefaultFlowControllerTest {
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
             sessionId = SESSION_ID,
-            testScope,
             paymentOptionCallback,
             paymentResultCallback
         )
@@ -516,11 +540,15 @@ class DefaultFlowControllerTest {
     private companion object {
         private val SESSION_ID = SessionId()
 
-        private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
             label = "····4242"
+        )
+
+        private val SAVE_NEW_CARD_SELECTION = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            shouldSavePaymentMethod = true
         )
     }
 }

@@ -111,7 +111,8 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
         private enum class DropdownItem(
             val country: String,
             @DrawableRes val icon: Int,
-            val createParams: (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
+            val createParams:
+                (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
             val requiresName: Boolean = true,
             val requiresEmail: Boolean = false
         ) {

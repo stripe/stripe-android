@@ -1,6 +1,8 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.view.View
 import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
@@ -29,6 +31,14 @@ internal class StripeEditTextTest {
     ).also {
         it.setDeleteEmptyListener(deleteEmptyListener)
         it.setAfterTextChangedListener(afterTextChangedListener)
+    }
+
+    @Test
+    fun onFocusListenerSetupCalledOnInit() {
+        val onFocusListener = mock<View.OnFocusChangeListener>()
+        editText.internalFocusChangeListeners.add(onFocusListener)
+        editText.getParentOnFocusChangeListener()!!.onFocusChange(editText, false)
+        verify(onFocusListener).onFocusChange(editText, false)
     }
 
     @Test
@@ -81,7 +91,7 @@ internal class StripeEditTextTest {
 
     @Test
     fun getDefaultErrorColorInt_onDarkTheme_returnsDarkError() {
-        editText.setTextColor(ContextCompat.getColor(context, android.R.color.primary_text_dark))
+        editText.defaultColorStateList = ColorStateList.valueOf(ContextCompat.getColor(context, android.R.color.primary_text_dark))
         assertThat(editText.defaultErrorColorInt)
             .isEqualTo(ContextCompat.getColor(context, R.color.stripe_error_text_dark_theme))
     }
@@ -105,8 +115,34 @@ internal class StripeEditTextTest {
     }
 
     @Test
+    fun setTextColor() {
+        editText.setTextColor(
+            ColorStateList.valueOf(
+                ContextCompat.getColor(
+                    context,
+                    android.R.color.holo_red_dark
+                )
+            )
+        )
+
+        // The field state must be toggled to show an error
+        editText.shouldShowError = true
+        editText.shouldShowError = false
+
+        assertThat(editText.textColors)
+            .isEqualTo(
+                ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        context,
+                        android.R.color.holo_red_dark
+                    )
+                )
+            )
+    }
+
+    @Test
     fun getCachedColorStateList_afterInit_returnsNotNull() {
-        assertThat(editText.cachedColorStateList)
+        assertThat(editText.defaultColorStateList)
             .isNotNull()
     }
 

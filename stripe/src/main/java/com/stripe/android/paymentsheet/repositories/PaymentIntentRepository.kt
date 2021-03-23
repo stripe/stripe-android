@@ -31,7 +31,8 @@ internal sealed class PaymentIntentRepository {
         override suspend fun get(clientSecret: String) = withContext(workContext) {
             val paymentIntent = stripeRepository.retrievePaymentIntent(
                 clientSecret,
-                requestOptions
+                requestOptions,
+                expandFields = listOf("payment_method")
             )
             requireNotNull(paymentIntent) {
                 "Could not parse PaymentIntent."

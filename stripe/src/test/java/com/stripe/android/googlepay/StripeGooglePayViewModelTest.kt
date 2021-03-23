@@ -1,5 +1,6 @@
 package com.stripe.android.googlepay
 
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -177,9 +178,10 @@ class StripeGooglePayViewModelTest {
             isEmailRequired = true
         )
 
-        private val ARGS = StripeGooglePayContract.Args.ConfirmPaymentIntent(
+        private val ARGS = StripeGooglePayContract.Args(
             paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            config = CONFIG
+            config = CONFIG,
+            statusBarColor = Color.RED
         )
     }
 }

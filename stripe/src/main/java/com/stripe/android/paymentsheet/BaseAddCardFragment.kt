@@ -6,13 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
@@ -27,10 +25,9 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
+import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.BillingAddressView
-import com.stripe.android.paymentsheet.ui.SheetMode
-import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
 import com.stripe.android.view.StripeEditText
@@ -41,12 +38,11 @@ import com.stripe.android.view.StripeEditText
 internal abstract class BaseAddCardFragment(
     private val eventReporter: EventReporter
 ) : Fragment() {
-    abstract val sheetViewModel: SheetViewModel<*>
+    abstract val sheetViewModel: BaseSheetViewModel<*>
 
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
     private lateinit var cardErrors: TextView
-    private lateinit var googlePayButton: View
     private lateinit var saveCardCheckbox: CheckBox
     private lateinit var addCardHeader: TextView
 
@@ -69,9 +65,6 @@ internal abstract class BaseAddCardFragment(
 
     private val addCardViewModel: AddCardViewModel by viewModels()
 
-    abstract fun onGooglePaySelected()
-    abstract fun createHeaderText(config: FragmentConfig): String
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -90,7 +83,9 @@ internal abstract class BaseAddCardFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val config = arguments?.getParcelable<FragmentConfig>(BasePaymentSheetActivity.EXTRA_FRAGMENT_CONFIG)
+        val config = arguments?.getParcelable<FragmentConfig>(
+            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
+        )
         if (activity == null || config == null) {
             sheetViewModel.onFatal(
                 IllegalArgumentException("Failed to start add payment option fragment.")
@@ -102,25 +97,20 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget = viewBinding.cardMultilineWidget
         billingAddressView = viewBinding.billingAddress
         cardErrors = viewBinding.cardErrors
-        googlePayButton = viewBinding.googlePayButton
         saveCardCheckbox = viewBinding.saveCardCheckbox
         addCardHeader = viewBinding.addCardHeader
 
         billingAddressView.level = sheetViewModel.config?.billingAddressCollection
             ?: PaymentSheet.BillingAddressCollectionLevel.Automatic
 
+        // This must be done prior to setting up the card widget or the save card checkbox won't
+        // populate correctly.
+        populateFieldsFromNewCard()
         setupCardWidget()
-
-        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
 
         billingAddressView.address.observe(viewLifecycleOwner) {
             // update selection whenever billing address changes
             updateSelection()
-        }
-
-        billingAddressView.onFocus = {
-            // If the user focuses on the billing address view, expand to full screen
-            sheetViewModel.updateMode(SheetMode.Full)
         }
 
         cardMultilineWidget.setCardValidCallback { isValid, _ ->
@@ -130,10 +120,7 @@ internal abstract class BaseAddCardFragment(
         }
 
         cardMultilineWidget.setCardInputListener(object : CardInputListener {
-            override fun onFocusChange(focusField: CardInputListener.FocusField) {
-                // If the user focuses any card field, expand to full screen
-                sheetViewModel.updateMode(SheetMode.Full)
-            }
+            override fun onFocusChange(focusField: CardInputListener.FocusField) {}
 
             override fun onCardComplete() {}
 
@@ -145,15 +132,6 @@ internal abstract class BaseAddCardFragment(
             }
         })
 
-        // If we're launched in full expanded mode, focus the card number field
-        // and show the keyboard automatically
-        if (sheetViewModel.sheetMode.value == SheetMode.Full) {
-            cardMultilineWidget.cardNumberEditText.requestFocus()
-            getSystemService(requireContext(), InputMethodManager::class.java)?.apply {
-                showSoftInput(cardMultilineWidget.cardNumberEditText, InputMethodManager.SHOW_IMPLICIT)
-            }
-        }
-
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             saveCardCheckbox.isEnabled = !isProcessing
             cardMultilineWidget.isEnabled = !isProcessing
@@ -162,38 +140,28 @@ internal abstract class BaseAddCardFragment(
 
         setupSaveCardCheckbox(saveCardCheckbox)
 
-        val shouldShowGooglePayButton = config.shouldShowGooglePayButton
-        googlePayButton.setOnClickListener {
-            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
-        }
-        googlePayButton.isVisible = shouldShowGooglePayButton
-        viewBinding.googlePayDivider.isVisible = shouldShowGooglePayButton
-        addCardHeader.isVisible = !shouldShowGooglePayButton
-        addCardHeader.text = createHeaderText(config)
-
-        sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
-            if (paymentSelection == PaymentSelection.GooglePay) {
-                onGooglePaySelected()
-            }
-        }
-
         eventReporter.onShowNewPaymentOptionForm()
     }
 
     private fun updateSelection() {
-        sheetViewModel.updateSelection(
-            if (addCardViewModel.isCardValid) {
-                paymentMethodParams?.let { params ->
-                    PaymentSelection.New.Card(
-                        params,
-                        cardMultilineWidget.brand,
-                        shouldSavePaymentMethod = shouldSaveCard()
-                    )
-                }
-            } else {
-                null
+        val validCard = if (addCardViewModel.isCardValid) {
+            paymentMethodParams?.let { params ->
+                PaymentSelection.New.Card(
+                    params,
+                    cardMultilineWidget.brand,
+                    shouldSavePaymentMethod = shouldSaveCard()
+                )
             }
-        )
+        } else {
+            null
+        }
+
+        // If you open a new unsaved card, edit it, go to the list view and come back the edited
+        // card should be shown, this means that the new card must be updated
+        validCard?.let {
+            sheetViewModel.newCard = validCard
+        }
+        sheetViewModel.updateSelection(validCard)
     }
 
     private fun setupCardWidget() {
@@ -220,8 +188,12 @@ internal abstract class BaseAddCardFragment(
             )
         }
 
+        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
-        cardMultilineWidget.expiryTextInputLayout.hint = getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.expiryTextInputLayout.hint =
+            getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
+        cardMultilineWidget.setCvcPlaceholderText("")
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
@@ -246,8 +218,10 @@ internal abstract class BaseAddCardFragment(
             1
         )
 
-        val layoutMarginHorizontal = resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_horizontal)
-        val layoutMarginVertical = resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_vertical)
+        val layoutMarginHorizontal =
+            resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_horizontal)
+        val layoutMarginVertical =
+            resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_vertical)
         setOf(
             cardMultilineWidget.cardNumberTextInputLayout,
             cardMultilineWidget.expiryTextInputLayout,
@@ -305,6 +279,13 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget.postalCodeErrorListener = null
     }
 
+    private fun populateFieldsFromNewCard() {
+        val paymentMethodCreateParams = sheetViewModel.newCard?.paymentMethodCreateParams
+        saveCardCheckbox.isChecked = sheetViewModel.newCard?.shouldSavePaymentMethod ?: true
+        cardMultilineWidget.populate(paymentMethodCreateParams?.card)
+        billingAddressView.populate(paymentMethodCreateParams?.billingDetails?.address)
+    }
+
     private fun onCardError(
         field: AddCardViewModel.Field,
         errorMessage: String?
@@ -325,7 +306,7 @@ internal abstract class BaseAddCardFragment(
         }
         saveCardCheckbox.text = merchantDisplayName?.let {
             getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name, it)
-        } ?: getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
+        } ?: getString(R.string.stripe_paymentsheet_save_this_card)
 
         saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
 
@@ -337,9 +318,9 @@ internal abstract class BaseAddCardFragment(
     private fun onSaveCardCheckboxChanged() {
         val selection = sheetViewModel.selection.value
         if (selection is PaymentSelection.New.Card) {
-            sheetViewModel.updateSelection(
-                selection.copy(shouldSavePaymentMethod = shouldSaveCard())
-            )
+            val newCardSelection = selection.copy(shouldSavePaymentMethod = shouldSaveCard())
+            sheetViewModel.updateSelection(newCardSelection)
+            sheetViewModel.newCard = newCardSelection
         }
     }
 

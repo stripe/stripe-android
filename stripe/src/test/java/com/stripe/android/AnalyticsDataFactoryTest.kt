@@ -110,9 +110,9 @@ class AnalyticsDataFactoryTest {
                 "event" to "stripe_android.payment_method_creation",
                 "publishable_key" to "pk_abc123",
                 "os_name" to "REL",
-                "os_release" to "9",
-                "os_version" to 28,
-                "device_type" to "unknown_Android_robolectric",
+                "os_release" to "11",
+                "os_version" to 30,
+                "device_type" to "robolectric_robolectric_robolectric",
                 "bindings_version" to Stripe.VERSION_NAME,
                 "app_name" to "com.stripe.android.test",
                 "app_version" to 0,
@@ -211,7 +211,7 @@ class AnalyticsDataFactoryTest {
         assertEquals(expectedUaName, params[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
 
         assertEquals(
-            "unknown_Android_robolectric",
+            "robolectric_robolectric_robolectric",
             params[AnalyticsDataFactory.FIELD_DEVICE_TYPE]
         )
     }
@@ -239,7 +239,7 @@ class AnalyticsDataFactoryTest {
         assertEquals(expectedEventName, params[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals(expectedUaName, params[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
 
-        assertEquals("unknown_Android_robolectric", params[AnalyticsDataFactory.FIELD_DEVICE_TYPE])
+        assertEquals("robolectric_robolectric_robolectric", params[AnalyticsDataFactory.FIELD_DEVICE_TYPE])
     }
 
     @Test

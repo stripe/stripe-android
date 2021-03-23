@@ -18,9 +18,4 @@
         app:title="Enable Google Pay"
         app:defaultValue="true" />
 
-    <SwitchPreferenceCompat
-        app:key="require_billing_address"
-        app:title="Require billing address"
-        app:defaultValue="false" />
-
 </PreferenceScreen>

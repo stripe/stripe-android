@@ -3,17 +3,24 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
+import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.R
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
+import com.stripe.android.exception.StripeException
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
 
@@ -31,7 +38,11 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         Logger.getInstance(_args?.enableLogging == true)
     }
     private val viewModel: PaymentAuthWebViewActivityViewModel by viewModels {
-        PaymentAuthWebViewActivityViewModel.Factory(requireNotNull(_args))
+        PaymentAuthWebViewActivityViewModel.Factory(
+            application,
+            logger,
+            requireNotNull(_args),
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,7 +66,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         customizeToolbar()
 
         val clientSecret = args.clientSecret
-        setResult(Activity.RESULT_OK, Intent().putExtras(viewModel.paymentResult.toBundle()))
+        setResult(Activity.RESULT_OK, createResultIntent(viewModel.paymentResult))
 
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
@@ -64,14 +75,56 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         }
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
-        viewBinding.webView.init(
-            this,
+
+        val isPagedLoaded = MutableLiveData(false)
+        isPagedLoaded.observe(this) { shouldHide ->
+            if (shouldHide) {
+                viewBinding.progressBar.isGone = true
+            }
+        }
+
+        val webViewClient = PaymentAuthWebViewClient(
             logger,
-            viewBinding.progressBar,
+            isPagedLoaded,
             clientSecret,
-            args.returnUrl
+            args.returnUrl,
+            ::startActivity,
+            ::onAuthComplete
+        )
+        viewBinding.webView.onLoadBlank = {
+            webViewClient.hasLoadedBlank = true
+        }
+        viewBinding.webView.webViewClient = webViewClient
+        viewBinding.webView.webChromeClient = PaymentAuthWebChromeClient(this, logger)
+
+        viewModel.logStart(
+            runCatching { Uri.parse(args.url) }.getOrNull()
         )
         viewBinding.webView.loadUrl(args.url)
+    }
+
+    @VisibleForTesting
+    internal fun onAuthComplete(
+        uri: Uri?,
+        error: Throwable?
+    ) {
+        if (error != null) {
+            viewModel.logError(uri, error)
+            setResult(
+                Activity.RESULT_OK,
+                createResultIntent(
+                    viewModel.paymentResult
+                        .copy(
+                            exception = StripeException.create(error),
+                            flowOutcome = StripeIntentResult.Outcome.FAILED,
+                            shouldCancelSource = true
+                        )
+                )
+            )
+        } else {
+            viewModel.logComplete(uri)
+        }
+        finish()
     }
 
     override fun onDestroy() {
@@ -133,4 +186,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             CustomizeUtils.setStatusBarColor(this, backgroundColorInt)
         }
     }
+
+    private fun createResultIntent(
+        paymentFlowResult: PaymentFlowResult.Unvalidated
+    ) = Intent().putExtras(paymentFlowResult.toBundle())
 }

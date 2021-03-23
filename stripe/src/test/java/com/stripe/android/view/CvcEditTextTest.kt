@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
@@ -110,5 +111,36 @@ class CvcEditTextTest {
 
         cvcEditText.setText("1234")
         assertTrue(hasCompleted)
+    }
+
+    @Test
+    fun cvcCustomPlaceholderSet_usesCustomPlaceholder() {
+        val textInputLayout = TextInputLayout(
+            ContextThemeWrapper(
+                ApplicationProvider.getApplicationContext(),
+                R.style.StripeDefaultTheme
+            )
+        )
+        cvcEditText.updateBrand(
+            CardBrand.AmericanExpress,
+            customPlaceholderText = "custom placeholder",
+            textInputLayout = textInputLayout
+        )
+        assertThat(textInputLayout.placeholderText).isEqualTo("custom placeholder")
+
+        cvcEditText.updateBrand(
+            CardBrand.AmericanExpress,
+            textInputLayout = textInputLayout
+        )
+        assertThat(textInputLayout.placeholderText).isEqualTo("1234")
+    }
+
+    @Test
+    fun `when lose focus and cvc length is wrong, show error`() {
+        cvcEditText.setText("12")
+        cvcEditText.updateBrand(CardBrand.AmericanExpress)
+        cvcEditText.onFocusChangeListener?.onFocusChange(cvcEditText, false)
+        assertThat(cvcEditText.shouldShowError)
+            .isTrue()
     }
 }

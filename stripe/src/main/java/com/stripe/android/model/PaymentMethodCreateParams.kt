@@ -181,33 +181,37 @@ data class PaymentMethodCreateParams internal constructor(
             }.orEmpty()
         }
 
-    internal enum class Type(internal val code: String, val hasMandate: Boolean = false) {
+    internal enum class Type(
+        internal val code: String,
+        val hasMandate: Boolean = false
+    ) {
         Card("card"),
-        Ideal("ideal"),
+        Ideal("ideal", hasMandate = true),
         Fpx("fpx"),
-        SepaDebit("sepa_debit", true),
-        AuBecsDebit("au_becs_debit", true),
-        BacsDebit("bacs_debit", true),
-        Sofort("sofort"),
+        SepaDebit("sepa_debit", hasMandate = true),
+        AuBecsDebit("au_becs_debit", hasMandate = true),
+        BacsDebit("bacs_debit", hasMandate = true),
+        Sofort("sofort", hasMandate = true),
         P24("p24"),
-        Bancontact("bancontact"),
+        Bancontact("bancontact", hasMandate = true),
         Giropay("giropay"),
-        Eps("eps"),
+        Eps("eps", hasMandate = true),
         Oxxo("oxxo"),
         Alipay("alipay"),
         GrabPay("grabpay"),
         PayPal("paypal"),
         AfterpayClearpay("afterpay_clearpay"),
         Upi("upi"),
-        Netbanking("netbanking")
+        Netbanking("netbanking"),
+        Blik("blik")
     }
 
     @Parcelize
     data class Card internal constructor(
-        private val number: String? = null,
-        private val expiryMonth: Int? = null,
-        private val expiryYear: Int? = null,
-        private val cvc: String? = null,
+        internal val number: String? = null,
+        internal val expiryMonth: Int? = null,
+        internal val expiryYear: Int? = null,
+        internal val cvc: String? = null,
         private val token: String? = null,
 
         internal val attribution: Set<String>? = null
@@ -750,6 +754,19 @@ data class PaymentMethodCreateParams internal constructor(
                     email = googlePayResult.email,
                     phone = googlePayResult.phoneNumber
                 )
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createBlik(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.Blik,
+                billingDetails = billingDetails,
+                metadata = metadata
             )
         }
     }
