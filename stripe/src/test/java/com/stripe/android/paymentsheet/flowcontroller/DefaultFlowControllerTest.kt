@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
-import android.graphics.Color
 import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -307,7 +306,10 @@ class DefaultFlowControllerTest {
                         countryCode = "US",
                         merchantName = "Widget Store"
                     ),
-                    statusBarColor = Color.RED
+                    statusBarColor = ContextCompat.getColor(
+                        activity,
+                        R.color.stripe_toolbar_color_default_dark
+                    )
                 )
             )
     }
