@@ -1,10 +1,10 @@
 package com.stripe.android.view
 
-enum class NetbankingBank(
-    override var id: String,
-    override var code: String,
-    override var displayName: String,
-    override var brandIconResId: Int? = null
+internal enum class NetbankingBank(
+    override val id: String,
+    override val code: String,
+    override val displayName: String,
+    override val brandIconResId: Int? = null
 ) : Bank {
     KotakBank(
         "162",

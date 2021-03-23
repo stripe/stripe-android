@@ -25,7 +25,7 @@ internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor
 
     override val createParams : PaymentMethodCreateParams?
         get() {
-            val netbankingBank = NetbankingBank.values()[netbankingAdapter.selectedPosition] ?: return null
+            val netbankingBank = NetbankingBank.values()[netbankingAdapter.selectedPosition]
 
             return PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Netbanking(bank = netbankingBank.code)

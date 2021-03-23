@@ -1,8 +1,8 @@
 package com.stripe.android.view
 
-interface Bank {
-    var id: String
-    var code: String
-    var displayName: String
-    var brandIconResId: Int?
+internal interface Bank {
+    val id: String
+    val code: String
+    val displayName: String
+    val brandIconResId: Int?
 }

@@ -2,11 +2,11 @@ package com.stripe.android.view
 
 import com.stripe.android.R
 
-enum class FpxBank(
-    override var id: String,
-    override var code: String,
-    override var displayName: String,
-    override var brandIconResId: Int? = null
+internal enum class FpxBank(
+    override val id: String,
+    override val code: String,
+    override val displayName: String,
+    override val brandIconResId: Int? = null
 ) : Bank {
     Maybank2U(
         "MB2U0227",

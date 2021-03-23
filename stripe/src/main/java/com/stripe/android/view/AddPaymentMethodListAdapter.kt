@@ -5,15 +5,16 @@ import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.databinding.BankItemBinding
 import com.stripe.android.model.BankStatuses
 
-internal class AddPaymentMethodListAdapter constructor (
-    var themeConfig: ThemeConfig,
-    var items : List<Bank>,
+internal class AddPaymentMethodListAdapter (
+    val themeConfig: ThemeConfig,
+    val items : List<Bank>,
     val itemSelectedCallback: (Int) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -103,11 +104,7 @@ internal class AddPaymentMethodListAdapter constructor (
                 viewBinding.checkIcon,
                 ColorStateList.valueOf(themeConfig.getTintColor(isSelected))
             )
-            viewBinding.checkIcon.visibility = if (isSelected) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            viewBinding.checkIcon.isVisible = isSelected
         }
     }
 }

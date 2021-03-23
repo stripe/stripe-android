@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class AddNetbankingPaymentMethodText {
+class AddNetbankingPaymentMethodTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule

@@ -36,7 +36,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
     override val createParams: PaymentMethodCreateParams?
         get() {
-            val fpxBank = FpxBank.values()[fpxAdapter.selectedPosition] ?: return null
+            val fpxBank = FpxBank.values()[fpxAdapter.selectedPosition]
 
             return PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Fpx(bank = fpxBank.code)
@@ -74,7 +74,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
     }
 
-    internal fun updateStatuses(fpxBankStatuses: BankStatuses) {
+    private fun updateStatuses(fpxBankStatuses: BankStatuses) {
         this.fpxBankStatuses = fpxBankStatuses
         this.fpxAdapter.bankStatuses = fpxBankStatuses
 

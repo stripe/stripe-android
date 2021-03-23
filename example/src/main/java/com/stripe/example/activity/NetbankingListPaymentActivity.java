@@ -3,13 +3,10 @@ package com.stripe.example.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.view.AddPaymentMethodActivityStarter;
@@ -64,7 +61,6 @@ public class NetbankingListPaymentActivity extends AppCompatActivity {
     }
 
     private void onPaymentMethodResult(@NonNull PaymentMethod paymentMethod) {
-        Log.d("Ali pm", paymentMethod.toString());
         final String netbankingCode = Objects.requireNonNull(paymentMethod.netbanking).bank;
         final String resultMessage = "Created Payment Method\n" +
                 "\nType: " + paymentMethod.type +
