@@ -2,6 +2,7 @@ package com.stripe.android.googlepay
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -55,20 +56,40 @@ class StripeGooglePayActivityTest {
         }
     }
 
+    @Test
+    fun `should update statusBarColor`() {
+        runOnActivityScenario(ARGS) { activityScenario ->
+            activityScenario.onActivity { activity ->
+                assertThat(activity.window.statusBarColor)
+                    .isEqualTo(Color.RED)
+                activity.finish()
+            }
+        }
+    }
+
     private fun createActivity(
         args: StripeGooglePayContract.Args,
-        onCreated: (ActivityScenario<StripeGooglePayActivity>) -> Unit
+        onActivityScenario: (ActivityScenario<StripeGooglePayActivity>) -> Unit
+    ) {
+        runOnActivityScenario(args) { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.finish()
+            }
+            onActivityScenario(activityScenario)
+        }
+    }
+
+    private fun runOnActivityScenario(
+        args: StripeGooglePayContract.Args,
+        onActivityScenario: (ActivityScenario<StripeGooglePayActivity>) -> Unit
     ) {
         ActivityScenario.launch<StripeGooglePayActivity>(
             contract.createIntent(
                 context,
                 args
             )
-        ).use { activityScenario ->
-            activityScenario.onActivity { activity ->
-                activity.finish()
-            }
-            onCreated(activityScenario)
+        ).use {
+            onActivityScenario(it)
         }
     }
 
@@ -91,7 +112,8 @@ class StripeGooglePayActivityTest {
 
         private val ARGS = StripeGooglePayContract.Args(
             paymentIntent = PAYMENT_INTENT,
-            config = CONFIG
+            config = CONFIG,
+            statusBarColor = Color.RED
         )
     }
 }

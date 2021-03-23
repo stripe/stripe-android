@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.google.android.gms.common.api.Status
 import com.stripe.android.model.PaymentIntent
@@ -40,7 +41,8 @@ internal class StripeGooglePayContract :
     @Parcelize
     data class Args(
         var paymentIntent: PaymentIntent,
-        var config: GooglePayConfig
+        var config: GooglePayConfig,
+        @ColorInt val statusBarColor: Int?
     ) : ActivityStarter.Args {
 
         companion object {

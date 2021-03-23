@@ -305,6 +305,10 @@ class DefaultFlowControllerTest {
                         environment = StripeGooglePayEnvironment.Test,
                         countryCode = "US",
                         merchantName = "Widget Store"
+                    ),
+                    statusBarColor = ContextCompat.getColor(
+                        activity,
+                        R.color.stripe_toolbar_color_default_dark
                     )
                 )
             )
