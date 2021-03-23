@@ -319,7 +319,7 @@ internal enum class NetbankingBank(
     UNIBank(
         "UNI",
         "united_bank_of_india",
-        "PNB (Erstwhile-United Bank of India )"
+        "PNB (Erstwhile-United Bank of India)"
     ),
     AxisBank(
         "UTI",
