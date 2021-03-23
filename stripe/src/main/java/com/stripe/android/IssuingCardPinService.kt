@@ -8,7 +8,11 @@ import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Methods for retrieval / update of a Stripe Issuing card
@@ -16,7 +20,8 @@ import kotlinx.coroutines.runBlocking
 class IssuingCardPinService @VisibleForTesting internal constructor(
     keyProvider: EphemeralKeyProvider,
     private val stripeRepository: StripeRepository,
-    private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory()
+    private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) {
     private val retrievalListeners = mutableMapOf<String, IssuingCardPinRetrievalListener>()
     private val updateListeners = mutableMapOf<String, IssuingCardPinUpdateListener>()
@@ -133,8 +138,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         operation: EphemeralOperation.Issuing.RetrievePin,
         listener: IssuingCardPinRetrievalListener
     ) {
-        runCatching {
-            runBlocking {
+        CoroutineScope(workContext).launch {
+            runCatching {
                 requireNotNull(
                     stripeRepository.retrieveIssuingCardPin(
                         operation.cardId,
@@ -145,19 +150,23 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 ) {
                     "Could not retrieve issuing card PIN."
                 }
-            }
-        }.fold(
-            onSuccess = listener::onIssuingCardPinRetrieved,
-            onFailure = {
-                onRetrievePinError(it, listener)
-            }
-        )
+            }.fold(
+                onSuccess = { pin ->
+                    withContext(Dispatchers.Main) {
+                        listener.onIssuingCardPinRetrieved(pin)
+                    }
+                },
+                onFailure = {
+                    onRetrievePinError(it, listener)
+                }
+            )
+        }
     }
 
-    private fun onRetrievePinError(
+    private suspend fun onRetrievePinError(
         throwable: Throwable,
         listener: IssuingCardPinRetrievalListener
-    ) {
+    ) = withContext(Dispatchers.Main) {
         when (throwable) {
             is InvalidRequestException -> {
                 when (throwable.stripeError?.code) {
@@ -213,8 +222,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         operation: EphemeralOperation.Issuing.UpdatePin,
         listener: IssuingCardPinUpdateListener
     ) {
-        runCatching {
-            runBlocking {
+        CoroutineScope(workContext).launch {
+            runCatching {
                 stripeRepository.updateIssuingCardPin(
                     operation.cardId,
                     operation.newPin,
@@ -222,18 +231,23 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     operation.userOneTimeCode,
                     ephemeralKey.secret
                 )
-            }
-        }.fold(
-            onSuccess = {
-                listener.onIssuingCardPinUpdated()
-            },
-            onFailure = {
-                onUpdatePinError(it, listener)
-            }
-        )
+            }.fold(
+                onSuccess = {
+                    withContext(Dispatchers.Main) {
+                        listener.onIssuingCardPinUpdated()
+                    }
+                },
+                onFailure = {
+                    onUpdatePinError(it, listener)
+                }
+            )
+        }
     }
 
-    private fun onUpdatePinError(throwable: Throwable, listener: IssuingCardPinUpdateListener) {
+    private suspend fun onUpdatePinError(
+        throwable: Throwable,
+        listener: IssuingCardPinUpdateListener
+    ) = withContext(Dispatchers.Main) {
         when (throwable) {
             is InvalidRequestException -> {
                 when (throwable.stripeError?.code) {
