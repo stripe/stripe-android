@@ -51,8 +51,8 @@ class IssuingCardPinServiceTest {
     }
 
     @Test
-    fun testRetrieval() {
-        stripeRepository.retrievedPin = { "1234" }
+    fun `retrievePin() should call onIssuingCardPinRetrieved() on listener when successful`() {
+        stripeRepository.retrievedPin = { PIN }
 
         service.retrievePin(
             "ic_abcdef",
@@ -62,14 +62,14 @@ class IssuingCardPinServiceTest {
         )
 
         verify(retrievalListener)
-            .onIssuingCardPinRetrieved("1234")
+            .onIssuingCardPinRetrieved(PIN)
     }
 
     @Test
-    fun testUpdate() {
+    fun `updatePin() should call onIssuingCardPinUpdated() on listener when successful`() {
         service.updatePin(
             "ic_abcdef",
-            "1234",
+            "5678",
             "iv_abcd",
             "123-456",
             updateListener
@@ -83,7 +83,7 @@ class IssuingCardPinServiceTest {
     }
 
     @Test
-    fun testRetrievalFailsWithReason() {
+    fun `retrievePin() should call onError() on listener when there is an error`() {
         stripeRepository.retrievedPin = {
             throw InvalidRequestException(
                 stripeError = StripeError(
@@ -131,6 +131,8 @@ class IssuingCardPinServiceTest {
     }
 
     private companion object {
+        private const val PIN = "1234"
+
         private val EPHEMERAL_KEY = JSONObject(
             """
             {

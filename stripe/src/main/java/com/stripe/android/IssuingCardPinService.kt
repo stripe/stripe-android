@@ -21,7 +21,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     keyProvider: EphemeralKeyProvider,
     private val stripeRepository: StripeRepository,
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
-    private val workContext: CoroutineContext
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) {
     private val retrievalListeners = mutableMapOf<String, IssuingCardPinRetrievalListener>()
     private val updateListeners = mutableMapOf<String, IssuingCardPinUpdateListener>()
@@ -359,8 +359,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             return IssuingCardPinService(
                 keyProvider,
                 StripeApiRepository(context, publishableKey, appInfo),
-                StripeOperationIdFactory(),
-                Dispatchers.IO
+                StripeOperationIdFactory()
             )
         }
     }
