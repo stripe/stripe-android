@@ -306,7 +306,7 @@ internal abstract class BaseAddCardFragment(
         }
         saveCardCheckbox.text = merchantDisplayName?.let {
             getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name, it)
-        } ?: getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
+        } ?: getString(R.string.stripe_paymentsheet_save_this_card)
 
         saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
 
