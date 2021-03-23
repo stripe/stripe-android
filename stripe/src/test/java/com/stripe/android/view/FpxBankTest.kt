@@ -2,8 +2,6 @@ package com.stripe.android.view
 
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class FpxBankTest {
     @Test

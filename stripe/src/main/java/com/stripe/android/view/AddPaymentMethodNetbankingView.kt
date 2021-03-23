@@ -13,7 +13,7 @@ internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : AddPaymentMethodView(activity, attrs, defStyleAttr) {
-    private var selectedPosition : Int? = null
+    private var selectedPosition: Int? = null
 
     private val netbankingAdapter = AddPaymentMethodListAdapter(
         ThemeConfig(activity),
@@ -23,7 +23,7 @@ internal class AddPaymentMethodNetbankingView @JvmOverloads internal constructor
         }
     )
 
-    override val createParams : PaymentMethodCreateParams?
+    override val createParams: PaymentMethodCreateParams?
         get() {
             val netbankingBank = NetbankingBank.values()[netbankingAdapter.selectedPosition]
 

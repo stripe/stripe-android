@@ -117,7 +117,7 @@ data class PaymentMethod internal constructor(
 
     @JvmField val upi: Upi? = null,
 
-    @JvmField val netbanking : Netbanking? = null
+    @JvmField val netbanking: Netbanking? = null
 ) : StripeModel {
 
     @Parcelize

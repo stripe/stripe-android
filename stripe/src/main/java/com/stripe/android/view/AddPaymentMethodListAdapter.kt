@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
@@ -12,13 +11,13 @@ import com.stripe.android.R
 import com.stripe.android.databinding.BankItemBinding
 import com.stripe.android.model.BankStatuses
 
-internal class AddPaymentMethodListAdapter (
+internal class AddPaymentMethodListAdapter(
     val themeConfig: ThemeConfig,
-    val items : List<Bank>,
+    val items: List<Bank>,
     val itemSelectedCallback: (Int) -> Unit,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    internal var bankStatuses : BankStatuses? = null
+    internal var bankStatuses: BankStatuses? = null
 
     var selectedPosition = RecyclerView.NO_POSITION
         set(value) {
