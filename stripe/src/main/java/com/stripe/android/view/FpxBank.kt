@@ -1,14 +1,13 @@
 package com.stripe.android.view
 
 import com.stripe.android.R
-import com.stripe.android.model.PaymentMethod
 
-enum class FpxBank(
-    val id: String,
-    val code: String,
-    val displayName: String,
-    val brandIconResId: Int = R.drawable.stripe_ic_bank_generic
-) {
+internal enum class FpxBank(
+    override val id: String,
+    override val code: String,
+    override val displayName: String,
+    override val brandIconResId: Int? = null
+) : Bank {
     Maybank2U(
         "MB2U0227",
         "maybank2u",

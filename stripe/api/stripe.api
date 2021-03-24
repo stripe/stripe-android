@@ -2504,6 +2504,7 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/m
 	public final field ideal Lcom/stripe/android/model/PaymentMethod$Ideal;
 	public final field liveMode Z
 	public final field metadata Ljava/util/Map;
+	public final field netbanking Lcom/stripe/android/model/PaymentMethod$Netbanking;
 	public final field sepaDebit Lcom/stripe/android/model/PaymentMethod$SepaDebit;
 	public final field sofort Lcom/stripe/android/model/PaymentMethod$Sofort;
 	public final field type Lcom/stripe/android/model/PaymentMethod$Type;
@@ -2516,6 +2517,7 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/m
 	public final fun component14 ()Lcom/stripe/android/model/PaymentMethod$BacsDebit;
 	public final fun component15 ()Lcom/stripe/android/model/PaymentMethod$Sofort;
 	public final fun component16 ()Lcom/stripe/android/model/PaymentMethod$Upi;
+	public final fun component17 ()Lcom/stripe/android/model/PaymentMethod$Netbanking;
 	public final fun component2 ()Ljava/lang/Long;
 	public final fun component3 ()Z
 	public final fun component4 ()Lcom/stripe/android/model/PaymentMethod$Type;
@@ -2524,8 +2526,8 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/m
 	public final fun component7 ()Ljava/util/Map;
 	public final fun component8 ()Lcom/stripe/android/model/PaymentMethod$Card;
 	public final fun component9 ()Lcom/stripe/android/model/PaymentMethod$CardPresent;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;)Lcom/stripe/android/model/PaymentMethod;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;)Lcom/stripe/android/model/PaymentMethod;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentMethod;
@@ -5643,39 +5645,6 @@ public final class com/stripe/android/view/ExpiryDateEditText : com/stripe/andro
 	public final fun getValidDateFields ()Lkotlin/Pair;
 	public final fun getValidatedDate ()Lcom/stripe/android/model/ExpirationDate$Validated;
 	public final fun isDateValid ()Z
-}
-
-public final class com/stripe/android/view/FpxBank : java/lang/Enum {
-	public static final field AffinBank Lcom/stripe/android/view/FpxBank;
-	public static final field AllianceBankBusiness Lcom/stripe/android/view/FpxBank;
-	public static final field AmBank Lcom/stripe/android/view/FpxBank;
-	public static final field BankIslam Lcom/stripe/android/view/FpxBank;
-	public static final field BankMuamalat Lcom/stripe/android/view/FpxBank;
-	public static final field BankRakyat Lcom/stripe/android/view/FpxBank;
-	public static final field Bsn Lcom/stripe/android/view/FpxBank;
-	public static final field Cimb Lcom/stripe/android/view/FpxBank;
-	public static final field Companion Lcom/stripe/android/view/FpxBank$Companion;
-	public static final field HongLeongBank Lcom/stripe/android/view/FpxBank;
-	public static final field Hsbc Lcom/stripe/android/view/FpxBank;
-	public static final field Kfh Lcom/stripe/android/view/FpxBank;
-	public static final field Maybank2E Lcom/stripe/android/view/FpxBank;
-	public static final field Maybank2U Lcom/stripe/android/view/FpxBank;
-	public static final field Ocbc Lcom/stripe/android/view/FpxBank;
-	public static final field PublicBank Lcom/stripe/android/view/FpxBank;
-	public static final field Rhb Lcom/stripe/android/view/FpxBank;
-	public static final field StandardChartered Lcom/stripe/android/view/FpxBank;
-	public static final field UobBank Lcom/stripe/android/view/FpxBank;
-	public static final fun get (Ljava/lang/String;)Lcom/stripe/android/view/FpxBank;
-	public final fun getBrandIconResId ()I
-	public final fun getCode ()Ljava/lang/String;
-	public final fun getDisplayName ()Ljava/lang/String;
-	public final fun getId ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/view/FpxBank;
-	public static fun values ()[Lcom/stripe/android/view/FpxBank;
-}
-
-public final class com/stripe/android/view/FpxBank$Companion {
-	public final fun get (Ljava/lang/String;)Lcom/stripe/android/view/FpxBank;
 }
 
 public final class com/stripe/android/view/PaymentAuthWebViewActivity : androidx/appcompat/app/AppCompatActivity {

@@ -12,6 +12,8 @@ import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.stripe.android.CustomerSession
+import com.stripe.android.EphemeralKeyProvider
+import com.stripe.android.EphemeralKeyUpdateListener
 import com.stripe.example.R
 import org.junit.Before
 import org.junit.Rule
@@ -20,7 +22,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class AddFpxPaymentMethodTest {
+class AddNetbankingPaymentMethodTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule
@@ -30,15 +32,19 @@ class AddFpxPaymentMethodTest {
     fun setup() {
         CustomerSession.initCustomerSession(
             context,
-            ephemeralKeyProvider = { _, _ ->
-                // noop
+            object : EphemeralKeyProvider {
+                override fun createEphemeralKey(
+                    apiVersion: String,
+                    keyUpdateListener: EphemeralKeyUpdateListener
+                ) {
+                }
             }
         )
     }
 
     @Test
-    fun launchFpxAndSelectBank() {
-        // launch FPX selection activity
+    fun launchNetbankingAndSelectBank() {
+        // launch Netbanking selection activity
         onView(withId(R.id.examples)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(9, click())
         )
