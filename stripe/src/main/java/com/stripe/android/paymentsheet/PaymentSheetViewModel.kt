@@ -215,14 +215,14 @@ internal class PaymentSheetViewModel internal constructor(
                 eventReporter.onPaymentSuccess(selection.value)
 
                 // SavedSelection needs to happen after new cards have been saved.
-                when(selection.value){
+                when (selection.value) {
                     is PaymentSelection.New.Card -> paymentIntentResult.intent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }
                     PaymentSelection.GooglePay -> selection.value
                     is PaymentSelection.Saved -> selection.value
                     null -> null
-                }?.let{
+                }?.let {
                     prefsRepository.savePaymentSelection(it)
                 }
 

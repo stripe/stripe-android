@@ -6,7 +6,6 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
-import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -21,10 +20,8 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
@@ -38,7 +35,6 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
-import org.json.JSONObject
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -162,7 +158,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `onPaymentFlowResult() should update ViewState and save preferences`() = testDispatcher.runBlockingTest{
+    fun `onPaymentFlowResult() should update ViewState and save preferences`() = testDispatcher.runBlockingTest {
         paymentFlowResultProcessor.paymentIntentResult = PAYMENT_INTENT_RESULT
 
         val confirmParams = mutableListOf<ConfirmPaymentIntentParams>()
