@@ -30,4 +30,16 @@ class CurrencyFormatterTest {
         assertThat(currencyFormatter.format(10000L, britishPound))
             .isEqualTo("£100.00")
     }
+
+    @Test
+    fun `test korea with us denomination`() {
+        assertThat(
+            currencyFormatter.format(
+                50,
+                Currency.getInstance("USD"),
+                Locale.KOREA
+            )
+        )
+            .isEqualTo("US$0.50")
+    }
 }

@@ -9,19 +9,25 @@ import kotlin.math.pow
 internal class CurrencyFormatter {
     fun format(
         amount: Long,
-        currency: Currency
+        currencyAmount: Currency,
+        targetLocale: Locale = Locale.getDefault()
     ): String {
-        val currencySymbol = currency.getSymbol(Locale.getDefault())
+        val currencySymbol = currencyAmount.getSymbol(targetLocale)
         val majorUnitAmount =
-            amount / MAJOR_UNIT_BASE.pow(getDefaultFractionDigits(currency).toDouble())
-        val currencyFormat = NumberFormat.getCurrencyInstance()
+            amount / MAJOR_UNIT_BASE.pow(getDefaultFractionDigits(currencyAmount).toDouble())
+        val currencyFormat = NumberFormat.getCurrencyInstance(
+            Locale(
+                "",
+                currencyAmount.currencyCode
+            )
+        )
 
         // We need to cast inside the try catch because most currencies are decimal formats but
         // not all. See the official Google Docs for NumberFormat for more context.
         runCatching {
             val decimalFormatSymbols =
                 (currencyFormat as DecimalFormat).decimalFormatSymbols
-            decimalFormatSymbols.currency = currency
+            decimalFormatSymbols.currency = currencyAmount
             decimalFormatSymbols.currencySymbol = currencySymbol
             currencyFormat.decimalFormatSymbols = decimalFormatSymbols
         }
