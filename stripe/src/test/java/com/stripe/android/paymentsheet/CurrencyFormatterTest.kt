@@ -43,5 +43,15 @@ class CurrencyFormatterTest {
             .isEqualTo("US$0.50")
     }
 
-    // TODO:  Spain, Brazil uses something different for commas
+    @Test
+    fun `test france with thousands of dollars`() {
+        assertThat(
+            currencyFormatter.format(
+                100000,
+                Currency.getInstance("USD"),
+                Locale.FRANCE
+            )
+        )
+            .isEqualTo("US$ 1,000.00")
+    }
 }
