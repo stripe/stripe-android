@@ -14,6 +14,8 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
+        val paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
+
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
             viewBinding.launch.isEnabled = !it
@@ -25,32 +27,28 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         viewBinding.launch.setOnClickListener {
             if (isCustomerEnabled) {
                 fetchEphemeralKey { customerConfig ->
-                    createPaymentIntent(
-                        customerConfig
-                    )
+                    createPaymentIntent(paymentSheet, customerConfig)
                 }
             } else {
-                createPaymentIntent(
-                    null
-                )
+                createPaymentIntent(paymentSheet, null)
             }
         }
-
-        fetchEphemeralKey()
     }
 
     private fun createPaymentIntent(
+        paymentSheet: PaymentSheet,
         customerConfig: PaymentSheet.CustomerConfiguration?
     ) {
         viewModel.createPaymentIntent(
             COUNTRY_CODE,
             customerId = customerConfig?.id
-        ).observe(this) { result ->
-            result.fold(
+        ).observe(this) {
+            it.fold(
                 onSuccess = { json ->
                     val clientSecret = json.getString("secret")
 
                     onPaymentIntent(
+                        paymentSheet,
                         clientSecret,
                         customerConfig
                     )
@@ -61,12 +59,21 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
     }
 
     private fun onPaymentIntent(
+        paymentSheet: PaymentSheet,
         paymentIntentClientSecret: String,
         customerConfig: PaymentSheet.CustomerConfiguration?
     ) {
         viewModel.inProgress.postValue(false)
 
-        // show PaymentSheet
+        paymentSheet.present(
+            paymentIntentClientSecret,
+            PaymentSheet.Configuration(
+                merchantDisplayName = merchantName,
+                customer = customerConfig,
+                googlePay = googlePayConfig,
+                billingAddressCollection = billingAddressCollection
+            )
+        )
     }
 
     override fun onRefreshEphemeralKey() {

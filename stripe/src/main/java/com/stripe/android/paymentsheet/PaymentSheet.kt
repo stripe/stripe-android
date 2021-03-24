@@ -11,14 +11,14 @@ import kotlinx.parcelize.Parcelize
 class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
-    internal constructor(
+    constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     )
 
-    internal constructor(
+    constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
@@ -31,7 +31,7 @@ class PaymentSheet internal constructor(
      * If [paymentIntentClientSecret] represents a [PaymentIntent] that is already confirmed,
      * [PaymentSheetResultCallback] will be invoked with [PaymentResult.Completed].
      */
-    internal fun present(
+    fun present(
         paymentIntentClientSecret: String,
         configuration: Configuration
     ) {
@@ -44,7 +44,7 @@ class PaymentSheet internal constructor(
      * If [paymentIntentClientSecret] represents a [PaymentIntent] that is already confirmed,
      * [PaymentSheetResultCallback] will be invoked with [PaymentResult.Completed].
      */
-    internal fun present(
+    fun present(
         paymentIntentClientSecret: String
     ) {
         paymentSheetLauncher.present(paymentIntentClientSecret)
@@ -125,7 +125,7 @@ class PaymentSheet internal constructor(
         }
     }
 
-    internal interface FlowController {
+    interface FlowController {
         fun getPaymentOption(): PaymentOption?
 
         fun configure(

@@ -42,4 +42,6 @@ class CurrencyFormatterTest {
         )
             .isEqualTo("US$0.50")
     }
+
+    // TODO:  Spain, Brazil uses something different for commas
 }
