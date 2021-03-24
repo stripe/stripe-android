@@ -103,11 +103,12 @@ internal class StripePaymentController internal constructor(
         } ?: PaymentAuthWebViewStarter.Legacy(host)
     }
 
-    private val stripe3ds2CompletionStarterFactory = { host: AuthActivityStarter.Host, requestCode: Int ->
-        stripe3ds2ChallengeLauncher?.let {
-            Stripe3ds2CompletionStarter.Modern(it)
-        } ?: Stripe3ds2CompletionStarter.Legacy(host, requestCode)
-    }
+    private val stripe3ds2CompletionStarterFactory =
+        { host: AuthActivityStarter.Host, requestCode: Int ->
+            stripe3ds2ChallengeLauncher?.let {
+                Stripe3ds2CompletionStarter.Modern(it)
+            } ?: Stripe3ds2CompletionStarter.Legacy(host, requestCode)
+        }
 
     init {
         threeDs2Service.initialize(
@@ -1018,8 +1019,11 @@ internal class StripePaymentController internal constructor(
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val transaction: Transaction,
         private val analyticsRequestFactory: AnalyticsRequest.Factory,
+        private val retryDelayIncrementMillis: Long = DEFAULT_RETRY_DELAY_INCREMENT_MILLIS,
+        enableLogging: Boolean = false,
         private val workContext: CoroutineContext
     ) : StripeChallengeStatusReceiver() {
+        private val logger = Logger.getInstance(enableLogging)
 
         override fun completed(
             completionEvent: CompletionEvent,
@@ -1036,6 +1040,8 @@ internal class StripePaymentController internal constructor(
                     )
                 )
             )
+            log3ds2ChallengePresented()
+
             complete3ds2Auth(flowOutcome)
         }
 
@@ -1052,6 +1058,8 @@ internal class StripePaymentController internal constructor(
                     )
                 )
             )
+            log3ds2ChallengePresented()
+
             complete3ds2Auth(ChallengeFlowOutcome.Cancel)
         }
 
@@ -1068,6 +1076,8 @@ internal class StripePaymentController internal constructor(
                     )
                 )
             )
+            log3ds2ChallengePresented()
+
             complete3ds2Auth(ChallengeFlowOutcome.Timeout)
         }
 
@@ -1083,6 +1093,8 @@ internal class StripePaymentController internal constructor(
                     )
                 )
             )
+            log3ds2ChallengePresented()
+
             complete3ds2Auth(ChallengeFlowOutcome.ProtocolError)
         }
 
@@ -1098,10 +1110,12 @@ internal class StripePaymentController internal constructor(
                     )
                 )
             )
+            log3ds2ChallengePresented()
+
             complete3ds2Auth(ChallengeFlowOutcome.RuntimeError)
         }
 
-        private fun complete3ds2Auth(flowOutcome: ChallengeFlowOutcome) {
+        private fun log3ds2ChallengePresented() {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
@@ -1111,7 +1125,27 @@ internal class StripePaymentController internal constructor(
                     )
                 )
             )
+        }
 
+        /**
+         * Call [StripeRepository.complete3ds2Auth] to notify the Stripe API that the 3DS2
+         * challenge has been completed.
+         *
+         * When successful, call [startCompletionActivity] to return the result.
+         *
+         * When [StripeRepository.complete3ds2Auth] fails and [retries] is greater than 0,
+         * a failure when calling [StripeRepository.complete3ds2Auth] will result in a retry
+         * attempt after a delay.
+         *
+         * The delay logic can be found in [getRetryDelayMillis].
+         *
+         * @param flowOutcome the outcome of the 3DS2 challenge flow.
+         * @param retries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
+         */
+        private fun complete3ds2Auth(
+            flowOutcome: ChallengeFlowOutcome,
+            retries: Int = MAX_RETRIES,
+        ) {
             CoroutineScope(workContext).launch {
                 // ignore result
                 runCatching {
@@ -1119,15 +1153,36 @@ internal class StripePaymentController internal constructor(
                         sourceId,
                         requestOptions
                     )
-                }
+                }.fold(
+                    onSuccess = {
+                        startCompletionActivity(flowOutcome)
+                    },
+                    onFailure = { error ->
+                        logger.error(
+                            "Failure when attempting 3DS2 challenge completion request. Remaining retries: $retries",
+                            error
+                        )
 
-                withContext(Dispatchers.Main) {
-                    startCompletionActivity(flowOutcome)
-                }
+                        if (retries > 0) {
+                            delay(getRetryDelayMillis(retries))
+
+                            // attempt request with a decremented `retries`
+                            complete3ds2Auth(
+                                flowOutcome,
+                                retries = retries - 1
+                            )
+                        } else {
+                            // There's nothing left to do, complete.
+                            startCompletionActivity(flowOutcome)
+                        }
+                    }
+                )
             }
         }
 
-        private fun startCompletionActivity(flowOutcome: ChallengeFlowOutcome) {
+        private suspend fun startCompletionActivity(
+            flowOutcome: ChallengeFlowOutcome
+        ) = withContext(Dispatchers.Main) {
             stripe3ds2CompletionStarter.start(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = stripeIntent.clientSecret.orEmpty(),
@@ -1147,6 +1202,23 @@ internal class StripePaymentController internal constructor(
                     }
                 )
             )
+        }
+
+        /**
+         * Calculate a linear backoff delay before retrying the next completion request.
+         *
+         * Delay 1 second before the first retry
+         * Delay 2 seconds before the second retry
+         * Delay 3 seconds before the third retry
+         */
+        fun getRetryDelayMillis(remainingRetries: Int): Long {
+            val retryAttempt = MAX_RETRIES - remainingRetries.coerceIn(1, MAX_RETRIES) + 1
+            return retryAttempt * retryDelayIncrementMillis
+        }
+
+        private companion object {
+            private const val MAX_RETRIES = 3
+            private const val DEFAULT_RETRY_DELAY_INCREMENT_MILLIS = 1000L
         }
     }
 
