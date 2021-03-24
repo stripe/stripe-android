@@ -6,9 +6,13 @@ import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -24,7 +28,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val bottomSheet: ViewGroup
     abstract val appbar: AppBarLayout
     abstract val scrollView: ScrollView
-    abstract val toolbar: Toolbar
+    abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
 
     abstract fun onUserCancel()
@@ -45,11 +49,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         supportFragmentManager.addOnBackStackChangedListener {
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                toolbar.showClose()
-            } else {
-                toolbar.showBack()
-            }
+            updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
         }
 
         scrollView.viewTreeObserver.addOnScrollChangedListener {
@@ -67,7 +67,20 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         viewModel.processing.observe(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
+            toolbar.isEnabled = !isProcessing
         }
+
+        toolbar.setNavigationOnClickListener {
+            if (toolbar.isEnabled) {
+                if (supportFragmentManager.backStackEntryCount == 0) {
+                    onUserCancel()
+                } else {
+                    onUserBack()
+                }
+            }
+        }
+
+        updateToolbarButton(true)
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener
@@ -95,6 +108,23 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         bottomSheetController.hide()
     }
 
+    private fun updateToolbarButton(isStackEmpty: Boolean) {
+        val toolbarResources = if (isStackEmpty) {
+            ToolbarResources(
+                R.drawable.stripe_paymentsheet_toolbar_close,
+                R.string.stripe_paymentsheet_close
+            )
+        } else {
+            ToolbarResources(
+                R.drawable.stripe_paymentsheet_toolbar_back,
+                R.string.stripe_paymentsheet_back
+            )
+        }
+
+        toolbar.navigationIcon = ContextCompat.getDrawable(this, toolbarResources.icon)
+        toolbar.navigationContentDescription = resources.getString(toolbarResources.description)
+    }
+
     private fun updateRootViewClickHandling(isProcessing: Boolean) {
         if (!isProcessing) {
             // Handle taps outside of bottom sheet
@@ -116,4 +146,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         const val EXTRA_FRAGMENT_CONFIG = "com.stripe.android.paymentsheet.extra_fragment_config"
         const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
     }
+
+    internal data class ToolbarResources(
+        @DrawableRes val icon: Int,
+        @StringRes val description: Int
+    )
 }

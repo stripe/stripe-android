@@ -16,6 +16,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
@@ -37,7 +38,6 @@ import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.Toolbar
 import com.stripe.android.view.AuthActivityStarter
 import java.util.Currency
 import java.util.Locale
@@ -78,7 +78,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
-    override val toolbar: Toolbar by lazy { viewBinding.toolbar }
+    override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
 
@@ -227,19 +227,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             }
         }
 
-        viewBinding.toolbar.action.observe(this) { action ->
-            when (action) {
-                Toolbar.Action.Close -> {
-                    onUserCancel()
-                }
-                Toolbar.Action.Back -> {
-                    onUserBack()
-                }
-                else -> {
-                }
-            }
-        }
-
         viewModel.fetchFragmentConfig().observe(this) { config ->
             if (config != null) {
                 val target = if (config.paymentMethods.isEmpty()) {
@@ -322,10 +309,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout()
-        }
-
-        viewModel.processing.observe(this) { isProcessing ->
-            viewBinding.toolbar.updateProcessing(isProcessing)
         }
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->
