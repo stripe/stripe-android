@@ -780,6 +780,9 @@ internal class CardInputWidgetTest {
     }
 
     @Test
+    fun
+
+    @Test
     fun onUpdateIcon_forCommonLengthBrand_setsLengthOnCvc() {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.

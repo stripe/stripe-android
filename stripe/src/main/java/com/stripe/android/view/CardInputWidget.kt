@@ -760,12 +760,19 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-        expiryDateEditText.internalFocusChangeListeners.add { _, hasFocus ->
-            if (hasFocus) {
-                scrollEnd()
-                cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
-            }
+      expiryDateEditText.internalFocusChangeListeners.add { _, hasFocus ->
+        if (hasFocus) {
+          scrollEnd()
+          cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
         }
+      }
+
+      postalCodeEditText.internalFocusChangeListeners.add { _, hasFocus ->
+        if (hasFocus) {
+          scrollEnd()
+          cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
+        }
+      }
 
         expiryDateEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cardNumberEditText))
         cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
