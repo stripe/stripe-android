@@ -23,7 +23,7 @@
         android:typeface="monospace" />
 
     <TextView
-        android:id="@+id/fpx_bank_info"
+        android:id="@+id/bank_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"

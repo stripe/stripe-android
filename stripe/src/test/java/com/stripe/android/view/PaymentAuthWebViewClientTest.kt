@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.webkit.WebView
 import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
@@ -15,7 +16,8 @@ import kotlin.test.Test
 class PaymentAuthWebViewClientTest {
     private val isPageLoaded = MutableLiveData(false)
 
-    private val onAuthCompletedError = mutableListOf<Throwable>()
+    private val onAuthCompletedErrors = mutableListOf<Throwable>()
+    private val onAuthCompleteUris = mutableListOf<Uri>()
     private var activityFinished = false
 
     private val webView = WebView(ApplicationProvider.getApplicationContext())
@@ -24,17 +26,18 @@ class PaymentAuthWebViewClientTest {
     fun shouldOverrideUrlLoading_withPaymentIntent_shouldSetResult() {
         val url =
             "stripe://payment_intent_return?payment_intent=pi_123&payment_intent_client_secret=pi_123_secret_456&source_type=card"
-        val paymentAuthWebViewClient = createWebViewClient(
+
+        val webViewClient = createWebViewClient(
             "pi_123_secret_456",
             returnUrl = "stripe://payment_intent_return"
         )
-
-        val shouldOverrideUrlLoading =
-            paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(webView, url)
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(url))
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isTrue()
@@ -44,19 +47,21 @@ class PaymentAuthWebViewClientTest {
     fun shouldOverrideUrlLoading_withSetupIntent_shouldSetResult() {
         val url =
             "stripe://payment_auth?setup_intent=seti_1234&setup_intent_client_secret=seti_1234_secret_5678&source_type=card"
-        val paymentAuthWebViewClient = createWebViewClient(
+        val webViewClient = createWebViewClient(
             "seti_1234_secret_5678",
             returnUrl = "stripe://payment_auth"
         )
 
-        val shouldOverrideUrlLoading = paymentAuthWebViewClient.shouldOverrideUrlLoading(
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
             url
         )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(url))
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isTrue()
@@ -66,16 +71,18 @@ class PaymentAuthWebViewClientTest {
     fun shouldOverrideUrlLoading_withoutReturnUrl_onPaymentIntentImplicitReturnUrl_shouldSetResult() {
         val url =
             "stripe://payment_intent_return?payment_intent=pi_123&payment_intent_client_secret=pi_123_secret_456&source_type=card"
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        val webViewClient = createWebViewClient("pi_123_secret_456")
 
-        val shouldOverrideUrlLoading = paymentAuthWebViewClient.shouldOverrideUrlLoading(
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
             url
         )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(url))
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isTrue()
@@ -85,16 +92,18 @@ class PaymentAuthWebViewClientTest {
     fun shouldOverrideUrlLoading_withoutReturnUrl_onSetupIntentImplicitReturnUrl_shouldSetResult() {
         val url =
             "stripe://payment_auth?setup_intent=seti_1234&setup_intent_client_secret=seti_1234_secret_5678&source_type=card"
-        val paymentAuthWebViewClient = createWebViewClient("seti_1234_secret_5678")
+        val webViewClient = createWebViewClient("seti_1234_secret_5678")
 
-        val shouldOverrideUrlLoading = paymentAuthWebViewClient.shouldOverrideUrlLoading(
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
             url
         )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(url))
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isTrue()
@@ -102,16 +111,18 @@ class PaymentAuthWebViewClientTest {
 
     @Test
     fun shouldOverrideUrlLoading_withoutReturnUrl_shouldNotAutoFinishActivity() {
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        val webViewClient = createWebViewClient("pi_123_secret_456")
 
-        val shouldOverrideUrlLoading = paymentAuthWebViewClient.shouldOverrideUrlLoading(
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
             "https://example.com"
         )
         assertThat(shouldOverrideUrlLoading)
             .isFalse()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .isEmpty()
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isFalse()
@@ -119,16 +130,16 @@ class PaymentAuthWebViewClientTest {
 
     @Test
     fun shouldOverrideUrlLoading_withKnownReturnUrl_shouldFinish() {
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        val url = "stripejs://use_stripe_sdk/return_url"
 
-        val shouldOverrideUrlLoading = paymentAuthWebViewClient.shouldOverrideUrlLoading(
-            webView,
-            "stripejs://use_stripe_sdk/return_url"
-        )
+        val shouldOverrideUrlLoading = createWebViewClient("pi_123_secret_456")
+            .shouldOverrideUrlLoading(webView, url)
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(url))
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isTrue()
@@ -136,15 +147,15 @@ class PaymentAuthWebViewClientTest {
 
     @Test
     fun onPageFinished_wit3DSecureCompleteUrl_shouldHideProgressAndFinish() {
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.onPageFinished(
-            webView,
-            "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng"
-        )
+        val url = "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng"
+        createWebViewClient("pi_123_secret_456")
+            .onPageFinished(webView, url)
         assertThat(isPageLoaded.value)
             .isTrue()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(url))
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isTrue()
@@ -152,13 +163,13 @@ class PaymentAuthWebViewClientTest {
 
     @Test
     fun onPageFinished_witRedirectCompleteUrl_shouldFinish() {
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.onPageFinished(
-            webView,
-            "https://hooks.stripe.com/redirect/complete/src_1ExLWoCRMbs6FrXfjPJRYtng"
-        )
+        val url = "https://hooks.stripe.com/redirect/complete/src_1ExLWoCRMbs6FrXfjPJRYtng"
+        createWebViewClient("pi_123_secret_456")
+            .onPageFinished(webView, url)
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(url))
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isTrue()
@@ -168,28 +179,35 @@ class PaymentAuthWebViewClientTest {
     fun shouldOverrideUrlLoading_withOpaqueUri_shouldNotCrash() {
         val url =
             "mailto:patrick@example.com?payment_intent=pi_123&payment_intent_client_secret=pi_123_secret_456&source_type=card"
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        val webViewClient = createWebViewClient("pi_123_secret_456")
 
         val shouldOverrideUrlLoading =
-            paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+            webViewClient.shouldOverrideUrlLoading(webView, url)
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
+
+        assertThat(onAuthCompleteUris)
+            .isEmpty()
+        assertThat(onAuthCompletedErrors)
+            .isEmpty()
     }
 
     @Test
     fun shouldOverrideUrlLoading_withUnsupportedDeeplink_shouldFinish() {
         val url = "deep://link"
-        val paymentAuthWebViewClient = createWebViewClient(
+        val webViewClient = createWebViewClient(
             "pi_123_secret_456",
             activityStarter = { throw ActivityNotFoundException() }
         )
 
         val shouldOverrideUrlLoading =
-            paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+            webViewClient.shouldOverrideUrlLoading(webView, url)
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(url))
+        assertThat(onAuthCompletedErrors)
             .hasSize(1)
         assertThat(activityFinished)
             .isTrue()
@@ -198,14 +216,16 @@ class PaymentAuthWebViewClientTest {
     @Test
     fun shouldOverloadUrlLoading_withAlipayDeeplink_shouldNotFinishActivity() {
         val url = "alipays://link"
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        val webViewClient = createWebViewClient("pi_123_secret_456")
 
         val shouldOverrideUrlLoading =
-            paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+            webViewClient.shouldOverrideUrlLoading(webView, url)
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .isEmpty()
+        assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
             .isFalse()
@@ -217,7 +237,7 @@ class PaymentAuthWebViewClientTest {
 
         val deepLink =
             "intent://example.com/#Intent;scheme=https;action=android.intent.action.VIEW;end"
-        val paymentAuthWebViewClient = createWebViewClient(
+        val webViewClient = createWebViewClient(
             "pi_123_secret_456",
             activityStarter = {
                 capturedIntents.add(it)
@@ -225,7 +245,7 @@ class PaymentAuthWebViewClientTest {
             }
         )
 
-        val shouldOverrideUrlLoading = paymentAuthWebViewClient.shouldOverrideUrlLoading(
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
             deepLink
         )
@@ -236,7 +256,9 @@ class PaymentAuthWebViewClientTest {
         assertThat(intent.dataString)
             .isEqualTo("https://example.com/")
 
-        assertThat(onAuthCompletedError)
+        assertThat(onAuthCompleteUris)
+            .containsExactly(Uri.parse(deepLink))
+        assertThat(onAuthCompletedErrors)
             .hasSize(1)
         assertThat(activityFinished)
             .isTrue()
@@ -246,36 +268,42 @@ class PaymentAuthWebViewClientTest {
     fun shouldOverrideUrlLoading_withAuthenticationUrlWithReturnUrlParam_shouldPopulateCompletionUrl() {
         val url =
             "https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&client_secret=src_client_secret_abc123&return_url=https%3A%2F%2Fhooks.stripe.com%2Fredirect%2Fcomplete%2Fsrc_X9Y8Z7%3Fclient_secret%3Dsrc_client_secret_abc123&source=src_X9Y8Z7&usage=single_use"
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        val webViewClient = createWebViewClient("pi_123_secret_456")
 
-        val shouldOverrideUrlLoading = paymentAuthWebViewClient.shouldOverrideUrlLoading(
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
             url
         )
         assertThat(shouldOverrideUrlLoading)
             .isFalse()
 
-        assertThat(paymentAuthWebViewClient.completionUrlParam)
+        assertThat(webViewClient.completionUrlParam)
             .isEqualTo(
                 "https://hooks.stripe.com/redirect/complete/src_X9Y8Z7?client_secret=src_client_secret_abc123"
             )
+
+        assertThat(onAuthCompleteUris)
+            .isEmpty()
     }
 
     @Test
     fun shouldOverrideUrlLoading_withAuthenticationUrlWithoutReturnUrlParam_shouldNotPopulateCompletionUrl() {
         val url =
             "https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&client_secret=src_client_secret_abc123&return_url=&source=src_X9Y8Z7&usage=single_use"
-        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        val webViewClient = createWebViewClient("pi_123_secret_456")
 
-        val shouldOverrideUrlLoading = paymentAuthWebViewClient.shouldOverrideUrlLoading(
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
             url
         )
         assertThat(shouldOverrideUrlLoading)
             .isFalse()
 
-        assertThat(paymentAuthWebViewClient.completionUrlParam)
+        assertThat(webViewClient.completionUrlParam)
             .isNull()
+
+        assertThat(onAuthCompleteUris)
+            .isEmpty()
     }
 
     private fun createWebViewClient(
@@ -289,8 +317,9 @@ class PaymentAuthWebViewClientTest {
             clientSecret,
             returnUrl,
             activityStarter,
-        ) { error ->
-            error?.let(onAuthCompletedError::add)
+        ) { uri, error ->
+            uri?.let(onAuthCompleteUris::add)
+            error?.let(onAuthCompletedErrors::add)
             activityFinished = true
         }
     }

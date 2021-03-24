@@ -16,6 +16,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
@@ -25,7 +26,6 @@ import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.Toolbar
 
 /**
  * An `Activity` for selecting a payment option.
@@ -66,7 +66,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
     override val appbar: AppBarLayout by lazy { viewBinding.appbar }
-    override val toolbar: Toolbar by lazy { viewBinding.toolbar }
+    override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
 
@@ -153,19 +153,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
-        viewBinding.toolbar.action.observe(this) { action ->
-            if (action != null) {
-                when (action) {
-                    Toolbar.Action.Close -> {
-                        onUserCancel()
-                    }
-                    Toolbar.Action.Back -> {
-                        onUserBack()
-                    }
-                }
-            }
-        }
-
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
@@ -181,10 +168,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         addButton.setOnClickListener {
             viewModel.onUserSelection()
-        }
-
-        viewModel.processing.observe(this) { isProcessing ->
-            viewBinding.toolbar.updateProcessing(isProcessing)
         }
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->

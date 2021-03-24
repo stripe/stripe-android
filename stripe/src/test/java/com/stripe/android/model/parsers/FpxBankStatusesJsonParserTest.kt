@@ -1,7 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.FpxBankStatuses
+import com.stripe.android.model.BankStatuses
 import org.json.JSONObject
 import kotlin.test.Test
 
@@ -11,7 +11,7 @@ class FpxBankStatusesJsonParserTest {
     fun parse_withValidData_createsExpectedObject() {
         assertThat(FpxBankStatusesJsonParser().parse(DEFAULT))
             .isEqualTo(
-                FpxBankStatuses(
+                BankStatuses(
                     mapOf(
                         "PBB0233" to true,
                         "MBB0228" to true,
@@ -45,7 +45,7 @@ class FpxBankStatusesJsonParserTest {
     @Test
     fun parse_withEmptyData_createsExpectedObject() {
         assertThat(FpxBankStatusesJsonParser().parse(JSONObject()))
-            .isEqualTo(FpxBankStatuses())
+            .isEqualTo(BankStatuses())
     }
 
     private companion object {

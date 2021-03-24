@@ -185,7 +185,8 @@ internal class PaymentSheetViewModel internal constructor(
                         },
                         countryCode = args.googlePayConfig?.countryCode.orEmpty(),
                         merchantName = args.config?.merchantDisplayName
-                    )
+                    ),
+                    statusBarColor = args.statusBarColor
                 )
             }
         } else {

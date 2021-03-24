@@ -6,7 +6,7 @@ import androidx.annotation.Size
  * Represents an object that can call to a server and create
  * [EphemeralKeys][EphemeralKey].
  */
-interface EphemeralKeyProvider {
+fun interface EphemeralKeyProvider {
 
     /**
      * When called, talks to a client server that then communicates with Stripe's servers to

@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">Expiry</string>
     <string name="fpx_bank_offline">%s - Offline</string>
+    <string name="incomplete_expiry_date">Your card\'s expiration date is incomplete.</string>
     <string name="invalid_card_number">Your card number is invalid.</string>
     <string name="invalid_cvc">Your card\'s security code is invalid.</string>
     <string name="invalid_expiry_month">Your card expiry month is invalid.</string>

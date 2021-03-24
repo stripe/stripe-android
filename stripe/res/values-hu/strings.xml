@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">HH/ÉÉ</string>
     <string name="expiry_label_short">Lejárat</string>
     <string name="fpx_bank_offline">%s - offline</string>
+    <string name="incomplete_expiry_date">A kártya lejárati dátuma hiányos.</string>
     <string name="invalid_card_number">Kártyaszáma érvénytelen.</string>
     <string name="invalid_cvc">A kártya biztonsági kódja érvénytelen.</string>
     <string name="invalid_expiry_month">Kártyájának lejárati hónapja érvénytelen.</string>

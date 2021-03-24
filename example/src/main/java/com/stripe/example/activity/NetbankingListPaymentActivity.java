@@ -12,14 +12,14 @@ import androidx.core.content.ContextCompat;
 import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.view.AddPaymentMethodActivityStarter;
-import com.stripe.android.view.FpxBank;
+import com.stripe.android.view.NetbankingBank;
 import com.stripe.example.R;
 import com.stripe.example.Settings;
 import com.stripe.example.databinding.BankSelectorPaymentActivityBinding;
 
 import java.util.Objects;
 
-public class FpxPaymentActivity extends AppCompatActivity {
+public class NetbankingListPaymentActivity extends AppCompatActivity {
 
     private BankSelectorPaymentActivityBinding viewBinding;
 
@@ -30,7 +30,7 @@ public class FpxPaymentActivity extends AppCompatActivity {
         viewBinding = BankSelectorPaymentActivityBinding.inflate(getLayoutInflater());
 
         setContentView(viewBinding.getRoot());
-        setTitle(R.string.fpx_payment_example);
+        setTitle(R.string.netbanking_payment_example);
 
         PaymentConfiguration.init(
                 this,
@@ -44,7 +44,7 @@ public class FpxPaymentActivity extends AppCompatActivity {
     private void launchAddPaymentMethod() {
         new AddPaymentMethodActivityStarter(this)
                 .startForResult(new AddPaymentMethodActivityStarter.Args.Builder()
-                        .setPaymentMethodType(PaymentMethod.Type.Fpx)
+                        .setPaymentMethodType(PaymentMethod.Type.Netbanking)
                         .build()
                 );
     }
@@ -63,23 +63,25 @@ public class FpxPaymentActivity extends AppCompatActivity {
     }
 
     private void onPaymentMethodResult(@NonNull PaymentMethod paymentMethod) {
-        final String fpxBankCode = Objects.requireNonNull(paymentMethod.fpx).bank;
+        final String netbankingCode = Objects.requireNonNull(paymentMethod.netbanking).bank;
         final String resultMessage = "Created Payment Method\n" +
                 "\nType: " + paymentMethod.type +
                 "\nId: " + paymentMethod.id +
-                "\nBank code: " + fpxBankCode;
+                "\nBank code: " + netbankingCode;
         viewBinding.paymentMethodResult.setText(resultMessage);
 
-        final FpxBank fpxBank = FpxBank.get(fpxBankCode);
-        if (fpxBank != null) {
+        final NetbankingBank netbankingBank = NetbankingBank.get(netbankingCode);
+        if (netbankingBank != null) {
             viewBinding.bankInfo.setVisibility(View.VISIBLE);
-            viewBinding.bankInfo.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    ContextCompat.getDrawable(this, fpxBank.getBrandIconResId()),
-                    null,
-                    null,
-                    null
-            );
-            viewBinding.bankInfo.setText(fpxBank.getDisplayName());
+            if (netbankingBank.getBrandIconResId() != null) {
+                viewBinding.bankInfo.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                        ContextCompat.getDrawable(this, netbankingBank.getBrandIconResId()),
+                        null,
+                        null,
+                        null
+                );
+            }
+            viewBinding.bankInfo.setText(netbankingBank.getDisplayName());
         } else {
             viewBinding.bankInfo.setVisibility(View.GONE);
         }

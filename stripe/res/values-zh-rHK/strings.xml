@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">月月/年年</string>
     <string name="expiry_label_short">有效期</string>
     <string name="fpx_bank_offline">%s - 線下</string>
+    <string name="incomplete_expiry_date">您銀行卡的到期日期不完整。</string>
     <string name="invalid_card_number">您的卡號無效。</string>
     <string name="invalid_cvc">您銀行卡的安全碼無效。</string>
     <string name="invalid_expiry_month">您銀行卡的到期月份無效。</string>

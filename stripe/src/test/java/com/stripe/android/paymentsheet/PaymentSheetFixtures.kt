@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.analytics.SessionId
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR = "#121212".toColorInt()
 
-    private const val MERCHANT_DISPLAY_NAME = "Widget Store"
+    internal const val MERCHANT_DISPLAY_NAME = "Widget Store"
     internal const val CLIENT_SECRET = "client_secret"
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(

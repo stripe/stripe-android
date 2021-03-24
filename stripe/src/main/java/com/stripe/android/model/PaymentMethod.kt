@@ -115,7 +115,9 @@ data class PaymentMethod internal constructor(
 
     @JvmField val sofort: Sofort? = null,
 
-    @JvmField val upi: Upi? = null
+    @JvmField val upi: Upi? = null,
+
+    @JvmField val netbanking: Netbanking? = null
 ) : StripeModel {
 
     @Parcelize
@@ -258,7 +260,8 @@ data class PaymentMethod internal constructor(
                 sepaDebit = sepaDebit,
                 auBecsDebit = auBecsDebit,
                 bacsDebit = bacsDebit,
-                sofort = sofort
+                sofort = sofort,
+                netbanking = netbanking
             )
         }
     }

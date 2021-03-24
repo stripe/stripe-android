@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">MM/JJ</string>
     <string name="expiry_label_short">Vervaldatum</string>
     <string name="fpx_bank_offline">%s - offline</string>
+    <string name="incomplete_expiry_date">De vervaldatum van je kaart is onvolledig.</string>
     <string name="invalid_card_number">Het kaartnummer is ongeldig.</string>
     <string name="invalid_cvc">De beveiligingscode van je kaart is ongeldig.</string>
     <string name="invalid_expiry_month">De vervalmaand van de kaart is ongeldig.</string>

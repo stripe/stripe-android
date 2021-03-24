@@ -40,6 +40,9 @@ internal enum class AnalyticsEvent(internal val code: String) {
 
     // 3DS1
     Auth3ds1Sdk("3ds1_sdk"),
+    Auth3ds1ChallengeStart("3ds1_challenge_start"),
+    Auth3ds1ChallengeError("3ds1_challenge_error"),
+    Auth3ds1ChallengeComplete("3ds1_challenge_complete"),
 
     // FPX
     FpxBankStatusesRetrieve("retrieve_fpx_bank_statuses"),

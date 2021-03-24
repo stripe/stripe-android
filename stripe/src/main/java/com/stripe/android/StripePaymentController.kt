@@ -329,6 +329,7 @@ internal class StripePaymentController internal constructor(
 
             paymentAuthWebViewStarterFactory(host).start(
                 PaymentAuthWebViewContract.Args(
+                    objectId = source.id.orEmpty(),
                     requestCode = SOURCE_REQUEST_CODE,
                     clientSecret = source.clientSecret.orEmpty(),
                     url = source.redirect?.url.orEmpty(),
@@ -635,6 +636,7 @@ internal class StripePaymentController internal constructor(
         )
         beginWebAuth(
             paymentAuthWebViewStarterFactory(host),
+            stripeIntent,
             getRequestCode(stripeIntent),
             stripeIntent.clientSecret.orEmpty(),
             nextActionData.url,
@@ -662,6 +664,7 @@ internal class StripePaymentController internal constructor(
 
         beginWebAuth(
             paymentAuthWebViewStarterFactory(host),
+            stripeIntent,
             getRequestCode(stripeIntent),
             stripeIntent.clientSecret.orEmpty(),
             nextActionData.url.toString(),
@@ -694,6 +697,7 @@ internal class StripePaymentController internal constructor(
 
         beginWebAuth(
             paymentAuthWebViewStarterFactory(host),
+            stripeIntent,
             getRequestCode(stripeIntent),
             stripeIntent.clientSecret.orEmpty(),
             nextActionData.webViewUrl.toString(),
@@ -713,6 +717,7 @@ internal class StripePaymentController internal constructor(
         if (nextActionData.hostedVoucherUrl != null) {
             beginWebAuth(
                 paymentAuthWebViewStarterFactory(host),
+                stripeIntent,
                 getRequestCode(stripeIntent),
                 stripeIntent.clientSecret.orEmpty(),
                 nextActionData.hostedVoucherUrl,
@@ -905,6 +910,7 @@ internal class StripePaymentController internal constructor(
         )
         beginWebAuth(
             paymentAuthWebViewStarterFactory(host),
+            stripeIntent,
             getRequestCode(stripeIntent),
             stripeIntent.clientSecret.orEmpty(),
             fallbackRedirectUrl,
@@ -1212,6 +1218,7 @@ internal class StripePaymentController internal constructor(
          */
         private fun beginWebAuth(
             paymentWebWebViewStarter: PaymentAuthWebViewStarter,
+            stripeIntent: StripeIntent,
             requestCode: Int,
             clientSecret: String,
             authUrl: String,
@@ -1224,6 +1231,7 @@ internal class StripePaymentController internal constructor(
             Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
             paymentWebWebViewStarter.start(
                 PaymentAuthWebViewContract.Args(
+                    objectId = stripeIntent.id.orEmpty(),
                     requestCode,
                     clientSecret,
                     authUrl,
