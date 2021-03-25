@@ -767,6 +767,13 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+        postalCodeEditText.internalFocusChangeListeners.add { _, hasFocus ->
+            if (hasFocus) {
+                scrollEnd()
+                cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
+            }
+        }
+
         expiryDateEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cardNumberEditText))
         cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
         postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
