@@ -52,6 +52,33 @@ class CurrencyFormatterTest {
                 Locale.FRANCE
             )
         )
-            .isEqualTo("US$ 1,000.00")
+            .isEqualTo("1 000,00 \$US")
+        // uber shows: 34,94 $US
+    }
+
+    @Test
+    fun `test UK with thousands of dollars`() {
+        assertThat(
+            currencyFormatter.format(
+                100000,
+                Currency.getInstance("USD"),
+                Locale("en-GB", "GB")
+            )
+        )
+            .isEqualTo("US\$ 1,000.00")
+        // uber shows: US$32.92
+    }
+
+    @Test
+    fun `test AU with thousands of dollars`() {
+        assertThat(
+            currencyFormatter.format(
+                100000,
+                Currency.getInstance("USD"),
+                Locale("en-AU", "AU")
+            )
+        )
+            .isEqualTo("US\$ 1,000.00")
+        // uber shows: USD 32.92
     }
 }

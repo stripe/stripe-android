@@ -15,12 +15,21 @@ internal class CurrencyFormatter {
         val currencySymbol = currencyAmount.getSymbol(targetLocale)
         val majorUnitAmount =
             amount / MAJOR_UNIT_BASE.pow(getDefaultFractionDigits(currencyAmount).toDouble())
-        val currencyFormat = NumberFormat.getCurrencyInstance(
-            Locale(
-                "",
-                currencyAmount.currencyCode
-            )
-        )
+
+        // The language string found in the system properties prevents an extra space being
+        // added after the currency symbol.  If it can't be found we will default to the display locale
+        val targetLanguageFormat = System.getProperty("user.language.format", targetLocale.language)
+        val targetCountryFormat = System.getProperty("user.country.format", targetLocale.language)
+        val targetVariantFormat = System.getProperty("user.variant.format", targetLocale.language)
+        val locale = if((targetLanguageFormat != null) &&
+           (targetCountryFormat != null) &&
+           (targetVariantFormat != null)){
+            Locale(targetLanguageFormat, targetCountryFormat, targetVariantFormat)
+        } else {
+            Locale("", targetLocale.country)
+        }
+
+        val currencyFormat = NumberFormat.getCurrencyInstance(locale)
 
         // We need to cast inside the try catch because most currencies are decimal formats but
         // not all. See the official Google Docs for NumberFormat for more context.
@@ -33,6 +42,7 @@ internal class CurrencyFormatter {
         }
 
         return currencyFormat.format(majorUnitAmount)
+
     }
 
     private fun getDefaultFractionDigits(currency: Currency): Int {
