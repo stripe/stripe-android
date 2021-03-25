@@ -171,7 +171,6 @@ internal class PaymentSheetViewModel internal constructor(
         _processing.value = true
 
         val paymentSelection = selection.value
-        prefsRepository.savePaymentSelection(paymentSelection)
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
@@ -214,6 +213,18 @@ internal class PaymentSheetViewModel internal constructor(
         when (paymentIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)
+
+                // SavedSelection needs to happen after new cards have been saved.
+                when (selection.value) {
+                    is PaymentSelection.New.Card -> paymentIntentResult.intent.paymentMethod?.let {
+                        PaymentSelection.Saved(it)
+                    }
+                    PaymentSelection.GooglePay -> selection.value
+                    is PaymentSelection.Saved -> selection.value
+                    null -> null
+                }?.let {
+                    prefsRepository.savePaymentSelection(it)
+                }
 
                 _viewState.value = ViewState.PaymentSheet.FinishProcessing {
                     _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
