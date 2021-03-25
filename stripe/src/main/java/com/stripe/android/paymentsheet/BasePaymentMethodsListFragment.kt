@@ -56,9 +56,7 @@ internal abstract class BasePaymentMethodsListFragment(
             canClickSelectedItem,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             addCardClickListener = {
-                if (sheetViewModel.processing.value == false) {
-                    transitionToAddPaymentMethod()
-                }
+                transitionToAddPaymentMethod()
             }
         ).also {
             viewBinding.recycler.adapter = it
@@ -71,7 +69,7 @@ internal abstract class BasePaymentMethodsListFragment(
         eventReporter.onShowExistingPaymentOptions()
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            adapter.interactionEnabled = !isProcessing
+            adapter.setEnabled(!isProcessing)
             layoutManager.canScroll = !isProcessing
         }
     }

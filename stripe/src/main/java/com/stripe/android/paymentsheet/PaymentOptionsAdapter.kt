@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.VisibleForTesting
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
@@ -22,11 +23,10 @@ internal class PaymentOptionsAdapter(
     val addCardClickListener: View.OnClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var items: List<Item> = emptyList()
-
     private var selectedItemPosition: Int = NO_POSITION
+    private var isEnabled = true
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
-    internal var interactionEnabled = true
 
     init {
         setHasStableIds(true)
@@ -50,6 +50,13 @@ internal class PaymentOptionsAdapter(
         )
 
         notifyDataSetChanged()
+    }
+
+    internal fun setEnabled(enabled: Boolean) {
+        if (isEnabled != enabled) {
+            isEnabled = enabled
+            notifyDataSetChanged()
+        }
     }
 
     /**
@@ -87,12 +94,12 @@ internal class PaymentOptionsAdapter(
         ).firstOrNull() ?: NO_POSITION
     }
 
-    private fun onItemSelected(
+    @VisibleForTesting
+    internal fun onItemSelected(
         position: Int,
         isClick: Boolean
     ) {
-        if (interactionEnabled &&
-            position != NO_POSITION &&
+        if (position != NO_POSITION &&
             (canClickSelectedItem || position != selectedItemPosition)
         ) {
             val previousSelectedIndex = selectedItemPosition
@@ -128,8 +135,16 @@ internal class PaymentOptionsAdapter(
             ViewType.AddCard -> AddCardViewHolder(parent).apply {
                 itemView.setOnClickListener(addCardClickListener)
             }
-            ViewType.GooglePay -> GooglePayViewHolder(parent)
-            ViewType.Card -> CardViewHolder(parent)
+            ViewType.GooglePay -> GooglePayViewHolder(parent).apply {
+                itemView.setOnClickListener {
+                    onItemSelected(adapterPosition, isClick = true)
+                }
+            }
+            ViewType.Card -> CardViewHolder(parent).apply {
+                itemView.setOnClickListener {
+                    onItemSelected(adapterPosition, isClick = true)
+                }
+            }
         }
     }
 
@@ -140,9 +155,6 @@ internal class PaymentOptionsAdapter(
         val item = items[position]
         if (holder is CardViewHolder) {
             holder.setSelected(position == selectedItemPosition)
-            holder.itemView.setOnClickListener {
-                onItemSelected(holder.adapterPosition, isClick = true)
-            }
 
             when (item) {
                 is Item.ExistingPaymentMethod -> {
@@ -154,13 +166,8 @@ internal class PaymentOptionsAdapter(
             }
         } else if (holder is GooglePayViewHolder) {
             holder.setSelected(position == selectedItemPosition)
-            holder.itemView.setOnClickListener {
-                onItemSelected(
-                    holder.adapterPosition,
-                    isClick = true
-                )
-            }
         }
+        holder.itemView.isEnabled = isEnabled
     }
 
     private class CardViewHolder(
@@ -175,11 +182,6 @@ internal class PaymentOptionsAdapter(
         )
 
         init {
-            binding.card.setOnClickListener {
-                // TODO(mshafrir-stripe): Card view was ignoring clicks without this - investigate?
-                itemView.performClick()
-            }
-
             // ensure that the check icon is above the card
             binding.checkIcon.elevation = binding.card.elevation + 1
         }
@@ -215,7 +217,7 @@ internal class PaymentOptionsAdapter(
         }
 
         fun setSelected(selected: Boolean) {
-            binding.card.isChecked = selected
+            binding.card.isSelected = selected
             binding.checkIcon.isVisible = selected
         }
     }
@@ -240,17 +242,12 @@ internal class PaymentOptionsAdapter(
         )
 
         init {
-            binding.card.setOnClickListener {
-                // TODO(mshafrir-stripe): Card view was ignoring clicks without this - investigate?
-                itemView.performClick()
-            }
-
             // ensure that the check icon is above the card
             binding.checkIcon.elevation = binding.card.elevation + 1
         }
 
         fun setSelected(selected: Boolean) {
-            binding.card.isChecked = selected
+            binding.card.isSelected = selected
             binding.checkIcon.isVisible = selected
         }
     }

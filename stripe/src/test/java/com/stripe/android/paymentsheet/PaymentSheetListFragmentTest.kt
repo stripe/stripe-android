@@ -105,7 +105,6 @@ class PaymentSheetListFragmentTest {
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
             assertThat(activityViewModel.transition.value).isNull()
-            activityViewModel._processing.value = false
 
             idleLooper()
 
@@ -123,25 +122,6 @@ class PaymentSheetListFragmentTest {
                         )
                     )
                 )
-        }
-    }
-
-    @Test
-    fun `does not post transition when add card clicked and processing`() {
-        createScenario().onFragment {
-            val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value).isNull()
-            activityViewModel._processing.value = true
-
-            idleLooper()
-
-            val recycler = recyclerView(it)
-            assertThat(recycler.adapter).isInstanceOf(PaymentOptionsAdapter::class.java)
-            val adapter = recycler.adapter as PaymentOptionsAdapter
-            adapter.addCardClickListener.onClick(it.requireView())
-            idleLooper()
-
-            assertThat(activityViewModel.transition.value).isNull()
         }
     }
 
