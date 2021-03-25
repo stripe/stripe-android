@@ -22,7 +22,7 @@ configurations {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.annotation:annotation:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
@@ -31,7 +31,7 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation "androidx.activity:activity-ktx:1.2.1"
+    implementation "androidx.activity:activity-ktx:1.2.2"
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
     implementation "com.google.android.material:material:$materialVersion"
 
@@ -43,7 +43,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
-    javadocDeps 'androidx.annotation:annotation:1.1.0'
+    javadocDeps 'androidx.annotation:annotation:1.2.0'
     javadocDeps 'androidx.appcompat:appcompat:1.2.0'
     javadocDeps "com.google.android.material:material:$materialVersion"
 
