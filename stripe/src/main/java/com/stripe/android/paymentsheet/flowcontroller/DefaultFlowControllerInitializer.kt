@@ -72,13 +72,8 @@ internal class DefaultFlowControllerInitializer(
                     types = paymentMethodTypes,
                     customerConfig
                 ).let { paymentMethods ->
-                    if (prefsRepository.getSavedSelection() == SavedSelection.None) {
-                        paymentMethods.firstOrNull()?.let { paymentMethod ->
-                            prefsRepository.savePaymentSelection(
-                                PaymentSelection.Saved(paymentMethod)
-                            )
-                        }
-                    }
+
+                    setLastSavedPaymentMethod(prefsRepository, isGooglePayReady, paymentMethods)
 
                     FlowControllerInitializer.InitResult.Success(
                         InitData(
@@ -112,13 +107,19 @@ internal class DefaultFlowControllerInitializer(
                         PaymentMethod.Type.fromCode(it)
                     }
 
+                val savedSelection = if (isGooglePayReady) {
+                    SavedSelection.GooglePay
+                } else {
+                    SavedSelection.None
+                }
+
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
                         config = config,
                         paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
-                        savedSelection = SavedSelection.None,
+                        savedSelection = savedSelection,
                         isGooglePayReady = isGooglePayReady
                     )
                 )
@@ -127,6 +128,26 @@ internal class DefaultFlowControllerInitializer(
                 FlowControllerInitializer.InitResult.Failure(it)
             }
         )
+    }
+
+    private suspend fun setLastSavedPaymentMethod(
+        prefsRepository: PrefsRepository,
+        isGooglePayReady: Boolean,
+        paymentMethods: List<PaymentMethod>
+    ) {
+        if (prefsRepository.getSavedSelection() == SavedSelection.None) {
+            paymentMethods.firstOrNull()?.let { paymentMethod ->
+                prefsRepository.savePaymentSelection(
+                    PaymentSelection.Saved(paymentMethod)
+                )
+            }
+        }
+
+        if (isGooglePayReady &&
+            prefsRepository.getSavedSelection() == SavedSelection.None
+        ) {
+            prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
+        }
     }
 
     private suspend fun retrieveAllPaymentMethods(
