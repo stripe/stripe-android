@@ -1,10 +1,10 @@
 # CHANGELOG
 
 ## 16.3.2 - unreleased
-* [#3457](https://github.com/stripe/stripe-android/pull/3457) StripeEditText restores text color after error
+* [#3457](https://github.com/stripe/stripe-android/pull/3457) Fix issue where StripeEditText was overriding default text color changes
 * [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix PaymentMethodsAdapter "new card" click handling
 * [#3479](https://github.com/stripe/stripe-android/pull/3479) Add support for Blik payment method
-* [#3482](https://github.com/stripe/stripe-android/pull/3482) Incomplete CardMultilineWidget fields show up red
+* [#3482](https://github.com/stripe/stripe-android/pull/3482) CardMultilineWidget now marks incomplete fields as invalid
 * [#3484](https://github.com/stripe/stripe-android/pull/3484) Added CardInputWidget#setCvcLabel
 * [#3493](https://github.com/stripe/stripe-android/pull/3493) Correctly return error results from `PaymentAuthWebViewActivity`
 * [#3504](https://github.com/stripe/stripe-android/pull/3504) Add default mandate data for all applicable payment method types
