@@ -1314,6 +1314,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 listOf(
                     CardInputListener.FocusField.Cvc,
+                    CardInputListener.FocusField.PostalCode,
                     CardInputListener.FocusField.CardNumber
                 )
             )
@@ -1582,6 +1583,38 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCvcLabel("123")
         assertThat(cardInputWidget.cvcEditText.hint)
             .isEqualTo("123")
+    }
+
+    @Test
+    fun `Verify on postal code focus change listeners trigger the callback`() {
+        cardInputWidget.postalCodeEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.postalCodeEditText, true)
+
+        assertThat(cardInputListener.focusedFields)
+            .contains(CardInputListener.FocusField.PostalCode)
+    }
+
+    @Test
+    fun `Verify on cvc focus change listeners trigger the callback`() {
+        cardInputWidget.cvcEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.cvcEditText, true)
+
+        assertThat(cardInputListener.focusedFields)
+            .contains(CardInputListener.FocusField.Cvc)
+    }
+
+    @Test
+    fun `Verify on expiration date focus change listeners trigger the callback`() {
+        cardInputWidget.expiryDateEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.expiryDateEditText, true)
+
+        assertThat(cardInputListener.focusedFields)
+            .contains(CardInputListener.FocusField.ExpiryDate)
+    }
+
+    @Test
+    fun `Verify on card number focus change listeners trigger the callback`() {
+        cardInputWidget.cardNumberEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.cardNumberEditText, true)
+
+        assertThat(cardInputListener.focusedFields)
+            .contains(CardInputListener.FocusField.CardNumber)
     }
 
     private fun updateCardNumberAndIdle(cardNumber: String) {
