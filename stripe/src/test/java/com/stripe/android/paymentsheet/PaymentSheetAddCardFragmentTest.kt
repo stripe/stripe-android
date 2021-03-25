@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import org.junit.Before
 import org.junit.Test
@@ -215,6 +216,41 @@ class PaymentSheetAddCardFragmentTest {
 
             assertThat(paymentSelections)
                 .containsExactly(PaymentSelection.GooglePay)
+        }
+    }
+
+    @Test
+    fun `when back to Ready state should update PaymentSelection`() {
+        createFragment { fragment, viewBinding ->
+            val paymentSelections = mutableListOf<PaymentSelection?>()
+            fragment.sheetViewModel.selection.observeForever { paymentSelection ->
+                paymentSelections.add(paymentSelection)
+            }
+
+            assertThat(viewBinding.googlePayButton.isVisible)
+                .isTrue()
+
+            // Start with null PaymentSelection because the card entered is invalid
+            assertThat(paymentSelections.size)
+                .isEqualTo(1)
+            assertThat(paymentSelections[0])
+                .isNull()
+
+            viewBinding.googlePayButton.performClick()
+
+            // Updates PaymentSelection to Google Pay
+            assertThat(paymentSelections.size)
+                .isEqualTo(2)
+            assertThat(paymentSelections[1])
+                .isEqualTo(PaymentSelection.GooglePay)
+
+            fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.Ready(5, "USD")
+
+            // Back to Ready state, should return to null PaymentSelection
+            assertThat(paymentSelections.size)
+                .isEqualTo(3)
+            assertThat(paymentSelections[2])
+                .isNull()
         }
     }
 
