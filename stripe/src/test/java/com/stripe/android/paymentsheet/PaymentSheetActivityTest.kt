@@ -14,6 +14,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.PrimaryButtonBinding
+import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -120,18 +121,56 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `updates buy button state`() {
+    fun `updates buy button state on payments list`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.buyButton.isEnabled)
-                    .isTrue()
-
-                viewModel.updateSelection(PaymentSelection.GooglePay)
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
 
+                viewModel.updateSelection(PaymentSelection.GooglePay)
+                assertThat(activity.viewBinding.buyButton.isVisible).isFalse()
+                assertThat(activity.viewBinding.googlePayButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
+
                 viewModel.updateSelection(null)
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+
+                scenario.moveToState(Lifecycle.State.DESTROYED)
+            }
+        }
+    }
+
+    @Test
+    fun `updates buy button state on add payment`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+
+                viewModel.transitionTo(
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+                        FragmentConfigFixtures.DEFAULT
+                    )
+                )
+
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+                assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
+
+                viewModel.updateSelection(PaymentSelection.GooglePay)
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+                assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
+                viewModel.onGooglePayResult(StripeGooglePayContract.Result.Canceled)
+
+                viewModel.updateSelection(
+                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
 
                 scenario.moveToState(Lifecycle.State.DESTROYED)
             }
