@@ -15,10 +15,12 @@ import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.googlepay.StripeGooglePayContract
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
@@ -121,7 +123,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `updates buy button state on payments list`() {
+    fun `updates buy button state on payment methods list`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
@@ -136,8 +138,6 @@ internal class PaymentSheetActivityTest {
                 viewModel.updateSelection(null)
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-
-                scenario.moveToState(Lifecycle.State.DESTROYED)
             }
         }
     }
@@ -147,32 +147,53 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
-                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-
                 viewModel.transitionTo(
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
                         FragmentConfigFixtures.DEFAULT
                     )
                 )
 
+                // Initially empty card
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
                 assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
 
+                // Update to Google Pay
                 viewModel.updateSelection(PaymentSelection.GooglePay)
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
                 assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
                 viewModel.onGooglePayResult(StripeGooglePayContract.Result.Canceled)
 
+                // Update to saved card
                 viewModel.updateSelection(
                     PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 )
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
 
-                scenario.moveToState(Lifecycle.State.DESTROYED)
+                // Back to empty/invalid card
+                viewModel.updateSelection(null)
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+
+                // New valid card
+                viewModel.updateSelection(
+                    PaymentSelection.New.Card(
+                        PaymentMethodCreateParams.create(
+                            card = PaymentMethodCreateParams.Card(
+                                number = "4242424242424242",
+                                cvc = "666",
+                                expiryMonth = 12,
+                                expiryYear = 2050
+                            )
+                        ),
+                        CardBrand.Visa,
+                        shouldSavePaymentMethod = false
+                    )
+                )
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
             }
         }
     }
