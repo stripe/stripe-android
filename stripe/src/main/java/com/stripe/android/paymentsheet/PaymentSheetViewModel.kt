@@ -169,6 +169,7 @@ internal class PaymentSheetViewModel internal constructor(
     fun checkout() {
         _userMessage.value = null
         _processing.value = true
+        _viewState.value = ViewState.PaymentSheet.StartProcessing
 
         val paymentSelection = selection.value
         prefsRepository.savePaymentSelection(paymentSelection)
@@ -205,7 +206,6 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            _viewState.value = ViewState.PaymentSheet.StartProcessing
             _startConfirm.value = confirmParams
         }
     }
@@ -247,6 +247,7 @@ internal class PaymentSheetViewModel internal constructor(
             else -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
 
+                paymentIntent.value?.let(::resetViewState)
                 // TODO(mshafrir-stripe): handle error
             }
         }

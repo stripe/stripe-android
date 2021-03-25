@@ -143,7 +143,7 @@ internal abstract class BaseAddCardFragment(
         eventReporter.onShowNewPaymentOptionForm()
     }
 
-    private fun updateSelection() {
+    protected fun updateSelection() {
         val validCard = if (addCardViewModel.isCardValid) {
             paymentMethodParams?.let { params ->
                 PaymentSelection.New.Card(

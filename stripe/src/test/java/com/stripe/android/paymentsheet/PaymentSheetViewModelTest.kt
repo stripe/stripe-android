@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -177,6 +178,37 @@ internal class PaymentSheetViewModelTest {
             .containsExactly(paymentSelection)
         assertThat(prefsRepository.getSavedSelection())
             .isEqualTo(SavedSelection.None)
+    }
+
+    @Test
+    fun `Google Pay checkout cancelled returns to Ready state`() {
+        viewModel.fetchPaymentIntent()
+        viewModel.updateSelection(PaymentSelection.GooglePay)
+        viewModel.checkout()
+
+        val viewState: MutableList<ViewState?> = mutableListOf()
+        viewModel.viewState.observeForever {
+            viewState.add(it)
+        }
+
+        val processing: MutableList<Boolean> = mutableListOf()
+        viewModel.processing.observeForever {
+            processing.add(it)
+        }
+
+        assertThat(viewState.size).isEqualTo(1)
+        assertThat(processing.size).isEqualTo(1)
+        assertThat(viewState[0])
+            .isEqualTo(ViewState.PaymentSheet.StartProcessing)
+        assertThat(processing[0]).isTrue()
+
+        viewModel.onGooglePayResult(StripeGooglePayContract.Result.Canceled)
+
+        assertThat(viewState.size).isEqualTo(2)
+        assertThat(processing.size).isEqualTo(2)
+        assertThat(viewState[1])
+            .isEqualTo(ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"))
+        assertThat(processing[1]).isFalse()
     }
 
     @Test
