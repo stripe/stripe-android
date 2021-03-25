@@ -5,7 +5,7 @@
 * [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix `PaymentMethodsAdapter` "new card" click handling
 * [#3479](https://github.com/stripe/stripe-android/pull/3479) Add support for Blik payment method
 * [#3482](https://github.com/stripe/stripe-android/pull/3482) `CardMultilineWidget` now marks incomplete fields as invalid
-* [#3484](https://github.com/stripe/stripe-android/pull/3484) Added `CardInputWidget#setCvcLabel`
+* [#3484](https://github.com/stripe/stripe-android/pull/3484) Add new method `CardInputWidget#setCvcLabel`
 * [#3493](https://github.com/stripe/stripe-android/pull/3493) Correctly return error results from `PaymentAuthWebViewActivity`
 * [#3504](https://github.com/stripe/stripe-android/pull/3504) Add default mandate data for all applicable payment method types
 * [#3507](https://github.com/stripe/stripe-android/pull/3507) Invoke issuing API requests on background thread
