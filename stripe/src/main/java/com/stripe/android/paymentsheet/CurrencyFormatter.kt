@@ -21,9 +21,10 @@ internal class CurrencyFormatter {
         val targetLanguageFormat = System.getProperty("user.language.format", targetLocale.language)
         val targetCountryFormat = System.getProperty("user.country.format", targetLocale.language)
         val targetVariantFormat = System.getProperty("user.variant.format", targetLocale.language)
-        val locale = if((targetLanguageFormat != null) &&
-           (targetCountryFormat != null) &&
-           (targetVariantFormat != null)){
+        val locale = if ((targetLanguageFormat != null) &&
+            (targetCountryFormat != null) &&
+            (targetVariantFormat != null)
+        ) {
             Locale(targetLanguageFormat, targetCountryFormat, targetVariantFormat)
         } else {
             Locale("", targetLocale.country)
@@ -42,7 +43,6 @@ internal class CurrencyFormatter {
         }
 
         return currencyFormat.format(majorUnitAmount)
-
     }
 
     private fun getDefaultFractionDigits(currency: Currency): Int {
