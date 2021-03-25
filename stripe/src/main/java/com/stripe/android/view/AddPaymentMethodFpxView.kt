@@ -1,22 +1,14 @@
 package com.stripe.android.view
 
-import android.content.res.ColorStateList
-import android.content.res.Resources
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
-import com.stripe.android.databinding.FpxBankItemBinding
-import com.stripe.android.databinding.FpxPaymentMethodBinding
-import com.stripe.android.model.FpxBankStatuses
+import com.stripe.android.databinding.BankListPaymentMethodBinding
+import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
 
 internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
@@ -24,9 +16,16 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : AddPaymentMethodView(activity, attrs, defStyleAttr) {
-    private val fpxAdapter = Adapter(ThemeConfig(activity)) {
-        viewModel.selectedPosition = it
-    }
+
+    private var fpxBankStatuses: BankStatuses = BankStatuses()
+
+    private val fpxAdapter = AddPaymentMethodListAdapter(
+        ThemeConfig(activity),
+        items = FpxBank.values().toList(),
+        itemSelectedCallback = {
+            viewModel.selectedPosition = it
+        }
+    )
 
     private val viewModel: FpxViewModel by lazy {
         ViewModelProvider(
@@ -37,7 +36,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
     override val createParams: PaymentMethodCreateParams?
         get() {
-            val fpxBank = fpxAdapter.selectedBank ?: return null
+            val fpxBank = FpxBank.values()[fpxAdapter.selectedPosition]
 
             return PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Fpx(bank = fpxBank.code)
@@ -45,7 +44,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
 
     init {
-        val viewBinding = FpxPaymentMethodBinding.inflate(
+        val viewBinding = BankListPaymentMethodBinding.inflate(
             activity.layoutInflater,
             this,
             true
@@ -54,138 +53,43 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         // an id is required for state to be saved
         id = R.id.stripe_payment_methods_add_fpx
 
-        viewBinding.fpxList.run {
+        viewModel.getFpxBankStatues()
+            .observe(activity, Observer(::onFpxBankStatusesUpdated))
+
+        with(viewBinding.bankList) {
             adapter = fpxAdapter
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)
             itemAnimator = DefaultItemAnimator()
         }
 
-        viewModel.getFpxBankStatues()
-            .observe(activity, Observer(::onFpxBankStatusesUpdated))
-
         viewModel.selectedPosition?.let {
             fpxAdapter.updateSelected(it)
         }
     }
 
-    private fun onFpxBankStatusesUpdated(fpxBankStatuses: FpxBankStatuses?) {
+    private fun onFpxBankStatusesUpdated(fpxBankStatuses: BankStatuses?) {
         fpxBankStatuses?.let {
-            fpxAdapter.updateStatuses(it)
+            updateStatuses(it)
         }
     }
 
-    private class Adapter constructor(
-        private val themeConfig: ThemeConfig,
-        private val itemSelectedCallback: (Int) -> Unit
-    ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
-        var selectedPosition = RecyclerView.NO_POSITION
-            set(value) {
-                if (value != field) {
-                    if (selectedPosition != RecyclerView.NO_POSITION) {
-                        notifyItemChanged(field)
-                    }
-                    notifyItemChanged(value)
-                    itemSelectedCallback(value)
-                }
-                field = value
+    private fun updateStatuses(fpxBankStatuses: BankStatuses) {
+        this.fpxBankStatuses = fpxBankStatuses
+        this.fpxAdapter.bankStatuses = fpxBankStatuses
+
+        // flag offline bank
+        FpxBank.values().indices
+            .filterNot { position ->
+                fpxBankStatuses.isOnline(getItem(position))
             }
-
-        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses()
-
-        val selectedBank: FpxBank?
-            get() = if (selectedPosition == -1) {
-                null
-            } else {
-                getItem(selectedPosition)
+            .forEach { position ->
+                fpxAdapter.notifyAdapterItemChanged(position)
             }
+    }
 
-        init {
-            setHasStableIds(true)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, i: Int): ViewHolder {
-            return ViewHolder(
-                FpxBankItemBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                ),
-                themeConfig
-            )
-        }
-
-        override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
-            viewHolder.setSelected(i == selectedPosition)
-
-            val fpxBank = getItem(i)
-            viewHolder.update(fpxBank, fpxBankStatuses.isOnline(fpxBank))
-            viewHolder.itemView.setOnClickListener {
-                selectedPosition = viewHolder.adapterPosition
-            }
-        }
-
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
-
-        override fun getItemCount(): Int {
-            return FpxBank.values().size
-        }
-
-        private fun getItem(position: Int): FpxBank {
-            return FpxBank.values()[position]
-        }
-
-        fun updateSelected(position: Int) {
-            selectedPosition = position
-            notifyItemChanged(position)
-        }
-
-        fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
-            this.fpxBankStatuses = fpxBankStatuses
-
-            // flag offline bank
-            FpxBank.values().indices
-                .filterNot { position ->
-                    fpxBankStatuses.isOnline(getItem(position))
-                }
-                .forEach { position ->
-                    notifyItemChanged(position)
-                }
-        }
-
-        private class ViewHolder constructor(
-            private val viewBinding: FpxBankItemBinding,
-            private val themeConfig: ThemeConfig
-        ) : RecyclerView.ViewHolder(viewBinding.root) {
-            private val resources: Resources = itemView.resources
-
-            fun update(fpxBank: FpxBank, isOnline: Boolean) {
-                viewBinding.name.text = if (isOnline) {
-                    fpxBank.displayName
-                } else {
-                    resources.getString(
-                        R.string.fpx_bank_offline,
-                        fpxBank.displayName
-                    )
-                }
-                viewBinding.icon.setImageResource(fpxBank.brandIconResId)
-            }
-
-            fun setSelected(isSelected: Boolean) {
-                viewBinding.name.setTextColor(themeConfig.getTextColor(isSelected))
-                ImageViewCompat.setImageTintList(
-                    viewBinding.checkIcon,
-                    ColorStateList.valueOf(themeConfig.getTintColor(isSelected))
-                )
-                viewBinding.checkIcon.visibility = if (isSelected) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
-            }
-        }
+    private fun getItem(position: Int): FpxBank {
+        return FpxBank.values()[position]
     }
 
     internal companion object {

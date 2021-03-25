@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 16.3.2 - unreleased
+* [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix PaymentMethodsAdapter "new card" click handling
+* [#3479](https://github.com/stripe/stripe-android/pull/3479) Add support for Blik payment method
+* [#3493](https://github.com/stripe/stripe-android/pull/3493) Correctly return error results from `PaymentAuthWebViewActivity`
+* [#3504](https://github.com/stripe/stripe-android/pull/3504) Add default mandate data for all applicable payment method types
+* [#3507](https://github.com/stripe/stripe-android/pull/3507) Invoke issuing API requests on background thread
+* [#3508](https://github.com/stripe/stripe-android/pull/3508) Make `EphemeralKeyProvider` a fun interface
+
 ## 16.3.1 - 2021-03-16
 * [#3381](https://github.com/stripe/stripe-android/pull/3381) Add `fingerprint` property to `PaymentMethod.Card`
 * [#3401](https://github.com/stripe/stripe-android/pull/3401) Upgrade Gradle to `6.8.3`

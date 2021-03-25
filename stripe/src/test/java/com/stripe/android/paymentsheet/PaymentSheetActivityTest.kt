@@ -192,6 +192,43 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `updates navigation button`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
+
+                assertThat(activity.toolbar.navigationContentDescription)
+                    .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
+
+                viewModel.transitionTo(
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+                        FragmentConfigFixtures.DEFAULT
+                    )
+                )
+                idleLooper()
+
+                assertThat(activity.toolbar.navigationContentDescription)
+                    .isEqualTo(context.getString(R.string.stripe_paymentsheet_back))
+
+                activity.onBackPressed()
+                idleLooper()
+
+                assertThat(activity.toolbar.navigationContentDescription)
+                    .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
+
+                activity.onBackPressed()
+                idleLooper()
+                // animating out
+                assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            }
+        }
+    }
+
+    @Test
     fun `handles buy button clicks`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
@@ -250,6 +287,24 @@ internal class PaymentSheetActivityTest {
                 idleLooper()
 
                 activity.finish()
+            }
+        }
+    }
+
+    @Test
+    fun `Verify processing state disables toolbar`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
+                idleLooper()
+
+                viewModel._processing.value = true
+
+                idleLooper()
+
+                assertThat(activity.toolbar.isEnabled).isFalse()
             }
         }
     }
