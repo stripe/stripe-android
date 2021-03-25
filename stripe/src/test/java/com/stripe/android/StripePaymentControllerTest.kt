@@ -988,7 +988,7 @@ internal class StripePaymentControllerTest {
             AnalyticsRequest.Factory(),
 
             // set to 0 so there is effectively no delay
-            retryDelayIncrementMillis = 0L,
+            retryDelayIncrementSeconds = 0L,
 
             workContext = testDispatcher
         )
@@ -1029,7 +1029,7 @@ internal class StripePaymentControllerTest {
             AnalyticsRequest.Factory(),
 
             // set to 0 so there is effectively no delay
-            retryDelayIncrementMillis = 0L,
+            retryDelayIncrementSeconds = 0L,
 
             workContext = testDispatcher
         )
@@ -1074,29 +1074,29 @@ internal class StripePaymentControllerTest {
             receiver.getRetryDelayMillis(
                 remainingRetries = 999
             )
-        ).isEqualTo(1000L)
-
-        assertThat(
-            receiver.getRetryDelayMillis(remainingRetries = 3)
-        ).isEqualTo(1000L)
-
-        assertThat(
-            receiver.getRetryDelayMillis(remainingRetries = 2)
         ).isEqualTo(2000L)
 
         assertThat(
+            receiver.getRetryDelayMillis(remainingRetries = 3)
+        ).isEqualTo(2000L)
+
+        assertThat(
+            receiver.getRetryDelayMillis(remainingRetries = 2)
+        ).isEqualTo(4000L)
+
+        assertThat(
             receiver.getRetryDelayMillis(remainingRetries = 1)
-        ).isEqualTo(3000L)
+        ).isEqualTo(8000L)
 
         // coerce to 1 remaining retry
         assertThat(
             receiver.getRetryDelayMillis(remainingRetries = -100)
-        ).isEqualTo(3000L)
+        ).isEqualTo(8000L)
 
         // coerce to 1 remaining retry
         assertThat(
             receiver.getRetryDelayMillis(remainingRetries = 0)
-        ).isEqualTo(3000L)
+        ).isEqualTo(8000L)
     }
 
     private fun createController(

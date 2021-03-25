@@ -50,6 +50,7 @@ import kotlinx.coroutines.withContext
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.pow
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
@@ -1019,7 +1020,7 @@ internal class StripePaymentController internal constructor(
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val transaction: Transaction,
         private val analyticsRequestFactory: AnalyticsRequest.Factory,
-        private val retryDelayIncrementMillis: Long = DEFAULT_RETRY_DELAY_INCREMENT_MILLIS,
+        private val retryDelayIncrementSeconds: Long = DEFAULT_RETRY_DELAY_INCREMENT_SECONDS,
         enableLogging: Boolean = false,
         private val workContext: CoroutineContext
     ) : StripeChallengeStatusReceiver() {
@@ -1205,20 +1206,22 @@ internal class StripePaymentController internal constructor(
         }
 
         /**
-         * Calculate a linear backoff delay before retrying the next completion request.
+         * Calculate an exponential backoff delay before retrying the next completion request.
          *
-         * Delay 1 second before the first retry
-         * Delay 2 seconds before the second retry
-         * Delay 3 seconds before the third retry
+         * Delay 2 seconds before the first retry
+         * Delay 4 seconds before the second retry
+         * Delay 8 seconds before the third retry
          */
         fun getRetryDelayMillis(remainingRetries: Int): Long {
             val retryAttempt = MAX_RETRIES - remainingRetries.coerceIn(1, MAX_RETRIES) + 1
-            return retryAttempt * retryDelayIncrementMillis
+            return TimeUnit.SECONDS.toMillis(
+                retryDelayIncrementSeconds.toDouble().pow(retryAttempt).toLong()
+            )
         }
 
         private companion object {
             private const val MAX_RETRIES = 3
-            private const val DEFAULT_RETRY_DELAY_INCREMENT_MILLIS = 1000L
+            private const val DEFAULT_RETRY_DELAY_INCREMENT_SECONDS = 2L
         }
     }
 
