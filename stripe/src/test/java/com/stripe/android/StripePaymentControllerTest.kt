@@ -964,7 +964,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `complete3ds2Auth() should retry until max retries are attempted`() {
+    fun `complete3ds2Auth() should retry until max retries are attempted due to a 4xx response`() {
         var complete3ds2AuthInvocations = 0
         val stripeRepository = object : AbsFakeStripeRepository() {
             override suspend fun complete3ds2Auth(
@@ -972,7 +972,10 @@ internal class StripePaymentControllerTest {
                 requestOptions: ApiRequest.Options
             ): Stripe3ds2AuthResult {
                 complete3ds2AuthInvocations++
-                error("Failed")
+
+                throw InvalidRequestException(
+                    statusCode = 400
+                )
             }
         }
 
@@ -1000,7 +1003,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `complete3ds2Auth() should succeed after a single retry failure`() {
+    fun `complete3ds2Auth() should succeed after a single retry failure due to a 4xx response`() {
         var complete3ds2AuthInvocations = 0
 
         val stripeRepository = object : AbsFakeStripeRepository() {
@@ -1010,7 +1013,9 @@ internal class StripePaymentControllerTest {
             ): Stripe3ds2AuthResult {
                 complete3ds2AuthInvocations++
                 if (complete3ds2AuthInvocations <= 2) {
-                    error("Failed")
+                    throw InvalidRequestException(
+                        statusCode = 400
+                    )
                 } else {
                     return Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION
                 }
@@ -1052,6 +1057,45 @@ internal class StripePaymentControllerTest {
             },
             eq(StripePaymentController.PAYMENT_REQUEST_CODE)
         )
+    }
+
+    @Test
+    fun `complete3ds2Auth() should not retry after a 5xx response`() {
+        var complete3ds2AuthInvocations = 0
+        val stripeRepository = object : AbsFakeStripeRepository() {
+            override suspend fun complete3ds2Auth(
+                sourceId: String,
+                requestOptions: ApiRequest.Options
+            ): Stripe3ds2AuthResult {
+                complete3ds2AuthInvocations++
+
+                throw APIException(
+                    statusCode = 500
+                )
+            }
+        }
+
+        val receiver = StripePaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
+            completionStarter,
+            stripeRepository,
+            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            "src_123",
+            REQUEST_OPTIONS,
+            analyticsRequestExecutor,
+            analyticsDataFactory,
+            transaction,
+            AnalyticsRequest.Factory(),
+
+            // set to 0 so there is effectively no delay
+            retryDelayIncrementSeconds = 0L,
+
+            workContext = testDispatcher
+        )
+
+        receiver.timedout("1")
+
+        assertThat(complete3ds2AuthInvocations)
+            .isEqualTo(1)
     }
 
     @Test

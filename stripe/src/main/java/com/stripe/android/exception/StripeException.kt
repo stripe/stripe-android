@@ -15,6 +15,8 @@ abstract class StripeException(
     cause: Throwable? = null,
     message: String? = stripeError?.message
 ) : Exception(message, cause) {
+    val isClientError = statusCode in 400..499
+
     override fun toString(): String {
         return listOfNotNull(
             requestId?.let { "Request-id: $it" },

@@ -1159,25 +1159,44 @@ internal class StripePaymentController internal constructor(
                         startCompletionActivity(flowOutcome)
                     },
                     onFailure = { error ->
-                        logger.error(
-                            "Failure when attempting 3DS2 challenge completion request. Remaining retries: $retries",
-                            error
+                        onComplete3ds2AuthFailure(
+                            flowOutcome, retries, error
                         )
-
-                        if (retries > 0) {
-                            delay(getRetryDelayMillis(retries))
-
-                            // attempt request with a decremented `retries`
-                            complete3ds2Auth(
-                                flowOutcome,
-                                retries = retries - 1
-                            )
-                        } else {
-                            // There's nothing left to do, complete.
-                            startCompletionActivity(flowOutcome)
-                        }
                     }
                 )
+            }
+        }
+
+        private suspend fun onComplete3ds2AuthFailure(
+            flowOutcome: ChallengeFlowOutcome,
+            retries: Int,
+            error: Throwable,
+        ) {
+            logger.error(
+                "Failure when attempting 3DS2 challenge completion request. Remaining retries: $retries",
+                error
+            )
+
+            val isClientError = when (error) {
+                is StripeException -> error.isClientError
+                else -> false
+            }
+            val shouldRetry = retries > 0 && isClientError
+
+            if (shouldRetry) {
+                delay(getRetryDelayMillis(retries))
+
+                // attempt request with a decremented `retries`
+                complete3ds2Auth(
+                    flowOutcome,
+                    retries = retries - 1
+                )
+            } else {
+                logger.debug(
+                    "Did not make a successful 3DS2 challenge completion request after retrying."
+                )
+                // There's nothing left to do, complete.
+                startCompletionActivity(flowOutcome)
             }
         }
 
