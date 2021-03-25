@@ -81,4 +81,17 @@ class CurrencyFormatterTest {
             .isEqualTo("US\$ 1,000.00")
         // uber shows: USD 32.92
     }
+
+    @Test
+    fun `test Icelandic with thousands of dollars`() {
+        assertThat(
+            currencyFormatter.format(
+                100000,
+                Currency.getInstance("USD"),
+                Locale("is-IS", "IS")
+            )
+        )
+            .isEqualTo("US\$ 1,000.00")
+        // uber shows: USD 34,86
+    }
 }
