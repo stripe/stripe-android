@@ -1134,11 +1134,7 @@ internal class StripePaymentController internal constructor(
          *
          * When successful, call [startCompletionActivity] to return the result.
          *
-         * When [StripeRepository.complete3ds2Auth] fails and [retries] is greater than 0,
-         * a failure when calling [StripeRepository.complete3ds2Auth] will result in a retry
-         * attempt after a delay.
-         *
-         * The delay logic can be found in [getRetryDelayMillis].
+         * When [StripeRepository.complete3ds2Auth] fails, handle in [onComplete3ds2AuthFailure].
          *
          * @param flowOutcome the outcome of the 3DS2 challenge flow.
          * @param retries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
@@ -1156,6 +1152,11 @@ internal class StripePaymentController internal constructor(
                     )
                 }.fold(
                     onSuccess = {
+                        val attemptedRetries = MAX_RETRIES - retries
+                        logger.debug(
+                            "3DS2 challenge completion request was successful. " +
+                                "$attemptedRetries retries attempted."
+                        )
                         startCompletionActivity(flowOutcome)
                     },
                     onFailure = { error ->
@@ -1167,13 +1168,22 @@ internal class StripePaymentController internal constructor(
             }
         }
 
+        /**
+         * When [StripeRepository.complete3ds2Auth] fails with a client error (a 4xx status code)
+         * and [retries] is greater than 0, retry after a delay.
+         *
+         * The delay logic can be found in [getRetryDelayMillis].
+         *
+         * @param flowOutcome the outcome of the 3DS2 challenge flow.
+         * @param retries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
+         */
         private suspend fun onComplete3ds2AuthFailure(
             flowOutcome: ChallengeFlowOutcome,
             retries: Int,
             error: Throwable,
         ) {
             logger.error(
-                "Failure when attempting 3DS2 challenge completion request. Remaining retries: $retries",
+                "3DS2 challenge completion request failed. Remaining retries: $retries",
                 error
             )
 
