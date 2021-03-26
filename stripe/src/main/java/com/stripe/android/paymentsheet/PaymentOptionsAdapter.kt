@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import kotlin.properties.Delegates
 
 internal class PaymentOptionsAdapter(
     private val canClickSelectedItem: Boolean,
@@ -24,9 +25,14 @@ internal class PaymentOptionsAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var items: List<Item> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
-    private var isEnabled = true
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
+
+    internal var isEnabled: Boolean by Delegates.observable(true) { _, oldValue, newValue ->
+        if (oldValue != newValue) {
+            notifyDataSetChanged()
+        }
+    }
 
     init {
         setHasStableIds(true)
@@ -50,13 +56,6 @@ internal class PaymentOptionsAdapter(
         )
 
         notifyDataSetChanged()
-    }
-
-    internal fun setEnabled(enabled: Boolean) {
-        if (isEnabled != enabled) {
-            isEnabled = enabled
-            notifyDataSetChanged()
-        }
     }
 
     /**
