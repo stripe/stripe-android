@@ -12,9 +12,10 @@ import java.util.Locale
  *
  * Also by looking at the [NumberFormat] fields returned from
  * {@link NumberFormat#getCurrencyInstance()}
- * we see other things that vary between countries. Each one is not verified here.
+ * we see other things that vary between countries. Each one is not verified here as we are not testing
+ * the library.
  *
- * The focus is that we are making sure the:
+ * The focus of this testing is to make sure the:
  *      - amount is formatted with the number of decimal digits based on the amount currency, and
  *      not the locale currency
  *      - decimal number is formatted in the locale format
@@ -23,7 +24,7 @@ import java.util.Locale
  *
  * If we added instrumented tests to our build server, this would be a good set of cases to run on device.
  *
- * Quite notable in testing is that we find if the targetLocale has a language vs a language and
+ * Notable in testing is that if the targetLocale has a language vs a language and
  * country the outputted results are quite different.
  *
  * Similar tests exist on iOS

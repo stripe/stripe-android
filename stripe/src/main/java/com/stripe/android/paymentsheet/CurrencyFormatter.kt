@@ -14,9 +14,7 @@ internal class CurrencyFormatter {
         targetLocale: Locale = Locale.getDefault()
     ) = format(
         amount,
-        Currency.getInstance(
-            amountCurrencyCode.toUpperCase(Locale.ROOT)
-        ),
+        Currency.getInstance(amountCurrencyCode.toUpperCase(Locale.ROOT)),
         targetLocale
     )
 
@@ -25,9 +23,9 @@ internal class CurrencyFormatter {
         amountCurrency: Currency,
         targetLocale: Locale = Locale.getDefault()
     ): String {
-        val defaultCurrencyDigits = getDefaultFractionDigits(amountCurrency)
+        val amountCurrencyDecimalDigits = getDefaultDecimalDigits(amountCurrency)
         val majorUnitAmount =
-            amount / MAJOR_UNIT_BASE.pow(defaultCurrencyDigits.toDouble())
+            amount / MAJOR_UNIT_BASE.pow(amountCurrencyDecimalDigits.toDouble())
 
         /**
          * The currencyFormat for a country and region specifies many things including:
@@ -36,33 +34,36 @@ internal class CurrencyFormatter {
          * - where does the symbol go (right or left of the number)
          * - how do they format decimal separators (i.e. France uses commas)
          * - how do they separate thousand digits (i.e. France uses spaces)
-         * When you get the currencyInstance you are getting the symbol for the target currency
-         * (i.e. francs) where they place their symbol for currency, etc.
+         * When you get the {@link NumberFormat#getCurrencyInstance()} you are getting all this information.
          *
          * Some fields not used here, but might be relevant in other scenarios:
          * - positive and negative numbers
          *
-         * However, the currency of the amount is different, the amount might have decimal places
-         * even if the target currency does not, and we want to use the symbol for the currency
-         * amount, and not the currency of the target.  So below we will switch these out.
+         * Among other things the currency format of the amount might have decimal places
+         * even if the targetLocale's currency does not, so below we will do a sort of merge of
+         * the targetLocale and amount currency. We will start with the currency format of the
+         * targetLocale, this sets, most notably, the number decimal and thousands separators,
+         * where the currency symbol should be placed relative to the number. Then we find the
+         * currency symbol of the amount for the targetLocale, and use that. Finally, we set the
+         * number of decimal places used by the amount currency.
+         *
+         * See the [NumberFormat] for why we use a try block.
          */
         val currencyFormat = NumberFormat.getCurrencyInstance(targetLocale)
 
-        // We need to cast inside the try catch because most currencies are decimal formats but
-        // not all. See the official Google Docs for NumberFormat for more context.
         runCatching {
             val decimalFormatSymbols =
                 (currencyFormat as DecimalFormat).decimalFormatSymbols
             decimalFormatSymbols.currency = amountCurrency
             decimalFormatSymbols.currencySymbol = amountCurrency.getSymbol(targetLocale)
-            currencyFormat.minimumFractionDigits = defaultCurrencyDigits
+            currencyFormat.minimumFractionDigits = amountCurrencyDecimalDigits
             currencyFormat.decimalFormatSymbols = decimalFormatSymbols
         }
 
         return currencyFormat.format(majorUnitAmount)
     }
 
-    private fun getDefaultFractionDigits(currency: Currency): Int {
+    private fun getDefaultDecimalDigits(currency: Currency): Int {
         /**
          * Handle special cases where the client's default fractional digits for a given currency
          * don't match the Stripe backend's assumption.
