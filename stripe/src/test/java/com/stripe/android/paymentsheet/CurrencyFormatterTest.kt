@@ -10,8 +10,7 @@ import java.util.Locale
  * See [currencies](https://stripe.com/docs/currencies#minimum-and-maximum-charge-amounts)
  * for useful test scenarios.
  *
- * Also by looking at the [NumberFormat] fields returned from
- * {@link NumberFormat#getCurrencyInstance()}
+ * Also by looking at the [NumberFormat] fields returned from [NumberFormat#getCurrencyInstance]
  * we see other things that vary between countries. Each one is not verified here as we are not testing
  * the library.
  *
@@ -28,7 +27,7 @@ import java.util.Locale
  * country the outputted results are quite different.
  *
  * Similar tests exist on iOS
- * [here](https://github.com/stripe-ios/stripe-ios/blob/master/Tests/Tests/NSString+StripeTest.swift#L48)
+ * [here](https://github.com/stripe/stripe-ios/blob/master/Tests/Tests/NSString+StripeTest.swift)
  */
 class CurrencyFormatterTest {
     private val currencyFormatter = CurrencyFormatter()
@@ -223,23 +222,6 @@ class CurrencyFormatterTest {
             )
         )
             .isEqualTo("US$ 1,234.12")
-    }
-
-    /**
-     * This test would be good to run on android phones to see where the apparent inconsistency
-     * with the server is coming from (See `CurrencyFormatter.SERVER_DECIMAL_DIGITS_2`).
-     */
-    @Test
-    fun `Currencies don't match server value of 2`() {
-        val non2Value = CurrencyFormatter.SERVER_DECIMAL_DIGITS_2
-        Currency.getAvailableCurrencies()
-            .filter { non2Value.contains(it.currencyCode) && it.defaultFractionDigits != 2 }
-            .sortedBy {
-                it.currencyCode
-            }
-            .forEach {
-                println("Found a currency that does not have 2 decimal places: " + it.currencyCode)
-            }
     }
 
     companion object {

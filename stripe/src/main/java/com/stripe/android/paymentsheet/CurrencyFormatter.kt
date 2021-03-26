@@ -29,12 +29,12 @@ internal class CurrencyFormatter {
 
         /**
          * The currencyFormat for a country and region specifies many things including:
-         * - do they use decimal places (some currencies like Korea's is whole numbers only)
+         * - do they use decimal places (e.g. Korea's is whole numbers only)
          * - what is the symbol for the currency
          * - where does the symbol go (right or left of the number)
-         * - how do they format decimal separators (i.e. France uses commas)
-         * - how do they separate thousand digits (i.e. France uses spaces)
-         * When you get the {@link NumberFormat#getCurrencyInstance()} you are getting all this information.
+         * - how do they format decimal separators (e.g. France uses commas)
+         * - how do they separate thousand digits (e.g. France uses spaces)
+         * When you get the [NumberFormat#getCurrencyInstance] you are getting all this information.
          *
          * Some fields not used here, but might be relevant in other scenarios:
          * - positive and negative numbers
@@ -68,16 +68,19 @@ internal class CurrencyFormatter {
          * Handle special cases where the client's default fractional digits for a given currency
          * don't match the Stripe backend's assumption.
          */
-        return if (SERVER_DECIMAL_DIGITS_2.contains(currency.currencyCode.toUpperCase(Locale.ROOT))) {
-            2
-        } else {
-            currency.defaultFractionDigits
-        }
+        return SERVER_DECIMAL_DIGITS
+            .filter { entry ->
+                entry.key.contains(currency.currencyCode.toUpperCase(Locale.ROOT))
+            }.map {
+                it.value
+            }.firstOrNull() ?: currency.defaultFractionDigits
     }
 
     internal companion object {
         private const val MAJOR_UNIT_BASE = 10.0
-        internal val SERVER_DECIMAL_DIGITS_2 =
-            setOf("UGX", "AFN", "ALL", "AMD", "COP", "IDR", "ISK", "PKR", "LBP")
+        private val SERVER_DECIMAL_DIGITS =
+            mapOf(
+                setOf("UGX", "AFN", "ALL", "AMD", "COP", "IDR", "ISK", "PKR", "LBP") to 2
+            )
     }
 }
