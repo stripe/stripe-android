@@ -39,8 +39,6 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.view.AuthActivityStarter
-import java.util.Currency
-import java.util.Locale
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     @VisibleForTesting
@@ -98,13 +96,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
     private val currencyFormatter = CurrencyFormatter()
     private fun getLabelText(viewState: ViewState.PaymentSheet.Ready): String {
-        val currency = Currency.getInstance(
-            viewState.currencyCode.toUpperCase(Locale.ROOT)
-        )
-
         return resources.getString(
             R.string.stripe_paymentsheet_pay_button_amount,
-            currencyFormatter.format(viewState.amount, currency)
+            currencyFormatter.format(viewState.amount, viewState.currencyCode)
         )
     }
 
