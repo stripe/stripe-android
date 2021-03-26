@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="acc_label_card_number">Card number</string>
     <string name="acc_label_expiry_date">Expiration date</string>
     <string name="acc_label_zip">ZIP Code</string>
@@ -99,7 +99,7 @@
     <string name="expiry_label_short">Expiry</string>
     <string name="invalid_card_number">Your card\'s number is invalid.</string>
     <string name="invalid_expiry_month">Your card\'s expiration month is invalid.</string>
-    <string name="incomplete_expiry_date" tools:ignore="MissingTranslation">Your card\'s expiration date is incomplete.</string>
+    <string name="incomplete_expiry_date">Your card\'s expiration date is incomplete.</string>
     <string name="invalid_expiry_year">Your card\'s expiration year is invalid.</string>
     <string name="invalid_cvc">Your card\'s security code is invalid.</string>
     <string name="invalid_zip">Your postal code is incomplete.</string>
@@ -167,20 +167,20 @@
     <!-- Payment Sheet -->
     <string name="stripe_paymentsheet_back">Back</string>
     <string name="stripe_paymentsheet_close">Close</string>
-    <string name="stripe_paymentsheet_select_payment_method" tools:ignore="MissingTranslation">Select your payment method</string>
-    <string name="stripe_paymentsheet_add_payment_method_title" tools:ignore="MissingTranslation">Add your payment information</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information" tools:ignore="MissingTranslation">Card information</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region" tools:ignore="MissingTranslation">Country or region</string>
+    <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ New card</string>
     <string name="stripe_paymentsheet_save_this_card">Save this card for future payments</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
-    <string name="stripe_paymentsheet_or_pay_with" tools:ignore="MissingTranslation">Or pay with a card</string>
-    <string name="stripe_paymentsheet_expiration_date_hint" tools:ignore="MissingTranslation">MM / YY</string>
+    <string name="stripe_paymentsheet_or_pay_with">Or pay with a card</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
 
     <!-- The payment amount (e.g. "Pay $25.00") -->
     <string name="stripe_paymentsheet_pay_button_label">Pay</string>
     <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
-    <string name="stripe_paymentsheet_primary_button_processing" tools:ignore="MissingTranslation">Processing…</string>
+    <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
 
     <string name="stripe_paymentsheet_add_button_label">Add</string>
 
