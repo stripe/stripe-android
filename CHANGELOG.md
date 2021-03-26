@@ -1,12 +1,16 @@
 # CHANGELOG
 
 ## 16.3.2 - unreleased
-* [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix PaymentMethodsAdapter "new card" click handling
+* [#3457](https://github.com/stripe/stripe-android/pull/3457) Fix issue where `StripeEditText` was overriding default text color changes
+* [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix `PaymentMethodsAdapter` "new card" click handling
 * [#3479](https://github.com/stripe/stripe-android/pull/3479) Add support for Blik payment method
+* [#3482](https://github.com/stripe/stripe-android/pull/3482) Mark incomplete fields in `CardMultilineWidget` as invalid
+* [#3484](https://github.com/stripe/stripe-android/pull/3484) Add new method `CardInputWidget#setCvcLabel`
 * [#3493](https://github.com/stripe/stripe-android/pull/3493) Correctly return error results from `PaymentAuthWebViewActivity`
 * [#3504](https://github.com/stripe/stripe-android/pull/3504) Add default mandate data for all applicable payment method types
 * [#3507](https://github.com/stripe/stripe-android/pull/3507) Invoke issuing API requests on background thread
 * [#3508](https://github.com/stripe/stripe-android/pull/3508) Make `EphemeralKeyProvider` a fun interface
+* [#3520](https://github.com/stripe/stripe-android/pull/3520) Invoke `CardInputWidget#cardInputListener` when postal code field gets focus
 
 ## 16.3.1 - 2021-03-16
 * [#3381](https://github.com/stripe/stripe-android/pull/3381) Add `fingerprint` property to `PaymentMethod.Card`
