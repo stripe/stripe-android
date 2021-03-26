@@ -7,38 +7,55 @@ import java.util.Locale
 import kotlin.math.pow
 
 internal class CurrencyFormatter {
+
     fun format(
         amount: Long,
-        currencyAmount: Currency,
+        amountCurrencyCode: String,
+        targetLocale: Locale = Locale.getDefault()
+    ) = format(
+        amount,
+        Currency.getInstance(
+            amountCurrencyCode.toUpperCase(Locale.ROOT)
+        ),
+        targetLocale
+    )
+
+    fun format(
+        amount: Long,
+        amountCurrency: Currency,
         targetLocale: Locale = Locale.getDefault()
     ): String {
-        val currencySymbol = currencyAmount.getSymbol(targetLocale)
+        val defaultCurrencyDigits = getDefaultFractionDigits(amountCurrency)
         val majorUnitAmount =
-            amount / MAJOR_UNIT_BASE.pow(getDefaultFractionDigits(currencyAmount).toDouble())
+            amount / MAJOR_UNIT_BASE.pow(defaultCurrencyDigits.toDouble())
 
-        // The language string found in the system properties prevents an extra space being
-        // added after the currency symbol.  If it can't be found we will default to the display locale
-        val targetLanguageFormat = System.getProperty("user.language.format", targetLocale.language)
-        val targetCountryFormat = System.getProperty("user.country.format", targetLocale.language)
-        val targetVariantFormat = System.getProperty("user.variant.format", targetLocale.language)
-        val locale = if ((targetLanguageFormat != null) &&
-            (targetCountryFormat != null) &&
-            (targetVariantFormat != null)
-        ) {
-            Locale(targetLanguageFormat, targetCountryFormat, targetVariantFormat)
-        } else {
-            Locale("", targetLocale.country)
-        }
-
-        val currencyFormat = NumberFormat.getCurrencyInstance(locale)
+        /**
+         * The currencyFormat for a country and region specifies many things including:
+         * - do they use decimal places (some currencies like Korea's is whole numbers only)
+         * - what is the symbol for the currency
+         * - where does the symbol go (right or left of the number)
+         * - how do they format decimal separators (i.e. France uses commas)
+         * - how do they separate thousand digits (i.e. France uses spaces)
+         * When you get the currencyInstance you are getting the symbol for the target currency
+         * (i.e. francs) where they place their symbol for currency, etc.
+         *
+         * Some fields not used here, but might be relevant in other scenarios:
+         * - positive and negative numbers
+         *
+         * However, the currency of the amount is different, the amount might have decimal places
+         * even if the target currency does not, and we want to use the symbol for the currency
+         * amount, and not the currency of the target.  So below we will switch these out.
+         */
+        val currencyFormat = NumberFormat.getCurrencyInstance(targetLocale)
 
         // We need to cast inside the try catch because most currencies are decimal formats but
         // not all. See the official Google Docs for NumberFormat for more context.
         runCatching {
             val decimalFormatSymbols =
                 (currencyFormat as DecimalFormat).decimalFormatSymbols
-            decimalFormatSymbols.currency = currencyAmount
-            decimalFormatSymbols.currencySymbol = currencySymbol
+            decimalFormatSymbols.currency = amountCurrency
+            decimalFormatSymbols.currencySymbol = amountCurrency.getSymbol(targetLocale)
+            currencyFormat.minimumFractionDigits = defaultCurrencyDigits
             currencyFormat.decimalFormatSymbols = decimalFormatSymbols
         }
 
@@ -50,20 +67,16 @@ internal class CurrencyFormatter {
          * Handle special cases where the client's default fractional digits for a given currency
          * don't match the Stripe backend's assumption.
          */
-        return when (currency.currencyCode.toUpperCase(Locale.ROOT)) {
-            "AFN" -> 2 // Afghanistan afghani
-            "ALL" -> 2 // Albanian lek
-            "AMD" -> 2 // Armenian dram
-            "COP" -> 2 // Colombia peso
-            "IDR" -> 2 // Indonesian rupiah
-            "ISK" -> 2 // Icelandic króna
-            "PKR" -> 2 // Pakistani rupee
-            "LBP" -> 2 // Lebanese pound (a.k.a. lira)
-            else -> currency.defaultFractionDigits
+        return if (SERVER_DECIMAL_DIGITS_2.contains(currency.currencyCode.toUpperCase(Locale.ROOT))) {
+            2
+        } else {
+            currency.defaultFractionDigits
         }
     }
 
-    private companion object {
+    internal companion object {
         private const val MAJOR_UNIT_BASE = 10.0
+        internal val SERVER_DECIMAL_DIGITS_2 =
+            setOf("UGX", "AFN", "ALL", "AMD", "COP", "IDR", "ISK", "PKR", "LBP")
     }
 }
