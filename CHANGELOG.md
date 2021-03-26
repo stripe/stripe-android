@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.3.2 - unreleased
+## 16.4.0 - unreleased
 * [#3457](https://github.com/stripe/stripe-android/pull/3457) Fix issue where `StripeEditText` was overriding default text color changes
 * [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix `PaymentMethodsAdapter` "new card" click handling
 * [#3479](https://github.com/stripe/stripe-android/pull/3479) Add support for Blik payment method
@@ -17,6 +17,11 @@
     * `androidx.fragment:fragment-ktx` to `1.3.2`
     * `androidx.lifecycle:lifecycle-*` to `2.3.1`
 * [#3520](https://github.com/stripe/stripe-android/pull/3520) Invoke `CardInputWidget#cardInputListener` when postal code field gets focus
+* [#3524](https://github.com/stripe/stripe-android/pull/3524) Make `CardInputWidget` and `CardMultilineWidget` rtl compatible
+    * Card number is always ltr
+    * CVC is always ltr
+    * Expiration Date is always ltr
+    * Postal Code is defined by the locale
 
 ## 16.3.1 - 2021-03-16
 * [#3381](https://github.com/stripe/stripe-android/pull/3381) Add `fingerprint` property to `PaymentMethod.Card`
