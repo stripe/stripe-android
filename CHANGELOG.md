@@ -10,6 +10,12 @@
 * [#3504](https://github.com/stripe/stripe-android/pull/3504) Add default mandate data for all applicable payment method types
 * [#3507](https://github.com/stripe/stripe-android/pull/3507) Invoke issuing API requests on background thread
 * [#3508](https://github.com/stripe/stripe-android/pull/3508) Make `EphemeralKeyProvider` a fun interface
+* [#3517](https://github.com/stripe/stripe-android/pull/3517) Add retry logic for 3DS2 challenge completion endpoint
+* [#3519](https://github.com/stripe/stripe-android/pull/3519) Update AndroidX dependencies
+    * `androidx.activity:activity-ktx` to `1.2.2`
+    * `androidx.annotation:annotation` to `1.2.0`
+    * `androidx.fragment:fragment-ktx` to `1.3.2`
+    * `androidx.lifecycle:lifecycle-*` to `2.3.1`
 * [#3520](https://github.com/stripe/stripe-android/pull/3520) Invoke `CardInputWidget#cardInputListener` when postal code field gets focus
 
 ## 16.3.1 - 2021-03-16
