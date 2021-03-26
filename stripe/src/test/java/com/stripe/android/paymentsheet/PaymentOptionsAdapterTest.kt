@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -105,18 +106,53 @@ class PaymentOptionsAdapterTest {
     fun `click on Google Pay view should update payment selection`() {
         val adapter = createConfiguredAdapter(
             CONFIG.copy(
-                isGooglePayReady = true
+                isGooglePayReady = true,
+                savedSelection = SavedSelection.PaymentMethod(CONFIG.paymentMethods[1].id!!)
             )
         )
+
+        adapter.onItemSelected(1, true)
+
+        assertThat(paymentSelections.last())
+            .isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
+    fun `when adapter is disabled all items should be disabled`() {
+        val adapter = createConfiguredAdapter(
+            CONFIG.copy(
+                isGooglePayReady = true,
+                savedSelection = SavedSelection.PaymentMethod(CONFIG.paymentMethods[1].id!!)
+            )
+        )
+        adapter.isEnabled = false
+
         val googlePayViewHolder = adapter.onCreateViewHolder(
             FrameLayout(context),
             adapter.getItemViewType(1)
         )
         adapter.onBindViewHolder(googlePayViewHolder, 1)
-        googlePayViewHolder.itemView.performClick()
 
-        assertThat(paymentSelections)
-            .containsExactly(PaymentSelection.GooglePay)
+        assertThat(googlePayViewHolder.itemView.isEnabled)
+            .isFalse()
+
+        val addCardViewHolder = adapter.onCreateViewHolder(
+            FrameLayout(context),
+            adapter.getItemViewType(0)
+        )
+        adapter.onBindViewHolder(addCardViewHolder, 0)
+
+        assertThat(addCardViewHolder.itemView.isEnabled)
+            .isFalse()
+
+        val cardViewHolder = adapter.createViewHolder(
+            FrameLayout(context),
+            adapter.getItemViewType(3)
+        )
+        adapter.onBindViewHolder(cardViewHolder, 3)
+
+        assertThat(cardViewHolder.itemView.isEnabled)
+            .isFalse()
     }
 
     @Test
