@@ -71,6 +71,8 @@ class CvcEditText @JvmOverloads constructor(
                 shouldShowError = true
             }
         }
+
+        layoutDirection = LAYOUT_DIRECTION_LTR
     }
 
     override val accessibilityText: String?
