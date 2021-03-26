@@ -40,6 +40,9 @@ import kotlin.properties.Delegates
  *
  * To enable 19-digit card support, [PaymentConfiguration.init] must be called before
  * [CardMultilineWidget] is instantiated.
+ *
+ * The card number, cvc, and expiry date will always be left to right regardless of locale.  Postal
+ * code layout direction will be set according to the locale.
  */
 class CardMultilineWidget @JvmOverloads constructor(
     context: Context,

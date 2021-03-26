@@ -262,6 +262,8 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 shouldShowError = true
             }
         }
+
+        layoutDirection = LAYOUT_DIRECTION_LTR
     }
 
     /**

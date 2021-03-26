@@ -50,6 +50,9 @@ import kotlin.properties.Delegates
  *
  * The individual `EditText` views of this widget can be styled by defining a style
  * `Stripe.CardInputWidget.EditText` that extends `Stripe.Base.CardInputWidget.EditText`.
+ *
+ * The card number, cvc, and expiry date will always be left to right regardless of locale.  Postal
+ * code layout direction will be set according to the locale.
  */
 class CardInputWidget @JvmOverloads constructor(
     context: Context,
