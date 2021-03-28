@@ -12,7 +12,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.google.android.material.textfield.TextInputLayout
+            <com.stripe.android.view.CountryAutoCompleteTextView
                 android:id="@+id/country_layout"
                 style="@style/StripePaymentSheetAutocompleteTextInputLayout"
                 android:layout_width="match_parent"
@@ -20,17 +20,10 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:helperTextEnabled="false">
-
-                <AutoCompleteTextView
-                    android:id="@+id/country"
-                    style="@style/StripePaymentSheetTextInputEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:paddingVertical="13dp"
-                    android:paddingHorizontal="12dp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                app:helperTextEnabled="false"
+                app:countryAutoCompleteStyle="@style/StripeBillingAddressCountryCell"
+                app:countryItemLayout="@layout/stripe_country_dropdown_item"
+            />
 
             <View
                 android:id="@+id/address1_divider"

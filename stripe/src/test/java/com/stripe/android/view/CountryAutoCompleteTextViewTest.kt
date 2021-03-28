@@ -59,8 +59,7 @@ class CountryAutoCompleteTextViewTest {
             activityScenario.onActivity {
                 countryAutoCompleteTextView = it
                     .findViewById(R.id.country_autocomplete_aaw)
-                autoCompleteTextView = countryAutoCompleteTextView
-                    .findViewById(R.id.country_autocomplete)
+                autoCompleteTextView = countryAutoCompleteTextView.countryAutocomplete
             }
         }
     }

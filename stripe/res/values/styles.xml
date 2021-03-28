@@ -146,6 +146,19 @@
         <item name="android:textColor">@color/stripe_paymentsheet_textinput_color</item>
     </style>
 
+    <style name="StripeBillingAddressCountryCell">
+        <item name="android:inputType">none</item>
+        <item name="android:editable">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:textColor">@color/stripe_paymentsheet_textinput_color</item>
+        <item name="android:paddingTop">13dp</item>
+        <item name="android:paddingBottom">13dp</item>
+        <item name="android:paddingStart">13dp</item>
+        <item name="android:paddingEnd">13dp</item>
+    </style>
+
     <style name="StripePaymentSheetFormDivider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>

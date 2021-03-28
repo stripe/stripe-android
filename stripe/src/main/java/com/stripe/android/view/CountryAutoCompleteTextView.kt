@@ -5,52 +5,96 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View.OnFocusChangeListener
 import android.widget.AdapterView
-import android.widget.FrameLayout
+import android.widget.AutoCompleteTextView
+import android.widget.TextView
+import androidx.annotation.LayoutRes
+import androidx.annotation.StyleRes
 import androidx.annotation.VisibleForTesting
+import androidx.core.content.withStyledAttributes
 import androidx.core.os.ConfigurationCompat
+import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
-import com.stripe.android.databinding.CountryAutocompleteViewBinding
-import com.stripe.android.databinding.CountryTextViewBinding
 
+/**
+ * A subclass of [TextInputLayout] that programmatically wraps a styleable [AutoCompleteTextView],
+ * which configures a [CountryAdapter] to display list of countries in its popup.
+ *
+ * The style of [AutoCompleteTextView] can be changed via [R.styleable.CountryAutoCompleteTextView_countryAutoCompleteStyle],
+ * the style of popup items can be changed via [R.styleable.CountryAutoCompleteTextView_countryItemLayout].
+ */
 internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
-    private val viewBinding =
-        CountryAutocompleteViewBinding.inflate(
-            LayoutInflater.from(context),
-            this
-        )
-    private val countryTextInputLayout = viewBinding.countryTextInputLayout
+    defStyleAttr: Int = com.google.android.material.R.attr.textInputStyle
+) : TextInputLayout(context, attrs, defStyleAttr) {
 
-    private val layoutInflater = LayoutInflater.from(context)
-    private val countryAdapter = CountryAdapter(
-        context,
-        CountryUtils.getOrderedCountries(
-            ConfigurationCompat.getLocales(context.resources.configuration)[0]
-        )
-    ) {
-        CountryTextViewBinding.inflate(
-            layoutInflater,
-            it,
-            false
-        ).root
-    }
+    @StyleRes
+    private var countryAutoCompleteStyleRes: Int = INVALID_COUNTRY_AUTO_COMPLETE_STYLE
+
+    @LayoutRes
+    private var countryLineLayoutRes: Int = DEFAULT_COUNTRY_LINE_LAYOUT
 
     @VisibleForTesting
-    internal val countryAutocomplete = viewBinding.countryAutocomplete
+    internal val countryAutocomplete: AutoCompleteTextView
 
     /**
      * The 2 digit country code of the country selected by this input.
      */
     @VisibleForTesting
-    var selectedCountry: Country?
+    var selectedCountry: Country? = null
+        set(value) {
+            field = value
+            value?.let {
+                countryChangeCallback(it)
+            }
+        }
 
     @JvmSynthetic
     internal var countryChangeCallback: (Country) -> Unit = {}
 
+    private var countryAdapter: CountryAdapter
+
     init {
+        context.withStyledAttributes(
+            attrs,
+            R.styleable.CountryAutoCompleteTextView
+        ) {
+            countryAutoCompleteStyleRes = getResourceId(
+                R.styleable.CountryAutoCompleteTextView_countryAutoCompleteStyle,
+                INVALID_COUNTRY_AUTO_COMPLETE_STYLE
+            )
+
+            countryLineLayoutRes = getResourceId(
+                R.styleable.CountryAutoCompleteTextView_countryItemLayout,
+                DEFAULT_COUNTRY_LINE_LAYOUT
+            )
+        }
+
+        countryAutocomplete = AutoCompleteTextView(
+            context,
+            null,
+            R.attr.autoCompleteTextViewStyle
+        ).takeIf { countryAutoCompleteStyleRes == INVALID_COUNTRY_AUTO_COMPLETE_STYLE }
+            ?: AutoCompleteTextView(context, null, 0, countryAutoCompleteStyleRes)
+
+        addView(
+            countryAutocomplete,
+            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        )
+
+        LayoutInflater.from(context).let { layoutInflater ->
+            countryAdapter = CountryAdapter(
+                context,
+                CountryUtils.getOrderedCountries(
+                    ConfigurationCompat.getLocales(context.resources.configuration)[0]
+                ),
+                countryLineLayoutRes
+            ) {
+                // document must be a text view
+                layoutInflater.inflate(countryLineLayoutRes, it, false) as TextView
+            }
+        }
+
         countryAutocomplete.threshold = 0
         countryAutocomplete.setAdapter(countryAdapter)
         countryAutocomplete.onItemClickListener =
@@ -79,8 +123,8 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
             if (country != null) {
                 clearError()
             } else {
-                countryTextInputLayout.error = errorMessage
-                countryTextInputLayout.isErrorEnabled = true
+                error = errorMessage
+                isErrorEnabled = true
             }
         }
     }
@@ -89,7 +133,6 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
         val initialCountry = countryAdapter.firstItem
         countryAutocomplete.setText(initialCountry.name)
         selectedCountry = initialCountry
-        countryChangeCallback(initialCountry)
     }
 
     /**
@@ -128,7 +171,6 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
         clearError()
         if (selectedCountry != country) {
             selectedCountry = country
-            countryChangeCallback(country)
         }
     }
 
@@ -137,7 +179,12 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     }
 
     private fun clearError() {
-        viewBinding.countryTextInputLayout.error = null
-        viewBinding.countryTextInputLayout.isErrorEnabled = false
+        error = null
+        isErrorEnabled = false
+    }
+
+    private companion object {
+        const val INVALID_COUNTRY_AUTO_COMPLETE_STYLE = 0
+        val DEFAULT_COUNTRY_LINE_LAYOUT = R.layout.country_text_view
     }
 }
