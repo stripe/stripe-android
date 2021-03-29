@@ -95,6 +95,17 @@ internal class BillingAddressView @JvmOverloads constructor(
         postalCodeView.inputType = config.inputType
     }
 
+    private val newCountryCallback = { newCountry: Country ->
+        updateStateView(newCountry)
+        updatePostalCodeView(newCountry)
+        _address.value = createAddress()
+
+        postalCodeView.shouldShowError = !postalCodeValidator.isValid(
+            postalCode = postalCodeView.value.orEmpty(),
+            countryCode = newCountry.code
+        )
+    }
+
     private val requiredViews = setOf(
         viewBinding.address1Divider,
         viewBinding.address1Layout,
@@ -122,23 +133,11 @@ internal class BillingAddressView @JvmOverloads constructor(
     )
 
     init {
-
-        { newCountry: Country ->
-            updateStateView(newCountry)
-            updatePostalCodeView(newCountry)
-            _address.value = createAddress()
-
-            postalCodeView.shouldShowError = !postalCodeValidator.isValid(
-                postalCode = postalCodeView.value.orEmpty(),
-                countryCode = newCountry.code
-            )
-        }.let { newCountryCallback ->
-            countryLayout.countryChangeCallback = newCountryCallback
-            // Since the callback is set after CountryAutoCompleteTextView is fully initialized,
-            // need to manually trigger the callback once to pick up the initial country
-            countryLayout.selectedCountry?.let {
-                newCountryCallback(it)
-            }
+        countryLayout.countryChangeCallback = newCountryCallback
+        // Since the callback is set after CountryAutoCompleteTextView is fully initialized,
+        // need to manually trigger the callback once to pick up the initial country
+        countryLayout.selectedCountry?.let {
+            newCountryCallback(it)
         }
 
         configureForLevel()
@@ -163,7 +162,8 @@ internal class BillingAddressView @JvmOverloads constructor(
                 )
             } ?: false
 
-            postalCodeView.shouldShowError = !hasFocus && !postalCodeView.value.isNullOrBlank() && !isPostalValid
+            postalCodeView.shouldShowError =
+                !hasFocus && !postalCodeView.value.isNullOrBlank() && !isPostalValid
         }
     }
 

@@ -14,6 +14,7 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.os.ConfigurationCompat
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
+import kotlin.properties.Delegates
 
 /**
  * A subclass of [TextInputLayout] that programmatically wraps a styleable [AutoCompleteTextView],
@@ -44,13 +45,13 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
      * The 2 digit country code of the country selected by this input.
      */
     @VisibleForTesting
-    var selectedCountry: Country? = null
-        set(value) {
-            field = value
-            value?.let {
-                countryChangeCallback(it)
-            }
+    var selectedCountry: Country? by Delegates.observable(
+        null
+    ) { _, _, newCountryValue ->
+        newCountryValue?.let {
+            countryChangeCallback(it)
         }
+    }
 
     @JvmSynthetic
     internal var countryChangeCallback: (Country) -> Unit = {}
