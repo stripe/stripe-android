@@ -26,13 +26,13 @@ import com.stripe.android.view.PostalCodeValidator
 import java.util.Locale
 import kotlin.properties.Delegates
 
-class BillingAddressView @JvmOverloads constructor(
+internal class BillingAddressView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
     @VisibleForTesting
-    var level: PaymentSheet.BillingAddressCollectionLevel by Delegates.observable(
+    internal var level: PaymentSheet.BillingAddressCollectionLevel by Delegates.observable(
         PaymentSheet.BillingAddressCollectionLevel.Automatic
     ) { _, oldLevel, newLevel ->
         if (oldLevel != newLevel) {

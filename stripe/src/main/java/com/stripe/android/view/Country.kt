@@ -6,7 +6,7 @@ internal data class Country(
 ) {
 
     /**
-     * @return display value for [CountryAutoCompleteTextView] text view
+     * @return display value for [CountryTextInputLayout] text view
      */
     override fun toString(): String = name
 }

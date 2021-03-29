@@ -12,7 +12,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.stripe.android.view.CountryAutoCompleteTextView
+            <com.stripe.android.view.CountryTextInputLayout
                 android:id="@+id/country_layout"
                 style="@style/StripePaymentSheetAutocompleteTextInputLayout"
                 android:layout_width="match_parent"
@@ -21,7 +21,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:helperTextEnabled="false"
-                app:countryAutoCompleteStyle="@style/StripeBillingAddressCountryCell"
+                app:countryAutoCompleteStyle="@style/StripePaymentSheetCountryItem"
                 app:countryItemLayout="@layout/stripe_country_dropdown_item"
             />
 

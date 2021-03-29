@@ -146,7 +146,7 @@
         <item name="android:textColor">@color/stripe_paymentsheet_textinput_color</item>
     </style>
 
-    <style name="StripeBillingAddressCountryCell">
+    <style name="StripePaymentSheetCountryItem">
         <item name="android:inputType">none</item>
         <item name="android:editable">false</item>
         <item name="android:maxLines">1</item>

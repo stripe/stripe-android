@@ -19,10 +19,12 @@ import com.stripe.android.R
  * A subclass of [TextInputLayout] that programmatically wraps a styleable [AutoCompleteTextView],
  * which configures a [CountryAdapter] to display list of countries in its popup.
  *
- * The style of [AutoCompleteTextView] can be changed via [R.styleable.CountryAutoCompleteTextView_countryAutoCompleteStyle],
- * the style of popup items can be changed via [R.styleable.CountryAutoCompleteTextView_countryItemLayout].
+ * The style of [AutoCompleteTextView] can be changed via
+ * [R.styleable.StripeCountryAutoCompleteTextInputLayout_countryAutoCompleteStyle],
+ * the style of popup items can be changed via
+ * [R.styleable.StripeCountryAutoCompleteTextInputLayout_countryItemLayout].
  */
-internal class CountryAutoCompleteTextView @JvmOverloads constructor(
+internal class CountryTextInputLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = com.google.android.material.R.attr.textInputStyle
@@ -57,42 +59,34 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     init {
         context.withStyledAttributes(
             attrs,
-            R.styleable.CountryAutoCompleteTextView
+            R.styleable.StripeCountryAutoCompleteTextInputLayout
         ) {
             countryAutoCompleteStyleRes = getResourceId(
-                R.styleable.CountryAutoCompleteTextView_countryAutoCompleteStyle,
+                R.styleable.StripeCountryAutoCompleteTextInputLayout_countryAutoCompleteStyle,
                 INVALID_COUNTRY_AUTO_COMPLETE_STYLE
             )
 
             countryLineLayoutRes = getResourceId(
-                R.styleable.CountryAutoCompleteTextView_countryItemLayout,
+                R.styleable.StripeCountryAutoCompleteTextInputLayout_countryItemLayout,
                 DEFAULT_COUNTRY_LINE_LAYOUT
             )
         }
 
-        countryAutocomplete = AutoCompleteTextView(
-            context,
-            null,
-            R.attr.autoCompleteTextViewStyle
-        ).takeIf { countryAutoCompleteStyleRes == INVALID_COUNTRY_AUTO_COMPLETE_STYLE }
-            ?: AutoCompleteTextView(context, null, 0, countryAutoCompleteStyleRes)
-
+        countryAutocomplete = initializeCountryAutoCompleteWithStyle()
         addView(
             countryAutocomplete,
             LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         )
 
-        LayoutInflater.from(context).let { layoutInflater ->
-            countryAdapter = CountryAdapter(
-                context,
-                CountryUtils.getOrderedCountries(
-                    ConfigurationCompat.getLocales(context.resources.configuration)[0]
-                ),
-                countryLineLayoutRes
-            ) {
-                // document must be a text view
-                layoutInflater.inflate(countryLineLayoutRes, it, false) as TextView
-            }
+        countryAdapter = CountryAdapter(
+            context,
+            CountryUtils.getOrderedCountries(
+                ConfigurationCompat.getLocales(context.resources.configuration)[0]
+            ),
+            countryLineLayoutRes
+        ) {
+            // document must be a text view
+            LayoutInflater.from(context).inflate(countryLineLayoutRes, it, false) as TextView
         }
 
         countryAutocomplete.threshold = 0
@@ -128,6 +122,22 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
             }
         }
     }
+
+    /**
+     * Initialize the encapsulated [AutoCompleteTextView] with [countryAutoCompleteStyleRes] style
+     * resource read from styleable.
+     * If no style resource is set, create one with default style attributes
+     * [R.attr.autoCompleteTextViewStyle].
+     */
+    private fun initializeCountryAutoCompleteWithStyle() =
+        when (countryAutoCompleteStyleRes) {
+            INVALID_COUNTRY_AUTO_COMPLETE_STYLE -> AutoCompleteTextView(
+                context,
+                null,
+                R.attr.autoCompleteTextViewStyle
+            )
+            else -> AutoCompleteTextView(context, null, 0, countryAutoCompleteStyleRes)
+        }
 
     private fun updateInitialCountry() {
         val initialCountry = countryAdapter.firstItem

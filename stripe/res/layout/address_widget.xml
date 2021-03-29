@@ -4,7 +4,7 @@
        android:layout_height="wrap_content"
     >
 
-    <com.stripe.android.view.CountryAutoCompleteTextView
+    <com.stripe.android.view.CountryTextInputLayout
         android:id="@+id/country_autocomplete_aaw"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
