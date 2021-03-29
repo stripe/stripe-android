@@ -7,11 +7,16 @@ internal class RetryDelaySupplier(
     private val incrementSeconds: Long = DEFAULT_INCREMENT_SECONDS
 ) {
     /**
-     * Calculate an exponential backoff delay before retrying the next completion request.
+     * Calculate an exponential backoff delay before retrying the next completion request
+     * using the equation:
+     * ```
+     * incrementSeconds ^ ((maxRetries - remainingRetries) + 1)
+     * ```
      *
-     * Delay 2 seconds before the first retry
-     * Delay 4 seconds before the second retry
-     * Delay 8 seconds before the third retry
+     * For example, if [maxRetries] is 3:
+     * - Delay 2 seconds before the first retry
+     * - Delay 4 seconds before the second retry
+     * - Delay 8 seconds before the third retry
      */
     fun getDelayMillis(
         maxRetries: Int,
