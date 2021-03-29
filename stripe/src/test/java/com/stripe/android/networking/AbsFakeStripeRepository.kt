@@ -191,7 +191,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
-        ephemeralKeySecret: String
+        requestOptions: ApiRequest.Options
     ): String? {
         return ""
     }
@@ -201,7 +201,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         newPin: String,
         verificationId: String,
         userOneTimeCode: String,
-        ephemeralKeySecret: String
+        requestOptions: ApiRequest.Options
     ) {
     }
 
