@@ -41,6 +41,7 @@ import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.payments.Stripe3ds2CompletionStarter
@@ -991,7 +992,7 @@ internal class StripePaymentControllerTest {
             AnalyticsRequest.Factory(),
 
             // set to 0 so there is effectively no delay
-            retryDelayIncrementSeconds = 0L,
+            retryDelaySupplier = RetryDelaySupplier(incrementSeconds = 0L),
 
             workContext = testDispatcher
         )
@@ -1034,7 +1035,7 @@ internal class StripePaymentControllerTest {
             AnalyticsRequest.Factory(),
 
             // set to 0 so there is effectively no delay
-            retryDelayIncrementSeconds = 0L,
+            retryDelaySupplier = RetryDelaySupplier(incrementSeconds = 0L),
 
             workContext = testDispatcher
         )
@@ -1087,7 +1088,7 @@ internal class StripePaymentControllerTest {
             AnalyticsRequest.Factory(),
 
             // set to 0 so there is effectively no delay
-            retryDelayIncrementSeconds = 0L,
+            retryDelaySupplier = RetryDelaySupplier(incrementSeconds = 0L),
 
             workContext = testDispatcher
         )
@@ -1096,51 +1097,6 @@ internal class StripePaymentControllerTest {
 
         assertThat(complete3ds2AuthInvocations)
             .isEqualTo(1)
-    }
-
-    @Test
-    fun `getRetryDelayMillis() should return expected value`() {
-        val receiver = StripePaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
-            completionStarter,
-            stripeRepository,
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            "src_123",
-            REQUEST_OPTIONS,
-            analyticsRequestExecutor,
-            analyticsDataFactory,
-            transaction,
-            AnalyticsRequest.Factory(),
-            workContext = testDispatcher
-        )
-
-        // coerce to 3 remaining retries
-        assertThat(
-            receiver.getRetryDelayMillis(
-                remainingRetries = 999
-            )
-        ).isEqualTo(2000L)
-
-        assertThat(
-            receiver.getRetryDelayMillis(remainingRetries = 3)
-        ).isEqualTo(2000L)
-
-        assertThat(
-            receiver.getRetryDelayMillis(remainingRetries = 2)
-        ).isEqualTo(4000L)
-
-        assertThat(
-            receiver.getRetryDelayMillis(remainingRetries = 1)
-        ).isEqualTo(8000L)
-
-        // coerce to 1 remaining retry
-        assertThat(
-            receiver.getRetryDelayMillis(remainingRetries = -100)
-        ).isEqualTo(8000L)
-
-        // coerce to 1 remaining retry
-        assertThat(
-            receiver.getRetryDelayMillis(remainingRetries = 0)
-        ).isEqualTo(8000L)
     }
 
     private fun createController(
