@@ -9,7 +9,6 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card"
         style="@style/StripePaymentOptionItemCard"
-        android:checkable="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

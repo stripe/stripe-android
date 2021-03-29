@@ -69,7 +69,7 @@ internal abstract class BasePaymentMethodsListFragment(
         eventReporter.onShowExistingPaymentOptions()
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            adapter.interactionEnabled = !isProcessing
+            adapter.isEnabled = !isProcessing
             layoutManager.canScroll = !isProcessing
         }
     }

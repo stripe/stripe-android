@@ -177,6 +177,8 @@ class CardNumberEditText internal constructor(
         }
 
         updateLengthFilter()
+
+        this.layoutDirection = LAYOUT_DIRECTION_LTR
     }
 
     override fun onAttachedToWindow() {

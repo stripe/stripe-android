@@ -297,7 +297,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         viewModel.viewState.observe(this, viewStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
-            val shouldShowGooglePay = paymentSelection == PaymentSelection.GooglePay
+            val shouldShowGooglePay =
+                paymentSelection == PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
+                    fragmentContainerId
+                ) is PaymentSheetListFragment
 
             viewBinding.googlePayButton.isVisible = shouldShowGooglePay
             viewBinding.buyButton.isVisible = !shouldShowGooglePay

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.3.2 - unreleased
+## 16.4.0 - unreleased
 * [#3457](https://github.com/stripe/stripe-android/pull/3457) Fix issue where `StripeEditText` was overriding default text color changes
 * [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix `PaymentMethodsAdapter` "new card" click handling
 * [#3479](https://github.com/stripe/stripe-android/pull/3479) Add support for Blik payment method
@@ -10,7 +10,16 @@
 * [#3504](https://github.com/stripe/stripe-android/pull/3504) Add default mandate data for all applicable payment method types
 * [#3507](https://github.com/stripe/stripe-android/pull/3507) Invoke issuing API requests on background thread
 * [#3508](https://github.com/stripe/stripe-android/pull/3508) Make `EphemeralKeyProvider` a fun interface
+* [#3517](https://github.com/stripe/stripe-android/pull/3517) Add retry logic for 3DS2 challenge completion endpoint
+* [#3519](https://github.com/stripe/stripe-android/pull/3519) Update AndroidX dependencies
+    * `androidx.activity:activity-ktx` to `1.2.2`
+    * `androidx.annotation:annotation` to `1.2.0`
+    * `androidx.fragment:fragment-ktx` to `1.3.2`
+    * `androidx.lifecycle:lifecycle-*` to `2.3.1`
 * [#3520](https://github.com/stripe/stripe-android/pull/3520) Invoke `CardInputWidget#cardInputListener` when postal code field gets focus
+* [#3524](https://github.com/stripe/stripe-android/pull/3524) Update `layoutDirection` for card widget fields
+    * Card number, expiration date, and CVC are always LTR
+    * Postal code is defined by the locale
 
 ## 16.3.1 - 2021-03-16
 * [#3381](https://github.com/stripe/stripe-android/pull/3381) Add `fingerprint` property to `PaymentMethod.Card`
