@@ -17,11 +17,9 @@
     * `androidx.fragment:fragment-ktx` to `1.3.2`
     * `androidx.lifecycle:lifecycle-*` to `2.3.1`
 * [#3520](https://github.com/stripe/stripe-android/pull/3520) Invoke `CardInputWidget#cardInputListener` when postal code field gets focus
-* [#3524](https://github.com/stripe/stripe-android/pull/3524) Make `CardInputWidget` and `CardMultilineWidget` rtl compatible
-    * Card number is always ltr
-    * CVC is always ltr
-    * Expiration Date is always ltr
-    * Postal Code is defined by the locale
+* [#3524](https://github.com/stripe/stripe-android/pull/3524) Update `layoutDirection` for card widget fields
+    * Card number, expiration date, and CVC are always LTR
+    * Postal code is defined by the locale
 
 ## 16.3.1 - 2021-03-16
 * [#3381](https://github.com/stripe/stripe-android/pull/3381) Add `fingerprint` property to `PaymentMethod.Card`
