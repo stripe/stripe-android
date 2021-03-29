@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.4.0 - unreleased
+## 16.4.0 - 2021-03-29
 * [#3457](https://github.com/stripe/stripe-android/pull/3457) Fix issue where `StripeEditText` was overriding default text color changes
 * [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix `PaymentMethodsAdapter` "new card" click handling
 * [#3479](https://github.com/stripe/stripe-android/pull/3479) Add support for Blik payment method
