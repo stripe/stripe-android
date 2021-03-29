@@ -6,7 +6,7 @@ import org.junit.Test
 class RetryDelaySupplierTest {
 
     @Test
-    fun `getRetryDelayMillis() should return expected value`() {
+    fun `getDelayMillis() should return expected value`() {
         val supplier = RetryDelaySupplier()
 
         // coerce to 3 remaining retries
