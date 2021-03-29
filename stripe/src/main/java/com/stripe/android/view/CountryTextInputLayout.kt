@@ -21,8 +21,9 @@ import com.stripe.android.R
  *
  * The style of [AutoCompleteTextView] can be changed via
  * [R.styleable.StripeCountryAutoCompleteTextInputLayout_countryAutoCompleteStyle],
- * the style of popup items can be changed via
- * [R.styleable.StripeCountryAutoCompleteTextInputLayout_countryItemLayout].
+ * the layout of popup items can be changed via
+ * [R.styleable.StripeCountryAutoCompleteTextInputLayout_countryItemLayout], note this layout must
+ * be a [TextView].
  */
 internal class CountryTextInputLayout @JvmOverloads constructor(
     context: Context,
@@ -34,7 +35,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     private var countryAutoCompleteStyleRes: Int = INVALID_COUNTRY_AUTO_COMPLETE_STYLE
 
     @LayoutRes
-    private var countryLineLayoutRes: Int = DEFAULT_COUNTRY_LINE_LAYOUT
+    private var itemLayoutRes: Int = DEFAULT_ITEM_LAYOUT
 
     @VisibleForTesting
     internal val countryAutocomplete: AutoCompleteTextView
@@ -66,9 +67,9 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
                 INVALID_COUNTRY_AUTO_COMPLETE_STYLE
             )
 
-            countryLineLayoutRes = getResourceId(
+            itemLayoutRes = getResourceId(
                 R.styleable.StripeCountryAutoCompleteTextInputLayout_countryItemLayout,
-                DEFAULT_COUNTRY_LINE_LAYOUT
+                DEFAULT_ITEM_LAYOUT
             )
         }
 
@@ -83,10 +84,10 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
             CountryUtils.getOrderedCountries(
                 ConfigurationCompat.getLocales(context.resources.configuration)[0]
             ),
-            countryLineLayoutRes
+            itemLayoutRes
         ) {
-            // document must be a text view
-            LayoutInflater.from(context).inflate(countryLineLayoutRes, it, false) as TextView
+            // item must be a TextView
+            LayoutInflater.from(context).inflate(itemLayoutRes, it, false) as TextView
         }
 
         countryAutocomplete.threshold = 0
@@ -195,6 +196,6 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
     private companion object {
         const val INVALID_COUNTRY_AUTO_COMPLETE_STYLE = 0
-        val DEFAULT_COUNTRY_LINE_LAYOUT = R.layout.country_text_view
+        val DEFAULT_ITEM_LAYOUT = R.layout.country_text_view
     }
 }
