@@ -2,34 +2,64 @@ package com.stripe.android.networking
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Logger
+import com.stripe.android.Stripe
 import com.stripe.android.exception.APIConnectionException
+import kotlinx.coroutines.delay
 import java.io.IOException
 
 internal interface ApiRequestExecutor {
-    fun execute(request: ApiRequest): StripeResponse
+    suspend fun execute(request: ApiRequest): StripeResponse
 
-    fun execute(request: FileUploadRequest): StripeResponse
+    suspend fun execute(request: FileUploadRequest): StripeResponse
 
     /**
      * Used by [StripeApiRepository] to make Stripe API requests
      */
     class Default internal constructor(
         private val connectionFactory: ConnectionFactory = ConnectionFactory.Default(),
+        private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier(),
         private val logger: Logger = Logger.noop()
     ) : ApiRequestExecutor {
 
-        override fun execute(request: ApiRequest): StripeResponse {
-            return executeInternal(request)
-        }
+        private val maxRetries: Int get() = Stripe.MAX_RETRIES
 
-        override fun execute(request: FileUploadRequest): StripeResponse {
-            return executeInternal(request)
-        }
+        override suspend fun execute(
+            request: ApiRequest
+        ): StripeResponse = executeInternal(request, maxRetries)
+
+        override suspend fun execute(
+            request: FileUploadRequest
+        ): StripeResponse = executeInternal(request, maxRetries)
 
         @VisibleForTesting
-        internal fun executeInternal(request: StripeRequest): StripeResponse {
-            logger.info(request.toString())
+        internal suspend fun executeInternal(
+            request: StripeRequest,
+            remainingRetries: Int
+        ): StripeResponse {
+            logger.info("Firing request: $request")
 
+            val stripeResponse = makeRequest(request)
+
+            return if (stripeResponse.isRateLimited && remainingRetries > 0) {
+                logger.info(
+                    "Request was rate-limited with $remainingRetries remaining retries."
+                )
+
+                delay(
+                    retryDelaySupplier.getDelayMillis(
+                        maxRetries,
+                        remainingRetries
+                    )
+                )
+                executeInternal(request, remainingRetries - 1)
+            } else {
+                stripeResponse
+            }
+        }
+
+        private fun makeRequest(
+            request: StripeRequest
+        ): StripeResponse {
             return connectionFactory.create(request).use {
                 runCatching {
                     val stripeResponse = it.response

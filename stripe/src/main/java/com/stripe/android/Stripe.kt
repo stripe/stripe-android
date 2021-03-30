@@ -1654,6 +1654,17 @@ class Stripe internal constructor(
     }
 
     companion object {
+        /**
+         * If the SDK receives a "Too Many Requests" (429) status code from Stripe,
+         * it will automatically retry the request using exponential backoff.
+         *
+         * The default value is 3.
+         *
+         * See https://stripe.com/docs/rate-limits for more information.
+         */
+        @JvmField
+        var MAX_RETRIES: Int = 3
+
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
