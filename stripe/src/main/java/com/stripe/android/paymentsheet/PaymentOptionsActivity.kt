@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.animation.LayoutTransition
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
@@ -52,6 +53,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
 
+    private val containerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(
             bottomSheetBehavior = bottomSheetBehavior,
@@ -116,6 +118,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 PaymentOptionResult.Failed(it)
             )
         }
+
+        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        containerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
             if (shouldFinish) {
                 finish()

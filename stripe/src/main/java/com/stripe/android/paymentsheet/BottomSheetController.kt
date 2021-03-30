@@ -17,14 +17,12 @@ internal class BottomSheetController(
     internal val shouldFinish = _shouldFinish.distinctUntilChanged()
 
     fun setup() {
+        bottomSheetBehavior.isFitToContents = false
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.isDraggable = false
-        // Start hidden and then animate in after delay
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         lifecycleScope.launch {
             delay(ANIMATE_IN_DELAY)
-
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetBehavior.addBottomSheetCallback(
                 object : BottomSheetBehavior.BottomSheetCallback() {
@@ -32,19 +30,10 @@ internal class BottomSheetController(
                     }
 
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        when (newState) {
-                            BottomSheetBehavior.STATE_EXPANDED -> {
-                                // Because we change the content of the sheet and its height at
-                                // runtime, make sure it's properly laid out once it settles
-                                bottomSheet.requestLayout()
-                            }
-                            BottomSheetBehavior.STATE_HIDDEN -> {
-                                // finish the activity only after the bottom sheet's state has
-                                // transitioned to `BottomSheetBehavior.STATE_HIDDEN`
-                                _shouldFinish.value = true
-                            }
-                            else -> {
-                            }
+                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                            // finish the activity only after the bottom sheet's state has
+                            // transitioned to `BottomSheetBehavior.STATE_HIDDEN`
+                            _shouldFinish.value = true
                         }
                     }
                 }

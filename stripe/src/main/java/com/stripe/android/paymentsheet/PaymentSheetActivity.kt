@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.animation.LayoutTransition
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -67,6 +68,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
 
+    private val containerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     private val fragmentContainerId: Int
         @IdRes
         get() = viewBinding.fragmentContainer.id
@@ -196,6 +198,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 )
             )
         }
+
+        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        containerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
             if (shouldFinish) {
