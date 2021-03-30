@@ -22,6 +22,7 @@ import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
+import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
@@ -50,7 +51,6 @@ import kotlinx.coroutines.withContext
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
-import kotlin.math.pow
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
@@ -1020,7 +1020,7 @@ internal class StripePaymentController internal constructor(
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val transaction: Transaction,
         private val analyticsRequestFactory: AnalyticsRequest.Factory,
-        private val retryDelayIncrementSeconds: Long = DEFAULT_RETRY_DELAY_INCREMENT_SECONDS,
+        private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier(),
         enableLogging: Boolean = false,
         private val workContext: CoroutineContext
     ) : StripeChallengeStatusReceiver() {
@@ -1137,11 +1137,11 @@ internal class StripePaymentController internal constructor(
          * When [StripeRepository.complete3ds2Auth] fails, handle in [onComplete3ds2AuthFailure].
          *
          * @param flowOutcome the outcome of the 3DS2 challenge flow.
-         * @param retries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
+         * @param remainingRetries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
          */
         private fun complete3ds2Auth(
             flowOutcome: ChallengeFlowOutcome,
-            retries: Int = MAX_RETRIES,
+            remainingRetries: Int = MAX_RETRIES,
         ) {
             CoroutineScope(workContext).launch {
                 // ignore result
@@ -1152,7 +1152,7 @@ internal class StripePaymentController internal constructor(
                     )
                 }.fold(
                     onSuccess = {
-                        val attemptedRetries = MAX_RETRIES - retries
+                        val attemptedRetries = MAX_RETRIES - remainingRetries
                         logger.debug(
                             "3DS2 challenge completion request was successful. " +
                                 "$attemptedRetries retries attempted."
@@ -1161,7 +1161,7 @@ internal class StripePaymentController internal constructor(
                     },
                     onFailure = { error ->
                         onComplete3ds2AuthFailure(
-                            flowOutcome, retries, error
+                            flowOutcome, remainingRetries, error
                         )
                     }
                 )
@@ -1170,20 +1170,20 @@ internal class StripePaymentController internal constructor(
 
         /**
          * When [StripeRepository.complete3ds2Auth] fails with a client error (a 4xx status code)
-         * and [retries] is greater than 0, retry after a delay.
+         * and [remainingRetries] is greater than 0, retry after a delay.
          *
          * The delay logic can be found in [getRetryDelayMillis].
          *
          * @param flowOutcome the outcome of the 3DS2 challenge flow.
-         * @param retries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
+         * @param remainingRetries the number of retry attempts remaining. Defaults to [MAX_RETRIES].
          */
         private suspend fun onComplete3ds2AuthFailure(
             flowOutcome: ChallengeFlowOutcome,
-            retries: Int,
+            remainingRetries: Int,
             error: Throwable,
         ) {
             logger.error(
-                "3DS2 challenge completion request failed. Remaining retries: $retries",
+                "3DS2 challenge completion request failed. Remaining retries: $remainingRetries",
                 error
             )
 
@@ -1191,15 +1191,20 @@ internal class StripePaymentController internal constructor(
                 is StripeException -> error.isClientError
                 else -> false
             }
-            val shouldRetry = retries > 0 && isClientError
+            val shouldRetry = remainingRetries > 0 && isClientError
 
             if (shouldRetry) {
-                delay(getRetryDelayMillis(retries))
+                delay(
+                    retryDelaySupplier.getDelayMillis(
+                        MAX_RETRIES,
+                        remainingRetries
+                    )
+                )
 
                 // attempt request with a decremented `retries`
                 complete3ds2Auth(
                     flowOutcome,
-                    retries = retries - 1
+                    remainingRetries = remainingRetries - 1
                 )
             } else {
                 logger.debug(
@@ -1234,23 +1239,8 @@ internal class StripePaymentController internal constructor(
             )
         }
 
-        /**
-         * Calculate an exponential backoff delay before retrying the next completion request.
-         *
-         * Delay 2 seconds before the first retry
-         * Delay 4 seconds before the second retry
-         * Delay 8 seconds before the third retry
-         */
-        fun getRetryDelayMillis(remainingRetries: Int): Long {
-            val retryAttempt = MAX_RETRIES - remainingRetries.coerceIn(1, MAX_RETRIES) + 1
-            return TimeUnit.SECONDS.toMillis(
-                retryDelayIncrementSeconds.toDouble().pow(retryAttempt).toLong()
-            )
-        }
-
         private companion object {
             private const val MAX_RETRIES = 3
-            private const val DEFAULT_RETRY_DELAY_INCREMENT_SECONDS = 2L
         }
     }
 
