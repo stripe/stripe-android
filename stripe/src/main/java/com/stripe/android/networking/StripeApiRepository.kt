@@ -71,7 +71,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
-    private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(logger),
+    private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(
+        logger = logger
+    ),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         AnalyticsRequestExecutor.Default(logger),
     private val fingerprintDataRepository: FingerprintDataRepository =
