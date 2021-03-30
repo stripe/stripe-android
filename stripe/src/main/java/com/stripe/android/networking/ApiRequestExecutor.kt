@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.Logger
 import com.stripe.android.exception.APIConnectionException
 import java.io.IOException
@@ -13,9 +14,9 @@ internal interface ApiRequestExecutor {
      * Used by [StripeApiRepository] to make Stripe API requests
      */
     class Default internal constructor(
+        private val connectionFactory: ConnectionFactory = ConnectionFactory.Default(),
         private val logger: Logger = Logger.noop()
     ) : ApiRequestExecutor {
-        private val connectionFactory = ConnectionFactory.Default()
 
         override fun execute(request: ApiRequest): StripeResponse {
             return executeInternal(request)
@@ -25,17 +26,22 @@ internal interface ApiRequestExecutor {
             return executeInternal(request)
         }
 
-        private fun executeInternal(request: StripeRequest): StripeResponse {
+        @VisibleForTesting
+        internal fun executeInternal(request: StripeRequest): StripeResponse {
             logger.info(request.toString())
 
-            connectionFactory.create(request).use {
-                try {
+            return connectionFactory.create(request).use {
+                runCatching {
                     val stripeResponse = it.response
                     logger.info(stripeResponse.toString())
-                    return stripeResponse
-                } catch (e: IOException) {
-                    logger.error("Exception while making Stripe API request", e)
-                    throw APIConnectionException.create(e, request.baseUrl)
+                    stripeResponse
+                }.getOrElse { error ->
+                    logger.error("Exception while making Stripe API request", error)
+
+                    throw when (error) {
+                        is IOException -> APIConnectionException.create(error, request.baseUrl)
+                        else -> error
+                    }
                 }
             }
         }
