@@ -109,9 +109,9 @@ internal class CardMultilineWidgetTest {
         shouldShowPostalCode: Boolean
     ): CardMultilineWidget {
         return CardMultilineWidget(
-            activity,
-            shouldShowPostalCode = shouldShowPostalCode
+            activity
         ).also {
+            it.shouldShowPostalCode = shouldShowPostalCode
             it.cardNumberEditText.workContext = testDispatcher
         }
     }
@@ -361,7 +361,7 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun paymentMethodCreateParams_whenPostalCodeIsRequiredAndValueIsBlank_returnsNull() {
-        cardMultilineWidget.setShouldShowPostalCode(true)
+        cardMultilineWidget.shouldShowPostalCode = true
         cardMultilineWidget.postalCodeRequired = true
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
@@ -375,7 +375,7 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun paymentMethodCreateParams_whenPostalCodeIsRequiredAndValueIsNotBlank_returnsNotNull() {
-        cardMultilineWidget.setShouldShowPostalCode(true)
+        cardMultilineWidget.shouldShowPostalCode = true
         cardMultilineWidget.postalCodeRequired = false
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
@@ -389,7 +389,7 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun paymentMethodCreateParams_whenPostalCodeIsNotRequiredAndValueIsBlank_returnsNotNull() {
-        cardMultilineWidget.setShouldShowPostalCode(true)
+        cardMultilineWidget.shouldShowPostalCode = true
         cardMultilineWidget.postalCodeRequired = false
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
@@ -559,7 +559,7 @@ internal class CardMultilineWidgetTest {
     fun initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() {
         assertThat(fullGroup.postalCodeInputLayout.visibility)
             .isEqualTo(View.VISIBLE)
-        cardMultilineWidget.setShouldShowPostalCode(false)
+        cardMultilineWidget.shouldShowPostalCode = false
         assertThat(fullGroup.postalCodeInputLayout.visibility)
             .isEqualTo(View.GONE)
 
@@ -584,7 +584,7 @@ internal class CardMultilineWidgetTest {
     fun initView_whenZipHiddenThenSetToRequired_secondRowAddsPostalCodeAndAdjustsMargin() {
         assertThat(noZipGroup.postalCodeInputLayout.visibility)
             .isEqualTo(View.GONE)
-        noZipCardMultilineWidget.setShouldShowPostalCode(true)
+        noZipCardMultilineWidget.shouldShowPostalCode = true
         assertThat(noZipGroup.postalCodeInputLayout.visibility)
             .isEqualTo(View.VISIBLE)
 

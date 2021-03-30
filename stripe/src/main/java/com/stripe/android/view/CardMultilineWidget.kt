@@ -47,8 +47,7 @@ import kotlin.properties.Delegates
 class CardMultilineWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-    private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+    defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private val viewBinding = CardMultilineWidgetBinding.inflate(
         LayoutInflater.from(context),
@@ -107,6 +106,16 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     @ColorInt
     private val tintColorInt: Int
+
+    /**
+     * The postal code field is enabled by default. Disabling the postal code field may impact
+     * auth success rates, so it is discouraged to disable it unless you are collecting the postal
+     * code outside of this form.
+     */
+    internal var shouldShowPostalCode: Boolean
+        by Delegates.observable(CardWidget.DEFAULT_POSTAL_CODE_ENABLED) { _, _, newValue ->
+            adjustViewForPostalCodeAttribute(newValue)
+        }
 
     /**
      * If [shouldShowPostalCode] is true and [postalCodeRequired] is true, then postal code is a
@@ -513,15 +522,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         showCvcIconInCvcField = resId != null
     }
 
-    /**
-     * The postal code field is enabled by default. Disabling the postal code field may impact
-     * auth success rates, so it is discouraged to disable it unless you are collecting the postal
-     * code outside of this form.
-     */
-    fun setShouldShowPostalCode(shouldShowPostalCode: Boolean) {
-        this.shouldShowPostalCode = shouldShowPostalCode
-        adjustViewForPostalCodeAttribute(shouldShowPostalCode)
-    }
+
+//    fun setShouldShowPostalCode(shouldShowPostalCode: Boolean) {
+//        this.shouldShowPostalCode = shouldShowPostalCode
+//        adjustViewForPostalCodeAttribute(shouldShowPostalCode)
+//    }
 
     /**
      * Set the card number. Method does not change text field focus.
