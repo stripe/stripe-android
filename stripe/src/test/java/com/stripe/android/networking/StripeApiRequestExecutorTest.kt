@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream
 import java.io.UnsupportedEncodingException
 import java.net.UnknownHostException
 import java.util.UUID
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -19,6 +20,11 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 internal class StripeApiRequestExecutorTest {
     private val testDispatcher = TestCoroutineDispatcher()
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun bodyBytes_shouldHandleUnsupportedEncodingException() {
