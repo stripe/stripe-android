@@ -4,10 +4,11 @@
        android:layout_height="wrap_content"
     >
 
-    <com.stripe.android.view.CountryAutoCompleteTextView
+    <com.stripe.android.view.CountryTextInputLayout
         android:id="@+id/country_autocomplete_aaw"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="@string/address_label_country"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tl_name_aaw"
