@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 16.4.1 - unreleased
+* [#3537](https://github.com/stripe/stripe-android/pull/3537) Add account id support in `IssuingCardPinService`
+* [#3538](https://github.com/stripe/stripe-android/pull/3538) Add support for retrying rate-limited API requests
+* [#3543](https://github.com/stripe/stripe-android/pull/3543) Add better support for auto-dismissing `PaymentAuthWebViewActivity` when `return_url` is not provided
+
 ## 16.4.0 - 2021-03-29
 * [#3457](https://github.com/stripe/stripe-android/pull/3457) Fix issue where `StripeEditText` was overriding default text color changes
 * [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix `PaymentMethodsAdapter` "new card" click handling
