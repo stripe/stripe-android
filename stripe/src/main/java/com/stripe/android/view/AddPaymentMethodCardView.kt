@@ -67,10 +67,8 @@ internal class AddPaymentMethodCardView @JvmOverloads internal constructor(
             true
         )
         cardMultilineWidget = viewBinding.cardMultilineWidget
-        cardMultilineWidget.setShouldShowPostalCode(
+        cardMultilineWidget.shouldShowPostalCode =
             billingAddressFields == BillingAddressFields.PostalCode
-        )
-
         billingAddressWidget = viewBinding.billingAddressWidget
         if (billingAddressFields == BillingAddressFields.Full) {
             billingAddressWidget.visibility = View.VISIBLE
