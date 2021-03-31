@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.animation.LayoutTransition
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -63,7 +62,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
 
-    private val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     private val fragmentContainerId: Int
         @IdRes
         get() = viewBinding.fragmentContainer.id
@@ -78,6 +76,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
+    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
 
     override val eventReporter: EventReporter by lazy {
         DefaultEventReporter(
@@ -188,18 +187,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 )
             )
         }
-
-        // Enable animation for layout transitions
-        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-
-        bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
-            if (shouldFinish) {
-                finish()
-            }
-        }
-
-        bottomSheetController.setup()
 
         rootView.doOnLayout {
             // Show bottom sheet only after the Activity has been laid out so that it animates in

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.animation.LayoutTransition
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
@@ -52,7 +51,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
 
-    private val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
@@ -67,6 +65,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
+    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
 
     override val eventReporter: EventReporter by lazy {
         DefaultEventReporter(
@@ -115,18 +114,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        // Enable animation for layout transitions
-        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-
-        bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
-            if (shouldFinish) {
-                finish()
-            }
-        }
-
-        bottomSheetController.setup()
-        // Fragment animates in immediately after activity is created, so we can already expand it
+        // Fragment is added with animation immediately after activity is created, so the sheet can
+        // be expanded now and it'll animate from the bottom.
         bottomSheetController.expand()
         // isFitToContents causes conflicts when calculating the sheet position upon resize.
         // CoordinatorLayout will already position the sheet correctly with gravity = bottom.
