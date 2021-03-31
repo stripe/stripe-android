@@ -2,7 +2,6 @@ package com.stripe.android.networking
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Logger
-import com.stripe.android.Stripe
 import com.stripe.android.exception.APIConnectionException
 import kotlinx.coroutines.delay
 import java.io.IOException
@@ -20,16 +19,13 @@ internal interface ApiRequestExecutor {
         private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier(),
         private val logger: Logger = Logger.noop()
     ) : ApiRequestExecutor {
-
-        private val maxRetries: Int get() = Stripe.maxRetries
-
         override suspend fun execute(
             request: ApiRequest
-        ): StripeResponse = executeInternal(request, maxRetries)
+        ): StripeResponse = executeInternal(request, MAX_RETRIES)
 
         override suspend fun execute(
             request: FileUploadRequest
-        ): StripeResponse = executeInternal(request, maxRetries)
+        ): StripeResponse = executeInternal(request, MAX_RETRIES)
 
         @VisibleForTesting
         internal suspend fun executeInternal(
@@ -47,7 +43,7 @@ internal interface ApiRequestExecutor {
 
                 delay(
                     retryDelaySupplier.getDelayMillis(
-                        maxRetries,
+                        MAX_RETRIES,
                         remainingRetries
                     )
                 )
@@ -74,6 +70,18 @@ internal interface ApiRequestExecutor {
                     }
                 }
             }
+        }
+
+        private companion object {
+            /**
+             * If the SDK receives a "Too Many Requests" (429) status code from Stripe,
+             * it will automatically retry the request using exponential backoff.
+             *
+             * The default value is 3.
+             *
+             * See https://stripe.com/docs/rate-limits for more information.
+             */
+            private const val MAX_RETRIES = 3
         }
     }
 }

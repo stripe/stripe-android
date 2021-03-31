@@ -1680,16 +1680,5 @@ class Stripe internal constructor(
          */
         @JvmStatic
         var advancedFraudSignalsEnabled: Boolean = true
-
-        /**
-         * If the SDK receives a "Too Many Requests" (429) status code from Stripe,
-         * it will automatically retry the request using exponential backoff.
-         *
-         * The default value is 3.
-         *
-         * See https://stripe.com/docs/rate-limits for more information.
-         */
-        @JvmField
-        var maxRetries: Int = 3
     }
 }
