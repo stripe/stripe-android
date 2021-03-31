@@ -8,8 +8,10 @@ import android.webkit.URLUtil
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.Logger
+import java.util.regex.Pattern
 
 internal class PaymentAuthWebViewClient(
     private val logger: Logger,
@@ -54,9 +56,10 @@ internal class PaymentAuthWebViewClient(
 
     private fun isAuthenticateUrl(url: String) = isAllowedUrl(url, AUTHENTICATE_URLS)
 
-    private fun isCompletionUrl(url: String) = isAllowedUrl(url, COMPLETION_URLS)
-
-    private fun isAllowedUrl(url: String, allowedUrls: Set<String>): Boolean {
+    private fun isAllowedUrl(
+        url: String,
+        allowedUrls: Set<String>
+    ): Boolean {
         for (completionUrl in allowedUrls) {
             if (url.startsWith(completionUrl)) {
                 return true
@@ -211,12 +214,22 @@ internal class PaymentAuthWebViewClient(
         )
 
         private val COMPLETION_URLS = setOf(
-            "https://hooks.stripe.com/redirect/complete/src_",
-            "https://hooks.stripe.com/3d_secure/complete/tdsrc_"
+            Pattern.compile("^https://hooks.stripe.com/redirect/complete/src_[A-Za-z0-9]+$"),
+            Pattern.compile("^https://hooks.stripe.com/3d_secure/complete/tdsrc_[A-Za-z0-9]+$"),
+            Pattern.compile("^https://hooks.stripe.com/3d_secure/complete/acct_[A-Za-z0-9]+/tdsrc_[A-Za-z0-9]+$")
         )
 
         private const val PARAM_RETURN_URL = "return_url"
 
         internal const val BLANK_PAGE = "about:blank"
+
+        @VisibleForTesting
+        internal fun isCompletionUrl(
+            url: String
+        ): Boolean {
+            return COMPLETION_URLS.any { pattern ->
+                pattern.matcher(url).matches()
+            }
+        }
     }
 }
