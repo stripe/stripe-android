@@ -522,12 +522,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         showCvcIconInCvcField = resId != null
     }
 
-
-//    fun setShouldShowPostalCode(shouldShowPostalCode: Boolean) {
-//        this.shouldShowPostalCode = shouldShowPostalCode
-//        adjustViewForPostalCodeAttribute(shouldShowPostalCode)
-//    }
-
     /**
      * Set the card number. Method does not change text field focus.
      *
