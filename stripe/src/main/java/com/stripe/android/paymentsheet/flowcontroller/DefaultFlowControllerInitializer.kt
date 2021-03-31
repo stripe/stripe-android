@@ -136,17 +136,19 @@ internal class DefaultFlowControllerInitializer(
         paymentMethods: List<PaymentMethod>
     ) {
         if (prefsRepository.getSavedSelection() == SavedSelection.None) {
-            paymentMethods.firstOrNull()?.let { paymentMethod ->
-                prefsRepository.savePaymentSelection(
-                    PaymentSelection.Saved(paymentMethod)
-                )
+            when {
+                paymentMethods.isNotEmpty() -> {
+                    PaymentSelection.Saved(paymentMethods.first())
+                }
+                isGooglePayReady -> {
+                    PaymentSelection.GooglePay
+                }
+                else -> {
+                    null
+                }
+            }?.let {
+                prefsRepository.savePaymentSelection(it)
             }
-        }
-
-        if (isGooglePayReady &&
-            prefsRepository.getSavedSelection() == SavedSelection.None
-        ) {
-            prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
         }
     }
 
