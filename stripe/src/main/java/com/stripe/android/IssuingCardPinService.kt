@@ -6,6 +6,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.EphemeralKeyManager.KeyManagerListener
 import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +22,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     keyProvider: EphemeralKeyProvider,
     private val stripeRepository: StripeRepository,
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
+    private val stripeAccountId: String? = null,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) {
     private val retrievalListeners = mutableMapOf<String, IssuingCardPinRetrievalListener>()
@@ -145,7 +147,10 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                         operation.cardId,
                         operation.verificationId,
                         operation.userOneTimeCode,
-                        ephemeralKey.secret
+                        ApiRequest.Options(
+                            ephemeralKey.secret,
+                            stripeAccount = stripeAccountId
+                        )
                     )
                 ) {
                     "Could not retrieve issuing card PIN."
@@ -229,7 +234,10 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     operation.newPin,
                     operation.verificationId,
                     operation.userOneTimeCode,
-                    ephemeralKey.secret
+                    ApiRequest.Options(
+                        ephemeralKey.secret,
+                        stripeAccount = stripeAccountId
+                    )
                 )
             }.fold(
                 onSuccess = {
@@ -337,9 +345,11 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             context: Context,
             keyProvider: EphemeralKeyProvider
         ): IssuingCardPinService {
+            val config = PaymentConfiguration.getInstance(context)
             return create(
                 context,
-                PaymentConfiguration.getInstance(context).publishableKey,
+                config.publishableKey,
+                config.stripeAccountId,
                 keyProvider
             )
         }
@@ -351,15 +361,18 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
          * @param keyProvider an [EphemeralKeyProvider] used to obtain an [EphemeralKey]
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             context: Context,
             publishableKey: String,
+            stripeAccountId: String? = null,
             keyProvider: EphemeralKeyProvider
         ): IssuingCardPinService {
             return IssuingCardPinService(
                 keyProvider,
                 StripeApiRepository(context, publishableKey, appInfo),
-                StripeOperationIdFactory()
+                StripeOperationIdFactory(),
+                stripeAccountId = stripeAccountId
             )
         }
     }

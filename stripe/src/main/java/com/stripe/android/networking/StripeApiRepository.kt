@@ -779,12 +779,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
-        ephemeralKeySecret: String
+        requestOptions: ApiRequest.Options
     ): String? {
         val issuingCardPin = fetchStripeModel(
             apiRequestFactory.createGet(
                 getIssuingCardPinUrl(cardId),
-                ApiRequest.Options(ephemeralKeySecret),
+                requestOptions,
                 mapOf("verification" to createVerificationParam(verificationId, userOneTimeCode))
             ),
             IssuingCardPinJsonParser()
@@ -813,12 +813,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         newPin: String,
         verificationId: String,
         userOneTimeCode: String,
-        ephemeralKeySecret: String
+        requestOptions: ApiRequest.Options
     ) {
         makeApiRequest(
             apiRequestFactory.createPost(
                 getIssuingCardPinUrl(cardId),
-                ApiRequest.Options(ephemeralKeySecret),
+                requestOptions,
                 mapOf(
                     "verification" to createVerificationParam(verificationId, userOneTimeCode),
                     "pin" to newPin

@@ -283,6 +283,7 @@ public final class com/stripe/android/IssuingCardPinService {
 	public static final field Companion Lcom/stripe/android/IssuingCardPinService$Companion;
 	public static final fun create (Landroid/content/Context;Lcom/stripe/android/EphemeralKeyProvider;)Lcom/stripe/android/IssuingCardPinService;
 	public static final fun create (Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/EphemeralKeyProvider;)Lcom/stripe/android/IssuingCardPinService;
+	public static final fun create (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/EphemeralKeyProvider;)Lcom/stripe/android/IssuingCardPinService;
 	public final fun retrievePin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/IssuingCardPinService$IssuingCardPinRetrievalListener;)V
 	public final fun updatePin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/IssuingCardPinService$IssuingCardPinUpdateListener;)V
 }
@@ -301,6 +302,8 @@ public final class com/stripe/android/IssuingCardPinService$CardPinActionError :
 public final class com/stripe/android/IssuingCardPinService$Companion {
 	public final fun create (Landroid/content/Context;Lcom/stripe/android/EphemeralKeyProvider;)Lcom/stripe/android/IssuingCardPinService;
 	public final fun create (Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/EphemeralKeyProvider;)Lcom/stripe/android/IssuingCardPinService;
+	public final fun create (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/EphemeralKeyProvider;)Lcom/stripe/android/IssuingCardPinService;
+	public static synthetic fun create$default (Lcom/stripe/android/IssuingCardPinService$Companion;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/EphemeralKeyProvider;ILjava/lang/Object;)Lcom/stripe/android/IssuingCardPinService;
 }
 
 public abstract interface class com/stripe/android/IssuingCardPinService$IssuingCardPinRetrievalListener : com/stripe/android/IssuingCardPinService$Listener {

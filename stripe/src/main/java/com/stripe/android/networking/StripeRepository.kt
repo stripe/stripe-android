@@ -281,7 +281,7 @@ internal interface StripeRepository {
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
-        ephemeralKeySecret: String
+        requestOptions: ApiRequest.Options
     ): String?
 
     @Throws(
@@ -296,7 +296,7 @@ internal interface StripeRepository {
         newPin: String,
         verificationId: String,
         userOneTimeCode: String,
-        ephemeralKeySecret: String
+        requestOptions: ApiRequest.Options
     )
 
     suspend fun getFpxBankStatus(options: ApiRequest.Options): BankStatuses
