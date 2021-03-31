@@ -11,11 +11,11 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
-import androidx.core.view.isInvisible
+import androidx.core.view.doOnLayout
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -53,10 +53,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
 
     override val bottomSheetController: BottomSheetController by lazy {
-        BottomSheetController(
-            bottomSheetBehavior = bottomSheetBehavior,
-            lifecycleScope = lifecycleScope
-        )
+        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
 
     @VisibleForTesting
@@ -66,7 +63,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
 
-    private val containerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    private val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     private val fragmentContainerId: Int
         @IdRes
         get() = viewBinding.fragmentContainer.id
@@ -182,7 +179,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             window.statusBarColor = it
         }
         setContentView(viewBinding.root)
-        appbar.isInvisible = true
 
         viewModel.fatal.observe(this) {
             closeSheet(
@@ -193,26 +189,24 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             )
         }
 
+        // Enable animation for layout transitions
         bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        containerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
             if (shouldFinish) {
                 finish()
             }
         }
+
         bottomSheetController.setup()
 
-        setupBuyButton()
-        supportFragmentManager.commit {
-            replace(
-                fragmentContainerId,
-                PaymentSheetLoadingFragment::class.java,
-                bundleOf(
-                    EXTRA_STARTER_ARGS to starterArgs
-                )
-            )
+        rootView.doOnLayout {
+            // Show bottom sheet only after the Activity has been laid out so that it animates in
+            bottomSheetController.expand()
         }
+
+        setupBuyButton()
 
         viewModel.transition.observe(this) { transitionTarget ->
             if (transitionTarget != null) {
@@ -270,6 +264,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                     )
                 }
                 is PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                    setCustomAnimations(
+                        AnimationConstants.FADE_IN,
+                        AnimationConstants.FADE_OUT,
+                        AnimationConstants.FADE_IN,
+                        AnimationConstants.FADE_OUT
+                    )
                     replace(
                         fragmentContainerId,
                         PaymentSheetListFragment::class.java,
@@ -277,6 +277,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                     )
                 }
                 is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                    setCustomAnimations(
+                        AnimationConstants.FADE_IN,
+                        AnimationConstants.FADE_OUT,
+                        AnimationConstants.FADE_IN,
+                        AnimationConstants.FADE_OUT
+                    )
                     replace(
                         fragmentContainerId,
                         PaymentSheetAddCardFragment::class.java,
@@ -286,10 +292,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             }
         }
 
-        // Execute transaction right away to avoid a two-step UI update
-        supportFragmentManager.executePendingTransactions()
-        viewBinding.buyButton.isVisible = true
-        appbar.isVisible = true
+        fragmentContainerParent.doOnNextLayout {
+            // Update visibility on next layout to avoid a two-step UI update
+            viewBinding.buyButton.isVisible = true
+            appbar.isVisible = true
+        }
     }
 
     private fun setupBuyButton() {

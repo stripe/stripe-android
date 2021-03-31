@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -65,10 +64,6 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-                idleLooper()
-
                 activity.viewBinding.root.performClick()
                 activity.finish()
             }
@@ -92,10 +87,6 @@ class PaymentOptionsActivityTest {
             )
         ).use {
             it.onActivity { activity ->
-                // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-                idleLooper()
-
                 assertThat(activity.viewBinding.addButton.isVisible)
                     .isFalse()
             }
@@ -109,10 +100,6 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-                idleLooper()
-
                 assertThat(activity.viewBinding.addButton.isVisible)
                     .isTrue()
             }
@@ -130,10 +117,6 @@ class PaymentOptionsActivityTest {
             )
         ).use {
             it.onActivity { activity ->
-                // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-                idleLooper()
-
                 assertThat(activity.viewBinding.addButton.isVisible)
                     .isFalse()
 

@@ -15,7 +15,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -53,12 +52,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
 
-    private val containerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    private val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val bottomSheetController: BottomSheetController by lazy {
-        BottomSheetController(
-            bottomSheetBehavior = bottomSheetBehavior,
-            lifecycleScope = lifecycleScope
-        )
+        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
 
     private val fragmentContainerId: Int
@@ -119,15 +115,22 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
+        // Enable animation for layout transitions
         bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        containerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
             if (shouldFinish) {
                 finish()
             }
         }
+
         bottomSheetController.setup()
+        // Fragment animates in immediately after activity is created, so we can already expand it
+        bottomSheetController.expand()
+        // isFitToContents causes conflicts when calculating the sheet position upon resize.
+        // CoordinatorLayout will already position the sheet correctly with gravity = bottom.
+        bottomSheetBehavior.isFitToContents = false
 
         setupAddButton(viewBinding.addButton)
 

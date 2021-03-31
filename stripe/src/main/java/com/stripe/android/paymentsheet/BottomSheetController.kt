@@ -5,49 +5,51 @@ import android.view.ViewGroup
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 internal class BottomSheetController(
-    private val bottomSheetBehavior: BottomSheetBehavior<ViewGroup>,
-    private val lifecycleScope: CoroutineScope
+    private val bottomSheetBehavior: BottomSheetBehavior<ViewGroup>
 ) {
     private val _shouldFinish = MutableLiveData(false)
     internal val shouldFinish = _shouldFinish.distinctUntilChanged()
 
     fun setup() {
-        bottomSheetBehavior.isFitToContents = false
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.isDraggable = false
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
-        lifecycleScope.launch {
-            delay(ANIMATE_IN_DELAY)
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            bottomSheetBehavior.addBottomSheetCallback(
-                object : BottomSheetBehavior.BottomSheetCallback() {
-                    override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                    }
+        bottomSheetBehavior.addBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                }
 
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            // isFitToContents causes conflicts when calculating the sheet position
+                            // upon resize. CoordinatorLayout will already position the sheet
+                            // correctly with gravity = bottom.
+                            bottomSheetBehavior.isFitToContents = false
+                        }
+                        BottomSheetBehavior.STATE_HIDDEN -> {
                             // finish the activity only after the bottom sheet's state has
                             // transitioned to `BottomSheetBehavior.STATE_HIDDEN`
                             _shouldFinish.value = true
                         }
+                        else -> {
+                        }
                     }
                 }
-            )
-        }
+            }
+        )
+    }
+
+    fun expand() {
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     fun hide() {
         // When the bottom sheet finishes animating to its new state,
         // the callback will finish the activity
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-    }
-
-    internal companion object {
-        const val ANIMATE_IN_DELAY = 300L
     }
 }
