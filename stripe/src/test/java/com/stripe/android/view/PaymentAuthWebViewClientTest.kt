@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.FakeLogger
+import com.stripe.android.view.PaymentAuthWebViewClient.Companion.isCompletionUrl
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -304,6 +305,53 @@ class PaymentAuthWebViewClientTest {
 
         assertThat(onAuthCompleteUris)
             .isEmpty()
+    }
+
+    @Test
+    fun `isCompletionUrl should return expected value for various URLs`() {
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/redirect/complete/src____123")
+        ).isFalse()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/redirect/complete/src_")
+        ).isFalse()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/redirect/complete/src__")
+        ).isFalse()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/redirect/complete/src_abc123")
+        ).isTrue()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/tdsrc_")
+        ).isFalse()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/tdsrc__")
+        ).isFalse()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/tdsrc_abc123")
+        ).isTrue()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/acct/tdsrc_123")
+        ).isFalse()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/acct_/tdsrc_123")
+        ).isFalse()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/acct_123/tdsrc_")
+        ).isFalse()
+
+        assertThat(
+            isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/acct_123/tdsrc_456")
+        ).isTrue()
     }
 
     private fun createWebViewClient(
