@@ -25,11 +25,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Test class for [CountryAutoCompleteTextView]
+ * Test class for [CountryTextInputLayout]
  */
 @RunWith(RobolectricTestRunner::class)
-class CountryAutoCompleteTextViewTest {
-    private lateinit var countryAutoCompleteTextView: CountryAutoCompleteTextView
+class CountryTextInputLayoutTest {
+    private lateinit var countryTextInputLayout: CountryTextInputLayout
     private lateinit var autoCompleteTextView: AutoCompleteTextView
 
     private val ephemeralKeyProvider: EphemeralKeyProvider = mock()
@@ -57,31 +57,30 @@ class CountryAutoCompleteTextViewTest {
             )
         ).use { activityScenario ->
             activityScenario.onActivity {
-                countryAutoCompleteTextView = it
+                countryTextInputLayout = it
                     .findViewById(R.id.country_autocomplete_aaw)
-                autoCompleteTextView = countryAutoCompleteTextView
-                    .findViewById(R.id.country_autocomplete)
+                autoCompleteTextView = countryTextInputLayout.countryAutocomplete
             }
         }
     }
 
     @Test
     fun countryAutoCompleteTextView_whenInitialized_displaysDefaultLocaleDisplayName() {
-        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountry?.code)
+        assertEquals(Locale.US.country, countryTextInputLayout.selectedCountry?.code)
         assertEquals(Locale.US.displayCountry, autoCompleteTextView.text.toString())
     }
 
     @Test
     fun updateUIForCountryEntered_whenInvalidCountry_revertsToLastCountry() {
         val previousValidCountryCode =
-            countryAutoCompleteTextView.selectedCountry?.code.orEmpty()
-        countryAutoCompleteTextView.setCountrySelected("FAKE COUNTRY CODE")
+            countryTextInputLayout.selectedCountry?.code.orEmpty()
+        countryTextInputLayout.setCountrySelected("FAKE COUNTRY CODE")
         assertNull(autoCompleteTextView.error)
         assertEquals(
             autoCompleteTextView.text.toString(),
             Locale("", previousValidCountryCode).displayCountry
         )
-        countryAutoCompleteTextView.setCountrySelected(Locale.UK.country)
+        countryTextInputLayout.setCountrySelected(Locale.UK.country)
         assertNotEquals(
             autoCompleteTextView.text.toString(),
             Locale("", previousValidCountryCode).displayCountry
@@ -91,9 +90,9 @@ class CountryAutoCompleteTextViewTest {
 
     @Test
     fun updateUIForCountryEntered_whenValidCountry_UIUpdates() {
-        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountry?.code)
-        countryAutoCompleteTextView.setCountrySelected(Locale.UK.country)
-        assertEquals(Locale.UK.country, countryAutoCompleteTextView.selectedCountry?.code)
+        assertEquals(Locale.US.country, countryTextInputLayout.selectedCountry?.code)
+        countryTextInputLayout.setCountrySelected(Locale.UK.country)
+        assertEquals(Locale.UK.country, countryTextInputLayout.selectedCountry?.code)
     }
 
     @Test
@@ -106,27 +105,27 @@ class CountryAutoCompleteTextViewTest {
 
     @Test
     fun setAllowedCountryCodes_withPopulatedSet_shouldUpdateSelectedCountry() {
-        countryAutoCompleteTextView.setAllowedCountryCodes(setOf("fr", "de"))
+        countryTextInputLayout.setAllowedCountryCodes(setOf("fr", "de"))
         assertEquals(
             "FR",
-            countryAutoCompleteTextView.selectedCountry?.code
+            countryTextInputLayout.selectedCountry?.code
         )
     }
 
     @Test
     fun validateCountry_withInvalidCountry_setsSelectedCountryToNull() {
-        assertNotNull(countryAutoCompleteTextView.selectedCountry)
-        countryAutoCompleteTextView.countryAutocomplete.setText("invalid country")
-        countryAutoCompleteTextView.validateCountry()
-        assertNull(countryAutoCompleteTextView.selectedCountry)
+        assertNotNull(countryTextInputLayout.selectedCountry)
+        countryTextInputLayout.countryAutocomplete.setText("invalid country")
+        countryTextInputLayout.validateCountry()
+        assertNull(countryTextInputLayout.selectedCountry)
     }
 
     @Test
     fun validateCountry_withValidCountry_setsSelectedCountry() {
-        assertNotNull(countryAutoCompleteTextView.selectedCountry)
-        countryAutoCompleteTextView.countryAutocomplete.setText("Canada")
-        countryAutoCompleteTextView.validateCountry()
-        assertEquals("Canada", countryAutoCompleteTextView.selectedCountry?.name)
+        assertNotNull(countryTextInputLayout.selectedCountry)
+        countryTextInputLayout.countryAutocomplete.setText("Canada")
+        countryTextInputLayout.validateCountry()
+        assertEquals("Canada", countryTextInputLayout.selectedCountry?.name)
     }
 
     @AfterTest

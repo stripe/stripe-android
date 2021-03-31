@@ -9,23 +9,18 @@ import android.text.method.TextKeyListener
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View.OnFocusChangeListener
-import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
-import androidx.core.os.ConfigurationCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
-import com.stripe.android.databinding.StripeCountryDropdownItemBinding
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
-import com.stripe.android.view.CountryAdapter
-import com.stripe.android.view.CountryAutoCompleteTextViewValidator
 import com.stripe.android.view.CountryUtils
 import com.stripe.android.view.PostalCodeValidator
 import java.util.Locale
@@ -52,27 +47,16 @@ internal class BillingAddressView @JvmOverloads constructor(
         this
     )
 
-    private val countryAdapter = CountryAdapter(
-        context,
-        CountryUtils.getOrderedCountries(
-            ConfigurationCompat.getLocales(context.resources.configuration)[0]
-        ),
-        R.layout.stripe_country_dropdown_item
-    ) {
-        StripeCountryDropdownItemBinding.inflate(
-            LayoutInflater.from(context),
-            it,
-            false
-        ).root
-    }
-
     private val postalCodeValidator = PostalCodeValidator()
 
     private val _address = MutableLiveData<Address?>(null)
     internal val address: LiveData<Address?> = _address
 
     @VisibleForTesting
-    internal val countryView = viewBinding.country
+    internal val countryLayout = viewBinding.countryLayout
+
+    @VisibleForTesting
+    internal val countryView = countryLayout.countryAutocomplete
 
     @VisibleForTesting
     internal val cityPostalContainer = viewBinding.cityPostalContainer
@@ -101,16 +85,7 @@ internal class BillingAddressView @JvmOverloads constructor(
     @VisibleForTesting
     internal val stateLayout = viewBinding.stateLayout
 
-    @VisibleForTesting
-    internal var selectedCountry: Country? by Delegates.observable(
-        null
-    ) { _, _, newCountry ->
-        updateStateView(newCountry)
-        updatePostalCodeView(newCountry)
-        _address.value = createAddress()
-    }
-
-    private val isUnitedStates: Boolean get() = selectedCountry?.code == Locale.US.country
+    private val isUnitedStates: Boolean get() = countryLayout.selectedCountry?.code == Locale.US.country
 
     private var postalCodeConfig: PostalCodeConfig by Delegates.observable(
         PostalCodeConfig.Global
@@ -118,6 +93,17 @@ internal class BillingAddressView @JvmOverloads constructor(
         postalCodeView.filters = arrayOf(InputFilter.LengthFilter(config.maxLength))
         postalCodeView.keyListener = config.getKeyListener()
         postalCodeView.inputType = config.inputType
+    }
+
+    private val newCountryCallback = { newCountry: Country ->
+        updateStateView(newCountry)
+        updatePostalCodeView(newCountry)
+        _address.value = createAddress()
+
+        postalCodeView.shouldShowError = !postalCodeValidator.isValid(
+            postalCode = postalCodeView.value.orEmpty(),
+            countryCode = newCountry.code
+        )
     }
 
     private val requiredViews = setOf(
@@ -147,7 +133,13 @@ internal class BillingAddressView @JvmOverloads constructor(
     )
 
     init {
-        configureCountryAutoComplete()
+        countryLayout.countryChangeCallback = newCountryCallback
+        // Since the callback is set after CountryAutoCompleteTextView is fully initialized,
+        // need to manually trigger the callback once to pick up the initial country
+        countryLayout.selectedCountry?.let {
+            newCountryCallback(it)
+        }
+
         configureForLevel()
 
         allFields.forEach { editText ->
@@ -163,82 +155,23 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
 
         postalCodeView.internalFocusChangeListeners.add { _, hasFocus ->
-            val isPostalValid = selectedCountry?.code?.let { countryCode ->
+            val isPostalValid = countryLayout.selectedCountry?.code?.let { countryCode ->
                 postalCodeValidator.isValid(
                     postalCode = postalCodeView.value.orEmpty(),
                     countryCode = countryCode
                 )
             } ?: false
 
-            postalCodeView.shouldShowError = !hasFocus && !postalCodeView.value.isNullOrBlank() && !isPostalValid
+            postalCodeView.shouldShowError =
+                !hasFocus && !postalCodeView.value.isNullOrBlank() && !isPostalValid
         }
-    }
-
-    private fun configureCountryAutoComplete() {
-        countryView.threshold = 0
-        countryView.setAdapter(countryAdapter)
-        countryView.onItemClickListener =
-            AdapterView.OnItemClickListener { _, _, position, _ ->
-                updatedSelectedCountryCode(countryAdapter.getItem(position))
-            }
-        countryView.onFocusChangeListener = OnFocusChangeListener { _, focused ->
-            if (focused) {
-                countryView.showDropDown()
-            } else {
-                val countryEntered = countryView.text.toString()
-                updateUiForCountryEntered(countryEntered)
-            }
-        }
-
-        selectedCountry = countryAdapter.firstItem
-        updateInitialCountry()
-
-        countryView.validator = CountryAutoCompleteTextViewValidator(
-            countryAdapter
-        ) { country ->
-            selectedCountry = country
-        }
-    }
-
-    private fun updateInitialCountry() {
-        val initialCountry = countryAdapter.firstItem
-        countryView.setText(initialCountry.name)
-        selectedCountry = initialCountry
-    }
-
-    @VisibleForTesting
-    internal fun updateUiForCountryEntered(displayCountryEntered: String) {
-        val country = CountryUtils.getCountryByName(displayCountryEntered)
-
-        // If the user-typed country matches a valid country, update the selected country
-        // Otherwise, revert back to last valid country if country is not recognized.
-        val displayCountry = country?.let {
-            updatedSelectedCountryCode(it)
-            displayCountryEntered
-        } ?: selectedCountry?.name
-
-        countryView.setText(displayCountry)
-    }
-
-    private fun updatedSelectedCountryCode(country: Country) {
-        if (selectedCountry != country) {
-            selectedCountry = country
-            postalCodeView.shouldShowError = !postalCodeValidator.isValid(
-                postalCode = postalCodeView.value.orEmpty(),
-                countryCode = country.code
-            )
-        }
-    }
-
-    internal fun validateCountry() {
-        countryView.performValidation()
     }
 
     /**
      * An [Address] if the country and postal code are valid; otherwise `null`.
      */
     private fun createAddress(): Address? {
-        return selectedCountry?.code?.let { countryCode ->
+        return countryLayout.selectedCountry?.code?.let { countryCode ->
             val postalCode = postalCodeView.value
             val isPostalCodeValid = postalCodeValidator.isValid(
                 postalCode = postalCode.orEmpty(),
@@ -345,7 +278,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         super.setEnabled(enabled)
 
         setOf(
-            viewBinding.countryLayout,
+            countryLayout,
             viewBinding.address1Layout,
             viewBinding.address2Layout,
             viewBinding.cityLayout,
@@ -382,7 +315,7 @@ internal class BillingAddressView @JvmOverloads constructor(
     internal fun populate(address: Address?) {
         address?.let { it ->
             it.country?.let { countryCode ->
-                this.selectedCountry = CountryUtils.getCountryByCode(countryCode)
+                countryLayout.selectedCountry = CountryUtils.getCountryByCode(countryCode)
                 this.countryView.setText(CountryUtils.getDisplayCountry(countryCode))
             }
             this.address1View.setText(it.line1)
