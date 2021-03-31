@@ -21,7 +21,7 @@ internal interface ApiRequestExecutor {
         private val logger: Logger = Logger.noop()
     ) : ApiRequestExecutor {
 
-        private val maxRetries: Int get() = Stripe.MAX_RETRIES
+        private val maxRetries: Int get() = Stripe.maxRetries
 
         override suspend fun execute(
             request: ApiRequest
