@@ -84,15 +84,6 @@ internal class StripeApiRepositoryTest {
         whenever(fingerprintDataRepository.get()).thenReturn(
             FingerprintDataFixtures.create(Calendar.getInstance().timeInMillis)
         )
-
-        whenever(stripeApiRequestExecutor.execute(any<FileUploadRequest>()))
-            .thenReturn(
-                StripeResponse(
-                    200,
-                    StripeFileFixtures.DEFAULT.toString(),
-                    emptyMap()
-                )
-            )
     }
 
     @AfterTest
@@ -783,6 +774,15 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun createFile_shouldFireExpectedRequests() = testDispatcher.runBlockingTest {
+        whenever(stripeApiRequestExecutor.execute(any<FileUploadRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    StripeFileFixtures.DEFAULT.toString(),
+                    emptyMap()
+                )
+            )
+
         val stripeRepository = create()
 
         stripeRepository.createFile(
