@@ -129,17 +129,22 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
-                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-
-                viewModel.updateSelection(PaymentSelection.GooglePay)
+                // Google Pay initially selected as there's no saved selection
                 assertThat(activity.viewBinding.buyButton.isVisible).isFalse()
                 assertThat(activity.viewBinding.googlePayButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
 
+                viewModel.updateSelection(
+                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+                assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
+
                 viewModel.updateSelection(null)
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+                assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
             }
         }
     }
