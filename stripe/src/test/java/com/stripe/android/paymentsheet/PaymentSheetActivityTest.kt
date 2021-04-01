@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.animation.LayoutTransition
 import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
@@ -91,7 +92,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `handles clicks outside of bottom sheet`() {
+    fun `bottom sheet expands on start and handles click outside`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
@@ -99,6 +100,8 @@ internal class PaymentSheetActivityTest {
                 idleLooper()
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
+                assertThat(activity.bottomSheetBehavior.isFitToContents)
+                    .isFalse()
 
                 activity.viewBinding.root.performClick()
                 idleLooper()
@@ -314,6 +317,30 @@ internal class PaymentSheetActivityTest {
                             returnUrl = "stripe://return_url"
                         )
                     )
+            }
+        }
+    }
+
+    @Test
+    fun `Verify animation is enabled for layout transition changes`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                idleLooper()
+
+                assertThat(
+                    activity.viewBinding.bottomSheet.layoutTransition.isTransitionTypeEnabled(
+                        LayoutTransition.CHANGING
+                    )
+                ).isTrue()
+
+                assertThat(
+                    activity.viewBinding.fragmentContainerParent.layoutTransition
+                        .isTransitionTypeEnabled(
+                            LayoutTransition.CHANGING
+                        )
+                ).isTrue()
             }
         }
     }

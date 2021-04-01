@@ -280,7 +280,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
         fragmentContainerParent.doOnNextLayout {
             // Update visibility on next layout to avoid a two-step UI update
-            viewBinding.buyButton.isVisible = true
             appbar.isVisible = true
         }
     }

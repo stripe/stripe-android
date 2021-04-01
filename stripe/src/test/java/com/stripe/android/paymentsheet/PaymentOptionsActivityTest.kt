@@ -250,6 +250,23 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
+    fun `Verify bottom sheet expands on start`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                idleLooper()
+
+                assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
+                assertThat(activity.bottomSheetBehavior.isFitToContents)
+                    .isFalse()
+            }
+        }
+    }
+
+    @Test
     fun `Verify ProcessResult state closes the sheet`() {
         val scenario = activityScenario()
         scenario.launch(

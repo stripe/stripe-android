@@ -205,6 +205,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
+        // Ensure the bottom sheet is expanded only after the fragment transaction is completed
         supportFragmentManager.executePendingTransactions()
         rootView.doOnNextLayout {
             // Expand sheet only after the first fragment is attached so that it animates in.
