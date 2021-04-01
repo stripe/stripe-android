@@ -19,6 +19,27 @@
         <activity
             android:name=".view.PaymentRelayActivity"
             android:theme="@style/StripeTransparentTheme" />
+
+        <!--
+        Set android:launchMode="singleTop" so that the StripeBrowserLauncherActivity instance that
+        launched the browser Activity will also handle the return URL deep link.
+        -->
+        <activity
+            android:name=".payments.StripeBrowserLauncherActivity"
+            android:theme="@style/StripeTransparentTheme"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!--
+                Must match the value used in `ConfirmStripeIntentParams.DEFAULT_RETURN_URL`.
+                -->
+                <data android:scheme="stripesdk" android:host="payment_return_url" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".view.Stripe3ds2CompletionActivity"
             android:theme="@style/StripeDefaultTheme" />

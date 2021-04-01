@@ -18,6 +18,7 @@ import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -319,7 +320,7 @@ internal class PaymentSheetActivityTest {
                         ConfirmPaymentIntentParams(
                             clientSecret = "client_secret",
                             paymentMethodId = "pm_123456789",
-                            returnUrl = "stripe://return_url"
+                            returnUrl = ConfirmStripeIntentParams.DEFAULT_RETURN_URL
                         )
                     )
             }

@@ -22,6 +22,7 @@ import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
@@ -75,7 +76,6 @@ internal class StripePaymentControllerTest {
         whenever(it.sdkTransactionId)
             .thenReturn(sdkTransactionId)
     }
-    private val setupIntentResultCallback: ApiResultCallback<SetupIntentResult> = mock()
     private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter =
@@ -94,8 +94,6 @@ internal class StripePaymentControllerTest {
         argumentCaptor()
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
-    private val setupIntentResultArgumentCaptor: KArgumentCaptor<SetupIntentResult> =
-        argumentCaptor()
 
     private val testDispatcher = TestCoroutineDispatcher()
 
@@ -139,7 +137,12 @@ internal class StripePaymentControllerTest {
                 )
             )
                 .thenReturn(transaction)
-            controller.handleNextAction(host, paymentIntent, REQUEST_OPTIONS)
+            controller.handleNextAction(
+                host,
+                paymentIntent,
+                null,
+                REQUEST_OPTIONS
+            )
             testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)
 
             verify(threeDs2Service).createTransaction(
@@ -189,6 +192,7 @@ internal class StripePaymentControllerTest {
             controller.handleNextAction(
                 host,
                 PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
+                null,
                 REQUEST_OPTIONS
             )
             testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)
@@ -219,6 +223,7 @@ internal class StripePaymentControllerTest {
         controller.handleNextAction(
             host,
             PaymentIntentFixtures.PI_REQUIRES_3DS1,
+            null,
             REQUEST_OPTIONS
         )
         verify(activity).startActivityForResult(
@@ -236,10 +241,34 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
+    fun handleNextAction_whenSdk3ds1_withReturnUrl() = testDispatcher.runBlockingTest {
+        controller.handleNextAction(
+            host,
+            PaymentIntentFixtures.PI_REQUIRES_3DS1,
+            ConfirmStripeIntentParams.DEFAULT_RETURN_URL,
+            REQUEST_OPTIONS
+        )
+        verify(activity).startActivityForResult(
+            intentArgumentCaptor.capture(),
+            eq(StripePaymentController.PAYMENT_REQUEST_CODE)
+        )
+        val args = requireNotNull(
+            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
+        )
+        assertThat(args.url)
+            .isEqualTo("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW")
+        assertThat(args.returnUrl)
+            .isEqualTo(ConfirmStripeIntentParams.DEFAULT_RETURN_URL)
+
+        verifyAnalytics(AnalyticsEvent.Auth3ds1Sdk)
+    }
+
+    @Test
     fun handleNextAction_whenBrowser3ds1() = testDispatcher.runBlockingTest {
         controller.handleNextAction(
             host,
             PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
+            null,
             REQUEST_OPTIONS
         )
         verify(activity).startActivityForResult(
@@ -267,6 +296,7 @@ internal class StripePaymentControllerTest {
         controller.handleNextAction(
             host,
             SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
+            null,
             REQUEST_OPTIONS
         )
         verify(activity).startActivityForResult(
@@ -280,6 +310,7 @@ internal class StripePaymentControllerTest {
         controller.handleNextAction(
             host,
             PaymentIntentFixtures.OXXO_REQUIES_ACTION,
+            null,
             REQUEST_OPTIONS
         )
         verify(activity).startActivityForResult(

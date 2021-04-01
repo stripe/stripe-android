@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import org.junit.Test
@@ -24,7 +25,7 @@ class ConfirmParamsFactoryTest {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
-                returnUrl = "stripe://return_url",
+                returnUrl = ConfirmStripeIntentParams.DEFAULT_RETURN_URL,
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
             )
         )

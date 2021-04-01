@@ -125,17 +125,24 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options
     ) {
         CoroutineScope(workContext).launch {
+            val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                ?: ConfirmStripeIntentParams.DEFAULT_RETURN_URL
+
             val result = runCatching {
                 when (confirmStripeIntentParams) {
                     is ConfirmPaymentIntentParams -> {
                         confirmPaymentIntent(
-                            confirmStripeIntentParams,
+                            confirmStripeIntentParams.also {
+                                it.returnUrl = returnUrl
+                            },
                             requestOptions
                         )
                     }
                     is ConfirmSetupIntentParams -> {
                         confirmSetupIntent(
-                            confirmStripeIntentParams,
+                            confirmStripeIntentParams.also {
+                                it.returnUrl = returnUrl
+                            },
                             requestOptions
                         )
                     }
@@ -146,7 +153,12 @@ internal class StripePaymentController internal constructor(
             withContext(Dispatchers.Main) {
                 result.fold(
                     onSuccess = { intent ->
-                        handleNextAction(host, intent, requestOptions)
+                        handleNextAction(
+                            host,
+                            intent,
+                            returnUrl,
+                            requestOptions
+                        )
                     },
                     onFailure = {
                         handleError(
@@ -250,7 +262,12 @@ internal class StripePaymentController internal constructor(
             withContext(Dispatchers.Main) {
                 stripeIntentResult.fold(
                     onSuccess = { stripeIntent ->
-                        handleNextAction(host, stripeIntent, requestOptions)
+                        handleNextAction(
+                            host = host,
+                            stripeIntent = stripeIntent,
+                            returnUrl = null,
+                            requestOptions = requestOptions
+                        )
                     },
                     onFailure = {
                         handleError(
@@ -543,11 +560,17 @@ internal class StripePaymentController internal constructor(
     /**
      * Determine which authentication mechanism should be used, or bypass authentication
      * if it is not needed.
+     *
+     * @param returnUrl in some cases, the return URL is not provided in
+     * [StripeIntent.NextActionData]. Specifically, it is not available in
+     * [StripeIntent.NextActionData.SdkData.Use3DS1]. Wire it through so that we can correctly
+     * determine how we should handle authentication.
      */
     @VisibleForTesting
     override suspend fun handleNextAction(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
+        returnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         if (stripeIntent.requiresAction()) {
@@ -561,14 +584,17 @@ internal class StripePaymentController internal constructor(
                     )
                 }
                 is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
+                    // can only triggered when `use_stripe_sdk=true`
                     handle3ds1Auth(
                         host,
                         stripeIntent,
                         requestOptions,
-                        nextActionData
+                        nextActionData,
+                        returnUrl
                     )
                 }
                 is StripeIntent.NextActionData.RedirectToUrl -> {
+                    // can only triggered when `use_stripe_sdk=false`
                     handleRedirectToUrlAuth(
                         host,
                         stripeIntent,
@@ -634,7 +660,8 @@ internal class StripePaymentController internal constructor(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options,
-        nextActionData: StripeIntent.NextActionData.SdkData.Use3DS1
+        nextActionData: StripeIntent.NextActionData.SdkData.Use3DS1,
+        returnUrl: String?
     ) {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
@@ -651,6 +678,7 @@ internal class StripePaymentController internal constructor(
             stripeIntent.clientSecret.orEmpty(),
             nextActionData.url,
             requestOptions.stripeAccount,
+            returnUrl = returnUrl,
             enableLogging = enableLogging,
             // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
             shouldCancelSource = true

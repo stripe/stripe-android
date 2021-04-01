@@ -11,6 +11,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -129,7 +130,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
                     CLIENT_SECRET,
-                    returnUrl = "stripe://return_url"
+                    returnUrl = ConfirmStripeIntentParams.DEFAULT_RETURN_URL
                 )
             )
     }
@@ -155,7 +156,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,
-                    returnUrl = "stripe://return_url",
+                    returnUrl = ConfirmStripeIntentParams.DEFAULT_RETURN_URL,
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 )
             )

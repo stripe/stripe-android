@@ -5,22 +5,28 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.PaymentAuthWebViewActivity
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
+internal class PaymentAuthWebViewContract :
+    ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
     override fun createIntent(
         context: Context,
-        input: Args?
+        input: Args
     ): Intent {
-        return Intent(context, PaymentAuthWebViewActivity::class.java)
-            .also { intent ->
-                if (input != null) {
-                    intent.putExtras(input.toBundle())
-                }
+        return Intent(
+            context,
+            when (input.shouldUseBrowser) {
+                true -> StripeBrowserLauncherActivity::class.java
+                false -> PaymentAuthWebViewActivity::class.java
             }
+        ).also { intent ->
+            intent.putExtras(input.toBundle())
+        }
     }
 
     internal fun parseArgs(
@@ -58,7 +64,20 @@ internal class PaymentAuthWebViewContract : ActivityResultContract<PaymentAuthWe
          */
         val shouldCancelIntentOnUserNavigation: Boolean = true
     ) : Parcelable {
+        /**
+         * If true, use [StripeBrowserLauncherActivity].
+         * If false, use [PaymentAuthWebViewActivity].
+         */
+        val shouldUseBrowser
+            get() = IS_BROWSER_ENABLED &&
+                returnUrl == ConfirmStripeIntentParams.DEFAULT_RETURN_URL
+
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
+
+        private companion object {
+            // TODO(mshafrir-stripe): enable when ready to launch
+            private const val IS_BROWSER_ENABLED = false
+        }
     }
 
     private companion object {

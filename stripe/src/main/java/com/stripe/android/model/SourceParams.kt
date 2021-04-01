@@ -525,9 +525,10 @@ class SourceParams private constructor(
          * This is the currency for which the source will be chargeable once ready.
          * @param klarnaParams Klarna-specific params
          */
+        @JvmOverloads
         @JvmStatic
         fun createKlarna(
-            returnUrl: String,
+            returnUrl: String? = null,
             currency: String,
             klarnaParams: KlarnaSourceParams
         ): SourceParams {
@@ -554,7 +555,6 @@ class SourceParams private constructor(
             return SourceParams(SourceType.KLARNA)
                 .setAmount(totalAmount.toLong())
                 .setCurrency(currency)
-                .setReturnUrl(returnUrl)
                 .setOwner(
                     OwnerParams(
                         address = klarnaParams.billingAddress,
@@ -569,6 +569,11 @@ class SourceParams private constructor(
                         PARAM_SOURCE_ORDER to sourceOrderParams.toParamMap()
                     )
                 )
+                .apply {
+                    if (returnUrl != null) {
+                        setReturnUrl(returnUrl)
+                    }
+                }
         }
 
         /**

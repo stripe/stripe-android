@@ -130,6 +130,7 @@ internal interface PaymentController {
     suspend fun handleNextAction(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
+        returnUrl: String?,
         requestOptions: ApiRequest.Options
     )
 

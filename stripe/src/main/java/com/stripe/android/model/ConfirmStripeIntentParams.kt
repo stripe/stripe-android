@@ -9,6 +9,8 @@ interface ConfirmStripeIntentParams : StripeParamsModel {
 
     val clientSecret: String
 
+    var returnUrl: String?
+
     fun shouldUseStripeSdk(): Boolean
 
     fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmStripeIntentParams
@@ -21,5 +23,10 @@ interface ConfirmStripeIntentParams : StripeParamsModel {
         internal const val PARAM_USE_STRIPE_SDK: String = "use_stripe_sdk"
         internal const val PARAM_MANDATE_ID: String = "mandate"
         internal const val PARAM_MANDATE_DATA = "mandate_data"
+
+        /**
+         * Must match the pattern used in `StripeBrowserLauncherActivity`'s intent filter.
+         */
+        internal const val DEFAULT_RETURN_URL = "stripesdk://payment_return_url"
     }
 }

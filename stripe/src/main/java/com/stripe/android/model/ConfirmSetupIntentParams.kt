@@ -31,7 +31,7 @@ data class ConfirmSetupIntentParams internal constructor(
      * supply an application URI scheme. This parameter is only used for cards and other
      * redirect-based payment methods.
      */
-    var returnUrl: String? = null,
+    override var returnUrl: String? = null,
 
     private val useStripeSdk: Boolean = false,
 
