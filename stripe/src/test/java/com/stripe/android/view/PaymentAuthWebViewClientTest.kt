@@ -315,7 +315,7 @@ class PaymentAuthWebViewClientTest {
 
         assertThat(
             isCompletionUrl("https://hooks.stripe.com/3d_secure/complete/")
-        ).isFalse()
+        ).isTrue()
 
         assertThat(
             isCompletionUrl("https://hooks.stripe.com/redirect/complete/src____123")

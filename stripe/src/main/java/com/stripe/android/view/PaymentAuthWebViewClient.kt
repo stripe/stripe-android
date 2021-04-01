@@ -11,7 +11,6 @@ import android.webkit.WebViewClient
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.Logger
-import java.util.regex.Pattern
 
 internal class PaymentAuthWebViewClient(
     private val logger: Logger,
@@ -201,8 +200,8 @@ internal class PaymentAuthWebViewClient(
         )
 
         private val COMPLETION_URLS = setOf(
-            Pattern.compile("^https://hooks.stripe.com/redirect/complete/.+$"),
-            Pattern.compile("^https://hooks.stripe.com/3d_secure/complete/.+$"),
+            "https://hooks.stripe.com/redirect/complete/",
+            "https://hooks.stripe.com/3d_secure/complete/"
         )
 
         private const val PARAM_RETURN_URL = "return_url"
@@ -213,9 +212,7 @@ internal class PaymentAuthWebViewClient(
         internal fun isCompletionUrl(
             url: String
         ): Boolean {
-            return COMPLETION_URLS.any { pattern ->
-                pattern.matcher(url).matches()
-            }
+            return COMPLETION_URLS.any(url::startsWith)
         }
 
         private fun isAuthenticateUrl(
