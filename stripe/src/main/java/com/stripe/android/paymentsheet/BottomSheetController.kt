@@ -16,6 +16,7 @@ internal class BottomSheetController(
         bottomSheetBehavior.isHideable = true
         bottomSheetBehavior.isDraggable = false
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.saveFlags = BottomSheetBehavior.SAVE_ALL
 
         bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
