@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.webkit.WebView
+import com.stripe.android.networking.RequestHeadersFactory
 import com.stripe.android.view.PaymentAuthWebViewClient.Companion.BLANK_PAGE
 
 /**
@@ -39,6 +40,8 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun configureSettings() {
+        val sdkUserAgent = RequestHeadersFactory.getUserAgent()
+        settings.userAgentString = "${settings.userAgentString.orEmpty()} [$sdkUserAgent]"
         settings.javaScriptEnabled = true
         settings.allowContentAccess = false
         settings.domStorageEnabled = true
