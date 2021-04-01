@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.4.2 - unreleased
+## 16.4.2 - 2021-04-01
 * [#3548](https://github.com/stripe/stripe-android/pull/3548) Refine `PaymentAuthWebViewClient` completion URL logic
 * [#3549](https://github.com/stripe/stripe-android/pull/3549) Add SDK user agent to `PaymentAuthWebView`'s user agent
 * [#3551](https://github.com/stripe/stripe-android/pull/3551) Add extra headers to `PaymentAuthWebViewActivity`'s loadUrl request
