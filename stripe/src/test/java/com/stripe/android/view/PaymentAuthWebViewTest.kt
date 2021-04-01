@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.Stripe
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -36,6 +37,6 @@ class PaymentAuthWebViewTest {
         assertThat(userAgent)
             .contains("AppleWebkit")
         assertThat(userAgent)
-            .endsWith(" [Stripe/v1 AndroidBindings/16.4.1]")
+            .endsWith(" [Stripe/v1 AndroidBindings/${Stripe.VERSION_NAME}]")
     }
 }
