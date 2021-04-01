@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">stripe.com</domain>
+        <pin-set expiration="2021-09-27">
+            <pin digest="SHA-256">1234</pin>
+            <!-- backup pin -->
+            <pin digest="SHA-256">12345</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>
