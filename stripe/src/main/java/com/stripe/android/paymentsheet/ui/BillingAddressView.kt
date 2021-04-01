@@ -31,6 +31,16 @@ internal class BillingAddressView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+
+    /**
+     * Listener to notify events related to [postalCodeView]
+     */
+    interface PostalCodeViewListener {
+        fun onLosingFocus(country: Country?, isPostalValid: Boolean)
+        fun onGainingFocus(country: Country?, isPostalValid: Boolean)
+        fun onCountryChanged(country: Country?, isPostalValid: Boolean)
+    }
+
     @VisibleForTesting
     internal var level: PaymentSheet.BillingAddressCollectionLevel by Delegates.observable(
         PaymentSheet.BillingAddressCollectionLevel.Automatic
@@ -85,6 +95,9 @@ internal class BillingAddressView @JvmOverloads constructor(
     @VisibleForTesting
     internal val stateLayout = viewBinding.stateLayout
 
+    @VisibleForTesting
+    internal var postalCodeViewListener: PostalCodeViewListener? = null
+
     private val isUnitedStates: Boolean get() = countryLayout.selectedCountry?.code == Locale.US.country
 
     private var postalCodeConfig: PostalCodeConfig by Delegates.observable(
@@ -100,10 +113,13 @@ internal class BillingAddressView @JvmOverloads constructor(
         updatePostalCodeView(newCountry)
         _address.value = createAddress()
 
-        postalCodeView.shouldShowError = !postalCodeValidator.isValid(
+        postalCodeValidator.isValid(
             postalCode = postalCodeView.value.orEmpty(),
             countryCode = newCountry.code
-        )
+        ).let { isPostalValid ->
+            postalCodeViewListener?.onCountryChanged(newCountry, isPostalValid)
+            postalCodeView.shouldShowError = !isPostalValid
+        }
     }
 
     private val requiredViews = setOf(
@@ -164,6 +180,20 @@ internal class BillingAddressView @JvmOverloads constructor(
 
             postalCodeView.shouldShowError =
                 !hasFocus && !postalCodeView.value.isNullOrBlank() && !isPostalValid
+
+            if (hasFocus) {
+                postalCodeViewListener?.onGainingFocus(
+                    countryLayout.selectedCountry,
+                    isPostalValid
+                )
+            } else {
+                postalCodeViewListener?.onLosingFocus(
+                    countryLayout.selectedCountry,
+                    isPostalValid
+                )
+                postalCodeView.shouldShowError =
+                    !postalCodeView.value.isNullOrBlank() && !isPostalValid
+            }
         }
     }
 
