@@ -1,6 +1,7 @@
 package com.stripe.android.networking
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.Stripe
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -22,7 +23,7 @@ class StripeClientUserAgentHeaderFactoryTest {
                 {
                     "os.name": "android",
                     "os.version": "30",
-                    "bindings.version": "16.4.1",
+                    "bindings.version": "${Stripe.VERSION_NAME}",
                     "lang": "Java",
                     "publisher": "Stripe",
                     "http.agent": "example_value"
