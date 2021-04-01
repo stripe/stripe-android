@@ -100,7 +100,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         viewModel.logStart(
             runCatching { Uri.parse(args.url) }.getOrNull()
         )
-        viewBinding.webView.loadUrl(args.url)
+        viewBinding.webView.loadUrl(
+            args.url,
+            viewModel.extraHeaders
+        )
     }
 
     @VisibleForTesting
