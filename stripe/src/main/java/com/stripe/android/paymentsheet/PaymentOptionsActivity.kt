@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -114,13 +115,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        // Fragment is added with animation immediately after activity is created, so the sheet can
-        // be expanded now and it'll animate from the bottom.
-        bottomSheetController.expand()
-        // isFitToContents causes conflicts when calculating the sheet position upon resize.
-        // CoordinatorLayout will already position the sheet correctly with gravity = bottom.
-        bottomSheetBehavior.isFitToContents = false
-
         setupAddButton(viewBinding.addButton)
 
         viewModel.transition.observe(this) { transitionTarget ->
@@ -209,6 +203,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                     )
                 }
             }
+        }
+
+        supportFragmentManager.executePendingTransactions()
+        rootView.doOnNextLayout {
+            // Expand sheet only after the first fragment is attached so that it animates in.
+            // Further calls to expand() are no-op if the sheet is already expanded.
+            bottomSheetController.expand()
         }
     }
 

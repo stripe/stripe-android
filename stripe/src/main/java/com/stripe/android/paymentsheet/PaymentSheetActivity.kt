@@ -10,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
-import androidx.core.view.doOnLayout
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
@@ -188,7 +187,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             )
         }
 
-        rootView.doOnLayout {
+        rootView.doOnNextLayout {
             // Show bottom sheet only after the Activity has been laid out so that it animates in
             bottomSheetController.expand()
         }
