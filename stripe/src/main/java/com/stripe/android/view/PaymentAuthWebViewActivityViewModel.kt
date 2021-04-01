@@ -8,11 +8,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.AnalyticsEvent
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.Stripe
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.StripeClientUserAgentHeaderFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 
@@ -22,6 +24,10 @@ internal class PaymentAuthWebViewActivityViewModel(
     private val analyticsRequestFactory: AnalyticsRequest.Factory,
     private val analyticsDataFactory: AnalyticsDataFactory
 ) : ViewModel() {
+    val extraHeaders: Map<String, String> by lazy {
+        StripeClientUserAgentHeaderFactory().create(Stripe.appInfo)
+    }
+
     @JvmSynthetic
     internal val buttonText = args.toolbarCustomization?.let { toolbarCustomization ->
         toolbarCustomization.buttonText.takeUnless { it.isNullOrBlank() }
