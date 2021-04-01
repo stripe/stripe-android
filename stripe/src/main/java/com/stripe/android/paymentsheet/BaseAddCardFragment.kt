@@ -284,17 +284,18 @@ internal abstract class BaseAddCardFragment(
         billingAddressView.postalCodeViewListener =
             object : BillingAddressView.PostalCodeViewListener {
                 override fun onLosingFocus(country: Country?, isPostalValid: Boolean) {
-                    if (isPostalValid) {
-                        billingErrors.text = null
-                        billingErrors.isVisible = false
-                    } else {
+                    val shouldToggleBillingError =
+                        !isPostalValid && !billingAddressView.postalCodeView.text.isNullOrEmpty()
+                    billingErrors.text = if (shouldToggleBillingError) {
                         if (country == null || country.code == "US") {
-                            billingErrors.text = getString(R.string.address_zip_invalid)
+                            getString(R.string.address_zip_invalid)
                         } else {
-                            billingErrors.text = getString(R.string.address_postal_code_invalid)
+                            getString(R.string.address_postal_code_invalid)
                         }
-                        billingErrors.isVisible = true
+                    } else {
+                        null
                     }
+                    billingErrors.isVisible = !billingErrors.text.isNullOrEmpty()
                 }
 
                 override fun onGainingFocus(country: Country?, isPostalValid: Boolean) {
