@@ -915,7 +915,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 getApiUrl("3ds2/challenge_complete"),
                 requestOptions,
-                mapOf("source" to sourceId + "foo")
+                mapOf("source" to sourceId)
             ),
             Stripe3ds2AuthResultJsonParser()
         ) {
