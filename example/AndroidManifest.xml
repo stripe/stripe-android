@@ -16,7 +16,8 @@
         android:name=".ExampleApplication"
         android:theme="@style/AppTheme"
         android:supportsRtl="true"
-        tools:ignore="AllowBackup">
+        tools:ignore="AllowBackup"
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <meta-data
             android:name="com.stripe.example.metadata.backend_url"

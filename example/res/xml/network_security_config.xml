@@ -2,10 +2,10 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">stripe.com</domain>
-        <pin-set expiration="2021-09-27">
-            <pin digest="SHA-256">1234</pin>
+        <pin-set>
+            <pin digest="SHA-256">1234567812345678123456781234567812345678123</pin>
             <!-- backup pin -->
-            <pin digest="SHA-256">12345</pin>
+            <pin digest="SHA-256">1234567812345678123456781234567812345678123</pin>
         </pin-set>
     </domain-config>
 </network-security-config>
