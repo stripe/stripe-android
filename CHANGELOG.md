@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.4.3 - unreleased
+## 16.4.3 - 2021-04-02
 * [#3555](https://github.com/stripe/stripe-android/pull/3555) Fix 3DS2 challenge completion endpoint request
 
 ## 16.4.2 - 2021-04-01
