@@ -913,7 +913,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): Stripe3ds2AuthResult? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getApiUrl("3ds2/chal¬lenge_complete"),
+                getApiUrl("3ds2/challenge_complete"),
                 requestOptions,
                 mapOf("source" to sourceId + "foo")
             ),
