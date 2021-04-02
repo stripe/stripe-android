@@ -15,7 +15,7 @@ internal interface ConnectionFactory {
     @Throws(IOException::class, InvalidRequestException::class)
     fun create(request: StripeRequest): StripeConnection
 
-    class Default() : ConnectionFactory {
+    class Default : ConnectionFactory {
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
         override fun create(request: StripeRequest): StripeConnection {
