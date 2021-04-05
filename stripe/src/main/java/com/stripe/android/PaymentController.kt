@@ -1,10 +1,6 @@
 package com.stripe.android
 
 import android.content.Intent
-import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
@@ -69,28 +65,6 @@ internal interface PaymentController {
     )
 
     /**
-     * Get the PaymentIntent's client_secret from {@param data} and use to retrieve
-     * the PaymentIntent object with updated status.
-     *
-     * @param data the result Intent
-     * @return the [PaymentIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the PaymentIntent response's JsonParser returns null
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getPaymentIntentResult(data: Intent): PaymentIntentResult
-
-    /**
      * If setup authentication triggered an exception, get the exception object and pass to
      * [ApiResultCallback.onError].
      *
@@ -104,54 +78,10 @@ internal interface PaymentController {
         callback: ApiResultCallback<SetupIntentResult>
     )
 
-    /**
-     * Get the SetupIntent's client_secret from {@param data} and use to retrieve
-     * the SetupIntent object with updated status.
-     *
-     * @param data the result Intent
-     * @return the [SetupIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the SetupIntent response's JsonParser returns null
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getSetupIntentResult(data: Intent): SetupIntentResult
-
     fun handleSourceResult(
         data: Intent,
         callback: ApiResultCallback<Source>
     )
-
-    /**
-     * Get the Source's client_secret from {@param data} and use to retrieve
-     * the Source object with updated status.
-     *
-     * @param data the result Intent
-     * @return the [Source] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the Source response's JsonParser returns null
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun getSource(data: Intent): Source
 
     /**
      * Determine which authentication mechanism should be used, or bypass authentication

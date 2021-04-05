@@ -5,10 +5,6 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.auth.PaymentAuthWebViewContract
-import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -397,31 +393,6 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * Get the PaymentIntent's client_secret from {@param data} and use to retrieve
-     * the PaymentIntent object with updated status.
-     *
-     * @param data the result Intent
-     * @return the [PaymentIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the response's JsonParser returns null
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    override suspend fun getPaymentIntentResult(data: Intent) =
-        paymentFlowResultProcessor.processPaymentIntent(
-            PaymentFlowResult.Unvalidated.fromIntent(data)
-        )
-
-    /**
      * If setup authentication triggered an exception, get the exception object and pass to
      * [ApiResultCallback.onError].
      *
@@ -449,31 +420,6 @@ internal class StripePaymentController internal constructor(
             )
         }
     }
-
-    /**
-     * Get the SetupIntent's client_secret from {@param data} and use to retrieve
-     * the PaymentIntent object with updated status.
-     *
-     * @param data the result Intent
-     * @return the [SetupIntentResult] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the response's JsonParser returns null
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    override suspend fun getSetupIntentResult(data: Intent) =
-        paymentFlowResultProcessor.processSetupIntent(
-            PaymentFlowResult.Unvalidated.fromIntent(data)
-        )
 
     override fun handleSourceResult(
         data: Intent,
@@ -513,53 +459,6 @@ internal class StripePaymentController internal constructor(
                 )
             }
         }
-    }
-
-    /**
-     * Get the Source's client_secret from {@param data} and use to retrieve
-     * the Source object with updated status.
-     *
-     * @param data the result Intent
-     * @return the [Source] object
-     *
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
-     * @throws IllegalArgumentException if the Source response's JsonParser returns null
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        IllegalArgumentException::class
-    )
-    override suspend fun getSource(data: Intent): Source {
-        val result = PaymentFlowResult.Unvalidated.fromIntent(data)
-        val sourceId = result.sourceId.orEmpty()
-        val clientSecret = result.clientSecret.orEmpty()
-
-        val requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = result.stripeAccountId
-        )
-
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthSourceParams(
-                    AnalyticsEvent.AuthSourceResult,
-                    sourceId
-                )
-            )
-        )
-        return requireNotNull(
-            stripeRepository.retrieveSource(
-                sourceId,
-                clientSecret,
-                requestOptions
-            )
-        )
     }
 
     @VisibleForTesting

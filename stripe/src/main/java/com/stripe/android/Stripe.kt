@@ -323,20 +323,6 @@ class Stripe internal constructor(
     }
 
     /**
-     * Check if the requestCode and intent is for [PaymentIntentResult].
-     * The Intent should the retrieved from result from `Activity#onActivityResult(int, int, Intent)}}`
-     * by activity started with [confirmPayment] or [handleNextActionForPayment].
-     *
-     * @return whether the requestCode and intent is for [PaymentIntentResult].
-     */
-    fun isForPaymentIntentResult(
-        requestCode: Int,
-        data: Intent?
-    ): Boolean {
-        return data != null && paymentController.shouldHandlePaymentResult(requestCode, data)
-    }
-
-    /**
      * Should be called via `Activity#onActivityResult(int, int, Intent)}}` to handle the
      * result of a PaymentIntent automatic confirmation (see [confirmPayment]) or
      * manual confirmation (see [handleNextActionForPayment]})
@@ -347,8 +333,8 @@ class Stripe internal constructor(
         data: Intent?,
         callback: ApiResultCallback<PaymentIntentResult>
     ): Boolean {
-        return if (isForPaymentIntentResult(requestCode, data)) {
-            paymentController.handlePaymentResult(data!!, callback)
+        return if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
+            paymentController.handlePaymentResult(data, callback)
             true
         } else {
             false
@@ -612,20 +598,6 @@ class Stripe internal constructor(
     }
 
     /**
-     * Check if the requestCode and intent is for [SetupIntentResult].
-     * The Intent should the retrieved from result from `Activity#onActivityResult(int, int, Intent)}}`
-     * by activity started with [confirmSetupIntent].
-     *
-     * @return whether the requestCode and intent is for [SetupIntentResult].
-     */
-    fun isForSetupIntentResult(
-        requestCode: Int,
-        data: Intent?
-    ): Boolean {
-        return data != null && paymentController.shouldHandleSetupResult(requestCode, data)
-    }
-
-    /**
      * Should be called via `Activity#onActivityResult(int, int, Intent)}}` to handle the
      * result of a SetupIntent confirmation (see [confirmSetupIntent]).
      */
@@ -635,8 +607,8 @@ class Stripe internal constructor(
         data: Intent?,
         callback: ApiResultCallback<SetupIntentResult>
     ): Boolean {
-        return if (isForSetupIntentResult(requestCode, data)) {
-            paymentController.handleSetupResult(data!!, callback)
+        return if (data != null && paymentController.shouldHandleSetupResult(requestCode, data)) {
+            paymentController.handleSetupResult(data, callback)
             true
         } else {
             false
@@ -878,11 +850,7 @@ class Stripe internal constructor(
     }
 
     /**
-     * Check if the requestCode and intent is for [Source] authentication.
-     * The Intent should the retrieved from result from `Activity#onActivityResult(int, int, Intent)}}`
-     * by activity started with [authenticateSource].
-     *
-     * @return whether the requestCode and intent is for [Source] authentication
+     * Should be called in `onActivityResult()` to determine if the result is for Source authentication
      */
     fun isAuthenticateSourceResult(
         requestCode: Int,

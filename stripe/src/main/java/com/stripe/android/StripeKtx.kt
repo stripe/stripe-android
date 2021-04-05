@@ -1,12 +1,12 @@
 package com.stripe.android
 
-import android.content.Intent
 import androidx.annotation.Size
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.exception.StripeException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccountTokenParams
 import com.stripe.android.model.CardParams
@@ -56,7 +56,7 @@ suspend fun Stripe.createPaymentMethod(
     paymentMethodCreateParams: PaymentMethodCreateParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): PaymentMethod = runOnIOAndThrowIfNull {
     stripeRepository.createPaymentMethod(
         paymentMethodCreateParams,
         ApiRequest.Options(
@@ -95,7 +95,7 @@ suspend fun Stripe.createSource(
     sourceParams: SourceParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): Source = runOnIOAndThrowIfNull {
     stripeRepository.createSource(
         sourceParams,
         ApiRequest.Options(
@@ -134,7 +134,7 @@ suspend fun Stripe.createAccountToken(
     accountParams: AccountParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): Token = runOnIOAndThrowIfNull {
     stripeRepository.createToken(
         accountParams,
         ApiRequest.Options(
@@ -173,7 +173,7 @@ suspend fun Stripe.createBankAccountToken(
     bankAccountTokenParams: BankAccountTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): Token = runOnIOAndThrowIfNull {
     stripeRepository.createToken(
         bankAccountTokenParams,
         ApiRequest.Options(
@@ -212,7 +212,7 @@ suspend fun Stripe.createPiiToken(
     personalId: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): Token = runOnIOAndThrowIfNull {
     stripeRepository.createToken(
         PiiTokenParams(personalId),
         ApiRequest.Options(
@@ -253,7 +253,7 @@ suspend fun Stripe.createCardToken(
     cardParams: CardParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): Token = runOnIOAndThrowIfNull {
     stripeRepository.createToken(
         cardParams,
         ApiRequest.Options(
@@ -291,7 +291,7 @@ suspend fun Stripe.createCvcUpdateToken(
     @Size(min = 3, max = 4) cvc: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): Token = runOnIOAndThrowIfNull {
     stripeRepository.createToken(
         CvcTokenParams(cvc),
         ApiRequest.Options(
@@ -331,7 +331,7 @@ suspend fun Stripe.createPersonToken(
     params: PersonTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): Token = runOnIOAndThrowIfNull {
     stripeRepository.createToken(
         params,
         ApiRequest.Options(
@@ -372,7 +372,7 @@ suspend fun Stripe.createFile(
     fileParams: StripeFileParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId,
-) = runOnIOAndThrowIfNull {
+): StripeFile = runOnIOAndThrowIfNull {
     stripeRepository.createFile(
         fileParams,
         ApiRequest.Options(
@@ -409,7 +409,7 @@ suspend fun Stripe.createFile(
 suspend fun Stripe.retrievePaymentIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): PaymentIntent = runOnIOAndThrowIfNull {
     stripeRepository.retrievePaymentIntent(
         clientSecret,
         ApiRequest.Options(
@@ -445,7 +445,7 @@ suspend fun Stripe.retrievePaymentIntent(
 suspend fun Stripe.retrieveSetupIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): SetupIntent = runOnIOAndThrowIfNull {
     stripeRepository.retrieveSetupIntent(
         clientSecret,
         ApiRequest.Options(
@@ -483,7 +483,7 @@ suspend fun Stripe.retrieveSource(
     @Size(min = 1) sourceId: String,
     @Size(min = 1) clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-) = runOnIOAndThrowIfNull {
+): Source = runOnIOAndThrowIfNull {
     stripeRepository.retrieveSource(
         sourceId,
         clientSecret,
@@ -519,7 +519,7 @@ suspend fun Stripe.retrieveSource(
 suspend fun Stripe.confirmSetupIntentSuspend(
     confirmSetupIntentParams: ConfirmSetupIntentParams,
     idempotencyKey: String? = null
-) = runOnIOAndThrowIfNull {
+): SetupIntent = runOnIOAndThrowIfNull {
     stripeRepository.confirmSetupIntent(
         confirmSetupIntentParams,
         ApiRequest.Options(
@@ -555,7 +555,7 @@ suspend fun Stripe.confirmSetupIntentSuspend(
 suspend fun Stripe.confirmPaymentIntentSuspend(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     idempotencyKey: String? = null
-) = runOnIOAndThrowIfNull {
+): PaymentIntent = runOnIOAndThrowIfNull {
     stripeRepository.confirmPaymentIntent(
         confirmPaymentIntentParams,
         ApiRequest.Options(
@@ -567,116 +567,15 @@ suspend fun Stripe.confirmPaymentIntentSuspend(
 }
 
 /**
- * Consume the empty result from Stripe's internal Json Parser, throw [APIException] for public API.
+ * Consume the empty result from Stripe's internal Json Parser, throw [InvalidRequestException] for public API.
  */
 internal suspend inline fun <reified T : Any> runOnIOAndThrowIfNull(
     crossinline block: suspend () -> T?
 ): T =
     withContext(Dispatchers.IO) {
-        block() ?: run {
-            throw APIException(message = "${T::class.java.simpleName}'s JsonParser returns null.")
-        }
-    }
-
-/**
- * Get the [PaymentIntentResult] from [Intent] returned via
- * Activity#onActivityResult(int, int, Intent)}} for PaymentIntent automatic confirmation
- * (see [confirmPayment]) or manual confirmation (see [handleNextActionForPayment]})
- *
- * @param requestCode [Int] code passed from Activity#onActivityResult
- * @param data [Intent] intent from Activity#onActivityResult
- *
- * @throws AuthenticationException failure to properly authenticate yourself (check your key)
- * @throws InvalidRequestException your request has invalid parameters
- * @throws APIConnectionException failure to connect to Stripe's API
- * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
- */
-@Throws(
-    AuthenticationException::class,
-    InvalidRequestException::class,
-    APIConnectionException::class,
-    APIException::class,
-)
-suspend fun Stripe.getPaymentIntentResult(
-    requestCode: Int,
-    data: Intent?,
-): PaymentIntentResult {
-    return if (
-        isForPaymentIntentResult(requestCode, data)
-    ) runOnIOAndThrowForIllegalArgumentException { paymentController.getPaymentIntentResult(data!!) }
-    else throw IllegalArgumentException("Intent is not from Stripe#confirmPayment or Stripe#handleNextActionForPayment.")
-}
-
-/**
- * Get the [SetupIntentResult] from [Intent] returned via
- * Activity#onActivityResult(int, int, Intent)}} for SetupIntentResult confirmation.
- * (see [confirmSetupIntent])
- *
- * @param requestCode [Int] code passed from Activity#onActivityResult
- * @param data [Intent] intent from Activity#onActivityResult
- *
- * @throws AuthenticationException failure to properly authenticate yourself (check your key)
- * @throws InvalidRequestException your request has invalid parameters
- * @throws APIConnectionException failure to connect to Stripe's API
- * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
- */
-@Throws(
-    AuthenticationException::class,
-    InvalidRequestException::class,
-    APIConnectionException::class,
-    APIException::class,
-    IllegalArgumentException::class
-)
-suspend fun Stripe.getSetupIntentResult(
-    requestCode: Int,
-    data: Intent?,
-): SetupIntentResult {
-    return if (
-        isForSetupIntentResult(requestCode, data)
-    ) runOnIOAndThrowForIllegalArgumentException { paymentController.getSetupIntentResult(data!!) }
-    else throw IllegalArgumentException("Intent is not from Stripe#confirmSetupIntent.")
-}
-
-/**
- * Get the [Source] from [Intent] returned via
- * Activity#onActivityResult(int, int, Intent)}} for [Source] authentication.
- * (see [authenticateSource])
- *
- * @param requestCode [Int] code passed from Activity#onActivityResult
- * @param data [Intent] intent from Activity#onActivityResult
- *
- * @throws AuthenticationException failure to properly authenticate yourself (check your key)
- * @throws InvalidRequestException your request has invalid parameters
- * @throws APIConnectionException failure to connect to Stripe's API
- * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
- */
-@Throws(
-    AuthenticationException::class,
-    InvalidRequestException::class,
-    APIConnectionException::class,
-    APIException::class
-)
-suspend fun Stripe.getAuthenticateSourceResult(
-    requestCode: Int,
-    data: Intent?,
-): Source {
-    return if (
-        isAuthenticateSourceResult(requestCode, data)
-    ) runOnIOAndThrowForIllegalArgumentException { paymentController.getSource(data!!) }
-    else throw IllegalArgumentException("Intent is not from Stripe#authenticateSource.")
-}
-
-/**
- * Consume the [IllegalArgumentException] caused by empty result from Stripe's internal Json Parser,
- * throw [APIException] for public API.
- */
-internal suspend inline fun <reified T : Any> runOnIOAndThrowForIllegalArgumentException(
-    crossinline block: suspend () -> T
-): T =
-    withContext(Dispatchers.IO) {
-        try {
-            block()
-        } catch (e: IllegalArgumentException) {
-            throw APIException(message = "${T::class.java.simpleName}'s JsonParser returns null.")
-        }
+        runCatching {
+            requireNotNull(block()) {
+                "Failed to parse ${T::class.java.simpleName}."
+            }
+        }.getOrElse { throw StripeException.create(it) }
     }
