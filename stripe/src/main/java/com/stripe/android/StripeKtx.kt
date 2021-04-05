@@ -23,6 +23,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
+import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.networking.ApiRequest
 
@@ -566,9 +567,11 @@ suspend fun Stripe.confirmPaymentIntent(
 
 /**
  * Consume the empty result from Stripe's internal Json Parser, throw [InvalidRequestException] for public API.
+ *
+ * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
-private suspend inline fun <reified T : Any> runApiRequest(
-    crossinline block: suspend () -> T?
+private inline fun <reified T : StripeModel> runApiRequest(
+    block: () -> T?
 ): T =
     runCatching {
         requireNotNull(block()) {
