@@ -281,7 +281,7 @@ internal class PaymentSheetViewModel internal constructor(
                         eventReporter.onPaymentFailure(it)
                     }
 
-                    onApiError(error.message)
+                    onApiError(error)
                     paymentIntent.value?.let(::resetViewState)
                 }
             )

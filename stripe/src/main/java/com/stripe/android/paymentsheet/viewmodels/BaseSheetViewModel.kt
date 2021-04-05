@@ -39,6 +39,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _fatal = MutableLiveData<Throwable>()
     internal val fatal: LiveData<Throwable> = _fatal
 
+    private val _apiException = MutableLiveData<Throwable>()
+    internal val apiException: LiveData<Throwable> = _apiException
+
     protected val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
@@ -151,6 +154,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun onApiError(errorMessage: String?) {
         _userMessage.value = errorMessage?.let { UserMessage.Error(it) }
         _processing.value = false
+    }
+
+    fun onApiError(e: Throwable) {
+        _apiException.value = e
     }
 
     fun updateSelection(selection: PaymentSelection?) {

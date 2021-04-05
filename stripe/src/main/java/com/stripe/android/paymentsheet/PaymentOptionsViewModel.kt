@@ -115,7 +115,7 @@ internal class PaymentOptionsViewModel(
                     }
                 },
                 onFailure = {
-                    onApiError(it.localizedMessage)
+                    onApiError(it)
                     _viewState.value = ViewState.PaymentOptions.Ready
                 }
             )

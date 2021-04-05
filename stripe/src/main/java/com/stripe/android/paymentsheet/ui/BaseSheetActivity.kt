@@ -15,6 +15,7 @@ import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.R
+import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -98,6 +99,17 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener
         bottomSheet.isClickable = true
+
+        viewModel.apiException.observe(this) { throwable ->
+            when (throwable) {
+                is APIConnectionException -> {
+                    viewModel.onApiError(getString(R.string.stripe_failure_connection_error))
+                }
+                else -> {
+                    viewModel.onApiError(throwable.localizedMessage)
+                }
+            }
+        }
     }
 
     override fun finish() {
