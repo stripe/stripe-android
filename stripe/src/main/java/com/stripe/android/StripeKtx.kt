@@ -570,11 +570,11 @@ suspend fun Stripe.confirmPaymentIntent(
  *
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
-private inline fun <reified T : StripeModel> runApiRequest(
-    block: () -> T?
-): T =
+private inline fun <reified APIObject : StripeModel> runApiRequest(
+    block: () -> APIObject?
+): APIObject =
     runCatching {
         requireNotNull(block()) {
-            "Failed to parse ${T::class.java.simpleName}."
+            "Failed to parse ${APIObject::class.java.simpleName}."
         }
     }.getOrElse { throw StripeException.create(it) }
