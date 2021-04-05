@@ -19,7 +19,7 @@ import com.stripe.example.R
 import com.stripe.example.databinding.DropdownMenuPopupItemBinding
 import com.stripe.example.databinding.SimplePaymentMethodActivityBinding
 
-class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
+class SimpleConfirmationActivity : StripeIntentActivity() {
     private val simpleConfirmationViewModel: SimpleConfirmationViewModel by viewModels()
 
     private val viewBinding: SimplePaymentMethodActivityBinding by lazy {
@@ -143,7 +143,7 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
         ),
         Oxxo(
             "mx",
-            0, // TODO (mshafrir-stripe): add icon for Oxxo
+            R.drawable.ic_brandicon__oxxo,
             PaymentMethodCreateParams.Companion::createOxxo,
             requiresEmail = true
         )
