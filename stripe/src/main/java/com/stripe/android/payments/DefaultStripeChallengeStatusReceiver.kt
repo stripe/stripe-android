@@ -12,6 +12,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.stripe3ds2.transaction.ChallengeFlowOutcome
+import com.stripe.android.stripe3ds2.transaction.ChallengeStatusReceiver
 import com.stripe.android.stripe3ds2.transaction.CompletionEvent
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
@@ -24,6 +25,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * The default implementation of [StripeChallengeStatusReceiver]. Used to receive a result from
+ * the 3DS2 challenge flow. See [StripeChallengeStatusReceiver] and [ChallengeStatusReceiver] for
+ * more details.
+ */
 internal class DefaultStripeChallengeStatusReceiver internal constructor(
     private val stripe3ds2CompletionStarter: Stripe3ds2CompletionStarter,
     private val stripeRepository: StripeRepository,
