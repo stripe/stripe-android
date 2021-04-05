@@ -53,7 +53,6 @@ import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -71,7 +70,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
-    private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(
+    private val stripeApiRequestExecutor: ApiRequestExecutor = DefaultApiRequestExecutor(
+        workContext = workContext,
         logger = logger
     ),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
@@ -915,7 +915,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 getApiUrl("3ds2/challenge_complete"),
                 requestOptions,
-                mapOf("source" to sourceId + "foo")
+                mapOf("source" to sourceId)
             ),
             Stripe3ds2AuthResultJsonParser()
         ) {
@@ -1019,8 +1019,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>,
         onResponse: (RequestId?) -> Unit
-    ): ModelType? = withContext(workContext) {
-        jsonParser.parse(makeApiRequest(apiRequest, onResponse).responseJson)
+    ): ModelType? {
+        return jsonParser.parse(makeApiRequest(apiRequest, onResponse).responseJson)
     }
 
     @VisibleForTesting
@@ -1034,7 +1034,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal suspend fun makeApiRequest(
         apiRequest: ApiRequest,
         onResponse: (RequestId?) -> Unit
-    ): StripeResponse = withContext(workContext) {
+    ): StripeResponse {
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
@@ -1054,7 +1054,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         resetDnsCache(dnsCacheData)
 
-        response
+        return response
     }
 
     @VisibleForTesting
@@ -1068,7 +1068,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal suspend fun makeFileUploadRequest(
         fileUploadRequest: FileUploadRequest,
         onResponse: (RequestId?) -> Unit
-    ): StripeResponse = withContext(workContext) {
+    ): StripeResponse {
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
@@ -1088,7 +1088,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         resetDnsCache(dnsCacheData)
 
-        response
+        return response
     }
 
     private fun disableDnsCache(): DnsCacheData {

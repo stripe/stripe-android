@@ -18,7 +18,7 @@ import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-internal class StripeApiRequestExecutorTest {
+internal class DefaultApiRequestExecutorTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     @AfterTest
@@ -53,7 +53,8 @@ internal class StripeApiRequestExecutorTest {
     @Test
     fun `executeInternal with IllegalStateException should throw the exception`() =
         testDispatcher.runBlockingTest {
-            val executor = ApiRequestExecutor.Default(
+            val executor = DefaultApiRequestExecutor(
+                workContext = testDispatcher,
                 connectionFactory = FakeConnectionFactory(
                     FailingConnection(
                         IllegalStateException("Failure")
@@ -71,7 +72,8 @@ internal class StripeApiRequestExecutorTest {
     @Test
     fun `executeInternal with IOException should throw an APIConnectionException`() =
         testDispatcher.runBlockingTest {
-            val executor = ApiRequestExecutor.Default(
+            val executor = DefaultApiRequestExecutor(
+                workContext = testDispatcher,
                 connectionFactory = FakeConnectionFactory(
                     FailingConnection(
                         UnknownHostException("Could not connect to Stripe API")
@@ -92,7 +94,8 @@ internal class StripeApiRequestExecutorTest {
             val connectionFactory = FakeConnectionFactory(
                 FakeConnection(429)
             )
-            val executor = ApiRequestExecutor.Default(
+            val executor = DefaultApiRequestExecutor(
+                workContext = testDispatcher,
                 connectionFactory = connectionFactory,
                 retryDelaySupplier = RetryDelaySupplier(0)
             )
@@ -115,7 +118,8 @@ internal class StripeApiRequestExecutorTest {
                     FakeConnection(200)
                 }
             }
-            val executor = ApiRequestExecutor.Default(
+            val executor = DefaultApiRequestExecutor(
+                workContext = testDispatcher,
                 connectionFactory = connectionFactory,
                 retryDelaySupplier = RetryDelaySupplier(0)
             )

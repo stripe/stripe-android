@@ -114,7 +114,5 @@ internal data class ApiRequest internal constructor(
 
     internal companion object {
         internal const val API_HOST = "https://api.stripe.com"
-
-        internal const val HEADER_STRIPE_CLIENT_USER_AGENT = "X-Stripe-Client-User-Agent"
     }
 }

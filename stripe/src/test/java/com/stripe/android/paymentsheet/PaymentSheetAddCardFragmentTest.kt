@@ -22,6 +22,8 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
+import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.view.Country
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -331,6 +333,124 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
+    fun `when postal code is valid then billing error is invisible`() {
+        createFragment { _, viewBinding ->
+            assertThat(viewBinding.cardErrors.isVisible)
+                .isFalse()
+
+            viewBinding.billingAddress.countryLayout.selectedCountry = USA
+            viewBinding.billingAddress.postalCodeView.setText("94107")
+
+            assertThat(viewBinding.billingErrors.text.toString())
+                .isEmpty()
+            assertThat(viewBinding.billingErrors.isVisible)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `when US zip code is invalid and losing focus then billing error is visible with correct error message`() {
+        createFragment { _, viewBinding ->
+            assertThat(viewBinding.cardErrors.isVisible)
+                .isFalse()
+
+            viewBinding.billingAddress.countryLayout.selectedCountry = USA
+            viewBinding.billingAddress.postalCodeView.setText("123")
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
+            idleLooper()
+
+            assertThat(viewBinding.billingErrors.text.toString())
+                .isEqualTo(context.getString(R.string.address_zip_invalid))
+            assertThat(viewBinding.billingErrors.isVisible)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `when US zip code is valid and losing focus then billing error is invisible`() {
+        createFragment { _, viewBinding ->
+            assertThat(viewBinding.cardErrors.isVisible)
+                .isFalse()
+
+            viewBinding.billingAddress.countryLayout.selectedCountry = USA
+            viewBinding.billingAddress.postalCodeView.setText("94107")
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
+            idleLooper()
+
+            assertThat(viewBinding.billingErrors.text.toString()).isEmpty()
+            assertThat(viewBinding.billingErrors.isVisible)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `when Canada postal code is invalid and losing focus then billing error is visible with correct error message`() {
+        createFragment { _, viewBinding ->
+            assertThat(viewBinding.cardErrors.isVisible)
+                .isFalse()
+
+            viewBinding.billingAddress.countryLayout.selectedCountry = CANADA
+            viewBinding.billingAddress.postalCodeView.setText("!@#")
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
+            idleLooper()
+
+            assertThat(viewBinding.billingErrors.text.toString())
+                .isEqualTo(context.getString(R.string.address_postal_code_invalid))
+            assertThat(viewBinding.billingErrors.isVisible)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `when Canada postal code is valid and losing focus then billing error is invisible`() {
+        createFragment { _, viewBinding ->
+            assertThat(viewBinding.cardErrors.isVisible)
+                .isFalse()
+
+            viewBinding.billingAddress.countryLayout.selectedCountry = CANADA
+            viewBinding.billingAddress.postalCodeView.setText("A1G9Z9")
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
+            idleLooper()
+
+            assertThat(viewBinding.billingErrors.text.toString()).isEmpty()
+            assertThat(viewBinding.billingErrors.isVisible)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `when zip code is empty and losing focus then billing error is invisible`() {
+        createFragment { _, viewBinding ->
+            assertThat(viewBinding.cardErrors.isVisible)
+                .isFalse()
+
+            viewBinding.billingAddress.countryLayout.selectedCountry = USA
+            viewBinding.billingAddress.postalCodeView.setText("")
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
+            idleLooper()
+
+            assertThat(viewBinding.billingErrors.text.toString()).isEmpty()
+            assertThat(viewBinding.billingErrors.isVisible)
+                .isFalse()
+        }
+    }
+
+    @Test
     fun `empty merchant display name shows correct message`() {
         createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { _, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.text)
@@ -371,5 +491,10 @@ class PaymentSheetAddCardFragmentTest {
                 )
             )
         }
+    }
+
+    private companion object {
+        private val USA = Country("US", "United States")
+        private val CANADA = Country("CA", "Canada")
     }
 }

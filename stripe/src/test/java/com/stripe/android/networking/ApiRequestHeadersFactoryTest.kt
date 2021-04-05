@@ -7,6 +7,7 @@ import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.AppInfoFixtures
 import com.stripe.android.Stripe
+import com.stripe.android.networking.StripeClientUserAgentHeaderFactory.Companion.HEADER_STRIPE_CLIENT_USER_AGENT
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -56,7 +57,9 @@ class ApiRequestHeadersFactoryTest {
     fun headers_containsPropertyMapValues() {
         val headers = createHeaders()
 
-        val userAgentData = JSONObject(requireNotNull(headers[ApiRequest.HEADER_STRIPE_CLIENT_USER_AGENT]))
+        val userAgentData = JSONObject(
+            requireNotNull(headers[HEADER_STRIPE_CLIENT_USER_AGENT])
+        )
         assertThat(userAgentData.getString("bindings.version"))
             .isEqualTo(Stripe.VERSION_NAME)
         assertThat(userAgentData.getString("lang"))
@@ -87,8 +90,8 @@ class ApiRequestHeadersFactoryTest {
         assertThat(headers["User-Agent"])
             .isEqualTo("${RequestHeadersFactory.getUserAgent()} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)")
 
-        val stripeClientUserAgent = headers[ApiRequest.HEADER_STRIPE_CLIENT_USER_AGENT]
-            ?: error("Invalid JSON in `${ApiRequest.HEADER_STRIPE_CLIENT_USER_AGENT}`")
+        val stripeClientUserAgent = headers[HEADER_STRIPE_CLIENT_USER_AGENT]
+            ?: error("Invalid JSON in `$HEADER_STRIPE_CLIENT_USER_AGENT`")
         val stripeClientUserAgentData = JSONObject(stripeClientUserAgent)
         assertThat(JSONObject(stripeClientUserAgentData.getString("application")).toString())
             .isEqualTo(
