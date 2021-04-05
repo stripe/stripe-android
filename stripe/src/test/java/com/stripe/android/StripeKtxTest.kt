@@ -3,7 +3,6 @@ package com.stripe.android
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.PaymentIntent
@@ -11,7 +10,9 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -21,13 +22,20 @@ import kotlin.test.assertSame
 /**
  * Test for [Stripe] suspend functions.
  */
+@ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
-internal class StripeKotlinTest {
+internal class StripeKtxTest {
     private val mockApiRepository: StripeApiRepository = mock()
     private val mockPaymentController: PaymentController = mock()
 
     private val stripe: Stripe =
-        Stripe(mockApiRepository, mockPaymentController, TEST_PUBLISHABLE_KEY)
+        Stripe(
+            mockApiRepository,
+            mockPaymentController,
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            TEST_STRIPE_ACCOUNT_ID,
+            TestCoroutineDispatcher()
+        )
 
     @Test
     fun `When repository returns correct value then createPaymentMethod should Succeed`(): Unit =
@@ -307,7 +315,7 @@ internal class StripeKotlinTest {
             whenever(
                 mockApiRepository.confirmSetupIntent(any(), any(), any())
             ).thenReturn(expectedApiObj)
-            val actualObj = stripe.confirmSetupIntentSuspend(mock())
+            val actualObj = stripe.confirmSetupIntent(mock())
 
             assertSame(expectedApiObj, actualObj)
         }
@@ -320,7 +328,7 @@ internal class StripeKotlinTest {
             ).thenThrow(mock<AuthenticationException>())
 
             assertFailsWith<AuthenticationException> {
-                stripe.confirmSetupIntentSuspend(mock())
+                stripe.confirmSetupIntent(mock())
             }
         }
 
@@ -331,8 +339,8 @@ internal class StripeKotlinTest {
                 mockApiRepository.confirmSetupIntent(any(), any(), any())
             ).thenReturn(null)
 
-            assertFailsWith<APIException> {
-                stripe.confirmSetupIntentSuspend(mock())
+            assertFailsWith<InvalidRequestException> {
+                stripe.confirmSetupIntent(mock())
             }
         }
 
@@ -343,7 +351,7 @@ internal class StripeKotlinTest {
             whenever(
                 mockApiRepository.confirmPaymentIntent(any(), any(), any())
             ).thenReturn(expectedApiObj)
-            val actualObj = stripe.confirmPaymentIntentSuspend(mock())
+            val actualObj = stripe.confirmPaymentIntent(mock())
 
             assertSame(expectedApiObj, actualObj)
         }
@@ -356,7 +364,7 @@ internal class StripeKotlinTest {
             ).thenThrow(mock<AuthenticationException>())
 
             assertFailsWith<AuthenticationException> {
-                stripe.confirmPaymentIntentSuspend(mock())
+                stripe.confirmPaymentIntent(mock())
             }
         }
 
@@ -368,7 +376,7 @@ internal class StripeKotlinTest {
             ).thenReturn(null)
 
             assertFailsWith<InvalidRequestException> {
-                stripe.confirmPaymentIntentSuspend(mock())
+                stripe.confirmPaymentIntent(mock())
             }
         }
 
@@ -538,7 +546,6 @@ internal class StripeKotlinTest {
     }
 
     private companion object {
-        const val TEST_PUBLISHABLE_KEY = "test_publishable_key"
         const val TEST_IDEMPOTENCY_KEY = "test_idempotenc_key"
         const val TEST_STRIPE_ACCOUNT_ID = "test_account_id"
     }

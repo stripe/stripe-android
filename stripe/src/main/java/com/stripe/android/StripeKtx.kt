@@ -25,8 +25,6 @@ import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.Token
 import com.stripe.android.networking.ApiRequest
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * Create a [PaymentMethod] from a coroutine.
@@ -56,7 +54,7 @@ suspend fun Stripe.createPaymentMethod(
     paymentMethodCreateParams: PaymentMethodCreateParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): PaymentMethod = runOnIOAndThrowIfNull {
+): PaymentMethod = runApiRequest {
     stripeRepository.createPaymentMethod(
         paymentMethodCreateParams,
         ApiRequest.Options(
@@ -95,7 +93,7 @@ suspend fun Stripe.createSource(
     sourceParams: SourceParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Source = runOnIOAndThrowIfNull {
+): Source = runApiRequest {
     stripeRepository.createSource(
         sourceParams,
         ApiRequest.Options(
@@ -134,7 +132,7 @@ suspend fun Stripe.createAccountToken(
     accountParams: AccountParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runOnIOAndThrowIfNull {
+): Token = runApiRequest {
     stripeRepository.createToken(
         accountParams,
         ApiRequest.Options(
@@ -173,7 +171,7 @@ suspend fun Stripe.createBankAccountToken(
     bankAccountTokenParams: BankAccountTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runOnIOAndThrowIfNull {
+): Token = runApiRequest {
     stripeRepository.createToken(
         bankAccountTokenParams,
         ApiRequest.Options(
@@ -212,7 +210,7 @@ suspend fun Stripe.createPiiToken(
     personalId: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runOnIOAndThrowIfNull {
+): Token = runApiRequest {
     stripeRepository.createToken(
         PiiTokenParams(personalId),
         ApiRequest.Options(
@@ -253,7 +251,7 @@ suspend fun Stripe.createCardToken(
     cardParams: CardParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runOnIOAndThrowIfNull {
+): Token = runApiRequest {
     stripeRepository.createToken(
         cardParams,
         ApiRequest.Options(
@@ -291,7 +289,7 @@ suspend fun Stripe.createCvcUpdateToken(
     @Size(min = 3, max = 4) cvc: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runOnIOAndThrowIfNull {
+): Token = runApiRequest {
     stripeRepository.createToken(
         CvcTokenParams(cvc),
         ApiRequest.Options(
@@ -331,7 +329,7 @@ suspend fun Stripe.createPersonToken(
     params: PersonTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runOnIOAndThrowIfNull {
+): Token = runApiRequest {
     stripeRepository.createToken(
         params,
         ApiRequest.Options(
@@ -372,7 +370,7 @@ suspend fun Stripe.createFile(
     fileParams: StripeFileParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId,
-): StripeFile = runOnIOAndThrowIfNull {
+): StripeFile = runApiRequest {
     stripeRepository.createFile(
         fileParams,
         ApiRequest.Options(
@@ -409,7 +407,7 @@ suspend fun Stripe.createFile(
 suspend fun Stripe.retrievePaymentIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-): PaymentIntent = runOnIOAndThrowIfNull {
+): PaymentIntent = runApiRequest {
     stripeRepository.retrievePaymentIntent(
         clientSecret,
         ApiRequest.Options(
@@ -445,7 +443,7 @@ suspend fun Stripe.retrievePaymentIntent(
 suspend fun Stripe.retrieveSetupIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-): SetupIntent = runOnIOAndThrowIfNull {
+): SetupIntent = runApiRequest {
     stripeRepository.retrieveSetupIntent(
         clientSecret,
         ApiRequest.Options(
@@ -483,7 +481,7 @@ suspend fun Stripe.retrieveSource(
     @Size(min = 1) sourceId: String,
     @Size(min = 1) clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-): Source = runOnIOAndThrowIfNull {
+): Source = runApiRequest {
     stripeRepository.retrieveSource(
         sourceId,
         clientSecret,
@@ -516,10 +514,10 @@ suspend fun Stripe.retrieveSource(
     APIConnectionException::class,
     APIException::class
 )
-suspend fun Stripe.confirmSetupIntentSuspend(
+suspend fun Stripe.confirmSetupIntent(
     confirmSetupIntentParams: ConfirmSetupIntentParams,
     idempotencyKey: String? = null
-): SetupIntent = runOnIOAndThrowIfNull {
+): SetupIntent = runApiRequest {
     stripeRepository.confirmSetupIntent(
         confirmSetupIntentParams,
         ApiRequest.Options(
@@ -552,10 +550,10 @@ suspend fun Stripe.confirmSetupIntentSuspend(
     APIConnectionException::class,
     APIException::class
 )
-suspend fun Stripe.confirmPaymentIntentSuspend(
+suspend fun Stripe.confirmPaymentIntent(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     idempotencyKey: String? = null
-): PaymentIntent = runOnIOAndThrowIfNull {
+): PaymentIntent = runApiRequest {
     stripeRepository.confirmPaymentIntent(
         confirmPaymentIntentParams,
         ApiRequest.Options(
@@ -569,13 +567,11 @@ suspend fun Stripe.confirmPaymentIntentSuspend(
 /**
  * Consume the empty result from Stripe's internal Json Parser, throw [InvalidRequestException] for public API.
  */
-internal suspend inline fun <reified T : Any> runOnIOAndThrowIfNull(
+private suspend inline fun <reified T : Any> runApiRequest(
     crossinline block: suspend () -> T?
 ): T =
-    withContext(Dispatchers.IO) {
-        runCatching {
-            requireNotNull(block()) {
-                "Failed to parse ${T::class.java.simpleName}."
-            }
-        }.getOrElse { throw StripeException.create(it) }
-    }
+    runCatching {
+        requireNotNull(block()) {
+            "Failed to parse ${T::class.java.simpleName}."
+        }
+    }.getOrElse { throw StripeException.create(it) }
