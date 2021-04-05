@@ -716,31 +716,50 @@ internal object PaymentIntentFixtures {
     val OXXO_REQUIRES_ACTION_JSON = JSONObject(
         """
         {
-            "id": "pi_1Ga0nFLYnbCF8",
+            "id": "pi_1IcuwoL32KlRo",
             "object": "payment_intent",
-            "amount": 1000,
+            "amount": 1099,
             "canceled_at": null,
             "cancellation_reason": null,
             "capture_method": "automatic",
-            "client_secret": "pi_1Ga0nFLYnbCF8_secret_Vd75bObmsTyGR4k",
+            "client_secret": "pi_1IcuwoL32KlRo_secret_KC0YoHfna465TDVW",
             "confirmation_method": "automatic",
-            "created": 1587393617,
+            "created": 1617638802,
             "currency": "mxn",
-            "description": null,
+            "description": "Example PaymentIntent",
             "last_payment_error": null,
             "livemode": false,
             "next_action": {
-                "display_oxxo_details": {
-                    "expires_after": 1587704399,
-                    "number": "12345678901234657890123456789012",
-                    "hosted_voucher_url": "https://payments.stripe.com/oxxo/voucher/vchr_test_YWNjdF8xR1hhNUZIU0wxMEo5d3F2LHZjaHJfSGJIOGVMYmNmQlkyMUJ5OU1WTU5uMVYxdDNta1Q2RQ0000gtenGCef"
+                "oxxo_display_details": {
+                    "expires_after": 1617944399,
+                    "hosted_voucher_url": "https:\/\/payments.stripe.com\/oxxo\/voucher\/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb",
+                    "number": "12345678901234657890123456789012"
                 },
-                "type": "display_oxxo_details"
+                "type": "oxxo_display_details"
             },
-            "payment_method": "pm_1Ga11MLYnbC",
-            "payment_method_types": [
-                "oxxo"
-            ],
+            "payment_method": {
+                "id": "pm_1IcuwoL32KlRot01",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": "jrosen@example.com",
+                    "name": "Jenny Rosen",
+                    "phone": null
+                },
+                "created": 1617638802,
+                "customer": null,
+                "livemode": false,
+                "oxxo": {},
+                "type": "oxxo"
+            },
+            "payment_method_types": ["card", "oxxo"],
             "receipt_email": null,
             "setup_future_usage": null,
             "shipping": null,
@@ -749,7 +768,7 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     )
-    val OXXO_REQUIES_ACTION = PARSER.parse(OXXO_REQUIRES_ACTION_JSON)!!
+    val OXXO_REQUIES_ACTION = requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
 
     val ALIPAY_REQUIRES_ACTION_JSON = JSONObject(
         """

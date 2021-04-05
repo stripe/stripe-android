@@ -60,7 +60,7 @@ interface StripeIntent : StripeModel {
     enum class NextActionType(val code: String) {
         RedirectToUrl("redirect_to_url"),
         UseStripeSdk("use_stripe_sdk"),
-        DisplayOxxoDetails("display_oxxo_details"),
+        DisplayOxxoDetails("oxxo_display_details"),
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize");
 
