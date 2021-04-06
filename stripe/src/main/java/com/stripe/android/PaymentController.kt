@@ -87,7 +87,7 @@ internal interface PaymentController {
      * Determine which authentication mechanism should be used, or bypass authentication
      * if it is not needed.
      */
-    fun handleNextAction(
+    suspend fun handleNextAction(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options

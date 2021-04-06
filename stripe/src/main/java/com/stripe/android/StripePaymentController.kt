@@ -309,35 +309,47 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    private fun onSourceRetrieved(
+    private suspend fun onSourceRetrieved(
         host: AuthActivityStarter.Host,
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
         if (source.flow == Source.Flow.Redirect) {
-            analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.create(
-                    analyticsDataFactory.createAuthSourceParams(
-                        AnalyticsEvent.AuthSourceRedirect,
-                        source.id
-                    )
-                )
-            )
-
-            paymentAuthWebViewStarterFactory(host).start(
-                PaymentAuthWebViewContract.Args(
-                    objectId = source.id.orEmpty(),
-                    requestCode = SOURCE_REQUEST_CODE,
-                    clientSecret = source.clientSecret.orEmpty(),
-                    url = source.redirect?.url.orEmpty(),
-                    returnUrl = source.redirect?.returnUrl,
-                    enableLogging = enableLogging,
-                    stripeAccountId = requestOptions.stripeAccount
-                )
+            startSourceAuth(
+                paymentAuthWebViewStarterFactory(host),
+                source,
+                requestOptions
             )
         } else {
             bypassAuth(host, source, requestOptions.stripeAccount)
         }
+    }
+
+    private suspend fun startSourceAuth(
+        paymentAuthWebViewStarter: PaymentAuthWebViewStarter,
+        source: Source,
+        requestOptions: ApiRequest.Options
+    ) = withContext(Dispatchers.Main) {
+        analyticsRequestExecutor.executeAsync(
+            analyticsRequestFactory.create(
+                analyticsDataFactory.createAuthSourceParams(
+                    AnalyticsEvent.AuthSourceRedirect,
+                    source.id
+                )
+            )
+        )
+
+        paymentAuthWebViewStarter.start(
+            PaymentAuthWebViewContract.Args(
+                objectId = source.id.orEmpty(),
+                requestCode = SOURCE_REQUEST_CODE,
+                clientSecret = source.clientSecret.orEmpty(),
+                url = source.redirect?.url.orEmpty(),
+                returnUrl = source.redirect?.returnUrl,
+                enableLogging = enableLogging,
+                stripeAccountId = requestOptions.stripeAccount
+            )
+        )
     }
 
     /**
@@ -480,9 +492,7 @@ internal class StripePaymentController internal constructor(
             )
         }.fold(
             onSuccess = {
-                withContext(Dispatchers.Main) {
-                    callback.onSuccess(it)
-                }
+                dispatchPaymentIntentResult(it, callback)
             },
             onFailure = {
                 dispatchError(it, callback)
@@ -513,11 +523,11 @@ internal class StripePaymentController internal constructor(
         callback.onError(StripeException.create(throwable))
     }
 
-    private fun handleError(
+    private suspend fun handleError(
         host: AuthActivityStarter.Host,
         requestCode: Int,
         throwable: Throwable
-    ) {
+    ) = withContext(Dispatchers.Main) {
         paymentRelayStarterFactory(host)
             .start(
                 PaymentRelayStarter.Args.ErrorArgs(
@@ -532,7 +542,7 @@ internal class StripePaymentController internal constructor(
      * if it is not needed.
      */
     @VisibleForTesting
-    override fun handleNextAction(
+    override suspend fun handleNextAction(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
@@ -587,7 +597,7 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    private fun handle3ds2Auth(
+    private suspend fun handle3ds2Auth(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options,
@@ -617,7 +627,7 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    private fun handle3ds1Auth(
+    private suspend fun handle3ds1Auth(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options,
@@ -644,7 +654,7 @@ internal class StripePaymentController internal constructor(
         )
     }
 
-    private fun handleRedirectToUrlAuth(
+    private suspend fun handleRedirectToUrlAuth(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options,
@@ -677,7 +687,7 @@ internal class StripePaymentController internal constructor(
      * Alipay Native SDK use case is handled by [Stripe.confirmAlipayPayment]
      * outside of the standard confirmation path.
      */
-    private fun handleAlipayAuth(
+    private suspend fun handleAlipayAuth(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options,
@@ -704,7 +714,7 @@ internal class StripePaymentController internal constructor(
         )
     }
 
-    private fun handleOxxoAuth(
+    private suspend fun handleOxxoAuth(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options,
@@ -729,22 +739,22 @@ internal class StripePaymentController internal constructor(
     }
 
     @JvmSynthetic
-    internal fun bypassAuth(
+    internal suspend fun bypassAuth(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         stripeAccountId: String?
-    ) {
+    ) = withContext(Dispatchers.Main) {
         paymentRelayStarterFactory(host)
             .start(
                 PaymentRelayStarter.Args.create(stripeIntent, stripeAccountId)
             )
     }
 
-    private fun bypassAuth(
+    private suspend fun bypassAuth(
         host: AuthActivityStarter.Host,
         source: Source,
         stripeAccountId: String?
-    ) {
+    ) = withContext(Dispatchers.Main) {
         paymentRelayStarterFactory(host)
             .start(
                 PaymentRelayStarter.Args.SourceArgs(source, stripeAccountId)
@@ -891,7 +901,7 @@ internal class StripePaymentController internal constructor(
     /**
      * Used when standard 3DS2 authentication mechanisms are unavailable.
      */
-    internal fun on3ds2AuthFallback(
+    internal suspend fun on3ds2AuthFallback(
         fallbackRedirectUrl: String,
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
@@ -1071,7 +1081,7 @@ internal class StripePaymentController internal constructor(
         /**
          * Start in-app WebView activity.
          */
-        private fun beginWebAuth(
+        private suspend fun beginWebAuth(
             paymentWebWebViewStarter: PaymentAuthWebViewStarter,
             stripeIntent: StripeIntent,
             requestCode: Int,
@@ -1082,7 +1092,7 @@ internal class StripePaymentController internal constructor(
             enableLogging: Boolean = false,
             shouldCancelSource: Boolean = false,
             shouldCancelIntentOnUserNavigation: Boolean = true
-        ) {
+        ) = withContext(Dispatchers.Main) {
             Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
             paymentWebWebViewStarter.start(
                 PaymentAuthWebViewContract.Args(
