@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
@@ -30,6 +31,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val scrollView: ScrollView
     abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
+    abstract val fragmentContainerParent: ViewGroup
 
     abstract fun onUserCancel()
     abstract fun setActivityResult(result: ResultType)
@@ -57,6 +59,17 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 resources.getDimension(R.dimen.stripe_paymentsheet_toolbar_elevation)
             } else {
                 0f
+            }
+        }
+
+        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+
+        bottomSheetController.setup()
+
+        bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
+            if (shouldFinish) {
+                finish()
             }
         }
 

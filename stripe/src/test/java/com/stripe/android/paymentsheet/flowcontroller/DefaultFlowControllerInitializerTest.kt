@@ -80,7 +80,57 @@ internal class DefaultFlowControllerInitializerTest {
     }
 
     @Test
-    fun `init() with customer should set first payment method as saved selection if saved selection is null`() =
+    fun `init() with no customer, and google pay ready should default saved selection to google pay`() =
+        testDispatcher.runBlockingTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val initializer = createInitializer()
+            assertThat(
+                initializer.init(
+                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.CONFIG_GOOGLEPAY
+                )
+            ).isEqualTo(
+                FlowControllerInitializer.InitResult.Success(
+                    InitData(
+                        PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                        listOf(PaymentMethod.Type.Card),
+                        emptyList(),
+                        SavedSelection.GooglePay,
+                        isGooglePayReady = true
+                    )
+                )
+            )
+        }
+
+    @Test
+    fun `init() with no customer, and google pay not ready should default saved selection to none`() =
+        testDispatcher.runBlockingTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val initializer = createInitializer(isGooglePayReady = false)
+            assertThat(
+                initializer.init(
+                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.CONFIG_GOOGLEPAY
+                )
+            ).isEqualTo(
+                FlowControllerInitializer.InitResult.Success(
+                    InitData(
+                        PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                        listOf(PaymentMethod.Type.Card),
+                        emptyList(),
+                        SavedSelection.None,
+                        isGooglePayReady = false
+                    )
+                )
+            )
+        }
+
+    @Test
+    fun `init() with customer payment methods, and google pay ready should default saved selection to last payment method`() =
         testDispatcher.runBlockingTest {
             prefsRepository.savePaymentSelection(null)
 
@@ -103,14 +153,72 @@ internal class DefaultFlowControllerInitializerTest {
                 )
             )
 
-            assertThat(
-                prefsRepository.getSavedSelection()
-            ).isEqualTo(
+            assertThat(prefsRepository.getSavedSelection()).isEqualTo(
                 SavedSelection.PaymentMethod(
                     id = "pm_123456789"
                 )
             )
         }
+
+    @Test
+    fun `init() with customer, no methods, and google pay not ready, should set first payment method as google pay`() =
+        testDispatcher.runBlockingTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val initializer = createInitializer(
+                paymentMethods = emptyList(),
+                isGooglePayReady = false
+            )
+            assertThat(
+                initializer.init(
+                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+                )
+            ).isEqualTo(
+                FlowControllerInitializer.InitResult.Success(
+                    InitData(
+                        PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                        listOf(PaymentMethod.Type.Card),
+                        emptyList(),
+                        SavedSelection.None,
+                        isGooglePayReady = false
+                    )
+                )
+            )
+
+            assertThat(prefsRepository.getSavedSelection()).isEqualTo(SavedSelection.None)
+        }
+
+    @Test
+    fun `init() with customer, no methods, and google pay ready, should set first payment method as none`() =
+        testDispatcher.runBlockingTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val initializer = createInitializer(paymentMethods = emptyList())
+            assertThat(
+                initializer.init(
+                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+                )
+            ).isEqualTo(
+                FlowControllerInitializer.InitResult.Success(
+                    InitData(
+                        PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                        listOf(PaymentMethod.Type.Card),
+                        emptyList(),
+                        SavedSelection.GooglePay,
+                        isGooglePayReady = true
+                    )
+                )
+            )
+
+            assertThat(prefsRepository.getSavedSelection()).isEqualTo(SavedSelection.GooglePay)
+        }
+
+    private fun testDefaultSavedSelection() {
+    }
 
     @Test
     fun `init() when PaymentIntent has invalid status should return null`() =
@@ -143,13 +251,15 @@ internal class DefaultFlowControllerInitializerTest {
         }
 
     private fun createInitializer(
-        paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
+        isGooglePayReady: Boolean = true
     ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
             PaymentIntentRepository.Static(paymentIntent),
-            FakePaymentMethodsRepository(PAYMENT_METHODS),
+            FakePaymentMethodsRepository(paymentMethods),
             { _, _ -> prefsRepository },
-            { true },
+            { isGooglePayReady },
             testDispatcher
         )
     }

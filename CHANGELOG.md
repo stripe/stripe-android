@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 16.4.3 - 2021-04-02
+* [#3555](https://github.com/stripe/stripe-android/pull/3555) Fix 3DS2 challenge completion endpoint request
+
+## 16.4.2 - 2021-04-01
+* [#3548](https://github.com/stripe/stripe-android/pull/3548) Refine `PaymentAuthWebViewClient` completion URL logic
+* [#3549](https://github.com/stripe/stripe-android/pull/3549) Add SDK user agent to `PaymentAuthWebView`'s user agent
+* [#3551](https://github.com/stripe/stripe-android/pull/3551) Add extra headers to `PaymentAuthWebViewActivity`'s loadUrl request
+
+## 16.4.1 - 2021-04-01
+* [#3537](https://github.com/stripe/stripe-android/pull/3537) Add account id support in `IssuingCardPinService`
+* [#3538](https://github.com/stripe/stripe-android/pull/3538) Add support for retrying rate-limited API requests
+* [#3543](https://github.com/stripe/stripe-android/pull/3543) Add better support for auto-dismissing `PaymentAuthWebViewActivity` when `return_url` is not provided
+
 ## 16.4.0 - 2021-03-29
 * [#3457](https://github.com/stripe/stripe-android/pull/3457) Fix issue where `StripeEditText` was overriding default text color changes
 * [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix `PaymentMethodsAdapter` "new card" click handling

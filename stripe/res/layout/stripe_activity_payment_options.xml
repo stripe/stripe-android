@@ -9,7 +9,8 @@
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipToPadding="true"
+        android:layout_gravity="bottom"
+        android:animateLayoutChanges="true"
         android:background="?colorSurface"
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -18,6 +19,7 @@
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
             app:elevation="0dp">
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -26,6 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?colorSurface" />
+
         </com.google.android.material.appbar.AppBarLayout>
 
         <ScrollView
@@ -34,15 +37,16 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
+                android:id="@+id/fragment_container_parent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:animateLayoutChanges="true">
 
                 <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/fragment_container"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/message"
@@ -51,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:visibility="gone"
                     android:layout_marginVertical="2dp"
-                    android:layout_marginHorizontal="10dp" />
+                    android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal" />
 
                 <com.stripe.android.paymentsheet.ui.PrimaryButton
                     android:id="@+id/add_button"
@@ -62,10 +66,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/stripe_paymentsheet_add_button_label"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintVertical_bias="1" />
+                    android:visibility="gone"/>
 
             </LinearLayout>
         </ScrollView>

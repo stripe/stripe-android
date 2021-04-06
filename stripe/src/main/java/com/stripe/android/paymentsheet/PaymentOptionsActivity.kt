@@ -9,12 +9,12 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -53,10 +53,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
 
     override val bottomSheetController: BottomSheetController by lazy {
-        BottomSheetController(
-            bottomSheetBehavior = bottomSheetBehavior,
-            lifecycleScope = lifecycleScope
-        )
+        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
 
     private val fragmentContainerId: Int
@@ -69,6 +66,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val toolbar: MaterialToolbar by lazy { viewBinding.toolbar }
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
+    override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
 
     override val eventReporter: EventReporter by lazy {
         DefaultEventReporter(
@@ -116,12 +114,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 PaymentOptionResult.Failed(it)
             )
         }
-        bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
-            if (shouldFinish) {
-                finish()
-            }
-        }
-        bottomSheetController.setup()
 
         setupAddButton(viewBinding.addButton)
 
@@ -211,6 +203,14 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                     )
                 }
             }
+        }
+
+        // Ensure the bottom sheet is expanded only after the fragment transaction is completed
+        supportFragmentManager.executePendingTransactions()
+        rootView.doOnNextLayout {
+            // Expand sheet only after the first fragment is attached so that it animates in.
+            // Further calls to expand() are no-op if the sheet is already expanded.
+            bottomSheetController.expand()
         }
     }
 

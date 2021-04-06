@@ -118,7 +118,7 @@ class LauncherActivity : AppCompatActivity() {
             ),
             Item(
                 activity.getString(R.string.simple_payment_method_example),
-                SimplePaymentMethodConfirmationActivity::class.java
+                SimpleConfirmationActivity::class.java
             ),
             Item(
                 activity.getString(R.string.connect_example),

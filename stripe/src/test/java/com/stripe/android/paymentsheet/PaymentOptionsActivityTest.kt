@@ -65,10 +65,6 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-                idleLooper()
-
                 activity.viewBinding.root.performClick()
                 activity.finish()
             }
@@ -92,10 +88,6 @@ class PaymentOptionsActivityTest {
             )
         ).use {
             it.onActivity { activity ->
-                // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-                idleLooper()
-
                 assertThat(activity.viewBinding.addButton.isVisible)
                     .isFalse()
             }
@@ -109,10 +101,6 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-                idleLooper()
-
                 assertThat(activity.viewBinding.addButton.isVisible)
                     .isTrue()
             }
@@ -130,10 +118,6 @@ class PaymentOptionsActivityTest {
             )
         ).use {
             it.onActivity { activity ->
-                // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
-                idleLooper()
-
                 assertThat(activity.viewBinding.addButton.isVisible)
                     .isFalse()
 
@@ -262,6 +246,23 @@ class PaymentOptionsActivityTest {
             idleLooper()
             assertThat(transitionTarget[1])
                 .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
+        }
+    }
+
+    @Test
+    fun `Verify bottom sheet expands on start`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                idleLooper()
+
+                assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
+                assertThat(activity.bottomSheetBehavior.isFitToContents)
+                    .isFalse()
+            }
         }
     }
 

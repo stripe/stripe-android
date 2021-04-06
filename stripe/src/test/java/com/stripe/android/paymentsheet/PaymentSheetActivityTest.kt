@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.animation.LayoutTransition
 import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
@@ -91,15 +92,16 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `handles clicks outside of bottom sheet`() {
+    fun `bottom sheet expands on start and handles click outside`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
+                assertThat(activity.bottomSheetBehavior.isFitToContents)
+                    .isFalse()
 
                 activity.viewBinding.root.performClick()
                 idleLooper()
@@ -127,17 +129,22 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
-                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-
-                viewModel.updateSelection(PaymentSelection.GooglePay)
+                // Google Pay initially selected as there's no saved selection
                 assertThat(activity.viewBinding.buyButton.isVisible).isFalse()
                 assertThat(activity.viewBinding.googlePayButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
 
+                viewModel.updateSelection(
+                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                )
+                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+                assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
+
                 viewModel.updateSelection(null)
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+                assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
             }
         }
     }
@@ -152,6 +159,7 @@ internal class PaymentSheetActivityTest {
                         FragmentConfigFixtures.DEFAULT
                     )
                 )
+                idleLooper()
 
                 // Initially empty card
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
@@ -204,7 +212,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 assertThat(currentFragment(activity))
@@ -257,7 +264,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 assertThat(activity.toolbar.navigationContentDescription)
@@ -294,7 +300,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 viewModel.updateSelection(
@@ -322,12 +327,35 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `Verify animation is enabled for layout transition changes`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                idleLooper()
+
+                assertThat(
+                    activity.viewBinding.bottomSheet.layoutTransition.isTransitionTypeEnabled(
+                        LayoutTransition.CHANGING
+                    )
+                ).isTrue()
+
+                assertThat(
+                    activity.viewBinding.fragmentContainerParent.layoutTransition
+                        .isTransitionTypeEnabled(
+                            LayoutTransition.CHANGING
+                        )
+                ).isTrue()
+            }
+        }
+    }
+
+    @Test
     fun `Verify Ready state updates the buy button label`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 viewModel._viewState.value = ViewState.PaymentSheet.Ready(
@@ -357,7 +385,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 viewModel._processing.value = true
@@ -375,7 +402,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
@@ -395,7 +421,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { _ ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 var finishProcessingCalled = false
@@ -418,7 +443,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 viewModel._viewState.value = ViewState.PaymentSheet.ProcessResult(
@@ -478,7 +502,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 assertThat(currentFragment(activity))
@@ -516,7 +539,6 @@ internal class PaymentSheetActivityTest {
                 assertThat(activity.viewBinding.buyButton.isEnabled)
                     .isTrue()
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 assertThat(activity.viewBinding.buyButton.isEnabled)
@@ -549,7 +571,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 idleLooper()
 
                 assertThat(currentFragment(activity))
@@ -587,7 +608,6 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).use {
             it.onActivity { activity ->
                 // wait for bottom sheet to animate in
-                testDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
                 activity.finish()
             }
         }

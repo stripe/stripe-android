@@ -58,13 +58,13 @@ import kotlin.coroutines.CoroutineContext
  *
  */
 class Stripe internal constructor(
-    private val stripeRepository: StripeRepository,
-    private val paymentController: PaymentController,
+    internal val stripeRepository: StripeRepository,
+    internal val paymentController: PaymentController,
     publishableKey: String,
-    private val stripeAccountId: String? = null,
+    internal val stripeAccountId: String? = null,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) {
-    private val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
+    internal val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
 
     /**
      * Constructor with publishable key and Stripe Connect account id.
@@ -1657,7 +1657,7 @@ class Stripe internal constructor(
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
-        internal const val VERSION_NAME = "16.4.0"
+        internal const val VERSION_NAME = "16.4.3"
         const val VERSION: String = "AndroidBindings/$VERSION_NAME"
 
         /**

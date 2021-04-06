@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -145,6 +146,30 @@ class PaymentOptionsViewModelTest {
 
         assertThat(viewState)
             .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+    }
+
+    @Test
+    fun `onUserSelection() when save fails error is reported and in ready state`() {
+        paymentMethodRepository.error = Exception("Card not valid.")
+
+        val viewStates: MutableList<ViewState> = mutableListOf()
+        viewModel.viewState.observeForever {
+            viewStates.add(it)
+        }
+
+        viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+
+        viewModel.onUserSelection()
+
+        verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+        assertThat(viewStates.size).isEqualTo(3)
+        assertThat(viewStates[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+        assertThat(viewStates[1]).isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
+        assertThat(viewStates[2]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+        assertThat(viewModel.userMessage.value)
+            .isEqualTo(
+                BaseSheetViewModel.UserMessage.Error("Card not valid.")
+            )
     }
 
     @Test

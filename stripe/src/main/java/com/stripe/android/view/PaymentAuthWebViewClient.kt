@@ -8,6 +8,7 @@ import android.webkit.URLUtil
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.Logger
 
@@ -38,6 +39,8 @@ internal class PaymentAuthWebViewClient(
         }
 
         if (url != null && isCompletionUrl(url)) {
+            logger.debug("$url is a completion URL")
+
             onAuthCompleted(
                 runCatching {
                     Uri.parse(url)
@@ -50,20 +53,6 @@ internal class PaymentAuthWebViewClient(
         logger.debug("PaymentAuthWebViewClient#hideProgressBar()")
 
         isPageLoaded.value = true
-    }
-
-    private fun isAuthenticateUrl(url: String) = isAllowedUrl(url, AUTHENTICATE_URLS)
-
-    private fun isCompletionUrl(url: String) = isAllowedUrl(url, COMPLETION_URLS)
-
-    private fun isAllowedUrl(url: String, allowedUrls: Set<String>): Boolean {
-        for (completionUrl in allowedUrls) {
-            if (url.startsWith(completionUrl)) {
-                return true
-            }
-        }
-
-        return false
     }
 
     override fun shouldOverrideUrlLoading(view: WebView, urlString: String): Boolean {
@@ -211,12 +200,25 @@ internal class PaymentAuthWebViewClient(
         )
 
         private val COMPLETION_URLS = setOf(
-            "https://hooks.stripe.com/redirect/complete/src_",
-            "https://hooks.stripe.com/3d_secure/complete/tdsrc_"
+            "https://hooks.stripe.com/redirect/complete/",
+            "https://hooks.stripe.com/3d_secure/complete/"
         )
 
         private const val PARAM_RETURN_URL = "return_url"
 
         internal const val BLANK_PAGE = "about:blank"
+
+        @VisibleForTesting
+        internal fun isCompletionUrl(
+            url: String
+        ): Boolean {
+            return COMPLETION_URLS.any(url::startsWith)
+        }
+
+        private fun isAuthenticateUrl(
+            url: String
+        ): Boolean {
+            return AUTHENTICATE_URLS.any(url::startsWith)
+        }
     }
 }

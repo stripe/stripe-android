@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,6 +37,7 @@ class IssuingCardPinServiceTest {
         },
         stripeRepository,
         OperationIdFactory.get(),
+        "acct_123",
         testDispatcher
     )
 
@@ -116,7 +118,7 @@ class IssuingCardPinServiceTest {
             cardId: String,
             verificationId: String,
             userOneTimeCode: String,
-            ephemeralKeySecret: String
+            requestOptions: ApiRequest.Options
         ): String? = retrievedPin()
 
         override suspend fun updateIssuingCardPin(
@@ -124,7 +126,7 @@ class IssuingCardPinServiceTest {
             newPin: String,
             verificationId: String,
             userOneTimeCode: String,
-            ephemeralKeySecret: String
+            requestOptions: ApiRequest.Options
         ) {
             updatePinCalls++
         }
