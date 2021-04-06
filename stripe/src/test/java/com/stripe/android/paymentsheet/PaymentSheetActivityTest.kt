@@ -594,6 +594,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(currentFragment(activity))
                     .isInstanceOf(PaymentSheetAddCardFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
             }
         }
     }
