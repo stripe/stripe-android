@@ -32,30 +32,29 @@ class CountryUtilsTest {
 
     @Test
     fun `getDisplayCountry() should return expected result`() {
-//        assertThat(CountryUtils.getDisplayCountry("US"))
-//            .isEqualTo("United States")
-//        assertThat(CountryUtils.getDisplayCountry("UK"))
-//            .isEqualTo("UK")
-//        assertThat(CountryUtils.getDisplayCountry("CA"))
-//            .isEqualTo("Canada")
-//        assertThat(CountryUtils.getDisplayCountry("DM"))
-//            .isEqualTo("Dominica")
-        assertThat(CountryUtils.getDisplayCountry("DE"))
-            .isEqualTo("Germany")
-        val countryNameToFormat = Locale("fr", "FR")
-        val currentLocale = Locale("de", "DE")
-        assertThat(countryNameToFormat.getDisplayCountry(currentLocale))
-            .isEqualTo("Frankreich")
+        assertThat(CountryUtils.getDisplayCountry("US"))
+            .isEqualTo("United States")
+        assertThat(CountryUtils.getDisplayCountry("UK"))
+            .isEqualTo("UK")
+        assertThat(CountryUtils.getDisplayCountry("CA"))
+            .isEqualTo("Canada")
+        assertThat(CountryUtils.getDisplayCountry("DM"))
+            .isEqualTo("Dominica")
     }
 
     @Test
-    fun `getDisplayCountry() in locale`() {
-        var currentLocale = Locale("en", "EN")
-        println(CountryUtils.getOrderedCountries(currentLocale))
-        currentLocale = Locale("de", "DE")
-        CountryUtils.getOrderedCountriesLocaleLanguage(currentLocale)
-            .forEach {
-                println(it.name)
-            }
+    fun `getOrderedCountriesLocaleLanguage() in the language of the current locale`() {
+        val currentLocale = Locale("de", "DE")
+        val germany = CountryUtils.getOrderedCountriesLocaleLanguage(currentLocale)
+            .firstOrNull()
+        val secondCountry = CountryUtils.getOrderedCountriesLocaleLanguage(currentLocale)
+            .firstOrNull()
+
+        // If the current locale is germany it should be first in the list, and the german
+        // word for germany
+        assertThat(germany?.name)
+            .isEqualTo("Deutschland")
+        assertThat(secondCountry?.name)
+            .isEqualTo("Deutschland")
     }
 }
