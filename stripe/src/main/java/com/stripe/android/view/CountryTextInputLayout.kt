@@ -82,7 +82,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
         countryAdapter = CountryAdapter(
             context,
-            CountryUtils.getOrderedCountries(
+            CountryUtils.getOrderedCountriesLocaleLanguage(
                 ConfigurationCompat.getLocales(context.resources.configuration)[0]
             ),
             itemLayoutRes

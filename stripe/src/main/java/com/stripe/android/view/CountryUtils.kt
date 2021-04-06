@@ -17,6 +17,11 @@ internal object CountryUtils {
             Country(code, Locale("", code).displayCountry)
         }
 
+    private fun localizedCountries(currentLocale: Locale) =
+        Locale.getISOCountries().map { code ->
+            Country(code, Locale("", code).getDisplayCountry(currentLocale))
+        }
+
     @JvmSynthetic
     fun getDisplayCountry(
         countryCode: String
@@ -34,11 +39,27 @@ internal object CountryUtils {
     }
 
     @JvmSynthetic
+    internal fun getCountryByCode(countryCode: String, currentLocale: Locale): Country? {
+        return localizedCountries(currentLocale).firstOrNull { it.code == countryCode }
+    }
+
+    @JvmSynthetic
     internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOfNotNull(getCountryByCode(currentLocale.country))
             .plus(
                 COUNTRIES
+                    .sortedBy { it.name.toLowerCase(Locale.ROOT) }
+                    .filterNot { it.code == currentLocale.country }
+            )
+    }
+
+    @JvmSynthetic
+    internal fun getOrderedCountriesLocaleLanguage(currentLocale: Locale): List<Country> {
+        // Show user's current locale first, followed by countries alphabetized by display name
+        return listOfNotNull(getCountryByCode(currentLocale.country, currentLocale))
+            .plus(
+                localizedCountries(currentLocale)
                     .sortedBy { it.name.toLowerCase(Locale.ROOT) }
                     .filterNot { it.code == currentLocale.country }
             )

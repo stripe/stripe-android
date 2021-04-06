@@ -32,13 +32,30 @@ class CountryUtilsTest {
 
     @Test
     fun `getDisplayCountry() should return expected result`() {
-        assertThat(CountryUtils.getDisplayCountry("US"))
-            .isEqualTo("United States")
-        assertThat(CountryUtils.getDisplayCountry("UK"))
-            .isEqualTo("UK")
-        assertThat(CountryUtils.getDisplayCountry("CA"))
-            .isEqualTo("Canada")
-        assertThat(CountryUtils.getDisplayCountry("DM"))
-            .isEqualTo("Dominica")
+//        assertThat(CountryUtils.getDisplayCountry("US"))
+//            .isEqualTo("United States")
+//        assertThat(CountryUtils.getDisplayCountry("UK"))
+//            .isEqualTo("UK")
+//        assertThat(CountryUtils.getDisplayCountry("CA"))
+//            .isEqualTo("Canada")
+//        assertThat(CountryUtils.getDisplayCountry("DM"))
+//            .isEqualTo("Dominica")
+        assertThat(CountryUtils.getDisplayCountry("DE"))
+            .isEqualTo("Germany")
+        val countryNameToFormat = Locale("fr", "FR")
+        val currentLocale = Locale("de", "DE")
+        assertThat(countryNameToFormat.getDisplayCountry(currentLocale))
+            .isEqualTo("Frankreich")
+    }
+
+    @Test
+    fun `getDisplayCountry() in locale`() {
+        var currentLocale = Locale("en", "EN")
+        println(CountryUtils.getOrderedCountries(currentLocale))
+        currentLocale = Locale("de", "DE")
+        CountryUtils.getOrderedCountriesLocaleLanguage(currentLocale)
+            .forEach {
+                println(it.name)
+            }
     }
 }
