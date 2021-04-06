@@ -20,6 +20,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -38,7 +39,7 @@ class StripePaymentAuthTest {
     private val hostArgumentCaptor: KArgumentCaptor<AuthActivityStarter.Host> = argumentCaptor()
 
     @Test
-    fun confirmPayment_shouldConfirmAndAuth() {
+    fun confirmPayment_shouldConfirmAndAuth() = testDispatcher.runBlockingTest {
         val stripe = createStripe()
         val confirmPaymentIntentParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
             "pm_card_threeDSecure2Required",
@@ -55,7 +56,7 @@ class StripePaymentAuthTest {
     }
 
     @Test
-    fun confirmSetupIntent_shouldConfirmAndAuth() {
+    fun confirmSetupIntent_shouldConfirmAndAuth() = testDispatcher.runBlockingTest {
         val stripe = createStripe()
         val confirmSetupIntentParams = ConfirmSetupIntentParams.create(
             "pm_card_threeDSecure2Required",
@@ -72,7 +73,7 @@ class StripePaymentAuthTest {
     }
 
     @Test
-    fun authenticatePayment_shouldAuth() {
+    fun authenticatePayment_shouldAuth() = testDispatcher.runBlockingTest {
         val stripe = createStripe()
         val clientSecret =
             requireNotNull(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret)
@@ -87,7 +88,7 @@ class StripePaymentAuthTest {
     }
 
     @Test
-    fun handleNextActionForSetupIntent_shouldStartAuth() {
+    fun handleNextActionForSetupIntent_shouldStartAuth() = testDispatcher.runBlockingTest {
         val stripe = createStripe()
         val clientSecret =
             requireNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret)

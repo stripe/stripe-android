@@ -14,6 +14,7 @@ import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -38,6 +39,7 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.view.AuthActivityStarter
+import kotlinx.coroutines.launch
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     @VisibleForTesting
@@ -218,14 +220,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
 
         viewModel.startConfirm.observe(this) { confirmParams ->
-            paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(this),
-                confirmParams,
-                ApiRequest.Options(
-                    apiKey = paymentConfig.publishableKey,
-                    stripeAccount = paymentConfig.stripeAccountId
+            lifecycleScope.launch {
+                paymentController.startConfirmAndAuth(
+                    AuthActivityStarter.Host.create(this@PaymentSheetActivity),
+                    confirmParams,
+                    ApiRequest.Options(
+                        apiKey = paymentConfig.publishableKey,
+                        stripeAccount = paymentConfig.stripeAccountId
+                    )
                 )
-            )
+            }
         }
     }
 
