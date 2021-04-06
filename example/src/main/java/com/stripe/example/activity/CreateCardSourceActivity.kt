@@ -6,6 +6,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
@@ -97,20 +98,17 @@ class CreateCardSourceActivity : AppCompatActivity() {
         viewBinding.progressBar.visibility = View.VISIBLE
 
         val params = SourceParams.createCardParams(cardParams)
-        viewModel.createSource(params).observe(
-            this,
-            { result ->
-                viewBinding.createButton.isEnabled = true
-                viewBinding.progressBar.visibility = View.INVISIBLE
+        viewModel.createSource(params).observe(this) { result ->
+            viewBinding.createButton.isEnabled = true
+            viewBinding.progressBar.visibility = View.INVISIBLE
 
-                result.fold(
-                    onSuccess = ::onSourceCreated,
-                    onFailure = {
-                        showSnackbar(it.message.orEmpty())
-                    }
-                )
-            }
-        )
+            result.fold(
+                onSuccess = ::onSourceCreated,
+                onFailure = {
+                    showSnackbar(it.message.orEmpty())
+                }
+            )
+        }
     }
 
     private fun onSourceCreated(source: Source) {
@@ -144,19 +142,16 @@ class CreateCardSourceActivity : AppCompatActivity() {
             cardId = source.id.orEmpty()
         )
 
-        viewModel.createSource(params).observe(
-            this,
-            { result ->
-                viewBinding.progressBar.visibility = View.INVISIBLE
+        viewModel.createSource(params).observe(this) { result ->
+            viewBinding.progressBar.isInvisible = true
 
-                result.fold(
-                    onSuccess = ::authenticateSource,
-                    onFailure = {
-                        showSnackbar(it.message.orEmpty())
-                    }
-                )
-            }
-        )
+            result.fold(
+                onSuccess = ::authenticateSource,
+                onFailure = {
+                    showSnackbar(it.message.orEmpty())
+                }
+            )
+        }
     }
 
     /**

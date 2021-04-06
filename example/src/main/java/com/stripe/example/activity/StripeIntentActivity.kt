@@ -97,14 +97,11 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     ) {
         keyboardController.hide()
 
-        viewModel.createSetupIntent(country).observe(
-            this,
-            { result ->
-                result.onSuccess {
-                    handleCreateSetupIntentResponse(it, params, stripeAccountId)
-                }
+        viewModel.createSetupIntent(country).observe(this) { result ->
+            result.onSuccess {
+                handleCreateSetupIntentResponse(it, params, stripeAccountId)
             }
-        )
+        }
     }
 
     private fun handleCreatePaymentIntentResponse(

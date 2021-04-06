@@ -31,7 +31,7 @@ class ConfirmSepaDebitActivity : StripeIntentActivity() {
         setContentView(viewBinding.root)
         setTitle(R.string.launch_confirm_pm_sepa_debit)
 
-        viewModel.inProgress.observe(this, { enableUi(!it) })
+        viewModel.inProgress.observe(this) { enableUi(!it) }
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         viewBinding.ibanInput.setText(TEST_ACCOUNT_NUMBER)

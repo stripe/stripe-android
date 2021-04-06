@@ -2,10 +2,11 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
@@ -43,29 +44,23 @@ class KlarnaSourceActivity : AppCompatActivity() {
         viewBinding.createButton.setOnClickListener {
             viewBinding.sourceResult.text = ""
             disableUi()
-            createKlarnaSource().observe(
-                this,
-                { result ->
-                    result.fold(
-                        onSuccess = { source ->
-                            logSource(source)
-                            stripe.authenticateSource(this, source)
-                        },
-                        onFailure = ::logException
-                    )
-                }
-            )
+            createKlarnaSource().observe(this) { result ->
+                result.fold(
+                    onSuccess = { source ->
+                        logSource(source)
+                        stripe.authenticateSource(this, source)
+                    },
+                    onFailure = ::logException
+                )
+            }
         }
 
         viewBinding.fetchButton.setOnClickListener {
             disableUi()
-            viewModel.fetchSource(viewModel.source).observe(
-                this,
-                { result ->
-                    enableUi()
-                    result.fold(::logSource, ::logException)
-                }
-            )
+            viewModel.fetchSource(viewModel.source).observe(this) { result ->
+                enableUi()
+                result.fold(::logSource, ::logException)
+            }
         }
     }
 
@@ -110,12 +105,12 @@ class KlarnaSourceActivity : AppCompatActivity() {
     }
 
     private fun enableUi() {
-        viewBinding.progressBar.visibility = View.INVISIBLE
+        viewBinding.progressBar.isInvisible = true
         buttons.forEach { it.isEnabled = true }
     }
 
     private fun disableUi() {
-        viewBinding.progressBar.visibility = View.VISIBLE
+        viewBinding.progressBar.isVisible = true
         buttons.forEach { it.isEnabled = false }
     }
 

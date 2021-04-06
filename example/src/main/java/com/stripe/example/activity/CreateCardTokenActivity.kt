@@ -9,11 +9,10 @@ import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.ApiResultCallback
+import com.stripe.android.createCardToken
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.Token
 import com.stripe.example.R
@@ -48,13 +47,10 @@ class CreateCardTokenActivity : AppCompatActivity() {
 
             viewBinding.cardInputWidget.cardParams?.let { cardParams ->
                 onRequestStart()
-                viewModel.createCardToken(cardParams).observe(
-                    this,
-                    {
-                        onRequestEnd()
-                        adapter.addToken(it)
-                    }
-                )
+                viewModel.createCardToken(cardParams).observe(this) {
+                    onRequestEnd()
+                    adapter.addToken(it)
+                }
             } ?: snackbarController.show(getString(R.string.invalid_card_details))
         }
 
@@ -118,25 +114,20 @@ class CreateCardTokenActivity : AppCompatActivity() {
     ) : AndroidViewModel(application) {
         private val stripe = StripeFactory(application).create()
 
-        fun createCardToken(cardParams: CardParams): LiveData<Token> {
-            val data = MutableLiveData<Token>()
+        fun createCardToken(cardParams: CardParams) = liveData {
+            val result = runCatching {
+                stripe.createCardToken(cardParams)
+            }
+            BackgroundTaskTracker.onStop()
 
-            stripe.createCardToken(
-                cardParams,
-                callback = object : ApiResultCallback<Token> {
-                    override fun onSuccess(result: Token) {
-                        BackgroundTaskTracker.onStop()
-                        data.value = result
-                    }
-
-                    override fun onError(e: Exception) {
-                        BackgroundTaskTracker.onStop()
-                        Log.e("StripeExample", "Error while creating card token", e)
-                    }
+            result.fold(
+                onSuccess = {
+                    emit(it)
+                },
+                onFailure = {
+                    Log.e("StripeExample", "Error while creating card token", it)
                 }
             )
-
-            return data
         }
     }
 }
