@@ -173,26 +173,6 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `getPaymentOptionResult() after selection is set should return Succeeded`() {
-        viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
-
-        assertThat(
-            viewModel.getPaymentOptionResult()
-        ).isEqualTo(
-            PaymentOptionResult.Succeeded.Existing(SELECTION_SAVED_PAYMENT_METHOD)
-        )
-    }
-
-    @Test
-    fun `getPaymentOptionResult() when selection is not set should return Canceled`() {
-        assertThat(
-            viewModel.getPaymentOptionResult()
-        ).isEqualTo(
-            PaymentOptionResult.Canceled(null)
-        )
-    }
-
-    @Test
     fun `resolveTransitionTarget no new card`() {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newCard = null),
