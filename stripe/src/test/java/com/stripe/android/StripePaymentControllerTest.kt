@@ -219,7 +219,7 @@ internal class StripePaymentControllerTest {
         }
 
     @Test
-    fun handleNextAction_whenSdk3ds1() {
+    fun handleNextAction_whenSdk3ds1() = testDispatcher.runBlockingTest {
         controller.handleNextAction(
             host,
             PaymentIntentFixtures.PI_REQUIRES_3DS1,
@@ -240,7 +240,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun handleNextAction_whenBrowser3ds1() {
+    fun handleNextAction_whenBrowser3ds1() = testDispatcher.runBlockingTest {
         controller.handleNextAction(
             host,
             PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
@@ -267,7 +267,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun handleNextAction_when3dsRedirectWithSetupIntent() {
+    fun handleNextAction_when3dsRedirectWithSetupIntent() = testDispatcher.runBlockingTest {
         controller.handleNextAction(
             host,
             SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
@@ -280,7 +280,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `handleNextAction oxxo details`() {
+    fun `handleNextAction oxxo details`() = testDispatcher.runBlockingTest {
         controller.handleNextAction(
             host,
             PaymentIntentFixtures.OXXO_REQUIES_ACTION,
@@ -683,7 +683,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `bypassAuth() with ActivityResultLauncher should use ActivityResultLauncher`() {
+    fun `bypassAuth() with ActivityResultLauncher should use ActivityResultLauncher`() = testDispatcher.runBlockingTest {
         verifyZeroInteractions(activity)
 
         val launcher = FakeActivityResultLauncher(PaymentRelayContract())
@@ -703,7 +703,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `on3ds2AuthFallback() with ActivityResultLauncher should use ActivityResultLauncher`() {
+    fun `on3ds2AuthFallback() with ActivityResultLauncher should use ActivityResultLauncher`() = testDispatcher.runBlockingTest {
         verifyZeroInteractions(activity)
 
         val launcher = FakeActivityResultLauncher(PaymentAuthWebViewContract())
