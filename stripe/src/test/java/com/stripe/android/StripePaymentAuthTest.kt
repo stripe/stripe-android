@@ -15,17 +15,21 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.ApiRequestExecutor
+import com.stripe.android.networking.DefaultApiRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.view.AuthActivityStarter
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class StripePaymentAuthTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val activity: Activity = mock()
     private val paymentController: PaymentController = mock()
@@ -142,7 +146,9 @@ class StripePaymentAuthTest {
             StripeApiRepository(
                 context,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeApiRequestExecutor = ApiRequestExecutor.Default(),
+                stripeApiRequestExecutor = DefaultApiRequestExecutor(
+                    workContext = testDispatcher
+                ),
                 analyticsRequestExecutor = {}
             ),
             paymentController,

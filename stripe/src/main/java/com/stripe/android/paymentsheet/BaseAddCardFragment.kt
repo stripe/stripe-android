@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
+import com.stripe.android.view.Country
 import com.stripe.android.view.StripeEditText
 
 /**
@@ -43,6 +44,7 @@ internal abstract class BaseAddCardFragment(
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
     private lateinit var cardErrors: TextView
+    private lateinit var billingErrors: TextView
     private lateinit var saveCardCheckbox: CheckBox
     private lateinit var addCardHeader: TextView
 
@@ -97,6 +99,7 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget = viewBinding.cardMultilineWidget
         billingAddressView = viewBinding.billingAddress
         cardErrors = viewBinding.cardErrors
+        billingErrors = viewBinding.billingErrors
         saveCardCheckbox = viewBinding.saveCardCheckbox
         addCardHeader = viewBinding.addCardHeader
 
@@ -277,6 +280,34 @@ internal abstract class BaseAddCardFragment(
                 )
             }
         cardMultilineWidget.postalCodeErrorListener = null
+
+        billingAddressView.postalCodeViewListener =
+            object : BillingAddressView.PostalCodeViewListener {
+                override fun onLosingFocus(country: Country?, isPostalValid: Boolean) {
+                    val shouldToggleBillingError =
+                        !isPostalValid && !billingAddressView.postalCodeView.text.isNullOrEmpty()
+                    billingErrors.text = if (shouldToggleBillingError) {
+                        if (country == null || country.code == "US") {
+                            getString(R.string.address_zip_invalid)
+                        } else {
+                            getString(R.string.address_postal_code_invalid)
+                        }
+                    } else {
+                        null
+                    }
+                    billingErrors.isVisible = !billingErrors.text.isNullOrEmpty()
+                }
+
+                override fun onGainingFocus(country: Country?, isPostalValid: Boolean) {
+                    // Always hide error field when user starts editing postal code
+                    billingErrors.isVisible = false
+                }
+
+                override fun onCountryChanged(country: Country?, isPostalValid: Boolean) {
+                    billingErrors.text = null
+                    billingErrors.isVisible = false
+                }
+            }
     }
 
     private fun populateFieldsFromNewCard() {

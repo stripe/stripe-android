@@ -34,7 +34,7 @@ import com.stripe.android.model.WeChat;
 import com.stripe.android.networking.AnalyticsDataFactory;
 import com.stripe.android.networking.AnalyticsRequest;
 import com.stripe.android.networking.AnalyticsRequestExecutor;
-import com.stripe.android.networking.ApiRequestExecutor;
+import com.stripe.android.networking.DefaultApiRequestExecutor;
 import com.stripe.android.networking.FakeAnalyticsRequestExecutor;
 import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
@@ -56,6 +56,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import kotlin.coroutines.CoroutineContext;
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.test.TestCoroutineDispatcher;
 
@@ -1358,7 +1359,7 @@ public class StripeTest {
     @NonNull
     private StripeRepository createStripeRepository(
             @NonNull final String publishableKey,
-            @NonNull CoroutineDispatcher workDispatcher,
+            @NonNull CoroutineContext workDispatcher,
             @NonNull AnalyticsRequestExecutor analyticsRequestExecutor,
             @NonNull FingerprintDataRepository fingerprintDataRepository
     ) {
@@ -1368,7 +1369,7 @@ public class StripeTest {
                 null,
                 new FakeLogger(),
                 workDispatcher,
-                new ApiRequestExecutor.Default(),
+                new DefaultApiRequestExecutor(workDispatcher),
                 analyticsRequestExecutor,
                 fingerprintDataRepository
         );

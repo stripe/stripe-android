@@ -458,7 +458,9 @@ internal class StripeApiRepositoryTest {
             context,
             DEFAULT_OPTIONS.apiKey,
             workContext = testDispatcher,
-            stripeApiRequestExecutor = ApiRequestExecutor.Default(),
+            stripeApiRequestExecutor = DefaultApiRequestExecutor(
+                workContext = testDispatcher
+            ),
             analyticsRequestExecutor = analyticsRequestExecutor,
             fingerprintDataRepository = fingerprintDataRepository
         )
