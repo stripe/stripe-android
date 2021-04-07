@@ -21,8 +21,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -62,11 +60,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _savedSelection = MutableLiveData<SavedSelection>()
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<TransitionTargetType?>(null)
-    internal val transition: LiveData<TransitionTargetType?> = _transition
-
-    private val transitionChannel = Channel<TransitionTargetType?>(Channel.BUFFERED)
-    internal val transitionFlow = transitionChannel.receiveAsFlow()
+    private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
+    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     /**
      * On [BaseAddCardFragment] this is set every time the details in the add
@@ -98,7 +93,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         transition.switchMap { transitionTarget ->
             selection.switchMap { paymentSelection ->
                 MutableLiveData(
-                    !isProcessing && transitionTarget != null && paymentSelection != null
+                    !isProcessing &&
+                        transitionTarget.peekContent() != null &&
+                        paymentSelection != null
                 )
             }
         }
@@ -146,11 +143,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun transitionTo(target: TransitionTargetType) {
         _userMessage.value = null
-        _transition.postValue(target)
-
-        viewModelScope.launch {
-            transitionChannel.send(target)
-        }
+        _transition.postValue(Event(target))
     }
 
     fun onFatal(throwable: Throwable) {
@@ -185,5 +178,33 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         data class Error(
             override val message: String
         ) : UserMessage()
+    }
+
+    /**
+     * Used as a wrapper for data that is exposed via a LiveData that represents an event.
+     * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
+     * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
+     */
+    open class Event<out T>(private val content: T) {
+
+        var hasBeenHandled = false
+            private set // Allow external read but not write
+
+        /**
+         * Returns the content and prevents its use again.
+         */
+        fun getContentIfNotHandled(): T? {
+            return if (hasBeenHandled) {
+                null
+            } else {
+                hasBeenHandled = true
+                content
+            }
+        }
+
+        /**
+         * Returns the content, even if it's already been handled.
+         */
+        fun peekContent(): T = content
     }
 }
