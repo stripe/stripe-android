@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -157,6 +156,11 @@ class PaymentOptionsViewModelTest {
             viewStates.add(it)
         }
 
+        var exception: Throwable? = null
+        viewModel.apiException.observeForever {
+            exception = it
+        }
+
         viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
 
         viewModel.onUserSelection()
@@ -166,9 +170,9 @@ class PaymentOptionsViewModelTest {
         assertThat(viewStates[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
         assertThat(viewStates[1]).isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
         assertThat(viewStates[2]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-        assertThat(viewModel.userMessage.value)
+        assertThat(viewModel.apiException.value)
             .isEqualTo(
-                BaseSheetViewModel.UserMessage.Error("Card not valid.")
+                paymentMethodRepository.error
             )
     }
 
