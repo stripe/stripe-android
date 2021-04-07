@@ -187,5 +187,5 @@
     <!-- Failure Reason -->
     <string name="stripe_failure_reason_authentication">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
     <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method -- try again</string>
-    <string name="stripe_failure_connection_error">There was an unexpected error -- try again in a few seconds</string>
+    <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
 </resources>
