@@ -801,6 +801,20 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
+    fun `when delete the card number completely, don't show an error`() {
+        updateCardNumberAndIdle("3")
+        updateCardNumberAndIdle("")
+        cardNumberEditText.internalFocusChangeListeners
+            .forEach {
+                it.onFocusChange(cardNumberEditText, false)
+            }
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.shouldShowError)
+            .isFalse()
+    }
+
+    @Test
     fun `getAccountRange() should only be called when necessary`() {
         var repositoryCalls = 0
         val cardNumberEditText = CardNumberEditText(
