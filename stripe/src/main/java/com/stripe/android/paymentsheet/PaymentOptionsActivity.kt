@@ -123,8 +123,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 onTransitionTarget(
                     transitionTarget,
                     bundleOf(
-                        PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
-                        PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+                        EXTRA_STARTER_ARGS to starterArgs,
+                        EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
                     )
                 )
             }
