@@ -802,7 +802,9 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `when delete the card number completely, don't show an error`() {
-        updateCardNumberAndIdle("3")
+        updateCardNumberAndIdle("7")
+        assertThat(cardNumberEditText.shouldShowError)
+            .isTrue()
         updateCardNumberAndIdle("")
         cardNumberEditText.internalFocusChangeListeners
             .forEach {
