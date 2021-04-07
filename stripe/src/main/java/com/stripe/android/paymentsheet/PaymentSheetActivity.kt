@@ -14,6 +14,7 @@ import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -38,6 +39,9 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.view.AuthActivityStarter
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     @VisibleForTesting
@@ -84,6 +88,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             application
         )
     }
+
+    private var job: Job? = null
 
     private lateinit var paymentController: PaymentController
 
@@ -194,26 +200,18 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
         setupBuyButton()
 
-        viewModel.transition.observe(this) { transitionTarget ->
-            if (transitionTarget != null) {
-                onTransitionTarget(
-                    transitionTarget,
-                    bundleOf(
-                        EXTRA_STARTER_ARGS to starterArgs,
-                        EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
-                    )
-                )
-            }
-        }
-
-        viewModel.fetchFragmentConfig().observe(this) { config ->
-            if (config != null) {
-                val target = if (config.paymentMethods.isEmpty()) {
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                } else {
-                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+        if (savedInstanceState == null) {
+            // Only fetch initial state if the activity is being created for the first time.
+            // Otherwise the FragmentManager will correctly restore the previous state.
+            viewModel.fetchFragmentConfig().observe(this) { config ->
+                if (config != null) {
+                    val target = if (config.paymentMethods.isEmpty()) {
+                        PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
+                    } else {
+                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+                    }
+                    viewModel.transitionTo(target)
                 }
-                viewModel.transitionTo(target)
             }
         }
 
@@ -227,6 +225,28 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 )
             )
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        job = viewModel.transitionFlow
+            .onEach { transitionTarget ->
+                if (transitionTarget != null) {
+                    onTransitionTarget(
+                        transitionTarget,
+                        bundleOf(
+                            EXTRA_STARTER_ARGS to starterArgs,
+                            EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+                        )
+                    )
+                }
+            }
+            .launchIn(lifecycleScope)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        job?.cancel()
     }
 
     private fun onTransitionTarget(

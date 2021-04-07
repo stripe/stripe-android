@@ -21,6 +21,8 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -62,6 +64,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private val _transition = MutableLiveData<TransitionTargetType?>(null)
     internal val transition: LiveData<TransitionTargetType?> = _transition
+
+    private val transitionChannel = Channel<TransitionTargetType?>(Channel.BUFFERED)
+    internal val transitionFlow = transitionChannel.receiveAsFlow()
 
     /**
      * On [BaseAddCardFragment] this is set every time the details in the add
@@ -142,6 +147,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun transitionTo(target: TransitionTargetType) {
         _userMessage.value = null
         _transition.postValue(target)
+
+        viewModelScope.launch {
+            transitionChannel.send(target)
+        }
     }
 
     fun onFatal(throwable: Throwable) {
