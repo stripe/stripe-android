@@ -238,7 +238,8 @@ class ExpiryDateEditText @JvmOverloads constructor(
                         )
                     )
 
-                    this@ExpiryDateEditText.shouldShowError = shouldShowError
+                    this@ExpiryDateEditText.shouldShowError =
+                        shouldShowError && (expirationDate.isPartialEntry || expirationDate.isComplete)
 
                     formattedDate = null
                     newCursorPosition = null
