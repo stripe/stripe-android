@@ -57,8 +57,8 @@ internal class PaymentAuthWebViewClient(
         view: WebView,
         request: WebResourceRequest
     ): Boolean {
-        val uri = request.url
         logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading(): $request")
+        val uri = request.url
         updateCompletionUrl(uri)
 
         return if (isReturnUrl(uri)) {
