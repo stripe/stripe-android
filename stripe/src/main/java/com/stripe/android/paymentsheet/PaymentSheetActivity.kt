@@ -164,7 +164,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         ) {
             viewModel.onGooglePayResult(it)
         }
-        viewModel.launchGooglePay.observe(this) { args ->
+        viewModel.launchGooglePay.observe(this) { event ->
+            val args = event.getContentIfNotHandled()
             if (args != null) {
                 googlePayLauncher.launch(args)
             }
@@ -222,15 +223,18 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             }
         }
 
-        viewModel.startConfirm.observe(this) { confirmParams ->
-            paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(this),
-                confirmParams,
-                ApiRequest.Options(
-                    apiKey = paymentConfig.publishableKey,
-                    stripeAccount = paymentConfig.stripeAccountId
+        viewModel.startConfirm.observe(this) { event ->
+            val confirmParams = event.getContentIfNotHandled()
+            if (confirmParams != null) {
+                paymentController.startConfirmAndAuth(
+                    AuthActivityStarter.Host.create(this),
+                    confirmParams,
+                    ApiRequest.Options(
+                        apiKey = paymentConfig.publishableKey,
+                        stripeAccount = paymentConfig.stripeAccountId
+                    )
                 )
-            )
+            }
         }
     }
 

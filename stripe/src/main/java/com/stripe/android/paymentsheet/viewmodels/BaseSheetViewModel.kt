@@ -42,8 +42,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    protected val _launchGooglePay = MutableLiveData<StripeGooglePayContract.Args>()
-    internal val launchGooglePay: LiveData<StripeGooglePayContract.Args> = _launchGooglePay
+    protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
+    internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
 
     protected val _paymentIntent = MutableLiveData<PaymentIntent?>()
     internal val paymentIntent: LiveData<PaymentIntent?> = _paymentIntent
@@ -90,14 +90,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     abstract var newCard: PaymentSelection.New.Card?
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
-        transition.switchMap { transitionTarget ->
-            selection.switchMap { paymentSelection ->
-                MutableLiveData(
-                    !isProcessing &&
-                        transitionTarget.peekContent() != null &&
-                        paymentSelection != null
-                )
-            }
+        selection.switchMap { paymentSelection ->
+            MutableLiveData(!isProcessing && paymentSelection != null)
         }
     }
 

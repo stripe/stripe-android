@@ -113,7 +113,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
-        val confirmParams = mutableListOf<ConfirmPaymentIntentParams>()
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmPaymentIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
         }
@@ -122,8 +122,9 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        assertThat(confirmParams)
-            .containsExactly(
+        assertThat(confirmParams).hasSize(1)
+        assertThat(confirmParams[0].peekContent())
+            .isEqualTo(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
                     CLIENT_SECRET,
@@ -134,7 +135,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm new payment methods`() = testDispatcher.runBlockingTest {
-        val confirmParams = mutableListOf<ConfirmPaymentIntentParams>()
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmPaymentIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
         }
@@ -147,8 +148,9 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        assertThat(confirmParams)
-            .containsExactly(
+        assertThat(confirmParams).hasSize(1)
+        assertThat(confirmParams[0].peekContent())
+            .isEqualTo(
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,
@@ -193,11 +195,6 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentFlowResult() should update ViewState and save preferences`() = testDispatcher.runBlockingTest {
         paymentFlowResultProcessor.paymentIntentResult = PAYMENT_INTENT_RESULT
 
-        val confirmParams = mutableListOf<ConfirmPaymentIntentParams>()
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
-
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
@@ -234,11 +231,6 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `onPaymentFlowResult() should update ViewState and save new payment method`() = testDispatcher.runBlockingTest {
         paymentFlowResultProcessor.paymentIntentResult = PAYMENT_INTENT_RESULT_WITH_PM
-
-        val confirmParams = mutableListOf<ConfirmPaymentIntentParams>()
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
 
         val selection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
