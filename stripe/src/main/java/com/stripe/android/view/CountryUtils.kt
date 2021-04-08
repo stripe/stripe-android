@@ -12,30 +12,19 @@ internal object CountryUtils {
         "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW"
     )
 
-    private val COUNTRIES: List<Country> =
-        Locale.getISOCountries().map { code ->
-            Country(code, Locale("", code).displayCountry)
-        }
-
     private fun localizedCountries(currentLocale: Locale) =
         Locale.getISOCountries().map { code ->
             Country(code, Locale("", code).getDisplayCountry(currentLocale))
         }
 
     @JvmSynthetic
-    fun getDisplayCountry(
-        countryCode: String
-    ): String = getCountryByCode(countryCode)?.name
-        ?: Locale("", countryCode).displayCountry
+    fun getDisplayCountry(countryCode: String, currentLocale: Locale): String =
+        getCountryByCode(countryCode, currentLocale)?.name
+            ?: Locale("", countryCode).getDisplayCountry(currentLocale)
 
     @JvmSynthetic
-    internal fun getCountryByName(countryName: String): Country? {
-        return COUNTRIES.firstOrNull { it.name == countryName }
-    }
-
-    @JvmSynthetic
-    internal fun getCountryByCode(countryCode: String): Country? {
-        return COUNTRIES.firstOrNull { it.code == countryCode }
+    internal fun getCountryByName(countryName: String, currentLocale: Locale): Country? {
+        return localizedCountries(currentLocale).firstOrNull { it.name == countryName }
     }
 
     @JvmSynthetic
@@ -45,17 +34,6 @@ internal object CountryUtils {
 
     @JvmSynthetic
     internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
-        // Show user's current locale first, followed by countries alphabetized by display name
-        return listOfNotNull(getCountryByCode(currentLocale.country))
-            .plus(
-                COUNTRIES
-                    .sortedBy { it.name.toLowerCase(Locale.ROOT) }
-                    .filterNot { it.code == currentLocale.country }
-            )
-    }
-
-    @JvmSynthetic
-    internal fun getOrderedCountriesLocaleLanguage(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOfNotNull(getCountryByCode(currentLocale.country, currentLocale))
             .plus(

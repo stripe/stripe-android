@@ -12,6 +12,7 @@ import android.view.View.OnFocusChangeListener
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.ConfigurationCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.LiveData
@@ -344,9 +345,13 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     internal fun populate(address: Address?) {
         address?.let { it ->
+            val currentLocale = ConfigurationCompat.getLocales(context.resources.configuration)[0]
             it.country?.let { countryCode ->
-                countryLayout.selectedCountry = CountryUtils.getCountryByCode(countryCode)
-                this.countryView.setText(CountryUtils.getDisplayCountry(countryCode))
+                countryLayout.selectedCountry = CountryUtils.getCountryByCode(
+                    countryCode,
+                    currentLocale
+                )
+                this.countryView.setText(CountryUtils.getDisplayCountry(countryCode, currentLocale))
             }
             this.address1View.setText(it.line1)
             this.address2View.setText(it.line2)

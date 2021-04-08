@@ -82,7 +82,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
         countryAdapter = CountryAdapter(
             context,
-            CountryUtils.getOrderedCountriesLocaleLanguage(
+            CountryUtils.getOrderedCountries(
                 ConfigurationCompat.getLocales(context.resources.configuration)[0]
             ),
             itemLayoutRes
@@ -162,12 +162,20 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
      * the full country display name.
      */
     internal fun setCountrySelected(countryCode: String) {
-        updateUiForCountryEntered(CountryUtils.getDisplayCountry(countryCode))
+        updateUiForCountryEntered(
+            CountryUtils.getDisplayCountry(
+                countryCode,
+                ConfigurationCompat.getLocales(context.resources.configuration)[0]
+            )
+        )
     }
 
     @VisibleForTesting
     internal fun updateUiForCountryEntered(displayCountryEntered: String) {
-        val country = CountryUtils.getCountryByName(displayCountryEntered)
+        val country = CountryUtils.getCountryByName(
+            displayCountryEntered,
+            ConfigurationCompat.getLocales(context.resources.configuration)[0]
+        )
 
         // If the user-typed country matches a valid country, update the selected country
         // Otherwise, revert back to last valid country if country is not recognized.
