@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.5.0 - unreleased
+## 16.5.0 - 2021-04-08
 * [#3557](https://github.com/stripe/stripe-android/pull/3557) Add suspending function variants of API methods
 * [#3559](https://github.com/stripe/stripe-android/pull/3559) Fix OXXO confirmation flow
 * [#3575](https://github.com/stripe/stripe-android/pull/3575) Upgrade `recyclerview` to `1.2.0`
