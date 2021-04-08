@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
@@ -32,7 +33,10 @@ class PaymentAuthWebViewClientTest {
             "pi_123_secret_456",
             returnUrl = "stripe://payment_intent_return"
         )
-        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(webView, url)
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
+            webView,
+            FakeWebResourceRequest(url)
+        )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
@@ -55,7 +59,7 @@ class PaymentAuthWebViewClientTest {
 
         val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
-            url
+            FakeWebResourceRequest(url)
         )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
@@ -76,7 +80,7 @@ class PaymentAuthWebViewClientTest {
 
         val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
-            url
+            FakeWebResourceRequest(url)
         )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
@@ -97,7 +101,7 @@ class PaymentAuthWebViewClientTest {
 
         val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
-            url
+            FakeWebResourceRequest(url)
         )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
@@ -116,7 +120,7 @@ class PaymentAuthWebViewClientTest {
 
         val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
-            "https://example.com"
+            FakeWebResourceRequest("https://example.com")
         )
         assertThat(shouldOverrideUrlLoading)
             .isFalse()
@@ -134,7 +138,10 @@ class PaymentAuthWebViewClientTest {
         val url = "stripejs://use_stripe_sdk/return_url"
 
         val shouldOverrideUrlLoading = createWebViewClient("pi_123_secret_456")
-            .shouldOverrideUrlLoading(webView, url)
+            .shouldOverrideUrlLoading(
+                webView,
+                FakeWebResourceRequest(url)
+            )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
@@ -182,8 +189,10 @@ class PaymentAuthWebViewClientTest {
             "mailto:patrick@example.com?payment_intent=pi_123&payment_intent_client_secret=pi_123_secret_456&source_type=card"
         val webViewClient = createWebViewClient("pi_123_secret_456")
 
-        val shouldOverrideUrlLoading =
-            webViewClient.shouldOverrideUrlLoading(webView, url)
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
+            webView,
+            FakeWebResourceRequest(url)
+        )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
@@ -201,8 +210,10 @@ class PaymentAuthWebViewClientTest {
             activityStarter = { throw ActivityNotFoundException() }
         )
 
-        val shouldOverrideUrlLoading =
-            webViewClient.shouldOverrideUrlLoading(webView, url)
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
+            webView,
+            FakeWebResourceRequest(url)
+        )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
@@ -219,8 +230,10 @@ class PaymentAuthWebViewClientTest {
         val url = "alipays://link"
         val webViewClient = createWebViewClient("pi_123_secret_456")
 
-        val shouldOverrideUrlLoading =
-            webViewClient.shouldOverrideUrlLoading(webView, url)
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
+            webView,
+            FakeWebResourceRequest(url)
+        )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
@@ -248,7 +261,7 @@ class PaymentAuthWebViewClientTest {
 
         val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
-            deepLink
+            FakeWebResourceRequest(deepLink)
         )
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
@@ -273,7 +286,7 @@ class PaymentAuthWebViewClientTest {
 
         val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
-            url
+            FakeWebResourceRequest(url)
         )
         assertThat(shouldOverrideUrlLoading)
             .isFalse()
@@ -295,7 +308,7 @@ class PaymentAuthWebViewClientTest {
 
         val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
             webView,
-            url
+            FakeWebResourceRequest(url)
         )
         assertThat(shouldOverrideUrlLoading)
             .isFalse()
@@ -382,5 +395,16 @@ class PaymentAuthWebViewClientTest {
             error?.let(onAuthCompletedErrors::add)
             activityFinished = true
         }
+    }
+
+    private class FakeWebResourceRequest(
+        private val url: String
+    ) : WebResourceRequest {
+        override fun getUrl(): Uri = Uri.parse(url)
+        override fun isForMainFrame(): Boolean = false
+        override fun isRedirect(): Boolean = false
+        override fun hasGesture(): Boolean = false
+        override fun getMethod(): String = "GET"
+        override fun getRequestHeaders(): Map<String, String> = emptyMap()
     }
 }
