@@ -29,6 +29,8 @@ import com.stripe.android.view.CardFormView.Style
  *
  * Use [R.styleable.StripeCardFormView_cardFormStyle] to toggle style between [Style.STANDARD] and [Style.BORDERLESS],
  * Use [R.styleable.StripeCardFormView_formBackgroundColorStateList] to change the card's background color in enable and disabled state.
+ *
+ * To access the [CardParams], see details in [cardParams] property.
  */
 class CardFormView @JvmOverloads constructor(
     context: Context,
@@ -382,7 +384,6 @@ class CardFormView @JvmOverloads constructor(
         cardContainer.cardElevation = 0f
     }
 
-
     private fun onFieldError(
         field: FieldErrors.Field,
         errorMessage: String?
@@ -415,6 +416,4 @@ class CardFormView @JvmOverloads constructor(
     internal companion object {
         const val CARD_FORM_VIEW = "CardFormView"
     }
-
-
 }

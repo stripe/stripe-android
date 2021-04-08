@@ -5517,6 +5517,24 @@ public final class com/stripe/android/view/BillingAddressFields : java/lang/Enum
 	public static fun values ()[Lcom/stripe/android/view/BillingAddressFields;
 }
 
+public final class com/stripe/android/view/CardFormView : android/widget/FrameLayout {
+	public static final field CARD_FORM_VIEW Ljava/lang/String;
+	public static final field Companion Lcom/stripe/android/view/CardFormView$Companion;
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
+	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCardParams ()Lcom/stripe/android/model/CardParams;
+	public fun setEnabled (Z)V
+}
+
+public final class com/stripe/android/view/CardFormView$Style : java/lang/Enum {
+	public static final field BORDERLESS Lcom/stripe/android/view/CardFormView$Style;
+	public static final field STANDARD Lcom/stripe/android/view/CardFormView$Style;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/view/CardFormView$Style;
+	public static fun values ()[Lcom/stripe/android/view/CardFormView$Style;
+}
+
 public abstract interface class com/stripe/android/view/CardInputListener {
 	public abstract fun onCardComplete ()V
 	public abstract fun onCvcComplete ()V

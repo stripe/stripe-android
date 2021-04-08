@@ -24,7 +24,6 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 
-
 @RunWith(RobolectricTestRunner::class)
 class CardFormViewTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -201,16 +200,20 @@ class CardFormViewTest {
         assertThat(standardCardFormView.cardMultilineWidget.secondRowLayout.childCount).isEqualTo(4)
         // tl_expiry
         assertThat(standardCardFormView.cardMultilineWidget.secondRowLayout.getChildAt(0)).isInstanceOf(
-            TextInputLayout::class.java)
+            TextInputLayout::class.java
+        )
         // vertical divider
         assertThat(standardCardFormView.cardMultilineWidget.secondRowLayout.getChildAt(1)).isInstanceOf(
-            View::class.java)
+            View::class.java
+        )
         // tl_cvc
         assertThat(standardCardFormView.cardMultilineWidget.secondRowLayout.getChildAt(2)).isInstanceOf(
-            TextInputLayout::class.java)
+            TextInputLayout::class.java
+        )
         // tl_postal_code(invisible)
         assertThat(standardCardFormView.cardMultilineWidget.secondRowLayout.getChildAt(3)).isInstanceOf(
-            TextInputLayout::class.java)
+            TextInputLayout::class.java
+        )
 
         // divider with width=match_parent is visible
         assertThat(standardCardFormView.countryPostalDivider.isVisible).isTrue()
@@ -232,15 +235,19 @@ class CardFormViewTest {
         )
 
         // 1 horizontal divider added to tl_card_number, now it has 2 child views
-        assertThat(borderLessCardFormView.cardMultilineWidget.cardNumberTextInputLayout.childCount).isEqualTo(2)
-
+        assertThat(borderLessCardFormView.cardMultilineWidget.cardNumberTextInputLayout.childCount).isEqualTo(
+            2
+        )
 
         // no vertical divider added between exp and cvc, secondRowLayout still has 3 child views
-        assertThat(borderLessCardFormView.cardMultilineWidget.secondRowLayout.childCount).isEqualTo(3)
-
+        assertThat(borderLessCardFormView.cardMultilineWidget.secondRowLayout.childCount).isEqualTo(
+            3
+        )
 
         // 1 horizontal divider added below tl_expiry, now it has 2 child views
-        assertThat(borderLessCardFormView.cardMultilineWidget.expiryTextInputLayout.childCount).isEqualTo(2)
+        assertThat(borderLessCardFormView.cardMultilineWidget.expiryTextInputLayout.childCount).isEqualTo(
+            2
+        )
 
         // 1 horizontal divider added below tl_cvc, now it has 2 child views
         assertThat(borderLessCardFormView.cardMultilineWidget.cvcInputLayout.childCount).isEqualTo(2)
@@ -251,7 +258,6 @@ class CardFormViewTest {
         // divider with width=match_parent is invisible
         assertThat(borderLessCardFormView.countryPostalDivider.isVisible).isFalse()
     }
-
 
     private fun setLocale(locale: Locale) {
         Locale.setDefault(locale)
@@ -270,7 +276,5 @@ class CardFormViewTest {
         const val VALID_US_ZIP = "95051"
         const val INVALID_US_ZIP = "9505"
         const val INVALID_VISA = "1234 1234 1234 1234"
-
     }
-
 }
