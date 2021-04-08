@@ -164,8 +164,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         ) {
             viewModel.onGooglePayResult(it)
         }
-        viewModel.launchGooglePay.observe(this) { event ->
-            val args = event.getContentIfNotHandled()
+        viewModel.launchGooglePay.observe(this) { args ->
             if (args != null) {
                 googlePayLauncher.launch(args)
             }
@@ -195,8 +194,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
         setupBuyButton()
 
-        viewModel.transition.observe(this) { event ->
-            val transitionTarget = event.getContentIfNotHandled()
+        viewModel.transition.observe(this) { transitionTarget ->
             if (transitionTarget != null) {
                 onTransitionTarget(
                     transitionTarget,
@@ -211,20 +209,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         if (savedInstanceState == null) {
             // Only fetch initial state if the activity is being created for the first time.
             // Otherwise the FragmentManager will correctly restore the previous state.
-            viewModel.fetchFragmentConfig().observe(this) { config ->
-                if (config != null) {
-                    val target = if (config.paymentMethods.isEmpty()) {
-                        PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                    } else {
-                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
-                    }
-                    viewModel.transitionTo(target)
-                }
-            }
+            fetchConfig()
         }
 
-        viewModel.startConfirm.observe(this) { event ->
-            val confirmParams = event.getContentIfNotHandled()
+        viewModel.startConfirm.observe(this) { confirmParams ->
             if (confirmParams != null) {
                 paymentController.startConfirmAndAuth(
                     AuthActivityStarter.Host.create(this),
@@ -234,6 +222,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                         stripeAccount = paymentConfig.stripeAccountId
                     )
                 )
+            }
+        }
+    }
+
+    private fun fetchConfig() {
+        viewModel.fetchFragmentConfig().observe(this) { config ->
+            if (config != null) {
+                val target = if (config.paymentMethods.isEmpty()) {
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
+                } else {
+                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+                }
+                viewModel.transitionTo(target)
             }
         }
     }

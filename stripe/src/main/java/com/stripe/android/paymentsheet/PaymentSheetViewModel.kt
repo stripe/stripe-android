@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
@@ -61,7 +62,7 @@ internal class PaymentSheetViewModel internal constructor(
     )
 
     private val _startConfirm = MutableLiveData<Event<ConfirmPaymentIntentParams>>()
-    internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
+    internal val startConfirm = _startConfirm.map { it.getContentIfNotHandled() }
 
     @VisibleForTesting
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)

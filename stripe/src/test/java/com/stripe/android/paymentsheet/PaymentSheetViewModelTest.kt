@@ -113,7 +113,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmPaymentIntentParams>>()
+        val confirmParams = mutableListOf<ConfirmPaymentIntentParams?>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
         }
@@ -122,9 +122,8 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
-            .isEqualTo(
+        assertThat(confirmParams)
+            .containsExactly(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
                     CLIENT_SECRET,
@@ -135,7 +134,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm new payment methods`() = testDispatcher.runBlockingTest {
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmPaymentIntentParams>>()
+        val confirmParams = mutableListOf<ConfirmPaymentIntentParams?>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
         }
@@ -148,9 +147,8 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
 
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
-            .isEqualTo(
+        assertThat(confirmParams)
+            .containsExactly(
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,

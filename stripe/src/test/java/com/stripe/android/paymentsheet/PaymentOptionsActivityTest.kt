@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -213,7 +212,7 @@ class PaymentOptionsActivityTest {
         val viewModel = createViewModel(
             PAYMENT_OPTIONS_CONTRACT_ARGS.copy(isGooglePayReady = true)
         )
-        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
+        val transitionTarget = mutableListOf<TransitionTarget?>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -222,7 +221,7 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             idleLooper()
-            assertThat(transitionTarget[1].peekContent())
+            assertThat(transitionTarget[1])
                 .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
         }
     }
@@ -235,7 +234,7 @@ class PaymentOptionsActivityTest {
         )
 
         val viewModel = createViewModel(args)
-        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
+        val transitionTarget = mutableListOf<TransitionTarget?>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -245,7 +244,7 @@ class PaymentOptionsActivityTest {
             createIntent(args)
         ).use {
             idleLooper()
-            assertThat(transitionTarget[1].peekContent())
+            assertThat(transitionTarget[1])
                 .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
         }
     }

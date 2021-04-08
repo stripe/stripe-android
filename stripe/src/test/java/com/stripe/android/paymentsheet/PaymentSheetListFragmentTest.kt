@@ -104,9 +104,14 @@ class PaymentSheetListFragmentTest {
     fun `posts transition when add card clicked`() {
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value?.peekContent()).isNull()
+            assertThat(activityViewModel.transition.value).isNull()
 
             idleLooper()
+
+            val transitionTarget = mutableListOf<PaymentSheetViewModel.TransitionTarget?>()
+            activityViewModel.transition.observeForever { target ->
+                transitionTarget.add(target)
+            }
 
             val recycler = recyclerView(it)
             assertThat(recycler.adapter).isInstanceOf(PaymentOptionsAdapter::class.java)
@@ -114,7 +119,7 @@ class PaymentSheetListFragmentTest {
             adapter.addCardClickListener.onClick(it.requireView())
             idleLooper()
 
-            assertThat(activityViewModel.transition.value?.peekContent())
+            assertThat(transitionTarget.lastOrNull())
                 .isEqualTo(
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
                         FragmentConfigFixtures.DEFAULT.copy(

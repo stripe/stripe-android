@@ -117,8 +117,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         setupAddButton(viewBinding.addButton)
 
-        viewModel.transition.observe(this) { event ->
-            val transitionTarget = event.getContentIfNotHandled()
+        viewModel.transition.observe(this) { transitionTarget ->
             if (transitionTarget != null) {
                 onTransitionTarget(
                     transitionTarget,
@@ -133,21 +132,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         if (savedInstanceState == null) {
             // Only fetch initial state if the activity is being created for the first time.
             // Otherwise the FragmentManager will correctly restore the previous state.
-            viewModel.fetchFragmentConfig().observe(this) { config ->
-                if (config != null) {
-                    viewModel.transitionTo(
-                        // It would be nice to see this condition move into the PaymentOptionsListFragment
-                        // where we also jump to a new unsaved card. However this move require
-                        // the transition target to specify when to and when not to add things to the
-                        // backstack.
-                        if (starterArgs.paymentMethods.isEmpty() && !config.isGooglePayReady) {
-                            PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                        } else {
-                            PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
-                        }
-                    )
-                }
-            }
+            fetchConfig(starterArgs)
         }
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(
@@ -158,6 +143,24 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             },
             false
         )
+    }
+
+    private fun fetchConfig(starterArgs: PaymentOptionContract.Args) {
+        viewModel.fetchFragmentConfig().observe(this) { config ->
+            if (config != null) {
+                viewModel.transitionTo(
+                    // It would be nice to see this condition move into the PaymentOptionsListFragment
+                    // where we also jump to a new unsaved card. However this move require
+                    // the transition target to specify when to and when not to add things to the
+                    // backstack.
+                    if (starterArgs.paymentMethods.isEmpty() && !config.isGooglePayReady) {
+                        PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(config)
+                    } else {
+                        PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+                    }
+                )
+            }
+        }
     }
 
     private fun setupAddButton(addButton: PrimaryButton) {

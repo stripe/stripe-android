@@ -6,6 +6,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.googlepay.StripeGooglePayContract
@@ -43,7 +44,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
     protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
-    internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
+    internal val launchGooglePay = _launchGooglePay.map { it.getContentIfNotHandled() }
 
     protected val _paymentIntent = MutableLiveData<PaymentIntent?>()
     internal val paymentIntent: LiveData<PaymentIntent?> = _paymentIntent
@@ -61,7 +62,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
     private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
-    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
+    internal val transition = _transition.map { it.getContentIfNotHandled() }
 
     /**
      * On [BaseAddCardFragment] this is set every time the details in the add
@@ -179,7 +180,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
      * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
      */
-    open class Event<out T>(private val content: T) {
+    class Event<out T>(private val content: T) {
 
         var hasBeenHandled = false
             private set // Allow external read but not write
@@ -195,10 +196,5 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 content
             }
         }
-
-        /**
-         * Returns the content, even if it's already been handled.
-         */
-        fun peekContent(): T = content
     }
 }
