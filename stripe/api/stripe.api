@@ -821,8 +821,8 @@ public final class com/stripe/android/Stripe {
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun isAuthenticateSourceResult (ILandroid/content/Intent;)Z
-	public final fun isForPaymentIntentResult (ILandroid/content/Intent;)Z
-	public final fun isForSetupIntentResult (ILandroid/content/Intent;)Z
+	public final fun isPaymentResult (ILandroid/content/Intent;)Z
+	public final fun isSetupResult (ILandroid/content/Intent;)Z
 	public final fun onAuthenticateSourceResult (Landroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun onPaymentResult (ILandroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)Z
 	public final fun onSetupResult (ILandroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)Z

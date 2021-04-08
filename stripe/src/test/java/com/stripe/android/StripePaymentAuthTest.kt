@@ -198,7 +198,6 @@ class StripePaymentAuthTest {
             verify(setupCallback).onSuccess(result)
         }
 
-
     @Test
     fun onSetupResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
         testDispatcher.runBlockingTest {
