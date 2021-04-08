@@ -54,7 +54,7 @@ sealed class ExpirationDate {
             ).joinToString(separator = "")
         }
 
-        private val isComplete = (month.length + year.length) == 4
+        internal val isComplete = (month.length + year.length) == 4
 
         internal val isPartialEntry = !isComplete && ((month.length + year.length) > 0)
 

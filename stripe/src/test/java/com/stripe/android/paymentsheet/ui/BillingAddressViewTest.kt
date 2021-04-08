@@ -9,6 +9,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.Address
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
@@ -236,6 +237,12 @@ class BillingAddressViewTest {
         billingAddressView.countryLayout.selectedCountry = USA
         assertThat(billingAddressView.stateLayout.hint)
             .isEqualTo("State")
+    }
+
+    @Test
+    fun `Calling populate should not result in an erroneous zip code if it has a value`() {
+        billingAddressView.populate(AddressFixtures.ADDRESS)
+        assertThat(billingAddressView.postalCodeView.shouldShowError).isFalse()
     }
 
     @Test

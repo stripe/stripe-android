@@ -268,6 +268,15 @@ class ExpiryDateEditTextTest {
     }
 
     @Test
+    fun clearingDate_doesNotShowError() {
+        expiryDateEditText.append("15")
+        assertThat(expiryDateEditText.shouldShowError).isTrue()
+        expiryDateEditText.setText("")
+        assertThat(expiryDateEditText.text.isNullOrBlank()).isTrue()
+        assertThat(expiryDateEditText.shouldShowError).isFalse()
+    }
+
+    @Test
     fun inputCompleteDate_whenMonthInvalid_showsInvalidMonth() {
         expiryDateEditText.append("15")
         expiryDateEditText.append("50")
