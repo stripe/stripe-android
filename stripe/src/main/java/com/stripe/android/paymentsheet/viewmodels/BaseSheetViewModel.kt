@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.R
@@ -46,8 +47,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    protected val _launchGooglePay = MutableLiveData<StripeGooglePayContract.Args>()
-    internal val launchGooglePay: LiveData<StripeGooglePayContract.Args> = _launchGooglePay
+    protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
+    internal val launchGooglePay = _launchGooglePay.map { it.getContentIfNotHandled() }
 
     protected val _paymentIntent = MutableLiveData<PaymentIntent?>()
     internal val paymentIntent: LiveData<PaymentIntent?> = _paymentIntent
@@ -64,8 +65,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _savedSelection = MutableLiveData<SavedSelection>()
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<TransitionTargetType?>(null)
-    internal val transition: LiveData<TransitionTargetType?> = _transition
+    private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
+    internal val transition = _transition.map { it.getContentIfNotHandled() }
 
     /**
      * On [BaseAddCardFragment] this is set every time the details in the add
@@ -94,12 +95,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     abstract var newCard: PaymentSelection.New.Card?
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
-        transition.switchMap { transitionTarget ->
-            selection.switchMap { paymentSelection ->
-                MutableLiveData(
-                    !isProcessing && transitionTarget != null && paymentSelection != null
-                )
-            }
+        selection.switchMap { paymentSelection ->
+            MutableLiveData(!isProcessing && paymentSelection != null)
         }
     }
 
@@ -145,7 +142,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun transitionTo(target: TransitionTargetType) {
         _userMessage.value = null
-        _transition.postValue(target)
+        _transition.postValue(Event(target))
     }
 
     fun onFatal(throwable: Throwable) {
@@ -195,5 +192,28 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         data class Error(
             override val message: String
         ) : UserMessage()
+    }
+
+    /**
+     * Used as a wrapper for data that is exposed via a LiveData that represents an event.
+     * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
+     * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
+     */
+    class Event<out T>(private val content: T) {
+
+        var hasBeenHandled = false
+            private set // Allow external read but not write
+
+        /**
+         * Returns the content and prevents its use again.
+         */
+        fun getContentIfNotHandled(): T? {
+            return if (hasBeenHandled) {
+                null
+            } else {
+                hasBeenHandled = true
+                content
+            }
+        }
     }
 }

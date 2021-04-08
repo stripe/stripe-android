@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
@@ -62,8 +63,8 @@ internal class PaymentSheetViewModel internal constructor(
         args.clientSecret
     )
 
-    private val _startConfirm = MutableLiveData<ConfirmPaymentIntentParams>()
-    internal val startConfirm: LiveData<ConfirmPaymentIntentParams> = _startConfirm
+    private val _startConfirm = MutableLiveData<Event<ConfirmPaymentIntentParams>>()
+    internal val startConfirm = _startConfirm.map { it.getContentIfNotHandled() }
 
     @VisibleForTesting
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
@@ -177,19 +178,21 @@ internal class PaymentSheetViewModel internal constructor(
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
-                _launchGooglePay.value = StripeGooglePayContract.Args(
-                    paymentIntent = paymentIntent,
-                    config = StripeGooglePayContract.GooglePayConfig(
-                        environment = when (args.config?.googlePay?.environment) {
-                            PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                                StripeGooglePayEnvironment.Production
-                            else ->
-                                StripeGooglePayEnvironment.Test
-                        },
-                        countryCode = args.googlePayConfig?.countryCode.orEmpty(),
-                        merchantName = args.config?.merchantDisplayName
-                    ),
-                    statusBarColor = args.statusBarColor
+                _launchGooglePay.value = Event(
+                    StripeGooglePayContract.Args(
+                        paymentIntent = paymentIntent,
+                        config = StripeGooglePayContract.GooglePayConfig(
+                            environment = when (args.config?.googlePay?.environment) {
+                                PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                                    StripeGooglePayEnvironment.Production
+                                else ->
+                                    StripeGooglePayEnvironment.Test
+                            },
+                            countryCode = args.googlePayConfig?.countryCode.orEmpty(),
+                            merchantName = args.config?.merchantDisplayName
+                        ),
+                        statusBarColor = args.statusBarColor
+                    )
                 )
             }
         } else {
@@ -207,7 +210,7 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            _startConfirm.value = confirmParams
+            _startConfirm.value = Event(confirmParams)
         }
     }
 
