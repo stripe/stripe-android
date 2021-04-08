@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -517,7 +518,8 @@ internal class PaymentSheetViewModelTest {
             prefsRepository,
             eventReporter,
             args,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
     }
 

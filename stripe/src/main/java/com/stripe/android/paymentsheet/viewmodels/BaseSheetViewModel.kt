@@ -1,13 +1,16 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import android.app.Application
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.R
+import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -29,10 +32,11 @@ import kotlin.coroutines.CoroutineContext
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
 internal abstract class BaseSheetViewModel<TransitionTargetType>(
+    application: Application,
     internal val config: PaymentSheet.Configuration?,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
-) : ViewModel() {
+) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
 
     // a fatal error
@@ -151,6 +155,21 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun onApiError(errorMessage: String?) {
         _userMessage.value = errorMessage?.let { UserMessage.Error(it) }
         _processing.value = false
+    }
+
+    fun onApiError(throwable: Throwable) {
+        when (throwable) {
+            is APIConnectionException -> {
+                onApiError(
+                    getApplication<Application>().resources.getString(
+                        R.string.stripe_failure_connection_error
+                    )
+                )
+            }
+            else -> {
+                onApiError(throwable.localizedMessage)
+            }
+        }
     }
 
     fun updateSelection(selection: PaymentSelection?) {

@@ -50,8 +50,10 @@ internal class PaymentSheetViewModel internal constructor(
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
     private val logger: Logger = Logger.noop(),
-    workContext: CoroutineContext
+    workContext: CoroutineContext,
+    application: Application
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
+    application = application,
     config = args.config,
     prefsRepository = prefsRepository,
     workContext = workContext
@@ -281,7 +283,7 @@ internal class PaymentSheetViewModel internal constructor(
                         eventReporter.onPaymentFailure(it)
                     }
 
-                    onApiError(error.message)
+                    onApiError(error)
                     paymentIntent.value?.let(::resetViewState)
                 }
             )
@@ -374,7 +376,8 @@ internal class PaymentSheetViewModel internal constructor(
                 ),
                 starterArgs,
                 logger = Logger.noop(),
-                workContext = Dispatchers.IO
+                workContext = Dispatchers.IO,
+                application = application
             ) as T
         }
     }
