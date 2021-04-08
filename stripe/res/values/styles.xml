@@ -192,4 +192,60 @@
         <item name="android:paddingEnd">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
         <item name="android:layout_marginBottom">12dp</item>
     </style>
+
+    <style name="StripeCardFormView">
+        <item name="cardFormStyle">STANDARD</item>
+    </style>
+
+    <style name="StripeCardFormView.Borderless">
+        <item name="cardFormStyle">BORDERLESS</item>
+    </style>
+
+    <style name="StripeCardFormCountryTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxStrokeColor">@android:color/transparent</item>
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="android:paddingStart">@dimen/stripe_card_form_view_text_input_layout_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/stripe_card_form_view_text_input_layout_padding_horizontal</item>
+        <item name="android:paddingTop">@dimen/stripe_card_form_view_text_input_layout_padding_vertical</item>
+        <item name="android:paddingBottom">@dimen/stripe_card_form_view_text_input_layout_padding_vertical</item>
+        <item name="android:background">@drawable/stripe_card_form_view_text_input_layout_background</item>
+    </style>
+
+    <style name="StripeCardFormCountryItem">
+        <item name="android:inputType">none</item>
+        <item name="android:editable">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textSize">@dimen/stripe_card_form_view_textsize</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:textColor">@color/stripe_card_form_view_textinput_color</item>
+        <item name="android:paddingTop">13dp</item>
+        <item name="android:paddingBottom">13dp</item>
+    </style>
+
+    <style name="StripeCardFormTextInputLayout" parent="Widget.Design.TextInputLayout">
+        <item name="android:paddingStart">@dimen/stripe_card_form_view_text_input_layout_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/stripe_card_form_view_text_input_layout_padding_horizontal</item>
+        <item name="android:paddingTop">@dimen/stripe_card_form_view_text_input_layout_padding_vertical</item>
+        <item name="android:paddingBottom">@dimen/stripe_card_form_view_text_input_layout_padding_vertical</item>
+        <item name="android:background">@drawable/stripe_card_form_view_text_input_layout_background</item>
+    </style>
+
+    <style name="StripeCardFormEditText">
+        <item name="android:imeOptions">actionDone</item>
+        <item name="android:textColor">@color/stripe_card_form_view_textinput_color</item>
+        <item name="android:textSize">@dimen/stripe_card_form_view_textsize</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:minHeight">@dimen/stripe_card_form_view_text_minheight</item>
+    </style>
+
+    <style name="StripeCardErrorTextView">
+        <item name="android:imeOptions">actionDone</item>
+        <item name="android:textColor">@color/stripe_card_form_view_form_error</item>
+        <item name="android:textSize">@dimen/stripe_card_form_view_error_textsize</item>
+        <item name="android:lineSpacingExtra">5dp</item>
+        <item name="android:layout_marginStart">@dimen/stripe_card_form_view_text_margin_horizontal</item>
+        <item name="android:layout_marginEnd">@dimen/stripe_card_form_view_text_margin_horizontal</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:layout_marginBottom">12dp</item>
+    </style>
 </resources>

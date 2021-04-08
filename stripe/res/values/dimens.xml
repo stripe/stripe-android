@@ -81,4 +81,14 @@
 
     <dimen name="stripe_card_number_text_input_layout_progress_end_margin">14dp</dimen>
     <dimen name="stripe_card_number_text_input_layout_progress_top_margin">10dp</dimen>
+
+    <!--CardFormView-->
+    <dimen name="stripe_card_form_view_textsize">14sp</dimen>
+    <dimen name="stripe_card_form_view_text_input_layout_padding_vertical">4dp</dimen>
+    <dimen name="stripe_card_form_view_text_input_layout_padding_horizontal">12dp</dimen>
+    <dimen name="stripe_card_form_view_text_margin_vertical">4dp</dimen>
+    <dimen name="stripe_card_form_view_text_margin_horizontal">12dp</dimen>
+    <dimen name="stripe_card_form_view_text_minheight">48dp</dimen>
+    <dimen name="stripe_card_form_view_card_elevation">1dp</dimen>
+    <dimen name="stripe_card_form_view_error_textsize">13sp</dimen>
 </resources>

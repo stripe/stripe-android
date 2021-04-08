@@ -48,4 +48,12 @@
     <color name="stripe_paymentsheet_googlepay_divider_line">#1F000000</color>
     <color name="stripe_paymentsheet_googlepay_divider_background">@android:color/white</color>
     <color name="stripe_paymentsheet_googlepay_divider_text">#99000000</color>
+
+    <!-- CardFormView -->
+    <color name="stripe_card_form_view_textinput_color">#E61A1A1A</color>
+    <color name="stripe_card_form_view_background_default">@android:color/transparent</color>
+    <color name="stripe_card_form_view_background_disabled">#F8F8F8</color>
+    <color name="stripe_card_form_view_form_error">#CF6679</color>
+    <color name="stripe_card_form_view_form_border">#33787880</color>
+
 </resources>

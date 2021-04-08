@@ -21,4 +21,12 @@
         <attr name="countryAutoCompleteStyle" format="reference" />
         <attr name="countryItemLayout" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="StripeCardFormView">
+        <attr name="cardFormStyle" format="enum">
+            <enum name="STANDARD" value="0"/>
+            <enum name="BORDERLESS" value="1"/>
+        </attr>
+        <attr name="formBackgroundColorStateList" format="reference" />
+    </declare-styleable>
 </resources>

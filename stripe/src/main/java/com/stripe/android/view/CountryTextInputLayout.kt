@@ -125,6 +125,12 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         }
     }
 
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        // setEnabled is called in super constructor, the empty check is required
+        countryAutocomplete?.isEnabled = enabled
+    }
+
     /**
      * Initialize the encapsulated [AutoCompleteTextView] with [countryAutoCompleteStyleRes] style
      * resource read from styleable.
