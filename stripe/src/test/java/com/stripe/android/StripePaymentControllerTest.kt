@@ -76,9 +76,7 @@ internal class StripePaymentControllerTest {
         whenever(it.sdkTransactionId)
             .thenReturn(sdkTransactionId)
     }
-    private val paymentIntentResultCallback: ApiResultCallback<PaymentIntentResult> = mock()
     private val setupIntentResultCallback: ApiResultCallback<SetupIntentResult> = mock()
-    private val sourceCallback: ApiResultCallback<Source> = mock()
     private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter =
@@ -99,7 +97,6 @@ internal class StripePaymentControllerTest {
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
     private val setupIntentResultArgumentCaptor: KArgumentCaptor<SetupIntentResult> =
         argumentCaptor()
-    private val sourceArgumentCaptor: KArgumentCaptor<Source> = argumentCaptor()
 
     private val testDispatcher = TestCoroutineDispatcher()
 
@@ -326,58 +323,6 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun handlePaymentResult_withAuthException_shouldCallCallbackOnError() {
-        val exception = APIException(RuntimeException())
-        val intent = Intent().putExtras(
-            PaymentFlowResult.Unvalidated(
-                exception = exception
-            ).toBundle()
-        )
-
-        controller.handlePaymentResult(intent, paymentIntentResultCallback)
-        verify(paymentIntentResultCallback).onError(exception)
-        verify(paymentIntentResultCallback, never())
-            .onSuccess(anyOrNull())
-    }
-
-    @Test
-    fun handleSetupResult_withAuthException_shouldCallCallbackOnError() {
-        val exception = APIException(RuntimeException())
-        val intent = Intent().putExtras(
-            PaymentFlowResult.Unvalidated(
-                exception = exception
-            ).toBundle()
-        )
-
-        controller.handleSetupResult(intent, setupIntentResultCallback)
-
-        verify(setupIntentResultCallback).onError(exception)
-        verify(setupIntentResultCallback, never())
-            .onSuccess(anyOrNull())
-    }
-
-    @Test
-    fun handleSetupResult_shouldCallbackOnSuccess() {
-        assertThat(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret)
-            .isNotNull()
-
-        val intent = Intent().putExtras(
-            PaymentFlowResult.Unvalidated(
-                clientSecret = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret,
-                flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
-            ).toBundle()
-        )
-
-        controller.handleSetupResult(intent, setupIntentResultCallback)
-
-        verify(setupIntentResultCallback)
-            .onSuccess(setupIntentResultArgumentCaptor.capture())
-        val result = setupIntentResultArgumentCaptor.firstValue
-        assertThat(result.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
-        assertThat(result.intent).isEqualTo(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
-    }
-
-    @Test
     fun `on3ds2AuthSuccess() with challenge flow should not start relay activity`() =
         testDispatcher.runBlockingTest {
             controller.on3ds2AuthSuccess(
@@ -561,7 +506,7 @@ internal class StripePaymentControllerTest {
                 ).toBundle()
             )
 
-            controller.handlePaymentResult(intent, paymentIntentResultCallback)
+            val paymentIntentResult = controller.getPaymentIntentResult(intent)
 
             assertThat(stripeRepository.retrievePaymentIntentArgs)
                 .containsExactly(
@@ -574,9 +519,7 @@ internal class StripePaymentControllerTest {
                     Triple(paymentIntent.id.orEmpty(), sourceId, REQUEST_OPTIONS)
                 )
 
-            verify(paymentIntentResultCallback).onSuccess(
-                PaymentIntentResult(paymentIntent)
-            )
+            assertThat(paymentIntentResult).isEqualTo(PaymentIntentResult(paymentIntent))
         }
 
     @Test
@@ -587,25 +530,6 @@ internal class StripePaymentControllerTest {
                 Intent()
             )
         ).isTrue()
-    }
-
-    @Test
-    fun handleSourceResult_withSuccessfulResult_shouldCallOnSuccess() {
-        controller.handleSourceResult(
-            data = Intent().putExtras(
-                PaymentFlowResult.Unvalidated(
-                    sourceId = "src_123",
-                    clientSecret = "src_123_secret_abc"
-                ).toBundle()
-            ),
-            callback = sourceCallback
-        )
-        verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture())
-        assertThat(
-            sourceArgumentCaptor.firstValue.status
-        ).isEqualTo(Source.Status.Chargeable)
-
-        verifyAnalytics(AnalyticsEvent.AuthSourceResult)
     }
 
     @Test

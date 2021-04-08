@@ -375,35 +375,6 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * If payment authentication triggered an exception, get the exception object and pass to
-     * [ApiResultCallback.onError].
-     *
-     * Otherwise, get the PaymentIntent's client_secret from {@param data} and use to retrieve
-     * the PaymentIntent object with updated status.
-     *
-     * @param data the result Intent
-     */
-    override fun handlePaymentResult(
-        data: Intent,
-        callback: ApiResultCallback<PaymentIntentResult>
-    ) {
-        CoroutineScope(workContext).launch {
-            runCatching {
-                paymentFlowResultProcessor.processPaymentIntent(
-                    PaymentFlowResult.Unvalidated.fromIntent(data)
-                )
-            }.fold(
-                onSuccess = {
-                    dispatchPaymentIntentResult(it, callback)
-                },
-                onFailure = {
-                    dispatchError(it, callback)
-                }
-            )
-        }
-    }
-
-    /**
      * Get the PaymentIntent's client_secret from {@param data} and use to retrieve
      * the PaymentIntent object with updated status.
      *
@@ -429,35 +400,6 @@ internal class StripePaymentController internal constructor(
         )
 
     /**
-     * If setup authentication triggered an exception, get the exception object and pass to
-     * [ApiResultCallback.onError].
-     *
-     * Otherwise, get the SetupIntent's client_secret from {@param data} and use to retrieve the
-     * SetupIntent object with updated status.
-     *
-     * @param data the result Intent
-     */
-    override fun handleSetupResult(
-        data: Intent,
-        callback: ApiResultCallback<SetupIntentResult>
-    ) {
-        CoroutineScope(workContext).launch {
-            runCatching {
-                paymentFlowResultProcessor.processSetupIntent(
-                    PaymentFlowResult.Unvalidated.fromIntent(data)
-                )
-            }.fold(
-                onSuccess = {
-                    dispatchSetupIntentResult(it, callback)
-                },
-                onFailure = {
-                    dispatchError(it, callback)
-                }
-            )
-        }
-    }
-
-    /**
      * Get the SetupIntent's client_secret from {@param data} and use to retrieve
      * the PaymentIntent object with updated status.
      *
@@ -481,46 +423,6 @@ internal class StripePaymentController internal constructor(
         paymentFlowResultProcessor.processSetupIntent(
             PaymentFlowResult.Unvalidated.fromIntent(data)
         )
-
-    override fun handleSourceResult(
-        data: Intent,
-        callback: ApiResultCallback<Source>
-    ) {
-        val result = PaymentFlowResult.Unvalidated.fromIntent(data)
-        val sourceId = result.sourceId.orEmpty()
-        val clientSecret = result.clientSecret.orEmpty()
-
-        val requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = result.stripeAccountId
-        )
-
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthSourceParams(
-                    AnalyticsEvent.AuthSourceResult,
-                    sourceId
-                )
-            )
-        )
-
-        CoroutineScope(workContext).launch {
-            val sourceResult = runCatching {
-                requireNotNull(
-                    stripeRepository.retrieveSource(sourceId, clientSecret, requestOptions)
-                )
-            }
-
-            withContext(Dispatchers.Main) {
-                sourceResult.fold(
-                    onSuccess = callback::onSuccess,
-                    onFailure = {
-                        dispatchError(it, callback)
-                    }
-                )
-            }
-        }
-    }
 
     /**
      * Get the Source's client_secret from {@param data} and use to retrieve

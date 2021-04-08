@@ -348,7 +348,9 @@ class Stripe internal constructor(
         callback: ApiResultCallback<PaymentIntentResult>
     ): Boolean {
         return if (isPaymentResult(requestCode, data) && data != null) {
-            paymentController.handlePaymentResult(data, callback)
+            executeAsync(callback) {
+                paymentController.getPaymentIntentResult(data)
+            }
             true
         } else {
             false
@@ -636,7 +638,9 @@ class Stripe internal constructor(
         callback: ApiResultCallback<SetupIntentResult>
     ): Boolean {
         return if (isSetupResult(requestCode, data) && data != null) {
-            paymentController.handleSetupResult(data, callback)
+            executeAsync(callback) {
+                paymentController.getSetupIntentResult(data)
+            }
             true
         } else {
             false
@@ -900,10 +904,9 @@ class Stripe internal constructor(
         data: Intent,
         callback: ApiResultCallback<Source>
     ) {
-        paymentController.handleSourceResult(
-            data,
-            callback
-        )
+        executeAsync(callback) {
+            paymentController.getAuthenticateSourceResult(data)
+        }
     }
 
     /**

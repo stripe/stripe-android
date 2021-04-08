@@ -55,20 +55,6 @@ internal interface PaymentController {
     fun shouldHandleSourceResult(requestCode: Int, data: Intent?): Boolean
 
     /**
-     * If payment authentication triggered an exception, get the exception object and pass to
-     * [ApiResultCallback.onError].
-     *
-     * Otherwise, get the PaymentIntent's client_secret from {@param data} and use to retrieve
-     * the PaymentIntent object with updated status.
-     *
-     * @param data the result Intent
-     */
-    fun handlePaymentResult(
-        data: Intent,
-        callback: ApiResultCallback<PaymentIntentResult>
-    )
-
-    /**
      * Get the PaymentIntent's client_secret from {@param data} and use to retrieve
      * the PaymentIntent object with updated status.
      *
@@ -91,20 +77,6 @@ internal interface PaymentController {
     suspend fun getPaymentIntentResult(data: Intent): PaymentIntentResult
 
     /**
-     * If setup authentication triggered an exception, get the exception object and pass to
-     * [ApiResultCallback.onError].
-     *
-     * Otherwise, get the SetupIntent's client_secret from {@param data} and use to retrieve the
-     * SetupIntent object with updated status.
-     *
-     * @param data the result Intent
-     */
-    fun handleSetupResult(
-        data: Intent,
-        callback: ApiResultCallback<SetupIntentResult>
-    )
-
-    /**
      * Get the SetupIntent's client_secret from {@param data} and use to retrieve
      * the SetupIntent object with updated status.
      *
@@ -125,11 +97,6 @@ internal interface PaymentController {
         IllegalArgumentException::class
     )
     suspend fun getSetupIntentResult(data: Intent): SetupIntentResult
-
-    fun handleSourceResult(
-        data: Intent,
-        callback: ApiResultCallback<Source>
-    )
 
     /**
      * Get the Source's client_secret from {@param data} and use to retrieve
