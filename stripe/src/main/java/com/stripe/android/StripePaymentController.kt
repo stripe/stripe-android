@@ -542,7 +542,7 @@ internal class StripePaymentController internal constructor(
         APIException::class,
         IllegalArgumentException::class
     )
-    override suspend fun getSource(data: Intent): Source {
+    override suspend fun getAuthenticateSourceResult(data: Intent): Source {
         val result = PaymentFlowResult.Unvalidated.fromIntent(data)
         val sourceId = result.sourceId.orEmpty()
         val clientSecret = result.clientSecret.orEmpty()

@@ -56,7 +56,7 @@ suspend fun Stripe.createPaymentMethod(
     paymentMethodCreateParams: PaymentMethodCreateParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): PaymentMethod = runApiRequestCaptureEmptyResult {
+): PaymentMethod = runApiRequest {
     stripeRepository.createPaymentMethod(
         paymentMethodCreateParams,
         ApiRequest.Options(
@@ -95,7 +95,7 @@ suspend fun Stripe.createSource(
     sourceParams: SourceParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Source = runApiRequestCaptureEmptyResult {
+): Source = runApiRequest {
     stripeRepository.createSource(
         sourceParams,
         ApiRequest.Options(
@@ -134,7 +134,7 @@ suspend fun Stripe.createAccountToken(
     accountParams: AccountParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequestCaptureEmptyResult {
+): Token = runApiRequest {
     stripeRepository.createToken(
         accountParams,
         ApiRequest.Options(
@@ -173,7 +173,7 @@ suspend fun Stripe.createBankAccountToken(
     bankAccountTokenParams: BankAccountTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequestCaptureEmptyResult {
+): Token = runApiRequest {
     stripeRepository.createToken(
         bankAccountTokenParams,
         ApiRequest.Options(
@@ -212,7 +212,7 @@ suspend fun Stripe.createPiiToken(
     personalId: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequestCaptureEmptyResult {
+): Token = runApiRequest {
     stripeRepository.createToken(
         PiiTokenParams(personalId),
         ApiRequest.Options(
@@ -253,7 +253,7 @@ suspend fun Stripe.createCardToken(
     cardParams: CardParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequestCaptureEmptyResult {
+): Token = runApiRequest {
     stripeRepository.createToken(
         cardParams,
         ApiRequest.Options(
@@ -291,7 +291,7 @@ suspend fun Stripe.createCvcUpdateToken(
     @Size(min = 3, max = 4) cvc: String,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequestCaptureEmptyResult {
+): Token = runApiRequest {
     stripeRepository.createToken(
         CvcTokenParams(cvc),
         ApiRequest.Options(
@@ -331,7 +331,7 @@ suspend fun Stripe.createPersonToken(
     params: PersonTokenParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
-): Token = runApiRequestCaptureEmptyResult {
+): Token = runApiRequest {
     stripeRepository.createToken(
         params,
         ApiRequest.Options(
@@ -372,7 +372,7 @@ suspend fun Stripe.createFile(
     fileParams: StripeFileParams,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId,
-): StripeFile = runApiRequestCaptureEmptyResult {
+): StripeFile = runApiRequest {
     stripeRepository.createFile(
         fileParams,
         ApiRequest.Options(
@@ -409,7 +409,7 @@ suspend fun Stripe.createFile(
 suspend fun Stripe.retrievePaymentIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-): PaymentIntent = runApiRequestCaptureEmptyResult {
+): PaymentIntent = runApiRequest {
     stripeRepository.retrievePaymentIntent(
         clientSecret,
         ApiRequest.Options(
@@ -445,7 +445,7 @@ suspend fun Stripe.retrievePaymentIntent(
 suspend fun Stripe.retrieveSetupIntent(
     clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-): SetupIntent = runApiRequestCaptureEmptyResult {
+): SetupIntent = runApiRequest {
     stripeRepository.retrieveSetupIntent(
         clientSecret,
         ApiRequest.Options(
@@ -483,7 +483,7 @@ suspend fun Stripe.retrieveSource(
     @Size(min = 1) sourceId: String,
     @Size(min = 1) clientSecret: String,
     stripeAccountId: String? = this.stripeAccountId
-): Source = runApiRequestCaptureEmptyResult {
+): Source = runApiRequest {
     stripeRepository.retrieveSource(
         sourceId,
         clientSecret,
@@ -519,7 +519,7 @@ suspend fun Stripe.retrieveSource(
 suspend fun Stripe.confirmSetupIntent(
     confirmSetupIntentParams: ConfirmSetupIntentParams,
     idempotencyKey: String? = null
-): SetupIntent = runApiRequestCaptureEmptyResult {
+): SetupIntent = runApiRequest {
     stripeRepository.confirmSetupIntent(
         confirmSetupIntentParams,
         ApiRequest.Options(
@@ -555,7 +555,7 @@ suspend fun Stripe.confirmSetupIntent(
 suspend fun Stripe.confirmPaymentIntent(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     idempotencyKey: String? = null
-): PaymentIntent = runApiRequestCaptureEmptyResult {
+): PaymentIntent = runApiRequest {
     stripeRepository.confirmPaymentIntent(
         confirmPaymentIntentParams,
         ApiRequest.Options(
@@ -571,12 +571,12 @@ suspend fun Stripe.confirmPaymentIntent(
  *
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
-private inline fun <reified APIObject : StripeModel> runApiRequestCaptureEmptyResult(
-    block: () -> APIObject?
-): APIObject =
+private inline fun <reified ApiObject : StripeModel> runApiRequest(
+    block: () -> ApiObject?
+): ApiObject =
     runCatching {
         requireNotNull(block()) {
-            "Failed to parse ${APIObject::class.java.simpleName}."
+            "Failed to parse ${ApiObject::class.java.simpleName}."
         }
     }.getOrElse { throw StripeException.create(it) }
 
@@ -601,14 +601,14 @@ private inline fun <reified APIObject : StripeModel> runApiRequestCaptureEmptyRe
 )
 suspend fun Stripe.getPaymentIntentResult(
     requestCode: Int,
-    data: Intent?,
+    data: Intent,
 ): PaymentIntentResult {
-    return runApiRequestCaptureIllegalArgumentException(
-        isForPaymentIntentResult(
+    return runApiRequest(
+        isPaymentResult(
             requestCode,
             data
         )
-    ) { paymentController.getPaymentIntentResult(data!!) }
+    ) { paymentController.getPaymentIntentResult(data) }
 }
 
 /**
@@ -633,14 +633,14 @@ suspend fun Stripe.getPaymentIntentResult(
 )
 suspend fun Stripe.getSetupIntentResult(
     requestCode: Int,
-    data: Intent?,
+    data: Intent,
 ): SetupIntentResult {
-    return runApiRequestCaptureIllegalArgumentException(
-        isForSetupIntentResult(
+    return runApiRequest(
+        isSetupResult(
             requestCode,
             data
         )
-    ) { paymentController.getSetupIntentResult(data!!) }
+    ) { paymentController.getSetupIntentResult(data) }
 }
 
 /**
@@ -664,14 +664,14 @@ suspend fun Stripe.getSetupIntentResult(
 )
 suspend fun Stripe.getAuthenticateSourceResult(
     requestCode: Int,
-    data: Intent?,
+    data: Intent,
 ): Source {
-    return runApiRequestCaptureIllegalArgumentException(
+    return runApiRequest(
         isAuthenticateSourceResult(
             requestCode,
             data
         )
-    ) { paymentController.getSource(data!!) }
+    ) { paymentController.getAuthenticateSourceResult(data) }
 }
 
 /**
@@ -680,13 +680,13 @@ suspend fun Stripe.getAuthenticateSourceResult(
  *
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
-internal inline fun <reified APIObject : StripeModel> runApiRequestCaptureIllegalArgumentException(
+internal inline fun <reified ApiObject : StripeModel> runApiRequest(
     isValidParam: Boolean,
-    block: () -> APIObject
-): APIObject =
+    block: () -> ApiObject
+): ApiObject =
     runCatching {
         require(isValidParam) {
-            "Incorrect requestCode and data for ${APIObject::class.java.simpleName}."
+            "Incorrect requestCode and data for ${ApiObject::class.java.simpleName}."
         }
         block()
     }.getOrElse { throw StripeException.create(it) }

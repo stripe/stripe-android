@@ -151,7 +151,7 @@ internal interface PaymentController {
         APIException::class,
         IllegalArgumentException::class
     )
-    suspend fun getSource(data: Intent): Source
+    suspend fun getAuthenticateSourceResult(data: Intent): Source
 
     /**
      * Determine which authentication mechanism should be used, or bypass authentication

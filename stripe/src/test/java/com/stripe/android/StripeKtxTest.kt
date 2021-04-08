@@ -463,7 +463,7 @@ internal class StripeKtxTest {
     fun `When controller returns correct value then getAuthenticateSourceResult should succeed`(): Unit =
         `Given controller returns non-empty value when calling getAPI then returns correct result`(
             mockPaymentController::shouldHandleSourceResult,
-            mockPaymentController::getSource,
+            mockPaymentController::getAuthenticateSourceResult,
             stripe::getAuthenticateSourceResult
         )
 
@@ -471,7 +471,7 @@ internal class StripeKtxTest {
     fun `When controller throws exception then getAuthenticateSourceResult should throw same exception`(): Unit =
         `Given controller returns exception when calling getAPI then throws same exception`(
             mockPaymentController::shouldHandleSourceResult,
-            mockPaymentController::getSource,
+            mockPaymentController::getAuthenticateSourceResult,
             stripe::getAuthenticateSourceResult
         )
 
@@ -482,12 +482,12 @@ internal class StripeKtxTest {
             stripe::getAuthenticateSourceResult
         )
 
-    private inline fun <reified APIObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
+    private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI then returns correct result`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> APIObject?,
-        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> APIObject
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
+        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject
     ) = testDispatcher.runBlockingTest {
-        val expectedApiObj = mock<APIObject>()
+        val expectedApiObj = mock<ApiObject>()
 
         whenever(
             repositoryBlock(any(), any())
@@ -520,16 +520,16 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified APIObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
+    private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns null when calling createAPI then throws InvalidRequestException`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> APIObject?,
-        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> APIObject
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
+        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject
     ): Unit = testDispatcher.runBlockingTest {
         whenever(
             repositoryBlock(any(), any())
         ).thenReturn(null)
 
-        assertFailsWithMessage<InvalidRequestException>("Failed to parse ${APIObject::class.java.simpleName}.") {
+        assertFailsWithMessage<InvalidRequestException>("Failed to parse ${ApiObject::class.java.simpleName}.") {
             createApiInvocationBlock(
                 mock(),
                 TEST_IDEMPOTENCY_KEY,
@@ -538,12 +538,12 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified APIObject : StripeModel, reified RepositoryParam : StripeParamsModel>
+    private inline fun <reified ApiObject : StripeModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI with String param then returns correct result`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> APIObject?,
-        crossinline createApiInvocationBlock: suspend (String, String?, String?) -> APIObject
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
+        crossinline createApiInvocationBlock: suspend (String, String?, String?) -> ApiObject
     ) = testDispatcher.runBlockingTest {
-        val expectedApiObj = mock<APIObject>()
+        val expectedApiObj = mock<ApiObject>()
 
         whenever(
             repositoryBlock(any(), any())
@@ -576,16 +576,16 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified APIObject : StripeModel, reified RepositoryParam : Any>
+    private inline fun <reified ApiObject : StripeModel, reified RepositoryParam : Any>
     `Given repository returns null when calling createAPI with String param then throws InvalidRequestException`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> APIObject?,
-        crossinline createApiInvocationBlock: suspend (String, String?, String?) -> APIObject
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
+        crossinline createApiInvocationBlock: suspend (String, String?, String?) -> ApiObject
     ): Unit = testDispatcher.runBlockingTest {
         whenever(
             repositoryBlock(any(), any())
         ).thenReturn(null)
 
-        assertFailsWithMessage<InvalidRequestException>("Failed to parse ${APIObject::class.java.simpleName}.") {
+        assertFailsWithMessage<InvalidRequestException>("Failed to parse ${ApiObject::class.java.simpleName}.") {
             createApiInvocationBlock(
                 "param1",
                 TEST_IDEMPOTENCY_KEY,
@@ -594,12 +594,12 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified APIObject : StripeModel>
+    private inline fun <reified ApiObject : StripeModel>
     `Given repository returns non-empty value when calling retrieveAPI with String param then returns correct result`(
-        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> APIObject?,
-        crossinline retrieveApiInvocationBlock: suspend (String, String?) -> APIObject
+        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> ApiObject?,
+        crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
     ): Unit = testDispatcher.runBlockingTest {
-        val expectedApiObj = mock<APIObject>()
+        val expectedApiObj = mock<ApiObject>()
 
         whenever(
             repositoryBlock(any(), any(), any())
@@ -630,16 +630,16 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified APIObject : StripeModel>
+    private inline fun <reified ApiObject : StripeModel>
     `Given repository returns null when calling retrieveAPI with String param then throws InvalidRequestException`(
-        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> APIObject?,
-        crossinline retrieveApiInvocationBlock: suspend (String, String?) -> APIObject
+        crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> ApiObject?,
+        crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
     ): Unit = testDispatcher.runBlockingTest {
         whenever(
             repositoryBlock(any(), any(), any())
         ).thenReturn(null)
 
-        assertFailsWith<InvalidRequestException>("Failed to parse ${APIObject::class.java.simpleName}.") {
+        assertFailsWith<InvalidRequestException>("Failed to parse ${ApiObject::class.java.simpleName}.") {
             retrieveApiInvocationBlock(
                 "param1",
                 TEST_STRIPE_ACCOUNT_ID
@@ -647,13 +647,13 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified APIObject : StripeModel>
+    private inline fun <reified ApiObject : StripeModel>
     `Given controller returns non-empty value when calling getAPI then returns correct result`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
-        crossinline controllerInvocationBlock: suspend (Intent) -> APIObject,
-        crossinline getAPIInvocationBlock: suspend (Int, Intent?) -> APIObject
+        crossinline controllerInvocationBlock: suspend (Intent) -> ApiObject,
+        crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject
     ) = testDispatcher.runBlockingTest {
-        val expectedApiObj = mock<APIObject>()
+        val expectedApiObj = mock<ApiObject>()
 
         whenever(
             controllerCheckBlock(any(), any())
@@ -671,11 +671,11 @@ internal class StripeKtxTest {
         assertSame(expectedApiObj, actualObj)
     }
 
-    private inline fun <APIObject : StripeModel>
+    private inline fun <ApiObject : StripeModel>
     `Given controller returns exception when calling getAPI then throws same exception`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
-        crossinline controllerInvocationBlock: suspend (Intent) -> APIObject,
-        crossinline getAPIInvocationBlock: suspend (Int, Intent?) -> APIObject
+        crossinline controllerInvocationBlock: suspend (Intent) -> ApiObject,
+        crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject
     ): Unit = testDispatcher.runBlockingTest {
         whenever(
             controllerCheckBlock(any(), any())
@@ -693,16 +693,16 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified APIObject : StripeModel>
+    private inline fun <reified ApiObject : StripeModel>
     `Given controller check fails when calling getAPI then throws InvalidRequestException`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
-        crossinline getAPIInvocationBlock: suspend (Int, Intent?) -> APIObject
+        crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject
     ): Unit = testDispatcher.runBlockingTest {
         whenever(
             controllerCheckBlock(any(), any())
         ).thenReturn(false)
 
-        assertFailsWith<InvalidRequestException>("Incorrect requestCode and data for ${APIObject::class.java.simpleName}.") {
+        assertFailsWith<InvalidRequestException>("Incorrect requestCode and data for ${ApiObject::class.java.simpleName}.") {
             getAPIInvocationBlock(
                 TEST_REQUEST_CODE,
                 mock()

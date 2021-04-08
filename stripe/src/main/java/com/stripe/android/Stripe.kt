@@ -329,7 +329,7 @@ class Stripe internal constructor(
      *
      * @return whether the requestCode and intent is for [PaymentIntentResult].
      */
-    fun isForPaymentIntentResult(
+    fun isPaymentResult(
         requestCode: Int,
         data: Intent?
     ): Boolean {
@@ -347,8 +347,8 @@ class Stripe internal constructor(
         data: Intent?,
         callback: ApiResultCallback<PaymentIntentResult>
     ): Boolean {
-        return if (isForPaymentIntentResult(requestCode, data)) {
-            paymentController.handlePaymentResult(data!!, callback)
+        return if (isPaymentResult(requestCode, data) && data != null) {
+            paymentController.handlePaymentResult(data, callback)
             true
         } else {
             false
@@ -618,7 +618,7 @@ class Stripe internal constructor(
      *
      * @return whether the requestCode and intent is for [SetupIntentResult].
      */
-    fun isForSetupIntentResult(
+    fun isSetupResult(
         requestCode: Int,
         data: Intent?
     ): Boolean {
@@ -635,8 +635,8 @@ class Stripe internal constructor(
         data: Intent?,
         callback: ApiResultCallback<SetupIntentResult>
     ): Boolean {
-        return if (isForSetupIntentResult(requestCode, data)) {
-            paymentController.handleSetupResult(data!!, callback)
+        return if (isSetupResult(requestCode, data) && data != null) {
+            paymentController.handleSetupResult(data, callback)
             true
         } else {
             false
