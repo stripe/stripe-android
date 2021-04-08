@@ -57,23 +57,23 @@ internal class PaymentAuthWebViewClient(
         view: WebView,
         request: WebResourceRequest
     ): Boolean {
-        val uri = request.url
-        logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading(): $uri")
-        updateCompletionUrl(uri)
+        val url = request.url
+        logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading(): $url")
+        updateCompletionUrl(url)
 
-        return if (isReturnUrl(uri)) {
+        return if (isReturnUrl(url)) {
             logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - handle return URL")
-            onAuthCompleted(uri)
+            onAuthCompleted(url)
             true
-        } else if ("intent".equals(uri.scheme, ignoreCase = true)) {
-            openIntentScheme(uri)
+        } else if ("intent".equals(url.scheme, ignoreCase = true)) {
+            openIntentScheme(url)
             true
-        } else if (!URLUtil.isNetworkUrl(uri.toString())) {
+        } else if (!URLUtil.isNetworkUrl(url.toString())) {
             // Non-network URLs are likely deep-links into banking apps. If the deep-link can be
             // opened via an Intent, start it. Otherwise, stop the authentication attempt.
             openIntent(
-                uri,
-                Intent(Intent.ACTION_VIEW, uri)
+                url,
+                Intent(Intent.ACTION_VIEW, url)
             )
             true
         } else {
