@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
@@ -39,17 +40,24 @@ class CardFormView @JvmOverloads constructor(
 
     private val cardContainer = viewBinding.cardMultilineWidgetContainer
 
-    private val cardMultilineWidget = viewBinding.cardMultilineWidget
+    @VisibleForTesting
+    internal val cardMultilineWidget = viewBinding.cardMultilineWidget
+
+    @VisibleForTesting
+    internal val countryPostalDivider = viewBinding.countryPostalDivider
 
     private val postalCodeContainer = viewBinding.postalCodeContainer
 
-    private val errors = viewBinding.errors
+    @VisibleForTesting
+    internal val errors = viewBinding.errors
 
     private val postalCodeValidator = PostalCodeValidator()
 
-    private val postalCodeView = viewBinding.postalCode
+    @VisibleForTesting
+    internal val postalCodeView = viewBinding.postalCode
 
-    private val countryLayout = viewBinding.countryLayout
+    @VisibleForTesting
+    internal val countryLayout = viewBinding.countryLayout
 
     private var formBackgroundColorStateList: ColorStateList? = null
 
@@ -368,7 +376,7 @@ class CardFormView @JvmOverloads constructor(
             ).root,
             1
         )
-        viewBinding.countryPostalDivider.isVisible = false
+        countryPostalDivider.isVisible = false
 
         // hide border
         cardContainer.cardElevation = 0f
@@ -404,8 +412,8 @@ class CardFormView @JvmOverloads constructor(
         }
     }
 
-    private companion object {
-        private const val CARD_FORM_VIEW = "CardFormView"
+    internal companion object {
+        const val CARD_FORM_VIEW = "CardFormView"
     }
 
 
