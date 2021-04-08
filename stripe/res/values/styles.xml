@@ -194,11 +194,11 @@
     </style>
 
     <style name="StripeCardFormView">
-        <item name="cardFormStyle">STANDARD</item>
+        <item name="cardFormStyle">standard</item>
     </style>
 
     <style name="StripeCardFormView.Borderless">
-        <item name="cardFormStyle">BORDERLESS</item>
+        <item name="cardFormStyle">borderless</item>
     </style>
 
     <style name="StripeCardFormCountryTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">

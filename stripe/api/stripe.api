@@ -5529,8 +5529,8 @@ public final class com/stripe/android/view/CardFormView : android/widget/FrameLa
 }
 
 public final class com/stripe/android/view/CardFormView$Style : java/lang/Enum {
-	public static final field BORDERLESS Lcom/stripe/android/view/CardFormView$Style;
-	public static final field STANDARD Lcom/stripe/android/view/CardFormView$Style;
+	public static final field Borderless Lcom/stripe/android/view/CardFormView$Style;
+	public static final field Standard Lcom/stripe/android/view/CardFormView$Style;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/view/CardFormView$Style;
 	public static fun values ()[Lcom/stripe/android/view/CardFormView$Style;
 }

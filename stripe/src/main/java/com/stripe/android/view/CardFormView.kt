@@ -16,7 +16,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.R
-import com.stripe.android.databinding.CardFormViewBinding
+import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
@@ -27,7 +27,7 @@ import com.stripe.android.view.CardFormView.Style
 /**
  * A view to collect credit card information and provide [CardParams] for API invocation.
  *
- * Use [R.styleable.StripeCardFormView_cardFormStyle] to toggle style between [Style.STANDARD] and [Style.BORDERLESS],
+ * Use [R.styleable.StripeCardFormView_cardFormStyle] to toggle style between [Style.Standard] and [Style.Borderless],
  * Use [R.styleable.StripeCardFormView_formBackgroundColorStateList] to change the card's background color in enable and disabled state.
  *
  * To access the [CardParams], see details in [cardParams] property.
@@ -38,7 +38,7 @@ class CardFormView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
     private val layoutInflater = LayoutInflater.from(context)
-    private val viewBinding = CardFormViewBinding.inflate(layoutInflater, this)
+    private val viewBinding = StripeCardFormViewBinding.inflate(layoutInflater, this)
 
     private val cardContainer = viewBinding.cardMultilineWidgetContainer
 
@@ -61,15 +61,23 @@ class CardFormView @JvmOverloads constructor(
     @VisibleForTesting
     internal val countryLayout = viewBinding.countryLayout
 
-    private var formBackgroundColorStateList: ColorStateList? = null
+    private var style: Style = Style.Standard
 
-    private var style: Style = Style.STANDARD
+    private val errorsMap = mutableMapOf<ErrorField, String?>()
 
-    private val cardErrors = FieldErrors()
+    enum class Style(
+        internal val attrValue: Int
+    ) {
+        Standard(0),
+        Borderless(1)
+    }
 
-    enum class Style {
-        STANDARD,
-        BORDERLESS
+    // indicating which field has error
+    private enum class ErrorField {
+        Number,
+        Date,
+        Cvc,
+        Zip,
     }
 
     /**
@@ -117,6 +125,8 @@ class CardFormView @JvmOverloads constructor(
         setupCountryAndPostal()
         setupCardWidget()
 
+        var formBackgroundColorStateList: ColorStateList? = null
+
         context.withStyledAttributes(
             attrs,
             R.styleable.StripeCardFormView
@@ -134,8 +144,8 @@ class CardFormView @JvmOverloads constructor(
         }
 
         when (style) {
-            Style.STANDARD -> applyStandardStyle()
-            Style.BORDERLESS -> applyBorderlessStyle()
+            Style.Standard -> applyStandardStyle()
+            Style.Borderless -> applyBorderlessStyle()
         }
     }
 
@@ -160,13 +170,13 @@ class CardFormView @JvmOverloads constructor(
                 if (postalCodeView.shouldShowError) {
                     showPostalError()
                 } else {
-                    onFieldError(FieldErrors.Field.Zip, null)
+                    onFieldError(ErrorField.Zip, null)
                 }
             }
         }
 
         postalCodeView.doAfterTextChanged {
-            onFieldError(FieldErrors.Field.Zip, null)
+            onFieldError(ErrorField.Zip, null)
         }
 
         countryLayout.countryChangeCallback = { country ->
@@ -191,7 +201,7 @@ class CardFormView @JvmOverloads constructor(
 
     private fun showPostalError() {
         onFieldError(
-            FieldErrors.Field.Zip,
+            ErrorField.Zip,
             if (countryLayout.selectedCountry == null || countryLayout.selectedCountry!!.code == "US") {
                 resources.getString(R.string.address_zip_invalid)
             } else {
@@ -274,21 +284,21 @@ class CardFormView @JvmOverloads constructor(
         cardMultilineWidget.cardNumberErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
                 onFieldError(
-                    FieldErrors.Field.Number,
+                    ErrorField.Number,
                     errorMessage
                 )
             }
         cardMultilineWidget.expirationDateErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
                 onFieldError(
-                    FieldErrors.Field.Date,
+                    ErrorField.Date,
                     errorMessage
                 )
             }
         cardMultilineWidget.cvcErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
                 onFieldError(
-                    FieldErrors.Field.Cvc,
+                    ErrorField.Cvc,
                     errorMessage
                 )
             }
@@ -385,13 +395,13 @@ class CardFormView @JvmOverloads constructor(
     }
 
     private fun onFieldError(
-        field: FieldErrors.Field,
+        field: ErrorField,
         errorMessage: String?
     ) {
-        cardErrors.errorsMap[field] = errorMessage
+        errorsMap[field] = errorMessage
 
-        val error = FieldErrors.Field.values()
-            .map { cardErrors.errorsMap[it] }
+        val error = ErrorField.values()
+            .map { errorsMap[it] }
             .firstOrNull { !it.isNullOrBlank() }
 
         setErrorMessageAndToggleVisibility(error)
@@ -400,17 +410,6 @@ class CardFormView @JvmOverloads constructor(
     private fun setErrorMessageAndToggleVisibility(errorMessage: String?) {
         errors.text = errorMessage
         errors.isVisible = errorMessage != null
-    }
-
-    private class FieldErrors {
-        val errorsMap = mutableMapOf<Field, String?>()
-
-        enum class Field {
-            Number,
-            Date,
-            Cvc,
-            Zip,
-        }
     }
 
     internal companion object {
