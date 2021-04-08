@@ -58,7 +58,7 @@ internal class AddPaymentMethodListAdapter(
         val item = items[position]
 
         holder.itemView.setOnClickListener {
-            selectedPosition = holder.adapterPosition
+            selectedPosition = holder.bindingAdapterPosition
         }
 
         val bankViewHolder = holder as BankViewHolder

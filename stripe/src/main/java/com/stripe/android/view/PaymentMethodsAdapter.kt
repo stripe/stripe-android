@@ -132,7 +132,7 @@ internal class PaymentMethodsAdapter constructor(
                 holder.setPaymentMethod(paymentMethod)
                 holder.setSelected(paymentMethod.id == selectedPaymentMethodId)
                 holder.itemView.setOnClickListener {
-                    onPositionClicked(holder.adapterPosition)
+                    onPositionClicked(holder.bindingAdapterPosition)
                 }
             }
             is ViewHolder.GooglePayViewHolder -> {
@@ -211,7 +211,7 @@ internal class PaymentMethodsAdapter constructor(
                 parent.context.getString(R.string.delete_payment_method)
             ) { _, _ ->
                 listener?.onDeletePaymentMethodAction(
-                    paymentMethod = getPaymentMethodAtPosition(viewHolder.adapterPosition)
+                    paymentMethod = getPaymentMethodAtPosition(viewHolder.bindingAdapterPosition)
                 )
                 true
             }

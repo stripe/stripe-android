@@ -136,12 +136,12 @@ internal class PaymentOptionsAdapter(
             }
             ViewType.GooglePay -> GooglePayViewHolder(parent).apply {
                 itemView.setOnClickListener {
-                    onItemSelected(adapterPosition, isClick = true)
+                    onItemSelected(bindingAdapterPosition, isClick = true)
                 }
             }
             ViewType.Card -> CardViewHolder(parent).apply {
                 itemView.setOnClickListener {
-                    onItemSelected(adapterPosition, isClick = true)
+                    onItemSelected(bindingAdapterPosition, isClick = true)
                 }
             }
         }
