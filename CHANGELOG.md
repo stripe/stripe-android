@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 16.5.0 - unreleased
+* [#3557](https://github.com/stripe/stripe-android/pull/3557) Add suspend functions to `Stripe.kt` methods
+* [#3559](https://github.com/stripe/stripe-android/pull/3559) Fix Oxxo's next_action type enum
+
 ## 16.4.3 - 2021-04-02
 * [#3555](https://github.com/stripe/stripe-android/pull/3555) Fix 3DS2 challenge completion endpoint request
 
