@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -29,6 +30,7 @@ import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -309,15 +311,17 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentFlowResult() should update emit API errors`() {
         paymentFlowResultProcessor.error = RuntimeException("Your card was declined.")
 
-        var exception: Throwable? = null
-        viewModel.apiException.observeForever {
-            exception = it
+        var userMessage: BaseSheetViewModel.UserMessage? = null
+        viewModel.userMessage.observeForever {
+            userMessage = it
         }
         viewModel.onPaymentFlowResult(
             PaymentFlowResult.Unvalidated()
         )
-        assertThat(exception)
-            .isEqualTo(paymentFlowResultProcessor.error)
+        assertThat(userMessage)
+            .isEqualTo(
+                BaseSheetViewModel.UserMessage.Error("Your card was declined.")
+            )
     }
 
     @Test
@@ -514,7 +518,8 @@ internal class PaymentSheetViewModelTest {
             prefsRepository,
             eventReporter,
             args,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
     }
 

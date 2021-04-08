@@ -655,7 +655,8 @@ internal class PaymentSheetActivityTest {
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
     }
 

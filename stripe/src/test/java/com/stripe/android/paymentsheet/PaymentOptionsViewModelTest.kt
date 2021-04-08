@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -46,7 +48,8 @@ class PaymentOptionsViewModelTest {
         prefsRepository = prefsRepository,
         paymentMethodsRepository = paymentMethodRepository,
         eventReporter = eventReporter,
-        workContext = testDispatcher
+        workContext = testDispatcher,
+        application = ApplicationProvider.getApplicationContext()
     )
 
     @BeforeTest
@@ -149,16 +152,17 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() when save fails error is reported and in ready state`() {
-        paymentMethodRepository.error = Exception("Card not valid.")
+        val exceptionMessage = "Card not valid."
+        paymentMethodRepository.error = Exception(exceptionMessage)
 
         val viewStates: MutableList<ViewState> = mutableListOf()
         viewModel.viewState.observeForever {
             viewStates.add(it)
         }
 
-        var exception: Throwable? = null
-        viewModel.apiException.observeForever {
-            exception = it
+        var userMessage: BaseSheetViewModel.UserMessage? = null
+        viewModel.userMessage.observeForever {
+            userMessage = it
         }
 
         viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
@@ -170,10 +174,7 @@ class PaymentOptionsViewModelTest {
         assertThat(viewStates[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
         assertThat(viewStates[1]).isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
         assertThat(viewStates[2]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-        assertThat(viewModel.apiException.value)
-            .isEqualTo(
-                paymentMethodRepository.error
-            )
+        assertThat(userMessage).isEqualTo(BaseSheetViewModel.UserMessage.Error(exceptionMessage))
     }
 
     @Test
@@ -203,7 +204,8 @@ class PaymentOptionsViewModelTest {
             prefsRepository = FakePrefsRepository(),
             paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
 
         var transitionTarget: TransitionTarget? = null
@@ -229,7 +231,8 @@ class PaymentOptionsViewModelTest {
             prefsRepository = FakePrefsRepository(),
             paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
 
         val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
@@ -254,7 +257,8 @@ class PaymentOptionsViewModelTest {
             prefsRepository = FakePrefsRepository(),
             paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
 
         val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
