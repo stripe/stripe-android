@@ -1,9 +1,7 @@
 package com.stripe.android.view
 
-import android.annotation.TargetApi
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.webkit.URLUtil
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -55,9 +53,12 @@ internal class PaymentAuthWebViewClient(
         isPageLoaded.value = true
     }
 
-    override fun shouldOverrideUrlLoading(view: WebView, urlString: String): Boolean {
-        logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - $urlString")
-        val uri = Uri.parse(urlString)
+    override fun shouldOverrideUrlLoading(
+        view: WebView,
+        request: WebResourceRequest
+    ): Boolean {
+        val uri = request.url
+        logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading(): $request")
         updateCompletionUrl(uri)
 
         return if (isReturnUrl(uri)) {
@@ -76,7 +77,7 @@ internal class PaymentAuthWebViewClient(
             )
             true
         } else {
-            super.shouldOverrideUrlLoading(view, urlString)
+            super.shouldOverrideUrlLoading(view, request)
         }
     }
 
@@ -130,15 +131,6 @@ internal class PaymentAuthWebViewClient(
         if (!returnUrlParam.isNullOrBlank()) {
             completionUrlParam = returnUrlParam
         }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun shouldOverrideUrlLoading(
-        view: WebView,
-        request: WebResourceRequest
-    ): Boolean {
-        logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading(WebResourceRequest)")
-        return shouldOverrideUrlLoading(view, request.url.toString())
     }
 
     private fun isReturnUrl(uri: Uri): Boolean {
