@@ -594,6 +594,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(currentFragment(activity))
                     .isInstanceOf(PaymentSheetAddCardFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
+                    .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
             }
         }
     }
@@ -654,7 +655,8 @@ internal class PaymentSheetActivityTest {
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
     }
 

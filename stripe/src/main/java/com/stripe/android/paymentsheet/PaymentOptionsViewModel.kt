@@ -28,11 +28,13 @@ internal class PaymentOptionsViewModel(
     prefsRepository: PrefsRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
     private val eventReporter: EventReporter,
-    workContext: CoroutineContext
+    workContext: CoroutineContext,
+    application: Application
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepository,
-    workContext = workContext
+    workContext = workContext,
+    application = application
 ) {
     @VisibleForTesting
     internal val _viewState = MutableLiveData<ViewState.PaymentOptions>(
@@ -115,7 +117,7 @@ internal class PaymentOptionsViewModel(
                     }
                 },
                 onFailure = {
-                    onApiError(it.localizedMessage)
+                    onApiError(it)
                     _viewState.value = ViewState.PaymentOptions.Ready
                 }
             )
@@ -224,7 +226,8 @@ internal class PaymentOptionsViewModel(
                     starterArgs.sessionId,
                     application
                 ),
-                workContext = Dispatchers.IO
+                workContext = Dispatchers.IO,
+                application = application
             ) as T
         }
     }

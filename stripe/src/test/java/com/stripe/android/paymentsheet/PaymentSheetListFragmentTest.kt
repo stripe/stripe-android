@@ -108,13 +108,18 @@ class PaymentSheetListFragmentTest {
 
             idleLooper()
 
+            val transitionTarget = mutableListOf<PaymentSheetViewModel.TransitionTarget?>()
+            activityViewModel.transition.observeForever { target ->
+                transitionTarget.add(target)
+            }
+
             val recycler = recyclerView(it)
             assertThat(recycler.adapter).isInstanceOf(PaymentOptionsAdapter::class.java)
             val adapter = recycler.adapter as PaymentOptionsAdapter
             adapter.addCardClickListener.onClick(it.requireView())
             idleLooper()
 
-            assertThat(activityViewModel.transition.value)
+            assertThat(transitionTarget.lastOrNull())
                 .isEqualTo(
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
                         FragmentConfigFixtures.DEFAULT.copy(
