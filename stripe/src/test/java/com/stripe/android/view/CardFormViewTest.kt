@@ -64,14 +64,15 @@ class CardFormViewTest {
     @Test
     fun `when locale is US then country should be US and postal config should be US`() {
         setLocale(Locale.US)
-        val binding = StripeCardFormViewBinding.bind(activityScenarioFactory.createView {
-            CardFormView(it)
-        })
+        val binding = StripeCardFormViewBinding.bind(
+            activityScenarioFactory.createView {
+                CardFormView(it)
+            }
+        )
 
         assertThat(
             binding.countryLayout.countryAutocomplete.text.toString()
         ).isEqualTo("United States")
-
 
         assertThat(
             binding.postalCode.config
@@ -81,14 +82,15 @@ class CardFormViewTest {
     @Test
     fun `when locale is not US then country should not be US and postal config should be Global`() {
         setLocale(Locale.CANADA)
-        val binding = StripeCardFormViewBinding.bind(activityScenarioFactory.createView {
-            CardFormView(it)
-        })
+        val binding = StripeCardFormViewBinding.bind(
+            activityScenarioFactory.createView {
+                CardFormView(it)
+            }
+        )
 
         assertThat(
             binding.countryLayout.countryAutocomplete.text.toString()
         ).isEqualTo("Canada")
-
 
         assertThat(
             binding.postalCode.config
