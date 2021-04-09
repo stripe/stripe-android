@@ -81,7 +81,6 @@ jobs:
           url: ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }}
           method: 'POST'
           data: |
-            |
             {
               "project": "RUN_MOBILESDK",
               "summary": "stripe-android E2E test failed",
