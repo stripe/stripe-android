@@ -314,7 +314,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(activity.viewBinding.buyButton.isEnabled)
                     .isFalse()
 
-                assertThat(viewModel.startConfirm.value)
+                assertThat(viewModel.startConfirm.value?.peekContent())
                     .isEqualTo(
                         ConfirmPaymentIntentParams(
                             clientSecret = "client_secret",
