@@ -164,7 +164,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         ) {
             viewModel.onGooglePayResult(it)
         }
-        viewModel.launchGooglePay.observe(this) { args ->
+        viewModel.launchGooglePay.observe(this) { event ->
+            val args = event.getContentIfNotHandled()
             if (args != null) {
                 googlePayLauncher.launch(args)
             }
@@ -194,7 +195,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
 
         setupBuyButton()
 
-        viewModel.transition.observe(this) { transitionTarget ->
+        viewModel.transition.observe(this) { event ->
+            val transitionTarget = event.getContentIfNotHandled()
             if (transitionTarget != null) {
                 onTransitionTarget(
                     transitionTarget,
@@ -212,7 +214,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             fetchConfig()
         }
 
-        viewModel.startConfirm.observe(this) { confirmParams ->
+        viewModel.startConfirm.observe(this) { event ->
+            val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
                 paymentController.startConfirmAndAuth(
                     AuthActivityStarter.Host.create(this),

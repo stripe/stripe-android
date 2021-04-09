@@ -117,7 +117,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         setupAddButton(viewBinding.addButton)
 
-        viewModel.transition.observe(this) { transitionTarget ->
+        viewModel.transition.observe(this) { event ->
+            val transitionTarget = event.getContentIfNotHandled()
             if (transitionTarget != null) {
                 onTransitionTarget(
                     transitionTarget,
