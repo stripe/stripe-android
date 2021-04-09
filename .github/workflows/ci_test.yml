@@ -19,8 +19,6 @@ jobs:
         with:
           path: ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-      - name: Unit tests
-        run: ./gradlew :stripe-test-e2e:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
@@ -36,7 +34,7 @@ jobs:
             {
               "project": "RUN_MOBILESDK",
               "summary": "stripe-android E2E test failed",
-              "description": "Please ACK this ticket and investigate the failure.\n\n Run id: ${{ github.run_id }}"
+              "description": "Please ACK this ticket and investigate the failure.\n\n Run id: ${{ env.GITHUB_RUN_ID }}"
             }
       - name: Show Response
         run: echo ${{ steps.notifyFailureEndpoint.outputs.response }}
