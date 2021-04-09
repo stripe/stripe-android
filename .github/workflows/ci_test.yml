@@ -29,9 +29,7 @@ jobs:
             {
               "project": "RUN_MOBILESDK",
               "summary": "stripe-android E2E test failed",
-              "description": "Please ACK this ticket and investigate the failure.
-
-              https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}"
+              "description": "Please ACK this ticket and investigate the failure. See https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}"
             }
       - name: Show Response
         run: echo ${{ steps.notifyFailureEndpoint.outputs.response }}
