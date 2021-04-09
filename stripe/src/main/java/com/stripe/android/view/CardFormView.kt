@@ -27,6 +27,7 @@ import com.stripe.android.view.CardValidCallback.Fields
 
 /**
  * A view to collect credit card information and provide [CardParams] for API invocation.
+ * The postal code field adjust its form accordingly based on currently selected country.
  *
  * Use [R.styleable.StripeCardFormView_cardFormStyle] to toggle style between [Style.Standard] and [Style.Borderless],
  * Use [R.styleable.StripeCardFormView_formBackgroundColorStateList] to change the card's background color in enable and disabled state.
@@ -34,7 +35,7 @@ import com.stripe.android.view.CardValidCallback.Fields
  * To access the [CardParams], see details in [cardParams] property.
  * To get notified if the current card params are valid, set a [CardValidCallback] object with [setCardValidCallback].
  */
-class CardFormView @JvmOverloads constructor(
+internal class CardFormView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -44,23 +45,17 @@ class CardFormView @JvmOverloads constructor(
 
     private val cardContainer = viewBinding.cardMultilineWidgetContainer
 
-    @VisibleForTesting
-    internal val cardMultilineWidget = viewBinding.cardMultilineWidget
+    private val cardMultilineWidget = viewBinding.cardMultilineWidget
 
-    @VisibleForTesting
-    internal val countryPostalDivider = viewBinding.countryPostalDivider
+    private val countryPostalDivider = viewBinding.countryPostalDivider
 
-    @VisibleForTesting
-    internal val postalCodeContainer = viewBinding.postalCodeContainer
+    private val postalCodeContainer = viewBinding.postalCodeContainer
 
-    @VisibleForTesting
-    internal val errors = viewBinding.errors
+    private val errors = viewBinding.errors
 
-    @VisibleForTesting
-    internal val postalCodeView = viewBinding.postalCode
+    private val postalCodeView = viewBinding.postalCode
 
-    @VisibleForTesting
-    internal val countryLayout = viewBinding.countryLayout
+    private val countryLayout = viewBinding.countryLayout
 
     private val postalCodeValidator = PostalCodeValidator()
 
@@ -120,7 +115,7 @@ class CardFormView @JvmOverloads constructor(
             }
 
             // validation OK, clear any error view
-            setErrorMessageAndToggleVisibility(null)
+            updateErrorsView(null)
 
             val expirationDate =
                 requireNotNull(cardMultilineWidget.expiryDateEditText.validatedDate)
@@ -436,10 +431,10 @@ class CardFormView @JvmOverloads constructor(
             .map { errorsMap[it] }
             .firstOrNull { !it.isNullOrBlank() }
 
-        setErrorMessageAndToggleVisibility(error)
+        updateErrorsView(error)
     }
 
-    private fun setErrorMessageAndToggleVisibility(errorMessage: String?) {
+    private fun updateErrorsView(errorMessage: String?) {
         errors.text = errorMessage
         errors.isVisible = errorMessage != null
     }
