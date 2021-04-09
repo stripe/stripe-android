@@ -129,6 +129,23 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
+        if (savedInstanceState == null) {
+            // Only fetch initial state if the activity is being created for the first time.
+            // Otherwise the FragmentManager will correctly restore the previous state.
+            fetchConfig(starterArgs)
+        }
+
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
+                    viewBinding.addButton.isVisible = fragment is PaymentOptionsAddCardFragment
+                }
+            },
+            false
+        )
+    }
+
+    private fun fetchConfig(starterArgs: PaymentOptionContract.Args) {
         viewModel.fetchFragmentConfig().observe(this) { config ->
             if (config != null) {
                 viewModel.transitionTo(
@@ -144,15 +161,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 )
             }
         }
-
-        supportFragmentManager.registerFragmentLifecycleCallbacks(
-            object : FragmentManager.FragmentLifecycleCallbacks() {
-                override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
-                    viewBinding.addButton.isVisible = fragment is PaymentOptionsAddCardFragment
-                }
-            },
-            false
-        )
     }
 
     private fun setupAddButton(addButton: PrimaryButton) {

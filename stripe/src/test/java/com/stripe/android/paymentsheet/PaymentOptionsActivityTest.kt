@@ -337,7 +337,8 @@ class PaymentOptionsActivityTest {
             prefsRepository = FakePrefsRepository(),
             paymentMethodsRepository = FakePaymentMethodsRepository(args.paymentMethods),
             eventReporter = eventReporter,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
     }
 

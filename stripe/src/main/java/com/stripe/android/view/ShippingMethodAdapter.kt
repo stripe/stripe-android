@@ -55,7 +55,7 @@ internal class ShippingMethodAdapter :
         holder.setShippingMethod(shippingMethods[i])
         holder.setSelected(i == selectedIndex)
         holder.shippingMethodView.setOnClickListener {
-            selectedIndex = holder.adapterPosition
+            selectedIndex = holder.bindingAdapterPosition
         }
     }
 

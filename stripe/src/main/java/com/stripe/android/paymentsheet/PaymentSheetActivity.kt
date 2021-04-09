@@ -206,6 +206,27 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             }
         }
 
+        if (savedInstanceState == null) {
+            // Only fetch initial state if the activity is being created for the first time.
+            // Otherwise the FragmentManager will correctly restore the previous state.
+            fetchConfig()
+        }
+
+        viewModel.startConfirm.observe(this) { confirmParams ->
+            if (confirmParams != null) {
+                paymentController.startConfirmAndAuth(
+                    AuthActivityStarter.Host.create(this),
+                    confirmParams,
+                    ApiRequest.Options(
+                        apiKey = paymentConfig.publishableKey,
+                        stripeAccount = paymentConfig.stripeAccountId
+                    )
+                )
+            }
+        }
+    }
+
+    private fun fetchConfig() {
         viewModel.fetchFragmentConfig().observe(this) { config ->
             if (config != null) {
                 val target = if (config.paymentMethods.isEmpty()) {
@@ -215,17 +236,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 }
                 viewModel.transitionTo(target)
             }
-        }
-
-        viewModel.startConfirm.observe(this) { confirmParams ->
-            paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(this),
-                confirmParams,
-                ApiRequest.Options(
-                    apiKey = paymentConfig.publishableKey,
-                    stripeAccount = paymentConfig.stripeAccountId
-                )
-            )
         }
     }
 
