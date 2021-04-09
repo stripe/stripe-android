@@ -39,7 +39,8 @@ internal class PaymentOptionsAdapter(
     }
 
     fun update(
-        config: FragmentConfig
+        config: FragmentConfig,
+        paymentSelection: PaymentSelection? = null
     ) {
         val items = listOfNotNull(
             Item.AddCard,
@@ -51,7 +52,8 @@ internal class PaymentOptionsAdapter(
         this.items = items
 
         onItemSelected(
-            position = findInitialSelectedPosition(config.savedSelection),
+            position = findSelectedPosition(paymentSelection).takeIf { it != -1 }
+                ?: findInitialSelectedPosition(config.savedSelection),
             isClick = false
         )
 
@@ -91,6 +93,26 @@ internal class PaymentOptionsAdapter(
             // the first payment method
             items.indexOfFirst { it is Item.ExistingPaymentMethod }.takeIf { it != -1 }
         ).firstOrNull() ?: NO_POSITION
+    }
+
+    /**
+     * Find the index of [paymentSelection] in the current items. Return -1 if not found.
+     */
+    private fun findSelectedPosition(paymentSelection: PaymentSelection?): Int {
+        return items.indexOfFirst { item ->
+            when (paymentSelection) {
+                PaymentSelection.GooglePay -> item is Item.GooglePay
+                is PaymentSelection.Saved -> {
+                    when (item) {
+                        is Item.ExistingPaymentMethod -> {
+                            paymentSelection.paymentMethod.id == item.paymentMethod.id
+                        }
+                        else -> false
+                    }
+                }
+                else -> false
+            }
+        }
     }
 
     @VisibleForTesting

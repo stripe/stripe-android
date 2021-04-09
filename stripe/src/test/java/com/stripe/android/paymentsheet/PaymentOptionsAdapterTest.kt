@@ -167,6 +167,64 @@ class PaymentOptionsAdapterTest {
     }
 
     @Test
+    fun `initial selected item should reflect SavedSelection`() {
+        val savedPaymentMethod = CONFIG.paymentMethods[3]
+        val adapter = createAdapter().also {
+            it.update(
+                CONFIG.copy(
+                    isGooglePayReady = true,
+                    savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
+                )
+            )
+        }
+
+        assertThat(adapter.selectedItem)
+            .isInstanceOf(PaymentOptionsAdapter.Item.ExistingPaymentMethod::class.java)
+        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.ExistingPaymentMethod).paymentMethod)
+            .isEqualTo(savedPaymentMethod)
+    }
+
+    @Test
+    fun `initial selected item should reflect PaymentSelection`() {
+        val savedPaymentMethod = CONFIG.paymentMethods[2]
+        val selectedPaymentMethod = CONFIG.paymentMethods[3]
+        val adapter = createAdapter().also {
+            it.update(
+                CONFIG.copy(
+                    isGooglePayReady = true,
+                    savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
+                ),
+                PaymentSelection.Saved(selectedPaymentMethod)
+            )
+        }
+
+        assertThat(adapter.selectedItem)
+            .isInstanceOf(PaymentOptionsAdapter.Item.ExistingPaymentMethod::class.java)
+        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.ExistingPaymentMethod).paymentMethod)
+            .isEqualTo(selectedPaymentMethod)
+    }
+
+    @Test
+    fun `initial selected item should fallback to config when invalid PaymentSelection`() {
+        val savedPaymentMethod = CONFIG.paymentMethods[2]
+        val selectedPaymentMethod = PaymentMethodFixtures.createCards(1).first()
+        val adapter = createAdapter().also {
+            it.update(
+                CONFIG.copy(
+                    isGooglePayReady = true,
+                    savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
+                ),
+                PaymentSelection.Saved(selectedPaymentMethod)
+            )
+        }
+
+        assertThat(adapter.selectedItem)
+            .isInstanceOf(PaymentOptionsAdapter.Item.ExistingPaymentMethod::class.java)
+        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.ExistingPaymentMethod).paymentMethod)
+            .isEqualTo(savedPaymentMethod)
+    }
+
+    @Test
     fun `initial selected item should be null when the only item is AddCard`() {
         val adapter = createConfiguredAdapter(
             CONFIG.copy(
