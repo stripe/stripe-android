@@ -74,17 +74,3 @@ jobs:
         with:
           name: unit-test-report
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
-      - name: Notify failure endpoint
-        id: notifyFailureEndpoint
-        uses: fjogeleit/http-request-action@master
-        with:
-          url: ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }}
-          method: 'POST'
-          data: |
-            {
-              "project": "RUN_MOBILESDK",
-              "summary": "stripe-android E2E test failed",
-              "description": "Please ACK this ticket and investigate the failure. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-            }
-      - name: Show Response
-        run: echo ${{ steps.notifyFailureEndpoint.outputs.response }}
