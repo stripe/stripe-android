@@ -243,8 +243,8 @@
         <item name="android:textColor">@color/stripe_card_form_view_form_error</item>
         <item name="android:textSize">@dimen/stripe_card_form_view_error_textsize</item>
         <item name="android:lineSpacingExtra">5dp</item>
-        <item name="android:layout_marginStart">@dimen/stripe_card_form_view_text_margin_horizontal</item>
-        <item name="android:layout_marginEnd">@dimen/stripe_card_form_view_text_margin_horizontal</item>
+        <item name="android:layout_marginStart">@dimen/stripe_card_form_view_error_text_margin_horizontal</item>
+        <item name="android:layout_marginEnd">@dimen/stripe_card_form_view_error_text_margin_horizontal</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:layout_marginBottom">12dp</item>
     </style>

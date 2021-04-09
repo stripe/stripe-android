@@ -88,6 +88,7 @@
     <dimen name="stripe_card_form_view_text_input_layout_padding_horizontal">12dp</dimen>
     <dimen name="stripe_card_form_view_text_margin_vertical">4dp</dimen>
     <dimen name="stripe_card_form_view_text_margin_horizontal">12dp</dimen>
+    <dimen name="stripe_card_form_view_error_text_margin_horizontal">17dp</dimen>
     <dimen name="stripe_card_form_view_text_minheight">48dp</dimen>
     <dimen name="stripe_card_form_view_card_elevation">1dp</dimen>
     <dimen name="stripe_card_form_view_error_textsize">13sp</dimen>
