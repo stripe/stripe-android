@@ -31,6 +31,9 @@ internal class EndToEndTest {
      */
     @Test
     fun testRigCon() = runBlocking {
+        assertThat(2L)
+            .isEqualTo(4L)
+
         // Create a PaymentIntent on the backend
         val newPaymentIntent = service.createPaymentIntent()
 
