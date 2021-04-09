@@ -252,11 +252,83 @@ class CardFormViewTest {
         // 1 horizontal divider added below tl_cvc, now it has 2 child views
         assertThat(borderLessCardFormView.cardMultilineWidget.cvcInputLayout.childCount).isEqualTo(2)
 
-        // 1 horizontal divider added below countryLayout, now it has 2 child views
-        assertThat(borderLessCardFormView.countryLayout.childCount).isEqualTo(2)
+        // 1 horizontal divider added above postalCodeContainer, now it has 2 child views
+        assertThat(borderLessCardFormView.postalCodeContainer.childCount).isEqualTo(2)
 
         // divider with width=match_parent is invisible
         assertThat(borderLessCardFormView.countryPostalDivider.isVisible).isFalse()
+    }
+
+    @Test
+    fun testCardValidCallback() {
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        standardCardFormView.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
+
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Zip
+            )
+
+        standardCardFormView.cardMultilineWidget.cardNumberEditText.setText(VISA_WITH_SPACES)
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Zip
+            )
+
+        standardCardFormView.cardMultilineWidget.expiryDateEditText.append("12")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Zip
+            )
+
+        standardCardFormView.cardMultilineWidget.expiryDateEditText.append("50")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Zip
+            )
+
+        standardCardFormView.cardMultilineWidget.cvcEditText.append("12")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Zip
+            )
+
+        standardCardFormView.cardMultilineWidget.cvcEditText.append("3")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Zip
+            )
+
+        standardCardFormView.postalCodeView.setText(VALID_US_ZIP)
+        assertThat(currentIsValid)
+            .isTrue()
+        assertThat(currentInvalidFields)
+            .isEmpty()
     }
 
     private fun setLocale(locale: Locale) {

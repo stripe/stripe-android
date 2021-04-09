@@ -80,7 +80,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
         }
     }
-    private val invalidFields: Set<CardValidCallback.Fields>
+    val invalidFields: Set<CardValidCallback.Fields>
         get() {
             return listOfNotNull(
                 CardValidCallback.Fields.Number.takeIf {

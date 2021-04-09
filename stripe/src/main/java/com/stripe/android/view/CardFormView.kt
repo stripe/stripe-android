@@ -3,11 +3,11 @@ package com.stripe.android.view
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.text.Editable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
@@ -23,6 +23,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.view.CardFormView.Style
+import com.stripe.android.view.CardValidCallback.Fields
 
 /**
  * A view to collect credit card information and provide [CardParams] for API invocation.
@@ -31,6 +32,7 @@ import com.stripe.android.view.CardFormView.Style
  * Use [R.styleable.StripeCardFormView_formBackgroundColorStateList] to change the card's background color in enable and disabled state.
  *
  * To access the [CardParams], see details in [cardParams] property.
+ * To get notified if the current card params are valid, set a [CardValidCallback] object with [setCardValidCallback].
  */
 class CardFormView @JvmOverloads constructor(
     context: Context,
@@ -48,12 +50,11 @@ class CardFormView @JvmOverloads constructor(
     @VisibleForTesting
     internal val countryPostalDivider = viewBinding.countryPostalDivider
 
-    private val postalCodeContainer = viewBinding.postalCodeContainer
+    @VisibleForTesting
+    internal val postalCodeContainer = viewBinding.postalCodeContainer
 
     @VisibleForTesting
     internal val errors = viewBinding.errors
-
-    private val postalCodeValidator = PostalCodeValidator()
 
     @VisibleForTesting
     internal val postalCodeView = viewBinding.postalCode
@@ -61,23 +62,41 @@ class CardFormView @JvmOverloads constructor(
     @VisibleForTesting
     internal val countryLayout = viewBinding.countryLayout
 
+    private val postalCodeValidator = PostalCodeValidator()
+
     private var style: Style = Style.Standard
 
-    private val errorsMap = mutableMapOf<ErrorField, String?>()
+    private val errorsMap = mutableMapOf<Fields, String?>()
 
-    enum class Style(
+    private var cardValidCallback: CardValidCallback? = null
+
+    private val allEditTextFields: Collection<StripeEditText>
+        get() {
+            return listOf(
+                cardMultilineWidget.cardNumberEditText,
+                cardMultilineWidget.expiryDateEditText,
+                cardMultilineWidget.cvcEditText,
+                postalCodeView
+            )
+        }
+
+    private val invalidFields: Set<Fields>
+        get() {
+            return (cardMultilineWidget.invalidFields.toList() + listOfNotNull(Fields.Zip.takeIf { !isPostalValid() })).toSet()
+        }
+
+    private val cardValidTextWatcher = object : StripeTextWatcher() {
+        override fun afterTextChanged(s: Editable?) {
+            super.afterTextChanged(s)
+            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
+        }
+    }
+
+    private enum class Style(
         internal val attrValue: Int
     ) {
         Standard(0),
         Borderless(1)
-    }
-
-    // indicating which field has error
-    private enum class ErrorField {
-        Number,
-        Date,
-        Cvc,
-        Zip,
     }
 
     /**
@@ -105,7 +124,6 @@ class CardFormView @JvmOverloads constructor(
 
             val expirationDate =
                 requireNotNull(cardMultilineWidget.expiryDateEditText.validatedDate)
-            val postalCode = postalCodeView.text?.toString()
 
             return CardParams(
                 brand = cardMultilineWidget.brand,
@@ -116,7 +134,7 @@ class CardFormView @JvmOverloads constructor(
                 cvc = cardMultilineWidget.cvcEditText.text?.toString(),
                 address = Address.Builder()
                     .setCountry(countryLayout.selectedCountry.toString())
-                    .setPostalCode(postalCode)
+                    .setPostalCode(postalCodeView.text?.toString())
                     .build()
             )
         }
@@ -151,6 +169,18 @@ class CardFormView @JvmOverloads constructor(
         }
     }
 
+    fun setCardValidCallback(callback: CardValidCallback?) {
+        this.cardValidCallback = callback
+        allEditTextFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
+
+        // only add the TextWatcher if it will be used
+        if (callback != null) {
+            allEditTextFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
+        }
+        // call immediately after setting
+        cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
+    }
+
     private fun setupCountryAndPostal() {
         // wire up postal code and country
         postalCodeView.config = if (countryLayout.selectedCountry?.code == "US") {
@@ -172,13 +202,13 @@ class CardFormView @JvmOverloads constructor(
                 if (postalCodeView.shouldShowError) {
                     showPostalError()
                 } else {
-                    onFieldError(ErrorField.Zip, null)
+                    onFieldError(Fields.Zip, null)
                 }
             }
         }
 
         postalCodeView.doAfterTextChanged {
-            onFieldError(ErrorField.Zip, null)
+            onFieldError(Fields.Zip, null)
         }
 
         countryLayout.countryChangeCallback = { country ->
@@ -203,7 +233,7 @@ class CardFormView @JvmOverloads constructor(
 
     private fun showPostalError() {
         onFieldError(
-            ErrorField.Zip,
+            Fields.Zip,
             if (countryLayout.selectedCountry == null || countryLayout.selectedCountry!!.code == "US") {
                 resources.getString(R.string.address_zip_invalid)
             } else {
@@ -286,21 +316,21 @@ class CardFormView @JvmOverloads constructor(
         cardMultilineWidget.cardNumberErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
                 onFieldError(
-                    ErrorField.Number,
+                    Fields.Number,
                     errorMessage
                 )
             }
         cardMultilineWidget.expirationDateErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
                 onFieldError(
-                    ErrorField.Date,
+                    Fields.Expiry,
                     errorMessage
                 )
             }
         cardMultilineWidget.cvcErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->
                 onFieldError(
-                    ErrorField.Cvc,
+                    Fields.Cvc,
                     errorMessage
                 )
             }
@@ -381,14 +411,14 @@ class CardFormView @JvmOverloads constructor(
             1
         )
 
-        // add horizontal divider below countryLayout and hide countrypostalDivider
-        countryLayout.addView(
+        // add horizontal divider above postalCodeContainer and hide countryPostalDivider
+        postalCodeContainer.addView(
             StripeHorizontalDividerBinding.inflate(
                 layoutInflater,
                 countryLayout,
                 false
             ).root,
-            1
+            0
         )
         countryPostalDivider.isVisible = false
 
@@ -397,12 +427,12 @@ class CardFormView @JvmOverloads constructor(
     }
 
     private fun onFieldError(
-        field: ErrorField,
+        field: Fields,
         errorMessage: String?
     ) {
         errorsMap[field] = errorMessage
 
-        val error = ErrorField.values()
+        val error = Fields.values()
             .map { errorsMap[it] }
             .firstOrNull { !it.isNullOrBlank() }
 

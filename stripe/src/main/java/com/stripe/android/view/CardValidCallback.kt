@@ -15,6 +15,7 @@ fun interface CardValidCallback {
     enum class Fields {
         Number,
         Expiry,
-        Cvc
+        Cvc,
+        Zip
     }
 }
