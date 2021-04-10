@@ -217,6 +217,5 @@ internal class StripeEditTextTest {
         verify(watcher, times(count)).beforeTextChanged(any(), any(), any(), any())
         verify(watcher, times(count)).onTextChanged(any(), any(), any(), any())
         verify(watcher, times(count)).afterTextChanged(any())
-
     }
 }

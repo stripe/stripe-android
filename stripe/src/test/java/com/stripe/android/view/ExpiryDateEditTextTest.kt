@@ -12,7 +12,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.R
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

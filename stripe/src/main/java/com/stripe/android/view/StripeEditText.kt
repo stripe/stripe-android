@@ -48,7 +48,6 @@ open class StripeEditText @JvmOverloads constructor(
     @ColorInt
     private var externalErrorColor: Int? = null
 
-
     private val textWatchers by lazy {
         mutableListOf<TextWatcher>()
     }
