@@ -72,15 +72,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                 0
             )
             viewBinding.buyButton.isEnabled = true
-        } else {
-            viewBinding.paymentMethod.text = "Select"
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                null,
-                null,
-                null,
-                null
-            )
-            viewBinding.buyButton.isEnabled = false
         }
     }
 
