@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -46,6 +47,8 @@ open class StripeEditText @JvmOverloads constructor(
 
     @ColorInt
     private var externalErrorColor: Int? = null
+
+    private val textWatchers = mutableListOf<TextWatcher>()
 
     /**
      * Gets whether or not the text should be displayed in error mode.
@@ -95,6 +98,7 @@ open class StripeEditText @JvmOverloads constructor(
 
     init {
         maxLines = 1
+
         listenForTextChanges()
         listenForDeleteEmpty()
         defaultColorStateList = textColors
@@ -244,4 +248,31 @@ open class StripeEditText @JvmOverloads constructor(
 
     @VisibleForTesting
     internal fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
+
+    override fun addTextChangedListener(watcher: TextWatcher?) {
+        super.addTextChangedListener(watcher)
+        watcher?.let {
+            textWatchers.add(it)
+        }
+    }
+
+    override fun removeTextChangedListener(watcher: TextWatcher?) {
+        super.removeTextChangedListener(watcher)
+        watcher?.let {
+            textWatchers.remove(it)
+        }
+    }
+
+    /**
+     * Set text without notifying its corresponding text watchers.
+     */
+    internal fun setTextSilent(text: CharSequence?) {
+        textWatchers.forEach {
+            super.removeTextChangedListener(it)
+        }
+        setText(text)
+        textWatchers.forEach {
+            super.addTextChangedListener(it)
+        }
+    }
 }

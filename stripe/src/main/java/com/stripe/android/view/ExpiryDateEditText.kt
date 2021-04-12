@@ -100,7 +100,6 @@ class ExpiryDateEditText @JvmOverloads constructor(
     private fun listenForTextChanges() {
         addTextChangedListener(
             object : StripeTextWatcher() {
-                private var ignoreChanges = false
                 private var latestChangeStart: Int = 0
                 private var latestInsertionSize: Int = 0
                 private var expirationDate = ExpirationDate.Unvalidated.EMPTY
@@ -114,18 +113,11 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     count: Int,
                     after: Int
                 ) {
-                    if (ignoreChanges) {
-                        return
-                    }
                     latestChangeStart = start
                     latestInsertionSize = after
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if (ignoreChanges) {
-                        return
-                    }
-
                     var inErrorState = false
 
                     val inputText = s?.toString().orEmpty()
@@ -186,19 +178,12 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    if (ignoreChanges) {
-                        return
-                    }
-
-                    ignoreChanges = true
                     if (!isLastKeyDelete && formattedDate != null) {
-                        setText(formattedDate)
+                        setTextSilent(formattedDate)
                         newCursorPosition?.let {
                             setSelection(it.coerceIn(0, fieldText.length))
                         }
                     }
-
-                    ignoreChanges = false
 
                     // Note: we want to show an error state if the month is invalid or the
                     // final, complete date is in the past. We don't want to show an error state for
