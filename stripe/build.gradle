@@ -127,9 +127,9 @@ android {
     }
 }
 
-//tasks.withType(Test).configureEach {
-//    maxParallelForks = 4
-//}
+tasks.withType(Test).configureEach {
+    maxParallelForks = 2
+}
 
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
