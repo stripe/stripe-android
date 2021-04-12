@@ -403,7 +403,9 @@ class CardNumberEditText internal constructor(
                 if (isComplete(wasCardNumberValid)) {
                     completionCallback()
                 }
-            } else if (!unvalidatedCardNumber.isPossibleCardBrand()) {
+            } else if (unvalidatedCardNumber.isPartialEntry(panLength) &&
+                !unvalidatedCardNumber.isPossibleCardBrand()
+            ) {
                 // Partial card number entered and brand is not yet determine, but possible.
                 isCardNumberValid = isValid
                 shouldShowError = true

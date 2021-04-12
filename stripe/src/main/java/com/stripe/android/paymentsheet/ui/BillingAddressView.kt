@@ -345,18 +345,22 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     internal fun populate(address: Address?) {
         address?.let { it ->
+            // The postal code needs to be set prior to the country, because the
+            // country will trigger a validation of the postal code, which will be
+            // invalid if not set first.
+            this.postalCodeView.setText(it.postalCode)
+
             val currentLocale = ConfigurationCompat.getLocales(context.resources.configuration)[0]
             it.country?.let { countryCode ->
                 countryLayout.selectedCountry = CountryUtils.getCountryByCode(
                     countryCode,
                     currentLocale
                 )
-                this.countryView.setText(CountryUtils.getDisplayCountry(countryCode, currentLocale))
+                this.countryView.setText(CountryUtils.getDisplayCountry(countryCode))
             }
             this.address1View.setText(it.line1)
             this.address2View.setText(it.line2)
             this.cityView.setText(it.city)
-            this.postalCodeView.setText(it.postalCode)
             this.stateView.setText(it.state)
         }
     }

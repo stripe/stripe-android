@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -47,7 +48,8 @@ class PaymentOptionsViewModelTest {
         prefsRepository = prefsRepository,
         paymentMethodsRepository = paymentMethodRepository,
         eventReporter = eventReporter,
-        workContext = testDispatcher
+        workContext = testDispatcher,
+        application = ApplicationProvider.getApplicationContext()
     )
 
     @BeforeTest
@@ -150,11 +152,17 @@ class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() when save fails error is reported and in ready state`() {
-        paymentMethodRepository.error = Exception("Card not valid.")
+        val exceptionMessage = "Card not valid."
+        paymentMethodRepository.error = Exception(exceptionMessage)
 
         val viewStates: MutableList<ViewState> = mutableListOf()
         viewModel.viewState.observeForever {
             viewStates.add(it)
+        }
+
+        var userMessage: BaseSheetViewModel.UserMessage? = null
+        viewModel.userMessage.observeForever {
+            userMessage = it
         }
 
         viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
@@ -166,10 +174,7 @@ class PaymentOptionsViewModelTest {
         assertThat(viewStates[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
         assertThat(viewStates[1]).isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
         assertThat(viewStates[2]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-        assertThat(viewModel.userMessage.value)
-            .isEqualTo(
-                BaseSheetViewModel.UserMessage.Error("Card not valid.")
-            )
+        assertThat(userMessage).isEqualTo(BaseSheetViewModel.UserMessage.Error(exceptionMessage))
     }
 
     @Test
@@ -199,10 +204,11 @@ class PaymentOptionsViewModelTest {
             prefsRepository = FakePrefsRepository(),
             paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
 
-        var transitionTarget: TransitionTarget? = null
+        var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
         viewModel.transition.observeForever {
             transitionTarget = it
         }
@@ -211,7 +217,7 @@ class PaymentOptionsViewModelTest {
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
         viewModel.resolveTransitionTarget(fragmentConfig)
 
-        assertThat(transitionTarget).isNull()
+        assertThat(transitionTarget!!.peekContent()).isNull()
     }
 
     @Test
@@ -225,10 +231,11 @@ class PaymentOptionsViewModelTest {
             prefsRepository = FakePrefsRepository(),
             paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
 
-        val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
+        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -236,7 +243,8 @@ class PaymentOptionsViewModelTest {
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
         viewModel.resolveTransitionTarget(fragmentConfig)
 
-        assertThat(transitionTarget).containsExactly(null)
+        assertThat(transitionTarget).hasSize(1)
+        assertThat(transitionTarget[0].peekContent()).isNull()
     }
 
     @Test
@@ -250,10 +258,11 @@ class PaymentOptionsViewModelTest {
             prefsRepository = FakePrefsRepository(),
             paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext()
         )
 
-        val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
+        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -261,7 +270,8 @@ class PaymentOptionsViewModelTest {
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
         viewModel.resolveTransitionTarget(fragmentConfig)
         assertThat(transitionTarget).hasSize(2)
-        assertThat(transitionTarget[1]).isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
+        assertThat(transitionTarget[1].peekContent())
+            .isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
 
         viewModel.resolveTransitionTarget(fragmentConfig)
         assertThat(transitionTarget).hasSize(2)
