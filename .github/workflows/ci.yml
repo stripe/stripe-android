@@ -32,7 +32,7 @@ jobs:
         run: ./gradlew apiCheck
 
   unit-tests:
-    name: Unit tests
+    name: Stripe Unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -50,7 +50,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Unit tests
-        run: ./gradlew testDebugUnitTest -x :stripe-test-e2e:testDebugUnitTest
+        run: ./gradlew :stripe:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
