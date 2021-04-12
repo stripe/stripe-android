@@ -7,6 +7,11 @@ import kotlin.test.Test
 
 class BinTest {
     @Test
+    fun `newTest`() {
+        assertThat(true).isTrue()
+    }
+
+    @Test
     fun `create() with 2 digit partial card number should return null`() {
         assertThat(
             Bin.create("42")
