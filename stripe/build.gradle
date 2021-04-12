@@ -127,6 +127,10 @@ android {
     }
 }
 
+tasks.withType(Test).configureEach {
+    maxParallelForks = Runtime.runtime.availableProcessors()
+}
+
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     main = "com.pinterest.ktlint.Main"
