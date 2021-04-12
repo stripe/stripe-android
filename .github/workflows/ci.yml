@@ -19,10 +19,6 @@ jobs:
         with:
           path: ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-      - uses: actions/cache@v2
-        with:
-          path: ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Ktlint
         run: ./gradlew ktlint
       - name: Checkstyle
@@ -50,7 +46,7 @@ jobs:
           path: ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Unit tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew :stripe:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
