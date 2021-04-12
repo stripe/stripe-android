@@ -128,7 +128,7 @@ android {
 }
 
 tasks.withType(Test).configureEach {
-    maxParallelForks = Runtime.runtime.availableProcessors()
+    maxParallelForks = 4
 }
 
 task ktlint(type: JavaExec, group: "verification") {
