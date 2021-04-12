@@ -48,9 +48,7 @@ open class StripeEditText @JvmOverloads constructor(
     @ColorInt
     private var externalErrorColor: Int? = null
 
-    private val textWatchers by lazy {
-        mutableListOf<TextWatcher>()
-    }
+    private val textWatchers = mutableListOf<TextWatcher>()
 
     /**
      * Gets whether or not the text should be displayed in error mode.
