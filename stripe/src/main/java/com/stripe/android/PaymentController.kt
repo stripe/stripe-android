@@ -43,19 +43,22 @@ internal interface PaymentController {
     )
 
     /**
-     * Decide whether [handlePaymentResult] should be called.
+     * Decide whether [getPaymentIntentResult] should be called.
      */
     fun shouldHandlePaymentResult(requestCode: Int, data: Intent?): Boolean
 
     /**
-     * Decide whether [handleSetupResult] should be called.
+     * Decide whether [getSetupIntentResult] should be called.
      */
     fun shouldHandleSetupResult(requestCode: Int, data: Intent?): Boolean
 
+    /**
+     * Decide whether [getAuthenticateSourceResult] should be called.
+     */
     fun shouldHandleSourceResult(requestCode: Int, data: Intent?): Boolean
 
     /**
-     * Get the PaymentIntent's client_secret from {@param data} and use to retrieve
+     * Get the PaymentIntent's client_secret from [data] and use to retrieve
      * the PaymentIntent object with updated status.
      *
      * @param data the result Intent
@@ -77,7 +80,7 @@ internal interface PaymentController {
     suspend fun getPaymentIntentResult(data: Intent): PaymentIntentResult
 
     /**
-     * Get the SetupIntent's client_secret from {@param data} and use to retrieve
+     * Get the SetupIntent's client_secret from [data] and use to retrieve
      * the SetupIntent object with updated status.
      *
      * @param data the result Intent
@@ -99,7 +102,7 @@ internal interface PaymentController {
     suspend fun getSetupIntentResult(data: Intent): SetupIntentResult
 
     /**
-     * Get the Source's client_secret from {@param data} and use to retrieve
+     * Get the Source's client_secret from [data] and use to retrieve
      * the Source object with updated status.
      *
      * @param data the result Intent

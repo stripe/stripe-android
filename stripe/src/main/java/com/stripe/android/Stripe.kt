@@ -323,9 +323,9 @@ class Stripe internal constructor(
     }
 
     /**
-     * Check if the requestCode and intent is for [PaymentIntentResult].
-     * The Intent should the retrieved from result from `Activity#onActivityResult(int, int, Intent)}}`
-     * by activity started with [confirmPayment] or [handleNextActionForPayment].
+     * Check if the requestCode and [Intent] is for [PaymentIntentResult].
+     * The [Intent] should the retrieved from the result from `Activity#onActivityResult(int, int, Intent)}}`
+     * by [Activity] started with [confirmPayment] or [handleNextActionForPayment].
      *
      * @return whether the requestCode and intent is for [PaymentIntentResult].
      */
@@ -614,9 +614,9 @@ class Stripe internal constructor(
     }
 
     /**
-     * Check if the requestCode and intent is for [SetupIntentResult].
-     * The Intent should the retrieved from result from `Activity#onActivityResult(int, int, Intent)}}`
-     * by activity started with [confirmSetupIntent].
+     * Check if the requestCode and [Intent] is for [SetupIntentResult].
+     * The [Intent] should the retrieved from the result from `Activity#onActivityResult(int, int, Intent)}}`
+     * by [Activity] started with [confirmSetupIntent].
      *
      * @return whether the requestCode and intent is for [SetupIntentResult].
      */
@@ -882,9 +882,9 @@ class Stripe internal constructor(
     }
 
     /**
-     * Check if the requestCode and intent is for [Source] authentication.
-     * The Intent should the retrieved from result from `Activity#onActivityResult(int, int, Intent)}}`
-     * by activity started with [authenticateSource].
+     * Check if the requestCode and [Intent] is for [Source] authentication.
+     * The [Intent] should the retrieved from the result from `Activity#onActivityResult(int, int, Intent)}}`
+     * by [Activity] started with [authenticateSource].
      *
      * @return whether the requestCode and intent is for [Source] authentication
      */
