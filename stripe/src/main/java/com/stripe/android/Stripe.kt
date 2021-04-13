@@ -347,7 +347,7 @@ class Stripe internal constructor(
         data: Intent?,
         callback: ApiResultCallback<PaymentIntentResult>
     ): Boolean {
-        return if (isPaymentResult(requestCode, data) && data != null) {
+        return if (data != null && isPaymentResult(requestCode, data)) {
             executeAsync(callback) {
                 paymentController.getPaymentIntentResult(data)
             }
@@ -637,7 +637,7 @@ class Stripe internal constructor(
         data: Intent?,
         callback: ApiResultCallback<SetupIntentResult>
     ): Boolean {
-        return if (isSetupResult(requestCode, data) && data != null) {
+        return if (data != null && isSetupResult(requestCode, data)) {
             executeAsync(callback) {
                 paymentController.getSetupIntentResult(data)
             }

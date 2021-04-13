@@ -145,7 +145,7 @@ class StripePaymentAuthTest {
     @Test
     fun onPaymentResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
         testDispatcher.runBlockingTest {
-            val data = mock<Intent>()
+            val data = Intent()
             whenever(
                 paymentController.shouldHandlePaymentResult(
                     StripePaymentController.PAYMENT_REQUEST_CODE,
@@ -201,7 +201,7 @@ class StripePaymentAuthTest {
     @Test
     fun onSetupResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
         testDispatcher.runBlockingTest {
-            val data = mock<Intent>()
+            val data = Intent()
             whenever(
                 paymentController.shouldHandleSetupResult(
                     StripePaymentController.SETUP_REQUEST_CODE,
@@ -230,7 +230,7 @@ class StripePaymentAuthTest {
     fun onAuthenticateSourceResult_whenControllerReturnsCorrectResult_shouldGetCorrectResult() =
         testDispatcher.runBlockingTest {
             val result = mock<Source>()
-            val data = mock<Intent>()
+            val data = Intent()
             whenever(
                 paymentController.getAuthenticateSourceResult(
                     data
@@ -251,7 +251,7 @@ class StripePaymentAuthTest {
     @Test
     fun onAuthenticateSourceResult_whenControllerReturnsNull_shouldThrowException() =
         testDispatcher.runBlockingTest {
-            val data = mock<Intent>()
+            val data = Intent()
             whenever(
                 paymentController.getAuthenticateSourceResult(
                     data
