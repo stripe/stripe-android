@@ -12,6 +12,7 @@ import androidx.annotation.StyleRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.ConfigurationCompat
+import androidx.core.view.doOnNextLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import kotlin.properties.Delegates
@@ -125,11 +126,11 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         }
     }
 
-    // not overriding #setEnabled as it's called in super constructor, by then
-    // countryAutocomplete is not initialized yet.
-    internal fun setEnabledWithChildView(enabled: Boolean) {
-        isEnabled = enabled
-        countryAutocomplete.isEnabled = enabled
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        doOnNextLayout {
+            countryAutocomplete.isEnabled = enabled
+        }
     }
 
     /**

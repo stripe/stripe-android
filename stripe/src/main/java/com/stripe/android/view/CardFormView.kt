@@ -335,7 +335,7 @@ internal class CardFormView @JvmOverloads constructor(
         super.setEnabled(enabled)
         cardContainer.isEnabled = enabled
         cardMultilineWidget.isEnabled = enabled
-        countryLayout.setEnabledWithChildView(enabled)
+        countryLayout.isEnabled = enabled
         postalCodeContainer.isEnabled = enabled
         errors.isEnabled = enabled
     }
