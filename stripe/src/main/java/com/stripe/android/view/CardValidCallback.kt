@@ -16,6 +16,6 @@ fun interface CardValidCallback {
         Number,
         Expiry,
         Cvc,
-        Zip
+        Postal
     }
 }

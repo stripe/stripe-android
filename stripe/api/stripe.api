@@ -5577,7 +5577,6 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public fun getCard ()Lcom/stripe/android/model/Card;
 	public fun getCardBuilder ()Lcom/stripe/android/model/Card$Builder;
 	public fun getCardParams ()Lcom/stripe/android/model/CardParams;
-	public final fun getInvalidFields ()Ljava/util/Set;
 	public final fun getPaymentMethodBillingDetails ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final fun getPaymentMethodBillingDetailsBuilder ()Lcom/stripe/android/model/PaymentMethod$BillingDetails$Builder;
 	public fun getPaymentMethodCard ()Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
@@ -5624,7 +5623,7 @@ public final class com/stripe/android/view/CardValidCallback$Fields : java/lang/
 	public static final field Cvc Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static final field Expiry Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static final field Number Lcom/stripe/android/view/CardValidCallback$Fields;
-	public static final field Zip Lcom/stripe/android/view/CardValidCallback$Fields;
+	public static final field Postal Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static fun values ()[Lcom/stripe/android/view/CardValidCallback$Fields;
 }

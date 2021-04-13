@@ -286,7 +286,7 @@ class CardFormViewTest {
                     CardValidCallback.Fields.Number,
                     CardValidCallback.Fields.Expiry,
                     CardValidCallback.Fields.Cvc,
-                    CardValidCallback.Fields.Zip
+                    CardValidCallback.Fields.Postal
                 )
 
             it.cardMultilineWidget.cardNumberEditText.setText(VISA_WITH_SPACES)
@@ -296,7 +296,7 @@ class CardFormViewTest {
                 .containsExactly(
                     CardValidCallback.Fields.Expiry,
                     CardValidCallback.Fields.Cvc,
-                    CardValidCallback.Fields.Zip
+                    CardValidCallback.Fields.Postal
                 )
 
             it.cardMultilineWidget.expiryDateEditText.append("12")
@@ -306,7 +306,7 @@ class CardFormViewTest {
                 .containsExactly(
                     CardValidCallback.Fields.Expiry,
                     CardValidCallback.Fields.Cvc,
-                    CardValidCallback.Fields.Zip
+                    CardValidCallback.Fields.Postal
                 )
 
             it.cardMultilineWidget.expiryDateEditText.append("50")
@@ -315,7 +315,7 @@ class CardFormViewTest {
             assertThat(currentInvalidFields)
                 .containsExactly(
                     CardValidCallback.Fields.Cvc,
-                    CardValidCallback.Fields.Zip
+                    CardValidCallback.Fields.Postal
                 )
 
             it.cardMultilineWidget.cvcEditText.append("12")
@@ -324,7 +324,7 @@ class CardFormViewTest {
             assertThat(currentInvalidFields)
                 .containsExactly(
                     CardValidCallback.Fields.Cvc,
-                    CardValidCallback.Fields.Zip
+                    CardValidCallback.Fields.Postal
                 )
 
             it.cardMultilineWidget.cvcEditText.append("3")
@@ -332,7 +332,7 @@ class CardFormViewTest {
                 .isFalse()
             assertThat(currentInvalidFields)
                 .containsExactly(
-                    CardValidCallback.Fields.Zip
+                    CardValidCallback.Fields.Postal
                 )
 
             it.postalCode.setText(VALID_US_ZIP)

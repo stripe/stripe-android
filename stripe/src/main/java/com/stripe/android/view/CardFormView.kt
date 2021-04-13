@@ -76,7 +76,7 @@ internal class CardFormView @JvmOverloads constructor(
 
     private val invalidFields: Set<Fields>
         get() {
-            return (cardMultilineWidget.invalidFields.toList() + listOfNotNull(Fields.Zip.takeIf { !isPostalValid() })).toSet()
+            return (cardMultilineWidget.invalidFields.toList() + listOfNotNull(Fields.Postal.takeIf { !isPostalValid() })).toSet()
         }
 
     private val cardValidTextWatcher = object : StripeTextWatcher() {
@@ -196,13 +196,13 @@ internal class CardFormView @JvmOverloads constructor(
                 if (postalCodeView.shouldShowError) {
                     showPostalError()
                 } else {
-                    onFieldError(Fields.Zip, null)
+                    onFieldError(Fields.Postal, null)
                 }
             }
         }
 
         postalCodeView.doAfterTextChanged {
-            onFieldError(Fields.Zip, null)
+            onFieldError(Fields.Postal, null)
         }
 
         countryLayout.countryChangeCallback = { country ->
@@ -227,7 +227,7 @@ internal class CardFormView @JvmOverloads constructor(
 
     private fun showPostalError() {
         onFieldError(
-            Fields.Zip,
+            Fields.Postal,
             if (countryLayout.selectedCountry == null || countryLayout.selectedCountry!!.code == "US") {
                 resources.getString(R.string.address_zip_invalid)
             } else {
@@ -335,7 +335,7 @@ internal class CardFormView @JvmOverloads constructor(
         super.setEnabled(enabled)
         cardContainer.isEnabled = enabled
         cardMultilineWidget.isEnabled = enabled
-        countryLayout.isEnabled = enabled
+        countryLayout.setEnabledWithChildView(enabled)
         postalCodeContainer.isEnabled = enabled
         errors.isEnabled = enabled
     }
