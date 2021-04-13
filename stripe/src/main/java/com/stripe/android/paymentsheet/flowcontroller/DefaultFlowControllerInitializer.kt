@@ -7,13 +7,13 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultFlowControllerInitializer(
-    private val paymentIntentRepository: PaymentIntentRepository,
+    private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
     private val prefsRepositoryFactory: (String, Boolean) -> PrefsRepository,
     private val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean,
@@ -165,7 +165,7 @@ internal class DefaultFlowControllerInitializer(
         clientSecret: String
     ): PaymentIntent {
         return paymentIntentValidator.requireValid(
-            paymentIntentRepository.get(clientSecret)
+            stripeIntentRepository.get(clientSecret)
         )
     }
 }

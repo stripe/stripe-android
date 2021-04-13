@@ -63,11 +63,11 @@ internal class DefaultPaymentSheetLauncher(
     )
 
     override fun present(
-        paymentIntentClientSecret: String,
+        intentClientSecret: String,
         configuration: PaymentSheet.Configuration
     ) = present(
         PaymentSheetContract.Args(
-            paymentIntentClientSecret,
+            intentClientSecret,
             sessionId,
             statusBarColor(),
             configuration
@@ -75,10 +75,10 @@ internal class DefaultPaymentSheetLauncher(
     )
 
     override fun present(
-        paymentIntentClientSecret: String
+        intentClientSecret: String
     ) = present(
         PaymentSheetContract.Args(
-            paymentIntentClientSecret,
+            intentClientSecret,
             sessionId,
             statusBarColor(),
             config = null

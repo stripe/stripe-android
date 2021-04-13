@@ -9,8 +9,8 @@ import java.util.regex.Pattern
  * A [SetupIntent] guides you through the process of setting up a customer's payment credentials for
  * future payments.
  *
- * See the [API Reference for SetupIntents](https://stripe.com/docs/api/setup_intents)
- * for more information.
+ * - [Setup Intents Overview](https://stripe.com/docs/payments/setup-intents)
+ * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
 @Parcelize
 data class SetupIntent internal constructor(
@@ -206,12 +206,16 @@ data class SetupIntent internal constructor(
     }
 
     companion object {
+        private const val clientSecretRegexPattern = "^seti_[^_]+_secret_[^_]+$"
 
-        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SetupIntent? {
             return jsonObject?.let {
                 SetupIntentJsonParser().parse(it)
             }
+        }
+
+        fun isClientSecretValid(clientSecret: String): Boolean {
+            return Pattern.compile(clientSecretRegexPattern).matcher(clientSecret).matches()
         }
     }
 }

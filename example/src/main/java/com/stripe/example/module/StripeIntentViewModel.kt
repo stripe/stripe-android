@@ -41,13 +41,20 @@ internal open class StripeIntentViewModel(
     }
 
     fun createSetupIntent(
-        country: String
+        country: String,
+        customerId: String? = null
     ) = makeBackendRequest(
         R.string.creating_setup_intent,
         R.string.setup_intent_status
     ) {
         backendApi.createSetupIntent(
             mutableMapOf("country" to country)
+                .plus(
+                    customerId?.let {
+                        mapOf("customer_id" to it)
+                    }.orEmpty()
+                )
+                .toMutableMap()
         )
     }
 

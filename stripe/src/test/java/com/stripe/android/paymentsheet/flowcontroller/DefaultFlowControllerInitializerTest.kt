@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -256,7 +256,7 @@ internal class DefaultFlowControllerInitializerTest {
         isGooglePayReady: Boolean = true
     ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
-            PaymentIntentRepository.Static(paymentIntent),
+            StripeIntentRepository.Static(paymentIntent),
             FakePaymentMethodsRepository(paymentMethods),
             { _, _ -> prefsRepository },
             { isGooglePayReady },

@@ -19,7 +19,6 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
@@ -39,7 +38,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.view.AuthActivityStarter
 
-internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
+internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
@@ -110,7 +109,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentSheet.ProcessResult -> processResult(
+            is ViewState.PaymentSheet.ProcessResult<*> -> processResult(
                 viewState.result
             )
         }
@@ -122,9 +121,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             setActivityResult(
-                PaymentResult.Failed(
-                    IllegalArgumentException("PaymentSheet started without arguments."),
-                    null
+                PaymentSheetResult.Failed(
+                    IllegalArgumentException("PaymentSheet started without arguments.")
                 )
             )
             finish()
@@ -172,7 +170,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
 
         viewModel.updatePaymentMethods()
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
 
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
@@ -180,12 +178,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         setContentView(viewBinding.root)
 
         viewModel.fatal.observe(this) {
-            closeSheet(
-                PaymentResult.Failed(
-                    it,
-                    paymentIntent = viewModel.paymentIntent.value
-                )
-            )
+            closeSheet(PaymentSheetResult.Failed(it))
         }
 
         rootView.doOnNextLayout {
@@ -323,12 +316,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
     }
 
-    private fun processResult(paymentIntentResult: PaymentIntentResult) {
-        when (paymentIntentResult.outcome) {
+    private fun processResult(stripeIntentResult: StripeIntentResult<*>) {
+        when (stripeIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
-                closeSheet(
-                    PaymentResult.Completed(paymentIntentResult.intent)
-                )
+                closeSheet(PaymentSheetResult.Completed)
             }
             else -> {
                 // TODO(mshafrir-stripe): handle other outcomes
@@ -336,7 +327,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
     }
 
-    override fun setActivityResult(result: PaymentResult) {
+    override fun setActivityResult(result: PaymentSheetResult) {
         setResult(
             Activity.RESULT_OK,
             Intent()
@@ -345,12 +336,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     }
 
     override fun onUserCancel() {
-        closeSheet(
-            PaymentResult.Canceled(
-                viewModel.fatal.value,
-                paymentIntent = viewModel.paymentIntent.value
-            )
-        )
+        closeSheet(PaymentSheetResult.Canceled)
     }
 
     internal companion object {

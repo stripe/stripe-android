@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.parcelize.Parcelize
@@ -28,26 +29,28 @@ class PaymentSheet internal constructor(
     /**
      * Create PaymentSheet with a [Configuration].
      *
-     * If [paymentIntentClientSecret] represents a [PaymentIntent] that is already confirmed,
-     * [PaymentSheetResultCallback] will be invoked with [PaymentResult.Completed].
+     * @param[intentClientSecret] the client secret for a [PaymentIntent] or [SetupIntent] object.
+     * If [intentClientSecret] represents a [PaymentIntent] or [SetupIntent] that is already
+     * confirmed, [PaymentSheetResultCallback] will be invoked with [PaymentSheetResult.Completed].
      */
     internal fun present(
-        paymentIntentClientSecret: String,
+        intentClientSecret: String,
         configuration: Configuration
     ) {
-        paymentSheetLauncher.present(paymentIntentClientSecret, configuration)
+        paymentSheetLauncher.present(intentClientSecret, configuration)
     }
 
     /**
      * Create PaymentSheet without a [Configuration].
      *
-     * If [paymentIntentClientSecret] represents a [PaymentIntent] that is already confirmed,
-     * [PaymentSheetResultCallback] will be invoked with [PaymentResult.Completed].
+     * @param[intentClientSecret] the client secret for a [PaymentIntent] or [SetupIntent] object.
+     * If [intentClientSecret] represents a [PaymentIntent] or [SetupIntent] that is already
+     * confirmed, [PaymentSheetResultCallback] will be invoked with [PaymentSheetResult.Completed].
      */
     internal fun present(
-        paymentIntentClientSecret: String
+        intentClientSecret: String
     ) {
-        paymentSheetLauncher.present(paymentIntentClientSecret)
+        paymentSheetLauncher.present(intentClientSecret)
     }
 
     @Parcelize
@@ -129,19 +132,19 @@ class PaymentSheet internal constructor(
         fun getPaymentOption(): PaymentOption?
 
         fun configure(
-            paymentIntentClientSecret: String,
+            intentClientSecret: String,
             configuration: Configuration,
             callback: ConfigCallback
         )
 
         fun configure(
-            paymentIntentClientSecret: String,
+            intentClientSecret: String,
             callback: ConfigCallback
         )
 
         fun presentPaymentOptions()
 
-        fun confirmPayment()
+        fun confirm()
 
         sealed class Result {
             object Success : Result()

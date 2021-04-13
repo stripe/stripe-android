@@ -7,10 +7,10 @@ import org.json.JSONObject
 import java.util.regex.Pattern
 
 /**
- * A PaymentIntent tracks the process of collecting a payment from your customer.
+ * A [PaymentIntent] tracks the process of collecting a payment from your customer.
  *
  * - [Payment Intents Overview](https://stripe.com/docs/payments/payment-intents)
- * - [PaymentIntents API](https://stripe.com/docs/api/payment_intents)
+ * - [PaymentIntents API Reference](https://stripe.com/docs/api/payment_intents)
  */
 @Parcelize
 data class PaymentIntent internal constructor(
@@ -151,16 +151,6 @@ data class PaymentIntent internal constructor(
     override fun requiresConfirmation(): Boolean {
         return status === StripeIntent.Status.RequiresConfirmation
     }
-
-    /**
-     * Confirmation has succeeded and all required actions have been handled.
-     */
-    internal val isConfirmed: Boolean
-        get() = setOf(
-            StripeIntent.Status.Processing,
-            StripeIntent.Status.RequiresCapture,
-            StripeIntent.Status.Succeeded
-        ).contains(status)
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
@@ -354,10 +344,16 @@ data class PaymentIntent internal constructor(
     }
 
     companion object {
+        private const val clientSecretRegexPattern = "^pi_[^_]+_secret_[^_]+$"
+
         fun fromJson(jsonObject: JSONObject?): PaymentIntent? {
             return jsonObject?.let {
                 PaymentIntentJsonParser().parse(it)
             }
+        }
+
+        fun isClientSecretValid(clientSecret: String): Boolean {
+            return Pattern.compile(clientSecretRegexPattern).matcher(clientSecret).matches()
         }
     }
 }

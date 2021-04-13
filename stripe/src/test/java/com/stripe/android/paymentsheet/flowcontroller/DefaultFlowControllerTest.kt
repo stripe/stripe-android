@@ -32,9 +32,9 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
-import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
@@ -278,7 +278,7 @@ class DefaultFlowControllerTest {
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
         }
-        flowController.confirmPayment()
+        flowController.confirm()
     }
 
     @Test
@@ -296,7 +296,7 @@ class DefaultFlowControllerTest {
         flowController.onPaymentOptionResult(
             PaymentOptionResult.Succeeded.Existing(PaymentSelection.GooglePay)
         )
-        flowController.confirmPayment()
+        flowController.confirm()
         assertThat(launchArgs)
             .isEqualTo(
                 StripeGooglePayContract.Args(
@@ -329,7 +329,7 @@ class DefaultFlowControllerTest {
         )
 
         verify(paymentResultCallback).onPaymentResult(
-            PaymentResult.Canceled(null, null)
+            PaymentSheetResult.Canceled
         )
     }
 
@@ -395,8 +395,7 @@ class DefaultFlowControllerTest {
 
         verify(paymentResultCallback).onPaymentResult(
             argWhere { paymentResult ->
-                (paymentResult as? PaymentResult.Completed)?.paymentIntent ==
-                    PaymentIntentFixtures.PI_WITH_SHIPPING
+                paymentResult is PaymentSheetResult.Completed
             }
         )
     }
@@ -417,8 +416,7 @@ class DefaultFlowControllerTest {
 
         verify(paymentResultCallback).onPaymentResult(
             argWhere { paymentResult ->
-                (paymentResult as? PaymentResult.Canceled)?.paymentIntent ==
-                    PaymentIntentFixtures.CANCELLED
+                paymentResult is PaymentSheetResult.Canceled
             }
         )
     }
@@ -439,8 +437,7 @@ class DefaultFlowControllerTest {
 
         verify(paymentResultCallback).onPaymentResult(
             argWhere { paymentResult ->
-                (paymentResult as? PaymentResult.Failed)?.paymentIntent ==
-                    PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
+                paymentResult is PaymentSheetResult.Failed
             }
         )
     }

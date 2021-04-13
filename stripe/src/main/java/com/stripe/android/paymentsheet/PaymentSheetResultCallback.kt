@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet
 
 /**
- * Callback that is invoked when a [PaymentResult] is available.
+ * Callback that is invoked when a [PaymentSheetResult] is available.
  */
 fun interface PaymentSheetResultCallback {
-    fun onPaymentResult(paymentResult: PaymentResult)
+    fun onPaymentResult(paymentSheetResult: PaymentSheetResult)
 }

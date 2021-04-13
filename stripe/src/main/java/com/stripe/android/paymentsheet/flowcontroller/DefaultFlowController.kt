@@ -18,8 +18,8 @@ import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
-import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
@@ -102,13 +102,13 @@ internal class DefaultFlowController internal constructor(
     )
 
     override fun configure(
-        paymentIntentClientSecret: String,
+        intentClientSecret: String,
         configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
-                paymentIntentClientSecret,
+                intentClientSecret,
                 configuration
             )
             dispatchResult(result, callback)
@@ -116,11 +116,11 @@ internal class DefaultFlowController internal constructor(
     }
 
     override fun configure(
-        paymentIntentClientSecret: String,
+        intentClientSecret: String,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         lifecycleScope.launch {
-            val result = flowControllerInitializer.init(paymentIntentClientSecret)
+            val result = flowControllerInitializer.init(intentClientSecret)
 
             if (isActive) {
                 dispatchResult(result, callback)
@@ -158,7 +158,7 @@ internal class DefaultFlowController internal constructor(
         )
     }
 
-    override fun confirmPayment() {
+    override fun confirm() {
         val initData = runCatching {
             viewModel.initData
         }.getOrElse {
@@ -240,10 +240,7 @@ internal class DefaultFlowController internal constructor(
                     onFailure = {
                         eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                         paymentResultCallback.onPaymentResult(
-                            PaymentResult.Failed(
-                                it,
-                                paymentIntent = null
-                            )
+                            PaymentSheetResult.Failed(it)
                         )
                     }
                 )
@@ -251,20 +248,12 @@ internal class DefaultFlowController internal constructor(
             is StripeGooglePayContract.Result.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 paymentResultCallback.onPaymentResult(
-                    PaymentResult.Failed(
-                        googlePayResult.exception,
-                        paymentIntent = null
-                    )
+                    PaymentSheetResult.Failed(googlePayResult.exception)
                 )
             }
             is StripeGooglePayContract.Result.Canceled -> {
                 // don't log cancellations as failures
-                paymentResultCallback.onPaymentResult(
-                    PaymentResult.Canceled(
-                        mostRecentError = null,
-                        paymentIntent = null
-                    )
-                )
+                paymentResultCallback.onPaymentResult(PaymentSheetResult.Canceled)
             }
             else -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
@@ -349,17 +338,14 @@ internal class DefaultFlowController internal constructor(
                 onSuccess = {
                     withContext(Dispatchers.Main) {
                         paymentResultCallback.onPaymentResult(
-                            createPaymentResult(it)
+                            createPaymentSheetResult(it)
                         )
                     }
                 },
                 onFailure = {
                     withContext(Dispatchers.Main) {
                         paymentResultCallback.onPaymentResult(
-                            PaymentResult.Failed(
-                                it,
-                                null
-                            )
+                            PaymentSheetResult.Failed(it)
                         )
                     }
                 }
@@ -367,33 +353,28 @@ internal class DefaultFlowController internal constructor(
         }
     }
 
-    private fun createPaymentResult(
+    private fun createPaymentSheetResult(
         paymentIntentResult: PaymentIntentResult
-    ): PaymentResult {
+    ): PaymentSheetResult {
         val paymentIntent = paymentIntentResult.intent
         return when {
             paymentIntent.status == StripeIntent.Status.Succeeded ||
                 paymentIntent.status == StripeIntent.Status.RequiresCapture -> {
-                PaymentResult.Completed(paymentIntent)
+                PaymentSheetResult.Completed
             }
             paymentIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
-                PaymentResult.Canceled(
-                    mostRecentError = null,
-                    paymentIntent = paymentIntent
-                )
+                PaymentSheetResult.Canceled
             }
             paymentIntent.lastPaymentError != null -> {
-                PaymentResult.Failed(
+                PaymentSheetResult.Failed(
                     error = IllegalArgumentException(
                         "Failed to confirm PaymentIntent. ${paymentIntent.lastPaymentError.message}"
-                    ),
-                    paymentIntent = paymentIntent
+                    )
                 )
             }
             else -> {
-                PaymentResult.Failed(
-                    error = RuntimeException("Failed to complete payment."),
-                    paymentIntent = paymentIntent
+                PaymentSheetResult.Failed(
+                    error = RuntimeException("Failed to complete payment.")
                 )
             }
         }
