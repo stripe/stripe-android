@@ -5628,6 +5628,7 @@ public final class com/stripe/android/view/CardValidCallback$Fields : java/lang/
 	public static final field Cvc Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static final field Expiry Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static final field Number Lcom/stripe/android/view/CardValidCallback$Fields;
+	public static final field Postal Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static fun values ()[Lcom/stripe/android/view/CardValidCallback$Fields;
 }
