@@ -283,18 +283,18 @@ class ShippingInfoWidget @JvmOverloads constructor(
         }
     }
 
-    private fun updateConfigForCountry(country: Country) {
-        when (country.code) {
-            Locale.US.country -> renderUSForm()
-            Locale.UK.country -> renderGreatBritainForm()
-            Locale.CANADA.country -> renderCanadianForm()
+    private fun updateConfigForCountry(countryCode: CountryCode) {
+        when (countryCode) {
+            Locale.US.getCountryCode() -> renderUSForm()
+            Locale.UK.getCountryCode() -> renderGreatBritainForm()
+            Locale.CANADA.getCountryCode() -> renderCanadianForm()
             else -> renderInternationalForm()
         }
 
-        updatePostalCodeInputFilter(country)
+        updatePostalCodeInputFilter(countryCode)
 
         postalCodeTextInputLayout.visibility =
-            if (CountryUtils.doesCountryUsePostalCode(country.code) &&
+            if (CountryUtils.doesCountryUsePostalCode(countryCode) &&
                 !isFieldHidden(CustomizableShippingField.PostalCode)
             ) {
                 View.VISIBLE
@@ -303,9 +303,9 @@ class ShippingInfoWidget @JvmOverloads constructor(
             }
     }
 
-    private fun updatePostalCodeInputFilter(country: Country) {
-        postalCodeEditText.filters = when (country.code) {
-            Locale.CANADA.country -> arrayOf<InputFilter>(AllCaps())
+    private fun updatePostalCodeInputFilter(countryCode: CountryCode) {
+        postalCodeEditText.filters = when (countryCode) {
+            Locale.CANADA.getCountryCode() -> arrayOf<InputFilter>(AllCaps())
             else -> arrayOf<InputFilter>()
         }
     }

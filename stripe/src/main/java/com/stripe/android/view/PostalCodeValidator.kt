@@ -15,7 +15,7 @@ internal class PostalCodeValidator {
      */
     fun isValid(
         postalCode: String,
-        countryCode: String
+        countryCode: CountryCode
     ): Boolean {
         return POSTAL_CODE_PATTERNS[countryCode]?.matcher(postalCode)?.matches()
             ?: (!CountryUtils.doesCountryUsePostalCode(countryCode) || postalCode.isNotBlank())
@@ -23,7 +23,7 @@ internal class PostalCodeValidator {
 
     fun isValid(
         postalCode: String,
-        countryCode: String?,
+        countryCode: CountryCode?,
         optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
         hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
     ): Boolean {

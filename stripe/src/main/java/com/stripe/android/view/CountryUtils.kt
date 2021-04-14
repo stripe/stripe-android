@@ -2,6 +2,9 @@ package com.stripe.android.view
 
 import java.util.Locale
 
+internal fun Locale.getCountryCode(): CountryCode = CountryCode(this.country)
+internal fun Locale.getISOCountryCodes(): CountryCode = CountryCode(this.country)
+
 internal object CountryUtils {
 
     internal val NO_POSTAL_CODE_COUNTRIES = setOf(
@@ -14,13 +17,16 @@ internal object CountryUtils {
 
     private fun localizedCountries(currentLocale: Locale) =
         Locale.getISOCountries().map { code ->
-            Country(code, Locale("", code).getDisplayCountry(currentLocale))
+            Country(
+                CountryCode(code),
+                Locale("", code).getDisplayCountry(currentLocale)
+            )
         }
 
     @JvmSynthetic
-    fun getDisplayCountry(countryCode: String, currentLocale: Locale): String =
+    fun getDisplayCountry(countryCode: CountryCode, currentLocale: Locale): String =
         getCountryByCode(countryCode, currentLocale)?.name
-            ?: Locale("", countryCode).getDisplayCountry(currentLocale)
+            ?: Locale("", countryCode.twoLetters).getDisplayCountry(currentLocale)
 
     @JvmSynthetic
     internal fun getCountryByName(countryName: String, currentLocale: Locale): Country? {
@@ -28,23 +34,27 @@ internal object CountryUtils {
     }
 
     @JvmSynthetic
-    internal fun getCountryByCode(countryCode: String, currentLocale: Locale): Country? {
+    internal fun getCountryByCode(countryCode: CountryCode?, currentLocale: Locale): Country? {
         return localizedCountries(currentLocale).firstOrNull { it.code == countryCode }
     }
 
     @JvmSynthetic
     internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
-        return listOfNotNull(getCountryByCode(currentLocale.country, currentLocale))
+        return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
                 localizedCountries(currentLocale)
                     .sortedBy { it.name.toLowerCase(Locale.ROOT) }
-                    .filterNot { it.code == currentLocale.country }
+                    .filterNot { it.code == currentLocale.getCountryCode() }
             )
     }
 
     @JvmSynthetic
-    internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.toUpperCase(Locale.ROOT))
+    internal fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
+        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.twoLetters.toUpperCase(Locale.ROOT))
+    }
+
+    fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
+        return localizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
     }
 }

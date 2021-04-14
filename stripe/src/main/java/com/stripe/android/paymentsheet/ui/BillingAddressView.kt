@@ -22,6 +22,7 @@ import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
+import com.stripe.android.view.CountryCode
 import com.stripe.android.view.CountryUtils
 import com.stripe.android.view.PostalCodeValidator
 import java.util.Locale
@@ -99,7 +100,7 @@ internal class BillingAddressView @JvmOverloads constructor(
     @VisibleForTesting
     internal var postalCodeViewListener: PostalCodeViewListener? = null
 
-    private val isUnitedStates: Boolean get() = countryLayout.selectedCountry?.code == Locale.US.country
+    private val isUnitedStates: Boolean get() = CountryCode.isUS(countryLayout.selectedCountry)
 
     private var postalCodeConfig: PostalCodeConfig by Delegates.observable(
         PostalCodeConfig.Global
@@ -109,16 +110,21 @@ internal class BillingAddressView @JvmOverloads constructor(
         postalCodeView.inputType = config.inputType
     }
 
-    private val newCountryCallback = { newCountry: Country ->
-        updateStateView(newCountry)
-        updatePostalCodeView(newCountry)
+    private val newCountryCallback = { newCountryCode: CountryCode ->
+        updateStateView(newCountryCode)
+        updatePostalCodeView(newCountryCode)
         _address.value = createAddress()
 
         postalCodeValidator.isValid(
             postalCode = postalCodeView.value.orEmpty(),
-            countryCode = newCountry.code
+            countryCode = newCountryCode
         ).let { isPostalValid ->
-            postalCodeViewListener?.onCountryChanged(newCountry, isPostalValid)
+            postalCodeViewListener?.onCountryChanged(
+                CountryUtils.getCountryByCode(
+                    newCountryCode,
+                    ConfigurationCompat.getLocales(context.resources.configuration)[0]
+                ), isPostalValid
+            )
             postalCodeView.shouldShowError = !isPostalValid
         }
     }
@@ -172,7 +178,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
 
         postalCodeView.internalFocusChangeListeners.add { _, hasFocus ->
-            val isPostalValid = countryLayout.selectedCountry?.code?.let { countryCode ->
+            val isPostalValid = countryLayout.selectedCountry?.let { countryCode ->
                 postalCodeValidator.isValid(
                     postalCode = postalCodeView.value.orEmpty(),
                     countryCode = countryCode
@@ -184,12 +190,18 @@ internal class BillingAddressView @JvmOverloads constructor(
 
             if (hasFocus) {
                 postalCodeViewListener?.onGainingFocus(
-                    countryLayout.selectedCountry,
+                    CountryUtils.getCountryByCode(
+                        countryLayout.selectedCountry,
+                        ConfigurationCompat.getLocales(context.resources.configuration)[0]
+                    ),
                     isPostalValid
                 )
             } else {
                 postalCodeViewListener?.onLosingFocus(
-                    countryLayout.selectedCountry,
+                    CountryUtils.getCountryByCode(
+                        countryLayout.selectedCountry,
+                        ConfigurationCompat.getLocales(context.resources.configuration)[0]
+                    ),
                     isPostalValid
                 )
                 postalCodeView.shouldShowError =
@@ -202,7 +214,7 @@ internal class BillingAddressView @JvmOverloads constructor(
      * An [Address] if the country and postal code are valid; otherwise `null`.
      */
     private fun createAddress(): Address? {
-        return countryLayout.selectedCountry?.code?.let { countryCode ->
+        return countryLayout.selectedCountry?.let { countryCode ->
             val postalCode = postalCodeView.value
             val isPostalCodeValid = postalCodeValidator.isValid(
                 postalCode = postalCode.orEmpty(),
@@ -212,7 +224,7 @@ internal class BillingAddressView @JvmOverloads constructor(
                 when (level) {
                     PaymentSheet.BillingAddressCollectionLevel.Automatic -> {
                         Address(
-                            country = countryCode,
+                            country = countryCode.twoLetters,
                             postalCode = postalCode
                         )
                     }
@@ -227,7 +239,7 @@ internal class BillingAddressView @JvmOverloads constructor(
     }
 
     private fun createRequiredAddress(
-        countryCode: String,
+        countryCode: CountryCode,
         postalCode: String?
     ): Address? {
         val line1 = address1View.value
@@ -238,7 +250,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         return if (line1 != null && city != null) {
             if (!isUnitedStates) {
                 Address(
-                    country = countryCode,
+                    country = countryCode.twoLetters,
                     postalCode = postalCode,
                     line1 = line1,
                     line2 = line2,
@@ -246,7 +258,7 @@ internal class BillingAddressView @JvmOverloads constructor(
                 )
             } else if (state != null) {
                 Address(
-                    country = countryCode,
+                    country = countryCode.twoLetters,
                     postalCode = postalCode,
                     line1 = line1,
                     line2 = line2,
@@ -261,15 +273,15 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
-    private fun updateStateView(country: Country?) {
-        when (country?.code?.toUpperCase(Locale.ROOT)) {
-            "US" -> {
+    private fun updateStateView(countryCode: CountryCode?) {
+        when {
+            CountryCode.isUS(countryCode) -> {
                 R.string.address_label_state
             }
-            "CA" -> {
+            CountryCode.isCA(countryCode) -> {
                 R.string.address_label_province
             }
-            "GB" -> {
+            CountryCode.isGB(countryCode) -> {
                 R.string.address_label_county
             }
             else -> {
@@ -280,9 +292,9 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
-    private fun updatePostalCodeView(country: Country?) {
-        val shouldShowPostalCode = country == null ||
-            CountryUtils.doesCountryUsePostalCode(country.code)
+    private fun updatePostalCodeView(countryCode: CountryCode?) {
+        val shouldShowPostalCode = countryCode == null ||
+            CountryUtils.doesCountryUsePostalCode(countryCode)
         postalCodeLayout.isVisible = shouldShowPostalCode
 
         val shouldShowPostalCodeContainer =
@@ -290,14 +302,14 @@ internal class BillingAddressView @JvmOverloads constructor(
         viewBinding.cityPostalDivider.isVisible = shouldShowPostalCodeContainer
         viewBinding.cityPostalContainer.isVisible = shouldShowPostalCodeContainer
 
-        postalCodeConfig = if (country?.code == "US") {
+        postalCodeConfig = if (CountryCode.isUS(countryCode)) {
             PostalCodeConfig.UnitedStates
         } else {
             PostalCodeConfig.Global
         }
 
         viewBinding.postalCodeLayout.hint = resources.getString(
-            if (country?.code == "US") {
+            if (CountryCode.isUS(countryCode)) {
                 R.string.acc_label_zip_short
             } else {
                 R.string.address_label_postal_code
@@ -350,13 +362,14 @@ internal class BillingAddressView @JvmOverloads constructor(
             // invalid if not set first.
             this.postalCodeView.setText(it.postalCode)
 
-            val currentLocale = ConfigurationCompat.getLocales(context.resources.configuration)[0]
-            it.country?.let { countryCode ->
-                countryLayout.selectedCountry = CountryUtils.getCountryByCode(
-                    countryCode,
-                    currentLocale
+            it.country?.let { country ->
+                countryLayout.selectedCountry = CountryCode(country)
+                this.countryView.setText(
+                    CountryUtils.getDisplayCountry(
+                        CountryCode(country),
+                        ConfigurationCompat.getLocales(context.resources.configuration)[0]
+                    )
                 )
-                this.countryView.setText(CountryUtils.getDisplayCountry(countryCode))
             }
             this.address1View.setText(it.line1)
             this.address2View.setText(it.line2)

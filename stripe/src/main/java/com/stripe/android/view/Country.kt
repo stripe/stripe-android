@@ -1,7 +1,7 @@
 package com.stripe.android.view
 
 internal data class Country(
-    val code: String,
+    val code: CountryCode,
     val name: String
 ) {
 
