@@ -40,7 +40,17 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         }
     }
 
-    private fun createPaymentSheetFlowController(
+    private fun createIntent(
+        customerConfig: PaymentSheet.CustomerConfiguration?
+    ) {
+        if (isSetupIntent) {
+            createSetupIntent(customerConfig)
+        } else {
+            createPaymentIntent(customerConfig)
+        }
+    }
+
+    private fun createPaymentIntent(
         customerConfig: PaymentSheet.CustomerConfiguration?
     ) {
         viewModel.createPaymentIntent(
@@ -50,20 +60,38 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             responseResult.fold(
                 onSuccess = { json ->
                     viewModel.inProgress.postValue(false)
-                    val paymentIntentClientSecret = json.getString("secret")
-                    onPaymentIntent(paymentIntentClientSecret, customerConfig)
+                    val clientSecret = json.getString("secret")
+                    onIntentCreated(clientSecret, customerConfig)
                 },
                 onFailure = ::onError
             )
         }
     }
 
-    private fun onPaymentIntent(
-        paymentIntentClientSecret: String,
+    private fun createSetupIntent(
+        customerConfig: PaymentSheet.CustomerConfiguration?
+    ) {
+        viewModel.createSetupIntent(
+            COUNTRY_CODE,
+            customerConfig?.id
+        ).observe(this) { responseResult ->
+            responseResult.fold(
+                onSuccess = { json ->
+                    viewModel.inProgress.postValue(false)
+                    val clientSecret = json.getString("secret")
+                    onIntentCreated(clientSecret, customerConfig)
+                },
+                onFailure = ::onError
+            )
+        }
+    }
+
+    private fun onIntentCreated(
+        intentClientSecret: String,
         customerConfig: PaymentSheet.CustomerConfiguration? = null
     ) {
         flowController.configure(
-            paymentIntentClientSecret = paymentIntentClientSecret,
+            intentClientSecret = intentClientSecret,
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = merchantName,
                 customer = customerConfig,
@@ -86,7 +114,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             flowController.presentPaymentOptions()
         }
         viewBinding.buyButton.setOnClickListener {
-            flowController.confirmPayment()
+            flowController.confirm()
         }
         onPaymentOption(flowController.getPaymentOption())
     }
@@ -116,10 +144,10 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
     override fun onRefreshEphemeralKey() {
         if (isCustomerEnabled) {
             fetchEphemeralKey { customerConfig ->
-                createPaymentSheetFlowController(customerConfig)
+                createIntent(customerConfig)
             }
         } else {
-            createPaymentSheetFlowController(null)
+            createIntent(null)
         }
     }
 
