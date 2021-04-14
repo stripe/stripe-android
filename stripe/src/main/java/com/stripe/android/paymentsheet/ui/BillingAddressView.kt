@@ -127,10 +127,6 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
-    private fun getLocale(): Locale {
-        return ConfigurationCompat.getLocales(context.resources.configuration)[0]
-    }
-
     private val requiredViews = setOf(
         viewBinding.address1Divider,
         viewBinding.address1Layout,
@@ -364,11 +360,11 @@ internal class BillingAddressView @JvmOverloads constructor(
             // invalid if not set first.
             this.postalCodeView.setText(it.postalCode)
 
-            it.country?.let { country ->
-                countryLayout.selectedCountryCode = CountryCode(country)
+            it.country?.let { countryCode ->
+                countryLayout.selectedCountryCode = CountryCode(countryCode)
                 this.countryView.setText(
                     CountryUtils.getDisplayCountry(
-                        CountryCode(country),
+                        CountryCode(countryCode),
                         getLocale()
                     )
                 )
@@ -386,6 +382,10 @@ internal class BillingAddressView @JvmOverloads constructor(
                 it.isNullOrBlank()
             }
         }
+
+    private fun getLocale(): Locale {
+        return ConfigurationCompat.getLocales(context.resources.configuration)[0]
+    }
 
     internal sealed class PostalCodeConfig {
         abstract val maxLength: Int

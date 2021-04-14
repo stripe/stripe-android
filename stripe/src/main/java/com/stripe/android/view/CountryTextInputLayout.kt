@@ -83,9 +83,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
         countryAdapter = CountryAdapter(
             context,
-            CountryUtils.getOrderedCountries(
-                getLocale()
-            ),
+            CountryUtils.getOrderedCountries(getLocale()),
             itemLayoutRes
         ) {
             // item must be a TextView
@@ -103,10 +101,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
                 countryAutocomplete.showDropDown()
             } else {
                 val countryEntered = countryAutocomplete.text.toString()
-                CountryUtils.getCountryCodeByName(
-                    countryEntered,
-                    getLocale()
-                )?.let {
+                CountryUtils.getCountryCodeByName(countryEntered, getLocale())?.let {
                     updateUiForCountryEntered(it)
                 }
             }
@@ -177,10 +172,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
         // If the user-typed country matches a valid country, update the selected country
         // Otherwise, revert back to last valid country if country is not recognized.
-        val displayCountry = CountryUtils.getCountryByCode(
-            countryCode,
-            getLocale()
-        )?.let {
+        val displayCountry = CountryUtils.getCountryByCode(countryCode, getLocale())?.let {
             updatedSelectedCountryCode(countryCode)
             it
         } ?: CountryUtils.getCountryByCode(selectedCountryCode, getLocale())
