@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.R
@@ -27,6 +26,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -48,7 +48,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
     protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
-    internal val launchGooglePay = _launchGooglePay.map { it.getContentIfNotHandled() }
+    internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
 
     protected val _paymentIntent = MutableLiveData<PaymentIntent?>()
     internal val paymentIntent: LiveData<PaymentIntent?> = _paymentIntent
@@ -66,7 +66,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
     private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
-    internal val transition = _transition.map { it.getContentIfNotHandled() }
+    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     /**
      * On [BaseAddCardFragment] this is set every time the details in the add
@@ -215,5 +215,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 content
             }
         }
+        /**
+         * Returns the content, even if it's already been handled.
+         */
+        @TestOnly
+        fun peekContent(): T = content
     }
 }

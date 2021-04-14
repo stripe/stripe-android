@@ -1,9 +1,14 @@
 package com.stripe.android.view
 
+import android.text.TextWatcher
 import android.view.ViewGroup
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_BIN
@@ -903,6 +908,17 @@ internal class CardNumberEditTextTest {
             .hasSize(1)
         assertThat(analyticsRequests.first().params["event"])
             .isEqualTo("stripe_android.card_metadata_loaded_too_slow")
+    }
+
+    @Test
+    fun verifyAdditionalTextChangeListenerGetTriggeredOnlyOnce() {
+        val textChangeListener = mock<TextWatcher>()
+        cardNumberEditText.addTextChangedListener(textChangeListener)
+        cardNumberEditText.setText("1")
+
+        idleLooper()
+
+        verify(textChangeListener, times(1)).afterTextChanged(any())
     }
 
     private fun verifyCardBrandBin(

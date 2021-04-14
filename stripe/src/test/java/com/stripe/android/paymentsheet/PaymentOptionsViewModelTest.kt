@@ -208,7 +208,7 @@ class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext()
         )
 
-        var transitionTarget: TransitionTarget? = null
+        var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
         viewModel.transition.observeForever {
             transitionTarget = it
         }
@@ -217,7 +217,7 @@ class PaymentOptionsViewModelTest {
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
         viewModel.resolveTransitionTarget(fragmentConfig)
 
-        assertThat(transitionTarget).isNull()
+        assertThat(transitionTarget!!.peekContent()).isNull()
     }
 
     @Test
@@ -235,7 +235,7 @@ class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext()
         )
 
-        val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
+        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -243,7 +243,8 @@ class PaymentOptionsViewModelTest {
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
         viewModel.resolveTransitionTarget(fragmentConfig)
 
-        assertThat(transitionTarget).containsExactly(null)
+        assertThat(transitionTarget).hasSize(1)
+        assertThat(transitionTarget[0].peekContent()).isNull()
     }
 
     @Test
@@ -261,7 +262,7 @@ class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext()
         )
 
-        val transitionTarget: MutableList<TransitionTarget?> = mutableListOf()
+        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -269,7 +270,7 @@ class PaymentOptionsViewModelTest {
         val fragmentConfig = FragmentConfigFixtures.DEFAULT
         viewModel.resolveTransitionTarget(fragmentConfig)
         assertThat(transitionTarget).hasSize(2)
-        assertThat(transitionTarget[1])
+        assertThat(transitionTarget[1].peekContent())
             .isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
 
         viewModel.resolveTransitionTarget(fragmentConfig)
