@@ -52,7 +52,7 @@ internal class PaymentOptionsAdapter(
         this.items = items
 
         onItemSelected(
-            position = findSelectedPosition(paymentSelection).takeIf { it != -1 }
+            position = paymentSelection?.let { findSelectedPosition(it) }.takeIf { it != -1 }
                 ?: findInitialSelectedPosition(config.savedSelection),
             isClick = false
         )
@@ -98,7 +98,7 @@ internal class PaymentOptionsAdapter(
     /**
      * Find the index of [paymentSelection] in the current items. Return -1 if not found.
      */
-    private fun findSelectedPosition(paymentSelection: PaymentSelection?): Int {
+    private fun findSelectedPosition(paymentSelection: PaymentSelection): Int {
         return items.indexOfFirst { item ->
             when (paymentSelection) {
                 PaymentSelection.GooglePay -> item is Item.GooglePay
