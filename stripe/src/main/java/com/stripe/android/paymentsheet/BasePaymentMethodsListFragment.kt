@@ -62,9 +62,7 @@ internal abstract class BasePaymentMethodsListFragment(
             viewBinding.recycler.adapter = it
         }
 
-        adapter.update(
-            config
-        )
+        adapter.update(config, sheetViewModel.selection.value)
 
         eventReporter.onShowExistingPaymentOptions()
 
