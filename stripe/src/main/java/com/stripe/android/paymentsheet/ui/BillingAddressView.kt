@@ -100,7 +100,7 @@ internal class BillingAddressView @JvmOverloads constructor(
     @VisibleForTesting
     internal var postalCodeViewListener: PostalCodeViewListener? = null
 
-    private val isUnitedStates: Boolean get() = CountryCode.isUS(countryLayout.selectedCountry)
+    private val isUnitedStates: Boolean get() = CountryCode.isUS(countryLayout.selectedCountryCode)
 
     private var postalCodeConfig: PostalCodeConfig by Delegates.observable(
         PostalCodeConfig.Global
@@ -120,13 +120,15 @@ internal class BillingAddressView @JvmOverloads constructor(
             countryCode = newCountryCode
         ).let { isPostalValid ->
             postalCodeViewListener?.onCountryChanged(
-                CountryUtils.getCountryByCode(
-                    newCountryCode,
-                    ConfigurationCompat.getLocales(context.resources.configuration)[0]
-                ), isPostalValid
+                CountryUtils.getCountryByCode(newCountryCode, getLocale()),
+                isPostalValid
             )
             postalCodeView.shouldShowError = !isPostalValid
         }
+    }
+
+    private fun getLocale(): Locale {
+        return ConfigurationCompat.getLocales(context.resources.configuration)[0]
     }
 
     private val requiredViews = setOf(
@@ -159,7 +161,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         countryLayout.countryChangeCallback = newCountryCallback
         // Since the callback is set after CountryAutoCompleteTextView is fully initialized,
         // need to manually trigger the callback once to pick up the initial country
-        countryLayout.selectedCountry?.let {
+        countryLayout.selectedCountryCode?.let {
             newCountryCallback(it)
         }
 
@@ -178,7 +180,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
 
         postalCodeView.internalFocusChangeListeners.add { _, hasFocus ->
-            val isPostalValid = countryLayout.selectedCountry?.let { countryCode ->
+            val isPostalValid = countryLayout.selectedCountryCode?.let { countryCode ->
                 postalCodeValidator.isValid(
                     postalCode = postalCodeView.value.orEmpty(),
                     countryCode = countryCode
@@ -191,16 +193,16 @@ internal class BillingAddressView @JvmOverloads constructor(
             if (hasFocus) {
                 postalCodeViewListener?.onGainingFocus(
                     CountryUtils.getCountryByCode(
-                        countryLayout.selectedCountry,
-                        ConfigurationCompat.getLocales(context.resources.configuration)[0]
+                        countryLayout.selectedCountryCode,
+                        getLocale()
                     ),
                     isPostalValid
                 )
             } else {
                 postalCodeViewListener?.onLosingFocus(
                     CountryUtils.getCountryByCode(
-                        countryLayout.selectedCountry,
-                        ConfigurationCompat.getLocales(context.resources.configuration)[0]
+                        countryLayout.selectedCountryCode,
+                        getLocale()
                     ),
                     isPostalValid
                 )
@@ -214,7 +216,7 @@ internal class BillingAddressView @JvmOverloads constructor(
      * An [Address] if the country and postal code are valid; otherwise `null`.
      */
     private fun createAddress(): Address? {
-        return countryLayout.selectedCountry?.let { countryCode ->
+        return countryLayout.selectedCountryCode?.let { countryCode ->
             val postalCode = postalCodeView.value
             val isPostalCodeValid = postalCodeValidator.isValid(
                 postalCode = postalCode.orEmpty(),
@@ -363,11 +365,11 @@ internal class BillingAddressView @JvmOverloads constructor(
             this.postalCodeView.setText(it.postalCode)
 
             it.country?.let { country ->
-                countryLayout.selectedCountry = CountryCode(country)
+                countryLayout.selectedCountryCode = CountryCode(country)
                 this.countryView.setText(
                     CountryUtils.getDisplayCountry(
                         CountryCode(country),
-                        ConfigurationCompat.getLocales(context.resources.configuration)[0]
+                        getLocale()
                     )
                 )
             }

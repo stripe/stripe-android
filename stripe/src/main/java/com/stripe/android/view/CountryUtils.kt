@@ -3,7 +3,6 @@ package com.stripe.android.view
 import java.util.Locale
 
 internal fun Locale.getCountryCode(): CountryCode = CountryCode(this.country)
-internal fun Locale.getISOCountryCodes(): CountryCode = CountryCode(this.country)
 
 internal object CountryUtils {
 
@@ -29,8 +28,9 @@ internal object CountryUtils {
             ?: Locale("", countryCode.twoLetters).getDisplayCountry(currentLocale)
 
     @JvmSynthetic
-    internal fun getCountryByName(countryName: String, currentLocale: Locale): Country? {
-        return localizedCountries(currentLocale).firstOrNull { it.name == countryName }
+
+    fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
+        return localizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
     }
 
     @JvmSynthetic
@@ -52,9 +52,5 @@ internal object CountryUtils {
     @JvmSynthetic
     internal fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
         return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.twoLetters.toUpperCase(Locale.ROOT))
-    }
-
-    fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
-        return localizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
     }
 }

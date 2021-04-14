@@ -193,8 +193,8 @@ internal abstract class BaseAddCardFragment(
 
         cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
         cardMultilineWidget.expirationDatePlaceholderRes = null
-        cardMultilineWidget.expiryTextInputLayout.hint =
-            getString(R.string.stripe_paymentsheet_expiration_date_hint)
+        cardMultilineWidget.expiryTextInputLayout.hint = "123"
+//            getString(R.string.stripe_paymentsheet_expiration_date_hint)
         cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
         cardMultilineWidget.setCvcPlaceholderText("")
 
@@ -287,7 +287,7 @@ internal abstract class BaseAddCardFragment(
                     val shouldToggleBillingError =
                         !isPostalValid && !billingAddressView.postalCodeView.text.isNullOrEmpty()
                     billingErrors.text = if (shouldToggleBillingError) {
-                        if (country == null || country.code == "US") {
+                        if (country == null || country.code.isUS()) {
                             getString(R.string.address_zip_invalid)
                         } else {
                             getString(R.string.address_postal_code_invalid)

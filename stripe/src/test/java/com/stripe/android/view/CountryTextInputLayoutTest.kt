@@ -66,14 +66,14 @@ class CountryTextInputLayoutTest {
 
     @Test
     fun countryAutoCompleteTextView_whenInitialized_displaysDefaultLocaleDisplayName() {
-        assertEquals(Locale.US.country, countryTextInputLayout.selectedCountry?.code)
+        assertEquals(Locale.US.country, countryTextInputLayout.selectedCountryCode?.code)
         assertEquals(Locale.US.displayCountry, autoCompleteTextView.text.toString())
     }
 
     @Test
     fun updateUIForCountryEntered_whenInvalidCountry_revertsToLastCountry() {
         val previousValidCountryCode =
-            countryTextInputLayout.selectedCountry?.code.orEmpty()
+            countryTextInputLayout.selectedCountryCode?.code.orEmpty()
         countryTextInputLayout.setCountrySelected("FAKE COUNTRY CODE")
         assertNull(autoCompleteTextView.error)
         assertEquals(
@@ -90,9 +90,9 @@ class CountryTextInputLayoutTest {
 
     @Test
     fun updateUIForCountryEntered_whenValidCountry_UIUpdates() {
-        assertEquals(Locale.US.country, countryTextInputLayout.selectedCountry?.code)
+        assertEquals(Locale.US.country, countryTextInputLayout.selectedCountryCode?.code)
         countryTextInputLayout.setCountrySelected(Locale.UK.country)
-        assertEquals(Locale.UK.country, countryTextInputLayout.selectedCountry?.code)
+        assertEquals(Locale.UK.country, countryTextInputLayout.selectedCountryCode?.code)
     }
 
     @Test
@@ -108,24 +108,24 @@ class CountryTextInputLayoutTest {
         countryTextInputLayout.setAllowedCountryCodes(setOf("fr", "de"))
         assertEquals(
             "FR",
-            countryTextInputLayout.selectedCountry?.code
+            countryTextInputLayout.selectedCountryCode?.code
         )
     }
 
     @Test
     fun validateCountry_withInvalidCountry_setsSelectedCountryToNull() {
-        assertNotNull(countryTextInputLayout.selectedCountry)
+        assertNotNull(countryTextInputLayout.selectedCountryCode)
         countryTextInputLayout.countryAutocomplete.setText("invalid country")
         countryTextInputLayout.validateCountry()
-        assertNull(countryTextInputLayout.selectedCountry)
+        assertNull(countryTextInputLayout.selectedCountryCode)
     }
 
     @Test
     fun validateCountry_withValidCountry_setsSelectedCountry() {
-        assertNotNull(countryTextInputLayout.selectedCountry)
+        assertNotNull(countryTextInputLayout.selectedCountryCode)
         countryTextInputLayout.countryAutocomplete.setText("Canada")
         countryTextInputLayout.validateCountry()
-        assertEquals("Canada", countryTextInputLayout.selectedCountry?.name)
+        assertEquals("Canada", countryTextInputLayout.selectedCountryCode?.name)
     }
 
     @AfterTest

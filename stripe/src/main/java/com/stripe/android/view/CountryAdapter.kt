@@ -71,7 +71,7 @@ internal class CountryAdapter(
 
         unfilteredCountries = unfilteredCountries.filter { (countryCode) ->
             allowedCountryCodes.any { allowedCountryCode ->
-                allowedCountryCode.equals(countryCode, ignoreCase = true)
+                allowedCountryCode.equals(countryCode.twoLetters, ignoreCase = true)
             }
         }
         countryFilter.unfilteredCountries = unfilteredCountries

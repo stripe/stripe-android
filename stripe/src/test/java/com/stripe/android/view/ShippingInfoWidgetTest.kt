@@ -322,7 +322,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo("12345")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountry?.code)
+        assertThat(countryTextInputLayout.selectedCountryCode?.code)
             .isEqualTo("US")
     }
 
@@ -344,7 +344,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo("M4B1B5")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountry?.code)
+        assertThat(countryTextInputLayout.selectedCountryCode?.code)
             .isEqualTo("CA")
     }
 

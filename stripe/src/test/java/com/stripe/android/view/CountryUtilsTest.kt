@@ -52,14 +52,10 @@ class CountryUtilsTest {
         val currentLocale = Locale("de", "DE")
         val germany = CountryUtils.getOrderedCountries(currentLocale)
             .firstOrNull()
-        val secondCountry = CountryUtils.getOrderedCountries(currentLocale)
-            .firstOrNull()
 
         // If the current locale is germany it should be first in the list, and the german
         // word for germany
         assertThat(germany?.name)
-            .isEqualTo("Deutschland")
-        assertThat(secondCountry?.name)
             .isEqualTo("Deutschland")
     }
 
