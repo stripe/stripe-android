@@ -2394,6 +2394,7 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public final fun getShipping ()Lcom/stripe/android/model/PaymentIntent$Shipping;
 	public fun getStatus ()Lcom/stripe/android/model/StripeIntent$Status;
 	public fun hashCode ()I
+	public fun isConfirmed ()Z
 	public fun isLiveMode ()Z
 	public fun requiresAction ()Z
 	public fun requiresConfirmation ()Z
@@ -2424,6 +2425,7 @@ public final class com/stripe/android/model/PaymentIntent$CaptureMethod : java/l
 
 public final class com/stripe/android/model/PaymentIntent$Companion {
 	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentIntent;
+	public final fun isClientSecretValid (Ljava/lang/String;)Z
 }
 
 public final class com/stripe/android/model/PaymentIntent$ConfirmationMethod : java/lang/Enum {
@@ -3699,7 +3701,6 @@ public final class com/stripe/android/model/SetupIntent : com/stripe/android/mod
 	public static synthetic fun copy$default (Lcom/stripe/android/model/SetupIntent;Ljava/lang/String;Lcom/stripe/android/model/SetupIntent$CancellationReason;JLjava/lang/String;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/util/List;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/SetupIntent$Error;Lcom/stripe/android/model/StripeIntent$NextActionData;ILjava/lang/Object;)Lcom/stripe/android/model/SetupIntent;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/SetupIntent;
 	public final fun getCancellationReason ()Lcom/stripe/android/model/SetupIntent$CancellationReason;
 	public fun getClientSecret ()Ljava/lang/String;
 	public fun getCreated ()J
@@ -3714,6 +3715,7 @@ public final class com/stripe/android/model/SetupIntent : com/stripe/android/mod
 	public fun getStatus ()Lcom/stripe/android/model/StripeIntent$Status;
 	public final fun getUsage ()Lcom/stripe/android/model/StripeIntent$Usage;
 	public fun hashCode ()I
+	public fun isConfirmed ()Z
 	public fun isLiveMode ()Z
 	public fun requiresAction ()Z
 	public fun requiresConfirmation ()Z
@@ -3732,6 +3734,7 @@ public final class com/stripe/android/model/SetupIntent$CancellationReason : jav
 
 public final class com/stripe/android/model/SetupIntent$Companion {
 	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/SetupIntent;
+	public final fun isClientSecretValid (Ljava/lang/String;)Z
 }
 
 public class com/stripe/android/model/SetupIntent$Creator : android/os/Parcelable$Creator {
@@ -4674,9 +4677,14 @@ public abstract interface class com/stripe/android/model/StripeIntent : com/stri
 	public abstract fun getPaymentMethodId ()Ljava/lang/String;
 	public abstract fun getPaymentMethodTypes ()Ljava/util/List;
 	public abstract fun getStatus ()Lcom/stripe/android/model/StripeIntent$Status;
+	public abstract fun isConfirmed ()Z
 	public abstract fun isLiveMode ()Z
 	public abstract fun requiresAction ()Z
 	public abstract fun requiresConfirmation ()Z
+}
+
+public final class com/stripe/android/model/StripeIntent$DefaultImpls {
+	public static fun isConfirmed (Lcom/stripe/android/model/StripeIntent;)Z
 }
 
 public abstract class com/stripe/android/model/StripeIntent$NextActionData : com/stripe/android/model/StripeModel {
@@ -5149,79 +5157,6 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCal
 	public abstract fun onPaymentOption (Lcom/stripe/android/paymentsheet/model/PaymentOption;)V
 }
 
-public abstract class com/stripe/android/paymentsheet/PaymentResult : android/os/Parcelable {
-}
-
-public final class com/stripe/android/paymentsheet/PaymentResult$Canceled : com/stripe/android/paymentsheet/PaymentResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Throwable;Lcom/stripe/android/model/PaymentIntent;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun component2 ()Lcom/stripe/android/model/PaymentIntent;
-	public final fun copy (Ljava/lang/Throwable;Lcom/stripe/android/model/PaymentIntent;)Lcom/stripe/android/paymentsheet/PaymentResult$Canceled;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentResult$Canceled;Ljava/lang/Throwable;Lcom/stripe/android/model/PaymentIntent;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentResult$Canceled;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMostRecentError ()Ljava/lang/Throwable;
-	public final fun getPaymentIntent ()Lcom/stripe/android/model/PaymentIntent;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public class com/stripe/android/paymentsheet/PaymentResult$Canceled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentResult$Canceled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentResult$Canceled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentResult$Completed : com/stripe/android/paymentsheet/PaymentResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/model/PaymentIntent;)V
-	public final fun component1 ()Lcom/stripe/android/model/PaymentIntent;
-	public final fun copy (Lcom/stripe/android/model/PaymentIntent;)Lcom/stripe/android/paymentsheet/PaymentResult$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentResult$Completed;Lcom/stripe/android/model/PaymentIntent;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentResult$Completed;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getPaymentIntent ()Lcom/stripe/android/model/PaymentIntent;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public class com/stripe/android/paymentsheet/PaymentResult$Completed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentResult$Completed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentResult$Completed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentResult$Failed : com/stripe/android/paymentsheet/PaymentResult {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Throwable;Lcom/stripe/android/model/PaymentIntent;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun component2 ()Lcom/stripe/android/model/PaymentIntent;
-	public final fun copy (Ljava/lang/Throwable;Lcom/stripe/android/model/PaymentIntent;)Lcom/stripe/android/paymentsheet/PaymentResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentResult$Failed;Ljava/lang/Throwable;Lcom/stripe/android/model/PaymentIntent;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentResult$Failed;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Ljava/lang/Throwable;
-	public final fun getPaymentIntent ()Lcom/stripe/android/model/PaymentIntent;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public class com/stripe/android/paymentsheet/PaymentResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentsheet/PaymentSheet {
 	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
@@ -5359,8 +5294,63 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfigu
 	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;
 }
 
+public abstract class com/stripe/android/paymentsheet/PaymentSheetResult : android/os/Parcelable {
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheetResult$Canceled : com/stripe/android/paymentsheet/PaymentSheetResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheetResult$Canceled;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/paymentsheet/PaymentSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheetResult$Canceled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheetResult$Canceled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheetResult$Completed : com/stripe/android/paymentsheet/PaymentSheetResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheetResult$Completed;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/paymentsheet/PaymentSheetResult$Completed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheetResult$Completed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheetResult$Completed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheetResult$Failed : com/stripe/android/paymentsheet/PaymentSheetResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/paymentsheet/PaymentSheetResult$Failed;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheetResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheetResult$Failed;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/paymentsheet/PaymentSheetResult$Failed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheetResult$Failed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheetResult$Failed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract interface class com/stripe/android/paymentsheet/PaymentSheetResultCallback {
-	public abstract fun onPaymentResult (Lcom/stripe/android/paymentsheet/PaymentResult;)V
+	public abstract fun onPaymentResult (Lcom/stripe/android/paymentsheet/PaymentSheetResult;)V
 }
 
 public final class com/stripe/android/paymentsheet/model/PaymentOption {

@@ -1,12 +1,13 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-internal sealed class PaymentIntentRepository {
+internal sealed class StripeIntentRepository {
     abstract suspend fun get(
         clientSecret: String
     ): PaymentIntent
@@ -16,7 +17,7 @@ internal sealed class PaymentIntentRepository {
      */
     class Static(
         private val paymentIntent: PaymentIntent
-    ) : PaymentIntentRepository() {
+    ) : StripeIntentRepository() {
         override suspend fun get(clientSecret: String): PaymentIntent = paymentIntent
     }
 
@@ -27,15 +28,21 @@ internal sealed class PaymentIntentRepository {
         private val stripeRepository: StripeRepository,
         private val requestOptions: ApiRequest.Options,
         private val workContext: CoroutineContext
-    ) : PaymentIntentRepository() {
+    ) : StripeIntentRepository() {
         override suspend fun get(clientSecret: String) = withContext(workContext) {
-            val paymentIntent = stripeRepository.retrievePaymentIntent(
-                clientSecret,
-                requestOptions,
-                expandFields = listOf("payment_method")
-            )
-            requireNotNull(paymentIntent) {
-                "Could not parse PaymentIntent."
+            if (PaymentIntent.isClientSecretValid(clientSecret)) {
+                val paymentIntent = stripeRepository.retrievePaymentIntent(
+                    clientSecret,
+                    requestOptions,
+                    expandFields = listOf("payment_method")
+                )
+                requireNotNull(paymentIntent) {
+                    "Could not parse PaymentIntent."
+                }
+            } else if (SetupIntent.isClientSecretValid(clientSecret)) {
+                throw IllegalArgumentException("SetupIntents not supported")
+            } else {
+                throw IllegalArgumentException("Invalid client secret.")
             }
         }
     }
