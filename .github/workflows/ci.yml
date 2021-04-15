@@ -16,10 +16,14 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
-          path: ~/.gradle/caches
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       - name: Ktlint
         run: ./gradlew ktlint
       - name: Checkstyle
@@ -43,10 +47,14 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
-          path: ~/.gradle/caches
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       - name: Unit tests
         run: ./gradlew :stripe:testDebugUnitTest
       - uses: actions/upload-artifact@v2
@@ -66,10 +74,14 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
-          path: ~/.gradle/caches
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       - name: End-to-end tests
         env:
           STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
