@@ -67,8 +67,10 @@ class ShippingInfoWidgetTest {
         ).use { activityScenario ->
             activityScenario.onActivity {
                 shippingInfoWidget = it.findViewById(R.id.shipping_info_widget)
-                addressLine1TextInputLayout = shippingInfoWidget.findViewById(R.id.tl_address_line1_aaw)
-                addressLine2TextInputLayout = shippingInfoWidget.findViewById(R.id.tl_address_line2_aaw)
+                addressLine1TextInputLayout =
+                    shippingInfoWidget.findViewById(R.id.tl_address_line1_aaw)
+                addressLine2TextInputLayout =
+                    shippingInfoWidget.findViewById(R.id.tl_address_line2_aaw)
                 cityTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_city_aaw)
                 nameTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_name_aaw)
                 postalCodeTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_postal_code_aaw)
@@ -80,14 +82,15 @@ class ShippingInfoWidgetTest {
                 postalEditText = shippingInfoWidget.findViewById(R.id.et_postal_code_aaw)
                 stateEditText = shippingInfoWidget.findViewById(R.id.et_state_aaw)
                 phoneEditText = shippingInfoWidget.findViewById(R.id.et_phone_number_aaw)
-                countryTextInputLayout = shippingInfoWidget.findViewById(R.id.country_autocomplete_aaw)
+                countryTextInputLayout =
+                    shippingInfoWidget.findViewById(R.id.country_autocomplete_aaw)
             }
         }
     }
 
     @Test
     fun shippingInfoWidget_whenCountryChanged_fieldsRenderCorrectly() {
-        countryTextInputLayout.updateUiForCountryEntered(Locale.US.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.US.getCountryCode())
         assertThat(addressLine1TextInputLayout.hint)
             .isEqualTo(res.getString(R.string.address_label_address))
         assertThat(addressLine2TextInputLayout.hint)
@@ -97,7 +100,7 @@ class ShippingInfoWidgetTest {
         assertThat(stateTextInputLayout.hint)
             .isEqualTo(res.getString(R.string.address_label_state))
 
-        countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.getCountryCode())
         assertThat(addressLine1TextInputLayout.hint)
             .isEqualTo(res.getString(R.string.address_label_address))
         assertThat(addressLine2TextInputLayout.hint)
@@ -107,7 +110,7 @@ class ShippingInfoWidgetTest {
         assertThat(stateTextInputLayout.hint)
             .isEqualTo(res.getString(R.string.address_label_province))
 
-        countryTextInputLayout.updateUiForCountryEntered(Locale.UK.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.UK.getCountryCode())
         assertThat(addressLine1TextInputLayout.hint)
             .isEqualTo(res.getString(R.string.address_label_address_line1))
         assertThat(addressLine2TextInputLayout.hint)
@@ -118,7 +121,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo(res.getString(R.string.address_label_county))
 
         countryTextInputLayout.updateUiForCountryEntered(
-            Locale("", NO_POSTAL_CODE_COUNTRY_CODE).displayCountry
+            Locale("", NO_POSTAL_CODE_COUNTRY_CODE).getCountryCode()
         )
         assertThat(addressLine1TextInputLayout.hint)
             .isEqualTo(res.getString(R.string.address_label_address_line1))
@@ -132,7 +135,7 @@ class ShippingInfoWidgetTest {
 
     @Test
     fun shippingInfoWidget_addressSaved_validationTriggers() {
-        countryTextInputLayout.updateUiForCountryEntered(Locale.US.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.US.getCountryCode())
         assertThat(shippingInfoWidget.validateAllFields())
             .isFalse()
         addressLine1EditText.setText("123 Fake Address")
@@ -150,14 +153,14 @@ class ShippingInfoWidgetTest {
         assertThat(shippingInfoWidget.validateAllFields())
             .isFalse()
         countryTextInputLayout
-            .updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).displayCountry)
+            .updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).getCountryCode())
         assertThat(shippingInfoWidget.validateAllFields())
             .isTrue()
     }
 
     @Test
     fun shippingInfoWidget_whenValidationFails_errorTextRenders() {
-        countryTextInputLayout.updateUiForCountryEntered(Locale.US.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.US.getCountryCode())
         assertThat(shippingInfoWidget.validateAllFields())
             .isFalse()
 
@@ -199,7 +202,7 @@ class ShippingInfoWidgetTest {
 
         countryTextInputLayout
             .updateUiForCountryEntered(
-                Locale("", NO_POSTAL_CODE_COUNTRY_CODE).displayCountry
+                Locale("", NO_POSTAL_CODE_COUNTRY_CODE).getCountryCode()
             )
         assertThat(shippingInfoWidget.validateAllFields())
             .isTrue()
@@ -209,7 +212,7 @@ class ShippingInfoWidgetTest {
 
     @Test
     fun shippingInfoWidget_whenErrorOccurs_errorsRenderInternationalized() {
-        countryTextInputLayout.updateUiForCountryEntered(Locale.US.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.US.getCountryCode())
         assertThat(shippingInfoWidget.validateAllFields())
             .isFalse()
 
@@ -218,7 +221,7 @@ class ShippingInfoWidgetTest {
         assertThat(postalCodeTextInputLayout.error)
             .isEqualTo(res.getString(R.string.address_zip_invalid))
 
-        countryTextInputLayout.updateUiForCountryEntered(Locale.UK.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.UK.getCountryCode())
         assertThat(shippingInfoWidget.validateAllFields())
             .isFalse()
         assertThat(stateTextInputLayout.error)
@@ -226,7 +229,7 @@ class ShippingInfoWidgetTest {
         assertThat(postalCodeTextInputLayout.error)
             .isEqualTo(res.getString(R.string.address_postcode_invalid))
 
-        countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.getCountryCode())
         assertThat(shippingInfoWidget.validateAllFields())
             .isFalse()
         assertThat(stateTextInputLayout.error)
@@ -235,7 +238,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo(res.getString(R.string.address_postal_code_invalid))
 
         countryTextInputLayout
-            .updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).displayCountry)
+            .updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).getCountryCode())
         assertThat(shippingInfoWidget.validateAllFields())
             .isFalse()
         assertThat(stateTextInputLayout.error)
@@ -255,7 +258,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo(res.getString(R.string.address_label_zip_code_optional))
         assertThat(nameTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_name))
-        countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.getCountryCode())
         assertThat(stateTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_province))
         shippingInfoWidget.optionalFields = listOf(
@@ -278,7 +281,7 @@ class ShippingInfoWidgetTest {
         assertThat(postalCodeTextInputLayout.visibility)
             .isEqualTo(View.GONE)
         countryTextInputLayout.updateUiForCountryEntered(
-            Locale.CANADA.displayCountry
+            Locale.CANADA.getCountryCode()
         )
         assertThat(postalCodeTextInputLayout.visibility)
             .isEqualTo(View.GONE)
@@ -299,7 +302,7 @@ class ShippingInfoWidgetTest {
         nameEditText.setText("Fake Name")
         phoneEditText.setText("(123) 456 - 7890")
         postalEditText.setText("12345")
-        countryTextInputLayout.updateUiForCountryEntered(Locale.US.displayCountry)
+        countryTextInputLayout.updateUiForCountryEntered(Locale.US.getCountryCode())
 
         assertThat(shippingInfoWidget.shippingInformation)
             .isEqualTo(SHIPPING_INFO)
@@ -322,7 +325,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo("12345")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountry?.code)
+        assertThat(countryTextInputLayout.selectedCountryCode?.twoLetters)
             .isEqualTo("US")
     }
 
@@ -344,7 +347,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo("M4B1B5")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountry?.code)
+        assertThat(countryTextInputLayout.selectedCountryCode?.twoLetters)
             .isEqualTo("CA")
     }
 

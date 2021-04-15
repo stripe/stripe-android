@@ -14,6 +14,7 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.os.ConfigurationCompat
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
+import java.util.Locale
 import kotlin.properties.Delegates
 
 /**
@@ -45,7 +46,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
      * The 2 digit country code of the country selected by this input.
      */
     @VisibleForTesting
-    var selectedCountry: Country? by Delegates.observable(
+    var selectedCountryCode: CountryCode? by Delegates.observable(
         null
     ) { _, _, newCountryValue ->
         newCountryValue?.let {
@@ -54,7 +55,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     }
 
     @JvmSynthetic
-    internal var countryChangeCallback: (Country) -> Unit = {}
+    internal var countryChangeCallback: (CountryCode) -> Unit = {}
 
     private var countryAdapter: CountryAdapter
 
@@ -82,9 +83,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
         countryAdapter = CountryAdapter(
             context,
-            CountryUtils.getOrderedCountries(
-                ConfigurationCompat.getLocales(context.resources.configuration)[0]
-            ),
+            CountryUtils.getOrderedCountries(getLocale()),
             itemLayoutRes
         ) {
             // item must be a TextView
@@ -95,18 +94,20 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         countryAutocomplete.setAdapter(countryAdapter)
         countryAutocomplete.onItemClickListener =
             AdapterView.OnItemClickListener { _, _, position, _ ->
-                updatedSelectedCountryCode(countryAdapter.getItem(position))
+                updatedSelectedCountryCode(countryAdapter.getItem(position).code)
             }
         countryAutocomplete.onFocusChangeListener = OnFocusChangeListener { _, focused ->
             if (focused) {
                 countryAutocomplete.showDropDown()
             } else {
                 val countryEntered = countryAutocomplete.text.toString()
-                updateUiForCountryEntered(countryEntered)
+                CountryUtils.getCountryCodeByName(countryEntered)?.let {
+                    updateUiForCountryEntered(it)
+                }
             }
         }
 
-        selectedCountry = countryAdapter.firstItem
+        selectedCountryCode = countryAdapter.firstItem.code
         updateInitialCountry()
 
         val errorMessage = resources.getString(R.string.address_country_invalid)
@@ -114,7 +115,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         countryAutocomplete.validator = CountryAutoCompleteTextViewValidator(
             countryAdapter
         ) { country ->
-            selectedCountry = country
+            selectedCountryCode = country?.code
 
             if (country != null) {
                 clearError()
@@ -144,7 +145,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     private fun updateInitialCountry() {
         val initialCountry = countryAdapter.firstItem
         countryAutocomplete.setText(initialCountry.name)
-        selectedCountry = initialCountry
+        selectedCountryCode = initialCountry.code
     }
 
     /**
@@ -161,28 +162,28 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
      * @param countryCode specify a country code to display in the input. The input will display
      * the full country display name.
      */
-    internal fun setCountrySelected(countryCode: String) {
-        updateUiForCountryEntered(CountryUtils.getDisplayCountry(countryCode))
+    @VisibleForTesting
+    internal fun setCountrySelected(countryCode: CountryCode) {
+        updateUiForCountryEntered(countryCode)
     }
 
     @VisibleForTesting
-    internal fun updateUiForCountryEntered(displayCountryEntered: String) {
-        val country = CountryUtils.getCountryByName(displayCountryEntered)
+    internal fun updateUiForCountryEntered(countryCode: CountryCode) {
 
         // If the user-typed country matches a valid country, update the selected country
         // Otherwise, revert back to last valid country if country is not recognized.
-        val displayCountry = country?.let {
-            updatedSelectedCountryCode(it)
-            displayCountryEntered
-        } ?: selectedCountry?.name
+        val displayCountry = CountryUtils.getCountryByCode(countryCode)?.let {
+            updatedSelectedCountryCode(countryCode)
+            it
+        } ?: selectedCountryCode?.let { CountryUtils.getCountryByCode(it) }
 
-        countryAutocomplete.setText(displayCountry)
+        countryAutocomplete.setText(displayCountry?.name)
     }
 
-    private fun updatedSelectedCountryCode(country: Country) {
+    private fun updatedSelectedCountryCode(countryCode: CountryCode) {
         clearError()
-        if (selectedCountry != country) {
-            selectedCountry = country
+        if (selectedCountryCode != countryCode) {
+            selectedCountryCode = countryCode
         }
     }
 
@@ -193,6 +194,10 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     private fun clearError() {
         error = null
         isErrorEnabled = false
+    }
+
+    private fun getLocale(): Locale {
+        return ConfigurationCompat.getLocales(context.resources.configuration)[0]
     }
 
     private companion object {

@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.Country
+import com.stripe.android.view.CountryCode
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -58,7 +59,7 @@ class BillingAddressViewTest {
     @Test
     fun `changing selectedCountry to country without postal code when level=Required should hide postal code view but show city view`() {
         billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
-        billingAddressView.countryLayout.selectedCountry = ZIMBABWE
+        billingAddressView.countryLayout.selectedCountryCode = ZIMBABWE.code
         idleLooper()
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isFalse()
@@ -90,8 +91,8 @@ class BillingAddressViewTest {
         billingAddressView.postalCodeView.setText("123")
 
         // This will have the effect of switching the country selected
-        billingAddressView.countryLayout.selectedCountry = GB
-        billingAddressView.countryLayout.updateUiForCountryEntered(USA.name)
+        billingAddressView.countryLayout.selectedCountryCode = GB.code
+        billingAddressView.countryLayout.updateUiForCountryEntered(USA.code)
         idleLooper()
 
         assertThat(billingAddressView.postalCodeLayout.isVisible)
@@ -219,22 +220,22 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing country should update postalCodeView inputType`() {
-        billingAddressView.countryLayout.selectedCountry = MEXICO
+        billingAddressView.countryLayout.selectedCountryCode = MEXICO.code
         assertThat(billingAddressView.postalCodeView.inputType)
             .isEqualTo(BillingAddressView.PostalCodeConfig.Global.inputType)
 
-        billingAddressView.countryLayout.selectedCountry = USA
+        billingAddressView.countryLayout.selectedCountryCode = USA.code
         assertThat(billingAddressView.postalCodeView.inputType)
             .isEqualTo(BillingAddressView.PostalCodeConfig.UnitedStates.inputType)
     }
 
     @Test
     fun `changing country should update state hint text`() {
-        billingAddressView.countryLayout.selectedCountry = MEXICO
+        billingAddressView.countryLayout.selectedCountryCode = MEXICO.code
         assertThat(billingAddressView.stateLayout.hint)
             .isEqualTo("State / Province / Region")
 
-        billingAddressView.countryLayout.selectedCountry = USA
+        billingAddressView.countryLayout.selectedCountryCode = USA.code
         assertThat(billingAddressView.stateLayout.hint)
             .isEqualTo("State")
     }
@@ -247,7 +248,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `address value should react to level`() {
-        billingAddressView.countryLayout.selectedCountry = USA
+        billingAddressView.countryLayout.selectedCountryCode = USA.code
         billingAddressView.postalCodeView.setText("94107")
 
         billingAddressView.address1View.setText("123 Main St")
@@ -286,7 +287,7 @@ class BillingAddressViewTest {
         postalCode?.let {
             billingAddressView.postalCodeView.setText(it)
         }
-        billingAddressView.countryLayout.selectedCountry = country
+        billingAddressView.countryLayout.selectedCountryCode = country?.code
         hasFocus?.let {
             billingAddressView.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
                 billingAddressView.postalCodeView,
@@ -297,10 +298,10 @@ class BillingAddressViewTest {
     }
 
     private companion object {
-        private val USA = Country("US", "United States")
-        private val GB = Country("GB", "United Kingdom")
-        private val FRANCE = Country("FR", "France")
-        private val ZIMBABWE = Country("ZW", "Zimbabwe")
-        private val MEXICO = Country("MX", "Mexico")
+        private val USA = Country(CountryCode("US"), "United States")
+        private val GB = Country(CountryCode("GB"), "United Kingdom")
+        private val FRANCE = Country(CountryCode("FR"), "France")
+        private val ZIMBABWE = Country(CountryCode("ZW"), "Zimbabwe")
+        private val MEXICO = Country(CountryCode("MX"), "Mexico")
     }
 }

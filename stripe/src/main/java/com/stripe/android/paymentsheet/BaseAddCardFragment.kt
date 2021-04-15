@@ -287,7 +287,7 @@ internal abstract class BaseAddCardFragment(
                     val shouldToggleBillingError =
                         !isPostalValid && !billingAddressView.postalCodeView.text.isNullOrEmpty()
                     billingErrors.text = if (shouldToggleBillingError) {
-                        if (country == null || country.code == "US") {
+                        if (country == null || country.code.isUS()) {
                             getString(R.string.address_zip_invalid)
                         } else {
                             getString(R.string.address_postal_code_invalid)
