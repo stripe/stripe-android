@@ -27,6 +27,38 @@ class PaymentSheet internal constructor(
     )
 
     /**
+     * Create PaymentSheet with a [Configuration] to process a [PaymentIntent].
+     * If the [PaymentIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
+     * with [PaymentSheetResult.Completed].
+     *
+     * @param[paymentIntentId] the id of the [PaymentIntent] that will be processed
+     * @param[paymentIntentClientSecret] the client secret for the [PaymentIntent]
+     * @param[configuration] the [PaymentSheet] settings
+     */
+    fun presentWithPaymentIntent(
+        paymentIntentId: String,
+        paymentIntentClientSecret: String,
+        configuration: Configuration
+    ) {
+        paymentSheetLauncher.present(paymentIntentClientSecret, configuration)
+    }
+
+    /**
+     * Create PaymentSheet without a [Configuration] to process a [PaymentIntent].
+     * If the [PaymentIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
+     * with [PaymentSheetResult.Completed].
+     *
+     * @param[paymentIntentId] the id of the [PaymentIntent] that will be processed
+     * @param[paymentIntentClientSecret] the client secret for the [PaymentIntent]
+     */
+    fun presentWithPaymentIntent(
+        paymentIntentId: String,
+        paymentIntentClientSecret: String,
+    ) {
+        paymentSheetLauncher.present(paymentIntentClientSecret)
+    }
+
+    /**
      * Create PaymentSheet with a [Configuration].
      *
      * @param[intentClientSecret] the client secret for a [PaymentIntent] or [SetupIntent] object.
