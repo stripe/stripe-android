@@ -48,7 +48,7 @@ jobs:
           path: ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Unit tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew :stripe:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
@@ -70,7 +70,9 @@ jobs:
         with:
           path: ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-      - name: Unit tests
+      - name: End-to-end tests
+        env:
+          STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()

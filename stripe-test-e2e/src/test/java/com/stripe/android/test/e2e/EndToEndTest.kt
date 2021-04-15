@@ -2,6 +2,7 @@ package com.stripe.android.test.e2e
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.Stripe
 import com.stripe.android.model.CardParams
@@ -11,16 +12,19 @@ import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 internal class EndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
+    private val settings: Settings by lazy {
+        Settings(context)
+    }
+
     private val service = ServiceFactory().create(
-        baseUrl = BASE_URL
+        baseUrl = settings.backendUrl
     )
 
     /**
@@ -71,8 +75,6 @@ internal class EndToEndTest {
     }
 
     private companion object {
-        private const val BASE_URL = "https://stp-e2e.glitch.me/"
-
         val PAYMENT_METHOD_CREATE_PARAMS = PaymentMethodCreateParams.createCard(
             CardParams(
                 number = "4242424242424242",

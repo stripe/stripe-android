@@ -26,11 +26,18 @@ android {
         targetSdkVersion 30
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl()
         ]
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using BuildConfig will fail.
+            includeAndroidResources = true
+        }
     }
 
     compileOptions {
@@ -50,7 +57,9 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.5.1'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.google.truth:truth:1.1.2'
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
     testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation 'androidx.test.ext:junit-ktx:1.1.2'
 
     testImplementation "com.squareup.retrofit2:retrofit:2.9.0"
     testImplementation "com.squareup.retrofit2:converter-moshi:2.9.0"
