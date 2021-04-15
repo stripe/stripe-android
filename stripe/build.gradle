@@ -5,7 +5,6 @@ plugins {
     id 'org.jetbrains.dokka'
     id 'org.jetbrains.kotlin.plugin.parcelize'
 
-    id 'maven'
     id 'signing'
     id 'maven-publish'
 
