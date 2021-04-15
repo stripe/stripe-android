@@ -1,12 +1,18 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.text.TextWatcher
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.R
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
@@ -268,6 +274,15 @@ class ExpiryDateEditTextTest {
     }
 
     @Test
+    fun clearingDate_doesNotShowError() {
+        expiryDateEditText.append("15")
+        assertThat(expiryDateEditText.shouldShowError).isTrue()
+        expiryDateEditText.setText("")
+        assertThat(expiryDateEditText.text.isNullOrBlank()).isTrue()
+        assertThat(expiryDateEditText.shouldShowError).isFalse()
+    }
+
+    @Test
     fun inputCompleteDate_whenMonthInvalid_showsInvalidMonth() {
         expiryDateEditText.append("15")
         expiryDateEditText.append("50")
@@ -383,5 +398,16 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.setText(3, 4)
         assertThat(expiryDateEditText.fieldText)
             .isEqualTo("03/04")
+    }
+
+    @Test
+    fun verifyAdditionalTextChangeListenerGetTriggeredOnlyOnce() {
+        val textChangeListener = mock<TextWatcher>()
+        expiryDateEditText.addTextChangedListener(textChangeListener)
+        expiryDateEditText.setText("1")
+
+        idleLooper()
+
+        verify(textChangeListener, times(1)).afterTextChanged(any())
     }
 }

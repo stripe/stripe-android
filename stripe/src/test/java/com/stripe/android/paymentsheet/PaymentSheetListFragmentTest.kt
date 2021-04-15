@@ -104,7 +104,7 @@ class PaymentSheetListFragmentTest {
     fun `posts transition when add card clicked`() {
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value).isNull()
+            assertThat(activityViewModel.transition.value?.peekContent()).isNull()
 
             idleLooper()
 
@@ -114,7 +114,7 @@ class PaymentSheetListFragmentTest {
             adapter.addCardClickListener.onClick(it.requireView())
             idleLooper()
 
-            assertThat(activityViewModel.transition.value)
+            assertThat(activityViewModel.transition.value?.peekContent())
                 .isEqualTo(
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
                         FragmentConfigFixtures.DEFAULT.copy(

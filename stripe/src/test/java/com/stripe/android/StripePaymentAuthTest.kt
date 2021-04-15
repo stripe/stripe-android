@@ -7,22 +7,27 @@ import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.isA
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.Source
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultApiRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -36,7 +41,13 @@ class StripePaymentAuthTest {
     private val paymentController: PaymentController = mock()
     private val paymentCallback: ApiResultCallback<PaymentIntentResult> = mock()
     private val setupCallback: ApiResultCallback<SetupIntentResult> = mock()
+    private val sourceCallback: ApiResultCallback<Source> = mock()
     private val hostArgumentCaptor: KArgumentCaptor<AuthActivityStarter.Host> = argumentCaptor()
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
+    }
 
     @Test
     fun confirmPayment_shouldConfirmAndAuth() = testDispatcher.runBlockingTest {
@@ -103,44 +114,160 @@ class StripePaymentAuthTest {
     }
 
     @Test
-    fun onPaymentResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
-        val data = Intent()
-        whenever(
-            paymentController.shouldHandlePaymentResult(
+    fun onPaymentResult_whenShouldHandleResultAndControllerReturnsCorrectResult_shouldGetCorrectResult() =
+        testDispatcher.runBlockingTest {
+            val data = Intent()
+            val result = mock<PaymentIntentResult>()
+            whenever(
+                paymentController.shouldHandlePaymentResult(
+                    StripePaymentController.PAYMENT_REQUEST_CODE,
+                    data
+                )
+            ).thenReturn(true)
+            whenever(
+                paymentController.getPaymentIntentResult(
+                    data
+                )
+            ).thenReturn(result)
+
+            val stripe = createStripe()
+            stripe.onPaymentResult(
                 StripePaymentController.PAYMENT_REQUEST_CODE,
-                data
+                data,
+                callback = paymentCallback
             )
-        ).thenReturn(true)
 
-        val stripe = createStripe()
-        stripe.onPaymentResult(
-            StripePaymentController.PAYMENT_REQUEST_CODE,
-            data,
-            callback = paymentCallback
-        )
+            idleLooper()
 
-        verify(paymentController).handlePaymentResult(data, paymentCallback)
-    }
+            verify(paymentCallback).onSuccess(result)
+        }
 
     @Test
-    fun onSetupResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
-        val data = Intent()
-        whenever(
-            paymentController.shouldHandleSetupResult(
-                StripePaymentController.SETUP_REQUEST_CODE,
-                data
+    fun onPaymentResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
+        testDispatcher.runBlockingTest {
+            val data = Intent()
+            whenever(
+                paymentController.shouldHandlePaymentResult(
+                    StripePaymentController.PAYMENT_REQUEST_CODE,
+                    data
+                )
+            ).thenReturn(true)
+            whenever(
+                paymentController.getPaymentIntentResult(
+                    data
+                )
+            ).thenReturn(null)
+
+            val stripe = createStripe()
+            stripe.onPaymentResult(
+                StripePaymentController.PAYMENT_REQUEST_CODE,
+                data,
+                callback = paymentCallback
             )
-        ).thenReturn(true)
 
-        val stripe = createStripe()
-        stripe.onSetupResult(
-            StripePaymentController.SETUP_REQUEST_CODE,
-            data,
-            callback = setupCallback
-        )
+            idleLooper()
 
-        verify(paymentController).handleSetupResult(data, setupCallback)
-    }
+            verify(paymentCallback).onError(isA<InvalidRequestException>())
+        }
+
+    @Test
+    fun onSetupResult_whenShouldHandleResultAndControllerReturnsCorrectResult_shouldGetCorrectResult() =
+        testDispatcher.runBlockingTest {
+            val data = Intent()
+            val result = mock<SetupIntentResult>()
+            whenever(
+                paymentController.shouldHandleSetupResult(
+                    StripePaymentController.SETUP_REQUEST_CODE,
+                    data
+                )
+            ).thenReturn(true)
+            whenever(
+                paymentController.getSetupIntentResult(
+                    data
+                )
+            ).thenReturn(result)
+
+            val stripe = createStripe()
+            stripe.onSetupResult(
+                StripePaymentController.SETUP_REQUEST_CODE,
+                data,
+                callback = setupCallback
+            )
+
+            idleLooper()
+            verify(setupCallback).onSuccess(result)
+        }
+
+    @Test
+    fun onSetupResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
+        testDispatcher.runBlockingTest {
+            val data = Intent()
+            whenever(
+                paymentController.shouldHandleSetupResult(
+                    StripePaymentController.SETUP_REQUEST_CODE,
+                    data
+                )
+            ).thenReturn(true)
+            whenever(
+                paymentController.getSetupIntentResult(
+                    data
+                )
+            ).thenReturn(null)
+
+            val stripe = createStripe()
+            stripe.onSetupResult(
+                StripePaymentController.SETUP_REQUEST_CODE,
+                data,
+                callback = setupCallback
+            )
+
+            idleLooper()
+
+            verify(setupCallback).onError(isA<InvalidRequestException>())
+        }
+
+    @Test
+    fun onAuthenticateSourceResult_whenControllerReturnsCorrectResult_shouldGetCorrectResult() =
+        testDispatcher.runBlockingTest {
+            val result = mock<Source>()
+            val data = Intent()
+            whenever(
+                paymentController.getAuthenticateSourceResult(
+                    data
+                )
+            ).thenReturn(result)
+
+            val stripe = createStripe()
+            stripe.onAuthenticateSourceResult(
+                data,
+                callback = sourceCallback
+            )
+
+            idleLooper()
+
+            verify(sourceCallback).onSuccess(result)
+        }
+
+    @Test
+    fun onAuthenticateSourceResult_whenControllerReturnsNull_shouldThrowException() =
+        testDispatcher.runBlockingTest {
+            val data = Intent()
+            whenever(
+                paymentController.getAuthenticateSourceResult(
+                    data
+                )
+            ).thenReturn(null)
+
+            val stripe = createStripe()
+            stripe.onAuthenticateSourceResult(
+                data,
+                callback = sourceCallback
+            )
+
+            idleLooper()
+
+            verify(sourceCallback).onError(isA<InvalidRequestException>())
+        }
 
     private fun createStripe(): Stripe {
         return Stripe(
@@ -154,7 +281,8 @@ class StripePaymentAuthTest {
             ),
             paymentController,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            null
+            null,
+            testDispatcher
         )
     }
 

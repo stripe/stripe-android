@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_multiline_widget_container"
+        android:layout_margin="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.stripe.android.view.CardMultilineWidget
+                android:id="@+id/card_multiline_widget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shouldShowPostalCode="false" />
+
+            <com.stripe.android.view.CountryTextInputLayout
+                android:id="@+id/country_layout"
+                style="@style/StripeCardFormCountryTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:countryAutoCompleteStyle="@style/StripeCardFormCountryItem"
+                app:countryItemLayout="@layout/stripe_country_dropdown_item"
+                app:layout_constraintBottom_toTopOf="@id/country_postal_divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/card_multiline_widget" />
+
+            <View
+                android:id="@+id/country_postal_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/stripe_card_form_view_form_border"
+                app:layout_constraintBottom_toTopOf="@id/postal_code_container"
+                app:layout_constraintTop_toBottomOf="@id/country_layout" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/postal_code_container"
+                style="@style/StripeCardFormTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/acc_label_zip_short"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/country_postal_divider">
+
+                <com.stripe.android.view.PostalCodeEditText
+                    android:id="@+id/postal_code"
+                    style="@style/StripeCardFormEditText"
+                    android:inputType="textPostalAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/errors"
+        style="@style/StripeCardErrorTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/postal_code_container" />
+
+</merge>

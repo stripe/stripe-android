@@ -821,6 +821,8 @@ public final class com/stripe/android/Stripe {
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun isAuthenticateSourceResult (ILandroid/content/Intent;)Z
+	public final fun isPaymentResult (ILandroid/content/Intent;)Z
+	public final fun isSetupResult (ILandroid/content/Intent;)Z
 	public final fun onAuthenticateSourceResult (Landroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun onPaymentResult (ILandroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)Z
 	public final fun onSetupResult (ILandroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)Z
@@ -932,6 +934,9 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun createPiiToken$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createSource (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createSource$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun getAuthenticateSourceResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getPaymentIntentResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getSetupIntentResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun retrievePaymentIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun retrieveSetupIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -5623,6 +5628,7 @@ public final class com/stripe/android/view/CardValidCallback$Fields : java/lang/
 	public static final field Cvc Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static final field Expiry Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static final field Number Lcom/stripe/android/view/CardValidCallback$Fields;
+	public static final field Postal Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static fun values ()[Lcom/stripe/android/view/CardValidCallback$Fields;
 }
@@ -5861,6 +5867,7 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun addTextChangedListener (Landroid/text/TextWatcher;)V
 	protected fun getAccessibilityText ()Ljava/lang/String;
 	public final fun getCachedColorStateList ()Landroid/content/res/ColorStateList;
 	public final fun getDefaultErrorColorInt ()I
@@ -5869,6 +5876,7 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	protected final fun isLastKeyDelete ()Z
 	public fun onCreateInputConnection (Landroid/view/inputmethod/EditorInfo;)Landroid/view/inputmethod/InputConnection;
 	public fun onInitializeAccessibilityNodeInfo (Landroid/view/accessibility/AccessibilityNodeInfo;)V
+	public fun removeTextChangedListener (Landroid/text/TextWatcher;)V
 	public final fun setAfterTextChangedListener (Lcom/stripe/android/view/StripeEditText$AfterTextChangedListener;)V
 	public final fun setDeleteEmptyListener (Lcom/stripe/android/view/StripeEditText$DeleteEmptyListener;)V
 	public final fun setErrorColor (I)V

@@ -93,7 +93,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        updateToolbarButton(true)
+        updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
 
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener

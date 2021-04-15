@@ -52,7 +52,7 @@ private def getValue(key) {
 dependencies {
     implementation project(':stripe')
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0'
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
     implementation "com.google.android.material:material:$materialVersion"
@@ -129,6 +129,10 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // From https://developer.android.com/training/testing/junit-runner:
+        // > To remove all shared state from your device's CPU and memory after each test,
+        // > use the clearPackageData flag.
         testInstrumentationRunnerArguments clearPackageData: 'true'
 
         manifestPlaceholders = [

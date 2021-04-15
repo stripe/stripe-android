@@ -1,31 +1,22 @@
-/*
- * Based on the example at Chris Banes's repository that allows signing
- * without manually creating a maven file.
- *
- * The original can be found at
- * https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle
- */
-
-def isReleaseBuild() {
-    return VERSION_NAME.contains("SNAPSHOT") == false
-}
+apply plugin: "signing"
+apply plugin: "maven-publish"
 
 def getReleaseRepositoryUrl() {
-    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
-            : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+    return findProperty('RELEASE_REPOSITORY_URL') ?:
+            "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 }
 
 def getSnapshotRepositoryUrl() {
-    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
-            : "https://oss.sonatype.org/content/repositories/snapshots/"
+    return findProperty('SNAPSHOT_REPOSITORY_URL') ?:
+            "https://oss.sonatype.org/content/repositories/snapshots/"
 }
 
 def getRepositoryUsername() {
-    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+    return findProperty('NEXUS_USERNAME') ?: ""
 }
 
 def getRepositoryPassword() {
-    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+    return findProperty('NEXUS_PASSWORD') ?: ""
 }
 
 task androidJavadocs(type: Javadoc) {
@@ -47,6 +38,7 @@ task androidSourcesJar(type: Jar) {
 
 afterEvaluate { project ->
     // See https://developer.android.com/studio/build/maven-publish-plugin
+    // and https://docs.gradle.org/current/userguide/publishing_maven.html
     publishing {
         publications {
             // Creates a Maven publication called "release".
@@ -58,80 +50,95 @@ afterEvaluate { project ->
                 artifact androidJavadocsJar
                 artifact androidSourcesJar
 
-                // You can then customize attributes of the publication as shown below.
-                groupId = GROUP
-                artifactId = POM_ARTIFACT_ID
+                groupId = "com.stripe"
+                artifactId = "stripe-android"
                 version = VERSION_NAME
+
+                pom {
+                    name = "stripe-android"
+                    packaging = "aar"
+                    description = "Stripe Android SDK"
+                    url = "https://github.com/stripe/stripe-android"
+
+                    scm {
+                        url = "https://github.com/stripe/stripe-android"
+                        connection = "scm:org-856813@github.com:stripe/stripe-android.git"
+                        developerConnection = "scm:org-856813@github.com:stripe/stripe-android.git"
+                    }
+
+                    licenses {
+                        license {
+                            name = "The MIT License"
+                            url = "https://raw.githubusercontent.com/stripe/stripe-android/master/LICENSE"
+                            distribution = "repo"
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = "stripe"
+                            name = "Stripe"
+                        }
+                    }
+                }
             }
             // Creates a Maven publication called "debug".
             debug(MavenPublication) {
                 // Applies the component for the debug build variant.
                 from components.debug
 
-                groupId = GROUP
-                artifactId = POM_ARTIFACT_ID
+                groupId = "com.stripe"
+                artifactId = "stripe-android"
                 version = VERSION_NAME
-            }
-        }
-    }
 
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                pom.groupId = GROUP
-                pom.artifactId = POM_ARTIFACT_ID
-                pom.version = VERSION_NAME
-
-                repository(url: getReleaseRepositoryUrl()) {
-                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
-                }
-                snapshotRepository(url: getSnapshotRepositoryUrl()) {
-                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
-                }
-
-                pom.project {
-                    name POM_NAME
-                    packaging POM_PACKAGING
-                    description POM_DESCRIPTION
-                    url POM_URL
+                pom {
+                    name = "stripe-android"
+                    packaging = "aar"
+                    description = "Stripe Android SDK"
+                    url = "https://github.com/stripe/stripe-android"
 
                     scm {
-                        url POM_SCM_URL
-                        connection POM_SCM_CONNECTION
-                        developerConnection POM_SCM_DEV_CONNECTION
+                        url = "https://github.com/stripe/stripe-android"
+                        connection = "scm:org-856813@github.com:stripe/stripe-android.git"
+                        developerConnection = "scm:org-856813@github.com:stripe/stripe-android.git"
                     }
 
                     licenses {
                         license {
-                            name POM_LICENCE_NAME
-                            url POM_LICENCE_URL
-                            distribution POM_LICENCE_DIST
+                            name = "The MIT License"
+                            url = "https://raw.githubusercontent.com/stripe/stripe-android/master/LICENSE"
+                            distribution = "repo"
                         }
                     }
 
                     developers {
                         developer {
-                            id POM_DEVELOPER_ID
-                            name POM_DEVELOPER_NAME
+                            id = "stripe"
+                            name = "Stripe"
                         }
                     }
+                }
+            }
+        }
+        repositories {
+            maven {
+                url getReleaseRepositoryUrl()
+                credentials {
+                    username = getRepositoryUsername()
+                    password = getRepositoryPassword()
                 }
             }
         }
     }
 
     signing {
-        required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
-        if (isReleaseBuild() && project.hasProperty('signing.gnupg.keyName')) {
-            useGpgCmd()
-        }
-        sign configurations.archives
+        required { gradle.taskGraph.hasTask("publish") }
+        useGpgCmd()
+        sign publishing.publications.release
     }
 
     tasks.withType(Sign) {
-        onlyIf { isReleaseBuild() && project.hasProperty('signing.gnupg.keyName') }
+        onlyIf { project.hasProperty('signing.gnupg.keyName') }
     }
 
     artifacts {

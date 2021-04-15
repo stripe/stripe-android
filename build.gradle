@@ -1,10 +1,12 @@
+import java.time.Duration
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlinVersion = '1.4.31'
+    ext.kotlinVersion = '1.4.32'
     ext.dokkaVersion = '1.4.30'
 
     repositories {
-        jcenter()
+        mavenCentral()
         google()
     }
 
@@ -18,7 +20,7 @@ buildscript {
 }
 
 plugins {
-    id 'io.codearte.nexus-staging' version '0.30.0'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
 }
 
 allprojects {
@@ -26,7 +28,7 @@ allprojects {
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     task checkstyle(type: Checkstyle) {
@@ -66,10 +68,23 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
-nexusStaging {
-    username = project.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
-    password = project.hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+nexusPublishing {
     packageGroup = GROUP
+
+    repositories {
+        sonatype {
+            username = project.findProperty('NEXUS_USERNAME') ?: ""
+            password = project.findProperty('NEXUS_PASSWORD') ?: ""
+        }
+    }
+
+    clientTimeout = Duration.ofMinutes(5)
+    connectTimeout = Duration.ofMinutes(1)
+
+    transitionCheckOptions {
+        maxRetries.set(40)
+        delayBetween.set(Duration.ofSeconds(10))
+    }
 }
 
 apply plugin: 'binary-compatibility-validator'

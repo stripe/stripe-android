@@ -1,13 +1,16 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import android.app.Application
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.R
+import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -23,16 +26,18 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
 internal abstract class BaseSheetViewModel<TransitionTargetType>(
+    application: Application,
     internal val config: PaymentSheet.Configuration?,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
-) : ViewModel() {
+) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
 
     // a fatal error
@@ -42,8 +47,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    protected val _launchGooglePay = MutableLiveData<StripeGooglePayContract.Args>()
-    internal val launchGooglePay: LiveData<StripeGooglePayContract.Args> = _launchGooglePay
+    protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
+    internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
 
     protected val _paymentIntent = MutableLiveData<PaymentIntent?>()
     internal val paymentIntent: LiveData<PaymentIntent?> = _paymentIntent
@@ -60,8 +65,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _savedSelection = MutableLiveData<SavedSelection>()
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<TransitionTargetType?>(null)
-    internal val transition: LiveData<TransitionTargetType?> = _transition
+    private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
+    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     /**
      * On [BaseAddCardFragment] this is set every time the details in the add
@@ -90,12 +95,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     abstract var newCard: PaymentSelection.New.Card?
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
-        transition.switchMap { transitionTarget ->
-            selection.switchMap { paymentSelection ->
-                MutableLiveData(
-                    !isProcessing && transitionTarget != null && paymentSelection != null
-                )
-            }
+        selection.switchMap { paymentSelection ->
+            MutableLiveData(!isProcessing && paymentSelection != null)
         }
     }
 
@@ -141,7 +142,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun transitionTo(target: TransitionTargetType) {
         _userMessage.value = null
-        _transition.postValue(target)
+        _transition.postValue(Event(target))
     }
 
     fun onFatal(throwable: Throwable) {
@@ -151,6 +152,21 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun onApiError(errorMessage: String?) {
         _userMessage.value = errorMessage?.let { UserMessage.Error(it) }
         _processing.value = false
+    }
+
+    fun onApiError(throwable: Throwable) {
+        when (throwable) {
+            is APIConnectionException -> {
+                onApiError(
+                    getApplication<Application>().resources.getString(
+                        R.string.stripe_failure_connection_error
+                    )
+                )
+            }
+            else -> {
+                onApiError(throwable.localizedMessage)
+            }
+        }
     }
 
     fun updateSelection(selection: PaymentSelection?) {
@@ -176,5 +192,33 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         data class Error(
             override val message: String
         ) : UserMessage()
+    }
+
+    /**
+     * Used as a wrapper for data that is exposed via a LiveData that represents an event.
+     * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
+     * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
+     */
+    class Event<out T>(private val content: T) {
+
+        var hasBeenHandled = false
+            private set // Allow external read but not write
+
+        /**
+         * Returns the content and prevents its use again.
+         */
+        fun getContentIfNotHandled(): T? {
+            return if (hasBeenHandled) {
+                null
+            } else {
+                hasBeenHandled = true
+                content
+            }
+        }
+        /**
+         * Returns the content, even if it's already been handled.
+         */
+        @TestOnly
+        fun peekContent(): T = content
     }
 }
