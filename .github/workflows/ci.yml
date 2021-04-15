@@ -48,7 +48,7 @@ jobs:
           path: ~/.gradle/caches
           key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Unit tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew :stripe:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
