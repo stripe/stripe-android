@@ -2,17 +2,22 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.text.TextWatcher
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.R
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.runner.RunWith
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -164,5 +169,53 @@ internal class StripeEditTextTest {
         editText.shouldShowError = false
         assertThat(editText.currentTextColor)
             .isEqualTo(-570425344)
+    }
+
+    @Test
+    fun setTextSilent_shouldNotNotifyTextWatchers() {
+        val textWatcher = mock<TextWatcher>()
+        editText.addTextChangedListener(textWatcher)
+        editText.setText("1")
+
+        verifyTextWatcherIsTriggered(textWatcher, 1)
+
+        editText.setTextSilent("1")
+
+        verifyNoMoreInteractions(textWatcher)
+    }
+
+    @Test
+    fun setTextSilent_shouldNotChangeSuperClassTextWatchers() {
+        val textWatcher1 = mock<TextWatcher>()
+        val textWatcher2 = mock<TextWatcher>()
+        editText.addTextChangedListener(textWatcher1)
+        editText.addTextChangedListener(textWatcher2)
+        editText.setText("1")
+        idleLooper()
+
+        verifyTextWatcherIsTriggered(textWatcher1, 1)
+        verifyTextWatcherIsTriggered(textWatcher2, 1)
+
+        reset(textWatcher1)
+        reset(textWatcher2)
+
+        editText.removeTextChangedListener(textWatcher2)
+        editText.setText("1")
+
+        verifyTextWatcherIsTriggered(textWatcher1, 1)
+        verifyTextWatcherIsTriggered(textWatcher2, 0)
+
+        editText.removeTextChangedListener(textWatcher1)
+        editText.setText("1")
+        idleLooper()
+
+        verifyNoMoreInteractions(textWatcher1)
+        verifyNoMoreInteractions(textWatcher2)
+    }
+
+    private fun verifyTextWatcherIsTriggered(watcher: TextWatcher, count: Int) {
+        verify(watcher, times(count)).beforeTextChanged(any(), any(), any(), any())
+        verify(watcher, times(count)).onTextChanged(any(), any(), any(), any())
+        verify(watcher, times(count)).afterTextChanged(any())
     }
 }

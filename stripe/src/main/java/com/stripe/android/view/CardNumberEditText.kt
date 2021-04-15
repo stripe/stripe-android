@@ -306,7 +306,6 @@ class CardNumberEditText internal constructor(
     }
 
     private inner class CardNumberTextWatcher : StripeTextWatcher() {
-        private var ignoreChanges = false
         private var latestChangeStart: Int = 0
         private var latestInsertionSize: Int = 0
 
@@ -318,20 +317,14 @@ class CardNumberEditText internal constructor(
         private var isPastedPan = false
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            if (!ignoreChanges) {
-                isPastedPan = false
-                beforeCardNumber = unvalidatedCardNumber
+            isPastedPan = false
+            beforeCardNumber = unvalidatedCardNumber
 
-                latestChangeStart = start
-                latestInsertionSize = after
-            }
+            latestChangeStart = start
+            latestInsertionSize = after
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            if (ignoreChanges) {
-                return
-            }
-
             val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
             val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
                 .let { accountRanges ->
@@ -372,14 +365,8 @@ class CardNumberEditText internal constructor(
         }
 
         override fun afterTextChanged(s: Editable?) {
-            if (ignoreChanges) {
-                return
-            }
-
-            ignoreChanges = true
-
             if (shouldUpdateAfterChange) {
-                setText(formattedNumber)
+                setTextSilent(formattedNumber)
                 newCursorPosition?.let {
                     setSelection(it.coerceIn(0, fieldText.length))
                 }
@@ -387,8 +374,6 @@ class CardNumberEditText internal constructor(
 
             formattedNumber = null
             newCursorPosition = null
-
-            ignoreChanges = false
 
             if (unvalidatedCardNumber.length == panLength) {
                 val wasCardNumberValid = isCardNumberValid
