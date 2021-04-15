@@ -12,6 +12,7 @@ import androidx.annotation.StyleRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.withStyledAttributes
 import androidx.core.os.ConfigurationCompat
+import androidx.core.view.doOnNextLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import java.util.Locale
@@ -123,6 +124,13 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
                 error = errorMessage
                 isErrorEnabled = true
             }
+        }
+    }
+
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        doOnNextLayout {
+            countryAutocomplete.isEnabled = enabled
         }
     }
 

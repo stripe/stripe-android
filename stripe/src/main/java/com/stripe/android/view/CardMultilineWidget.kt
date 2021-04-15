@@ -80,7 +80,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
         }
     }
-    private val invalidFields: Set<CardValidCallback.Fields>
+    internal val invalidFields: Set<CardValidCallback.Fields>
         get() {
             return listOfNotNull(
                 CardValidCallback.Fields.Number.takeIf {
@@ -258,7 +258,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                 .loggingTokens(setOf(CARD_MULTILINE_TOKEN))
         }
 
-    private val validatedCardNumber: CardNumber.Validated?
+    internal val validatedCardNumber: CardNumber.Validated?
         get() {
             return cardNumberEditText.validatedCardNumber
         }
@@ -288,7 +288,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     @VisibleForTesting
     internal var shouldShowErrorIcon = false
-        private set(value) {
+        set(value) {
             val isValueChange = field != value
             field = value
 
