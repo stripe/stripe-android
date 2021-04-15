@@ -82,43 +82,6 @@ afterEvaluate { project ->
                     }
                 }
             }
-            // Creates a Maven publication called "debug".
-            debug(MavenPublication) {
-                // Applies the component for the debug build variant.
-                from components.debug
-
-                groupId = "com.stripe"
-                artifactId = "stripe-android"
-                version = VERSION_NAME
-
-                pom {
-                    name = "stripe-android"
-                    packaging = "aar"
-                    description = "Stripe Android SDK"
-                    url = "https://github.com/stripe/stripe-android"
-
-                    scm {
-                        url = "https://github.com/stripe/stripe-android"
-                        connection = "scm:org-856813@github.com:stripe/stripe-android.git"
-                        developerConnection = "scm:org-856813@github.com:stripe/stripe-android.git"
-                    }
-
-                    licenses {
-                        license {
-                            name = "The MIT License"
-                            url = "https://raw.githubusercontent.com/stripe/stripe-android/master/LICENSE"
-                            distribution = "repo"
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id = "stripe"
-                            name = "Stripe"
-                        }
-                    }
-                }
-            }
         }
         repositories {
             maven {
