@@ -140,22 +140,6 @@ internal class PaymentOptionsViewModel(
         }
     }
 
-    fun getPaymentOptionResult(): PaymentOptionResult {
-        return when (val paymentSelection = selection.value) {
-            is PaymentSelection.Saved, PaymentSelection.GooglePay -> {
-                PaymentOptionResult.Succeeded.Existing(paymentSelection)
-            }
-            is PaymentSelection.New -> {
-                PaymentOptionResult.Succeeded.Unsaved(paymentSelection)
-            }
-            null -> {
-                PaymentOptionResult.Canceled(
-                    mostRecentError = fatal.value
-                )
-            }
-        }
-    }
-
     fun resolveTransitionTarget(config: FragmentConfig) {
         if (shouldTransitionToUnsavedCard) {
             hasTransitionToUnsavedCard = true
