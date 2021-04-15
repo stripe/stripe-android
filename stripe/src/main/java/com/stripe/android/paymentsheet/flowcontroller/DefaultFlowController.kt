@@ -332,7 +332,15 @@ internal class DefaultFlowController internal constructor(
                     )
                 )
             }
+            is PaymentOptionResult.Failed, is PaymentOptionResult.Canceled -> {
+                paymentOptionCallback.onPaymentOption(
+                    viewModel.paymentSelection?.let {
+                        paymentOptionFactory.create(it)
+                    }
+                )
+            }
             else -> {
+                viewModel.paymentSelection = null
                 paymentOptionCallback.onPaymentOption(null)
             }
         }

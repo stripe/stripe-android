@@ -236,11 +236,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     override fun onUserCancel() {
-        closeSheet(
-            PaymentOptionResult.Canceled(
-                mostRecentError = viewModel.fatal.value
-            )
-        )
+        closeSheet(PaymentOptionResult.Canceled(mostRecentError = viewModel.fatal.value))
     }
 
     internal companion object {
