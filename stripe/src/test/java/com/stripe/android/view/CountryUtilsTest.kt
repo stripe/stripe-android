@@ -11,20 +11,20 @@ class CountryUtilsTest {
 
     @Test
     fun `doesCountryUsePostalCode() should return expected result`() {
-        assertThat(CountryUtils.doesCountryUsePostalCode("US"))
+        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode("US")))
             .isTrue()
-        assertThat(CountryUtils.doesCountryUsePostalCode("UK"))
+        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode("UK")))
             .isTrue()
-        assertThat(CountryUtils.doesCountryUsePostalCode("CA"))
+        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode("CA")))
             .isTrue()
-        assertThat(CountryUtils.doesCountryUsePostalCode("DM"))
+        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode("DM")))
             .isFalse()
     }
 
     @Test
     fun getOrderedCountries() {
         assertThat(
-            CountryUtils.getOrderedCountries(Locale.getDefault())[0].code
+            CountryUtils.getOrderedCountries(Locale.getDefault())[0].code.twoLetters
         ).isEqualTo(
             Locale.getDefault().country
         )
@@ -33,17 +33,17 @@ class CountryUtilsTest {
     @Test
     fun `getDisplayCountry() should return expected result`() {
         var currentLocale = Locale.US
-        assertThat(CountryUtils.getDisplayCountry("US", currentLocale))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode("US"), currentLocale))
             .isEqualTo("United States")
-        assertThat(CountryUtils.getDisplayCountry("UK", currentLocale))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode("UK"), currentLocale))
             .isEqualTo("UK")
-        assertThat(CountryUtils.getDisplayCountry("CA", currentLocale))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode("CA"), currentLocale))
             .isEqualTo("Canada")
-        assertThat(CountryUtils.getDisplayCountry("DM", currentLocale))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode("DM"), currentLocale))
             .isEqualTo("Dominica")
 
         currentLocale = Locale("de", "DE")
-        assertThat(CountryUtils.getDisplayCountry("DE", currentLocale))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode("DE"), currentLocale))
             .isEqualTo("Deutschland")
     }
 

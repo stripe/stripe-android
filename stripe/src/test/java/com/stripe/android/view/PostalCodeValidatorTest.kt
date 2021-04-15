@@ -11,7 +11,7 @@ class PostalCodeValidatorTest {
         assertTrue(
             VALIDATOR.isValid(
                 postalCode = "",
-                countryCode = "US",
+                countryCode = CountryCode("US"),
                 optionalShippingInfoFields = listOf(
                     ShippingInfoWidget.CustomizableShippingField.PostalCode
                 ),
@@ -25,7 +25,7 @@ class PostalCodeValidatorTest {
         assertTrue(
             VALIDATOR.isValid(
                 postalCode = "94107",
-                countryCode = "",
+                countryCode = CountryCode(""),
                 optionalShippingInfoFields = listOf(
                     ShippingInfoWidget.CustomizableShippingField.PostalCode
                 ),
@@ -73,8 +73,8 @@ class PostalCodeValidatorTest {
         assertTrue(isValid("ABC123", CountryUtils.NO_POSTAL_CODE_COUNTRIES.first()))
     }
 
-    private fun isValid(postalCode: String, countryCode: String): Boolean {
-        return VALIDATOR.isValid(postalCode, countryCode, emptyList(), emptyList())
+    private fun isValid(postalCode: String, twoLetterCountry: String): Boolean {
+        return VALIDATOR.isValid(postalCode, CountryCode(twoLetterCountry), emptyList(), emptyList())
     }
 
     private companion object {

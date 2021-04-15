@@ -29,13 +29,15 @@ internal object CountryUtils {
 
     @JvmSynthetic
 
-    fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
+    internal fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
         return localizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
     }
 
     @JvmSynthetic
     internal fun getCountryByCode(countryCode: CountryCode?, currentLocale: Locale): Country? {
-        return localizedCountries(currentLocale).firstOrNull { it.code == countryCode }
+        return localizedCountries(currentLocale).firstOrNull {
+            it.code == countryCode
+        }
     }
 
     @JvmSynthetic
@@ -45,7 +47,9 @@ internal object CountryUtils {
             .plus(
                 localizedCountries(currentLocale)
                     .sortedBy { it.name.toLowerCase(Locale.ROOT) }
-                    .filterNot { it.code == currentLocale.getCountryCode() }
+                    .filterNot {
+                        it.code == currentLocale.getCountryCode()
+                    }
             )
     }
 

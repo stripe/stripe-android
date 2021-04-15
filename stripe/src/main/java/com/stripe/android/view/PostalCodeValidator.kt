@@ -49,9 +49,9 @@ internal class PostalCodeValidator {
 
     private companion object {
         private val POSTAL_CODE_PATTERNS = mapOf(
-            Locale.US.country to
+            Locale.US.getCountryCode() to
                 Pattern.compile("^[0-9]{5}(?:-[0-9]{4})?$"),
-            Locale.CANADA.country to
+            Locale.CANADA.getCountryCode() to
                 Pattern.compile("^(?!.*[DFIOQU])[A-VXY][0-9][A-Z] ?[0-9][A-Z][0-9]$")
         )
 

@@ -6,11 +6,27 @@ import java.util.Locale
 
 @Parcelize
 internal class CountryCode(
-    val twoLetters: String
+    private val letters: String,
+    val twoLetters: String = letters.toUpperCase(Locale.getDefault())
 ) : Parcelable {
-    internal fun isUS() = twoLetters.toUpperCase(Locale.getDefault()) == "US"
-    fun isCA() = twoLetters.toUpperCase(Locale.getDefault()) == "CA"
-    fun isGB() = twoLetters.toUpperCase(Locale.getDefault()) == "GB"
+    internal fun isUS() = twoLetters == "US"
+    internal fun isCA() = twoLetters == "CA"
+    internal fun isGB() = twoLetters == "GB"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CountryCode
+
+        if (twoLetters != other.twoLetters) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return twoLetters.hashCode()
+    }
 
     companion object {
         fun isUS(countryCode: CountryCode?) = countryCode?.isUS() ?: false

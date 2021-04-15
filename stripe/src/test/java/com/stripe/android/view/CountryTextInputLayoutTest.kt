@@ -66,21 +66,21 @@ class CountryTextInputLayoutTest {
 
     @Test
     fun countryAutoCompleteTextView_whenInitialized_displaysDefaultLocaleDisplayName() {
-        assertEquals(Locale.US.country, countryTextInputLayout.selectedCountryCode?.code)
+        assertEquals(Locale.US.getCountryCode(), countryTextInputLayout.selectedCountryCode)
         assertEquals(Locale.US.displayCountry, autoCompleteTextView.text.toString())
     }
 
     @Test
     fun updateUIForCountryEntered_whenInvalidCountry_revertsToLastCountry() {
         val previousValidCountryCode =
-            countryTextInputLayout.selectedCountryCode?.code.orEmpty()
-        countryTextInputLayout.setCountrySelected("FAKE COUNTRY CODE")
+            countryTextInputLayout.selectedCountryCode?.twoLetters.orEmpty()
+        countryTextInputLayout.setCountrySelected(CountryCode("FAKE COUNTRY CODE"))
         assertNull(autoCompleteTextView.error)
         assertEquals(
             autoCompleteTextView.text.toString(),
             Locale("", previousValidCountryCode).displayCountry
         )
-        countryTextInputLayout.setCountrySelected(Locale.UK.country)
+        countryTextInputLayout.setCountrySelected(Locale.UK.getCountryCode())
         assertNotEquals(
             autoCompleteTextView.text.toString(),
             Locale("", previousValidCountryCode).displayCountry
@@ -90,9 +90,9 @@ class CountryTextInputLayoutTest {
 
     @Test
     fun updateUIForCountryEntered_whenValidCountry_UIUpdates() {
-        assertEquals(Locale.US.country, countryTextInputLayout.selectedCountryCode?.code)
-        countryTextInputLayout.setCountrySelected(Locale.UK.country)
-        assertEquals(Locale.UK.country, countryTextInputLayout.selectedCountryCode?.code)
+        assertEquals(Locale.US.getCountryCode(), countryTextInputLayout.selectedCountryCode)
+        countryTextInputLayout.setCountrySelected(CountryCode(Locale.UK.country))
+        assertEquals(Locale.UK.getCountryCode(), countryTextInputLayout.selectedCountryCode)
     }
 
     @Test
@@ -108,7 +108,7 @@ class CountryTextInputLayoutTest {
         countryTextInputLayout.setAllowedCountryCodes(setOf("fr", "de"))
         assertEquals(
             "FR",
-            countryTextInputLayout.selectedCountryCode?.code
+            countryTextInputLayout.selectedCountryCode?.twoLetters
         )
     }
 
@@ -125,7 +125,15 @@ class CountryTextInputLayoutTest {
         assertNotNull(countryTextInputLayout.selectedCountryCode)
         countryTextInputLayout.countryAutocomplete.setText("Canada")
         countryTextInputLayout.validateCountry()
-        assertEquals("Canada", countryTextInputLayout.selectedCountryCode?.name)
+        countryTextInputLayout.selectedCountryCode?.let {
+            assertEquals(
+                "Canada",
+                CountryUtils.getDisplayCountry(
+                    it,
+                    Locale.getDefault()
+                )
+            )
+        }
     }
 
     @AfterTest
