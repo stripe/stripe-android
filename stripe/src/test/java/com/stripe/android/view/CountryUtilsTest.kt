@@ -11,13 +11,13 @@ class CountryUtilsTest {
 
     @Test
     fun `doesCountryUsePostalCode() should return expected result`() {
-        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode("US")))
+        assertThat(CountryUtils.doesCountryUsePostalCode("US"))
             .isTrue()
-        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode("UK")))
+        assertThat(CountryUtils.doesCountryUsePostalCode("UK"))
             .isTrue()
-        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode("CA")))
+        assertThat(CountryUtils.doesCountryUsePostalCode("CA"))
             .isTrue()
-        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode("DM")))
+        assertThat(CountryUtils.doesCountryUsePostalCode("DM"))
             .isFalse()
     }
 

@@ -51,12 +51,21 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         null
     ) { _, _, newCountryValue ->
         newCountryValue?.let {
-            countryChangeCallback(it)
+            countryCodeChangeCallback(it)
+            CountryUtils.getCountryByCode(it)?.let { country ->
+                countryChangeCallback(country)
+            }
         }
     }
 
+    val selectedCountry: Country?
+        get() = selectedCountryCode?.let { CountryUtils.getCountryByCode(it) }
+
     @JvmSynthetic
-    internal var countryChangeCallback: (CountryCode) -> Unit = {}
+    internal var countryChangeCallback: (Country) -> Unit = {}
+
+    @JvmSynthetic
+    internal var countryCodeChangeCallback: (CountryCode) -> Unit = {}
 
     private var countryAdapter: CountryAdapter
 
@@ -168,11 +177,16 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
     /**
      * @param countryCode specify a country code to display in the input. The input will display
-     * the full country display name.
+     * the full country display name.  This is preferred over the function that takes a string
      */
     @VisibleForTesting
     internal fun setCountrySelected(countryCode: CountryCode) {
         updateUiForCountryEntered(countryCode)
+    }
+
+    @VisibleForTesting
+    internal fun setCountrySelected(twoLetterCountryCode: String) {
+        updateUiForCountryEntered(CountryCode(twoLetterCountryCode))
     }
 
     @VisibleForTesting

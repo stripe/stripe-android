@@ -46,7 +46,7 @@ internal object CountryUtils {
     }
 
     @JvmSynthetic
-    internal fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.twoLetters.toUpperCase(Locale.ROOT))
+    internal fun doesCountryUsePostalCode(twoLetterCountryCode: String): Boolean {
+        return !NO_POSTAL_CODE_COUNTRIES.contains(twoLetterCountryCode.toUpperCase(Locale.ROOT))
     }
 }

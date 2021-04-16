@@ -205,13 +205,13 @@ internal class CardFormView @JvmOverloads constructor(
             onFieldError(Fields.Postal, null)
         }
 
-        countryLayout.countryChangeCallback = { countryCode ->
+        countryLayout.countryCodeChangeCallback = { countryCode ->
             postalCodeView.config = if (CountryCode.isUS(countryCode)) {
                 PostalCodeEditText.Config.US
             } else {
                 PostalCodeEditText.Config.Global
             }
-            postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(countryCode)
+            postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(countryCode.twoLetters)
             postalCodeView.shouldShowError = false
             postalCodeView.text = null
         }
@@ -221,7 +221,7 @@ internal class CardFormView @JvmOverloads constructor(
         countryLayout.selectedCountryCode?.let { countryCode ->
             postalCodeValidator.isValid(
                 postalCode = postalCodeView.postalCode.orEmpty(),
-                countryCode = countryCode
+                countryCode = countryCode.twoLetters
             )
         } ?: false
 

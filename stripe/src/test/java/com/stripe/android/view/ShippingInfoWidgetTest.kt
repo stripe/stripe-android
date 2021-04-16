@@ -67,10 +67,8 @@ class ShippingInfoWidgetTest {
         ).use { activityScenario ->
             activityScenario.onActivity {
                 shippingInfoWidget = it.findViewById(R.id.shipping_info_widget)
-                addressLine1TextInputLayout =
-                    shippingInfoWidget.findViewById(R.id.tl_address_line1_aaw)
-                addressLine2TextInputLayout =
-                    shippingInfoWidget.findViewById(R.id.tl_address_line2_aaw)
+                addressLine1TextInputLayout = shippingInfoWidget.findViewById(R.id.tl_address_line1_aaw)
+                addressLine2TextInputLayout = shippingInfoWidget.findViewById(R.id.tl_address_line2_aaw)
                 cityTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_city_aaw)
                 nameTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_name_aaw)
                 postalCodeTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_postal_code_aaw)
@@ -82,8 +80,7 @@ class ShippingInfoWidgetTest {
                 postalEditText = shippingInfoWidget.findViewById(R.id.et_postal_code_aaw)
                 stateEditText = shippingInfoWidget.findViewById(R.id.et_state_aaw)
                 phoneEditText = shippingInfoWidget.findViewById(R.id.et_phone_number_aaw)
-                countryTextInputLayout =
-                    shippingInfoWidget.findViewById(R.id.country_autocomplete_aaw)
+                countryTextInputLayout = shippingInfoWidget.findViewById(R.id.country_autocomplete_aaw)
             }
         }
     }
@@ -325,8 +322,8 @@ class ShippingInfoWidgetTest {
             .isEqualTo("12345")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountryCode)
-            .isEqualTo(CountryCode.US)
+        assertThat(countryTextInputLayout.selectedCountry?.code?.twoLetters)
+            .isEqualTo("US")
     }
 
     @Test
@@ -347,8 +344,8 @@ class ShippingInfoWidgetTest {
             .isEqualTo("M4B1B5")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountryCode)
-            .isEqualTo(CountryCode.CA)
+        assertThat(countryTextInputLayout.selectedCountry?.code?.twoLetters)
+            .isEqualTo("CA")
     }
 
     private companion object {
