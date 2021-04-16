@@ -13,13 +13,7 @@ def getBackendUrl() {
 }
 
 private def readProperty(name) {
-    final String propValue
-    if (hasProperty(name)) {
-        propValue = property(name)
-    } else {
-        propValue = System.getenv(name)
-    }
-
+    final String propValue = findProperty(name) ?: System.getenv(name)
     return propValue?.trim() ? propValue : ""
 }
 
