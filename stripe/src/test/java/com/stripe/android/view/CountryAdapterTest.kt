@@ -67,22 +67,22 @@ class CountryAdapterTest {
 
     @Test
     fun updateUnfilteredCountries_withPopulatedSet_shouldUpdateSuggestions() {
-        assertThat(countryAdapter.firstItem.code.twoLetters)
-            .isEqualTo("US")
+        assertThat(countryAdapter.firstItem.code)
+            .isEqualTo(CountryCode("US"))
         assertThat(countryAdapter.updateUnfilteredCountries(setOf("fr", "de")))
             .isTrue()
-        assertThat(countryAdapter.firstItem.code.twoLetters)
-            .isEqualTo("FR")
+        assertThat(countryAdapter.firstItem.code)
+            .isEqualTo(CountryCode("FR"))
     }
 
     @Test
     fun updateUnfilteredCountries_withEmptySet_shouldNotUpdateSuggestions() {
-        assertThat(countryAdapter.firstItem.code.twoLetters)
-            .isEqualTo("US")
+        assertThat(countryAdapter.firstItem.code)
+            .isEqualTo(CountryCode.US)
         assertThat(countryAdapter.updateUnfilteredCountries(emptySet()))
             .isFalse()
-        assertThat(countryAdapter.firstItem.code.twoLetters)
-            .isEqualTo("US")
+        assertThat(countryAdapter.firstItem.code)
+            .isEqualTo(CountryCode.US)
     }
 
     @Test

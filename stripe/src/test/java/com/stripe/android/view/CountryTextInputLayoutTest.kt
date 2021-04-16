@@ -91,7 +91,7 @@ class CountryTextInputLayoutTest {
     @Test
     fun updateUIForCountryEntered_whenValidCountry_UIUpdates() {
         assertEquals(Locale.US.getCountryCode(), countryTextInputLayout.selectedCountryCode)
-        countryTextInputLayout.setCountrySelected(CountryCode(Locale.UK.country))
+        countryTextInputLayout.setCountrySelected(Locale.UK.getCountryCode())
         assertEquals(Locale.UK.getCountryCode(), countryTextInputLayout.selectedCountryCode)
     }
 

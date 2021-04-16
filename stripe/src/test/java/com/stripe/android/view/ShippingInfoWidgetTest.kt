@@ -325,8 +325,8 @@ class ShippingInfoWidgetTest {
             .isEqualTo("12345")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountryCode?.twoLetters)
-            .isEqualTo("US")
+        assertThat(countryTextInputLayout.selectedCountryCode)
+            .isEqualTo(CountryCode.US)
     }
 
     @Test
@@ -347,8 +347,8 @@ class ShippingInfoWidgetTest {
             .isEqualTo("M4B1B5")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountryCode?.twoLetters)
-            .isEqualTo("CA")
+        assertThat(countryTextInputLayout.selectedCountryCode)
+            .isEqualTo(CountryCode.CA)
     }
 
     private companion object {

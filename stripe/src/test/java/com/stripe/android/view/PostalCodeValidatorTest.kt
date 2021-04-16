@@ -32,6 +32,17 @@ class PostalCodeValidatorTest {
                 hiddenShippingInfoFields = emptyList()
             )
         )
+
+        assertTrue(
+            VALIDATOR.isValid(
+                postalCode = "94107",
+                countryCode = null,
+                optionalShippingInfoFields = listOf(
+                    ShippingInfoWidget.CustomizableShippingField.PostalCode
+                ),
+                hiddenShippingInfoFields = emptyList()
+            )
+        )
     }
 
     @Test
@@ -74,7 +85,12 @@ class PostalCodeValidatorTest {
     }
 
     private fun isValid(postalCode: String, twoLetterCountry: String): Boolean {
-        return VALIDATOR.isValid(postalCode, CountryCode(twoLetterCountry), emptyList(), emptyList())
+        return VALIDATOR.isValid(
+            postalCode,
+            CountryCode(twoLetterCountry),
+            emptyList(),
+            emptyList()
+        )
     }
 
     private companion object {

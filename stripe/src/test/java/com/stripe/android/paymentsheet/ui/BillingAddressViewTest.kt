@@ -59,7 +59,7 @@ class BillingAddressViewTest {
     @Test
     fun `changing selectedCountry to country without postal code when level=Required should hide postal code view but show city view`() {
         billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
-        billingAddressView.countryLayout.selectedCountryCode = ZIMBABWE.code
+        billingAddressView.countryLayout.selectedCountryCode = ZIMBABWE
         idleLooper()
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isFalse()
@@ -81,7 +81,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing selectedCountry to US should show postal code view`() {
-        setupPostalCode(USA)
+        setupPostalCode(CountryCode.US)
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
     }
@@ -91,8 +91,8 @@ class BillingAddressViewTest {
         billingAddressView.postalCodeView.setText("123")
 
         // This will have the effect of switching the country selected
-        billingAddressView.countryLayout.selectedCountryCode = GB.code
-        billingAddressView.countryLayout.updateUiForCountryEntered(USA.code)
+        billingAddressView.countryLayout.selectedCountryCode = CountryCode.GB
+        billingAddressView.countryLayout.updateUiForCountryEntered(CountryCode.US)
         idleLooper()
 
         assertThat(billingAddressView.postalCodeLayout.isVisible)
@@ -103,7 +103,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing selectedCountry to UK should show postal code view and set shouldShowError to true`() {
-        setupPostalCode(GB, "123")
+        setupPostalCode(CountryCode.GB, "123")
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
         assertThat(billingAddressView.postalCodeView.shouldShowError)
@@ -112,7 +112,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `when focus is lost and zip code is incomplete it should show error`() {
-        setupPostalCode(USA, "123", hasFocus = false)
+        setupPostalCode(CountryCode.US, "123", hasFocus = false)
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
         assertThat(billingAddressView.postalCodeView.shouldShowError)
@@ -121,37 +121,37 @@ class BillingAddressViewTest {
 
     @Test
     fun `when focus is lost and zip code is valid then postal listener's onLosingFocus is correctly called`() {
-        setupPostalCode(USA, "94107", hasFocus = false)
+        setupPostalCode(CountryCode.US, "94107", hasFocus = false)
         verify(mockPostalCodeViewListener).onLosingFocus(USA, true)
     }
 
     @Test
     fun `when focus is lost and zip code is invalid then postal listener's onLosingFocus is correctly called`() {
-        setupPostalCode(USA, "123", hasFocus = false)
+        setupPostalCode(CountryCode.US, "123", hasFocus = false)
         verify(mockPostalCodeViewListener).onLosingFocus(USA, false)
     }
 
     @Test
     fun `when focus is gained and zip code is valid then postal listener's onGainingFocus is correctly called`() {
-        setupPostalCode(USA, "94107", hasFocus = true)
+        setupPostalCode(CountryCode.US, "94107", hasFocus = true)
         verify(mockPostalCodeViewListener).onGainingFocus(USA, true)
     }
 
     @Test
     fun `when focus is gained and zip code is invalid then postal listener's onGainingFocus is correctly called`() {
-        setupPostalCode(USA, "123", hasFocus = true)
+        setupPostalCode(CountryCode.US, "123", hasFocus = true)
         verify(mockPostalCodeViewListener).onGainingFocus(USA, false)
     }
 
     @Test
     fun `when country is changed and zip code is valid then listener's onCountryChanged is correctly called`() {
-        setupPostalCode(USA, "94107")
+        setupPostalCode(CountryCode.US, "94107")
         verify(mockPostalCodeViewListener).onCountryChanged(USA, true)
     }
 
     @Test
     fun `when country is changed and zip code is invalid then listener's onCountryChanged is correctly called`() {
-        setupPostalCode(USA, "123")
+        setupPostalCode(CountryCode.US, "123")
         verify(mockPostalCodeViewListener).onCountryChanged(USA, false)
     }
 
@@ -175,21 +175,21 @@ class BillingAddressViewTest {
 
     @Test
     fun `address with validated postal code country and no postal code should return null`() {
-        setupPostalCode(USA)
+        setupPostalCode(CountryCode.US)
         assertThat(billingAddressView.address.value)
             .isNull()
     }
 
     @Test
     fun `address with validated postal code country and invalid postal code should return null`() {
-        setupPostalCode(USA, "abc")
+        setupPostalCode(CountryCode.US, "abc")
         assertThat(billingAddressView.address.value)
             .isNull()
     }
 
     @Test
     fun `address with validated postal code country and valid postal code should return expected value`() {
-        setupPostalCode(USA, "94107")
+        setupPostalCode(CountryCode.US, "94107")
         assertThat(billingAddressView.address.value)
             .isEqualTo(
                 Address(
@@ -220,22 +220,22 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing country should update postalCodeView inputType`() {
-        billingAddressView.countryLayout.selectedCountryCode = MEXICO.code
+        billingAddressView.countryLayout.selectedCountryCode = MEXICO
         assertThat(billingAddressView.postalCodeView.inputType)
             .isEqualTo(BillingAddressView.PostalCodeConfig.Global.inputType)
 
-        billingAddressView.countryLayout.selectedCountryCode = USA.code
+        billingAddressView.countryLayout.selectedCountryCode = CountryCode.US
         assertThat(billingAddressView.postalCodeView.inputType)
             .isEqualTo(BillingAddressView.PostalCodeConfig.UnitedStates.inputType)
     }
 
     @Test
     fun `changing country should update state hint text`() {
-        billingAddressView.countryLayout.selectedCountryCode = MEXICO.code
+        billingAddressView.countryLayout.selectedCountryCode = MEXICO
         assertThat(billingAddressView.stateLayout.hint)
             .isEqualTo("State / Province / Region")
 
-        billingAddressView.countryLayout.selectedCountryCode = USA.code
+        billingAddressView.countryLayout.selectedCountryCode = CountryCode.US
         assertThat(billingAddressView.stateLayout.hint)
             .isEqualTo("State")
     }
@@ -248,7 +248,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `address value should react to level`() {
-        billingAddressView.countryLayout.selectedCountryCode = USA.code
+        billingAddressView.countryLayout.selectedCountryCode = CountryCode.US
         billingAddressView.postalCodeView.setText("94107")
 
         billingAddressView.address1View.setText("123 Main St")
@@ -280,14 +280,14 @@ class BillingAddressViewTest {
     }
 
     private fun setupPostalCode(
-        country: Country?,
+        countryCode: CountryCode?,
         postalCode: String? = null,
         hasFocus: Boolean? = null
     ) {
         postalCode?.let {
             billingAddressView.postalCodeView.setText(it)
         }
-        billingAddressView.countryLayout.selectedCountryCode = country?.code
+        billingAddressView.countryLayout.selectedCountryCode = countryCode
         hasFocus?.let {
             billingAddressView.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
                 billingAddressView.postalCodeView,
@@ -299,9 +299,8 @@ class BillingAddressViewTest {
 
     private companion object {
         private val USA = Country(CountryCode.US, "United States")
-        private val GB = Country(CountryCode.GB, "United Kingdom")
-        private val FRANCE = Country(CountryCode("FR"), "France")
-        private val ZIMBABWE = Country(CountryCode("ZW"), "Zimbabwe")
-        private val MEXICO = Country(CountryCode("MX"), "Mexico")
+        private val FRANCE = CountryCode("FR")
+        private val ZIMBABWE = CountryCode("ZW")
+        private val MEXICO = CountryCode("MX")
     }
 }

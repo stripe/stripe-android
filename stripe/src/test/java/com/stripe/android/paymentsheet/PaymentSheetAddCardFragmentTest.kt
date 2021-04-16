@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.view.Country
 import com.stripe.android.view.CountryCode
 import org.junit.Before
 import org.junit.Test
@@ -339,7 +338,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = USA.code
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("94107")
 
             assertThat(viewBinding.billingErrors.text.toString())
@@ -355,7 +354,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = USA.code
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("123")
             viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
@@ -376,7 +375,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = USA.code
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("94107")
             viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
@@ -396,7 +395,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CANADA.code
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.CA
             viewBinding.billingAddress.postalCodeView.setText("!@#")
             viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
@@ -417,7 +416,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CANADA.code
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.CA
             viewBinding.billingAddress.postalCodeView.setText("A1G9Z9")
             viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
@@ -437,7 +436,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = USA.code
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("")
             viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
@@ -492,10 +491,5 @@ class PaymentSheetAddCardFragmentTest {
                 )
             )
         }
-    }
-
-    private companion object {
-        private val USA = Country(CountryCode.US, "United States")
-        private val CANADA = Country(CountryCode.CA, "Canada")
     }
 }
