@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CountryCode
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -68,11 +69,11 @@ class CountryAdapterTest {
     @Test
     fun updateUnfilteredCountries_withPopulatedSet_shouldUpdateSuggestions() {
         assertThat(countryAdapter.firstItem.code)
-            .isEqualTo(CountryCode("US"))
+            .isEqualTo(CountryCode.create("US"))
         assertThat(countryAdapter.updateUnfilteredCountries(setOf("fr", "de")))
             .isTrue()
         assertThat(countryAdapter.firstItem.code)
-            .isEqualTo(CountryCode("FR"))
+            .isEqualTo(CountryCode.create("FR"))
     }
 
     @Test

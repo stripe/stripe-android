@@ -40,7 +40,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
             field = value
 
             renderLabels()
-            countryAutoCompleteTextView.selectedCountryCode?.let(::updateConfigForCountry)
+            countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
         }
 
     /**
@@ -51,7 +51,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
             field = value
 
             renderLabels()
-            countryAutoCompleteTextView.selectedCountryCode?.let(::updateConfigForCountry)
+            countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
         }
 
     private val countryAutoCompleteTextView = viewBinding.countryAutocompleteAaw
@@ -90,7 +90,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
             return ShippingInformation(
                 Address.Builder()
                     .setCity(cityEditText.fieldText)
-                    .setCountry(countryAutoCompleteTextView.selectedCountryCode?.twoLetters)
+                    .setCountryCode(countryAutoCompleteTextView.selectedCountry?.code)
                     .setLine1(addressEditText.fieldText)
                     .setLine2(addressEditText2.fieldText)
                     .setPostalCode(postalCodeEditText.fieldText)
@@ -144,7 +144,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         cityEditText.setText(address.city)
         address.country?.let { country ->
             if (country.isNotEmpty()) {
-                countryAutoCompleteTextView.setCountrySelected(CountryCode(country))
+                countryAutoCompleteTextView.setCountrySelected(country)
             }
         }
         addressEditText.setText(address.line1)
@@ -171,11 +171,11 @@ class ShippingInfoWidget @JvmOverloads constructor(
         val phoneNumber = phoneNumberEditText.text?.toString() ?: return false
 
         countryAutoCompleteTextView.validateCountry()
-        val selectedCountryCode = countryAutoCompleteTextView.selectedCountryCode
+        val selectedCountry = countryAutoCompleteTextView.selectedCountry
 
         val isPostalCodeValid = postalCodeValidator.isValid(
             postalCode,
-            selectedCountryCode,
+            selectedCountry?.code?.twoLetters,
             optionalFields,
             hiddenFields
         )
@@ -202,7 +202,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
         return isPostalCodeValid && !requiredAddressLine1Empty && !requiredCityEmpty &&
             !requiredStateEmpty && !requiredNameEmpty && !requiredPhoneNumberEmpty &&
-            selectedCountryCode != null
+            selectedCountry != null
     }
 
     private fun isFieldRequired(field: CustomizableShippingField): Boolean {
@@ -224,7 +224,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         setupErrorHandling()
         renderLabels()
 
-        countryAutoCompleteTextView.selectedCountryCode?.let(::updateConfigForCountry)
+        countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
     }
 
     private fun setupErrorHandling() {
@@ -283,18 +283,18 @@ class ShippingInfoWidget @JvmOverloads constructor(
         }
     }
 
-    private fun updateConfigForCountry(countryCode: CountryCode) {
-        when (countryCode) {
-            Locale.US.getCountryCode() -> renderUSForm()
-            Locale.UK.getCountryCode() -> renderGreatBritainForm()
-            Locale.CANADA.getCountryCode() -> renderCanadianForm()
+    private fun updateConfigForCountry(country: Country) {
+        when (country.code.twoLetters) {
+            Locale.US.country -> renderUSForm()
+            Locale.UK.country -> renderGreatBritainForm()
+            Locale.CANADA.country -> renderCanadianForm()
             else -> renderInternationalForm()
         }
 
-        updatePostalCodeInputFilter(countryCode)
+        updatePostalCodeInputFilter(country)
 
         postalCodeTextInputLayout.visibility =
-            if (CountryUtils.doesCountryUsePostalCode(countryCode) &&
+            if (CountryUtils.doesCountryUsePostalCode(country.code) &&
                 !isFieldHidden(CustomizableShippingField.PostalCode)
             ) {
                 View.VISIBLE
@@ -303,9 +303,9 @@ class ShippingInfoWidget @JvmOverloads constructor(
             }
     }
 
-    private fun updatePostalCodeInputFilter(countryCode: CountryCode) {
-        postalCodeEditText.filters = when (countryCode) {
-            Locale.CANADA.getCountryCode() -> arrayOf<InputFilter>(AllCaps())
+    private fun updatePostalCodeInputFilter(country: Country) {
+        postalCodeEditText.filters = when (country.code.twoLetters) {
+            Locale.CANADA.country -> arrayOf<InputFilter>(AllCaps())
             else -> arrayOf<InputFilter>()
         }
     }

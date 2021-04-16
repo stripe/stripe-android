@@ -21,6 +21,7 @@ import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -31,7 +32,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
 import com.stripe.android.view.Country
-import com.stripe.android.view.CountryCode
 import com.stripe.android.view.StripeEditText
 
 /**

@@ -20,9 +20,9 @@ import androidx.lifecycle.MutableLiveData
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.model.Address
+import com.stripe.android.model.CountryCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
-import com.stripe.android.view.CountryCode
 import com.stripe.android.view.CountryUtils
 import com.stripe.android.view.PostalCodeValidator
 import java.util.Locale
@@ -110,14 +110,14 @@ internal class BillingAddressView @JvmOverloads constructor(
         postalCodeView.inputType = config.inputType
     }
 
-    private val newCountryCallback = { newCountryCode: CountryCode ->
+    private val newCountryCodeCallback = { newCountryCode: CountryCode ->
         updateStateView(newCountryCode)
         updatePostalCodeView(newCountryCode)
         _address.value = createAddress()
 
         postalCodeValidator.isValid(
             postalCode = postalCodeView.value.orEmpty(),
-            countryCode = newCountryCode
+            countryCode = newCountryCode.twoLetters
         ).let { isPostalValid ->
             postalCodeViewListener?.onCountryChanged(
                 CountryUtils.getCountryByCode(newCountryCode, getLocale()),
@@ -154,11 +154,11 @@ internal class BillingAddressView @JvmOverloads constructor(
     )
 
     init {
-        countryLayout.countryChangeCallback = newCountryCallback
+        countryLayout.countryCodeChangeCallback = newCountryCodeCallback
         // Since the callback is set after CountryAutoCompleteTextView is fully initialized,
         // need to manually trigger the callback once to pick up the initial country
-        countryLayout.selectedCountryCode?.let { code ->
-            newCountryCallback(code)
+        countryLayout.selectedCountryCode?.let { it ->
+            newCountryCodeCallback(it)
         }
 
         configureForLevel()
@@ -179,7 +179,7 @@ internal class BillingAddressView @JvmOverloads constructor(
             val isPostalValid = countryLayout.selectedCountryCode?.let { countryCode ->
                 postalCodeValidator.isValid(
                     postalCode = postalCodeView.value.orEmpty(),
-                    countryCode = countryCode
+                    countryCode = countryCode.twoLetters
                 )
             } ?: false
 
@@ -214,15 +214,15 @@ internal class BillingAddressView @JvmOverloads constructor(
             val postalCode = postalCodeView.value
             val isPostalCodeValid = postalCodeValidator.isValid(
                 postalCode = postalCode.orEmpty(),
-                countryCode = countryCode
+                countryCode = countryCode.twoLetters
             )
             if (isPostalCodeValid) {
                 when (level) {
                     PaymentSheet.BillingAddressCollectionLevel.Automatic -> {
-                        Address(
-                            country = countryCode.twoLetters,
-                            postalCode = postalCode
-                        )
+                        Address.Builder()
+                            .setCountryCode(countryCode)
+                            .setPostalCode(postalCode)
+                            .build()
                     }
                     PaymentSheet.BillingAddressCollectionLevel.Required -> {
                         createRequiredAddress(countryCode, postalCode)
@@ -245,22 +245,22 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         return if (line1 != null && city != null) {
             if (!isUnitedStates) {
-                Address(
-                    country = countryCode.twoLetters,
-                    postalCode = postalCode,
-                    line1 = line1,
-                    line2 = line2,
-                    city = city
-                )
+                Address.Builder()
+                    .setCountryCode(countryCode)
+                    .setPostalCode(postalCode)
+                    .setLine1(line1)
+                    .setLine2(line2)
+                    .setCity(city)
+                    .build()
             } else if (state != null) {
-                Address(
-                    country = countryCode.twoLetters,
-                    postalCode = postalCode,
-                    line1 = line1,
-                    line2 = line2,
-                    city = city,
-                    state = state
-                )
+                Address.Builder()
+                    .setCountryCode(countryCode)
+                    .setPostalCode(postalCode)
+                    .setLine1(line1)
+                    .setLine2(line2)
+                    .setCity(city)
+                    .setState(state)
+                    .build()
             } else {
                 null
             }
@@ -290,7 +290,7 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     private fun updatePostalCodeView(countryCode: CountryCode?) {
         val shouldShowPostalCode = countryCode == null ||
-            CountryUtils.doesCountryUsePostalCode(countryCode)
+            CountryUtils.doesCountryUsePostalCode(CountryCode.create(countryCode.twoLetters))
         postalCodeLayout.isVisible = shouldShowPostalCode
 
         val shouldShowPostalCodeContainer =
@@ -358,14 +358,9 @@ internal class BillingAddressView @JvmOverloads constructor(
             // invalid if not set first.
             this.postalCodeView.setText(it.postalCode)
 
-            it.country.takeIf { !it.isNullOrBlank() }?.let { countryCode ->
-                countryLayout.selectedCountryCode = CountryCode(countryCode)
-                this.countryView.setText(
-                    CountryUtils.getDisplayCountry(
-                        CountryCode(countryCode),
-                        getLocale()
-                    )
-                )
+            it.countryCode?.let {
+                this.countryLayout.selectedCountryCode = it
+                this.countryView.setText(CountryUtils.getDisplayCountry(it, getLocale()))
             }
             this.address1View.setText(it.line1)
             this.address2View.setText(it.line2)

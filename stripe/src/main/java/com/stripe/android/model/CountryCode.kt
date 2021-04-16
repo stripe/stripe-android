@@ -1,14 +1,10 @@
-package com.stripe.android.view
+package com.stripe.android.model
 
-import androidx.annotation.Size
 import java.util.Locale
 
-internal data class CountryCode(
-    @Size(2) private val value: String,
+data class CountryCode private constructor(
+    val twoLetters: String,
 ) {
-    val twoLetters: String
-        get() = value.toUpperCase(Locale.getDefault())
-
     companion object {
         val US = CountryCode("US")
         val CA = CountryCode("CA")
@@ -16,5 +12,7 @@ internal data class CountryCode(
         fun isUS(countryCode: CountryCode?) = countryCode == US
         fun isCA(countryCode: CountryCode?) = countryCode == CA
         fun isGB(countryCode: CountryCode?) = countryCode == GB
+
+        fun create(value: String) = CountryCode(value.toUpperCase(Locale.ROOT))
     }
 }

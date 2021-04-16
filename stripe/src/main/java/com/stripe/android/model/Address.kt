@@ -19,6 +19,8 @@ data class Address internal constructor(
     val postalCode: String? = null,
     val state: String? = null
 ) : StripeModel, StripeParamsModel {
+    val countryCode: CountryCode?
+        get() = country?.takeUnless { it.isBlank() }?.let { CountryCode.create(it) }
 
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
@@ -43,8 +45,19 @@ data class Address internal constructor(
             this.city = city
         }
 
+        @Deprecated(
+            message = "This will be removed in future version",
+            replaceWith = ReplaceWith(
+                expression = "setCountryCode(CountryCode.create(country))",
+                imports = ["com.stripe.android.model.CountryCode"]
+            )
+        )
         fun setCountry(country: String?): Builder = apply {
             this.country = country?.toUpperCase(Locale.ROOT)
+        }
+
+        fun setCountryCode(country: CountryCode?): Builder = apply {
+            this.country = country?.twoLetters
         }
 
         fun setLine1(line1: String?): Builder = apply {
@@ -77,6 +90,7 @@ data class Address internal constructor(
 
     companion object {
         private const val PARAM_CITY = "city"
+
         // 2 Character Country Code
         private const val PARAM_COUNTRY = "country"
         private const val PARAM_LINE_1 = "line1"

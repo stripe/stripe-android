@@ -10,11 +10,11 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.Address
 import com.stripe.android.model.AddressFixtures
+import com.stripe.android.model.CountryCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.Country
-import com.stripe.android.view.CountryCode
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -299,8 +299,8 @@ class BillingAddressViewTest {
 
     private companion object {
         private val USA = Country(CountryCode.US, "United States")
-        private val FRANCE = CountryCode("FR")
-        private val ZIMBABWE = CountryCode("ZW")
-        private val MEXICO = CountryCode("MX")
+        private val FRANCE = CountryCode.create("FR")
+        private val ZIMBABWE = CountryCode.create("ZW")
+        private val MEXICO = CountryCode.create("MX")
     }
 }

@@ -15,7 +15,7 @@ internal class PostalCodeValidator {
      */
     fun isValid(
         postalCode: String,
-        countryCode: CountryCode
+        countryCode: String
     ): Boolean {
         return POSTAL_CODE_PATTERNS[countryCode]?.matcher(postalCode)?.matches()
             ?: (!CountryUtils.doesCountryUsePostalCode(countryCode) || postalCode.isNotBlank())
@@ -23,7 +23,7 @@ internal class PostalCodeValidator {
 
     fun isValid(
         postalCode: String,
-        countryCode: CountryCode?,
+        countryCode: String?,
         optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
         hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
     ): Boolean {
@@ -49,9 +49,9 @@ internal class PostalCodeValidator {
 
     private companion object {
         private val POSTAL_CODE_PATTERNS = mapOf(
-            Locale.US.getCountryCode() to
+            Locale.US.country to
                 Pattern.compile("^[0-9]{5}(?:-[0-9]{4})?$"),
-            Locale.CANADA.getCountryCode() to
+            Locale.CANADA.country to
                 Pattern.compile("^(?!.*[DFIOQU])[A-VXY][0-9][A-Z] ?[0-9][A-Z][0-9]$")
         )
 
