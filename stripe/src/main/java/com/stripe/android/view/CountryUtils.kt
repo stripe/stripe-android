@@ -47,9 +47,7 @@ internal object CountryUtils {
             .plus(
                 localizedCountries(currentLocale)
                     .sortedBy { it.name.toLowerCase(Locale.ROOT) }
-                    .filterNot {
-                        it.code == currentLocale.getCountryCode()
-                    }
+                    .filterNot { it.code == currentLocale.getCountryCode() }
             )
     }
 

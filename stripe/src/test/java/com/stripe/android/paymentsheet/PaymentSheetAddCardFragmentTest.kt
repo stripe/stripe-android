@@ -357,11 +357,10 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = USA.code
             viewBinding.billingAddress.postalCodeView.setText("123")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString())
@@ -379,11 +378,10 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = USA.code
             viewBinding.billingAddress.postalCodeView.setText("94107")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString()).isEmpty()
@@ -400,11 +398,10 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = CANADA.code
             viewBinding.billingAddress.postalCodeView.setText("!@#")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString())
@@ -422,11 +419,10 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = CANADA.code
             viewBinding.billingAddress.postalCodeView.setText("A1G9Z9")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString()).isEmpty()
@@ -443,11 +439,10 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = USA.code
             viewBinding.billingAddress.postalCodeView.setText("")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString()).isEmpty()
@@ -500,7 +495,7 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     private companion object {
-        private val USA = Country(CountryCode("US"), "United States")
-        private val CANADA = Country(CountryCode("CA"), "Canada")
+        private val USA = Country(CountryCode.US, "United States")
+        private val CANADA = Country(CountryCode.CA, "Canada")
     }
 }

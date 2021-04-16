@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.Country
+import com.stripe.android.view.CountryCode
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -297,10 +298,10 @@ class BillingAddressViewTest {
     }
 
     private companion object {
-        private val USA = Country("US", "United States")
-        private val GB = Country("GB", "United Kingdom")
-        private val FRANCE = Country("FR", "France")
-        private val ZIMBABWE = Country("ZW", "Zimbabwe")
-        private val MEXICO = Country("MX", "Mexico")
+        private val USA = Country(CountryCode.US, "United States")
+        private val GB = Country(CountryCode.GB, "United Kingdom")
+        private val FRANCE = Country(CountryCode("FR"), "France")
+        private val ZIMBABWE = Country(CountryCode("ZW"), "Zimbabwe")
+        private val MEXICO = Country(CountryCode("MX"), "Mexico")
     }
 }

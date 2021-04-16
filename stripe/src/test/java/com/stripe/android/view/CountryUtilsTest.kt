@@ -33,14 +33,16 @@ class CountryUtilsTest {
     @Test
     fun `getDisplayCountry() should return expected result`() {
         var currentLocale = Locale.US
-        assertThat(CountryUtils.getDisplayCountry(CountryCode("US"), currentLocale))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.US, currentLocale))
             .isEqualTo("United States")
-        assertThat(CountryUtils.getDisplayCountry(CountryCode("UK"), currentLocale))
-            .isEqualTo("UK")
-        assertThat(CountryUtils.getDisplayCountry(CountryCode("CA"), currentLocale))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.GB, currentLocale))
+            .isEqualTo("United Kingdom")
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.CA, currentLocale))
             .isEqualTo("Canada")
         assertThat(CountryUtils.getDisplayCountry(CountryCode("DM"), currentLocale))
             .isEqualTo("Dominica")
+        assertThat(CountryUtils.getDisplayCountry(CountryCode("DMd"), currentLocale))
+            .isEqualTo("DMD")
 
         currentLocale = Locale("de", "DE")
         assertThat(CountryUtils.getDisplayCountry(CountryCode("DE"), currentLocale))

@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
 import com.stripe.android.view.Country
+import com.stripe.android.view.CountryCode
 import com.stripe.android.view.StripeEditText
 
 /**
@@ -287,7 +288,7 @@ internal abstract class BaseAddCardFragment(
                     val shouldToggleBillingError =
                         !isPostalValid && !billingAddressView.postalCodeView.text.isNullOrEmpty()
                     billingErrors.text = if (shouldToggleBillingError) {
-                        if (country == null || country.code.isUS()) {
+                        if (country == null || CountryCode.isUS(country.code)) {
                             getString(R.string.address_zip_invalid)
                         } else {
                             getString(R.string.address_postal_code_invalid)

@@ -157,8 +157,8 @@ internal class BillingAddressView @JvmOverloads constructor(
         countryLayout.countryChangeCallback = newCountryCallback
         // Since the callback is set after CountryAutoCompleteTextView is fully initialized,
         // need to manually trigger the callback once to pick up the initial country
-        countryLayout.selectedCountryCode?.let {
-            newCountryCallback(it)
+        countryLayout.selectedCountryCode?.let { code ->
+            newCountryCallback(code)
         }
 
         configureForLevel()
