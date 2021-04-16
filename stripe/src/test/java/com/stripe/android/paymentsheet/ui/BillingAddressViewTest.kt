@@ -298,8 +298,8 @@ class BillingAddressViewTest {
     }
 
     private companion object {
-        private val USA = Country(CountryCode("US"), "United States")
-        private val GB = Country(CountryCode("GB"), "United Kingdom")
+        private val USA = Country(CountryCode.US, "United States")
+        private val GB = Country(CountryCode.GB, "United Kingdom")
         private val FRANCE = Country(CountryCode("FR"), "France")
         private val ZIMBABWE = Country(CountryCode("ZW"), "Zimbabwe")
         private val MEXICO = Country(CountryCode("MX"), "Mexico")

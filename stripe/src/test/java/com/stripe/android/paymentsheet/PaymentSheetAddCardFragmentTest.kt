@@ -495,7 +495,7 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     private companion object {
-        private val USA = Country(CountryCode("US"), "United States")
-        private val CANADA = Country(CountryCode("CA"), "Canada")
+        private val USA = Country(CountryCode.US, "United States")
+        private val CANADA = Country(CountryCode.CA, "Canada")
     }
 }

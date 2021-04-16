@@ -111,7 +111,7 @@ class CardFormViewTest {
                     expYear = 2050,
                     cvc = VALID_CVC,
                     address = Address.Builder()
-                        .setCountry("United States")
+                        .setCountry(CountryCode.US.twoLetters)
                         .setPostalCode(VALID_US_ZIP)
                         .build()
                 )

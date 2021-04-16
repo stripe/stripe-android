@@ -127,7 +127,7 @@ internal class CardFormView @JvmOverloads constructor(
                 expYear = expirationDate.year,
                 cvc = cardMultilineWidget.cvcEditText.text?.toString(),
                 address = Address.Builder()
-                    .setCountry(countryLayout.selectedCountry.toString())
+                    .setCountry(countryLayout.selectedCountryCode?.twoLetters)
                     .setPostalCode(postalCodeView.text?.toString())
                     .build()
             )
@@ -177,7 +177,7 @@ internal class CardFormView @JvmOverloads constructor(
 
     private fun setupCountryAndPostal() {
         // wire up postal code and country
-        postalCodeView.config = if (countryLayout.selectedCountry?.code == "US") {
+        postalCodeView.config = if (CountryCode.isUS(countryLayout.selectedCountryCode)) {
             PostalCodeEditText.Config.US
         } else {
             PostalCodeEditText.Config.Global
@@ -205,20 +205,20 @@ internal class CardFormView @JvmOverloads constructor(
             onFieldError(Fields.Postal, null)
         }
 
-        countryLayout.countryChangeCallback = { country ->
-            postalCodeView.config = if (country.code == "US") {
+        countryLayout.countryChangeCallback = { countryCode ->
+            postalCodeView.config = if (CountryCode.isUS(countryCode)) {
                 PostalCodeEditText.Config.US
             } else {
                 PostalCodeEditText.Config.Global
             }
-            postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(country.code)
+            postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(countryCode)
             postalCodeView.shouldShowError = false
             postalCodeView.text = null
         }
     }
 
     private fun isPostalValid() =
-        countryLayout.selectedCountry?.code?.let { countryCode ->
+        countryLayout.selectedCountryCode?.let { countryCode ->
             postalCodeValidator.isValid(
                 postalCode = postalCodeView.postalCode.orEmpty(),
                 countryCode = countryCode
@@ -228,7 +228,7 @@ internal class CardFormView @JvmOverloads constructor(
     private fun showPostalError() {
         onFieldError(
             Fields.Postal,
-            if (countryLayout.selectedCountry == null || countryLayout.selectedCountry!!.code == "US") {
+            if (countryLayout.selectedCountryCode == null || CountryCode.isUS(countryLayout.selectedCountryCode!!)) {
                 resources.getString(R.string.address_zip_invalid)
             } else {
                 resources.getString(R.string.address_postal_code_invalid)

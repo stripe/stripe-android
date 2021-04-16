@@ -32,17 +32,15 @@ class CountryUtilsTest {
 
     @Test
     fun `getDisplayCountry() should return expected result`() {
-        assertThat(CountryUtils.getDisplayCountry(CountryCode("US")))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.US))
             .isEqualTo("United States")
-        assertThat(CountryUtils.getDisplayCountry(CountryCode("UK")))
-            .isEqualTo("UK")
-        assertThat(CountryUtils.getDisplayCountry(CountryCode("CA")))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.GB))
+            .isEqualTo("United Kingdom")
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.CA))
             .isEqualTo("Canada")
         assertThat(CountryUtils.getDisplayCountry(CountryCode("DM")))
             .isEqualTo("Dominica")
-    }
-
-    @Test
-    fun `getCountryByName() in the language of current locale`() {
+        assertThat(CountryUtils.getDisplayCountry(CountryCode("DMd")))
+            .isEqualTo("DMD")
     }
 }
