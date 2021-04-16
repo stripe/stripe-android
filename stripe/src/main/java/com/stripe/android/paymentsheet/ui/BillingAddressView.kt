@@ -19,9 +19,9 @@ import androidx.lifecycle.MutableLiveData
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.model.Address
+import com.stripe.android.model.CountryCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
-import com.stripe.android.view.CountryCode
 import com.stripe.android.view.CountryUtils
 import com.stripe.android.view.PostalCodeValidator
 import kotlin.properties.Delegates
@@ -213,10 +213,10 @@ internal class BillingAddressView @JvmOverloads constructor(
             if (isPostalCodeValid) {
                 when (level) {
                     PaymentSheet.BillingAddressCollectionLevel.Automatic -> {
-                        Address(
-                            country = countryCode.twoLetters,
-                            postalCode = postalCode
-                        )
+                        Address.Builder()
+                            .setCountryCode(countryCode)
+                            .setPostalCode(postalCode)
+                            .build()
                     }
                     PaymentSheet.BillingAddressCollectionLevel.Required -> {
                         createRequiredAddress(countryCode, postalCode)
@@ -239,22 +239,22 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         return if (line1 != null && city != null) {
             if (!isUnitedStates) {
-                Address(
-                    country = countryCode.twoLetters,
-                    postalCode = postalCode,
-                    line1 = line1,
-                    line2 = line2,
-                    city = city
-                )
+                Address.Builder()
+                    .setCountryCode(countryCode)
+                    .setPostalCode(postalCode)
+                    .setLine1(line1)
+                    .setLine2(line2)
+                    .setCity(city)
+                    .build()
             } else if (state != null) {
-                Address(
-                    country = countryCode.twoLetters,
-                    postalCode = postalCode,
-                    line1 = line1,
-                    line2 = line2,
-                    city = city,
-                    state = state
-                )
+                Address.Builder()
+                    .setCountryCode(countryCode)
+                    .setPostalCode(postalCode)
+                    .setLine1(line1)
+                    .setLine2(line2)
+                    .setCity(city)
+                    .setState(state)
+                    .build()
             } else {
                 null
             }
@@ -284,7 +284,7 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     private fun updatePostalCodeView(countryCode: CountryCode?) {
         val shouldShowPostalCode = countryCode == null ||
-            CountryUtils.doesCountryUsePostalCode(countryCode.twoLetters)
+            CountryUtils.doesCountryUsePostalCode(CountryCode.create(countryCode.twoLetters))
         postalCodeLayout.isVisible = shouldShowPostalCode
 
         val shouldShowPostalCodeContainer =
@@ -352,9 +352,9 @@ internal class BillingAddressView @JvmOverloads constructor(
             // invalid if not set first.
             this.postalCodeView.setText(it.postalCode)
 
-            it.country.takeIf { !it.isNullOrBlank() }?.let { countryCode ->
-                countryLayout.selectedCountryCode = CountryCode(countryCode)
-                this.countryView.setText(CountryUtils.getDisplayCountry(CountryCode(countryCode)))
+            it.countryCode?.let {
+                this.countryLayout.selectedCountryCode = it
+                this.countryView.setText(CountryUtils.getDisplayCountry(it))
             }
             this.address1View.setText(it.line1)
             this.address2View.setText(it.line2)

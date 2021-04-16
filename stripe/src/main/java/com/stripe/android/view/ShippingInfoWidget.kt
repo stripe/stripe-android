@@ -90,7 +90,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
             return ShippingInformation(
                 Address.Builder()
                     .setCity(cityEditText.fieldText)
-                    .setCountry(countryAutoCompleteTextView.selectedCountry?.code?.twoLetters)
+                    .setCountryCode(countryAutoCompleteTextView.selectedCountry?.code)
                     .setLine1(addressEditText.fieldText)
                     .setLine2(addressEditText2.fieldText)
                     .setPostalCode(postalCodeEditText.fieldText)
@@ -294,7 +294,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         updatePostalCodeInputFilter(country)
 
         postalCodeTextInputLayout.visibility =
-            if (CountryUtils.doesCountryUsePostalCode(country.code.twoLetters) &&
+            if (CountryUtils.doesCountryUsePostalCode(country.code) &&
                 !isFieldHidden(CustomizableShippingField.PostalCode)
             ) {
                 View.VISIBLE

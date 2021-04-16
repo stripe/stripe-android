@@ -15,6 +15,7 @@ import androidx.core.os.ConfigurationCompat
 import androidx.core.view.doOnNextLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
+import com.stripe.android.model.CountryCode
 import java.util.Locale
 import kotlin.properties.Delegates
 
@@ -61,6 +62,10 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     val selectedCountry: Country?
         get() = selectedCountryCode?.let { CountryUtils.getCountryByCode(it) }
 
+    @Deprecated(
+        message = "Will be removed in a future version",
+        replaceWith = ReplaceWith("countryCodeChangeCallback")
+    )
     @JvmSynthetic
     internal var countryChangeCallback: (Country) -> Unit = {}
 
@@ -177,16 +182,23 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
     /**
      * @param countryCode specify a country code to display in the input. The input will display
-     * the full country display name.  This is preferred over the function that takes a string
+     * the full country display name.
      */
     @VisibleForTesting
     internal fun setCountrySelected(countryCode: CountryCode) {
         updateUiForCountryEntered(countryCode)
     }
 
+    @Deprecated(
+        message = "This will be removed in a future version",
+        replaceWith = ReplaceWith(
+            expression = "setCountrySelected(CountryCode.create(twoLetterCountryCode))",
+            imports = ["com.stripe.android.model.CountryCode"]
+        )
+    )
     @VisibleForTesting
     internal fun setCountrySelected(twoLetterCountryCode: String) {
-        updateUiForCountryEntered(CountryCode(twoLetterCountryCode))
+        updateUiForCountryEntered(CountryCode.create(twoLetterCountryCode))
     }
 
     @VisibleForTesting

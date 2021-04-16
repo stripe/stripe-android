@@ -1,8 +1,9 @@
 package com.stripe.android.view
 
+import com.stripe.android.model.CountryCode
 import java.util.Locale
 
-internal fun Locale.getCountryCode(): CountryCode = CountryCode(this.country)
+internal fun Locale.getCountryCode(): CountryCode = CountryCode.create(this.country)
 
 internal object CountryUtils {
 
@@ -16,7 +17,7 @@ internal object CountryUtils {
 
     private val COUNTRIES: List<Country> =
         Locale.getISOCountries().map { code ->
-            Country(CountryCode(code), Locale("", code).displayCountry)
+            Country(CountryCode.create(code), Locale("", code).displayCountry)
         }
 
     @JvmSynthetic
@@ -45,8 +46,20 @@ internal object CountryUtils {
             )
     }
 
+    @Deprecated(
+        message = "Use with parameter CountryCode",
+        replaceWith = ReplaceWith(
+            expression = "CountryUtils.doesCountryUsePostalCode(CountryCode.create(twoLetterCountryCode))",
+            imports = ["com.stripe.android.model.CountryCode"]
+        )
+    )
     @JvmSynthetic
     internal fun doesCountryUsePostalCode(twoLetterCountryCode: String): Boolean {
         return !NO_POSTAL_CODE_COUNTRIES.contains(twoLetterCountryCode.toUpperCase(Locale.ROOT))
+    }
+
+    @JvmSynthetic
+    internal fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
+        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.twoLetters)
     }
 }

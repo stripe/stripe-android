@@ -21,6 +21,7 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.CountryCode
 import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
 
@@ -127,7 +128,7 @@ internal class CardFormView @JvmOverloads constructor(
                 expYear = expirationDate.year,
                 cvc = cardMultilineWidget.cvcEditText.text?.toString(),
                 address = Address.Builder()
-                    .setCountry(countryLayout.selectedCountryCode?.twoLetters)
+                    .setCountryCode(countryLayout.selectedCountryCode)
                     .setPostalCode(postalCodeView.text?.toString())
                     .build()
             )
@@ -211,7 +212,7 @@ internal class CardFormView @JvmOverloads constructor(
             } else {
                 PostalCodeEditText.Config.Global
             }
-            postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(countryCode.twoLetters)
+            postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(countryCode)
             postalCodeView.shouldShowError = false
             postalCodeView.text = null
         }
