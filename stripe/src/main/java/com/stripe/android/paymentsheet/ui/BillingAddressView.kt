@@ -193,7 +193,6 @@ internal class BillingAddressView @JvmOverloads constructor(
                     },
                     isPostalValid
                 )
-
             } else {
                 postalCodeViewListener?.onLosingFocus(
                     countryLayout.selectedCountryCode?.let {
