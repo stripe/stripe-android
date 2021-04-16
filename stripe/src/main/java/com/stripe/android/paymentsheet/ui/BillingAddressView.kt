@@ -352,7 +352,7 @@ internal class BillingAddressView @JvmOverloads constructor(
             // invalid if not set first.
             this.postalCodeView.setText(it.postalCode)
 
-            it.country?.let { countryCode ->
+            it.country.takeIf { !it.isNullOrBlank() }?.let { countryCode ->
                 countryLayout.selectedCountryCode = CountryCode(countryCode)
                 this.countryView.setText(CountryUtils.getDisplayCountry(CountryCode(countryCode)))
             }

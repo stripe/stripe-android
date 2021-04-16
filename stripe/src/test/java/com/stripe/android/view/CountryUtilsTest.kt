@@ -24,9 +24,9 @@ class CountryUtilsTest {
     @Test
     fun getOrderedCountries() {
         assertThat(
-            CountryUtils.getOrderedCountries(Locale.getDefault())[0].code.twoLetters
+            CountryUtils.getOrderedCountries(Locale.getDefault())[0].code
         ).isEqualTo(
-            Locale.getDefault().country
+            Locale.getDefault().getCountryCode()
         )
     }
 

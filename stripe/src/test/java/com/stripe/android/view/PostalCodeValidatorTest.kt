@@ -25,7 +25,7 @@ class PostalCodeValidatorTest {
         assertTrue(
             VALIDATOR.isValid(
                 postalCode = "94107",
-                countryCode = CountryCode.US,
+                countryCode = null,
                 optionalShippingInfoFields = listOf(
                     ShippingInfoWidget.CustomizableShippingField.PostalCode
                 ),
