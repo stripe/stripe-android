@@ -60,8 +60,4 @@ class CountryUtilsTest {
         assertThat(germany?.name)
             .isEqualTo("Deutschland")
     }
-
-    @Test
-    fun `getCountryByName() in the language of current locale`() {
-    }
 }

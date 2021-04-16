@@ -128,10 +128,7 @@ class CountryTextInputLayoutTest {
         countryTextInputLayout.selectedCountryCode?.let {
             assertEquals(
                 "Canada",
-                CountryUtils.getDisplayCountry(
-                    it,
-                    Locale.getDefault()
-                )
+                CountryUtils.getDisplayCountry(it, Locale.getDefault())
             )
         }
     }

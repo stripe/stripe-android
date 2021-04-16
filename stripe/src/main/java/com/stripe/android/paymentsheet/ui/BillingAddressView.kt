@@ -188,18 +188,17 @@ internal class BillingAddressView @JvmOverloads constructor(
 
             if (hasFocus) {
                 postalCodeViewListener?.onGainingFocus(
-                    CountryUtils.getCountryByCode(
-                        countryLayout.selectedCountryCode,
-                        getLocale()
-                    ),
+                    countryLayout.selectedCountryCode?.let {
+                        CountryUtils.getCountryByCode(it, getLocale())
+                    },
                     isPostalValid
                 )
+
             } else {
                 postalCodeViewListener?.onLosingFocus(
-                    CountryUtils.getCountryByCode(
-                        countryLayout.selectedCountryCode,
-                        getLocale()
-                    ),
+                    countryLayout.selectedCountryCode?.let {
+                        CountryUtils.getCountryByCode(it, getLocale())
+                    },
                     isPostalValid
                 )
                 postalCodeView.shouldShowError =
