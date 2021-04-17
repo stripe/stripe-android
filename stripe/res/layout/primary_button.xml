@@ -23,7 +23,8 @@
         android:visibility="gone"
         android:layout_marginStart="@dimen/stripe_paymentsheet_primary_button_icon_padding"
         android:layout_marginEnd="@dimen/stripe_paymentsheet_primary_button_icon_padding"
-        android:contentDescription="@null" />
+        android:contentDescription="@null"
+        />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/confirming_icon"
@@ -31,12 +32,13 @@
         android:layout_gravity="end|center_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:indicatorSize="@dimen/stripe_paymentsheet_primary_button_icon_size"
+        app:indicatorColor="@color/stripe_paymentsheet_primary_button_confirming_progress"
+        app:trackThickness="1dp"
         android:layout_marginStart="@dimen/stripe_paymentsheet_primary_button_icon_padding"
         android:layout_marginEnd="@dimen/stripe_paymentsheet_primary_button_icon_padding"
         android:visibility="gone"
-        app:indicatorColor="@color/stripe_paymentsheet_primary_button_confirming_progress"
-        app:indicatorSize="@dimen/stripe_paymentsheet_primary_button_icon_size"
-        app:trackThickness="1dp" />
+        />
 
     <ImageView
         android:id="@+id/confirmed_icon"
@@ -47,6 +49,7 @@
         android:layout_marginEnd="@dimen/stripe_paymentsheet_primary_button_icon_padding"
         android:layout_gravity="end|center_vertical"
         android:visibility="invisible"
-        android:contentDescription="@null" />
+        android:contentDescription="@null"
+        />
 
 </merge>

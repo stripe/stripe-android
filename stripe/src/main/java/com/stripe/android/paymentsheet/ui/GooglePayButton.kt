@@ -49,11 +49,9 @@ internal class GooglePayButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         viewBinding.buyButton.isEnabled = enabled
-        viewBinding.buyButton.updateAlpha()
     }
 
     fun updateState(state: PrimaryButton.State?) {
-        viewBinding.buyButton.updateAlpha()
         viewBinding.buyButton.updateState(state)
 
         when (state) {
