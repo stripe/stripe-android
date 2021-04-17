@@ -38,14 +38,13 @@ internal class PaymentSheetAddCardFragment(
         } ?: false
 
         val viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
-        googlePayButton = viewBinding.googlePayButton
+        val googlePayButton = viewBinding.googlePayButton
         val addCardHeader = viewBinding.addCardHeader
         val googlePayDivider = viewBinding.googlePayDivider
 
         var count = 0
         googlePayButton.setOnClickListener {
 //            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
-//        googlePayButton.isEnabled = false
             if (count % 2 == 0) {
                 googlePayButton.updateState(PrimaryButton.State.StartProcessing)
             } else {
@@ -58,7 +57,6 @@ internal class PaymentSheetAddCardFragment(
         }
 
         googlePayButton.isVisible = shouldShowGooglePayButton
-        googlePayButton.updateState(PrimaryButton.State.Ready(""))
         googlePayButton.isEnabled = true
 
         googlePayDivider.isVisible = shouldShowGooglePayButton
