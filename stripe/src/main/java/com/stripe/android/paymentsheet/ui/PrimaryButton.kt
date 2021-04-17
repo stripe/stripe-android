@@ -72,7 +72,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         animator.fadeOut(viewBinding.confirmingIcon)
 
         animator.fadeIn(confirmedIcon, width) {
-//            onAnimationEnd()
+            onAnimationEnd()
         }
     }
 
@@ -99,7 +99,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         }
     }
 
-    private fun updateAlpha() {
+    internal fun updateAlpha() {
         viewBinding.label.alpha = if ((state == null || state is State.Ready) && !isEnabled) {
             0.5f
         } else {

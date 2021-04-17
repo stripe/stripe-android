@@ -31,7 +31,7 @@
             android:id="@+id/google_pay_button"
             android:visibility="gone"
             android:layout_width="match_parent"
-            android:layout_height="48sp"
+            android:layout_height="wrap_content"
             android:layout_margin="@dimen/stripe_paymentsheet_primary_button_margin" />
 
         <com.stripe.android.paymentsheet.ui.GooglePayDivider

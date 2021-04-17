@@ -1,72 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-<!-- The google pay background has a small margin on the image, so we need to add one here -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/stripe_overlay"
-        android:layout_margin="2sp"
+    <com.stripe.android.paymentsheet.ui.PrimaryButton
+        android:id="@+id/buy_button"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/stripe_paymentsheet_primary_button_margin"
+        android:text="@string/stripe_paymentsheet_pay_button_label"
+        android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal|center_vertical"
-            android:textColor="@color/stripe_paymentsheet_primary_button_text"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:lineSpacingExtra="5sp"
-            android:textSize="16sp"
-            android:paddingHorizontal="4dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="5dp"
-            android:text="Processing..."
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/confirming_icon"
-            android:indeterminate="true"
-            android:layout_gravity="end|center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/stripe_paymentsheet_primary_button_icon_padding"
-            android:layout_marginEnd="@dimen/stripe_paymentsheet_primary_button_icon_padding"
-            android:visibility="gone"
-            app:indicatorColor="@color/stripe_paymentsheet_primary_button_confirming_progress"
-            app:indicatorSize="@dimen/stripe_paymentsheet_primary_button_icon_size"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:trackThickness="1dp" />
-
-        <ImageView
-            android:id="@+id/confirmed_icon"
-            android:layout_width="@dimen/stripe_paymentsheet_primary_button_icon_size"
-            android:layout_height="@dimen/stripe_paymentsheet_primary_button_icon_size"
-            android:src="@drawable/stripe_ic_paymentsheet_primary_button_checkmark"
-            android:layout_marginStart="@dimen/stripe_paymentsheet_primary_button_icon_padding"
-            android:layout_marginEnd="@dimen/stripe_paymentsheet_primary_button_icon_padding"
-            android:layout_gravity="end|center_vertical"
-            android:visibility="invisible"
-            android:contentDescription="@null"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/customer_supplied"
+    <RelativeLayout
+        android:id="@+id/google_pay_button_icon"
         android:background="@drawable/stripe_googlepay_button_no_shadow_background"
         android:contentDescription="@string/google_pay"
-        android:layout_height="match_parent"
+        android:layout_height="48sp"
         android:layout_width="match_parent"
-        android:paddingTop="2sp" />
+        android:paddingTop="2sp">
+
+        <LinearLayout
+            android:duplicateParentState="true"
+            android:gravity="center_vertical"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:weightSum="2">
+
+            <ImageView
+                android:duplicateParentState="true"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/stripe_googlepay_button_content" />
+        </LinearLayout>
+
+        <ImageView
+            android:duplicateParentState="true"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/stripe_googlepay_button_overlay" />
+    </RelativeLayout>
 
 </merge>
 

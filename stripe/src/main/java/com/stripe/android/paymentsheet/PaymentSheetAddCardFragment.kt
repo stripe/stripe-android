@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayButton
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 
 internal class PaymentSheetAddCardFragment(
     eventReporter: EventReporter
@@ -46,10 +47,10 @@ internal class PaymentSheetAddCardFragment(
 //            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
 //        googlePayButton.isEnabled = false
             if (count % 2 == 0) {
-                googlePayButton.updateState(GooglePayButton.State.StartProcessing)
+                googlePayButton.updateState(PrimaryButton.State.StartProcessing)
             } else {
                 googlePayButton.updateState(
-                    GooglePayButton.State.FinishProcessing({
+                    PrimaryButton.State.FinishProcessing({
                     })
                 )
             }
@@ -57,7 +58,7 @@ internal class PaymentSheetAddCardFragment(
         }
 
         googlePayButton.isVisible = shouldShowGooglePayButton
-        googlePayButton.updateState(GooglePayButton.State.Ready(""))
+        googlePayButton.updateState(PrimaryButton.State.Ready(""))
         googlePayButton.isEnabled = true
 
         googlePayDivider.isVisible = shouldShowGooglePayButton
