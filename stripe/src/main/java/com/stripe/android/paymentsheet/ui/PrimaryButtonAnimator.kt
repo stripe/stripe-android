@@ -101,7 +101,6 @@ internal class PrimaryButtonAnimator(
 
                         override fun onAnimationEnd(p0: Animation?) {
                             view.isInvisible = true
-                            onAnimationEnd()
                         }
 
                         override fun onAnimationRepeat(p0: Animation?) {

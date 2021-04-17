@@ -4,10 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
-import com.stripe.android.databinding.StripeGooglePayButtonBinding
-import com.stripe.android.databinding.StripeGooglePayButtonOverlayBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -62,16 +59,6 @@ internal class PaymentSheetAddCardFragment(
         googlePayButton.isVisible = shouldShowGooglePayButton
         googlePayButton.updateState(GooglePayButton.State.Ready(""))
         googlePayButton.isEnabled = true
-        googlePayButton.setBackgroundResource(R.drawable.stripe_googlepay_button_no_shadow_background)
-
-        val googlePayButtonDetails = StripeGooglePayButtonBinding.bind(googlePayButton)
-        googlePayButtonDetails.customerSupplied.addView(
-            StripeGooglePayButtonOverlayBinding.inflate(
-                layoutInflater,
-                googlePayButton.viewBinding.customerSupplied,
-                false
-            ).root
-        )
 
         googlePayDivider.isVisible = shouldShowGooglePayButton
         addCardHeader.isVisible = !shouldShowGooglePayButton

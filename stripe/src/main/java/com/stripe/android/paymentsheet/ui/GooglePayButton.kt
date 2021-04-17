@@ -8,6 +8,7 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
+import com.stripe.android.databinding.StripeGooglePayButtonOverlayBinding
 
 internal class GooglePayButton @JvmOverloads constructor(
     context: Context,
@@ -22,18 +23,27 @@ internal class GooglePayButton @JvmOverloads constructor(
         this
     )
 
+    private val googlePayImage = StripeGooglePayButtonOverlayBinding.inflate(
+        LayoutInflater.from(context),
+        viewBinding.customerSupplied,
+        false
+    )
+
     private val confirmedIcon = viewBinding.confirmedIcon
 
     private var backgroundResource =
         R.drawable.stripe_googlepay_button_no_shadow_background
 
     init {
-        super.setBackgroundResource(backgroundResource)
+        setBackgroundResource(backgroundResource)
 
         viewBinding.label.text = getTextAttributeValue(attrs)
 
         isClickable = true
         isEnabled = false
+
+        val googlePayButtonDetails = StripeGooglePayButtonBinding.bind(this)
+        googlePayButtonDetails.customerSupplied.addView(googlePayImage.root)
     }
 
     override fun setBackgroundResource(resid: Int) {
@@ -71,7 +81,7 @@ internal class GooglePayButton @JvmOverloads constructor(
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
 
-        super.setBackgroundResource(
+        viewBinding.stripeOverlay.setBackgroundResource(
             R.drawable.stripe_paymentsheet_primary_button_confirmed_background
         )
 
@@ -79,10 +89,13 @@ internal class GooglePayButton @JvmOverloads constructor(
         animator.fadeOut(viewBinding.confirmingIcon)
 
         animator.fadeIn(confirmedIcon, width) {
-            super.setBackgroundResource(
-                backgroundResource
+            // This won't really happen instead we will just close the sheet
+            setBackgroundResource(
+                R.drawable.stripe_googlepay_button_no_shadow_background
             )
             viewBinding.customerSupplied.isVisible = true
+            // -----
+
             onAnimationEnd()
         }
         viewBinding.confirmingIcon.isVisible = false

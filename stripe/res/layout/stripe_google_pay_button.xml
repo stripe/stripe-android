@@ -4,11 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+<!-- The google pay background has a small margin on the image, so we need to add one here -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/stripe_overlay"
+        android:layout_margin="2sp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="8dp">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/label"
@@ -56,18 +57,16 @@
             android:contentDescription="@null"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-    <RelativeLayout
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/customer_supplied"
-        android:layout_width="match_parent"
+        android:background="@drawable/stripe_googlepay_button_no_shadow_background"
+        android:contentDescription="@string/google_pay"
         android:layout_height="match_parent"
-        android:paddingTop="2sp"
-        android:contentDescription="@string/google_pay" />
-
+        android:layout_width="match_parent"
+        android:paddingTop="2sp" />
 
 </merge>
 
