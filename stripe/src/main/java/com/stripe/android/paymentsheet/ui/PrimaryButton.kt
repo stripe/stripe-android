@@ -72,7 +72,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         animator.fadeOut(viewBinding.confirmingIcon)
 
         animator.fadeIn(confirmedIcon, width) {
-            onAnimationEnd()
+//            onAnimationEnd()
         }
     }
 

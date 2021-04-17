@@ -24,13 +24,21 @@ internal class GooglePayButton @JvmOverloads constructor(
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
+    private var backgroundResource =
+        R.drawable.stripe_googlepay_button_no_shadow_background
+
     init {
-        setBackgroundResource(R.drawable.stripe_googlepay_button_no_shadow_background)
+        super.setBackgroundResource(backgroundResource)
 
         viewBinding.label.text = getTextAttributeValue(attrs)
 
         isClickable = true
         isEnabled = false
+    }
+
+    override fun setBackgroundResource(resid: Int) {
+        super.setBackgroundResource(resid)
+        backgroundResource = resid
     }
 
     private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
@@ -53,15 +61,17 @@ internal class GooglePayButton @JvmOverloads constructor(
 
     private fun onStartProcessing() {
         viewBinding.confirmingIcon.isVisible = true
-        viewBinding.googlePayButtonIcon.isVisible = false
+        viewBinding.customerSupplied.isVisible = false
 
         viewBinding.label.text = resources.getString(
             R.string.stripe_paymentsheet_primary_button_processing
         )
+        viewBinding.label.isVisible = true
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
-        setBackgroundResource(
+
+        super.setBackgroundResource(
             R.drawable.stripe_paymentsheet_primary_button_confirmed_background
         )
 
@@ -69,14 +79,13 @@ internal class GooglePayButton @JvmOverloads constructor(
         animator.fadeOut(viewBinding.confirmingIcon)
 
         animator.fadeIn(confirmedIcon, width) {
+            super.setBackgroundResource(
+                backgroundResource
+            )
+            viewBinding.customerSupplied.isVisible = true
             onAnimationEnd()
         }
-
-        setBackgroundResource(
-            R.drawable.stripe_googlepay_button_no_shadow_background
-        )
         viewBinding.confirmingIcon.isVisible = false
-        viewBinding.googlePayButtonIcon.isVisible = true
     }
 
     override fun setEnabled(enabled: Boolean) {

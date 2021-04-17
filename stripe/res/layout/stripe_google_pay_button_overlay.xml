@@ -3,7 +3,7 @@
     android:id="@+id/google_pay_button_icon"
     android:background="@drawable/stripe_googlepay_button_no_shadow_background"
     android:contentDescription="@string/google_pay"
-    android:layout_height="match_parent"
+    android:layout_height="48sp"
     android:layout_width="match_parent"
     android:paddingTop="2sp">
 
