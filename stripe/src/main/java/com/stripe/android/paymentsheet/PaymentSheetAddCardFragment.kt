@@ -28,6 +28,22 @@ internal class PaymentSheetAddCardFragment(
         )
     }
 
+    private val googleViewStateObserver = { viewState: ViewState.PaymentSheet? ->
+        when (viewState) {
+            is ViewState.PaymentSheet.Ready -> googlePayButton.updateState(
+                PrimaryButton.State.Ready("")
+            )
+            is ViewState.PaymentSheet.StartProcessing -> googlePayButton.updateState(
+                PrimaryButton.State.StartProcessing
+            )
+            is ViewState.PaymentSheet.FinishProcessing -> googlePayButton.updateState(
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
+            )
+            is ViewState.PaymentSheet.ProcessResult -> {
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val config = arguments?.getParcelable<FragmentConfig>(
@@ -38,22 +54,12 @@ internal class PaymentSheetAddCardFragment(
         } ?: false
 
         val viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
-        val googlePayButton = viewBinding.googlePayButton
+        googlePayButton = viewBinding.googlePayButton
         val addCardHeader = viewBinding.addCardHeader
         val googlePayDivider = viewBinding.googlePayDivider
 
-        var count = 0
         googlePayButton.setOnClickListener {
-//            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
-            if (count % 2 == 0) {
-                googlePayButton.updateState(PrimaryButton.State.StartProcessing)
-            } else {
-                googlePayButton.updateState(
-                    PrimaryButton.State.FinishProcessing({
-                    })
-                )
-            }
-            count = count + 1
+            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }
 
         googlePayButton.isVisible = shouldShowGooglePayButton
@@ -73,5 +79,7 @@ internal class PaymentSheetAddCardFragment(
                 updateSelection()
             }
         }
+
+        sheetViewModel.googleViewState.observe(viewLifecycleOwner, googleViewStateObserver)
     }
 }

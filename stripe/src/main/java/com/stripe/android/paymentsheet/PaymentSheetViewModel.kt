@@ -62,6 +62,10 @@ internal class PaymentSheetViewModel internal constructor(
         args.clientSecret
     )
 
+    // TODO: This probably needs to be an event
+    private val _googleViewState = MutableLiveData<ViewState.PaymentSheet>()
+    internal val googleViewState: LiveData<ViewState.PaymentSheet> = _googleViewState
+
     private val _startConfirm = MutableLiveData<Event<ConfirmPaymentIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
 
@@ -171,12 +175,14 @@ internal class PaymentSheetViewModel internal constructor(
     fun checkout() {
         _userMessage.value = null
         _processing.value = true
-        _viewState.value = ViewState.PaymentSheet.StartProcessing
 
         val paymentSelection = selection.value
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
+                // TODO: I think processing state will also need to be set to disable things?
+                _googleViewState.value = ViewState.PaymentSheet.StartProcessing
+                // TODO: Hide the sheet
                 _launchGooglePay.value = Event(
                     StripeGooglePayContract.Args(
                         paymentIntent = paymentIntent,
@@ -195,6 +201,7 @@ internal class PaymentSheetViewModel internal constructor(
                 )
             }
         } else {
+            _viewState.value = ViewState.PaymentSheet.StartProcessing
             confirmPaymentSelection(paymentSelection)
         }
     }
@@ -223,16 +230,22 @@ internal class PaymentSheetViewModel internal constructor(
                     is PaymentSelection.New.Card -> paymentIntentResult.intent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }
-                    PaymentSelection.GooglePay -> selection.value
+                    PaymentSelection.GooglePay -> selection.value // I am ot sure this path is possible? maybe when called from list view?
                     is PaymentSelection.Saved -> selection.value
                     null -> null
                 }?.let {
                     prefsRepository.savePaymentSelection(it)
                 }
 
-                _viewState.value = ViewState.PaymentSheet.FinishProcessing {
-                    _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
-                }
+//                if (_googleViewState.value == ViewState.PaymentSheet.StartProcessing) {
+//                    _googleViewState.value = ViewState.PaymentSheet.FinishProcessing {
+//                        _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
+//                    }
+//                } else {
+//                    _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+//                        _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
+//                    }
+//                }
             }
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
@@ -261,6 +274,9 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
+
+                _googleViewState.value = ViewState.PaymentSheet.Ready(0, "")
+                // TODO: Set error field text
 
                 paymentIntent.value?.let(::resetViewState)
                 // TODO(mshafrir-stripe): handle error
