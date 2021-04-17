@@ -24,13 +24,6 @@ internal class GooglePayButton @JvmOverloads constructor(
         isEnabled = false
     }
 
-    // This is only needed for testing so we can click the button to iterate through
-    // the states
-    override fun setOnClickListener(l: OnClickListener?) {
-        super.setOnClickListener(l)
-        viewBinding.buyButton.setOnClickListener(l)
-    }
-
     private fun onReadyState() {
         viewBinding.buyButton.isVisible = false
         viewBinding.googlePayButtonIcon.isVisible = true
