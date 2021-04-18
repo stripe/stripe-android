@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 /**
- * The result a payment sheet operation.
+ * The result of a payment sheet operation.
  */
 sealed class PaymentSheetResult : Parcelable {
 
