@@ -2425,7 +2425,6 @@ public final class com/stripe/android/model/PaymentIntent$CaptureMethod : java/l
 
 public final class com/stripe/android/model/PaymentIntent$Companion {
 	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentIntent;
-	public final fun isClientSecretValid (Ljava/lang/String;)Z
 }
 
 public final class com/stripe/android/model/PaymentIntent$ConfirmationMethod : java/lang/Enum {
@@ -3734,7 +3733,6 @@ public final class com/stripe/android/model/SetupIntent$CancellationReason : jav
 
 public final class com/stripe/android/model/SetupIntent$Companion {
 	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/SetupIntent;
-	public final fun isClientSecretValid (Ljava/lang/String;)Z
 }
 
 public class com/stripe/android/model/SetupIntent$Creator : android/os/Parcelable$Creator {

@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -32,7 +33,7 @@ internal class PaymentSheetContract :
 
     @Parcelize
     internal data class Args(
-        val clientSecret: String,
+        val clientSecret: ClientSecret,
         val sessionId: SessionId,
         @ColorInt val statusBarColor: Int?,
         val config: PaymentSheet.Configuration?

@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.ClientSecret
 import org.jetbrains.annotations.TestOnly
 
 internal class DefaultPaymentSheetLauncher(
@@ -62,26 +63,27 @@ internal class DefaultPaymentSheetLauncher(
         { getStatusBarColor(fragment.activity) }
     )
 
-    override fun present(
-        intentClientSecret: String,
-        configuration: PaymentSheet.Configuration
+    override fun presentWithPaymentIntent(
+        paymentIntentClientSecret: String,
+        configuration: PaymentSheet.Configuration?
     ) = present(
         PaymentSheetContract.Args(
-            intentClientSecret,
+            ClientSecret.PaymentIntentClientSecret(paymentIntentClientSecret),
             sessionId,
             statusBarColor(),
             configuration
         )
     )
 
-    override fun present(
-        intentClientSecret: String
+    override fun presentWithSetupIntent(
+        setupIntentClientSecret: String,
+        configuration: PaymentSheet.Configuration?
     ) = present(
         PaymentSheetContract.Args(
-            intentClientSecret,
+            ClientSecret.SetupIntentClientSecret(setupIntentClientSecret),
             sessionId,
             statusBarColor(),
-            config = null
+            configuration
         )
     )
 

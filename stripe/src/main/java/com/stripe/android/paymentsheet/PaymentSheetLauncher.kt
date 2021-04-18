@@ -1,12 +1,13 @@
 package com.stripe.android.paymentsheet
 
 internal interface PaymentSheetLauncher {
-    fun present(
-        intentClientSecret: String,
-        configuration: PaymentSheet.Configuration
+    fun presentWithPaymentIntent(
+        paymentIntentClientSecret: String,
+        configuration: PaymentSheet.Configuration? = null
     )
 
-    fun present(
-        intentClientSecret: String
+    fun presentWithSetupIntent(
+        setupIntentClientSecret: String,
+        configuration: PaymentSheet.Configuration? = null
     )
 }
