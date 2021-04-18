@@ -129,6 +129,10 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // From https://developer.android.com/training/testing/junit-runner:
+        // > To remove all shared state from your device's CPU and memory after each test,
+        // > use the clearPackageData flag.
         testInstrumentationRunnerArguments clearPackageData: 'true'
 
         manifestPlaceholders = [
