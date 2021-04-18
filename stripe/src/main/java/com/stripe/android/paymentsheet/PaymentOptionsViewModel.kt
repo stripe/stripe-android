@@ -7,26 +7,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.viewModelScope
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
     prefsRepository: PrefsRepository,
-    private val paymentMethodsRepository: PaymentMethodsRepository,
     private val eventReporter: EventReporter,
     workContext: CoroutineContext,
     application: Application
@@ -71,13 +63,7 @@ internal class PaymentOptionsViewModel(
                 is PaymentSelection.Saved, PaymentSelection.GooglePay -> processExistingCard(
                     paymentSelection
                 )
-                is PaymentSelection.New -> {
-                    if (paymentSelection.shouldSavePaymentMethod) {
-                        processSaveNewCard(paymentSelection)
-                    } else {
-                        processUnsavedNewCard(paymentSelection)
-                    }
-                }
+                is PaymentSelection.New -> processNewCard(paymentSelection)
             }
         }
     }
@@ -90,54 +76,12 @@ internal class PaymentOptionsViewModel(
         )
     }
 
-    private fun processUnsavedNewCard(paymentSelection: PaymentSelection) {
+    private fun processNewCard(paymentSelection: PaymentSelection) {
         _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
         _viewState.value = ViewState.PaymentOptions.ProcessResult(
             PaymentOptionResult.Succeeded.Unsaved(paymentSelection)
         )
-    }
-
-    private fun processSaveNewCard(paymentSelection: PaymentSelection) {
-        _processing.value = true
-        _viewState.value = ViewState.PaymentOptions.StartProcessing
-        savePaymentSelection(paymentSelection as PaymentSelection.New) { result ->
-            result.fold(
-                onSuccess = { paymentMethod ->
-                    prefsRepository.savePaymentSelection(PaymentSelection.Saved(paymentMethod))
-
-                    _viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                        _processing.value = false
-                        _viewState.value = ViewState.PaymentOptions.ProcessResult(
-                            PaymentOptionResult.Succeeded.NewlySaved(
-                                paymentSelection,
-                                paymentMethod
-                            )
-                        )
-                    }
-                },
-                onFailure = {
-                    onApiError(it)
-                    _viewState.value = ViewState.PaymentOptions.Ready
-                }
-            )
-        }
-    }
-
-    private fun savePaymentSelection(
-        paymentSelection: PaymentSelection.New,
-        onResult: (Result<PaymentMethod>) -> Unit
-    ) {
-        viewModelScope.launch {
-            onResult(
-                runCatching {
-                    paymentMethodsRepository.save(
-                        customerConfig!!,
-                        paymentSelection.paymentMethodCreateParams
-                    )
-                }
-            )
-        }
     }
 
     fun resolveTransitionTarget(config: FragmentConfig) {
@@ -177,13 +121,6 @@ internal class PaymentOptionsViewModel(
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val starterArgs = starterArgsSupplier()
             val application = applicationSupplier()
-            val config = PaymentConfiguration.getInstance(application)
-            val publishableKey = config.publishableKey
-            val stripeAccountId = config.stripeAccountId
-            val stripeRepository = StripeApiRepository(
-                application,
-                publishableKey
-            )
 
             val prefsRepository = starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
@@ -194,17 +131,9 @@ internal class PaymentOptionsViewModel(
                 )
             } ?: PrefsRepository.Noop()
 
-            val paymentMethodsRepository = PaymentMethodsApiRepository(
-                stripeRepository = stripeRepository,
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-                workContext = Dispatchers.IO
-            )
-
             return PaymentOptionsViewModel(
                 starterArgs,
                 prefsRepository,
-                paymentMethodsRepository,
                 DefaultEventReporter(
                     mode = EventReporter.Mode.Custom,
                     starterArgs.sessionId,

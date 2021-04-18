@@ -46,7 +46,6 @@ class PaymentOptionsViewModelTest {
     private val viewModel = PaymentOptionsViewModel(
         args = PAYMENT_OPTION_CONTRACT_ARGS,
         prefsRepository = prefsRepository,
-        paymentMethodsRepository = paymentMethodRepository,
         eventReporter = eventReporter,
         workContext = testDispatcher,
         application = ApplicationProvider.getApplicationContext()
@@ -182,7 +181,6 @@ class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newCard = null),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
@@ -209,7 +207,6 @@ class PaymentOptionsViewModelTest {
                 )
             ),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
@@ -236,7 +233,6 @@ class PaymentOptionsViewModelTest {
                 )
             ),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()

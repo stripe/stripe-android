@@ -336,7 +336,6 @@ class PaymentOptionsActivityTest {
         return PaymentOptionsViewModel(
             args = args,
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = FakePaymentMethodsRepository(args.paymentMethods),
             eventReporter = eventReporter,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
