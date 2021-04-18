@@ -218,6 +218,44 @@ class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `onPaymentOptionResult() with failure when initial value is a card invoke callback with last saved`() {
+        val flowController = createFlowController(
+            savedSelection = SavedSelection.GooglePay
+        )
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Failed(Exception("Message for testing"))
+        )
+
+        verify(paymentOptionCallback).onPaymentOption(
+            PaymentOption(R.drawable.stripe_google_pay_mark, "Google Pay")
+        )
+    }
+
+    @Test
+    fun `onPaymentOptionResult() with null invoke callback with null`() {
+        val flowController = createFlowController(
+            savedSelection = SavedSelection.GooglePay
+        )
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+
+        flowController.onPaymentOptionResult(null)
+
+        verify(paymentOptionCallback).onPaymentOption(isNull())
+    }
+
+    @Test
     fun `onPaymentOptionResult() adds payment method which is added on next open`() {
         // Create a default flow controller with the paymentMethods initialized with cards.
         val initialPaymentMethods = PaymentMethodFixtures.createCards(5)
@@ -257,7 +295,7 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onPaymentOptionResult() with cancelled result should return invoke callback with null`() {
+    fun `onPaymentOptionResult() with cancelled invoke callback when initial value is null`() {
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -269,6 +307,27 @@ class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionCallback).onPaymentOption(isNull())
+    }
+
+    @Test
+    fun `onPaymentOptionResult() with cancelled invoke callback when initial value is a card`() {
+        val flowController = createFlowController(
+            savedSelection = SavedSelection.GooglePay
+        )
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Canceled(null)
+        )
+
+        verify(paymentOptionCallback).onPaymentOption(
+            PaymentOption(R.drawable.stripe_google_pay_mark, "Google Pay")
+        )
     }
 
     @Test
