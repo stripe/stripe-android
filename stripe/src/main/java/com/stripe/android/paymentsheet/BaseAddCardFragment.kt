@@ -103,8 +103,7 @@ internal abstract class BaseAddCardFragment(
         saveCardCheckbox = viewBinding.saveCardCheckbox
         addCardHeader = viewBinding.addCardHeader
 
-        billingAddressView.level = sheetViewModel.config?.billingAddressCollection
-            ?: PaymentSheet.BillingAddressCollectionLevel.Automatic
+        billingAddressView.level = BillingAddressView.BillingAddressCollectionLevel.Automatic
 
         // This must be done prior to setting up the card widget or the save card checkbox won't
         // populate correctly.

@@ -10,7 +10,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.Address
 import com.stripe.android.model.AddressFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.Country
@@ -57,7 +56,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing selectedCountry to country without postal code when level=Required should hide postal code view but show city view`() {
-        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
+        billingAddressView.level = BillingAddressView.BillingAddressCollectionLevel.Required
         billingAddressView.countryLayout.selectedCountry = ZIMBABWE
         idleLooper()
         assertThat(billingAddressView.postalCodeLayout.isVisible)
@@ -255,7 +254,7 @@ class BillingAddressViewTest {
         billingAddressView.cityView.setText("San Francisco")
         billingAddressView.stateView.setText("California")
 
-        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Required
+        billingAddressView.level = BillingAddressView.BillingAddressCollectionLevel.Required
         assertThat(billingAddressView.address.value)
             .isEqualTo(
                 Address(
@@ -268,7 +267,7 @@ class BillingAddressViewTest {
                 )
             )
 
-        billingAddressView.level = PaymentSheet.BillingAddressCollectionLevel.Automatic
+        billingAddressView.level = BillingAddressView.BillingAddressCollectionLevel.Automatic
         assertThat(billingAddressView.address.value)
             .isEqualTo(
                 Address(
