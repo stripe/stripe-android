@@ -26,7 +26,8 @@ internal class DefaultFlowControllerInitializer(
         clientSecret: ClientSecret,
         configuration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
-        val isGooglePayReady = isGooglePayReadySupplier(configuration?.googlePay?.environment)
+        val isGooglePayReady =
+            configuration?.let { isGooglePayReadySupplier(it.googlePay?.environment) } ?: false
         configuration?.customer?.let { customerConfig ->
             createWithCustomer(
                 clientSecret,

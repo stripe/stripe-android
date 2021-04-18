@@ -8,7 +8,8 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import org.junit.Test
 
 class ConfirmParamsFactoryTest {
-    private val factory = ConfirmParamsFactory(PAYMENT_INTENT_CLIENT_SECRET)
+    private val factory =
+        ConfirmParamsFactory(ClientSecret.PaymentIntentClientSecret(CLIENT_SECRET))
 
     @Test
     fun `create() with new card when savePaymentMethod is true should create params with setupFutureUsage = OffSession`() {
@@ -32,7 +33,5 @@ class ConfirmParamsFactoryTest {
 
     private companion object {
         private const val CLIENT_SECRET = PaymentSheetFixtures.CLIENT_SECRET
-        private val PAYMENT_INTENT_CLIENT_SECRET =
-            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET
     }
 }
