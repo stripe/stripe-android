@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -19,9 +20,8 @@ internal class GooglePayButton @JvmOverloads constructor(
     )
 
     init {
-        viewBinding.buyButton.background.setTint(Color.BLACK)
         isClickable = true
-        isEnabled = false
+        isEnabled = true
     }
 
     private fun onReadyState() {
@@ -30,11 +30,13 @@ internal class GooglePayButton @JvmOverloads constructor(
     }
 
     private fun onStartProcessing() {
+        viewBinding.buyButton.backgroundTintList = (ColorStateList.valueOf(Color.BLACK))
         viewBinding.buyButton.isVisible = true
         viewBinding.googlePayButtonIcon.isVisible = false
     }
 
     private fun onFinishProcessing() {
+        viewBinding.buyButton.backgroundTintList = null
         viewBinding.buyButton.isVisible = true
         viewBinding.googlePayButtonIcon.isVisible = false
     }

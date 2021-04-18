@@ -31,7 +31,7 @@ internal class PaymentSheetAddCardFragment(
     private val googleViewStateObserver = { viewState: ViewState.PaymentSheet? ->
         when (viewState) {
             is ViewState.PaymentSheet.Ready -> googlePayButton.updateState(
-                PrimaryButton.State.Ready("")
+                PrimaryButton.State.Ready()
             )
             is ViewState.PaymentSheet.StartProcessing -> googlePayButton.updateState(
                 PrimaryButton.State.StartProcessing
@@ -63,14 +63,13 @@ internal class PaymentSheetAddCardFragment(
         }
 
         googlePayButton.isVisible = shouldShowGooglePayButton
-        googlePayButton.isEnabled = true
 
         googlePayDivider.isVisible = shouldShowGooglePayButton
         addCardHeader.isVisible = !shouldShowGooglePayButton
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
-                sheetViewModel.checkout()
+                sheetViewModel.checkout(googlePayButton.id)
             }
         }
 
@@ -80,6 +79,7 @@ internal class PaymentSheetAddCardFragment(
             }
         }
 
-        sheetViewModel.googleViewState.observe(viewLifecycleOwner, googleViewStateObserver)
+        sheetViewModel.getViewStateObservable(googlePayButton.id)
+            .observe(viewLifecycleOwner, googleViewStateObserver)
     }
 }

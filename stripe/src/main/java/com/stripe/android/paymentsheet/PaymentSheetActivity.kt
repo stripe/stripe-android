@@ -99,7 +99,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         )
     }
 
-    private val viewStateObserver = { viewState: ViewState.PaymentSheet? ->
+    private val buyViewStateObserver = { viewState: ViewState.PaymentSheet? ->
         when (viewState) {
             is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.Ready(getLabelText(viewState))
@@ -108,6 +108,23 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 PrimaryButton.State.StartProcessing
             )
             is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
+            )
+            is ViewState.PaymentSheet.ProcessResult -> processResult(
+                viewState.result
+            )
+        }
+    }
+
+    private val googlePayViewStateObserver = { viewState: ViewState.PaymentSheet? ->
+        when (viewState) {
+            is ViewState.PaymentSheet.Ready -> viewBinding.googlePayButton.updateState(
+                PrimaryButton.State.Ready(getLabelText(viewState))
+            )
+            is ViewState.PaymentSheet.StartProcessing -> viewBinding.googlePayButton.updateState(
+                PrimaryButton.State.StartProcessing
+            )
+            is ViewState.PaymentSheet.FinishProcessing -> viewBinding.googlePayButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
             is ViewState.PaymentSheet.ProcessResult -> processResult(
@@ -227,6 +244,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
                 )
             }
         }
+
+        // This needs to be handled in the case where the google pay button on the add
+        // fragment is listening for events.  The page still needs to know to close the sheet.
+        viewModel.viewState.observe(this) { viewState ->
+            if (viewState is ViewState.PaymentSheet.ProcessResult) {
+                processResult(viewState.result)
+            }
+        }
     }
 
     private fun fetchConfig() {
@@ -298,7 +323,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     }
 
     private fun setupBuyButton() {
-        viewModel.viewState.observe(this, viewStateObserver)
+        viewModel.initViewState(viewBinding.buyButton.id)
+        viewModel.getViewStateObservable(viewBinding.googlePayButton.id)
+            .observe(this, googlePayViewStateObserver)
+
+        viewModel.getViewStateObservable(viewBinding.buyButton.id)
+            .observe(this, buyViewStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
             val shouldShowGooglePay =
@@ -311,11 +341,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
 
         viewBinding.googlePayButton.setOnClickListener {
-            viewModel.checkout()
+            viewModel.checkout(viewBinding.googlePayButton.id)
         }
 
         viewBinding.buyButton.setOnClickListener {
-            viewModel.checkout()
+            viewModel.checkout(viewBinding.buyButton.id)
         }
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->
