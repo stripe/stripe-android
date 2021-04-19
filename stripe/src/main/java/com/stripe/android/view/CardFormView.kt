@@ -30,7 +30,7 @@ import com.stripe.android.view.CardValidCallback.Fields
  * The postal code field adjust its form accordingly based on currently selected country.
  *
  * Use [R.styleable.StripeCardFormView_cardFormStyle] to toggle style between [Style.Standard] and [Style.Borderless],
- * Use [R.styleable.StripeCardFormView_formBackgroundColorStateList] to change the card's background color in enable and disabled state.
+ * Use [R.styleable.StripeCardFormView_backgroundColorStateList] to change the card form's background color in enable and disabled state.
  *
  * To access the [CardParams], see details in [cardParams] property.
  * To get notified if the current card params are valid, set a [CardValidCallback] object with [setCardValidCallback].
@@ -140,18 +140,18 @@ internal class CardFormView @JvmOverloads constructor(
         setupCountryAndPostal()
         setupCardWidget()
 
-        var formBackgroundColorStateList: ColorStateList? = null
+        var backgroundColorStateList: ColorStateList? = null
 
         context.withStyledAttributes(
             attrs,
             R.styleable.StripeCardFormView
         ) {
-            formBackgroundColorStateList =
-                getColorStateList(R.styleable.StripeCardFormView_formBackgroundColorStateList)
+            backgroundColorStateList =
+                getColorStateList(R.styleable.StripeCardFormView_backgroundColorStateList)
             style = Style.values()[getInt(R.styleable.StripeCardFormView_cardFormStyle, 0)]
         }
 
-        formBackgroundColorStateList?.let {
+        backgroundColorStateList?.let {
             cardContainer.setCardBackgroundColor(it)
             cardMultilineWidget.setBackgroundColor(Color.TRANSPARENT)
             countryLayout.setBackgroundColor(Color.TRANSPARENT)
