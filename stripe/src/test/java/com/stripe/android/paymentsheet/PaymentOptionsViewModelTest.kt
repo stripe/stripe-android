@@ -73,7 +73,7 @@ class PaymentOptionsViewModelTest {
         viewModel.onUserSelection()
 
         assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
-            .isEqualTo(PaymentOptionResult.Succeeded.Existing(SELECTION_SAVED_PAYMENT_METHOD))
+            .isEqualTo(PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD))
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
@@ -90,7 +90,7 @@ class PaymentOptionsViewModelTest {
 
             assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
                 .isEqualTo(
-                    PaymentOptionResult.Succeeded.Unsaved(
+                    PaymentOptionResult.Succeeded(
                         NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION
                     )
                 )
@@ -126,11 +126,9 @@ class PaymentOptionsViewModelTest {
 
             val paymentOptionResultSucceeded =
                 (viewState[3] as ViewState.PaymentOptions.ProcessResult)
-                    .result as PaymentOptionResult.Succeeded.NewlySaved
+                    .result as PaymentOptionResult.Succeeded
             assertThat((paymentOptionResultSucceeded).paymentSelection)
                 .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-            assertThat((paymentOptionResultSucceeded).newSavedPaymentMethod)
-                .isEqualTo(paymentMethodRepository.savedPaymentMethod)
             verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
 
             assertThat((prefsRepository.getSavedSelection() as SavedSelection.PaymentMethod).id)
@@ -169,7 +167,7 @@ class PaymentOptionsViewModelTest {
         viewModel.onUserSelection()
 
         verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-        assertThat(viewStates.size).isEqualTo(3)
+        assertThat(viewStates.size).isEqualTo(2)
         assertThat(viewStates[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
         assertThat(viewStates[1]).isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
         assertThat(viewStates[2]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)

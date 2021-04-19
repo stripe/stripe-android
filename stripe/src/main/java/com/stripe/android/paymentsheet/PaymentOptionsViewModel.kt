@@ -72,7 +72,7 @@ internal class PaymentOptionsViewModel(
         _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
         _viewState.value = ViewState.PaymentOptions.ProcessResult(
-            PaymentOptionResult.Succeeded.Existing(paymentSelection)
+            PaymentOptionResult.Succeeded(paymentSelection)
         )
     }
 
@@ -80,7 +80,7 @@ internal class PaymentOptionsViewModel(
         _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
         _viewState.value = ViewState.PaymentOptions.ProcessResult(
-            PaymentOptionResult.Succeeded.Unsaved(paymentSelection)
+            PaymentOptionResult.Succeeded(paymentSelection)
         )
     }
 
