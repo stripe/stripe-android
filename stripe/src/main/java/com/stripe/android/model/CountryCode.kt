@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import java.util.Locale
 
-data class CountryCode private constructor(
+internal data class CountryCode private constructor(
     val twoLetters: String,
 ) {
     companion object {

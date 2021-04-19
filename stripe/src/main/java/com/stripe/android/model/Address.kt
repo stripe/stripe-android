@@ -19,7 +19,7 @@ data class Address internal constructor(
     val postalCode: String? = null,
     val state: String? = null
 ) : StripeModel, StripeParamsModel {
-    val countryCode: CountryCode?
+    internal val countryCode: CountryCode?
         get() = country?.takeUnless { it.isBlank() }?.let { CountryCode.create(it) }
 
     override fun toParamMap(): Map<String, Any> {
@@ -56,7 +56,7 @@ data class Address internal constructor(
             this.country = country?.toUpperCase(Locale.ROOT)
         }
 
-        fun setCountryCode(country: CountryCode?): Builder = apply {
+        internal fun setCountryCode(country: CountryCode?): Builder = apply {
             this.country = country?.twoLetters
         }
 
