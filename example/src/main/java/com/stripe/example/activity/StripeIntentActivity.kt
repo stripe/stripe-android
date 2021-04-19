@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
@@ -175,49 +174,17 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         keyboardController.hide()
 
         viewModel.status.value += "\n\nPayment authentication completed, getting result"
-        if (viewModel.useSuspendApi) {
-            if (stripe.isPaymentResult(requestCode, data)) {
-                lifecycleScope.launch {
-                    viewModel.paymentIntentResultLiveData.value = runCatching {
-                        stripe.getPaymentIntentResult(requestCode, data!!)
-                    }
-                }
-            } else if(stripe.isSetupResult(requestCode, data)) {
-                lifecycleScope.launch {
-                    viewModel.setupIntentResultLiveData.value = runCatching {
-                        stripe.getSetupIntentResult(requestCode, data!!)
-                    }
+        if (stripe.isPaymentResult(requestCode, data)) {
+            lifecycleScope.launch {
+                viewModel.paymentIntentResultLiveData.value = runCatching {
+                    stripe.getPaymentIntentResult(requestCode, data!!)
                 }
             }
-        } else {
-            if (stripe.isPaymentResult(requestCode, data)) {
-                stripe.onPaymentResult(
-                    requestCode,
-                    data,
-                    object : ApiResultCallback<PaymentIntentResult> {
-                        override fun onSuccess(result: PaymentIntentResult) {
-                            viewModel.paymentIntentResultLiveData.value = Result.success(result)
-                        }
-
-                        override fun onError(e: Exception) {
-                            viewModel.paymentIntentResultLiveData.value = Result.failure(e)
-                        }
-                    }
-                )
-            } else {
-                stripe.onSetupResult(
-                    requestCode,
-                    data,
-                    object : ApiResultCallback<SetupIntentResult> {
-                        override fun onSuccess(result: SetupIntentResult) {
-                            viewModel.setupIntentResultLiveData.value = Result.success(result)
-                        }
-
-                        override fun onError(e: Exception) {
-                            viewModel.setupIntentResultLiveData.value = Result.failure(e)
-                        }
-                    }
-                )
+        } else if(stripe.isSetupResult(requestCode, data)) {
+            lifecycleScope.launch {
+                viewModel.setupIntentResultLiveData.value = runCatching {
+                    stripe.getSetupIntentResult(requestCode, data!!)
+                }
             }
         }
     }

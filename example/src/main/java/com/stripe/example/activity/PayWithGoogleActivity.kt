@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.IsReadyToPayRequest
@@ -15,13 +16,13 @@ import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
-import com.stripe.android.ApiResultCallback
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Stripe
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.createPaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.GooglePayActivityBinding
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 class PayWithGoogleActivity : AppCompatActivity() {
@@ -164,22 +165,18 @@ class PayWithGoogleActivity : AppCompatActivity() {
 
         viewBinding.googlePayResult.text = paymentDataJson.toString(2)
 
-        val paymentMethodCreateParams =
-            PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
-
-        stripe.createPaymentMethod(
-            paymentMethodCreateParams,
-            callback = object : ApiResultCallback<PaymentMethod> {
-                override fun onSuccess(result: PaymentMethod) {
-                    showSnackbar("Created PaymentMethod ${result.id}")
-                }
-
-                override fun onError(e: Exception) {
-                    Log.e("StripeExample", "Exception while creating PaymentMethod", e)
-                    showSnackbar("Exception while creating PaymentMethod")
-                }
+        lifecycleScope.launch {
+            try {
+                val pm = stripe.createPaymentMethod(
+                    PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
+                )
+                showSnackbar("Created PaymentMethod ${pm.id}")
+            } catch (e: java.lang.Exception) {
+                Log.e("StripeExample", "Exception while creating PaymentMethod", e)
+                showSnackbar("Exception while creating PaymentMethod")
             }
-        )
+
+        }
     }
 
     private fun showSnackbar(message: String) {

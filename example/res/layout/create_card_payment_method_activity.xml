@@ -37,12 +37,6 @@
             android:layout_width="320dp"
             android:text="@string/create_payment_method" />
 
-        <CheckBox
-            android:id="@+id/use_suspend_api"
-            android:layout_height="wrap_content"
-            android:layout_width="320dp"
-            android:text="@string/use_suspend_api" />
-
         <TextView
             style="@style/Header"
             android:layout_marginTop="30dp"

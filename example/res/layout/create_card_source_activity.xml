@@ -43,13 +43,6 @@
             android:layout_gravity="center"
             android:text="@string/create_source_header"/>
 
-        <CheckBox
-            android:id="@+id/use_suspend_api"
-            android:layout_height="wrap_content"
-            android:layout_width="160dp"
-            android:layout_gravity="center"
-            android:text="@string/use_suspend_api" />
-
         <TextView android:text="@string/updatedSources"
                   style="@style/Header" />
 

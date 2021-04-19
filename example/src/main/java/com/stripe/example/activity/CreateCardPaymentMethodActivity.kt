@@ -44,14 +44,14 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             keyboardController.hide()
 
             viewBinding.cardMultilineWidget.paymentMethodCreateParams?.let {
-                createPaymentMethod(it, viewBinding.useSuspendApi.isChecked)
+                createPaymentMethod(it)
             }
         }
     }
 
-    private fun createPaymentMethod(params: PaymentMethodCreateParams, useSuspendApi: Boolean) {
+    private fun createPaymentMethod(params: PaymentMethodCreateParams) {
         onCreatePaymentMethodStart()
-        viewModel.createPaymentMethod(params, useSuspendApi).observe(
+        viewModel.createPaymentMethod(params).observe(
             this,
             { result ->
                 onCreatePaymentMethodCompleted()
@@ -72,13 +72,11 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
     private fun onCreatePaymentMethodStart() {
         viewBinding.progressBar.visibility = View.VISIBLE
         viewBinding.createButton.isEnabled = false
-        viewBinding.useSuspendApi.isEnabled = false
     }
 
     private fun onCreatePaymentMethodCompleted() {
         viewBinding.progressBar.visibility = View.INVISIBLE
         viewBinding.createButton.isEnabled = true
-        viewBinding.useSuspendApi.isEnabled = true
     }
 
     private fun onCreatedPaymentMethod(paymentMethod: PaymentMethod?) {

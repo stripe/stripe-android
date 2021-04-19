@@ -94,15 +94,13 @@ class CreateCardSourceActivity : AppCompatActivity() {
         keyboardController.hide()
 
         viewBinding.createButton.isEnabled = false
-        viewBinding.useSuspendApi.isEnabled = false
         viewBinding.progressBar.visibility = View.VISIBLE
 
         val params = SourceParams.createCardParams(cardParams)
-        viewModel.createSource(params, viewBinding.useSuspendApi.isChecked).observe(
+        viewModel.createSource(params).observe(
             this,
             { result ->
                 viewBinding.createButton.isEnabled = true
-                viewBinding.useSuspendApi.isEnabled = true
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
                 result.fold(
@@ -146,7 +144,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
             cardId = source.id.orEmpty()
         )
 
-        viewModel.createSource(params, viewBinding.useSuspendApi.isChecked).observe(
+        viewModel.createSource(params).observe(
             this,
             { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
