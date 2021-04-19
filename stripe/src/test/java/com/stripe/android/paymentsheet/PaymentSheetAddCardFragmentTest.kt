@@ -14,6 +14,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -23,7 +24,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.view.CountryCode
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
