@@ -11,15 +11,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.ApiResultCallback
+import com.stripe.android.createCardToken
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.Token
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.CreateCardTokenActivityBinding
 import com.stripe.example.databinding.TokenItemBinding
+import kotlinx.coroutines.launch
 
 class CreateCardTokenActivity : AppCompatActivity() {
     private val viewBinding: CreateCardTokenActivityBinding by lazy {
@@ -48,7 +51,7 @@ class CreateCardTokenActivity : AppCompatActivity() {
 
             viewBinding.cardInputWidget.cardParams?.let { cardParams ->
                 onRequestStart()
-                viewModel.createCardToken(cardParams).observe(
+                viewModel.createCardToken(cardParams, viewBinding.useSuspendApi.isChecked).observe(
                     this,
                     {
                         onRequestEnd()
@@ -68,11 +71,13 @@ class CreateCardTokenActivity : AppCompatActivity() {
     private fun onRequestStart() {
         viewBinding.progressBar.visibility = View.VISIBLE
         viewBinding.createTokenButton.isEnabled = false
+        viewBinding.useSuspendApi.isEnabled = false
     }
 
     private fun onRequestEnd() {
         viewBinding.progressBar.visibility = View.INVISIBLE
         viewBinding.createTokenButton.isEnabled = true
+        viewBinding.useSuspendApi.isEnabled = true
     }
 
     internal class Adapter(
@@ -118,23 +123,35 @@ class CreateCardTokenActivity : AppCompatActivity() {
     ) : AndroidViewModel(application) {
         private val stripe = StripeFactory(application).create()
 
-        fun createCardToken(cardParams: CardParams): LiveData<Token> {
+        fun createCardToken(cardParams: CardParams, useSuspendApi: Boolean): LiveData<Token> {
             val data = MutableLiveData<Token>()
-
-            stripe.createCardToken(
-                cardParams,
-                callback = object : ApiResultCallback<Token> {
-                    override fun onSuccess(result: Token) {
-                        BackgroundTaskTracker.onStop()
-                        data.value = result
-                    }
-
-                    override fun onError(e: Exception) {
-                        BackgroundTaskTracker.onStop()
+            if (useSuspendApi) {
+                viewModelScope.launch {
+                    data.value = try {
+                        stripe.createCardToken(cardParams)
+                    } catch (e: Exception) {
                         Log.e("StripeExample", "Error while creating card token", e)
+                        null
+                    } finally {
+                        BackgroundTaskTracker.onStop()
                     }
                 }
-            )
+            } else {
+                stripe.createCardToken(
+                    cardParams,
+                    callback = object : ApiResultCallback<Token> {
+                        override fun onSuccess(result: Token) {
+                            BackgroundTaskTracker.onStop()
+                            data.value = result
+                        }
+
+                        override fun onError(e: Exception) {
+                            BackgroundTaskTracker.onStop()
+                            Log.e("StripeExample", "Error while creating card token", e)
+                        }
+                    }
+                )
+            }
 
             return data
         }

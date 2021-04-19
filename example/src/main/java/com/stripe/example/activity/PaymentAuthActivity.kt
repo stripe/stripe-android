@@ -80,6 +80,11 @@ class PaymentAuthActivity : StripeIntentActivity() {
                 stripeAccountId = stripeAccountId
             )
         }
+
+        viewBinding.useSuspendApi.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.useSuspendApi = isChecked
+        }
+
     }
 
     private fun enableUi(enable: Boolean) {
@@ -88,6 +93,7 @@ class PaymentAuthActivity : StripeIntentActivity() {
         viewBinding.confirmWith3ds1Button.isEnabled = enable
         viewBinding.confirmWithNewCardButton.isEnabled = enable
         viewBinding.setupButton.isEnabled = enable
+        viewBinding.useSuspendApi.isEnabled = enable
     }
 
     private companion object {

@@ -38,6 +38,12 @@
             android:text="@string/create_token"
             />
 
+        <CheckBox
+            android:id="@+id/use_suspend_api"
+            android:layout_height="wrap_content"
+            android:layout_width="160dp"
+            android:text="@string/use_suspend_api" />
+
         <TextView android:id="@+id/token_list_title"
                   android:text="@string/paymentMethods"
                   android:layout_marginTop="12dp"

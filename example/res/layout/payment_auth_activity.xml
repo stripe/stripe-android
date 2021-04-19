@@ -76,11 +76,19 @@
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"/>
 
+        <CheckBox
+            android:id="@+id/use_suspend_api"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/use_suspend_api"
+            android:layout_marginBottom="12dp" />
+
         <TextView
             android:id="@+id/status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:typeface="monospace"
             android:layout_marginTop="40dp"/>
+
     </LinearLayout>
 </ScrollView>

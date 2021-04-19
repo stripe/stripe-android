@@ -7,8 +7,10 @@ import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
+import com.stripe.android.getAuthenticateSourceResult
 import com.stripe.android.model.Address
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.KlarnaSourceParams
@@ -16,6 +18,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.KlarnaSourceActivityBinding
+import kotlinx.coroutines.launch
 
 class KlarnaSourceActivity : AppCompatActivity() {
     private val viewBinding: KlarnaSourceActivityBinding by lazy {
@@ -59,7 +62,10 @@ class KlarnaSourceActivity : AppCompatActivity() {
 
         viewBinding.fetchButton.setOnClickListener {
             disableUi()
-            viewModel.fetchSource(viewModel.source).observe(
+            viewModel.fetchSource(
+                viewModel.source,
+                viewBinding.useSuspendApi.isChecked
+            ).observe(
                 this,
                 { result ->
                     enableUi()
@@ -71,24 +77,41 @@ class KlarnaSourceActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        if (data != null && stripe.isAuthenticateSourceResult(requestCode, data)) {
-            stripe.onAuthenticateSourceResult(
-                data,
-                object : ApiResultCallback<Source> {
-                    override fun onSuccess(result: Source) {
-                        enableUi()
-                        viewModel.source = result
-                        logSource(result)
-                    }
-
-                    override fun onError(e: Exception) {
+        if (viewBinding.useSuspendApi.isChecked) {
+            data?.let {
+                lifecycleScope.launch {
+                    viewModel.source = try {
+                        stripe.getAuthenticateSourceResult(requestCode, data).let { result ->
+                            enableUi()
+                            result
+                        }
+                    } catch (e: java.lang.Exception) {
                         enableUi()
                         logException(e)
+                        null
                     }
                 }
-            )
+            }
+        } else {
+            if (data != null && stripe.isAuthenticateSourceResult(requestCode, data)) {
+                stripe.onAuthenticateSourceResult(
+                    data,
+                    object : ApiResultCallback<Source> {
+                        override fun onSuccess(result: Source) {
+                            enableUi()
+                            viewModel.source = result
+                            logSource(result)
+                        }
+
+                        override fun onError(e: Exception) {
+                            enableUi()
+                            logException(e)
+                        }
+                    }
+                )
+            }
         }
+
     }
 
     private fun logSource(source: Source) {
@@ -112,11 +135,13 @@ class KlarnaSourceActivity : AppCompatActivity() {
     private fun enableUi() {
         viewBinding.progressBar.visibility = View.INVISIBLE
         buttons.forEach { it.isEnabled = true }
+        viewBinding.useSuspendApi.isEnabled = true
     }
 
     private fun disableUi() {
         viewBinding.progressBar.visibility = View.VISIBLE
         buttons.forEach { it.isEnabled = false }
+        viewBinding.useSuspendApi.isEnabled = false
     }
 
     private fun createKlarnaSource(): LiveData<Result<Source>> {
@@ -143,7 +168,8 @@ class KlarnaSourceActivity : AppCompatActivity() {
                     billingPhone = "02012267709",
                     billingDob = DateOfBirth(1, 1, 1990)
                 )
-            )
+            ),
+            viewBinding.useSuspendApi.isChecked
         )
     }
 

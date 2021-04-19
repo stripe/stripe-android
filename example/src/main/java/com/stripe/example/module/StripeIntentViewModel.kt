@@ -22,6 +22,8 @@ internal open class StripeIntentViewModel(
     val paymentIntentResultLiveData = MutableLiveData<Result<PaymentIntentResult>>()
     val setupIntentResultLiveData = MutableLiveData<Result<SetupIntentResult>>()
 
+    var useSuspendApi: Boolean = false
+
     fun createPaymentIntent(
         country: String,
         customerId: String? = null
