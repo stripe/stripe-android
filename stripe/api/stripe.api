@@ -821,6 +821,8 @@ public final class com/stripe/android/Stripe {
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun isAuthenticateSourceResult (ILandroid/content/Intent;)Z
+	public final fun isPaymentResult (ILandroid/content/Intent;)Z
+	public final fun isSetupResult (ILandroid/content/Intent;)Z
 	public final fun onAuthenticateSourceResult (Landroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun onPaymentResult (ILandroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)Z
 	public final fun onSetupResult (ILandroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)Z
@@ -932,6 +934,9 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun createPiiToken$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createSource (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createSource$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun getAuthenticateSourceResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getPaymentIntentResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getSetupIntentResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun retrievePaymentIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun retrieveSetupIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -2425,7 +2430,6 @@ public final class com/stripe/android/model/PaymentIntent$CaptureMethod : java/l
 
 public final class com/stripe/android/model/PaymentIntent$Companion {
 	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentIntent;
-	public final fun isClientSecretValid (Ljava/lang/String;)Z
 }
 
 public final class com/stripe/android/model/PaymentIntent$ConfirmationMethod : java/lang/Enum {
@@ -3734,7 +3738,6 @@ public final class com/stripe/android/model/SetupIntent$CancellationReason : jav
 
 public final class com/stripe/android/model/SetupIntent$Companion {
 	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/SetupIntent;
-	public final fun isClientSecretValid (Ljava/lang/String;)Z
 }
 
 public class com/stripe/android/model/SetupIntent$Creator : android/os/Parcelable$Creator {
@@ -5649,6 +5652,7 @@ public final class com/stripe/android/view/CardValidCallback$Fields : java/lang/
 	public static final field Cvc Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static final field Expiry Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static final field Number Lcom/stripe/android/view/CardValidCallback$Fields;
+	public static final field Postal Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/view/CardValidCallback$Fields;
 	public static fun values ()[Lcom/stripe/android/view/CardValidCallback$Fields;
 }

@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import android.content.Intent
 import androidx.annotation.Size
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -570,11 +571,122 @@ suspend fun Stripe.confirmPaymentIntent(
  *
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
-private inline fun <reified APIObject : StripeModel> runApiRequest(
-    block: () -> APIObject?
-): APIObject =
+private inline fun <reified ApiObject : StripeModel> runApiRequest(
+    block: () -> ApiObject?
+): ApiObject =
     runCatching {
         requireNotNull(block()) {
-            "Failed to parse ${APIObject::class.java.simpleName}."
+            "Failed to parse ${ApiObject::class.java.simpleName}."
         }
+    }.getOrElse { throw StripeException.create(it) }
+
+/**
+ * Get the [PaymentIntentResult] from [Intent] returned via
+ * Activity#onActivityResult(int, int, Intent)}} for PaymentIntent automatic confirmation
+ * (see [confirmPayment]) or manual confirmation (see [handleNextActionForPayment]})
+ *
+ * @param requestCode [Int] code passed from Activity#onActivityResult
+ * @param data [Intent] intent from Activity#onActivityResult
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class,
+)
+suspend fun Stripe.getPaymentIntentResult(
+    requestCode: Int,
+    data: Intent,
+): PaymentIntentResult {
+    return runApiRequest(
+        isPaymentResult(
+            requestCode,
+            data
+        )
+    ) { paymentController.getPaymentIntentResult(data) }
+}
+
+/**
+ * Get the [SetupIntentResult] from [Intent] returned via
+ * Activity#onActivityResult(int, int, Intent)}} for SetupIntentResult confirmation.
+ * (see [confirmSetupIntent])
+ *
+ * @param requestCode [Int] code passed from Activity#onActivityResult
+ * @param data [Intent] intent from Activity#onActivityResult
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class,
+    IllegalArgumentException::class
+)
+suspend fun Stripe.getSetupIntentResult(
+    requestCode: Int,
+    data: Intent,
+): SetupIntentResult {
+    return runApiRequest(
+        isSetupResult(
+            requestCode,
+            data
+        )
+    ) { paymentController.getSetupIntentResult(data) }
+}
+
+/**
+ * Get the [Source] from [Intent] returned via
+ * Activity#onActivityResult(int, int, Intent)}} for [Source] authentication.
+ * (see [authenticateSource])
+ *
+ * @param requestCode [Int] code passed from Activity#onActivityResult
+ * @param data [Intent] intent from Activity#onActivityResult
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.getAuthenticateSourceResult(
+    requestCode: Int,
+    data: Intent,
+): Source {
+    return runApiRequest(
+        isAuthenticateSourceResult(
+            requestCode,
+            data
+        )
+    ) { paymentController.getAuthenticateSourceResult(data) }
+}
+
+/**
+ * Consume the [IllegalArgumentException] caused by empty result from Stripe's internal Json Parser,
+ * throw [InvalidRequestException] for public API.
+ *
+ * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
+ */
+internal inline fun <reified ApiObject : StripeModel> runApiRequest(
+    isValidParam: Boolean,
+    block: () -> ApiObject
+): ApiObject =
+    runCatching {
+        require(isValidParam) {
+            "Incorrect requestCode and data for ${ApiObject::class.java.simpleName}."
+        }
+        block()
     }.getOrElse { throw StripeException.create(it) }

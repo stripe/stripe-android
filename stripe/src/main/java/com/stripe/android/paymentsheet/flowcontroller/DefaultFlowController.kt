@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -101,26 +102,40 @@ internal class DefaultFlowController internal constructor(
         stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
     )
 
-    override fun configure(
-        intentClientSecret: String,
-        configuration: PaymentSheet.Configuration,
+    override fun configureWithPaymentIntent(
+        paymentIntentClientSecret: String,
+        configuration: PaymentSheet.Configuration?,
+        callback: PaymentSheet.FlowController.ConfigCallback
+    ) {
+        configureInternal(
+            ClientSecret.PaymentIntentClientSecret(paymentIntentClientSecret),
+            configuration,
+            callback
+        )
+    }
+
+    override fun configureWithSetupIntent(
+        setupIntentClientSecret: String,
+        configuration: PaymentSheet.Configuration?,
+        callback: PaymentSheet.FlowController.ConfigCallback
+    ) {
+        configureInternal(
+            ClientSecret.SetupIntentClientSecret(setupIntentClientSecret),
+            configuration,
+            callback
+        )
+    }
+
+    private fun configureInternal(
+        clientSecret: ClientSecret,
+        configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
-                intentClientSecret,
+                clientSecret,
                 configuration
             )
-            dispatchResult(result, callback)
-        }
-    }
-
-    override fun configure(
-        intentClientSecret: String,
-        callback: PaymentSheet.FlowController.ConfigCallback
-    ) {
-        lifecycleScope.launch {
-            val result = flowControllerInitializer.init(intentClientSecret)
 
             if (isActive) {
                 dispatchResult(result, callback)
@@ -196,7 +211,7 @@ internal class DefaultFlowController internal constructor(
         initData: InitData
     ) {
         val confirmParamsFactory = ConfirmParamsFactory(
-            initData.paymentIntent.clientSecret.orEmpty()
+            ClientSecret.PaymentIntentClientSecret(initData.paymentIntent.clientSecret.orEmpty())
         )
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -321,7 +336,15 @@ internal class DefaultFlowController internal constructor(
                     )
                 )
             }
+            is PaymentOptionResult.Failed, is PaymentOptionResult.Canceled -> {
+                paymentOptionCallback.onPaymentOption(
+                    viewModel.paymentSelection?.let {
+                        paymentOptionFactory.create(it)
+                    }
+                )
+            }
             else -> {
+                viewModel.paymentSelection = null
                 paymentOptionCallback.onPaymentOption(null)
             }
         }

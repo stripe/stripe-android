@@ -344,16 +344,10 @@ data class PaymentIntent internal constructor(
     }
 
     companion object {
-        private const val clientSecretRegexPattern = "^pi_[^_]+_secret_[^_]+$"
-
         fun fromJson(jsonObject: JSONObject?): PaymentIntent? {
             return jsonObject?.let {
                 PaymentIntentJsonParser().parse(it)
             }
-        }
-
-        fun isClientSecretValid(clientSecret: String): Boolean {
-            return Pattern.compile(clientSecretRegexPattern).matcher(clientSecret).matches()
         }
     }
 }

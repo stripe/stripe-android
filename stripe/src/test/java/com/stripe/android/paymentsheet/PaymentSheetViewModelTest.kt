@@ -346,7 +346,7 @@ internal class PaymentSheetViewModelTest {
         }
         viewModel.fetchStripeIntent()
         assertThat(error?.message)
-            .isEqualTo("Invalid client secret.")
+            .isEqualTo("Could not parse PaymentIntent.")
     }
 
     @Test

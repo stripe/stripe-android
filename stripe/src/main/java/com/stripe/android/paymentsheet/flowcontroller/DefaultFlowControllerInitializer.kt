@@ -4,6 +4,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -22,36 +23,27 @@ internal class DefaultFlowControllerInitializer(
     private val paymentIntentValidator = PaymentIntentValidator()
 
     override suspend fun init(
-        paymentIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration
+        clientSecret: ClientSecret,
+        configuration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
-        val isGooglePayReady = isGooglePayReadySupplier(configuration.googlePay?.environment)
-        configuration.customer?.let { customerConfig ->
+        val isGooglePayReady =
+            configuration?.let { isGooglePayReadySupplier(it.googlePay?.environment) } ?: false
+        configuration?.customer?.let { customerConfig ->
             createWithCustomer(
-                paymentIntentClientSecret,
+                clientSecret,
                 customerConfig,
                 configuration,
                 isGooglePayReady
             )
         } ?: createWithoutCustomer(
-            paymentIntentClientSecret,
+            clientSecret,
             configuration,
             isGooglePayReady
         )
     }
 
-    override suspend fun init(
-        paymentIntentClientSecret: String
-    ) = withContext(workContext) {
-        createWithoutCustomer(
-            paymentIntentClientSecret,
-            config = null,
-            isGooglePayReady = false
-        )
-    }
-
     private suspend fun createWithCustomer(
-        clientSecret: String,
+        clientSecret: ClientSecret,
         customerConfig: PaymentSheet.CustomerConfiguration,
         config: PaymentSheet.Configuration?,
         isGooglePayReady: Boolean
@@ -94,7 +86,7 @@ internal class DefaultFlowControllerInitializer(
     }
 
     private suspend fun createWithoutCustomer(
-        clientSecret: String,
+        clientSecret: ClientSecret,
         config: PaymentSheet.Configuration?,
         isGooglePayReady: Boolean
     ): FlowControllerInitializer.InitResult {
@@ -162,7 +154,7 @@ internal class DefaultFlowControllerInitializer(
     }
 
     private suspend fun retrievePaymentIntent(
-        clientSecret: String
+        clientSecret: ClientSecret
     ): PaymentIntent {
         return paymentIntentValidator.requireValid(
             stripeIntentRepository.get(clientSecret)

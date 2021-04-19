@@ -41,7 +41,7 @@ class DefaultPaymentSheetLauncherTest {
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
-                launcher.present("pi_fake")
+                launcher.presentWithPaymentIntent("pi_fake")
                 assertThat(results)
                     .containsExactly(PaymentSheetResult.Completed)
             }

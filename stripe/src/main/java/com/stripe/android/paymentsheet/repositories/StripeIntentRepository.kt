@@ -1,15 +1,15 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.model.ClientSecret
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal sealed class StripeIntentRepository {
     abstract suspend fun get(
-        clientSecret: String
+        clientSecret: ClientSecret
     ): PaymentIntent
 
     /**
@@ -18,7 +18,7 @@ internal sealed class StripeIntentRepository {
     class Static(
         private val paymentIntent: PaymentIntent
     ) : StripeIntentRepository() {
-        override suspend fun get(clientSecret: String): PaymentIntent = paymentIntent
+        override suspend fun get(clientSecret: ClientSecret): PaymentIntent = paymentIntent
     }
 
     /**
@@ -29,20 +29,24 @@ internal sealed class StripeIntentRepository {
         private val requestOptions: ApiRequest.Options,
         private val workContext: CoroutineContext
     ) : StripeIntentRepository() {
-        override suspend fun get(clientSecret: String) = withContext(workContext) {
-            if (PaymentIntent.isClientSecretValid(clientSecret)) {
-                val paymentIntent = stripeRepository.retrievePaymentIntent(
-                    clientSecret,
-                    requestOptions,
-                    expandFields = listOf("payment_method")
-                )
-                requireNotNull(paymentIntent) {
-                    "Could not parse PaymentIntent."
+        override suspend fun get(clientSecret: ClientSecret) = withContext(workContext) {
+            when (clientSecret) {
+                is ClientSecret.PaymentIntentClientSecret -> {
+                    val paymentIntent = stripeRepository.retrievePaymentIntent(
+                        clientSecret.value,
+                        requestOptions,
+                        expandFields = listOf("payment_method")
+                    )
+                    requireNotNull(paymentIntent) {
+                        "Could not parse PaymentIntent."
+                    }
                 }
-            } else if (SetupIntent.isClientSecretValid(clientSecret)) {
-                throw IllegalArgumentException("SetupIntents not supported")
-            } else {
-                throw IllegalArgumentException("Invalid client secret.")
+                is ClientSecret.SetupIntentClientSecret -> {
+                    throw IllegalArgumentException("SetupIntents not supported")
+                }
+                else -> {
+                    throw IllegalArgumentException("Invalid client secret.")
+                }
             }
         }
     }

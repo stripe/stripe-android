@@ -2,12 +2,17 @@ package com.stripe.android.paymentsheet
 
 import androidx.core.graphics.toColorInt
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.ClientSecret
 
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR = "#121212".toColorInt()
 
     internal const val MERCHANT_DISPLAY_NAME = "Widget Store"
     internal const val CLIENT_SECRET = "client_secret"
+
+    internal val PAYMENT_INTENT_CLIENT_SECRET = ClientSecret.PaymentIntentClientSecret(
+        CLIENT_SECRET
+    )
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME
@@ -31,21 +36,21 @@ internal object PaymentSheetFixtures {
     )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetContract.Args(
-        CLIENT_SECRET,
+        PAYMENT_INTENT_CLIENT_SECRET,
         SessionId(),
         STATUS_BAR_COLOR,
         CONFIG_CUSTOMER_WITH_GOOGLEPAY
     )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY = PaymentSheetContract.Args(
-        CLIENT_SECRET,
+        PAYMENT_INTENT_CLIENT_SECRET,
         SessionId(),
         STATUS_BAR_COLOR,
         CONFIG_CUSTOMER
     )
 
     internal val ARGS_WITHOUT_CUSTOMER = PaymentSheetContract.Args(
-        CLIENT_SECRET,
+        PAYMENT_INTENT_CLIENT_SECRET,
         SessionId(),
         STATUS_BAR_COLOR,
         config = null

@@ -27,30 +27,33 @@ class PaymentSheet internal constructor(
     )
 
     /**
-     * Create PaymentSheet with a [Configuration].
+     * Create PaymentSheet to process a [PaymentIntent].
+     * If the [PaymentIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
+     * with [PaymentSheetResult.Completed].
      *
-     * @param[intentClientSecret] the client secret for a [PaymentIntent] or [SetupIntent] object.
-     * If [intentClientSecret] represents a [PaymentIntent] or [SetupIntent] that is already
-     * confirmed, [PaymentSheetResultCallback] will be invoked with [PaymentSheetResult.Completed].
+     * @param[paymentIntentClientSecret] the client secret for the [PaymentIntent]
+     * @param[configuration] optional [PaymentSheet] settings
      */
-    fun present(
-        intentClientSecret: String,
-        configuration: Configuration
+    fun presentWithPaymentIntent(
+        paymentIntentClientSecret: String,
+        configuration: Configuration? = null
     ) {
-        paymentSheetLauncher.present(intentClientSecret, configuration)
+        paymentSheetLauncher.presentWithPaymentIntent(paymentIntentClientSecret, configuration)
     }
 
     /**
-     * Create PaymentSheet without a [Configuration].
+     * Create PaymentSheet to process a [SetupIntent].
+     * If the [SetupIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
+     * with [PaymentSheetResult.Completed].
      *
-     * @param[intentClientSecret] the client secret for a [PaymentIntent] or [SetupIntent] object.
-     * If [intentClientSecret] represents a [PaymentIntent] or [SetupIntent] that is already
-     * confirmed, [PaymentSheetResultCallback] will be invoked with [PaymentSheetResult.Completed].
+     * @param[setupIntentClientSecret] the client secret for the [SetupIntent]
+     * @param[configuration] optional [PaymentSheet] settings
      */
-    fun present(
-        intentClientSecret: String
+    fun presentWithSetupIntent(
+        setupIntentClientSecret: String,
+        configuration: Configuration? = null
     ) {
-        paymentSheetLauncher.present(intentClientSecret)
+        paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
     }
 
     @Parcelize
@@ -131,14 +134,15 @@ class PaymentSheet internal constructor(
     interface FlowController {
         fun getPaymentOption(): PaymentOption?
 
-        fun configure(
-            intentClientSecret: String,
-            configuration: Configuration,
+        fun configureWithPaymentIntent(
+            paymentIntentClientSecret: String,
+            configuration: Configuration? = null,
             callback: ConfigCallback
         )
 
-        fun configure(
-            intentClientSecret: String,
+        fun configureWithSetupIntent(
+            setupIntentClientSecret: String,
+            configuration: Configuration? = null,
             callback: ConfigCallback
         )
 
