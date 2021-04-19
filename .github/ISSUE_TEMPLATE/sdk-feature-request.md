@@ -1,7 +1,7 @@
 ---
-name: SDK Feature Request
+name: "\U0001F4A1 SDK Feature Request"
 about: Suggest an idea for this project
-title: ''
+title: "[Feature]"
 labels: ''
 assignees: ''
 
