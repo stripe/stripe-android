@@ -116,23 +116,13 @@ class PaymentOptionsViewModelTest {
 
             assertThat(viewState[0])
                 .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-            assertThat(viewState[1])
-                .isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
-
-            assertThat(viewState[2])
-                .isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
-
-            (viewState[2] as ViewState.PaymentOptions.FinishProcessing).onComplete()
 
             val paymentOptionResultSucceeded =
-                (viewState[3] as ViewState.PaymentOptions.ProcessResult)
+                (viewState[1] as ViewState.PaymentOptions.ProcessResult)
                     .result as PaymentOptionResult.Succeeded
             assertThat((paymentOptionResultSucceeded).paymentSelection)
                 .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
             verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
-
-            assertThat((prefsRepository.getSavedSelection() as SavedSelection.PaymentMethod).id)
-                .isEqualTo(paymentMethodRepository.savedPaymentMethod.id!!)
         }
 
     @Test
