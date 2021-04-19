@@ -138,33 +138,6 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `onUserSelection() when save fails error is reported and in ready state`() {
-        val exceptionMessage = "Card not valid."
-        paymentMethodRepository.error = Exception(exceptionMessage)
-
-        val viewStates: MutableList<ViewState> = mutableListOf()
-        viewModel.viewState.observeForever {
-            viewStates.add(it)
-        }
-
-        var userMessage: BaseSheetViewModel.UserMessage? = null
-        viewModel.userMessage.observeForever {
-            userMessage = it
-        }
-
-        viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-
-        viewModel.onUserSelection()
-
-        verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-        assertThat(viewStates.size).isEqualTo(2)
-        assertThat(viewStates[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-        assertThat(viewStates[1]).isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
-        assertThat(viewStates[2]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-        assertThat(userMessage).isEqualTo(BaseSheetViewModel.UserMessage.Error(exceptionMessage))
-    }
-
-    @Test
     fun `resolveTransitionTarget no new card`() {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newCard = null),
