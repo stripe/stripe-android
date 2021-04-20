@@ -126,12 +126,10 @@ class CountryTextInputLayoutTest {
         assertNotNull(countryTextInputLayout.selectedCountryCode)
         countryTextInputLayout.countryAutocomplete.setText("Canada")
         countryTextInputLayout.validateCountry()
-        countryTextInputLayout.selectedCountryCode?.let {
-            assertEquals(
-                "Canada",
-                CountryUtils.getDisplayCountry(it)
-            )
-        }
+        assertEquals(
+            "Canada",
+            CountryUtils.getDisplayCountry(requireNotNull(countryTextInputLayout.selectedCountryCode))
+        )
     }
 
     @AfterTest
