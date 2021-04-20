@@ -93,5 +93,6 @@
     <!-- <UPI> -->
     <string name="vpa_layout_hint">Virtual Payment Address (VPA)</string>
     <string name="vpa_input_hint">something@stripeupi</string>
+    <string name="toy">Toy</string>
 
 </resources>
