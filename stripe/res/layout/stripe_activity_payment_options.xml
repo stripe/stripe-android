@@ -57,17 +57,23 @@
                     android:layout_marginVertical="2dp"
                     android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal" />
 
-                <com.stripe.android.paymentsheet.ui.PrimaryButton
-                    android:id="@+id/add_button"
-                    android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
-                    android:layout_marginStart="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
-                    android:layout_marginEnd="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
-                    android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom"
+                <!-- Needed to avoid animating layout changes when showing/hiding the button -->
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/stripe_paymentsheet_add_button_label"
-                    android:visibility="gone"/>
+                    android:layout_height="wrap_content">
 
+                    <com.stripe.android.paymentsheet.ui.PrimaryButton
+                        android:id="@+id/add_button"
+                        android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
+                        android:layout_marginStart="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+                        android:layout_marginEnd="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+                        android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stripe_paymentsheet_add_button_label"
+                        android:visibility="gone" />
+
+                </FrameLayout>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

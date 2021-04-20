@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -28,6 +30,21 @@ class PrimaryButtonTest {
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+    }
+
+    @Test
+    fun `onFinishingState() should clear any tint and restore onReadyState()`() {
+        primaryButton.backgroundTintList = ColorStateList.valueOf(Color.BLACK)
+
+        primaryButton.updateState(
+            PrimaryButton.State.FinishProcessing({})
+        )
+        assertThat(primaryButton.backgroundTintList).isNull()
+
+        primaryButton.updateState(
+            PrimaryButton.State.Ready("Pay $10.99")
+        )
+        assertThat(primaryButton.backgroundTintList).isEqualTo(ColorStateList.valueOf(Color.BLACK))
     }
 
     @Test

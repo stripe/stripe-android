@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
@@ -71,6 +72,12 @@ class PaymentSheet internal constructor(
          */
         var googlePay: GooglePayConfiguration? = null,
 
+        /**
+         * The color of the Pay or Add button. Keep in mind the text color is white.
+         *
+         * If set, PaymentSheet displays the button with this color.
+         */
+        var primaryButtonColor: ColorStateList? = null,
     ) : Parcelable
 
     @Parcelize

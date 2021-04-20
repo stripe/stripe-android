@@ -21,6 +21,7 @@ import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -284,7 +285,7 @@ internal abstract class BaseAddCardFragment(
                     val shouldToggleBillingError =
                         !isPostalValid && !billingAddressView.postalCodeView.text.isNullOrEmpty()
                     billingErrors.text = if (shouldToggleBillingError) {
-                        if (country == null || country.code == "US") {
+                        if (country == null || CountryCode.isUS(country.code)) {
                             getString(R.string.address_zip_invalid)
                         } else {
                             getString(R.string.address_postal_code_invalid)
