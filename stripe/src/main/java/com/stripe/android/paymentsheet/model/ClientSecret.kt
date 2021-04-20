@@ -8,16 +8,17 @@ import kotlinx.parcelize.Parcelize
 /**
  * Represents the client secret for a [SetupIntent] or [PaymentIntent]
  */
-internal interface ClientSecret : Parcelable {
-    val value: String
+internal sealed class ClientSecret(
+    open val value: String
+) : Parcelable {
 
     @Parcelize
     data class PaymentIntentClientSecret(
         override val value: String
-    ) : ClientSecret
+    ) : ClientSecret(value)
 
     @Parcelize
     data class SetupIntentClientSecret(
         override val value: String
-    ) : ClientSecret
+    ) : ClientSecret(value)
 }

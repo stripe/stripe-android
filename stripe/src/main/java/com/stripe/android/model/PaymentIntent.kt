@@ -344,6 +344,7 @@ data class PaymentIntent internal constructor(
     }
 
     companion object {
+        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): PaymentIntent? {
             return jsonObject?.let {
                 PaymentIntentJsonParser().parse(it)

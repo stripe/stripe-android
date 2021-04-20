@@ -206,6 +206,7 @@ data class SetupIntent internal constructor(
     }
 
     companion object {
+        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SetupIntent? {
             return jsonObject?.let {
                 SetupIntentJsonParser().parse(it)
