@@ -167,6 +167,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     private fun setupAddButton(addButton: PrimaryButton) {
         viewModel.viewState.observe(this, viewStateObserver)
 
+        viewModel.config?.primaryButtonColor?.let {
+            viewBinding.addButton.backgroundTintList = it
+        }
+
         addButton.setOnClickListener {
             viewModel.onUserSelection()
         }
