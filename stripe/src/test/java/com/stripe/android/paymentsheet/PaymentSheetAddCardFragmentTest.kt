@@ -356,7 +356,9 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountry = USA
             viewBinding.billingAddress.postalCodeView.setText("123")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
                 false
             )
@@ -377,7 +379,9 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountry = USA
             viewBinding.billingAddress.postalCodeView.setText("94107")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
                 false
             )
@@ -397,7 +401,9 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountry = CANADA
             viewBinding.billingAddress.postalCodeView.setText("!@#")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
                 false
             )
@@ -418,7 +424,9 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountry = CANADA
             viewBinding.billingAddress.postalCodeView.setText("A1G9Z9")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
                 false
             )
@@ -438,7 +446,9 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountry = USA
             viewBinding.billingAddress.postalCodeView.setText("")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
                 viewBinding.billingAddress.postalCodeView,
                 false
             )

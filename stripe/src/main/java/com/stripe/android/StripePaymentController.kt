@@ -28,6 +28,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.DefaultStripeChallengeStatusReceiver
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
@@ -90,6 +91,7 @@ internal class StripePaymentController internal constructor(
 
     private val logger = Logger.getInstance(enableLogging)
     private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
+    private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
     private val paymentRelayStarterFactory = { host: AuthActivityStarter.Host ->
         paymentRelayLauncher?.let {
@@ -100,7 +102,10 @@ internal class StripePaymentController internal constructor(
     private val paymentAuthWebViewStarterFactory = { host: AuthActivityStarter.Host ->
         paymentAuthWebViewLauncher?.let {
             PaymentAuthWebViewStarter.Modern(it)
-        } ?: PaymentAuthWebViewStarter.Legacy(host)
+        } ?: PaymentAuthWebViewStarter.Legacy(
+            host,
+            defaultReturnUrl
+        )
     }
 
     private val stripe3ds2CompletionStarterFactory =
@@ -126,7 +131,7 @@ internal class StripePaymentController internal constructor(
     ) {
         CoroutineScope(workContext).launch {
             val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-                ?: ConfirmStripeIntentParams.DEFAULT_RETURN_URL
+                ?: defaultReturnUrl.value
 
             val result = runCatching {
                 when (confirmStripeIntentParams) {

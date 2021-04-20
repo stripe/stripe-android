@@ -5,34 +5,29 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.PaymentAuthWebViewActivity
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentAuthWebViewContract :
-    ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
+internal class PaymentAuthWebViewContract(
+    private val defaultReturnUrl: DefaultReturnUrl
+) : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
     override fun createIntent(
         context: Context,
         input: Args
     ): Intent {
         return Intent(
             context,
-            when (input.shouldUseBrowser) {
+            when (input.shouldUseBrowser(defaultReturnUrl)) {
                 true -> StripeBrowserLauncherActivity::class.java
                 false -> PaymentAuthWebViewActivity::class.java
             }
         ).also { intent ->
             intent.putExtras(input.toBundle())
         }
-    }
-
-    internal fun parseArgs(
-        intent: Intent
-    ): Args? {
-        return intent.getParcelableExtra(EXTRA_ARGS)
     }
 
     override fun parseResult(
@@ -68,9 +63,9 @@ internal class PaymentAuthWebViewContract :
          * If true, use [StripeBrowserLauncherActivity].
          * If false, use [PaymentAuthWebViewActivity].
          */
-        val shouldUseBrowser
-            get() = IS_BROWSER_ENABLED &&
-                returnUrl == ConfirmStripeIntentParams.DEFAULT_RETURN_URL
+        internal fun shouldUseBrowser(defaultReturnUrl: DefaultReturnUrl): Boolean {
+            return IS_BROWSER_ENABLED && returnUrl == defaultReturnUrl.value
+        }
 
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -80,7 +75,13 @@ internal class PaymentAuthWebViewContract :
         }
     }
 
-    private companion object {
+    companion object {
         const val EXTRA_ARGS = "extra_args"
+
+        internal fun parseArgs(
+            intent: Intent
+        ): Args? {
+            return intent.getParcelableExtra(EXTRA_ARGS)
+        }
     }
 }

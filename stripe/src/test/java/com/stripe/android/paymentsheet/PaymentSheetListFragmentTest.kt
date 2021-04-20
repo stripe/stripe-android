@@ -175,7 +175,7 @@ class PaymentSheetListFragmentTest {
     private fun createScenario(
         fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG
     ): FragmentScenario<PaymentSheetListFragment> {
-        return launchFragmentInContainer<PaymentSheetListFragment>(
+        return launchFragmentInContainer(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY

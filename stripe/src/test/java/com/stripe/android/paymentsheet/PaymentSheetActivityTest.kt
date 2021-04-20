@@ -18,13 +18,13 @@ import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -62,6 +62,7 @@ internal class PaymentSheetActivityTest {
     private val googlePayRepository = FakeGooglePayRepository(true)
     private val eventReporter = mock<EventReporter>()
 
+    private val defaultReturnUrl = DefaultReturnUrl.create(context)
     private val viewModel = createViewModel()
 
     private val contract = PaymentSheetContract()
@@ -320,7 +321,7 @@ internal class PaymentSheetActivityTest {
                         ConfirmPaymentIntentParams(
                             clientSecret = "client_secret",
                             paymentMethodId = "pm_123456789",
-                            returnUrl = ConfirmStripeIntentParams.DEFAULT_RETURN_URL
+                            returnUrl = defaultReturnUrl.value
                         )
                     )
             }
@@ -420,7 +421,7 @@ internal class PaymentSheetActivityTest {
     fun `Verify FinishProcessing state calls the callback`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
-            it.onActivity { _ ->
+            it.onActivity {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
@@ -656,6 +657,7 @@ internal class PaymentSheetActivityTest {
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            defaultReturnUrl = defaultReturnUrl,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
         )

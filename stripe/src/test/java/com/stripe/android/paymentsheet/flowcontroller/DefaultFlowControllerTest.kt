@@ -27,6 +27,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -474,6 +475,7 @@ class DefaultFlowControllerTest {
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null,
             sessionId = SESSION_ID,
+            defaultReturnUrl = DefaultReturnUrl.create(activity),
             paymentOptionCallback,
             paymentResultCallback
         )

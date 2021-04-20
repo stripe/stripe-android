@@ -28,7 +28,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = PaymentAuthWebViewContract().parseArgs(intent)
+        val args = PaymentAuthWebViewContract.parseArgs(intent)
         if (args == null) {
             // handle failures
             finish()

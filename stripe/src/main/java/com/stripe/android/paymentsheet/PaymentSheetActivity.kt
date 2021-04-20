@@ -29,6 +29,7 @@ import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -137,7 +138,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             viewModel.onPaymentFlowResult(it)
         }
         val paymentAuthWebViewLauncher = registerForActivityResult(
-            PaymentAuthWebViewContract()
+            PaymentAuthWebViewContract(
+                DefaultReturnUrl.create(application)
+            )
         ) {
             viewModel.onPaymentFlowResult(it)
         }

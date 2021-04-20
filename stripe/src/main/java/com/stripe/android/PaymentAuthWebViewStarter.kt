@@ -2,6 +2,7 @@ package com.stripe.android
 
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentAuthWebViewActivity
@@ -12,11 +13,12 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
 internal interface PaymentAuthWebViewStarter :
     AuthActivityStarter<PaymentAuthWebViewContract.Args> {
     class Legacy(
-        private val host: AuthActivityStarter.Host
+        private val host: AuthActivityStarter.Host,
+        private val defaultReturnUrl: DefaultReturnUrl
     ) : PaymentAuthWebViewStarter {
         override fun start(args: PaymentAuthWebViewContract.Args) {
             host.startActivityForResult(
-                when (args.shouldUseBrowser) {
+                when (args.shouldUseBrowser(defaultReturnUrl)) {
                     true -> StripeBrowserLauncherActivity::class.java
                     false -> PaymentAuthWebViewActivity::class.java
                 },

@@ -34,9 +34,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!--
-                Must match the value used in `ConfirmStripeIntentParams.DEFAULT_RETURN_URL`.
+                Must match `DefaultReturnUrl#value`.
                 -->
-                <data android:scheme="stripesdk" android:host="payment_return_url" />
+                <data android:scheme="stripesdk" android:host="payment_return_url/${applicationId}" />
             </intent-filter>
         </activity>
 

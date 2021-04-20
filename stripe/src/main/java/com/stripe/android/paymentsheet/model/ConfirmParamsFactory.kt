@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet.model
 
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.payments.DefaultReturnUrl
 
 internal class ConfirmParamsFactory(
+    private val defaultReturnUrl: DefaultReturnUrl,
     private val clientSecret: String
 ) {
     internal fun create(
@@ -12,7 +13,7 @@ internal class ConfirmParamsFactory(
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentSelection.paymentMethod.id.orEmpty(),
             clientSecret = clientSecret,
-            returnUrl = ConfirmStripeIntentParams.DEFAULT_RETURN_URL
+            returnUrl = defaultReturnUrl.value
         )
     }
 
@@ -22,7 +23,7 @@ internal class ConfirmParamsFactory(
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
             clientSecret = clientSecret,
-            returnUrl = ConfirmStripeIntentParams.DEFAULT_RETURN_URL,
+            returnUrl = defaultReturnUrl.value,
             setupFutureUsage = when (paymentSelection.shouldSavePaymentMethod) {
                 true -> ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 false -> null

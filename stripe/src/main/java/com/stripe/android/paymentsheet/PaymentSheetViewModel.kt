@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -49,6 +50,7 @@ internal class PaymentSheetViewModel internal constructor(
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
+    defaultReturnUrl: DefaultReturnUrl,
     private val logger: Logger = Logger.noop(),
     workContext: CoroutineContext,
     application: Application
@@ -59,6 +61,7 @@ internal class PaymentSheetViewModel internal constructor(
     workContext = workContext
 ) {
     private val confirmParamsFactory = ConfirmParamsFactory(
+        defaultReturnUrl,
         args.clientSecret
     )
 
@@ -377,6 +380,7 @@ internal class PaymentSheetViewModel internal constructor(
                     application
                 ),
                 starterArgs,
+                defaultReturnUrl = DefaultReturnUrl.create(application),
                 logger = Logger.noop(),
                 workContext = Dispatchers.IO,
                 application = application

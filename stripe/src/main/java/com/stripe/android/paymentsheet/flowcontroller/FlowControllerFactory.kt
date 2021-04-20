@@ -10,6 +10,7 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.GooglePayRepository
@@ -162,6 +163,7 @@ internal class FlowControllerFactory(
             publishableKey = config.publishableKey,
             stripeAccountId = config.stripeAccountId,
             sessionId = sessionId,
+            defaultReturnUrl = DefaultReturnUrl.create(appContext),
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback
         )
