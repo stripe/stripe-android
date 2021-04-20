@@ -70,12 +70,12 @@ internal class PaymentSheetViewModel internal constructor(
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
     internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
-    var checkoutResId: Int? = null
-    internal fun getViewStateObservable(resId: Int): MediatorLiveData<ViewState.PaymentSheet> {
+    var checkoutIdentifier: CheckoutIdentifier? = null
+    internal fun getViewStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet> {
         val outputLiveData: MediatorLiveData<ViewState.PaymentSheet> =
             MediatorLiveData<ViewState.PaymentSheet>()
         outputLiveData.addSource(_viewState) { currentValue ->
-            if (checkoutResId == resId) {
+            if (this.checkoutIdentifier == checkoutIdentifier) {
                 outputLiveData.value = currentValue
             }
         }
@@ -174,7 +174,7 @@ internal class PaymentSheetViewModel internal constructor(
         if (amount != null && currencyCode != null) {
             _viewState.value = ViewState.PaymentSheet.Ready(amount, currencyCode)
             _processing.value = false
-            checkoutResId = 0
+            checkoutIdentifier = CheckoutIdentifier.NONE
         } else {
             onFatal(
                 IllegalStateException("PaymentIntent could not be parsed correctly.")
@@ -182,12 +182,12 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    fun initViewState(resId: Int) {
-        checkoutResId = resId
+    fun initViewState(checkoutIdentifier: CheckoutIdentifier) {
+        this.checkoutIdentifier = checkoutIdentifier
     }
 
-    fun checkout(resId: Int) {
-        checkoutResId = resId
+    fun checkout(checkoutIdentifier: CheckoutIdentifier) {
+        this.checkoutIdentifier = checkoutIdentifier
         _userMessage.value = null
         _processing.value = true
         _viewState.value = ViewState.PaymentSheet.StartProcessing

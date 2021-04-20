@@ -323,11 +323,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     }
 
     private fun setupBuyButton() {
-        viewModel.initViewState(viewBinding.buyButton.id)
-        viewModel.getViewStateObservable(viewBinding.googlePayButton.id)
+        viewModel.initViewState(CheckoutIdentifier.SHEET_BOTTOM_BUY)
+        viewModel.getViewStateObservable(CheckoutIdentifier.SHEET_BOTTOM_GOOGLE_PAY)
             .observe(this, googlePayViewStateObserver)
 
-        viewModel.getViewStateObservable(viewBinding.buyButton.id)
+        viewModel.getViewStateObservable(CheckoutIdentifier.SHEET_BOTTOM_BUY)
             .observe(this, buyViewStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
@@ -341,7 +341,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
 
         viewBinding.googlePayButton.setOnClickListener {
-            viewModel.checkout(viewBinding.googlePayButton.id)
+            viewModel.checkout(CheckoutIdentifier.SHEET_BOTTOM_GOOGLE_PAY)
         }
 
         viewModel.config?.primaryButtonColor?.let {
@@ -349,7 +349,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
 
         viewBinding.buyButton.setOnClickListener {
-            viewModel.checkout(viewBinding.buyButton.id)
+            viewModel.checkout(CheckoutIdentifier.SHEET_BOTTOM_BUY)
         }
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->
