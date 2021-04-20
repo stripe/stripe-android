@@ -117,7 +117,7 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         postalCodeValidator.isValid(
             postalCode = postalCodeView.value.orEmpty(),
-            countryCode = newCountryCode.twoLetters
+            countryCode = newCountryCode.value
         ).let { isPostalValid ->
             postalCodeViewListener?.onCountryChanged(
                 CountryUtils.getCountryByCode(newCountryCode, getLocale()),
@@ -179,7 +179,7 @@ internal class BillingAddressView @JvmOverloads constructor(
             val isPostalValid = countryLayout.selectedCountryCode?.let { countryCode ->
                 postalCodeValidator.isValid(
                     postalCode = postalCodeView.value.orEmpty(),
-                    countryCode = countryCode.twoLetters
+                    countryCode = countryCode.value
                 )
             } ?: false
 
@@ -214,7 +214,7 @@ internal class BillingAddressView @JvmOverloads constructor(
             val postalCode = postalCodeView.value
             val isPostalCodeValid = postalCodeValidator.isValid(
                 postalCode = postalCode.orEmpty(),
-                countryCode = countryCode.twoLetters
+                countryCode = countryCode.value
             )
             if (isPostalCodeValid) {
                 when (level) {
@@ -290,7 +290,7 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     private fun updatePostalCodeView(countryCode: CountryCode?) {
         val shouldShowPostalCode = countryCode == null ||
-            CountryUtils.doesCountryUsePostalCode(CountryCode.create(countryCode.twoLetters))
+            CountryUtils.doesCountryUsePostalCode(countryCode)
         postalCodeLayout.isVisible = shouldShowPostalCode
 
         val shouldShowPostalCodeContainer =

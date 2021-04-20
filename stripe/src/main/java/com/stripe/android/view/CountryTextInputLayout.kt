@@ -192,13 +192,13 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     @Deprecated(
         message = "This will be removed in a future version",
         replaceWith = ReplaceWith(
-            expression = "setCountrySelected(CountryCode.create(twoLetterCountryCode))",
+            expression = "setCountrySelected(CountryCode.create(countryCode))",
             imports = ["com.stripe.android.model.CountryCode"]
         )
     )
     @VisibleForTesting
-    internal fun setCountrySelected(twoLetterCountryCode: String) {
-        updateUiForCountryEntered(CountryCode.create(twoLetterCountryCode))
+    internal fun setCountrySelected(countryCode: String) {
+        updateUiForCountryEntered(CountryCode.create(countryCode))
     }
 
     @VisibleForTesting

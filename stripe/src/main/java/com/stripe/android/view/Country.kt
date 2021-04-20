@@ -6,7 +6,7 @@ internal data class Country(
     val code: CountryCode,
     val name: String
 ) {
-    constructor(twoLetter: String, name: String) : this(CountryCode.create(twoLetter), name)
+    constructor(code: String, name: String) : this(CountryCode.create(code), name)
 
     /**
      * @return display value for [CountryTextInputLayout] text view

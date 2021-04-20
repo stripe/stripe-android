@@ -15,6 +15,7 @@ import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
+import com.stripe.android.model.getCountryCode
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -322,7 +323,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo("12345")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountry?.code?.twoLetters)
+        assertThat(countryTextInputLayout.selectedCountry?.code?.value)
             .isEqualTo("US")
     }
 
@@ -344,7 +345,7 @@ class ShippingInfoWidgetTest {
             .isEqualTo("M4B1B5")
         assertThat(nameEditText.fieldText)
             .isEqualTo("Fake Name")
-        assertThat(countryTextInputLayout.selectedCountry?.code?.twoLetters)
+        assertThat(countryTextInputLayout.selectedCountry?.code?.value)
             .isEqualTo("CA")
     }
 

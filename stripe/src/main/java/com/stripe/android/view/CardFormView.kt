@@ -222,7 +222,7 @@ internal class CardFormView @JvmOverloads constructor(
         countryLayout.selectedCountryCode?.let { countryCode ->
             postalCodeValidator.isValid(
                 postalCode = postalCodeView.postalCode.orEmpty(),
-                countryCode = countryCode.twoLetters
+                countryCode = countryCode.value
             )
         } ?: false
 

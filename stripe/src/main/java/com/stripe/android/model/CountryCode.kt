@@ -2,8 +2,10 @@ package com.stripe.android.model
 
 import java.util.Locale
 
+internal fun Locale.getCountryCode(): CountryCode = CountryCode.create(this.country)
+
 internal data class CountryCode private constructor(
-    val twoLetters: String,
+    val value: String,
 ) {
     companion object {
         val US = CountryCode("US")
