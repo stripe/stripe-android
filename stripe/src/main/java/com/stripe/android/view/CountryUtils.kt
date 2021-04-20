@@ -48,13 +48,13 @@ internal object CountryUtils {
     @Deprecated(
         message = "Use with parameter CountryCode",
         replaceWith = ReplaceWith(
-            expression = "CountryUtils.doesCountryUsePostalCode(CountryCode.create(twoLetterCountryCode))",
+            expression = "CountryUtils.doesCountryUsePostalCode(CountryCode.create(countryCode))",
             imports = ["com.stripe.android.model.CountryCode"]
         )
     )
     @JvmSynthetic
-    internal fun doesCountryUsePostalCode(twoLetterCountryCode: String): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(twoLetterCountryCode.toUpperCase(Locale.ROOT))
+    internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
+        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.toUpperCase(Locale.ROOT))
     }
 
     @JvmSynthetic
