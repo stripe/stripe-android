@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -17,6 +18,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+    private var defaultTintList: ColorStateList? = null
     private var state: State? = null
     private val animator = PrimaryButtonAnimator(context)
 
@@ -36,6 +38,11 @@ internal class PrimaryButton @JvmOverloads constructor(
         isEnabled = false
     }
 
+    override fun setBackgroundTintList(tintList: ColorStateList?) {
+        super.setBackgroundTintList(tintList)
+        defaultTintList = tintList
+    }
+
     private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
         var text: CharSequence? = null
         context.withStyledAttributes(
@@ -48,6 +55,9 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onReadyState(text: String?) {
+        defaultTintList?.let {
+            backgroundTintList = it
+        }
         text?.let {
             viewBinding.label.text = text
         }
@@ -64,6 +74,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
+        super.setBackgroundTintList(null)
         setBackgroundResource(
             R.drawable.stripe_paymentsheet_primary_button_confirmed_background
         )
