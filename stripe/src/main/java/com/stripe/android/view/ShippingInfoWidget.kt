@@ -90,7 +90,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
             return ShippingInformation(
                 Address.Builder()
                     .setCity(cityEditText.fieldText)
-                    .setCountry(countryAutoCompleteTextView.selectedCountry?.code)
+                    .setCountryCode(countryAutoCompleteTextView.selectedCountry?.code)
                     .setLine1(addressEditText.fieldText)
                     .setLine2(addressEditText2.fieldText)
                     .setPostalCode(postalCodeEditText.fieldText)
@@ -175,7 +175,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
         val isPostalCodeValid = postalCodeValidator.isValid(
             postalCode,
-            selectedCountry?.code,
+            selectedCountry?.code?.value,
             optionalFields,
             hiddenFields
         )
@@ -284,7 +284,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
     }
 
     private fun updateConfigForCountry(country: Country) {
-        when (country.code) {
+        when (country.code.value) {
             Locale.US.country -> renderUSForm()
             Locale.UK.country -> renderGreatBritainForm()
             Locale.CANADA.country -> renderCanadianForm()
@@ -304,7 +304,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
     }
 
     private fun updatePostalCodeInputFilter(country: Country) {
-        postalCodeEditText.filters = when (country.code) {
+        postalCodeEditText.filters = when (country.code.value) {
             Locale.CANADA.country -> arrayOf<InputFilter>(AllCaps())
             else -> arrayOf<InputFilter>()
         }

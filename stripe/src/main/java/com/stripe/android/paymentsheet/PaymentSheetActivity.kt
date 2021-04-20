@@ -344,6 +344,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             viewModel.checkout(viewBinding.googlePayButton.id)
         }
 
+        viewModel.config?.primaryButtonColor?.let {
+            viewBinding.buyButton.backgroundTintList = it
+        }
+
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout(viewBinding.buyButton.id)
         }

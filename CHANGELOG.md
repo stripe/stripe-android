@@ -5,6 +5,7 @@
 * [#3587](https://github.com/stripe/stripe-android/pull/3587) Upgrade Kotlin to `1.4.32`
 * [#3594](https://github.com/stripe/stripe-android/pull/3594) Upgrade 3DS2 SDK to `5.2.1`
     * Upgrade `nimbus-jose-jwt` to `9.8.1`
+* [#3606](https://github.com/stripe/stripe-android/pull/3606) Upgrade Gradle to 7.0
 
 ## 16.5.0 - 2021-04-08
 * [#3557](https://github.com/stripe/stripe-android/pull/3557) Add suspending function variants of API methods
