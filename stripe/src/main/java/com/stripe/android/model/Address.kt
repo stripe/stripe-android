@@ -45,13 +45,6 @@ data class Address internal constructor(
             this.city = city
         }
 
-        @Deprecated(
-            message = "This will be removed in future version",
-            replaceWith = ReplaceWith(
-                expression = "setCountryCode(CountryCode.create(country))",
-                imports = ["com.stripe.android.model.CountryCode"]
-            )
-        )
         fun setCountry(country: String?): Builder = apply {
             this.country = country?.toUpperCase(Locale.ROOT)
         }
