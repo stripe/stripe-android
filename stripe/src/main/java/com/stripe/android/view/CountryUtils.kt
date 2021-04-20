@@ -14,32 +14,38 @@ internal object CountryUtils {
         "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW"
     )
 
-    private val COUNTRIES: List<Country> =
+    private fun localizedCountries(currentLocale: Locale) =
         Locale.getISOCountries().map { code ->
-            Country(CountryCode.create(code), Locale("", code).displayCountry)
+            Country(
+                CountryCode.create(code),
+                Locale("", code).getDisplayCountry(currentLocale)
+            )
         }
 
     @JvmSynthetic
-    fun getDisplayCountry(countryCode: CountryCode): String =
-        getCountryByCode(countryCode)?.name
-            ?: Locale("", countryCode.value).displayCountry
+    fun getDisplayCountry(countryCode: CountryCode, currentLocale: Locale): String =
+        getCountryByCode(countryCode, currentLocale)?.name
+            ?: Locale("", countryCode.value).getDisplayCountry(currentLocale)
 
     @JvmSynthetic
-    internal fun getCountryCodeByName(countryName: String): CountryCode? {
-        return COUNTRIES.firstOrNull { it.name == countryName }?.code
+
+    internal fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
+        return localizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
     }
 
     @JvmSynthetic
-    internal fun getCountryByCode(countryCode: CountryCode): Country? {
-        return COUNTRIES.firstOrNull { it.code == countryCode }
+    internal fun getCountryByCode(countryCode: CountryCode?, currentLocale: Locale): Country? {
+        return localizedCountries(currentLocale).firstOrNull {
+            it.code == countryCode
+        }
     }
 
     @JvmSynthetic
     internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
-        return listOfNotNull(getCountryByCode(currentLocale.getCountryCode()))
+        return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
-                COUNTRIES
+                localizedCountries(currentLocale)
                     .sortedBy { it.name.toLowerCase(Locale.ROOT) }
                     .filterNot { it.code == currentLocale.getCountryCode() }
             )

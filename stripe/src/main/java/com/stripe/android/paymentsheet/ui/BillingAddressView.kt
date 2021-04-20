@@ -12,6 +12,7 @@ import android.view.View.OnFocusChangeListener
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.ConfigurationCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.LiveData
@@ -24,6 +25,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
 import com.stripe.android.view.CountryUtils
 import com.stripe.android.view.PostalCodeValidator
+import java.util.Locale
 import kotlin.properties.Delegates
 
 internal class BillingAddressView @JvmOverloads constructor(
@@ -118,7 +120,7 @@ internal class BillingAddressView @JvmOverloads constructor(
             countryCode = newCountryCode.value
         ).let { isPostalValid ->
             postalCodeViewListener?.onCountryChanged(
-                CountryUtils.getCountryByCode(newCountryCode),
+                CountryUtils.getCountryByCode(newCountryCode, getLocale()),
                 isPostalValid
             )
             postalCodeView.shouldShowError = !isPostalValid
@@ -186,12 +188,16 @@ internal class BillingAddressView @JvmOverloads constructor(
 
             if (hasFocus) {
                 postalCodeViewListener?.onGainingFocus(
-                    countryLayout.selectedCountryCode?.let { CountryUtils.getCountryByCode(it) },
+                    countryLayout.selectedCountryCode?.let {
+                        CountryUtils.getCountryByCode(it, getLocale())
+                    },
                     isPostalValid
                 )
             } else {
                 postalCodeViewListener?.onLosingFocus(
-                    countryLayout.selectedCountryCode?.let { CountryUtils.getCountryByCode(it) },
+                    countryLayout.selectedCountryCode?.let {
+                        CountryUtils.getCountryByCode(it, getLocale())
+                    },
                     isPostalValid
                 )
                 postalCodeView.shouldShowError =
@@ -354,7 +360,7 @@ internal class BillingAddressView @JvmOverloads constructor(
 
             it.countryCode?.let {
                 this.countryLayout.selectedCountryCode = it
-                this.countryView.setText(CountryUtils.getDisplayCountry(it))
+                this.countryView.setText(CountryUtils.getDisplayCountry(it, getLocale()))
             }
             this.address1View.setText(it.line1)
             this.address2View.setText(it.line2)
@@ -369,6 +375,10 @@ internal class BillingAddressView @JvmOverloads constructor(
                 it.isNullOrBlank()
             }
         }
+
+    private fun getLocale(): Locale {
+        return ConfigurationCompat.getLocales(context.resources.configuration)[0]
+    }
 
     internal sealed class PostalCodeConfig {
         abstract val maxLength: Int

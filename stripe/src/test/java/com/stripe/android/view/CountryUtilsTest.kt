@@ -34,15 +34,32 @@ class CountryUtilsTest {
 
     @Test
     fun `getDisplayCountry() should return expected result`() {
-        assertThat(CountryUtils.getDisplayCountry(CountryCode.US))
+        var currentLocale = Locale.US
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.US, currentLocale))
             .isEqualTo("United States")
-        assertThat(CountryUtils.getDisplayCountry(CountryCode.GB))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.GB, currentLocale))
             .isEqualTo("United Kingdom")
-        assertThat(CountryUtils.getDisplayCountry(CountryCode.CA))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.CA, currentLocale))
             .isEqualTo("Canada")
-        assertThat(CountryUtils.getDisplayCountry(CountryCode.create("DM")))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.create("DM"), currentLocale))
             .isEqualTo("Dominica")
-        assertThat(CountryUtils.getDisplayCountry(CountryCode.create("DMd")))
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.create("DMd"), currentLocale))
             .isEqualTo("DMD")
+
+        currentLocale = Locale("de", "DE")
+        assertThat(CountryUtils.getDisplayCountry(CountryCode.create("DE"), currentLocale))
+            .isEqualTo("Deutschland")
+    }
+
+    @Test
+    fun `getOrderedCountriesLocaleLanguage() in the language of the current locale`() {
+        val currentLocale = Locale("de", "DE")
+        val germany = CountryUtils.getOrderedCountries(currentLocale)
+            .firstOrNull()
+
+        // If the current locale is germany it should be first in the list, and the german
+        // word for germany
+        assertThat(germany?.name)
+            .isEqualTo("Deutschland")
     }
 }
