@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CountryCode
+import com.stripe.android.model.getCountryCode
 import java.util.Locale
 import kotlin.test.Test
 

@@ -12,6 +12,7 @@ import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.CountryCode
+import com.stripe.android.model.getCountryCode
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -74,7 +75,7 @@ class CountryTextInputLayoutTest {
     @Test
     fun updateUIForCountryEntered_whenInvalidCountry_revertsToLastCountry() {
         val previousValidCountryCode =
-            countryTextInputLayout.selectedCountryCode?.twoLetters.orEmpty()
+            countryTextInputLayout.selectedCountryCode?.value.orEmpty()
         countryTextInputLayout.setCountrySelected(CountryCode.create("FAKE COUNTRY CODE"))
         assertNull(autoCompleteTextView.error)
         assertEquals(
@@ -109,7 +110,7 @@ class CountryTextInputLayoutTest {
         countryTextInputLayout.setAllowedCountryCodes(setOf("fr", "de"))
         assertEquals(
             "FR",
-            countryTextInputLayout.selectedCountryCode?.twoLetters
+            countryTextInputLayout.selectedCountryCode?.value
         )
     }
 

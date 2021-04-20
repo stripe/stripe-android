@@ -49,8 +49,8 @@ data class Address internal constructor(
             this.country = country?.toUpperCase(Locale.ROOT)
         }
 
-        internal fun setCountryCode(country: CountryCode?): Builder = apply {
-            this.country = country?.twoLetters
+        internal fun setCountryCode(countryCode: CountryCode?): Builder = apply {
+            this.country = countryCode?.value
         }
 
         fun setLine1(line1: String?): Builder = apply {
