@@ -121,7 +121,7 @@ internal class PaymentSheetViewModelTest {
 
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
-        viewModel.checkout(CheckoutIdentifier.NONE)
+        viewModel.checkout(CheckoutIdentifier.None)
 
         assertThat(confirmParams).hasSize(1)
         assertThat(confirmParams[0].peekContent())
@@ -147,7 +147,7 @@ internal class PaymentSheetViewModelTest {
             shouldSavePaymentMethod = true
         )
         viewModel.updateSelection(paymentSelection)
-        viewModel.checkout(CheckoutIdentifier.NONE)
+        viewModel.checkout(CheckoutIdentifier.None)
 
         assertThat(confirmParams).hasSize(1)
         assertThat(confirmParams[0].peekContent())
@@ -165,7 +165,7 @@ internal class PaymentSheetViewModelTest {
     fun `Google Pay checkout cancelled returns to Ready state`() {
         viewModel.fetchPaymentIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.checkout(CheckoutIdentifier.NONE)
+        viewModel.checkout(CheckoutIdentifier.None)
 
         val viewState: MutableList<ViewState?> = mutableListOf()
         viewModel.viewState.observeForever {

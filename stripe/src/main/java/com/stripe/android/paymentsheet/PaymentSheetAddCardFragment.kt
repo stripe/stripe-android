@@ -69,7 +69,7 @@ internal class PaymentSheetAddCardFragment(
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
-                sheetViewModel.checkout(CheckoutIdentifier.ADD_FRAGMENT_TOP_GOOGLE_PAY)
+                sheetViewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
             }
         }
 
@@ -79,7 +79,7 @@ internal class PaymentSheetAddCardFragment(
             }
         }
 
-        sheetViewModel.getViewStateObservable(CheckoutIdentifier.ADD_FRAGMENT_TOP_GOOGLE_PAY)
+        sheetViewModel.getViewStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner, googleViewStateObserver)
     }
 }

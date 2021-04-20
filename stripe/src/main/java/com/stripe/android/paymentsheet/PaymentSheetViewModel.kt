@@ -174,7 +174,7 @@ internal class PaymentSheetViewModel internal constructor(
         if (amount != null && currencyCode != null) {
             _viewState.value = ViewState.PaymentSheet.Ready(amount, currencyCode)
             _processing.value = false
-            checkoutIdentifier = CheckoutIdentifier.NONE
+            checkoutIdentifier = CheckoutIdentifier.None
         } else {
             onFatal(
                 IllegalStateException("PaymentIntent could not be parsed correctly.")
