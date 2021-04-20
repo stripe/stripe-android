@@ -61,7 +61,12 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                 onSuccess = { json ->
                     viewModel.inProgress.postValue(false)
                     val clientSecret = json.getString("secret")
-                    onIntentCreated(clientSecret, customerConfig)
+
+                    flowController.configureWithPaymentIntent(
+                        clientSecret,
+                        makeConfiguration(customerConfig),
+                        ::onConfigured
+                    )
                 },
                 onFailure = ::onError
             )
@@ -79,33 +84,36 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                 onSuccess = { json ->
                     viewModel.inProgress.postValue(false)
                     val clientSecret = json.getString("secret")
-                    onIntentCreated(clientSecret, customerConfig)
+
+                    flowController.configureWithSetupIntent(
+                        clientSecret,
+                        makeConfiguration(customerConfig),
+                        ::onConfigured
+                    )
                 },
                 onFailure = ::onError
             )
         }
     }
 
-    private fun onIntentCreated(
-        intentClientSecret: String,
+    private fun makeConfiguration(
         customerConfig: PaymentSheet.CustomerConfiguration? = null
-    ) {
-        flowController.configure(
-            intentClientSecret = intentClientSecret,
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = merchantName,
-                customer = customerConfig,
-                googlePay = googlePayConfig,
-                billingAddressCollection = billingAddressCollection
+    ): PaymentSheet.Configuration {
+        return PaymentSheet.Configuration(
+            merchantDisplayName = merchantName,
+            customer = customerConfig,
+            googlePay = googlePayConfig,
+            billingAddressCollection = billingAddressCollection
+        )
+    }
+
+    fun onConfigured(success: Boolean, error: Throwable?) {
+        if (success) {
+            onFlowControllerReady()
+        } else {
+            viewModel.status.postValue(
+                "Failed to create PaymentSheetFlowController: ${error?.message}"
             )
-        ) { isReady, error ->
-            if (isReady) {
-                onFlowControllerReady()
-            } else {
-                viewModel.status.postValue(
-                    "Failed to create PaymentSheetFlowController: ${error?.message}"
-                )
-            }
         }
     }
 

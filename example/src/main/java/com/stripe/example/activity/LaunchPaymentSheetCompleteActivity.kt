@@ -41,9 +41,9 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
     ) {
         if (isSetupIntent) {
             createSetupIntent(paymentSheet, customerConfig)
-        } else (
+        } else {
             createPaymentIntent(paymentSheet, customerConfig)
-            )
+        }
     }
 
     private fun createPaymentIntent(
@@ -57,11 +57,16 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
             it.fold(
                 onSuccess = { json ->
                     val clientSecret = json.getString("secret")
+                    viewModel.inProgress.postValue(false)
 
-                    onIntentCreated(
-                        paymentSheet,
+                    paymentSheet.presentWithPaymentIntent(
                         clientSecret,
-                        customerConfig
+                        PaymentSheet.Configuration(
+                            merchantDisplayName = merchantName,
+                            customer = customerConfig,
+                            googlePay = googlePayConfig,
+                            billingAddressCollection = billingAddressCollection
+                        )
                     )
                 },
                 onFailure = ::onError
@@ -80,34 +85,21 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
             it.fold(
                 onSuccess = { json ->
                     val clientSecret = json.getString("secret")
+                    viewModel.inProgress.postValue(false)
 
-                    onIntentCreated(
-                        paymentSheet,
+                    paymentSheet.presentWithSetupIntent(
                         clientSecret,
-                        customerConfig
+                        PaymentSheet.Configuration(
+                            merchantDisplayName = merchantName,
+                            customer = customerConfig,
+                            googlePay = googlePayConfig,
+                            billingAddressCollection = billingAddressCollection
+                        )
                     )
                 },
                 onFailure = ::onError
             )
         }
-    }
-
-    private fun onIntentCreated(
-        paymentSheet: PaymentSheet,
-        intentClientSecret: String,
-        customerConfig: PaymentSheet.CustomerConfiguration?
-    ) {
-        viewModel.inProgress.postValue(false)
-
-        paymentSheet.present(
-            intentClientSecret,
-            PaymentSheet.Configuration(
-                merchantDisplayName = merchantName,
-                customer = customerConfig,
-                googlePay = googlePayConfig,
-                billingAddressCollection = billingAddressCollection
-            )
-        )
     }
 
     override fun onRefreshEphemeralKey() {
