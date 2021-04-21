@@ -181,7 +181,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     stripe.getPaymentIntentResult(requestCode, data!!)
                 }
             }
-        } else if(stripe.isSetupResult(requestCode, data)) {
+        } else if (stripe.isSetupResult(requestCode, data)) {
             lifecycleScope.launch {
                 viewModel.setupIntentResultLiveData.value = runCatching {
                     // stripe.isSetupResult already verifies data is not null

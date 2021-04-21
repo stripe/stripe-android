@@ -3,13 +3,11 @@ package com.stripe.example.activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.liveData
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.createSource
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.retrieveSource
 import com.stripe.example.StripeFactory
-import kotlinx.coroutines.launch
 
 internal class SourceViewModel(
     application: Application
