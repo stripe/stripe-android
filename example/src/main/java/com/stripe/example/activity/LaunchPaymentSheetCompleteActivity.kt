@@ -27,11 +27,22 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         viewBinding.launch.setOnClickListener {
             if (isCustomerEnabled) {
                 fetchEphemeralKey { customerConfig ->
-                    createPaymentIntent(paymentSheet, customerConfig)
+                    createIntent(paymentSheet, customerConfig)
                 }
             } else {
-                createPaymentIntent(paymentSheet, null)
+                createIntent(paymentSheet, null)
             }
+        }
+    }
+
+    private fun createIntent(
+        paymentSheet: PaymentSheet,
+        customerConfig: PaymentSheet.CustomerConfiguration?
+    ) {
+        if (isSetupIntent) {
+            createSetupIntent(paymentSheet, customerConfig)
+        } else {
+            createPaymentIntent(paymentSheet, customerConfig)
         }
     }
 
@@ -46,11 +57,15 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
             it.fold(
                 onSuccess = { json ->
                     val clientSecret = json.getString("secret")
+                    viewModel.inProgress.postValue(false)
 
-                    onPaymentIntent(
-                        paymentSheet,
+                    paymentSheet.presentWithPaymentIntent(
                         clientSecret,
-                        customerConfig
+                        PaymentSheet.Configuration(
+                            merchantDisplayName = merchantName,
+                            customer = customerConfig,
+                            googlePay = googlePayConfig,
+                        )
                     )
                 },
                 onFailure = ::onError
@@ -58,22 +73,31 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         }
     }
 
-    private fun onPaymentIntent(
+    private fun createSetupIntent(
         paymentSheet: PaymentSheet,
-        paymentIntentClientSecret: String,
         customerConfig: PaymentSheet.CustomerConfiguration?
     ) {
-        viewModel.inProgress.postValue(false)
+        viewModel.createSetupIntent(
+            COUNTRY_CODE,
+            customerId = customerConfig?.id
+        ).observe(this) {
+            it.fold(
+                onSuccess = { json ->
+                    val clientSecret = json.getString("secret")
+                    viewModel.inProgress.postValue(false)
 
-        paymentSheet.present(
-            paymentIntentClientSecret,
-            PaymentSheet.Configuration(
-                merchantDisplayName = merchantName,
-                customer = customerConfig,
-                googlePay = googlePayConfig,
-                billingAddressCollection = billingAddressCollection
+                    paymentSheet.presentWithSetupIntent(
+                        clientSecret,
+                        PaymentSheet.Configuration(
+                            merchantDisplayName = merchantName,
+                            customer = customerConfig,
+                            googlePay = googlePayConfig,
+                        )
+                    )
+                },
+                onFailure = ::onError
             )
-        )
+        }
     }
 
     override fun onRefreshEphemeralKey() {

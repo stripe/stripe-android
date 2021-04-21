@@ -9,6 +9,11 @@
         app:defaultValue="Widget Store" />
 
     <SwitchPreferenceCompat
+        app:key="setup_intent"
+        app:title="Use SetupIntent"
+        app:defaultValue="false" />
+
+    <SwitchPreferenceCompat
         app:key="enable_customer"
         app:title="Use Customer API"
         app:defaultValue="true" />
