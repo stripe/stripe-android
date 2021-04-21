@@ -12,6 +12,6 @@ class PaymentSheetContractTest {
     @Test
     fun `parseResult() with missing data should return failed result`() {
         assertThat(PaymentSheetContract().parseResult(0, Intent()))
-            .isInstanceOf(PaymentResult.Failed::class.java)
+            .isInstanceOf(PaymentSheetResult.Failed::class.java)
     }
 }

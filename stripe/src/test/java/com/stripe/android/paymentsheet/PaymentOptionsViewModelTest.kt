@@ -46,7 +46,6 @@ class PaymentOptionsViewModelTest {
     private val viewModel = PaymentOptionsViewModel(
         args = PAYMENT_OPTION_CONTRACT_ARGS,
         prefsRepository = prefsRepository,
-        paymentMethodsRepository = paymentMethodRepository,
         eventReporter = eventReporter,
         workContext = testDispatcher,
         application = ApplicationProvider.getApplicationContext()
@@ -74,7 +73,7 @@ class PaymentOptionsViewModelTest {
         viewModel.onUserSelection()
 
         assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
-            .isEqualTo(PaymentOptionResult.Succeeded.Existing(SELECTION_SAVED_PAYMENT_METHOD))
+            .isEqualTo(PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD))
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
@@ -91,7 +90,7 @@ class PaymentOptionsViewModelTest {
 
             assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
                 .isEqualTo(
-                    PaymentOptionResult.Succeeded.Unsaved(
+                    PaymentOptionResult.Succeeded(
                         NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION
                     )
                 )
@@ -117,25 +116,13 @@ class PaymentOptionsViewModelTest {
 
             assertThat(viewState[0])
                 .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-            assertThat(viewState[1])
-                .isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
-
-            assertThat(viewState[2])
-                .isInstanceOf(ViewState.PaymentOptions.FinishProcessing::class.java)
-
-            (viewState[2] as ViewState.PaymentOptions.FinishProcessing).onComplete()
 
             val paymentOptionResultSucceeded =
-                (viewState[3] as ViewState.PaymentOptions.ProcessResult)
-                    .result as PaymentOptionResult.Succeeded.NewlySaved
+                (viewState[1] as ViewState.PaymentOptions.ProcessResult)
+                    .result as PaymentOptionResult.Succeeded
             assertThat((paymentOptionResultSucceeded).paymentSelection)
                 .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-            assertThat((paymentOptionResultSucceeded).newSavedPaymentMethod)
-                .isEqualTo(paymentMethodRepository.savedPaymentMethod)
             verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
-
-            assertThat((prefsRepository.getSavedSelection() as SavedSelection.PaymentMethod).id)
-                .isEqualTo(paymentMethodRepository.savedPaymentMethod.id!!)
         }
 
     @Test
@@ -151,58 +138,10 @@ class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `onUserSelection() when save fails error is reported and in ready state`() {
-        val exceptionMessage = "Card not valid."
-        paymentMethodRepository.error = Exception(exceptionMessage)
-
-        val viewStates: MutableList<ViewState> = mutableListOf()
-        viewModel.viewState.observeForever {
-            viewStates.add(it)
-        }
-
-        var userMessage: BaseSheetViewModel.UserMessage? = null
-        viewModel.userMessage.observeForever {
-            userMessage = it
-        }
-
-        viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-
-        viewModel.onUserSelection()
-
-        verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-        assertThat(viewStates.size).isEqualTo(3)
-        assertThat(viewStates[0]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-        assertThat(viewStates[1]).isInstanceOf(ViewState.PaymentOptions.StartProcessing::class.java)
-        assertThat(viewStates[2]).isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
-        assertThat(userMessage).isEqualTo(BaseSheetViewModel.UserMessage.Error(exceptionMessage))
-    }
-
-    @Test
-    fun `getPaymentOptionResult() after selection is set should return Succeeded`() {
-        viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
-
-        assertThat(
-            viewModel.getPaymentOptionResult()
-        ).isEqualTo(
-            PaymentOptionResult.Succeeded.Existing(SELECTION_SAVED_PAYMENT_METHOD)
-        )
-    }
-
-    @Test
-    fun `getPaymentOptionResult() when selection is not set should return Canceled`() {
-        assertThat(
-            viewModel.getPaymentOptionResult()
-        ).isEqualTo(
-            PaymentOptionResult.Canceled(null)
-        )
-    }
-
-    @Test
     fun `resolveTransitionTarget no new card`() {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newCard = null),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
@@ -229,7 +168,6 @@ class PaymentOptionsViewModelTest {
                 )
             ),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
@@ -256,7 +194,6 @@ class PaymentOptionsViewModelTest {
                 )
             ),
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = FakePaymentMethodsRepository(emptyList()),
             eventReporter = eventReporter,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()

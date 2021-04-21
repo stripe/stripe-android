@@ -43,7 +43,6 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -1733,13 +1732,14 @@ class Stripe internal constructor(
     }
 
     /**
-     * Get a [LifecycleCoroutineScope] if available. Otherwise, default to [MainScope].
+     * Get a [LifecycleCoroutineScope] if available. Otherwise, default to a [CoroutineScope]
+     * using [Dispatchers.IO].
      */
     private fun getLifecycleScope(
         activity: Activity
     ): CoroutineScope = when (activity) {
         is ComponentActivity -> activity.lifecycleScope
-        else -> MainScope()
+        else -> CoroutineScope(Dispatchers.IO)
     }
 
     companion object {

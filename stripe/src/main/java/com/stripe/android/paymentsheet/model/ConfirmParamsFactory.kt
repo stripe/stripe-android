@@ -3,14 +3,14 @@ package com.stripe.android.paymentsheet.model
 import com.stripe.android.model.ConfirmPaymentIntentParams
 
 internal class ConfirmParamsFactory(
-    private val clientSecret: String
+    private val clientSecret: ClientSecret
 ) {
     internal fun create(
         paymentSelection: PaymentSelection.Saved
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentSelection.paymentMethod.id.orEmpty(),
-            clientSecret = clientSecret,
+            clientSecret = clientSecret.value,
             returnUrl = RETURN_URL
         )
     }
@@ -20,7 +20,7 @@ internal class ConfirmParamsFactory(
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
-            clientSecret = clientSecret,
+            clientSecret = clientSecret.value,
             returnUrl = RETURN_URL,
             setupFutureUsage = when (paymentSelection.shouldSavePaymentMethod) {
                 true -> ConfirmPaymentIntentParams.SetupFutureUsage.OffSession

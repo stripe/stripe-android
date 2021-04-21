@@ -33,7 +33,7 @@ import kotlin.test.assertEquals
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class StripePaymentAuthTest {
+internal class StripePaymentAuthTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
 

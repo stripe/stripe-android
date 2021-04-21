@@ -340,14 +340,14 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * Decide whether [handlePaymentResult] should be called.
+     * Decide whether [getPaymentIntentResult] should be called.
      */
     override fun shouldHandlePaymentResult(requestCode: Int, data: Intent?): Boolean {
         return requestCode == PAYMENT_REQUEST_CODE && data != null
     }
 
     /**
-     * Decide whether [handleSetupResult] should be called.
+     * Decide whether [getSetupIntentResult] should be called.
      */
     override fun shouldHandleSetupResult(requestCode: Int, data: Intent?): Boolean {
         return requestCode == SETUP_REQUEST_CODE && data != null
@@ -487,28 +487,12 @@ internal class StripePaymentController internal constructor(
         )
     }
 
-    private suspend fun dispatchSource(
-        source: Source,
-        callback: ApiResultCallback<Source>
-    ) = withContext(uiContext) {
-        logger.debug("Dispatching Source with id=${source.id}")
-        callback.onSuccess(source)
-    }
-
     private suspend fun dispatchPaymentIntentResult(
         paymentIntentResult: PaymentIntentResult,
         callback: ApiResultCallback<PaymentIntentResult>
     ) = withContext(uiContext) {
         logger.debug("Dispatching PaymentIntentResult for ${paymentIntentResult.intent.id}")
         callback.onSuccess(paymentIntentResult)
-    }
-
-    private suspend fun dispatchSetupIntentResult(
-        setupIntentResult: SetupIntentResult,
-        callback: ApiResultCallback<SetupIntentResult>
-    ) = withContext(uiContext) {
-        logger.debug("Dispatching SetupIntentResult for ${setupIntentResult.intent.id}")
-        callback.onSuccess(setupIntentResult)
     }
 
     private suspend fun dispatchError(

@@ -167,6 +167,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     private fun setupAddButton(addButton: PrimaryButton) {
         viewModel.viewState.observe(this, viewStateObserver)
 
+        viewModel.config?.primaryButtonColor?.let {
+            viewBinding.addButton.backgroundTintList = it
+        }
+
         addButton.setOnClickListener {
             viewModel.onUserSelection()
         }
@@ -236,7 +240,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     override fun onUserCancel() {
-        closeSheet(viewModel.getPaymentOptionResult())
+        closeSheet(PaymentOptionResult.Canceled(mostRecentError = viewModel.fatal.value))
     }
 
     internal companion object {
