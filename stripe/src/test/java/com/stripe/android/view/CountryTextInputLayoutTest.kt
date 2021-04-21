@@ -129,7 +129,10 @@ class CountryTextInputLayoutTest {
         countryTextInputLayout.validateCountry()
         assertEquals(
             "Canada",
-            CountryUtils.getDisplayCountry(requireNotNull(countryTextInputLayout.selectedCountryCode))
+            CountryUtils.getDisplayCountry(
+                requireNotNull(countryTextInputLayout.selectedCountryCode),
+                Locale.getDefault()
+            )
         )
     }
 

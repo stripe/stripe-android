@@ -53,14 +53,14 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     ) { _, _, newCountryValue ->
         newCountryValue?.let {
             countryCodeChangeCallback(it)
-            CountryUtils.getCountryByCode(it)?.let { country ->
+            CountryUtils.getCountryByCode(it, getLocale())?.let { country ->
                 countryChangeCallback(country)
             }
         }
     }
 
     val selectedCountry: Country?
-        get() = selectedCountryCode?.let { CountryUtils.getCountryByCode(it) }
+        get() = selectedCountryCode?.let { CountryUtils.getCountryByCode(it, getLocale()) }
 
     @Deprecated(
         message = "Will be removed in a future version",
@@ -116,7 +116,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
                 countryAutocomplete.showDropDown()
             } else {
                 val countryEntered = countryAutocomplete.text.toString()
-                CountryUtils.getCountryCodeByName(countryEntered)?.let {
+                CountryUtils.getCountryCodeByName(countryEntered, getLocale())?.let {
                     updateUiForCountryEntered(it)
                 }
             }
@@ -206,10 +206,10 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
 
         // If the user-typed country matches a valid country, update the selected country
         // Otherwise, revert back to last valid country if country is not recognized.
-        val displayCountry = CountryUtils.getCountryByCode(countryCode)?.let {
+        val displayCountry = CountryUtils.getCountryByCode(countryCode, getLocale())?.let {
             updatedSelectedCountryCode(countryCode)
             it
-        } ?: selectedCountryCode?.let { CountryUtils.getCountryByCode(it) }
+        } ?: CountryUtils.getCountryByCode(selectedCountryCode, getLocale())
 
         countryAutocomplete.setText(displayCountry?.name)
     }
