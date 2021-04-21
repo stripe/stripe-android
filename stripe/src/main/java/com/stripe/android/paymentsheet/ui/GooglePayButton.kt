@@ -23,31 +23,31 @@ internal class GooglePayButton @JvmOverloads constructor(
         // Call super so we don't inadvertently effect the primary button as well.
         super.setClickable(true)
         super.setEnabled(true)
-        viewBinding.buyButton.backgroundTintList = (ColorStateList.valueOf(Color.BLACK))
+        viewBinding.primaryButton.backgroundTintList = (ColorStateList.valueOf(Color.BLACK))
     }
 
     private fun onReadyState() {
-        viewBinding.buyButton.isVisible = false
+        viewBinding.primaryButton.isVisible = false
         viewBinding.googlePayButtonIcon.isVisible = true
     }
 
     private fun onStartProcessing() {
-        viewBinding.buyButton.isVisible = true
+        viewBinding.primaryButton.isVisible = true
         viewBinding.googlePayButtonIcon.isVisible = false
     }
 
     private fun onFinishProcessing() {
-        viewBinding.buyButton.isVisible = true
+        viewBinding.primaryButton.isVisible = true
         viewBinding.googlePayButtonIcon.isVisible = false
     }
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-        viewBinding.buyButton.isEnabled = enabled
+        viewBinding.primaryButton.isEnabled = enabled
     }
 
     fun updateState(state: PrimaryButton.State?) {
-        viewBinding.buyButton.updateState(state)
+        viewBinding.primaryButton.updateState(state)
 
         when (state) {
             is PrimaryButton.State.Ready -> {

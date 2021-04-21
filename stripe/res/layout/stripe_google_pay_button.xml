@@ -2,7 +2,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.stripe.android.paymentsheet.ui.PrimaryButton
-        android:id="@+id/buy_button"
+        android:id="@+id/primary_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/stripe_paymentsheet_primary_button_margin"

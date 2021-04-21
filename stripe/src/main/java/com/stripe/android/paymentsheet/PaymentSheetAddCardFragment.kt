@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
@@ -16,6 +17,8 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 internal class PaymentSheetAddCardFragment(
     eventReporter: EventReporter
 ) : BaseAddCardFragment(eventReporter) {
+    @VisibleForTesting
+    internal lateinit var viewBinding: FragmentPaymentsheetAddCardBinding
     private lateinit var googlePayButton: GooglePayButton
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
@@ -53,7 +56,7 @@ internal class PaymentSheetAddCardFragment(
             config.isGooglePayReady && config.paymentMethods.isEmpty()
         } ?: false
 
-        val viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
+        viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
         googlePayButton = viewBinding.googlePayButton
         val addCardHeader = viewBinding.addCardHeader
         val googlePayDivider = viewBinding.googlePayDivider

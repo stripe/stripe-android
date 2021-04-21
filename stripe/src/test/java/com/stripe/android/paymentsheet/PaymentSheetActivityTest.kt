@@ -15,6 +15,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.PrimaryButtonBinding
+import com.stripe.android.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -436,6 +437,7 @@ internal class PaymentSheetActivityTest {
             }
         }
     }
+
     @Test
     fun `Verify StartProcessing state updates the google button label`() {
         val scenario = activityScenario()
@@ -449,8 +451,9 @@ internal class PaymentSheetActivityTest {
 
                 idleLooper()
 
-                val buyBinding = PrimaryButtonBinding.bind(activity.viewBinding.buyButton)
-                assertThat(buyBinding.label.text)
+                val googlePayButton =
+                    StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
+                assertThat(googlePayButton.primaryButton.viewBinding.label.text)
                     .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
             }
         }

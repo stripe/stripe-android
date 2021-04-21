@@ -119,7 +119,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     private val googlePayViewStateObserver = { viewState: ViewState.PaymentSheet? ->
         when (viewState) {
             is ViewState.PaymentSheet.Ready -> viewBinding.googlePayButton.updateState(
-                PrimaryButton.State.Ready(getLabelText(viewState))
+                PrimaryButton.State.Ready()
             )
             is ViewState.PaymentSheet.StartProcessing -> viewBinding.googlePayButton.updateState(
                 PrimaryButton.State.StartProcessing
