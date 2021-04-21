@@ -73,10 +73,10 @@ class KlarnaSourceActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        data?.let {
+        if (stripe.isAuthenticateSourceResult(requestCode, data)) {
             lifecycleScope.launch {
                 runCatching {
-                    stripe.getAuthenticateSourceResult(requestCode, data)
+                    stripe.getAuthenticateSourceResult(requestCode, data!!)
                 }.fold(
                     onSuccess = {
                         viewModel.source = it
