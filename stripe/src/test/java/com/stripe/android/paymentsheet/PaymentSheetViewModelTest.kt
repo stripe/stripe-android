@@ -196,7 +196,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Google Pay checkout failed returns to Ready state and shows error`() {
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
