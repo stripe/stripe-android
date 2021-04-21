@@ -75,7 +75,6 @@ internal class StripePaymentControllerTest {
         whenever(it.sdkTransactionId)
             .thenReturn(sdkTransactionId)
     }
-    private val setupIntentResultCallback: ApiResultCallback<SetupIntentResult> = mock()
     private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter =
@@ -94,8 +93,6 @@ internal class StripePaymentControllerTest {
         argumentCaptor()
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
-    private val setupIntentResultArgumentCaptor: KArgumentCaptor<SetupIntentResult> =
-        argumentCaptor()
 
     private val testDispatcher = TestCoroutineDispatcher()
 
@@ -606,50 +603,52 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `bypassAuth() with ActivityResultLauncher should use ActivityResultLauncher`() = testDispatcher.runBlockingTest {
-        verifyZeroInteractions(activity)
+    fun `bypassAuth() with ActivityResultLauncher should use ActivityResultLauncher`() =
+        testDispatcher.runBlockingTest {
+            verifyZeroInteractions(activity)
 
-        val launcher = FakeActivityResultLauncher(PaymentRelayContract())
-        createController(
-            paymentRelayLauncher = launcher
-        ).bypassAuth(
-            host,
-            PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-            null
-        )
-        assertThat(launcher.launchArgs)
-            .containsExactly(
-                PaymentRelayStarter.Args.PaymentIntentArgs(
-                    PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
-                )
+            val launcher = FakeActivityResultLauncher(PaymentRelayContract())
+            createController(
+                paymentRelayLauncher = launcher
+            ).bypassAuth(
+                host,
+                PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+                null
             )
-    }
+            assertThat(launcher.launchArgs)
+                .containsExactly(
+                    PaymentRelayStarter.Args.PaymentIntentArgs(
+                        PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
+                    )
+                )
+        }
 
     @Test
-    fun `on3ds2AuthFallback() with ActivityResultLauncher should use ActivityResultLauncher`() = testDispatcher.runBlockingTest {
-        verifyZeroInteractions(activity)
+    fun `on3ds2AuthFallback() with ActivityResultLauncher should use ActivityResultLauncher`() =
+        testDispatcher.runBlockingTest {
+            verifyZeroInteractions(activity)
 
-        val launcher = FakeActivityResultLauncher(PaymentAuthWebViewContract())
-        createController(
-            paymentAuthWebViewLauncher = launcher
-        ).on3ds2AuthFallback(
-            "https://example.com",
-            host,
-            PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-            REQUEST_OPTIONS
-        )
-        assertThat(launcher.launchArgs)
-            .containsExactly(
-                PaymentAuthWebViewContract.Args(
-                    objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
-                    requestCode = 50000,
-                    clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
-                    stripeAccountId = ACCOUNT_ID,
-                    url = "https://example.com",
-                    shouldCancelSource = true
-                )
+            val launcher = FakeActivityResultLauncher(PaymentAuthWebViewContract())
+            createController(
+                paymentAuthWebViewLauncher = launcher
+            ).on3ds2AuthFallback(
+                "https://example.com",
+                host,
+                PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+                REQUEST_OPTIONS
             )
-    }
+            assertThat(launcher.launchArgs)
+                .containsExactly(
+                    PaymentAuthWebViewContract.Args(
+                        objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
+                        requestCode = 50000,
+                        clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
+                        stripeAccountId = ACCOUNT_ID,
+                        url = "https://example.com",
+                        shouldCancelSource = true
+                    )
+                )
+        }
 
     private fun createController(
         paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,

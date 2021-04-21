@@ -51,6 +51,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -61,7 +62,7 @@ import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class DefaultFlowControllerTest {
+internal class DefaultFlowControllerTest {
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
@@ -393,29 +394,30 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onGooglePayResult() when PaymentData result should invoke startConfirmAndAuth() with expected params`() {
-        flowController.configure(
-            PaymentSheetFixtures.CLIENT_SECRET,
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { _, _ ->
-        }
+    fun `onGooglePayResult() when PaymentData result should invoke startConfirmAndAuth() with expected params`() =
+        testDispatcher.runBlockingTest {
+            flowController.configure(
+                PaymentSheetFixtures.CLIENT_SECRET,
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            ) { _, _ ->
+            }
 
-        flowController.onGooglePayResult(
-            StripeGooglePayContract.Result.PaymentData(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                shippingInformation = null
+            flowController.onGooglePayResult(
+                StripeGooglePayContract.Result.PaymentData(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    shippingInformation = null
+                )
             )
-        )
 
-        verify(paymentController).startConfirmAndAuth(
-            any(),
-            argWhere {
-                val params = (it as ConfirmPaymentIntentParams)
-                params.paymentMethodId == "pm_123456789"
-            },
-            any()
-        )
-    }
+            verify(paymentController).startConfirmAndAuth(
+                any(),
+                argWhere {
+                    val params = (it as ConfirmPaymentIntentParams)
+                    params.paymentMethodId == "pm_123456789"
+                },
+                any()
+            )
+        }
 
     @Test
     fun `configure() when scope is cancelled before completion should not call onInit lambda`() {

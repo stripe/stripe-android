@@ -3,10 +3,12 @@ package com.stripe.android
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -147,14 +149,16 @@ class Stripe internal constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startConfirmAndAuth(
-            AuthActivityStarter.Host.create(activity),
-            confirmPaymentIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        getLifecycleScope(activity).launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmPaymentIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -202,14 +206,16 @@ class Stripe internal constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startConfirmAndAuth(
-            AuthActivityStarter.Host.create(fragment),
-            confirmPaymentIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        fragment.lifecycleScope.launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(fragment),
+                confirmPaymentIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -475,14 +481,16 @@ class Stripe internal constructor(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startConfirmAndAuth(
-            AuthActivityStarter.Host.create(activity),
-            confirmSetupIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        getLifecycleScope(activity).launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmSetupIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -499,14 +507,16 @@ class Stripe internal constructor(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startConfirmAndAuth(
-            AuthActivityStarter.Host.create(fragment),
-            confirmSetupIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        fragment.lifecycleScope.launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(fragment),
+                confirmSetupIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -1686,6 +1696,17 @@ class Stripe internal constructor(
                 callback.onError(StripeException.create(it))
             }
         )
+    }
+
+    /**
+     * Get a `LifecycleCoroutineScope` if available. Otherwise, default to a `CoroutineScope`
+     * using `Dispatchers.IO`.
+     */
+    private fun getLifecycleScope(
+        activity: Activity
+    ): CoroutineScope = when (activity) {
+        is ComponentActivity -> activity.lifecycleScope
+        else -> CoroutineScope(Dispatchers.IO)
     }
 
     companion object {

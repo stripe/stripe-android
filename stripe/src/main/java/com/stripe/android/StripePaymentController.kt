@@ -119,45 +119,41 @@ internal class StripePaymentController internal constructor(
     /**
      * Confirm the Stripe Intent and resolve any next actions
      */
-    override fun startConfirmAndAuth(
+    override suspend fun startConfirmAndAuth(
         host: AuthActivityStarter.Host,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
-    ) {
-        CoroutineScope(workContext).launch {
-            val result = runCatching {
-                when (confirmStripeIntentParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        confirmPaymentIntent(
-                            confirmStripeIntentParams,
-                            requestOptions
-                        )
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        confirmSetupIntent(
-                            confirmStripeIntentParams,
-                            requestOptions
-                        )
-                    }
-                    else -> error("Confirmation params must be ConfirmPaymentIntentParams or ConfirmSetupIntentParams")
+    ) = withContext(workContext) {
+        runCatching {
+            when (confirmStripeIntentParams) {
+                is ConfirmPaymentIntentParams -> {
+                    confirmPaymentIntent(
+                        confirmStripeIntentParams,
+                        requestOptions
+                    )
                 }
+                is ConfirmSetupIntentParams -> {
+                    confirmSetupIntent(
+                        confirmStripeIntentParams,
+                        requestOptions
+                    )
+                }
+                else -> error("Confirmation params must be ConfirmPaymentIntentParams or ConfirmSetupIntentParams")
             }
-
-            withContext(Dispatchers.Main) {
-                result.fold(
-                    onSuccess = { intent ->
-                        handleNextAction(host, intent, requestOptions)
-                    },
-                    onFailure = {
-                        handleError(
-                            host,
-                            getRequestCode(confirmStripeIntentParams),
-                            it
-                        )
-                    }
+        }.fold(
+            onSuccess = { intent ->
+                withContext(Dispatchers.Main) {
+                    handleNextAction(host, intent, requestOptions)
+                }
+            },
+            onFailure = {
+                handleError(
+                    host,
+                    getRequestCode(confirmStripeIntentParams),
+                    it
                 )
             }
-        }
+        )
     }
 
     override fun startConfirmAlipay(
