@@ -6,6 +6,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import org.jetbrains.annotations.TestOnly
 
 internal class DefaultPaymentSheetLauncher(
@@ -21,7 +23,7 @@ internal class DefaultPaymentSheetLauncher(
         activity.registerForActivityResult(
             PaymentSheetContract()
         ) {
-            callback.onPaymentResult(it)
+            callback.onPaymentSheetResult(it)
         },
 
         // lazily access the statusBarColor in case the value changes between when this
@@ -36,7 +38,7 @@ internal class DefaultPaymentSheetLauncher(
         fragment.registerForActivityResult(
             PaymentSheetContract()
         ) {
-            callback.onPaymentResult(it)
+            callback.onPaymentSheetResult(it)
         },
 
         // lazily access the statusBarColor in case the value changes between when this
@@ -54,7 +56,7 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract(),
             registry
         ) {
-            callback.onPaymentResult(it)
+            callback.onPaymentSheetResult(it)
         },
 
         // lazily access the statusBarColor in case the value changes between when this
@@ -62,26 +64,27 @@ internal class DefaultPaymentSheetLauncher(
         { getStatusBarColor(fragment.activity) }
     )
 
-    override fun present(
+    override fun presentWithPaymentIntent(
         paymentIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration
+        configuration: PaymentSheet.Configuration?
     ) = present(
         PaymentSheetContract.Args(
-            paymentIntentClientSecret,
+            PaymentIntentClientSecret(paymentIntentClientSecret),
             sessionId,
             statusBarColor(),
             configuration
         )
     )
 
-    override fun present(
-        paymentIntentClientSecret: String
+    override fun presentWithSetupIntent(
+        setupIntentClientSecret: String,
+        configuration: PaymentSheet.Configuration?
     ) = present(
         PaymentSheetContract.Args(
-            paymentIntentClientSecret,
+            SetupIntentClientSecret(setupIntentClientSecret),
             sessionId,
             statusBarColor(),
-            config = null
+            configuration
         )
     )
 

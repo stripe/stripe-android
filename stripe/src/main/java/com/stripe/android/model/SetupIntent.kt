@@ -9,8 +9,8 @@ import java.util.regex.Pattern
  * A [SetupIntent] guides you through the process of setting up a customer's payment credentials for
  * future payments.
  *
- * See the [API Reference for SetupIntents](https://stripe.com/docs/api/setup_intents)
- * for more information.
+ * - [Setup Intents Overview](https://stripe.com/docs/payments/setup-intents)
+ * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
 @Parcelize
 data class SetupIntent internal constructor(
@@ -95,6 +95,12 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
             else -> null
         }
+
+    override val isConfirmed: Boolean
+        get() = setOf(
+            StripeIntent.Status.Processing,
+            StripeIntent.Status.Succeeded
+        ).contains(status)
 
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
@@ -206,7 +212,6 @@ data class SetupIntent internal constructor(
     }
 
     companion object {
-
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SetupIntent? {
             return jsonObject?.let {

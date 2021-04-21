@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
-import com.stripe.android.PaymentIntentResult
+import com.stripe.android.StripeIntentResult
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentOptionResult
 
 internal sealed class ViewState {
@@ -21,8 +22,8 @@ internal sealed class ViewState {
             val onComplete: () -> Unit
         ) : PaymentSheet()
 
-        data class ProcessResult(
-            val result: PaymentIntentResult
+        data class ProcessResult<T : StripeIntent>(
+            val result: StripeIntentResult<T>
         ) : PaymentSheet()
     }
 

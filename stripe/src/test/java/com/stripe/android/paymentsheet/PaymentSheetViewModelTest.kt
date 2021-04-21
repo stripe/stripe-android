@@ -27,9 +27,9 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.ViewState
-import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserMessage
 import kotlinx.coroutines.Dispatchers
@@ -164,7 +164,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Google Pay checkout cancelled returns to Ready state`() {
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
@@ -256,7 +256,7 @@ internal class PaymentSheetViewModelTest {
 
         (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
 
-        assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult).result)
+        assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult<*>).result)
             .isEqualTo(PAYMENT_INTENT_RESULT)
 
         verify(eventReporter)
@@ -297,7 +297,7 @@ internal class PaymentSheetViewModelTest {
 
         (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
 
-        assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult).result)
+        assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult<*>).result)
             .isEqualTo(PAYMENT_INTENT_RESULT_WITH_PM)
 
         verify(eventReporter)
@@ -363,7 +363,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.viewState.observeForever {
             viewState = it
         }
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
         assertThat(viewState)
             .isEqualTo(
                 ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd")
@@ -373,7 +373,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `fetchPaymentIntent() should propagate errors`() {
         val viewModel = createViewModel(
-            paymentIntentRepository = PaymentIntentRepository.Api(
+            stripeIntentRepository = StripeIntentRepository.Api(
                 stripeRepository = FailingStripeRepository(),
                 requestOptions = ApiRequest.Options(
                     apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -385,7 +385,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fatal.observeForever {
             error = it
         }
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
         assertThat(error?.message)
             .isEqualTo("Could not parse PaymentIntent.")
     }
@@ -393,7 +393,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `fetchPaymentIntent() should fail if confirmationMethod=manual`() {
         val viewModel = createViewModel(
-            paymentIntentRepository = PaymentIntentRepository.Static(
+            stripeIntentRepository = StripeIntentRepository.Static(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
                 )
@@ -403,7 +403,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fatal.observeForever {
             error = it
         }
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
         assertThat(error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
@@ -414,7 +414,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `fetchPaymentIntent() should fail if status != requires_payment_method`() {
         val viewModel = createViewModel(
-            paymentIntentRepository = PaymentIntentRepository.Static(
+            stripeIntentRepository = StripeIntentRepository.Static(
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
             )
         )
@@ -422,7 +422,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fatal.observeForever {
             error = it
         }
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
         assertThat(error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
@@ -455,7 +455,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `fetchFragmentConfig() when all data is ready should emit value`() {
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
         viewModel.fetchIsGooglePayReady()
         viewModel.updatePaymentMethods()
 
@@ -492,7 +492,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(isEnabled)
             .isFalse()
 
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
         assertThat(isEnabled)
             .isTrue()
     }
@@ -500,7 +500,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `viewState should emit FinishProcessing and ProcessResult if PaymentIntent is confirmed`() {
         val viewModel = createViewModel(
-            paymentIntentRepository = PaymentIntentRepository.Static(
+            stripeIntentRepository = StripeIntentRepository.Static(
                 PaymentIntentFixtures.PI_SUCCEEDED
             )
         )
@@ -515,7 +515,7 @@ internal class PaymentSheetViewModelTest {
                 viewStates.add(it)
             }
         }
-        viewModel.fetchPaymentIntent()
+        viewModel.fetchStripeIntent()
 
         assertThat(viewStates)
             .hasSize(2)
@@ -534,7 +534,7 @@ internal class PaymentSheetViewModelTest {
 
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        paymentIntentRepository: PaymentIntentRepository = PaymentIntentRepository.Static(
+        stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(
             PAYMENT_INTENT
         ),
         paymentMethodsRepository: PaymentMethodsRepository = FakePaymentMethodsRepository(
@@ -544,7 +544,7 @@ internal class PaymentSheetViewModelTest {
         return PaymentSheetViewModel(
             "publishable_key",
             "stripe_account_id",
-            paymentIntentRepository = paymentIntentRepository,
+            stripeIntentRepository = stripeIntentRepository,
             paymentMethodsRepository = paymentMethodsRepository,
             paymentFlowResultProcessor,
             googlePayRepository,

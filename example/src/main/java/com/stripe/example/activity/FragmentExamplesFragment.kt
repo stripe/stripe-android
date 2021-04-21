@@ -8,15 +8,15 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.stripe.android.ApiResultCallback
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
-import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
 import com.stripe.android.StripeError
+import com.stripe.android.getPaymentIntentResult
+import com.stripe.android.getSetupIntentResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
@@ -24,6 +24,7 @@ import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.LaunchPaymentSessionFragmentBinding
+import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -126,38 +127,20 @@ class FragmentExamplesFragment : Fragment() {
             return
         }
 
-        val isPaymentResult = stripe.onPaymentResult(
-            requestCode,
-            data,
-            callback = object : ApiResultCallback<PaymentIntentResult> {
-                override fun onSuccess(result: PaymentIntentResult) {
-                    viewModel.paymentIntentResultLiveData.value = Result.success(result)
-                }
-
-                override fun onError(e: Exception) {
-                    viewModel.paymentIntentResultLiveData.value = Result.failure(e)
+        if (stripe.isPaymentResult(requestCode, data)) {
+            lifecycleScope.launch {
+                viewModel.paymentIntentResultLiveData.value = runCatching {
+                    // stripe.isPaymentResult already verifies data is not null
+                    stripe.getPaymentIntentResult(requestCode, data!!)
                 }
             }
-        )
-        if (isPaymentResult) {
-            return
-        }
-
-        val isSetupResult = stripe.onSetupResult(
-            requestCode,
-            data,
-            callback = object : ApiResultCallback<SetupIntentResult> {
-                override fun onSuccess(result: SetupIntentResult) {
-                    viewModel.setupIntentResultLiveData.value = Result.success(result)
-                }
-
-                override fun onError(e: Exception) {
-                    viewModel.setupIntentResultLiveData.value = Result.failure(e)
+        } else if (stripe.isSetupResult(requestCode, data)) {
+            lifecycleScope.launch {
+                viewModel.setupIntentResultLiveData.value = runCatching {
+                    // stripe.isSetupResult already verifies data is not null
+                    stripe.getSetupIntentResult(requestCode, data!!)
                 }
             }
-        )
-        if (isSetupResult) {
-            return
         }
     }
 

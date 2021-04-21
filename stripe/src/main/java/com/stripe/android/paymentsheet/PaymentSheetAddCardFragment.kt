@@ -40,7 +40,7 @@ internal class PaymentSheetAddCardFragment(
             is ViewState.PaymentSheet.FinishProcessing -> googlePayButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentSheet.ProcessResult -> {
+            is ViewState.PaymentSheet.ProcessResult<*> -> {
             }
         }
     }
