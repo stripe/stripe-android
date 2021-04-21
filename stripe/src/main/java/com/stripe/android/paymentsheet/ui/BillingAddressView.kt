@@ -21,7 +21,6 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CountryCode
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.Country
 import com.stripe.android.view.CountryUtils
 import com.stripe.android.view.PostalCodeValidator
@@ -44,8 +43,8 @@ internal class BillingAddressView @JvmOverloads constructor(
     }
 
     @VisibleForTesting
-    internal var level: PaymentSheet.BillingAddressCollectionLevel by Delegates.observable(
-        PaymentSheet.BillingAddressCollectionLevel.Automatic
+    internal var level: BillingAddressCollectionLevel by Delegates.observable(
+        BillingAddressCollectionLevel.Automatic
     ) { _, oldLevel, newLevel ->
         if (oldLevel != newLevel) {
             configureForLevel()
@@ -218,13 +217,13 @@ internal class BillingAddressView @JvmOverloads constructor(
             )
             if (isPostalCodeValid) {
                 when (level) {
-                    PaymentSheet.BillingAddressCollectionLevel.Automatic -> {
+                    BillingAddressCollectionLevel.Automatic -> {
                         Address.Builder()
                             .setCountryCode(countryCode)
                             .setPostalCode(postalCode)
                             .build()
                     }
-                    PaymentSheet.BillingAddressCollectionLevel.Required -> {
+                    BillingAddressCollectionLevel.Required -> {
                         createRequiredAddress(countryCode, postalCode)
                     }
                 }
@@ -294,7 +293,7 @@ internal class BillingAddressView @JvmOverloads constructor(
         postalCodeLayout.isVisible = shouldShowPostalCode
 
         val shouldShowPostalCodeContainer =
-            level == PaymentSheet.BillingAddressCollectionLevel.Required || shouldShowPostalCode
+            level == BillingAddressCollectionLevel.Required || shouldShowPostalCode
         viewBinding.cityPostalDivider.isVisible = shouldShowPostalCodeContainer
         viewBinding.cityPostalContainer.isVisible = shouldShowPostalCodeContainer
 
@@ -330,10 +329,10 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     private fun configureForLevel() {
         when (level) {
-            PaymentSheet.BillingAddressCollectionLevel.Automatic -> {
+            BillingAddressCollectionLevel.Automatic -> {
                 requiredViews.forEach { it.isVisible = false }
             }
-            PaymentSheet.BillingAddressCollectionLevel.Required -> {
+            BillingAddressCollectionLevel.Required -> {
                 requiredViews.forEach { it.isVisible = true }
             }
         }
@@ -342,10 +341,10 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     fun focusFirstField() {
         when (level) {
-            PaymentSheet.BillingAddressCollectionLevel.Automatic -> {
+            BillingAddressCollectionLevel.Automatic -> {
                 postalCodeLayout.requestFocus()
             }
-            PaymentSheet.BillingAddressCollectionLevel.Required -> {
+            BillingAddressCollectionLevel.Required -> {
                 viewBinding.address1Layout.requestFocus()
             }
         }
@@ -401,5 +400,17 @@ internal class BillingAddressView @JvmOverloads constructor(
                 return TextKeyListener.getInstance()
             }
         }
+    }
+
+    internal enum class BillingAddressCollectionLevel {
+        /**
+         * (Default) PaymentSheet will only collect the necessary billing address information.
+         */
+        Automatic,
+
+        /**
+         * PaymentSheet will always collect full billing address details.
+         */
+        Required
     }
 }
