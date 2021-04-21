@@ -152,7 +152,7 @@ class PaymentSheet internal constructor(
          */
         fun configureWithPaymentIntent(
             paymentIntentClientSecret: String,
-            configuration: Configuration? = null,
+            configuration: Configuration?,
             callback: ConfigCallback
         )
 
@@ -175,7 +175,7 @@ class PaymentSheet internal constructor(
          */
         fun configureWithSetupIntent(
             setupIntentClientSecret: String,
-            configuration: Configuration? = null,
+            configuration: Configuration?,
             callback: ConfigCallback
         )
 
