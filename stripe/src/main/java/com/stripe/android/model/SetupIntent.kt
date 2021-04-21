@@ -96,6 +96,12 @@ data class SetupIntent internal constructor(
             else -> null
         }
 
+    override val isConfirmed: Boolean
+        get() = setOf(
+            StripeIntent.Status.Processing,
+            StripeIntent.Status.Succeeded
+        ).contains(status)
+
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
     }
