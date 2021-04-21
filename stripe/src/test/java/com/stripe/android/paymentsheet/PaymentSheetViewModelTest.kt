@@ -344,7 +344,7 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentFlowResult() should update emit API errors`() {
         paymentFlowResultProcessor.error = RuntimeException("Your card was declined.")
 
-        var userMessage: BaseSheetViewModel.UserMessage? = null
+        var userMessage: UserMessage? = null
         viewModel.userMessage.observeForever {
             userMessage = it
         }
@@ -353,7 +353,7 @@ internal class PaymentSheetViewModelTest {
         )
         assertThat(userMessage)
             .isEqualTo(
-                BaseSheetViewModel.UserMessage.Error("Your card was declined.")
+                UserMessage.Error("Your card was declined.")
             )
     }
 
