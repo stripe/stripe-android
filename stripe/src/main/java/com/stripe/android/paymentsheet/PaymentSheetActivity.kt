@@ -173,10 +173,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
         setContentView(viewBinding.root)
 
-        viewModel.fatal.observe(this) {
-            closeSheet(PaymentSheetResult.Failed(it))
-        }
-
         rootView.doOnNextLayout {
             // Show bottom sheet only after the Activity has been laid out so that it animates in
             bottomSheetController.expand()
@@ -326,10 +322,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             Intent()
                 .putExtras(PaymentSheetContract.Result(result).toBundle())
         )
-    }
-
-    override fun onUserCancel() {
-        closeSheet(PaymentSheetResult.Canceled)
     }
 
     internal companion object {

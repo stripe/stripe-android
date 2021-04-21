@@ -58,6 +58,16 @@ internal class PaymentOptionsViewModel(
         _processing.postValue(false)
     }
 
+    override fun onFatal(throwable: Throwable) {
+        _fatal.value = throwable
+        _paymentOptionResult.value = PaymentOptionResult.Failed(throwable)
+    }
+
+    override fun onUserCancel() {
+        _paymentOptionResult.value =
+            PaymentOptionResult.Canceled(mostRecentError = _fatal.value)
+    }
+
     fun onUserSelection() {
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?

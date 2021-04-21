@@ -350,12 +350,12 @@ internal class PaymentSheetViewModelTest {
                 workContext = testDispatcher
             )
         )
-        var error: Throwable? = null
-        viewModel.fatal.observeForever {
-            error = it
+        var result: PaymentSheetResult? = null
+        viewModel.paymentSheetResult.observeForever {
+            result = it
         }
         viewModel.fetchStripeIntent()
-        assertThat(error?.message)
+        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo("Could not parse PaymentIntent.")
     }
 
@@ -368,12 +368,12 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
-        var error: Throwable? = null
-        viewModel.fatal.observeForever {
-            error = it
+        var result: PaymentSheetResult? = null
+        viewModel.paymentSheetResult.observeForever {
+            result = it
         }
         viewModel.fetchStripeIntent()
-        assertThat(error?.message)
+        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
@@ -387,12 +387,12 @@ internal class PaymentSheetViewModelTest {
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
             )
         )
-        var error: Throwable? = null
-        viewModel.fatal.observeForever {
-            error = it
+        var result: PaymentSheetResult? = null
+        viewModel.paymentSheetResult.observeForever {
+            result = it
         }
         viewModel.fetchStripeIntent()
-        assertThat(error?.message)
+        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."

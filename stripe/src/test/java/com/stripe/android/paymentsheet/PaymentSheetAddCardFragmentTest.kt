@@ -298,7 +298,7 @@ class PaymentSheetAddCardFragmentTest {
         createFragment(
             fragmentConfig = null
         ) { fragment, _ ->
-            assertThat(fragment.sheetViewModel.fatal.value?.message)
+            assertThat((fragment.sheetViewModel.paymentSheetResult.value as PaymentSheetResult.Failed).error.message)
                 .isEqualTo("Failed to start add payment option fragment.")
         }
     }

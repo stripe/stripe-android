@@ -113,7 +113,7 @@ internal class PaymentSheetViewModel internal constructor(
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)
             }.fold(
-                onSuccess = ::onPaymentIntentResponse,
+                onSuccess = ::onFetchPaymentIntentResponse,
                 onFailure = {
                     _paymentIntent.value = null
                     onFatal(it)
@@ -122,9 +122,9 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
+    private fun onFetchPaymentIntentResponse(paymentIntent: PaymentIntent) {
         if (paymentIntent.isConfirmed) {
-            onConfirmedPaymentIntent(paymentIntent)
+            onFetchConfirmedPaymentIntent(paymentIntent)
         } else {
             runCatching {
                 paymentIntentValidator.requireValid(paymentIntent)
@@ -143,7 +143,7 @@ internal class PaymentSheetViewModel internal constructor(
      *
      * See [How intents work](https://stripe.com/docs/payments/intents) for more details.
      */
-    private fun onConfirmedPaymentIntent(paymentIntent: PaymentIntent) {
+    private fun onFetchConfirmedPaymentIntent(paymentIntent: PaymentIntent) {
         logger.info(
             """
             PaymentIntent with id=${paymentIntent.id}" has already been confirmed.
@@ -305,6 +305,15 @@ internal class PaymentSheetViewModel internal constructor(
                 }
             )
         }
+    }
+
+    override fun onFatal(throwable: Throwable) {
+        _fatal.value = throwable
+        _paymentSheetResult.value = PaymentSheetResult.Failed(throwable)
+    }
+
+    override fun onUserCancel() {
+        _paymentSheetResult.value = PaymentSheetResult.Canceled
     }
 
     internal sealed class TransitionTarget {

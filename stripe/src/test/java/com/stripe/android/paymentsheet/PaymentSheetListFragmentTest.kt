@@ -153,7 +153,7 @@ class PaymentSheetListFragmentTest {
         createScenario(
             fragmentConfig = null
         ).onFragment { fragment ->
-            assertThat(fragment.sheetViewModel.fatal.value?.message)
+            assertThat((fragment.sheetViewModel.paymentSheetResult.value as PaymentSheetResult.Failed).error.message)
                 .isEqualTo("Failed to start existing payment options fragment.")
         }
     }
