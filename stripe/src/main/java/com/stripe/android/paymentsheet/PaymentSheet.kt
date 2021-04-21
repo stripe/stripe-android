@@ -152,19 +152,9 @@ class PaymentSheet internal constructor(
          */
         fun configureWithPaymentIntent(
             paymentIntentClientSecret: String,
-            configuration: Configuration?,
+            configuration: Configuration? = null,
             callback: ConfigCallback
         )
-
-        /**
-         * @see [configureWithPaymentIntent] above.
-         */
-        fun configureWithPaymentIntent(
-            paymentIntentClientSecret: String,
-            callback: ConfigCallback
-        ) {
-            configureWithPaymentIntent(paymentIntentClientSecret, null, callback)
-        }
 
         /**
          * Configure the FlowController to process a [SetupIntent].
@@ -175,19 +165,9 @@ class PaymentSheet internal constructor(
          */
         fun configureWithSetupIntent(
             setupIntentClientSecret: String,
-            configuration: Configuration?,
+            configuration: Configuration? = null,
             callback: ConfigCallback
         )
-
-        /**
-         * @see [configureWithSetupIntent] above.
-         */
-        fun configureWithSetupIntent(
-            setupIntentClientSecret: String,
-            callback: ConfigCallback
-        ) {
-            configureWithSetupIntent(setupIntentClientSecret, null, callback)
-        }
 
         /**
          * Retrieve information about the customer's desired payment option.
