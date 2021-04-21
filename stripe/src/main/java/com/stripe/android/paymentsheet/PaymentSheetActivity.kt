@@ -110,9 +110,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentSheet.ProcessResult -> processResult(
-                viewState.result
-            )
+            is ViewState.PaymentSheet.ProcessResult -> {
+            }
         }
     }
 
@@ -127,9 +126,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
             is ViewState.PaymentSheet.FinishProcessing -> viewBinding.googlePayButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentSheet.ProcessResult -> processResult(
-                viewState.result
-            )
+            is ViewState.PaymentSheet.ProcessResult -> {
+            }
         }
     }
 
