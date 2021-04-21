@@ -70,7 +70,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
     internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
-    var checkoutIdentifier: CheckoutIdentifier? = null
+    private var checkoutIdentifier: CheckoutIdentifier? = null
     internal fun getViewStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet> {
         val outputLiveData = MediatorLiveData<ViewState.PaymentSheet>()
         outputLiveData.addSource(_viewState) { currentValue ->
