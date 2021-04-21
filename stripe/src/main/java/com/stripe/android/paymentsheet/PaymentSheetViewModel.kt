@@ -72,8 +72,7 @@ internal class PaymentSheetViewModel internal constructor(
 
     var checkoutIdentifier: CheckoutIdentifier? = null
     internal fun getViewStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet> {
-        val outputLiveData: MediatorLiveData<ViewState.PaymentSheet> =
-            MediatorLiveData<ViewState.PaymentSheet>()
+        val outputLiveData = MediatorLiveData<ViewState.PaymentSheet>()
         outputLiveData.addSource(_viewState) { currentValue ->
             if (this.checkoutIdentifier == checkoutIdentifier) {
                 outputLiveData.value = currentValue

@@ -99,7 +99,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         )
     }
 
-    private val buyViewStateObserver = { viewState: ViewState.PaymentSheet? ->
+    private val buyButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
         when (viewState) {
             is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.Ready(getLabelText(viewState))
@@ -116,7 +116,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
         }
     }
 
-    private val googlePayViewStateObserver = { viewState: ViewState.PaymentSheet? ->
+    private val googlePayButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
         when (viewState) {
             is ViewState.PaymentSheet.Ready -> viewBinding.googlePayButton.updateState(
                 PrimaryButton.State.Ready()
@@ -325,10 +325,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentResult>() {
     private fun setupBuyButton() {
         viewModel.initViewState(CheckoutIdentifier.SheetBottomBuy)
         viewModel.getViewStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
-            .observe(this, googlePayViewStateObserver)
+            .observe(this, googlePayButtonStateObserver)
 
         viewModel.getViewStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observe(this, buyViewStateObserver)
+            .observe(this, buyButtonStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
             val shouldShowGooglePay =
