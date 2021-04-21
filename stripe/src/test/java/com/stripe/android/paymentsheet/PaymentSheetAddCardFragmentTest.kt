@@ -12,6 +12,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
+import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
@@ -40,6 +41,27 @@ class PaymentSheetAddCardFragmentTest {
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+    }
+
+    @Test
+    fun `required billing fields should not be visible`() {
+        createFragment { _, viewBinding ->
+            val billingBinding = StripeBillingAddressLayoutBinding.bind(viewBinding.billingAddress)
+            assertThat(billingBinding.address1Divider.isVisible).isFalse()
+            assertThat(billingBinding.address1Layout.isVisible).isFalse()
+            assertThat(viewBinding.billingAddress.address1View.isVisible).isFalse()
+
+            assertThat(billingBinding.address2Divider.isVisible).isFalse()
+            assertThat(billingBinding.address2Layout.isVisible).isFalse()
+            assertThat(viewBinding.billingAddress.address2View.isVisible).isFalse()
+
+            assertThat(billingBinding.cityLayout.isVisible).isFalse()
+            assertThat(viewBinding.billingAddress.cityView.isVisible).isFalse()
+
+            assertThat(billingBinding.stateDivider.isVisible).isFalse()
+            assertThat(billingBinding.stateLayout.isVisible).isFalse()
+            assertThat(viewBinding.billingAddress.stateView.isVisible).isFalse()
+        }
     }
 
     @Test
