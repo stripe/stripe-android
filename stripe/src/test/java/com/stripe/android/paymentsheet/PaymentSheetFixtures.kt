@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.core.graphics.toColorInt
 import com.stripe.android.paymentsheet.analytics.SessionId
-import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR = "#121212".toColorInt()
@@ -10,7 +10,7 @@ internal object PaymentSheetFixtures {
     internal const val MERCHANT_DISPLAY_NAME = "Widget Store"
     internal const val CLIENT_SECRET = "client_secret"
 
-    internal val PAYMENT_INTENT_CLIENT_SECRET = ClientSecret.PaymentIntentClientSecret(
+    internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(
         CLIENT_SECRET
     )
 

@@ -9,7 +9,7 @@ import org.junit.Test
 
 class ConfirmParamsFactoryTest {
     private val factory =
-        ConfirmParamsFactory(ClientSecret.PaymentIntentClientSecret(CLIENT_SECRET))
+        ConfirmParamsFactory(PaymentIntentClientSecret(CLIENT_SECRET))
 
     @Test
     fun `create() with new card when savePaymentMethod is true should create params with setupFutureUsage = OffSession`() {

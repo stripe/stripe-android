@@ -25,10 +25,12 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -108,7 +110,7 @@ internal class DefaultFlowController internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configureInternal(
-            ClientSecret.PaymentIntentClientSecret(paymentIntentClientSecret),
+            PaymentIntentClientSecret(paymentIntentClientSecret),
             configuration,
             callback
         )
@@ -120,7 +122,7 @@ internal class DefaultFlowController internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configureInternal(
-            ClientSecret.SetupIntentClientSecret(setupIntentClientSecret),
+            SetupIntentClientSecret(setupIntentClientSecret),
             configuration,
             callback
         )
@@ -211,7 +213,7 @@ internal class DefaultFlowController internal constructor(
         initData: InitData
     ) {
         val confirmParamsFactory = ConfirmParamsFactory(
-            ClientSecret.PaymentIntentClientSecret(initData.paymentIntent.clientSecret.orEmpty())
+            PaymentIntentClientSecret(initData.paymentIntent.clientSecret.orEmpty())
         )
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
