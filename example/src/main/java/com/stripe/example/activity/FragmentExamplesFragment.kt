@@ -130,12 +130,14 @@ class FragmentExamplesFragment : Fragment() {
         if (stripe.isPaymentResult(requestCode, data)) {
             lifecycleScope.launch {
                 viewModel.paymentIntentResultLiveData.value = runCatching {
+                    // stripe.isPaymentResult already verifies data is not null
                     stripe.getPaymentIntentResult(requestCode, data!!)
                 }
             }
         } else if (stripe.isSetupResult(requestCode, data)) {
             lifecycleScope.launch {
                 viewModel.setupIntentResultLiveData.value = runCatching {
+                    // stripe.isSetupResult already verifies data is not null
                     stripe.getSetupIntentResult(requestCode, data!!)
                 }
             }
