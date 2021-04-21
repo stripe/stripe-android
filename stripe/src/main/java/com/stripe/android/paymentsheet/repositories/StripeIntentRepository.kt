@@ -4,6 +4,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -31,7 +33,7 @@ internal sealed class StripeIntentRepository {
     ) : StripeIntentRepository() {
         override suspend fun get(clientSecret: ClientSecret) = withContext(workContext) {
             when (clientSecret) {
-                is ClientSecret.PaymentIntentClientSecret -> {
+                is PaymentIntentClientSecret -> {
                     val paymentIntent = stripeRepository.retrievePaymentIntent(
                         clientSecret.value,
                         requestOptions,
@@ -41,11 +43,8 @@ internal sealed class StripeIntentRepository {
                         "Could not parse PaymentIntent."
                     }
                 }
-                is ClientSecret.SetupIntentClientSecret -> {
+                is SetupIntentClientSecret -> {
                     throw IllegalArgumentException("SetupIntents not supported")
-                }
-                else -> {
-                    throw IllegalArgumentException("Invalid client secret.")
                 }
             }
         }

@@ -19,8 +19,8 @@ class PaymentSheet internal constructor(
     /**
      * Constructor to be used when launching the payment sheet from an Activity.
      *
-     * @param[activity] the Activity that is presenting the payment sheet.
-     * @param[callback] called with the result of the payment after the payment sheet is dismissed.
+     * @param activity  the Activity that is presenting the payment sheet.
+     * @param callback  called with the result of the payment after the payment sheet is dismissed.
      */
     internal constructor(
         activity: ComponentActivity,
@@ -32,8 +32,8 @@ class PaymentSheet internal constructor(
     /**
      * Constructor to be used when launching the payment sheet from a Fragment.
      *
-     * @param[fragment] the Fragment that is presenting the payment sheet.
-     * @param[callback] called with the result of the payment after the payment sheet is dismissed.
+     * @param fragment the Fragment that is presenting the payment sheet.
+     * @param callback called with the result of the payment after the payment sheet is dismissed.
      */
     internal constructor(
         fragment: Fragment,
@@ -47,8 +47,8 @@ class PaymentSheet internal constructor(
      * If the [PaymentIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
      * with [PaymentSheetResult.Completed].
      *
-     * @param[paymentIntentClientSecret] the client secret for the [PaymentIntent].
-     * @param[configuration] optional [PaymentSheet] settings.
+     * @param paymentIntentClientSecret the client secret for the [PaymentIntent].
+     * @param configuration optional [PaymentSheet] settings.
      */
     @JvmOverloads
     internal fun presentWithPaymentIntent(
@@ -63,8 +63,8 @@ class PaymentSheet internal constructor(
      * If the [SetupIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
      * with [PaymentSheetResult.Completed].
      *
-     * @param[setupIntentClientSecret] the client secret for the [SetupIntent].
-     * @param[configuration] optional [PaymentSheet] settings.
+     * @param setupIntentClientSecret the client secret for the [SetupIntent].
+     * @param configuration optional [PaymentSheet] settings.
      */
     @JvmOverloads
     internal fun presentWithSetupIntent(
@@ -146,9 +146,9 @@ class PaymentSheet internal constructor(
         /**
          * Configure the FlowController to process a [PaymentIntent].
          *
-         * @param[paymentIntentClientSecret] the client secret for the [PaymentIntent].
-         * @param[configuration] optional [PaymentSheet] settings.
-         * @param[callback] called with the result of configuring the FlowController.
+         * @param paymentIntentClientSecret the client secret for the [PaymentIntent].
+         * @param configuration optional [PaymentSheet] settings.
+         * @param callback called with the result of configuring the FlowController.
          */
         fun configureWithPaymentIntent(
             paymentIntentClientSecret: String,
@@ -169,9 +169,9 @@ class PaymentSheet internal constructor(
         /**
          * Configure the FlowController to process a [SetupIntent].
          *
-         * @param[setupIntentClientSecret] the client secret for the [SetupIntent].
-         * @param[configuration] optional [PaymentSheet] settings.
-         * @param[callback] called with the result of configuring the FlowController.
+         * @param setupIntentClientSecret the client secret for the [SetupIntent].
+         * @param configuration optional [PaymentSheet] settings.
+         * @param callback called with the result of configuring the FlowController.
          */
         fun configureWithSetupIntent(
             setupIntentClientSecret: String,
@@ -227,10 +227,10 @@ class PaymentSheet internal constructor(
             /**
              * Create the FlowController when launching the payment sheet from an Activity.
              *
-             * @param[activity] the Activity that is presenting the payment sheet.
-             * @param[paymentOptionCallback] called when the customer's desired payment method
+             * @param activity  the Activity that is presenting the payment sheet.
+             * @param paymentOptionCallback called when the customer's desired payment method
              *      changes.  Called in response to the [PaymentSheet#presentPaymentOptions()]
-             * @param[paymentResultCallback] called when a [PaymentSheetResult] is available.
+             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
              */
             @JvmStatic
             fun create(
@@ -248,9 +248,9 @@ class PaymentSheet internal constructor(
             /**
              * Create the FlowController when launching the payment sheet from a Fragment.
              *
-             * @param[fragment] the Fragment that is presenting the payment sheet.
-             * @param[paymentOptionCallback] called when the customer's [PaymentOption] selection changes.
-             * @param[paymentResultCallback] called when a [PaymentSheetResult] is available.
+             * @param fragment the Fragment that is presenting the payment sheet.
+             * @param paymentOptionCallback called when the customer's [PaymentOption] selection changes.
+             * @param paymentResultCallback called when a [PaymentSheetResult] is available.
              */
             @JvmStatic
             fun create(
