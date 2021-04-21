@@ -33,14 +33,6 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val isSetupIntent: Boolean
         get() = prefsManager.getBoolean("setup_intent", false)
 
-    protected val billingAddressCollection: PaymentSheet.BillingAddressCollectionLevel
-        get() {
-            return when (prefsManager.getBoolean("require_billing_address", false)) {
-                true -> PaymentSheet.BillingAddressCollectionLevel.Required
-                false -> PaymentSheet.BillingAddressCollectionLevel.Automatic
-            }
-        }
-
     protected val googlePayConfig: PaymentSheet.GooglePayConfiguration?
         get() {
             return when (prefsManager.getBoolean("enable_googlepay", true)) {

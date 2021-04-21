@@ -163,7 +163,7 @@ internal class DefaultFlowController internal constructor(
         paymentOptionLauncher(
             PaymentOptionContract.Args(
                 paymentIntent = initData.paymentIntent,
-                paymentMethods = viewModel.newlySavedPaymentMethods.plus(initData.paymentMethods),
+                paymentMethods = initData.paymentMethods,
                 sessionId = sessionId,
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
@@ -325,10 +325,6 @@ internal class DefaultFlowController internal constructor(
             is PaymentOptionResult.Succeeded -> {
                 val paymentSelection = paymentOptionResult.paymentSelection
                 viewModel.paymentSelection = paymentSelection
-
-                (paymentOptionResult as? PaymentOptionResult.Succeeded.NewlySaved)?.let {
-                    viewModel.newlySavedPaymentMethods.add(it.newSavedPaymentMethod)
-                }
 
                 paymentOptionCallback.onPaymentOption(
                     paymentOptionFactory.create(
