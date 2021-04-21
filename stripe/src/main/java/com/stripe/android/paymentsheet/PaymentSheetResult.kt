@@ -32,7 +32,7 @@ sealed class PaymentSheetResult : Parcelable {
     /**
      * The payment or setup attempt failed.
      * @param error The error encountered by the customer.
-     *      You can display its `localizedDescription` to the customer.
+     *      You can display its `localizedMessage` to the customer.
      */
     @Parcelize
     data class Failed(
