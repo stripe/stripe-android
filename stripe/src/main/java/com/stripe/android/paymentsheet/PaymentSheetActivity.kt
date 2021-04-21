@@ -307,6 +307,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.checkout()
         }
 
+        viewModel.config?.primaryButtonColor?.let {
+            viewBinding.buyButton.backgroundTintList = it
+        }
+
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout()
         }
