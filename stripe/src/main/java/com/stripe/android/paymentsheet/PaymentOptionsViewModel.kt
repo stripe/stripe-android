@@ -34,6 +34,10 @@ internal class PaymentOptionsViewModel(
     )
     internal val viewState: LiveData<ViewState.PaymentOptions> = _viewState.distinctUntilChanged()
 
+    @VisibleForTesting
+    internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
+    internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
+
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newCard = args.newCard
@@ -71,17 +75,13 @@ internal class PaymentOptionsViewModel(
     private fun processExistingCard(paymentSelection: PaymentSelection) {
         _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
-        _viewState.value = ViewState.PaymentOptions.ProcessResult(
-            PaymentOptionResult.Succeeded(paymentSelection)
-        )
+        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
     private fun processNewCard(paymentSelection: PaymentSelection) {
         _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
-        _viewState.value = ViewState.PaymentOptions.ProcessResult(
-            PaymentOptionResult.Succeeded(paymentSelection)
-        )
+        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
     fun resolveTransitionTarget(config: FragmentConfig) {

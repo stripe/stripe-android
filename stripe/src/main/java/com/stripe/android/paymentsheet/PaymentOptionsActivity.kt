@@ -89,9 +89,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentOptions.ProcessResult -> processResult(
-                viewState.result
-            )
         }
     }
 
@@ -113,6 +110,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(
                 PaymentOptionResult.Failed(it)
             )
+        }
+
+        viewModel.paymentOptionResult.observe(this) {
+            closeSheet(it)
         }
 
         setupAddButton(viewBinding.addButton)

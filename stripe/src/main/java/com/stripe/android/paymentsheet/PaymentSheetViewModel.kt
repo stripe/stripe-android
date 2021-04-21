@@ -62,6 +62,10 @@ internal class PaymentSheetViewModel internal constructor(
         args.clientSecret
     )
 
+    @VisibleForTesting
+    internal val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
+    internal val paymentSheetResult: LiveData<PaymentSheetResult> = _paymentSheetResult
+
     private val _startConfirm = MutableLiveData<Event<ConfirmPaymentIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
 
@@ -146,7 +150,7 @@ internal class PaymentSheetViewModel internal constructor(
             """.trimIndent()
         )
         _viewState.value = ViewState.PaymentSheet.FinishProcessing {
-            _viewState.value = ViewState.PaymentSheet.ProcessResult(
+            processResult(
                 PaymentIntentResult(
                     paymentIntent,
                     StripeIntentResult.Outcome.SUCCEEDED
@@ -231,7 +235,7 @@ internal class PaymentSheetViewModel internal constructor(
                 }
 
                 _viewState.value = ViewState.PaymentSheet.FinishProcessing {
-                    _viewState.value = ViewState.PaymentSheet.ProcessResult(paymentIntentResult)
+                    processResult(paymentIntentResult)
                 }
             }
             else -> {
@@ -244,6 +248,17 @@ internal class PaymentSheetViewModel internal constructor(
                     onSuccess = ::resetViewState,
                     onFailure = ::onFatal
                 )
+            }
+        }
+    }
+
+    private fun processResult(stripeIntentResult: PaymentIntentResult) {
+        when (stripeIntentResult.outcome) {
+            StripeIntentResult.Outcome.SUCCEEDED -> {
+                _paymentSheetResult.value = PaymentSheetResult.Completed
+            }
+            else -> {
+                // TODO(mshafrir-stripe): handle other outcomes
             }
         }
     }

@@ -21,7 +21,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.R
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
@@ -108,9 +107,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
             is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            )
-            is ViewState.PaymentSheet.ProcessResult<*> -> processResult(
-                viewState.result
             )
         }
     }
@@ -220,6 +216,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 )
             }
         }
+
+        viewModel.paymentSheetResult.observe(this) {
+            closeSheet(it)
+        }
     }
 
     private fun fetchConfig() {
@@ -317,17 +317,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->
             viewBinding.buyButton.isEnabled = isEnabled
-        }
-    }
-
-    private fun processResult(stripeIntentResult: StripeIntentResult<*>) {
-        when (stripeIntentResult.outcome) {
-            StripeIntentResult.Outcome.SUCCEEDED -> {
-                closeSheet(PaymentSheetResult.Completed)
-            }
-            else -> {
-                // TODO(mshafrir-stripe): handle other outcomes
-            }
         }
     }
 
