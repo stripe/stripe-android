@@ -10,8 +10,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.createCardToken
@@ -21,7 +20,6 @@ import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.CreateCardTokenActivityBinding
 import com.stripe.example.databinding.TokenItemBinding
-import kotlinx.coroutines.launch
 
 class CreateCardTokenActivity : AppCompatActivity() {
     private val viewBinding: CreateCardTokenActivityBinding by lazy {
@@ -120,20 +118,19 @@ class CreateCardTokenActivity : AppCompatActivity() {
     ) : AndroidViewModel(application) {
         private val stripe = StripeFactory(application).create()
 
-        fun createCardToken(cardParams: CardParams): LiveData<Token> {
-            val data = MutableLiveData<Token>()
-            viewModelScope.launch {
-                data.value = try {
-                    stripe.createCardToken(cardParams)
-                } catch (e: Exception) {
-                    Log.e("StripeExample", "Error while creating card token", e)
-                    null
-                } finally {
-                    BackgroundTaskTracker.onStop()
+        fun createCardToken(cardParams: CardParams): LiveData<Token> = liveData {
+            runCatching {
+                stripe.createCardToken(cardParams)
+            }.also {
+                BackgroundTaskTracker.onStop()
+            }.fold(
+                onSuccess = {
+                    emit(it)
+                },
+                onFailure = {
+                    Log.e("StripeExample", "Error while creating card token", it)
                 }
-            }
-
-            return data
+            )
         }
     }
 }
