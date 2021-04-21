@@ -2378,6 +2378,7 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentIntent;Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLjava/util/Map;Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Lcom/stripe/android/model/StripeIntent$NextActionData;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentIntent;
 	public final fun getAmount ()Ljava/lang/Long;
 	public final fun getCanceledAt ()J
 	public final fun getCancellationReason ()Lcom/stripe/android/model/PaymentIntent$CancellationReason;
@@ -3705,6 +3706,7 @@ public final class com/stripe/android/model/SetupIntent : com/stripe/android/mod
 	public static synthetic fun copy$default (Lcom/stripe/android/model/SetupIntent;Ljava/lang/String;Lcom/stripe/android/model/SetupIntent$CancellationReason;JLjava/lang/String;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/util/List;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/SetupIntent$Error;Lcom/stripe/android/model/StripeIntent$NextActionData;ILjava/lang/Object;)Lcom/stripe/android/model/SetupIntent;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/SetupIntent;
 	public final fun getCancellationReason ()Lcom/stripe/android/model/SetupIntent$CancellationReason;
 	public fun getClientSecret ()Ljava/lang/String;
 	public fun getCreated ()J
@@ -4684,10 +4686,6 @@ public abstract interface class com/stripe/android/model/StripeIntent : com/stri
 	public abstract fun isLiveMode ()Z
 	public abstract fun requiresAction ()Z
 	public abstract fun requiresConfirmation ()Z
-}
-
-public final class com/stripe/android/model/StripeIntent$DefaultImpls {
-	public static fun isConfirmed (Lcom/stripe/android/model/StripeIntent;)Z
 }
 
 public abstract class com/stripe/android/model/StripeIntent$NextActionData : com/stripe/android/model/StripeModel {

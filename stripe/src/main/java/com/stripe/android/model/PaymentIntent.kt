@@ -144,6 +144,13 @@ data class PaymentIntent internal constructor(
             else -> null
         }
 
+    override val isConfirmed: Boolean
+        get() = setOf(
+            StripeIntent.Status.Processing,
+            StripeIntent.Status.RequiresCapture,
+            StripeIntent.Status.Succeeded
+        ).contains(status)
+
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
     }
@@ -344,6 +351,7 @@ data class PaymentIntent internal constructor(
     }
 
     companion object {
+        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): PaymentIntent? {
             return jsonObject?.let {
                 PaymentIntentJsonParser().parse(it)

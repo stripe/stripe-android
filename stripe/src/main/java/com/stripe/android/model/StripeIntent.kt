@@ -51,14 +51,9 @@ interface StripeIntent : StripeModel {
     val nextActionData: NextActionData?
 
     /**
-     * Confirmation has succeeded and all required actions have been handled.
+     * Whether confirmation has succeeded and all required actions have been handled.
      */
     val isConfirmed: Boolean
-        get() = setOf(
-            Status.Processing,
-            Status.RequiresCapture,
-            Status.Succeeded
-        ).contains(status)
 
     fun requiresAction(): Boolean
 
