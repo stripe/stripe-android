@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -37,7 +37,7 @@ internal class DefaultFlowControllerInitializerTest {
     fun `init without configuration should return expect result`() =
         testDispatcher.runBlockingTest {
             assertThat(
-                initializer.init(PaymentSheetFixtures.CLIENT_SECRET)
+                initializer.init(PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET)
             ).isEqualTo(
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
@@ -60,7 +60,7 @@ internal class DefaultFlowControllerInitializerTest {
 
         assertThat(
             initializer.init(
-                PaymentSheetFixtures.CLIENT_SECRET,
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
         ).isEqualTo(
@@ -87,7 +87,7 @@ internal class DefaultFlowControllerInitializerTest {
             val initializer = createInitializer()
             assertThat(
                 initializer.init(
-                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentSheetFixtures.CONFIG_GOOGLEPAY
                 )
             ).isEqualTo(
@@ -112,7 +112,7 @@ internal class DefaultFlowControllerInitializerTest {
             val initializer = createInitializer(isGooglePayReady = false)
             assertThat(
                 initializer.init(
-                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentSheetFixtures.CONFIG_GOOGLEPAY
                 )
             ).isEqualTo(
@@ -137,7 +137,7 @@ internal class DefaultFlowControllerInitializerTest {
             val initializer = createInitializer()
             assertThat(
                 initializer.init(
-                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
@@ -171,7 +171,7 @@ internal class DefaultFlowControllerInitializerTest {
             )
             assertThat(
                 initializer.init(
-                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
@@ -198,7 +198,7 @@ internal class DefaultFlowControllerInitializerTest {
             val initializer = createInitializer(paymentMethods = emptyList())
             assertThat(
                 initializer.init(
-                    PaymentSheetFixtures.CLIENT_SECRET,
+                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
@@ -228,7 +228,7 @@ internal class DefaultFlowControllerInitializerTest {
                     status = StripeIntent.Status.Succeeded
                 )
             ).init(
-                PaymentSheetFixtures.CLIENT_SECRET,
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
             assertThat(result)
@@ -243,7 +243,7 @@ internal class DefaultFlowControllerInitializerTest {
                     confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
                 )
             ).init(
-                PaymentSheetFixtures.CLIENT_SECRET,
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
             assertThat(result)
@@ -256,7 +256,7 @@ internal class DefaultFlowControllerInitializerTest {
         isGooglePayReady: Boolean = true
     ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
-            PaymentIntentRepository.Static(paymentIntent),
+            StripeIntentRepository.Static(paymentIntent),
             FakePaymentMethodsRepository(paymentMethods),
             { _, _ -> prefsRepository },
             { isGooglePayReady },

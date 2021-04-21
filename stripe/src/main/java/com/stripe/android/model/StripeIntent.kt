@@ -50,6 +50,11 @@ interface StripeIntent : StripeModel {
 
     val nextActionData: NextActionData?
 
+    /**
+     * Whether confirmation has succeeded and all required actions have been handled.
+     */
+    val isConfirmed: Boolean
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean

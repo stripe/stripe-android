@@ -7,11 +7,12 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentSheetContract :
-    ActivityResultContract<PaymentSheetContract.Args, PaymentResult>() {
+    ActivityResultContract<PaymentSheetContract.Args, PaymentSheetResult>() {
     override fun createIntent(
         context: Context,
         input: Args
@@ -23,17 +24,16 @@ internal class PaymentSheetContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): PaymentResult {
-        val paymentResult = intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.paymentResult
-        return paymentResult ?: PaymentResult.Failed(
-            IllegalArgumentException("Failed to retrieve a PaymentResult."),
-            null
+    ): PaymentSheetResult {
+        val paymentResult = intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.paymentSheetResult
+        return paymentResult ?: PaymentSheetResult.Failed(
+            IllegalArgumentException("Failed to retrieve a PaymentSheetResult.")
         )
     }
 
     @Parcelize
     internal data class Args(
-        val clientSecret: String,
+        val clientSecret: ClientSecret,
         val sessionId: SessionId,
         @ColorInt val statusBarColor: Int?,
         val config: PaymentSheet.Configuration?
@@ -50,7 +50,7 @@ internal class PaymentSheetContract :
 
     @Parcelize
     internal data class Result(
-        val paymentResult: PaymentResult
+        val paymentSheetResult: PaymentSheetResult
     ) : ActivityStarter.Result {
         override fun toBundle(): Bundle {
             return bundleOf(EXTRA_RESULT to this)
