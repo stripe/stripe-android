@@ -4688,10 +4688,6 @@ public abstract interface class com/stripe/android/model/StripeIntent : com/stri
 	public abstract fun requiresConfirmation ()Z
 }
 
-public final class com/stripe/android/model/StripeIntent$DefaultImpls {
-	public static fun isConfirmed (Lcom/stripe/android/model/StripeIntent;)Z
-}
-
 public abstract class com/stripe/android/model/StripeIntent$NextActionData : com/stripe/android/model/StripeModel {
 }
 
@@ -5163,6 +5159,8 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCal
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet {
+	public final fun presentWithPaymentIntent$stripe_release (Ljava/lang/String;)V
+	public final fun presentWithSetupIntent$stripe_release (Ljava/lang/String;)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$BillingAddressCollectionLevel : java/lang/Enum {
