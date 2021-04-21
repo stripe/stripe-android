@@ -29,9 +29,9 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
-import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -42,7 +42,7 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentSheetViewModel internal constructor(
     private val publishableKey: String,
     private val stripeAccountId: String?,
-    private val paymentIntentRepository: PaymentIntentRepository,
+    private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
     private val paymentFlowResultProcessor: PaymentFlowResultProcessor,
     private val googlePayRepository: GooglePayRepository,
@@ -104,10 +104,10 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    fun fetchPaymentIntent() {
+    fun fetchStripeIntent() {
         viewModelScope.launch {
             runCatching {
-                paymentIntentRepository.get(args.clientSecret)
+                stripeIntentRepository.get(args.clientSecret)
             }.fold(
                 onSuccess = ::onPaymentIntentResponse,
                 onFailure = {
@@ -344,7 +344,7 @@ internal class PaymentSheetViewModel internal constructor(
                 )
             } ?: PrefsRepository.Noop()
 
-            val paymentIntentRepository = PaymentIntentRepository.Api(
+            val stripeIntentRepository = StripeIntentRepository.Api(
                 stripeRepository = stripeRepository,
                 requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
                 workContext = Dispatchers.IO
@@ -360,7 +360,7 @@ internal class PaymentSheetViewModel internal constructor(
             return PaymentSheetViewModel(
                 publishableKey,
                 stripeAccountId,
-                paymentIntentRepository,
+                stripeIntentRepository,
                 paymentMethodsRepository,
                 DefaultPaymentFlowResultProcessor(
                     application,

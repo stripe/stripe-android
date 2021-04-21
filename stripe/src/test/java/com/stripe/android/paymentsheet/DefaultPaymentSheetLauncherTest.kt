@@ -10,7 +10,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.PaymentIntentFixtures
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -28,7 +27,7 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `init and present should return expected PaymentResult`() {
-        val testRegistry = FakeActivityResultRegistry(PAYMENT_RESULT_COMPLETED)
+        val testRegistry = FakeActivityResultRegistry(PaymentSheetResult.Completed)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
@@ -36,21 +35,21 @@ class DefaultPaymentSheetLauncherTest {
             }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<PaymentResult>()
+                val results = mutableListOf<PaymentSheetResult>()
                 val launcher = DefaultPaymentSheetLauncher(fragment, testRegistry) {
                     results.add(it)
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
-                launcher.present("pi_fake")
+                launcher.presentWithPaymentIntent("pi_fake")
                 assertThat(results)
-                    .containsExactly(PAYMENT_RESULT_COMPLETED)
+                    .containsExactly(PaymentSheetResult.Completed)
             }
         }
     }
 
     private class FakeActivityResultRegistry(
-        private val result: PaymentResult
+        private val result: PaymentSheetResult
     ) : ActivityResultRegistry() {
         override fun <I, O> onLaunch(
             requestCode: Int,
@@ -66,10 +65,4 @@ class DefaultPaymentSheetLauncherTest {
     }
 
     internal class TestFragment : Fragment()
-
-    private companion object {
-        private val PAYMENT_RESULT_COMPLETED = PaymentResult.Completed(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2
-        )
-    }
 }
