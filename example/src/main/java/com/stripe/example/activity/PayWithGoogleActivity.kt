@@ -166,16 +166,19 @@ class PayWithGoogleActivity : AppCompatActivity() {
         viewBinding.googlePayResult.text = paymentDataJson.toString(2)
 
         lifecycleScope.launch {
-            try {
-                val pm = stripe.createPaymentMethod(
+            runCatching {
+                stripe.createPaymentMethod(
                     PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
                 )
-                showSnackbar("Created PaymentMethod ${pm.id}")
-            } catch (e: java.lang.Exception) {
-                Log.e("StripeExample", "Exception while creating PaymentMethod", e)
-                showSnackbar("Exception while creating PaymentMethod")
-            }
-
+            }.fold(
+                onSuccess = {
+                    showSnackbar("Created PaymentMethod ${it.id}")
+                },
+                onFailure = {
+                    Log.e("StripeExample", "Exception while creating PaymentMethod", it)
+                    showSnackbar("Exception while creating PaymentMethod")
+                }
+            )
         }
     }
 

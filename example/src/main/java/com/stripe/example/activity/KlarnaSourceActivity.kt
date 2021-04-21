@@ -75,16 +75,18 @@ class KlarnaSourceActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         data?.let {
             lifecycleScope.launch {
-                viewModel.source = try {
-                    stripe.getAuthenticateSourceResult(requestCode, data).let { result ->
+                runCatching {
+                    stripe.getAuthenticateSourceResult(requestCode, data)
+                }.fold(
+                    onSuccess = {
+                        viewModel.source = it
                         enableUi()
-                        result
+                    },
+                    onFailure = {
+                        enableUi()
+                        logException(it)
                     }
-                } catch (e: java.lang.Exception) {
-                    enableUi()
-                    logException(e)
-                    null
-                }
+                )
             }
         }
     }
