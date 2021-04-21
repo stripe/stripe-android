@@ -206,7 +206,7 @@ class DefaultFlowControllerTest {
         }
 
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded.Existing(
+            PaymentOptionResult.Succeeded(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
         )
@@ -273,12 +273,7 @@ class DefaultFlowControllerTest {
         // Add a saved card payment method so that we can make sure it is added when we open
         // up the payment option launcher
         val newSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded.NewlySaved(
-                SAVE_NEW_CARD_SELECTION,
-                newSavedPaymentMethod
-            )
-        )
+        flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(SAVE_NEW_CARD_SELECTION))
 
         // Save off the actual launch arguments when paymentOptionLauncher is called
         var launchArgs: PaymentOptionContract.Args? = null
@@ -290,7 +285,7 @@ class DefaultFlowControllerTest {
 
         // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
         assertThat(launchArgs!!.paymentMethods)
-            .isEqualTo(listOf(newSavedPaymentMethod).plus(initialPaymentMethods))
+            .isEqualTo(initialPaymentMethods)
     }
 
     @Test
@@ -353,7 +348,7 @@ class DefaultFlowControllerTest {
         ) { _, _ ->
         }
         flowController.onPaymentOptionResult(
-            PaymentOptionResult.Succeeded.Existing(PaymentSelection.GooglePay)
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
         )
         flowController.confirmPayment()
         assertThat(launchArgs)
