@@ -36,7 +36,10 @@
                 <!--
                 Must match `DefaultReturnUrl#value`.
                 -->
-                <data android:scheme="stripesdk" android:host="payment_return_url/${applicationId}" />
+                <data
+                    android:scheme="stripesdk"
+                    android:host="payment_return_url"
+                    android:path="/${applicationId}" />
             </intent-filter>
         </activity>
 

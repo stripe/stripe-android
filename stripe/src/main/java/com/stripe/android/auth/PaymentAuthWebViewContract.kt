@@ -76,7 +76,7 @@ internal class PaymentAuthWebViewContract(
     }
 
     companion object {
-        const val EXTRA_ARGS = "extra_args"
+        private const val EXTRA_ARGS = "extra_args"
 
         internal fun parseArgs(
             intent: Intent
