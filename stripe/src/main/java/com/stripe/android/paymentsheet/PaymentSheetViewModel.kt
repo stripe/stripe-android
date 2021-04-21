@@ -243,7 +243,7 @@ internal class PaymentSheetViewModel internal constructor(
                     is PaymentSelection.New.Card -> paymentIntentResult.intent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }
-                    PaymentSelection.GooglePay -> selection.value // 8: I am not sure this path is possible? maybe when called from list view?
+                    PaymentSelection.GooglePay -> selection.value
                     is PaymentSelection.Saved -> selection.value
                     null -> null
                 }?.let {

@@ -74,6 +74,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
+
         super.setBackgroundTintList(null)
         setBackgroundResource(
             R.drawable.stripe_paymentsheet_primary_button_confirmed_background

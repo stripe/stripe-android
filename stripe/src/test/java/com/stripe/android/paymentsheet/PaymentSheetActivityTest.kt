@@ -436,6 +436,49 @@ internal class PaymentSheetActivityTest {
             }
         }
     }
+    @Test
+    fun `Verify StartProcessing state updates the google button label`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                viewModel.initViewState(CheckoutIdentifier.SheetBottomGooglePay)
+                // wait for bottom sheet to animate in
+                idleLooper()
+
+                viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
+
+                idleLooper()
+
+                val buyBinding = PrimaryButtonBinding.bind(activity.viewBinding.buyButton)
+                assertThat(buyBinding.label.text)
+                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
+            }
+        }
+    }
+
+    @Test
+    fun `Verify FinishProcessing state calls the callback on google pay view state observer`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity { _ ->
+                viewModel.initViewState(CheckoutIdentifier.SheetBottomGooglePay)
+
+                // wait for bottom sheet to animate in
+                idleLooper()
+
+                var finishProcessingCalled = false
+                viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                    finishProcessingCalled = true
+                }
+
+                idleLooper()
+
+                testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+
+                assertThat(finishProcessingCalled).isTrue()
+            }
+        }
+    }
 
     @Test
     fun `Verify ProcessResult state closes the sheet`() {
