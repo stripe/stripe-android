@@ -102,8 +102,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = customerConfig,
-            googlePay = googlePayConfig,
-            billingAddressCollection = billingAddressCollection
+            googlePay = googlePayConfig
         )
     }
 

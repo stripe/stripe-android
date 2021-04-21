@@ -65,7 +65,6 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
                             merchantDisplayName = merchantName,
                             customer = customerConfig,
                             googlePay = googlePayConfig,
-                            billingAddressCollection = billingAddressCollection
                         )
                     )
                 },
@@ -93,7 +92,6 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
                             merchantDisplayName = merchantName,
                             customer = customerConfig,
                             googlePay = googlePayConfig,
-                            billingAddressCollection = billingAddressCollection
                         )
                     )
                 },
