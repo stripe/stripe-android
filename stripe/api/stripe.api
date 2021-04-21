@@ -5321,7 +5321,7 @@ public class com/stripe/android/paymentsheet/PaymentSheetResult$Failed$Creator :
 }
 
 public abstract interface class com/stripe/android/paymentsheet/PaymentSheetResultCallback {
-	public abstract fun onPaymentResult (Lcom/stripe/android/paymentsheet/PaymentSheetResult;)V
+	public abstract fun onPaymentSheetResult (Lcom/stripe/android/paymentsheet/PaymentSheetResult;)V
 }
 
 public final class com/stripe/android/paymentsheet/model/PaymentOption {

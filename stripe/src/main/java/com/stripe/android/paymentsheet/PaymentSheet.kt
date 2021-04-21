@@ -74,7 +74,7 @@ class PaymentSheet internal constructor(
         paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
     }
 
-    /** Configuration for PaymentSheet **/
+    /** Configuration for [PaymentSheet] **/
     @Parcelize
     data class Configuration @JvmOverloads constructor(
         /**
@@ -247,7 +247,8 @@ class PaymentSheet internal constructor(
              * Create the FlowController when launching the payment sheet from an Activity.
              *
              * @param[activity] the Activity that is presenting the payment sheet.
-             * @param[paymentOptionCallback] called when the customer's [PaymentOption] selection changes.
+             * @param[paymentOptionCallback] called when the customer's desired payment method
+             *      changes.  Called in response to the [PaymentSheet#presentPaymentOptions()]
              * @param[paymentResultCallback] called when a [PaymentSheetResult] is available.
              */
             @JvmStatic

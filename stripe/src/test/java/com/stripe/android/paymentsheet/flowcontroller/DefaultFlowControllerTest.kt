@@ -388,7 +388,7 @@ class DefaultFlowControllerTest {
             StripeGooglePayContract.Result.Canceled
         )
 
-        verify(paymentResultCallback).onPaymentResult(
+        verify(paymentResultCallback).onPaymentSheetResult(
             PaymentSheetResult.Canceled
         )
     }
@@ -453,7 +453,7 @@ class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentResultCallback).onPaymentResult(
+        verify(paymentResultCallback).onPaymentSheetResult(
             argWhere { paymentResult ->
                 paymentResult is PaymentSheetResult.Completed
             }
@@ -474,7 +474,7 @@ class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentResultCallback).onPaymentResult(
+        verify(paymentResultCallback).onPaymentSheetResult(
             argWhere { paymentResult ->
                 paymentResult is PaymentSheetResult.Canceled
             }
@@ -495,7 +495,7 @@ class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentResultCallback).onPaymentResult(
+        verify(paymentResultCallback).onPaymentSheetResult(
             argWhere { paymentResult ->
                 paymentResult is PaymentSheetResult.Failed
             }

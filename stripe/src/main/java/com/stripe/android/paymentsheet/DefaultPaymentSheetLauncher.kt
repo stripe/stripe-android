@@ -22,7 +22,7 @@ internal class DefaultPaymentSheetLauncher(
         activity.registerForActivityResult(
             PaymentSheetContract()
         ) {
-            callback.onPaymentResult(it)
+            callback.onPaymentSheetResult(it)
         },
 
         // lazily access the statusBarColor in case the value changes between when this
@@ -37,7 +37,7 @@ internal class DefaultPaymentSheetLauncher(
         fragment.registerForActivityResult(
             PaymentSheetContract()
         ) {
-            callback.onPaymentResult(it)
+            callback.onPaymentSheetResult(it)
         },
 
         // lazily access the statusBarColor in case the value changes between when this
@@ -55,7 +55,7 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract(),
             registry
         ) {
-            callback.onPaymentResult(it)
+            callback.onPaymentSheetResult(it)
         },
 
         // lazily access the statusBarColor in case the value changes between when this
