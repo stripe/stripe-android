@@ -74,7 +74,7 @@ class PaymentSheet internal constructor(
         paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
     }
 
-    /** Configuration for PaymentSheet **/
+    /** Configuration for [PaymentSheet] **/
     @Parcelize
     data class Configuration @JvmOverloads constructor(
         /**
@@ -102,26 +102,7 @@ class PaymentSheet internal constructor(
          * If set, PaymentSheet displays the button with this color.
          */
         var primaryButtonColor: ColorStateList? = null,
-
-        /**
-         * The amount of billing address details to collect.
-         *
-         * See [BillingAddressCollectionLevel]
-         */
-        var billingAddressCollection: BillingAddressCollectionLevel = BillingAddressCollectionLevel.Automatic
     ) : Parcelable
-
-    enum class BillingAddressCollectionLevel {
-        /**
-         * (Default) PaymentSheet will only collect the necessary billing address information.
-         */
-        Automatic,
-
-        /**
-         * PaymentSheet will always collect full billing address details.
-         */
-        Required
-    }
 
     @Parcelize
     data class CustomerConfiguration(
@@ -247,7 +228,8 @@ class PaymentSheet internal constructor(
              * Create the FlowController when launching the payment sheet from an Activity.
              *
              * @param[activity] the Activity that is presenting the payment sheet.
-             * @param[paymentOptionCallback] called when the customer's [PaymentOption] selection changes.
+             * @param[paymentOptionCallback] called when the customer's desired payment method
+             *      changes.  Called in response to the [PaymentSheet#presentPaymentOptions()]
              * @param[paymentResultCallback] called when a [PaymentSheetResult] is available.
              */
             @JvmStatic

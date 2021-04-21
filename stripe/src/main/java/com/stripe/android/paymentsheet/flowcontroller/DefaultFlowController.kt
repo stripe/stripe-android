@@ -163,7 +163,7 @@ internal class DefaultFlowController internal constructor(
         paymentOptionLauncher(
             PaymentOptionContract.Args(
                 paymentIntent = initData.paymentIntent,
-                paymentMethods = viewModel.newlySavedPaymentMethods.plus(initData.paymentMethods),
+                paymentMethods = initData.paymentMethods,
                 sessionId = sessionId,
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
@@ -254,7 +254,7 @@ internal class DefaultFlowController internal constructor(
                     },
                     onFailure = {
                         eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                        paymentResultCallback.onPaymentResult(
+                        paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(it)
                         )
                     }
@@ -262,13 +262,13 @@ internal class DefaultFlowController internal constructor(
             }
             is StripeGooglePayContract.Result.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                paymentResultCallback.onPaymentResult(
+                paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(googlePayResult.exception)
                 )
             }
             is StripeGooglePayContract.Result.Canceled -> {
                 // don't log cancellations as failures
-                paymentResultCallback.onPaymentResult(PaymentSheetResult.Canceled)
+                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
             }
             else -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
@@ -326,10 +326,6 @@ internal class DefaultFlowController internal constructor(
                 val paymentSelection = paymentOptionResult.paymentSelection
                 viewModel.paymentSelection = paymentSelection
 
-                (paymentOptionResult as? PaymentOptionResult.Succeeded.NewlySaved)?.let {
-                    viewModel.newlySavedPaymentMethods.add(it.newSavedPaymentMethod)
-                }
-
                 paymentOptionCallback.onPaymentOption(
                     paymentOptionFactory.create(
                         paymentSelection
@@ -360,14 +356,14 @@ internal class DefaultFlowController internal constructor(
             }.fold(
                 onSuccess = {
                     withContext(Dispatchers.Main) {
-                        paymentResultCallback.onPaymentResult(
+                        paymentResultCallback.onPaymentSheetResult(
                             createPaymentSheetResult(it)
                         )
                     }
                 },
                 onFailure = {
                     withContext(Dispatchers.Main) {
-                        paymentResultCallback.onPaymentResult(
+                        paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(it)
                         )
                     }
