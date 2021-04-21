@@ -8,6 +8,7 @@ buildscript {
     repositories {
         mavenCentral()
         google()
+        gradlePluginPortal()
     }
 
     dependencies {
@@ -27,8 +28,9 @@ allprojects {
     group = GROUP
 
     repositories {
-        google()
         mavenCentral()
+        google()
+        gradlePluginPortal()
     }
 
     task checkstyle(type: Checkstyle) {

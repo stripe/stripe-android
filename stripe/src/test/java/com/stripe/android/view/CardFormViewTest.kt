@@ -16,6 +16,7 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.CountryCode
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
 import org.junit.Before
@@ -111,7 +112,7 @@ class CardFormViewTest {
                     expYear = 2050,
                     cvc = VALID_CVC,
                     address = Address.Builder()
-                        .setCountry("United States")
+                        .setCountryCode(CountryCode.US)
                         .setPostalCode(VALID_US_ZIP)
                         .build()
                 )
