@@ -70,8 +70,9 @@ internal class PaymentSheetViewModel internal constructor(
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
     internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
-    private var checkoutIdentifier: CheckoutIdentifier? = null
-    internal fun getViewStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet> {
+    @VisibleForTesting
+    internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
+    internal fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet> {
         val outputLiveData = MediatorLiveData<ViewState.PaymentSheet>()
         outputLiveData.addSource(_viewState) { currentValue ->
             if (this.checkoutIdentifier == checkoutIdentifier) {
@@ -181,10 +182,6 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    fun initViewState(checkoutIdentifier: CheckoutIdentifier) {
-        this.checkoutIdentifier = checkoutIdentifier
-    }
-
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
         this.checkoutIdentifier = checkoutIdentifier
         _userMessage.value = null
@@ -195,7 +192,6 @@ internal class PaymentSheetViewModel internal constructor(
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
-                // TODO: Hide the sheet
                 _launchGooglePay.value = Event(
                     StripeGooglePayContract.Args(
                         paymentIntent = paymentIntent,
@@ -402,5 +398,16 @@ internal class PaymentSheetViewModel internal constructor(
                 application = application
             ) as T
         }
+    }
+
+    /**
+     * This is the identifier of the caller of the [checkout] function.  It is used in
+     * [getButtonStateObservable] to get state events related to it's events.
+     */
+    internal enum class CheckoutIdentifier {
+        AddFragmentTopGooglePay,
+        SheetBottomGooglePay,
+        SheetBottomBuy,
+        None
     }
 }

@@ -21,6 +21,7 @@ import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -169,7 +170,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
         val viewState: MutableList<ViewState?> = mutableListOf()
-        viewModel.getViewStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observeForever {
                 viewState.add(it)
             }
@@ -201,7 +202,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
         val viewState: MutableList<ViewState?> = mutableListOf()
-        viewModel.getViewStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observeForever {
                 viewState.add(it)
             }

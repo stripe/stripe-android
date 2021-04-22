@@ -20,6 +20,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -503,7 +504,7 @@ class PaymentSheetAddCardFragmentTest {
     @Test
     fun `google pay button state updated on start processing`() {
         createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
-            fragment.sheetViewModel.initViewState(CheckoutIdentifier.AddFragmentTopGooglePay)
+            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
             fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
 
             val googlePayButton =
@@ -522,7 +523,7 @@ class PaymentSheetAddCardFragmentTest {
     @Test
     fun `google pay button state updated on finish processing`() {
         createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
-            fragment.sheetViewModel.initViewState(CheckoutIdentifier.AddFragmentTopGooglePay)
+            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
 
             var finishProcessingCalled = false
             fragment.sheetViewModel._viewState.value =

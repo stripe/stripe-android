@@ -29,6 +29,7 @@ import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.Stripe3ds2CompletionContract
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -314,11 +315,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupBuyButton() {
-        viewModel.initViewState(CheckoutIdentifier.SheetBottomBuy)
-        viewModel.getViewStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
             .observe(this, googlePayButtonStateObserver)
 
-        viewModel.getViewStateObservable(CheckoutIdentifier.SheetBottomBuy)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
             .observe(this, buyButtonStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->

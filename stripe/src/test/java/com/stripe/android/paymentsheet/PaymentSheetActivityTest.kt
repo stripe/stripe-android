@@ -27,6 +27,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -438,7 +439,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
-                viewModel.initViewState(CheckoutIdentifier.SheetBottomGooglePay)
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
                 // wait for bottom sheet to animate in
                 idleLooper()
 
@@ -458,8 +459,8 @@ internal class PaymentSheetActivityTest {
     fun `Verify FinishProcessing state calls the callback on google pay view state observer`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
-            it.onActivity { _ ->
-                viewModel.initViewState(CheckoutIdentifier.SheetBottomGooglePay)
+            it.onActivity {
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
 
                 // wait for bottom sheet to animate in
                 idleLooper()
