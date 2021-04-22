@@ -2,6 +2,10 @@ package com.stripe.android.payments
 
 import android.content.Context
 
+/**
+ * The SDK's "default" `return_url`. When a PaymentIntent or SetupIntent is confirmed without
+ * a custom `return_url` via the SDK, [value] will be used instead.
+ */
 internal data class DefaultReturnUrl(
     private val packageName: String
 ) {

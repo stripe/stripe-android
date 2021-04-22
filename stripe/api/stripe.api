@@ -4406,7 +4406,6 @@ public final class com/stripe/android/model/SourceParams : com/stripe/android/mo
 	public static final fun createEPSParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createGiropayParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createIdealParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
-	public static final fun createKlarna (Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createKlarna (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createMasterpassParams (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createMultibancoParams (JLjava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
@@ -4459,9 +4458,7 @@ public final class com/stripe/android/model/SourceParams$Companion {
 	public static synthetic fun createGiropayParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
 	public final fun createIdealParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static synthetic fun createIdealParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
-	public final fun createKlarna (Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;)Lcom/stripe/android/model/SourceParams;
 	public final fun createKlarna (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;)Lcom/stripe/android/model/SourceParams;
-	public static synthetic fun createKlarna$default (Lcom/stripe/android/model/SourceParams$Companion;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
 	public final fun createMasterpassParams (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public final fun createMultibancoParams (JLjava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public final fun createP24Params (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
