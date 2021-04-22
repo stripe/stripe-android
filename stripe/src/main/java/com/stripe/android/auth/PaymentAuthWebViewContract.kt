@@ -12,6 +12,9 @@ import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.PaymentAuthWebViewActivity
 import kotlinx.parcelize.Parcelize
 
+/**
+ * TODO(mshafrir-stripe): use a more generic class name
+ */
 internal class PaymentAuthWebViewContract(
     private val defaultReturnUrl: DefaultReturnUrl
 ) : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {

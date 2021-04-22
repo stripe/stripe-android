@@ -9,6 +9,8 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
  * A class that manages starting a [PaymentAuthWebViewActivity] with [PaymentAuthWebViewContract.Args].
+ *
+ * TODO(mshafrir-stripe): use a more generic class name
  */
 internal interface PaymentAuthWebViewStarter :
     AuthActivityStarter<PaymentAuthWebViewContract.Args> {
