@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.payments.CustomTabsCapabilities
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.StripeBrowserLauncherActivity
@@ -16,15 +17,28 @@ import kotlinx.parcelize.Parcelize
  * TODO(mshafrir-stripe): use a more generic class name
  */
 internal class PaymentAuthWebViewContract(
-    private val defaultReturnUrl: DefaultReturnUrl
+    private val defaultReturnUrl: DefaultReturnUrl,
+    private val isCustomTabsSupported: (Context) -> Boolean
 ) : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
+    constructor(
+        defaultReturnUrl: DefaultReturnUrl
+    ) : this(
+        defaultReturnUrl,
+        { context -> CustomTabsCapabilities(context).isSupported() }
+    )
+
     override fun createIntent(
         context: Context,
         input: Args
     ): Intent {
+        val shouldUseCustomTabs = input.shouldUseCustomTabs(
+            isCustomTabsSupported(context),
+            defaultReturnUrl
+        )
+
         return Intent(
             context,
-            when (input.shouldUseBrowser(defaultReturnUrl)) {
+            when (shouldUseCustomTabs) {
                 true -> StripeBrowserLauncherActivity::class.java
                 false -> PaymentAuthWebViewActivity::class.java
             }
@@ -66,8 +80,13 @@ internal class PaymentAuthWebViewContract(
          * If true, use [StripeBrowserLauncherActivity].
          * If false, use [PaymentAuthWebViewActivity].
          */
-        internal fun shouldUseBrowser(defaultReturnUrl: DefaultReturnUrl): Boolean {
-            return IS_BROWSER_ENABLED && returnUrl == defaultReturnUrl.value
+        internal fun shouldUseCustomTabs(
+            isCustomTabsSupported: Boolean,
+            defaultReturnUrl: DefaultReturnUrl
+        ): Boolean {
+            return IS_BROWSER_ENABLED &&
+                isCustomTabsSupported &&
+                returnUrl == defaultReturnUrl.value
         }
 
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
