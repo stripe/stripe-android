@@ -37,7 +37,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.view.AuthActivityStarter
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
@@ -95,24 +94,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val currencyFormatter = CurrencyFormatter()
 
     private val buyButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
-        viewBinding.buyButton.updateState(convert(viewState))
+        viewBinding.buyButton.updateState(viewState?.convert())
     }
 
     private val googlePayButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
-        viewBinding.googlePayButton.updateState(convert(viewState))
-    }
-
-    // TODO: Make this conversion function shareable with PaymentSheetAddCardFragment
-    private fun convert(viewState: ViewState.PaymentSheet?): PrimaryButton.State? {
-        return when (viewState) {
-            is ViewState.PaymentSheet.Ready ->
-                PrimaryButton.State.Ready
-            is ViewState.PaymentSheet.StartProcessing ->
-                PrimaryButton.State.StartProcessing
-            is ViewState.PaymentSheet.FinishProcessing ->
-                PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            else -> null
-        }
+        viewBinding.googlePayButton.updateState(viewState?.convert())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

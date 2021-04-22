@@ -33,12 +33,29 @@ import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
+
+/**
+ * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddCardFragment] classes
+ * to convert a [ViewState.PaymentSheet] to a [PrimaryButton.State]
+ */
+internal fun ViewState.PaymentSheet.convert(): PrimaryButton.State? {
+    return when (this) {
+        is ViewState.PaymentSheet.Ready ->
+            PrimaryButton.State.Ready
+        is ViewState.PaymentSheet.StartProcessing ->
+            PrimaryButton.State.StartProcessing
+        is ViewState.PaymentSheet.FinishProcessing ->
+            PrimaryButton.State.FinishProcessing(this.onComplete)
+        else -> null
+    }
+}
 
 internal class PaymentSheetViewModel internal constructor(
     private val publishableKey: String,
@@ -65,6 +82,9 @@ internal class PaymentSheetViewModel internal constructor(
 
     private val _startConfirm = MutableLiveData<Event<ConfirmPaymentIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
+
+    private val _amount = MutableLiveData<Amount>()
+    internal val amount: LiveData<Amount> = _amount
 
     @VisibleForTesting
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
@@ -167,10 +187,6 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    data class Amount(val value: Long, val currencyCode: String)
-
-    private val _amount = MutableLiveData<Amount>()
-    val amount: LiveData<Amount> = _amount
     private fun resetViewState(paymentIntent: PaymentIntent) {
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
@@ -403,6 +419,11 @@ internal class PaymentSheetViewModel internal constructor(
             ) as T
         }
     }
+
+    /**
+     * This class represents the long value amount to charge and the currency code of the amount.
+     */
+    data class Amount(val value: Long, val currencyCode: String)
 
     /**
      * This is the identifier of the caller of the [checkout] function.  It is used in

@@ -11,14 +11,10 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
-import com.stripe.android.paymentsheet.ui.GooglePayButton
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 
 internal class PaymentSheetAddCardFragment(
     eventReporter: EventReporter
 ) : BaseAddCardFragment(eventReporter) {
-    private lateinit var viewBinding: FragmentPaymentsheetAddCardBinding
-    private lateinit var googlePayButton: GooglePayButton
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
@@ -39,8 +35,8 @@ internal class PaymentSheetAddCardFragment(
             config.isGooglePayReady && config.paymentMethods.isEmpty()
         } ?: false
 
-        viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
-        googlePayButton = viewBinding.googlePayButton
+        val viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
+        val googlePayButton = viewBinding.googlePayButton
         val addCardHeader = viewBinding.addCardHeader
         val googlePayDivider = viewBinding.googlePayDivider
 
@@ -61,26 +57,11 @@ internal class PaymentSheetAddCardFragment(
 
         sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner) { viewState ->
-                if (sheetViewModel.checkoutIdentifier == CheckoutIdentifier.AddFragmentTopGooglePay) {
-                    googlePayButton.updateState(convert(viewState))
-                }
+                googlePayButton.updateState(viewState?.convert())
 
                 if (viewState is ViewState.PaymentSheet.Ready) {
                     updateSelection()
                 }
             }
-    }
-
-    // TODO: Make this conversion function shareable with PaymentSheetAddCardFragment
-    private fun convert(viewState: ViewState.PaymentSheet?): PrimaryButton.State? {
-        return when (viewState) {
-            is ViewState.PaymentSheet.Ready ->
-                PrimaryButton.State.Ready
-            is ViewState.PaymentSheet.StartProcessing ->
-                PrimaryButton.State.StartProcessing
-            is ViewState.PaymentSheet.FinishProcessing ->
-                PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            else -> null
-        }
     }
 }
