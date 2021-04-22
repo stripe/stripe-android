@@ -11,10 +11,7 @@ internal sealed class ViewState {
      * The states always progress as follows: Ready -> StartProcessing -> FinishProcessing -> ProcessResult
      */
     internal sealed class PaymentSheet : ViewState() {
-        data class Ready(
-            val amount: Long,
-            val currencyCode: String
-        ) : PaymentSheet()
+        object Ready : PaymentSheet()
 
         object StartProcessing : PaymentSheet()
 

@@ -12,12 +12,15 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
+import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
+import com.stripe.android.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -268,7 +271,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(paymentSelections[1])
                 .isEqualTo(PaymentSelection.GooglePay)
 
-            fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.Ready(5, "USD")
+            fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.Ready
 
             // Back to Ready state, should return to null PaymentSelection
             assertThat(paymentSelections.size)
@@ -495,6 +498,47 @@ class PaymentSheetAddCardFragmentTest {
                         PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
                     )
                 )
+        }
+    }
+
+    @Test
+    fun `google pay button state updated on start processing`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
+            fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
+
+            val googlePayButton =
+                StripeGooglePayButtonBinding.bind(viewBinding.googlePayButton)
+            val googlePayPrimaryComponent =
+                PrimaryButtonBinding.bind(googlePayButton.primaryButton)
+            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
+            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
+            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(googlePayPrimaryComponent.label.text).isEqualTo(
+                fragment.getString(R.string.stripe_paymentsheet_primary_button_processing)
+            )
+        }
+    }
+
+    @Test
+    fun `google pay button state updated on finish processing`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
+
+            var finishProcessingCalled = false
+            fragment.sheetViewModel._viewState.value =
+                ViewState.PaymentSheet.FinishProcessing {
+                    finishProcessingCalled = true
+                }
+
+            idleLooper()
+
+            val googlePayButton =
+                StripeGooglePayButtonBinding.bind(viewBinding.googlePayButton)
+            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
+            assertThat(googlePayButton.primaryButton.isVisible).isTrue()
+            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(finishProcessingCalled).isTrue()
         }
     }
 
