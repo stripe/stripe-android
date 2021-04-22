@@ -59,15 +59,16 @@ internal class PaymentSheetAddCardFragment(
             }
         }
 
-        sheetViewModel.viewState.observe(viewLifecycleOwner) { viewState ->
-            if (sheetViewModel.checkoutIdentifier == CheckoutIdentifier.AddFragmentTopGooglePay) {
-                googlePayButton.updateState(convert(viewState))
-            }
+        sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+            .observe(viewLifecycleOwner) { viewState ->
+                if (sheetViewModel.checkoutIdentifier == CheckoutIdentifier.AddFragmentTopGooglePay) {
+                    googlePayButton.updateState(convert(viewState))
+                }
 
-            if (viewState is ViewState.PaymentSheet.Ready) {
-                updateSelection()
+                if (viewState is ViewState.PaymentSheet.Ready) {
+                    updateSelection()
+                }
             }
-        }
     }
 
     // TODO: Make this conversion function shareable with PaymentSheetAddCardFragment

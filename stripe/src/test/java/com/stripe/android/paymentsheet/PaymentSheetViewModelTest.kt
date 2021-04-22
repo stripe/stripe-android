@@ -170,10 +170,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
         val viewState: MutableList<ViewState?> = mutableListOf()
-//        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
-//            .observeForever {
-//                viewState.add(it)
-//            }
+        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+            .observeForever {
+                viewState.add(it)
+            }
 
         val processing: MutableList<Boolean> = mutableListOf()
         viewModel.processing.observeForever {
@@ -202,10 +202,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
         val viewState: MutableList<ViewState?> = mutableListOf()
-//        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
-//            .observeForever {
-//                viewState.add(it)
-//            }
+        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+            .observeForever {
+                viewState.add(it)
+            }
 
         val processing: MutableList<Boolean> = mutableListOf()
         viewModel.processing.observeForever {

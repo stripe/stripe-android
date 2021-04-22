@@ -94,17 +94,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private val currencyFormatter = CurrencyFormatter()
 
-    private val viewStateObserver = { viewState: ViewState.PaymentSheet ->
-        when (viewModel.checkoutIdentifier) {
-            CheckoutIdentifier.SheetBottomBuy -> {
-                viewBinding.buyButton.updateState(convert(viewState))
-            }
-            CheckoutIdentifier.SheetBottomGooglePay -> {
-                viewBinding.googlePayButton.updateState(convert(viewState))
-            }
-            else -> {
-            }
-        }
+    private val buyButtonStateObserver = { viewState: ViewState.PaymentSheet ->
+        viewBinding.buyButton.updateState(convert(viewState))
+    }
+
+    private val googlePayButtonStateObserver = { viewState: ViewState.PaymentSheet ->
+        viewBinding.googlePayButton.updateState(convert(viewState))
     }
 
     // TODO: Make this conversion function shareable with PaymentSheetAddCardFragment
@@ -308,7 +303,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewBinding.buyButton.setLabel(getLabelText(it))
         }
 
-        viewModel.viewState.observe(this, viewStateObserver)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
+            .observe(this, buyButtonStateObserver)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
+            .observe(this, googlePayButtonStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
             val shouldShowGooglePay =

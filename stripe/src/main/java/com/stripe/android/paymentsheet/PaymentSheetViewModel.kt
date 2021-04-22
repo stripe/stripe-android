@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -66,10 +67,19 @@ internal class PaymentSheetViewModel internal constructor(
     internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
 
     @VisibleForTesting
-    internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
+    internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(ViewState.PaymentSheet.Ready)
     internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
+    internal fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet> {
+        val outputLiveData = MediatorLiveData<ViewState.PaymentSheet>()
+        outputLiveData.addSource(_viewState) { currentValue ->
+            if (this.checkoutIdentifier == checkoutIdentifier) {
+                outputLiveData.value = currentValue
+            }
+        }
+        return outputLiveData
+    }
 
     override var newCard: PaymentSelection.New.Card? = null
 
