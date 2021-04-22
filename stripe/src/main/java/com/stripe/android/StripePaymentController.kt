@@ -174,7 +174,7 @@ internal class StripePaymentController internal constructor(
                 )
             }.fold(
                 onSuccess = { paymentIntent ->
-                    authenticateAlipay(
+                    authenticateAlipayWithCallback(
                         paymentIntent,
                         authenticator,
                         requestOptions,
@@ -186,6 +186,21 @@ internal class StripePaymentController internal constructor(
                 }
             )
         }
+    }
+
+    override suspend fun confirmAndAuthenticateAlipay(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        authenticator: AlipayAuthenticator,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntentResult {
+        return authenticateAlipay(
+            confirmPaymentIntent(
+                confirmPaymentIntentParams,
+                requestOptions
+            ),
+            authenticator,
+            requestOptions
+        )
     }
 
     private suspend fun confirmPaymentIntent(
@@ -471,28 +486,36 @@ internal class StripePaymentController internal constructor(
         )
     }
 
+    private suspend fun authenticateAlipay(
+        paymentIntent: PaymentIntent,
+        authenticator: AlipayAuthenticator,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntentResult {
+        val outcome =
+            alipayRepository.authenticate(paymentIntent, authenticator, requestOptions).outcome
+        val refreshedPaymentIntent = requireNotNull(
+            stripeRepository.retrievePaymentIntent(
+                paymentIntent.clientSecret.orEmpty(),
+                requestOptions,
+                expandFields = EXPAND_PAYMENT_METHOD
+            )
+        )
+        return PaymentIntentResult(
+            refreshedPaymentIntent,
+            outcome,
+            failureMessageFactory.create(refreshedPaymentIntent, outcome)
+        )
+    }
+
     @VisibleForTesting
-    internal suspend fun authenticateAlipay(
+    internal suspend fun authenticateAlipayWithCallback(
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
         runCatching {
-            alipayRepository.authenticate(paymentIntent, authenticator, requestOptions)
-        }.mapCatching { (outcome) ->
-            val refreshedPaymentIntent = requireNotNull(
-                stripeRepository.retrievePaymentIntent(
-                    paymentIntent.clientSecret.orEmpty(),
-                    requestOptions,
-                    expandFields = EXPAND_PAYMENT_METHOD
-                )
-            )
-            PaymentIntentResult(
-                refreshedPaymentIntent,
-                outcome,
-                failureMessageFactory.create(refreshedPaymentIntent, outcome)
-            )
+            authenticateAlipay(paymentIntent, authenticator, requestOptions)
         }.fold(
             onSuccess = {
                 dispatchPaymentIntentResult(it, callback)

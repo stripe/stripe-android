@@ -581,7 +581,7 @@ internal class StripePaymentControllerTest {
     @Test
     fun `authenticateAlipay() should return expected outcome`() = testDispatcher.runBlockingTest {
         val results = mutableListOf<Result<PaymentIntentResult>>()
-        controller.authenticateAlipay(
+        controller.authenticateAlipayWithCallback(
             PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
             {
                 mapOf("key" to "value")
