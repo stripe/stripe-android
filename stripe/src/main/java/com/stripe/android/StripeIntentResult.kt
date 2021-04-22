@@ -15,6 +15,7 @@ abstract class StripeIntentResult<T : StripeIntent> internal constructor(
     @Outcome private val outcomeFromFlow: Int
 ) : StripeModel {
     abstract val intent: T
+    abstract val failureMessage: String?
 
     @Outcome
     @get:Outcome

@@ -12,8 +12,7 @@ internal sealed class ViewState {
      */
     internal sealed class PaymentSheet : ViewState() {
         data class Ready(
-            val amount: Long,
-            val currencyCode: String
+            val primaryButtonLabel: String
         ) : PaymentSheet()
 
         object StartProcessing : PaymentSheet()

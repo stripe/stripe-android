@@ -12,8 +12,8 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.R
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.BaseAddCardFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -50,8 +50,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
     internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
 
-    protected val _paymentIntent = MutableLiveData<PaymentIntent?>()
-    internal val paymentIntent: LiveData<PaymentIntent?> = _paymentIntent
+    protected val _stripeIntent = MutableLiveData<StripeIntent?>()
+    internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
@@ -107,7 +107,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun fetchFragmentConfig() = MediatorLiveData<FragmentConfig?>().also { configLiveData ->
         listOf(
             savedSelection,
-            paymentIntent,
+            stripeIntent,
             paymentMethods,
             isGooglePayReady
         ).forEach { source ->
@@ -118,19 +118,19 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }.distinctUntilChanged()
 
     private fun createFragmentConfig(): FragmentConfig? {
-        val paymentIntentValue = paymentIntent.value
+        val stripeIntentValue = stripeIntent.value
         val paymentMethodsValue = paymentMethods.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val savedSelectionValue = savedSelection.value
 
         return if (
-            paymentIntentValue != null &&
+            stripeIntentValue != null &&
             paymentMethodsValue != null &&
             isGooglePayReadyValue != null &&
             savedSelectionValue != null
         ) {
             FragmentConfig(
-                paymentIntent = paymentIntentValue,
+                stripeIntent = stripeIntentValue,
                 paymentMethods = paymentMethodsValue,
                 isGooglePayReady = isGooglePayReadyValue,
                 savedSelection = savedSelectionValue

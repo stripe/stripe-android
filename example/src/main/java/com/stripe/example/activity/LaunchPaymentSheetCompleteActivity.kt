@@ -1,7 +1,7 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
-import android.view.View
+import androidx.core.view.isVisible
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.example.databinding.ActivityPaymentSheetCompleteBinding
 
@@ -15,7 +15,7 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         setContentView(viewBinding.root)
 
         viewModel.inProgress.observe(this) {
-            viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
+            viewBinding.progressBar.isVisible = it
             viewBinding.launch.isEnabled = !it
         }
         viewModel.status.observe(this) {

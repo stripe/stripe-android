@@ -268,7 +268,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(paymentSelections[1])
                 .isEqualTo(PaymentSelection.GooglePay)
 
-            fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.Ready(5, "USD")
+            fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.Ready("Pay $5.00")
 
             // Back to Ready state, should return to null PaymentSelection
             assertThat(paymentSelections.size)

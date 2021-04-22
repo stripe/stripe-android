@@ -344,7 +344,7 @@ class PaymentOptionsActivityTest {
 
     private companion object {
         private val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
             sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,

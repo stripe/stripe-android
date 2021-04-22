@@ -20,7 +20,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayContract
-import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentAuthWebViewContract
@@ -90,18 +89,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         PaymentConfiguration.getInstance(application)
     }
 
-    private val currencyFormatter = CurrencyFormatter()
-    private fun getLabelText(viewState: ViewState.PaymentSheet.Ready): String {
-        return resources.getString(
-            R.string.stripe_paymentsheet_pay_button_amount,
-            currencyFormatter.format(viewState.amount, viewState.currencyCode)
-        )
-    }
-
     private val viewStateObserver = { viewState: ViewState.PaymentSheet? ->
         when (viewState) {
             is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
-                PrimaryButton.State.Ready(getLabelText(viewState))
+                PrimaryButton.State.Ready(viewState.primaryButtonLabel)
             )
             is ViewState.PaymentSheet.StartProcessing -> viewBinding.buyButton.updateState(
                 PrimaryButton.State.StartProcessing

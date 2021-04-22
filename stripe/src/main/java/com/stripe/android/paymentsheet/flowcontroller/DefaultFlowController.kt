@@ -4,12 +4,13 @@ import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
@@ -164,11 +165,11 @@ internal class DefaultFlowController internal constructor(
 
         paymentOptionLauncher(
             PaymentOptionContract.Args(
-                paymentIntent = initData.paymentIntent,
+                stripeIntent = initData.stripeIntent,
                 paymentMethods = initData.paymentMethods,
                 sessionId = sessionId,
                 config = initData.config,
-                isGooglePayReady = initData.isGooglePayReady,
+                isGooglePayReady = initData.isGooglePayReady && initData.stripeIntent is PaymentIntent,
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
                 statusBarColor = statusBarColor()
             )
@@ -189,7 +190,7 @@ internal class DefaultFlowController internal constructor(
         if (paymentSelection == PaymentSelection.GooglePay) {
             googlePayLauncher(
                 StripeGooglePayContract.Args(
-                    paymentIntent = initData.paymentIntent,
+                    paymentIntent = initData.stripeIntent as PaymentIntent,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -213,7 +214,9 @@ internal class DefaultFlowController internal constructor(
         initData: InitData
     ) {
         val confirmParamsFactory = ConfirmParamsFactory(
-            PaymentIntentClientSecret(initData.paymentIntent.clientSecret.orEmpty())
+            if (initData.stripeIntent is PaymentIntent)
+                PaymentIntentClientSecret(initData.stripeIntent.clientSecret.orEmpty()) else
+                SetupIntentClientSecret(initData.stripeIntent.clientSecret.orEmpty())
         )
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -354,7 +357,15 @@ internal class DefaultFlowController internal constructor(
     ) {
         lifecycleScope.launch {
             runCatching {
-                paymentFlowResultProcessor.processPaymentIntent(paymentFlowResult)
+                when (viewModel.initData.stripeIntent) {
+                    is PaymentIntent -> {
+                        paymentFlowResultProcessor.processPaymentIntent(paymentFlowResult)
+                    }
+                    is SetupIntent -> {
+                        paymentFlowResultProcessor.processSetupIntent(paymentFlowResult)
+                    }
+                    else -> throw IllegalStateException("<error message>")
+                }
             }.fold(
                 onSuccess = {
                     withContext(Dispatchers.Main) {
@@ -374,22 +385,21 @@ internal class DefaultFlowController internal constructor(
         }
     }
 
-    private fun createPaymentSheetResult(
-        paymentIntentResult: PaymentIntentResult
+    private fun <T : StripeIntent> createPaymentSheetResult(
+        stripeIntentResult: StripeIntentResult<T>
     ): PaymentSheetResult {
-        val paymentIntent = paymentIntentResult.intent
+        val stripeIntent = stripeIntentResult.intent
         return when {
-            paymentIntent.status == StripeIntent.Status.Succeeded ||
-                paymentIntent.status == StripeIntent.Status.RequiresCapture -> {
+            stripeIntent.isConfirmed -> {
                 PaymentSheetResult.Completed
             }
-            paymentIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
+            stripeIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
                 PaymentSheetResult.Canceled
             }
-            paymentIntent.lastPaymentError != null -> {
+            stripeIntent is PaymentIntent && stripeIntent.lastPaymentError != null -> {
                 PaymentSheetResult.Failed(
                     error = IllegalArgumentException(
-                        "Failed to confirm PaymentIntent. ${paymentIntent.lastPaymentError.message}"
+                        "Failed to confirm PaymentIntent. ${stripeIntent.lastPaymentError.message}"
                     )
                 )
             }

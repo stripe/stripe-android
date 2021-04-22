@@ -11,12 +11,14 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
@@ -114,7 +116,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmPaymentIntentParams>>()
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
         }
@@ -136,7 +138,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm new payment methods`() = testDispatcher.runBlockingTest {
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmPaymentIntentParams>>()
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
         }
@@ -188,93 +190,95 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"))
+            .isEqualTo(ViewState.PaymentSheet.Ready("Pay $10.99"))
         assertThat(processing[1]).isFalse()
     }
 
     @Test
-    fun `onPaymentFlowResult() should update ViewState and save preferences`() = testDispatcher.runBlockingTest {
-        paymentFlowResultProcessor.paymentIntentResult = PAYMENT_INTENT_RESULT
+    fun `onPaymentFlowResult() should update ViewState and save preferences`() =
+        testDispatcher.runBlockingTest {
+            paymentFlowResultProcessor.paymentIntentResult = PAYMENT_INTENT_RESULT
 
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        viewModel.updateSelection(selection)
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            viewModel.updateSelection(selection)
 
-        val viewState: MutableList<ViewState?> = mutableListOf()
-        viewModel.viewState.observeForever {
-            viewState.add(it)
+            val viewState: MutableList<ViewState?> = mutableListOf()
+            viewModel.viewState.observeForever {
+                viewState.add(it)
+            }
+
+            viewModel.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated(
+                    "client_secret",
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+            assertThat(viewState[1])
+                .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+
+            (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
+
+            assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult<*>).result)
+                .isEqualTo(PAYMENT_INTENT_RESULT)
+
+            verify(eventReporter)
+                .onPaymentSuccess(selection)
+
+            assertThat(prefsRepository.paymentSelectionArgs)
+                .containsExactly(selection)
+            assertThat(prefsRepository.getSavedSelection())
+                .isEqualTo(
+                    SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
+                )
         }
-
-        viewModel.onPaymentFlowResult(
-            PaymentFlowResult.Unvalidated(
-                "client_secret",
-                StripeIntentResult.Outcome.SUCCEEDED
-            )
-        )
-        assertThat(viewState[1])
-            .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
-
-        (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
-
-        assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult<*>).result)
-            .isEqualTo(PAYMENT_INTENT_RESULT)
-
-        verify(eventReporter)
-            .onPaymentSuccess(selection)
-
-        assertThat(prefsRepository.paymentSelectionArgs)
-            .containsExactly(selection)
-        assertThat(prefsRepository.getSavedSelection())
-            .isEqualTo(
-                SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
-            )
-    }
 
     @Test
-    fun `onPaymentFlowResult() should update ViewState and save new payment method`() = testDispatcher.runBlockingTest {
-        paymentFlowResultProcessor.paymentIntentResult = PAYMENT_INTENT_RESULT_WITH_PM
+    fun `onPaymentFlowResult() should update ViewState and save new payment method`() =
+        testDispatcher.runBlockingTest {
+            paymentFlowResultProcessor.paymentIntentResult = PAYMENT_INTENT_RESULT_WITH_PM
 
-        val selection = PaymentSelection.New.Card(
-            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            CardBrand.Visa,
-            shouldSavePaymentMethod = true
-        )
-        viewModel.updateSelection(selection)
+            val selection = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CardBrand.Visa,
+                shouldSavePaymentMethod = true
+            )
+            viewModel.updateSelection(selection)
 
-        val viewState: MutableList<ViewState?> = mutableListOf()
-        viewModel.viewState.observeForever {
-            viewState.add(it)
+            val viewState: MutableList<ViewState?> = mutableListOf()
+            viewModel.viewState.observeForever {
+                viewState.add(it)
+            }
+
+            viewModel.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated(
+                    "client_secret",
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+            assertThat(viewState[1])
+                .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+
+            (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
+
+            assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult<*>).result)
+                .isEqualTo(PAYMENT_INTENT_RESULT_WITH_PM)
+
+            verify(eventReporter)
+                .onPaymentSuccess(selection)
+
+            assertThat(prefsRepository.paymentSelectionArgs)
+                .containsExactly(
+                    PaymentSelection.Saved(
+                        PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!
+                    )
+                )
+            assertThat(prefsRepository.getSavedSelection())
+                .isEqualTo(
+                    SavedSelection.PaymentMethod(
+                        PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
+                    )
+                )
         }
-
-        viewModel.onPaymentFlowResult(
-            PaymentFlowResult.Unvalidated(
-                "client_secret",
-                StripeIntentResult.Outcome.SUCCEEDED
-            )
-        )
-        assertThat(viewState[1])
-            .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
-
-        (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
-
-        assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult<*>).result)
-            .isEqualTo(PAYMENT_INTENT_RESULT_WITH_PM)
-
-        verify(eventReporter)
-            .onPaymentSuccess(selection)
-
-        assertThat(prefsRepository.paymentSelectionArgs)
-            .containsExactly(
-                PaymentSelection.Saved(
-                    PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!
-                )
-            )
-        assertThat(prefsRepository.getSavedSelection())
-            .isEqualTo(
-                SavedSelection.PaymentMethod(
-                    PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
-                )
-            )
-    }
 
     @Test
     fun `onPaymentFlowResult() with non-success outcome should report failure event`() {
@@ -285,9 +289,9 @@ internal class PaymentSheetViewModelTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
-        var paymentIntent: PaymentIntent? = null
-        viewModel.paymentIntent.observeForever {
-            paymentIntent = it
+        var stripeIntent: StripeIntent? = null
+        viewModel.stripeIntent.observeForever {
+            stripeIntent = it
         }
 
         viewModel.onPaymentFlowResult(
@@ -296,7 +300,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter)
             .onPaymentFailure(selection)
 
-        assertThat(paymentIntent).isNull()
+        assertThat(stripeIntent).isNull()
     }
 
     @Test
@@ -325,7 +329,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(viewState)
             .isEqualTo(
-                ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd")
+                ViewState.PaymentSheet.Ready("Pay $10.99")
             )
     }
 
@@ -366,7 +370,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
-                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
+                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method"
             )
     }
 
@@ -385,7 +389,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
-                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
+                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method"
             )
     }
 

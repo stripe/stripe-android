@@ -43,7 +43,7 @@ class PaymentOptionsAddCardFragmentTest {
 
     private fun createFragment(
         args: PaymentOptionContract.Args = PaymentOptionContract.Args(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
             sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,

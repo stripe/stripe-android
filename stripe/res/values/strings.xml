@@ -177,9 +177,13 @@
     <string name="stripe_paymentsheet_or_pay_with">Or pay with a card</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
 
-    <!-- The payment amount (e.g. "Pay $25.00") -->
+    <!-- Label for a button that starts payment processing -->
     <string name="stripe_paymentsheet_pay_button_label">Pay</string>
+    <!-- Label for a button that starts payment processing for a given amount (e.g. "Pay $25.00") -->
     <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
+    <!-- Label for a button that sets up a payment method for future use -->
+    <string name="stripe_paymentsheet_setup_button_label" tools:ignore="MissingTranslation">Set up</string>
+    <!-- Label shown while the payment is being processed -->
     <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
 
     <string name="stripe_paymentsheet_add_button_label">Add</string>

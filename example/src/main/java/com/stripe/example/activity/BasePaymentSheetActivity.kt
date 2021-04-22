@@ -83,9 +83,9 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     }
 
     protected fun onPaymentSheetResult(
-        paymentResult: PaymentSheetResult
+        paymentSheetResult: PaymentSheetResult
     ) {
-        viewModel.status.value = paymentResult.toString()
+        viewModel.status.value = paymentSheetResult.toString()
     }
 
     protected fun onError(error: Throwable) {

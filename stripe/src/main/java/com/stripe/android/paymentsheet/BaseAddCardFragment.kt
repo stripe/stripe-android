@@ -22,6 +22,7 @@ import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -337,7 +338,8 @@ internal abstract class BaseAddCardFragment(
             getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name, it)
         } ?: getString(R.string.stripe_paymentsheet_save_this_card)
 
-        saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
+        saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null &&
+            sheetViewModel.stripeIntent.value is PaymentIntent
 
         saveCardCheckbox.setOnCheckedChangeListener { _, _ ->
             onSaveCardCheckboxChanged()

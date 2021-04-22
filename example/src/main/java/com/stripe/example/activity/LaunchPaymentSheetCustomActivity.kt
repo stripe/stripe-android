@@ -1,7 +1,7 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
-import android.view.View
+import androidx.core.view.isVisible
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -25,7 +25,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         }
 
         viewModel.inProgress.observe(this) {
-            viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
+            viewBinding.progressBar.isVisible = it
         }
         viewModel.status.observe(this) {
             viewBinding.status.text = it

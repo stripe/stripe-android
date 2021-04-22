@@ -353,10 +353,9 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
-                viewModel._viewState.value = ViewState.PaymentSheet.Ready(
-                    amount = 1099,
-                    currencyCode = "usd"
-                )
+                val buttonLabel = "Pay $10.99"
+
+                viewModel._viewState.value = ViewState.PaymentSheet.Ready(buttonLabel)
 
                 idleLooper()
 
@@ -365,7 +364,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(buyBinding.confirmedIcon.isVisible)
                     .isFalse()
                 assertThat(buyBinding.label.text)
-                    .isEqualTo("Pay $10.99")
+                    .isEqualTo(buttonLabel)
 
                 idleLooper()
 
