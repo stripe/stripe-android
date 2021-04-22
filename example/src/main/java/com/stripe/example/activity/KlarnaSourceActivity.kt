@@ -122,6 +122,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
     private fun createKlarnaSource(): LiveData<Result<Source>> {
         return viewModel.createSource(
             SourceParams.createKlarna(
+                returnUrl = RETURN_URL,
                 currency = "gbp",
                 klarnaParams = KlarnaSourceParams(
                     purchaseCountry = "UK",
@@ -147,6 +148,8 @@ class KlarnaSourceActivity : AppCompatActivity() {
     }
 
     private companion object {
+        private const val RETURN_URL = "https://example.com"
+
         private val LINE_ITEMS = listOf(
             KlarnaSourceParams.LineItem(
                 itemType = KlarnaSourceParams.LineItem.Type.Sku,

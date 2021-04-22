@@ -525,10 +525,9 @@ class SourceParams private constructor(
          * This is the currency for which the source will be chargeable once ready.
          * @param klarnaParams Klarna-specific params
          */
-        @JvmOverloads
         @JvmStatic
         fun createKlarna(
-            returnUrl: String? = null,
+            returnUrl: String,
             currency: String,
             klarnaParams: KlarnaSourceParams
         ): SourceParams {
