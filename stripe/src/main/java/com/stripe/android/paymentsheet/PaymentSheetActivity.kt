@@ -94,11 +94,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private val currencyFormatter = CurrencyFormatter()
 
-    private val buyButtonStateObserver = { viewState: ViewState.PaymentSheet ->
+    private val buyButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
         viewBinding.buyButton.updateState(convert(viewState))
     }
 
-    private val googlePayButtonStateObserver = { viewState: ViewState.PaymentSheet ->
+    private val googlePayButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
         viewBinding.googlePayButton.updateState(convert(viewState))
     }
 

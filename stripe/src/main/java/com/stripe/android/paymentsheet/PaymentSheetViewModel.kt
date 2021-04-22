@@ -67,12 +67,12 @@ internal class PaymentSheetViewModel internal constructor(
     internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
 
     @VisibleForTesting
-    internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(ViewState.PaymentSheet.Ready)
+    internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
     internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-    internal fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet> {
-        val outputLiveData = MediatorLiveData<ViewState.PaymentSheet>()
+    internal fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet?> {
+        val outputLiveData = MediatorLiveData<ViewState.PaymentSheet?>()
         outputLiveData.addSource(_viewState) { currentValue ->
             if (this.checkoutIdentifier == checkoutIdentifier) {
                 outputLiveData.value = currentValue
