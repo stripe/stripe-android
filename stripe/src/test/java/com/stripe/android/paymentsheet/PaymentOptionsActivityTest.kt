@@ -79,6 +79,27 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
+    fun `click outside of bottom sheet should return cancel result even if there is a selection`() {
+        val scenario = activityScenario()
+        scenario.launch(
+            createIntent()
+        ).use {
+            it.onActivity { activity ->
+                viewModel.updateSelection(PaymentSelection.GooglePay)
+
+                activity.viewBinding.root.performClick()
+                activity.finish()
+            }
+
+            assertThat(
+                PaymentOptionResult.fromIntent(scenario.getResult().resultData)
+            ).isEqualTo(
+                PaymentOptionResult.Canceled(null)
+            )
+        }
+    }
+
+    @Test
     fun `AddButton should be hidden when showing payment options`() {
         val scenario = activityScenario()
         scenario.launch(
@@ -276,7 +297,7 @@ class PaymentOptionsActivityTest {
             it.onActivity { activity ->
                 val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
                 viewModel._viewState.value = ViewState.PaymentOptions.ProcessResult(
-                    PaymentOptionResult.Succeeded.Unsaved(
+                    PaymentOptionResult.Succeeded(
                         paymentSelectionMock
                     )
                 )
@@ -315,7 +336,6 @@ class PaymentOptionsActivityTest {
         return PaymentOptionsViewModel(
             args = args,
             prefsRepository = FakePrefsRepository(),
-            paymentMethodsRepository = FakePaymentMethodsRepository(args.paymentMethods),
             eventReporter = eventReporter,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()

@@ -21,8 +21,8 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
-import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -130,7 +130,7 @@ internal class FlowControllerFactory(
             workContext = Dispatchers.IO
         )
 
-        val paymentIntentRepository = PaymentIntentRepository.Api(
+        val stripeIntentRepository = StripeIntentRepository.Api(
             stripeRepository = stripeRepository,
             requestOptions = ApiRequest.Options(
                 config.publishableKey,
@@ -147,7 +147,7 @@ internal class FlowControllerFactory(
             authHostSupplier = authHostSupplier,
             paymentOptionFactory = paymentOptionFactory,
             flowControllerInitializer = DefaultFlowControllerInitializer(
-                paymentIntentRepository = paymentIntentRepository,
+                stripeIntentRepository = stripeIntentRepository,
                 paymentMethodsRepository = paymentMethodsRepository,
                 prefsRepositoryFactory = prefsRepositoryFactory,
                 isGooglePayReadySupplier = isGooglePayReadySupplier,

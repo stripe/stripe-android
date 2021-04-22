@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.Logger
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -48,49 +47,7 @@ internal class PaymentMethodsApiRepository(
         }.getOrDefault(emptyList())
     }
 
-    override suspend fun save(
-        customerConfig: PaymentSheet.CustomerConfiguration,
-        paymentMethodCreateParams: PaymentMethodCreateParams
-    ): PaymentMethod = withContext(workContext) {
-        runCatching {
-            val paymentMethod = requireNotNull(
-                stripeRepository.createPaymentMethod(
-                    paymentMethodCreateParams,
-                    ApiRequest.Options(
-                        publishableKey,
-                        stripeAccountId
-                    )
-                )
-            ) {
-                ERROR_MSG
-            }
-
-            requireNotNull(paymentMethod.id) {
-                ERROR_MSG
-            }
-
-            requireNotNull(
-                stripeRepository.attachPaymentMethod(
-                    customerConfig.id,
-                    publishableKey,
-                    PRODUCT_USAGE,
-                    paymentMethod.id,
-                    ApiRequest.Options(
-                        customerConfig.ephemeralKeySecret,
-                        stripeAccountId
-                    )
-                )
-            ) {
-                ERROR_MSG
-            }
-        }.onFailure {
-            logger.error("Failed to save ${customerConfig.id}'s payment methods.", it)
-            throw it
-        }.getOrThrow()
-    }
-
     private companion object {
         private val PRODUCT_USAGE = setOf("PaymentSheet")
-        private val ERROR_MSG = "Could not parse PaymentMethod."
     }
 }

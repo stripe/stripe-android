@@ -7,8 +7,8 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import com.stripe.android.paymentsheet.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.example.R
 import com.stripe.example.paymentsheet.PaymentSheetViewModel
 
@@ -30,13 +30,8 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val isCustomerEnabled: Boolean
         get() = prefsManager.getBoolean("enable_customer", true)
 
-    protected val billingAddressCollection: PaymentSheet.BillingAddressCollectionLevel
-        get() {
-            return when (prefsManager.getBoolean("require_billing_address", false)) {
-                true -> PaymentSheet.BillingAddressCollectionLevel.Required
-                false -> PaymentSheet.BillingAddressCollectionLevel.Automatic
-            }
-        }
+    protected val isSetupIntent: Boolean
+        get() = prefsManager.getBoolean("setup_intent", false)
 
     protected val googlePayConfig: PaymentSheet.GooglePayConfiguration?
         get() {
@@ -88,7 +83,7 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     }
 
     protected fun onPaymentSheetResult(
-        paymentResult: PaymentResult
+        paymentResult: PaymentSheetResult
     ) {
         viewModel.status.value = paymentResult.toString()
     }

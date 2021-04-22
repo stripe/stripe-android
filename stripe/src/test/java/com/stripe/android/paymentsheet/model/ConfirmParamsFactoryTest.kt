@@ -12,7 +12,7 @@ class ConfirmParamsFactoryTest {
     private val defaultReturnUrl = DefaultReturnUrl("com.example.app")
     private val factory = ConfirmParamsFactory(
         defaultReturnUrl,
-        CLIENT_SECRET
+        PaymentIntentClientSecret(CLIENT_SECRET)
     )
 
     @Test

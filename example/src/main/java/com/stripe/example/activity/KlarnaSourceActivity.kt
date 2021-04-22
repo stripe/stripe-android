@@ -7,8 +7,9 @@ import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
-import com.stripe.android.ApiResultCallback
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.Stripe
+import com.stripe.android.getAuthenticateSourceResult
 import com.stripe.android.model.Address
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.KlarnaSourceParams
@@ -16,6 +17,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.KlarnaSourceActivityBinding
+import kotlinx.coroutines.launch
 
 class KlarnaSourceActivity : AppCompatActivity() {
     private val viewBinding: KlarnaSourceActivityBinding by lazy {
@@ -71,23 +73,21 @@ class KlarnaSourceActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        if (data != null && stripe.isAuthenticateSourceResult(requestCode, data)) {
-            stripe.onAuthenticateSourceResult(
-                data,
-                object : ApiResultCallback<Source> {
-                    override fun onSuccess(result: Source) {
+        if (stripe.isAuthenticateSourceResult(requestCode, data)) {
+            lifecycleScope.launch {
+                runCatching {
+                    stripe.getAuthenticateSourceResult(requestCode, data!!)
+                }.fold(
+                    onSuccess = {
+                        viewModel.source = it
                         enableUi()
-                        viewModel.source = result
-                        logSource(result)
-                    }
-
-                    override fun onError(e: Exception) {
+                    },
+                    onFailure = {
                         enableUi()
-                        logException(e)
+                        logException(it)
                     }
-                }
-            )
+                )
+            }
         }
     }
 

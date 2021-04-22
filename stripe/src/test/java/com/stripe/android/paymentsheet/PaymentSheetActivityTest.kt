@@ -30,9 +30,10 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
-import com.stripe.android.paymentsheet.repositories.PaymentIntentRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -70,7 +71,7 @@ internal class PaymentSheetActivityTest {
     private val intent = contract.createIntent(
         context,
         PaymentSheetContract.Args(
-            "client_secret",
+            PaymentIntentClientSecret("client_secret"),
             sessionId = SessionId(),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             PaymentSheetFixtures.CONFIG_CUSTOMER
@@ -119,10 +120,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isEqualTo(
-            PaymentResult.Canceled(
-                null,
-                PAYMENT_INTENT
-            )
+            PaymentSheetResult.Canceled
         )
     }
 
@@ -252,10 +250,7 @@ internal class PaymentSheetActivityTest {
                     scenario.getResult().resultData
                 )
             ).isEqualTo(
-                PaymentResult.Canceled(
-                    null,
-                    PAYMENT_INTENT
-                )
+                PaymentSheetResult.Canceled
             )
         }
     }
@@ -525,10 +520,7 @@ internal class PaymentSheetActivityTest {
                     scenario.getResult().resultData
                 )
             ).isEqualTo(
-                PaymentResult.Canceled(
-                    null,
-                    PAYMENT_INTENT
-                )
+                PaymentSheetResult.Canceled
             )
         }
     }
@@ -621,7 +613,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isEqualTo(
-            PaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            PaymentSheetResult.Completed
         )
     }
 
@@ -650,7 +642,7 @@ internal class PaymentSheetActivityTest {
         return PaymentSheetViewModel(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = null,
-            paymentIntentRepository = PaymentIntentRepository.Static(paymentIntent),
+            stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
             paymentMethodsRepository = FakePaymentMethodsRepository(paymentMethods),
             paymentFlowResultProcessor = paymentFlowResultProcessor,
             googlePayRepository = googlePayRepository,
