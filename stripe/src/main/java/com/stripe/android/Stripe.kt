@@ -1739,7 +1739,7 @@ class Stripe internal constructor(
         activity: Activity
     ): CoroutineScope = when (activity) {
         is ComponentActivity -> activity.lifecycleScope
-        else -> CoroutineScope(Dispatchers.IO)
+        else -> CoroutineScope(workContext)
     }
 
     companion object {
