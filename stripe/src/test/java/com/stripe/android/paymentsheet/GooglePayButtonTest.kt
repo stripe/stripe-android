@@ -38,17 +38,23 @@ class GooglePayButtonTest {
     }
 
     @Test
-    fun `onReadyState() should update label`() {
+    fun `onReadyState() should update the backgroundTint`() {
         googlePayButton.updateState(
-            PrimaryButton.State.Ready("Pay $10.99")
+            PrimaryButton.State.StartProcessing,
+        )
+        googlePayButton.updateState(
+            PrimaryButton.State.FinishProcessing {},
+        )
+        assertThat(primaryButton.isVisible).isTrue()
+        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isFalse()
+        assertThat(primaryButton.backgroundTintList).isNull()
+
+        googlePayButton.updateState(
+            PrimaryButton.State.Ready
         )
         assertThat(primaryButton.isVisible).isFalse()
+        assertThat(primaryButton.backgroundTintList).isNotNull()
         assertThat(googlePayButton.viewBinding.googlePayButtonIcon.isVisible).isTrue()
-        assertThat(
-            primaryButton.viewBinding.label.text.toString()
-        ).isEqualTo(
-            "Pay $10.99"
-        )
     }
 
     @Test
@@ -89,18 +95,14 @@ class GooglePayButtonTest {
 
     @Test
     fun `after viewState ready and disabled, label alpha is 50%`() {
-        googlePayButton.updateState(
-            PrimaryButton.State.Ready("$10.99")
-        )
+        googlePayButton.updateState(PrimaryButton.State.Ready)
         assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(0.5f)
     }
 
     @Test
     fun `after viewState ready and enabled, label alpha is 100%`() {
-        googlePayButton.updateState(
-            PrimaryButton.State.Ready("$10.99")
-        )
+        googlePayButton.updateState(PrimaryButton.State.Ready)
         googlePayButton.isEnabled = true
         assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(1.0f)

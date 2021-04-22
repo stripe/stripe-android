@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -70,17 +69,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
     internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
 
-    @VisibleForTesting
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-    internal fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet> {
-        val outputLiveData = MediatorLiveData<ViewState.PaymentSheet>()
-        outputLiveData.addSource(_viewState) { currentValue ->
-            if (this.checkoutIdentifier == checkoutIdentifier) {
-                outputLiveData.value = currentValue
-            }
-        }
-        return outputLiveData
-    }
 
     override var newCard: PaymentSelection.New.Card? = null
 
@@ -168,11 +157,16 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
+    data class Amount(val value: Long, val currencyCode: String)
+
+    private val _amount = MutableLiveData<Amount>()
+    val amount: LiveData<Amount> = _amount
     private fun resetViewState(paymentIntent: PaymentIntent) {
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
         if (amount != null && currencyCode != null) {
-            _viewState.value = ViewState.PaymentSheet.Ready(amount, currencyCode)
+            _amount.value = Amount(amount, currencyCode)
+            _viewState.value = ViewState.PaymentSheet.Ready
             _processing.value = false
             checkoutIdentifier = CheckoutIdentifier.None
         } else {
@@ -402,7 +396,7 @@ internal class PaymentSheetViewModel internal constructor(
 
     /**
      * This is the identifier of the caller of the [checkout] function.  It is used in
-     * [getButtonStateObservable] to get state events related to it's events.
+     * the observables of [viewState] to get state events related to it.
      */
     internal enum class CheckoutIdentifier {
         AddFragmentTopGooglePay,

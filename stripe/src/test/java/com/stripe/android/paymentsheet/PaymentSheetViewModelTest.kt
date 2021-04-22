@@ -170,10 +170,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
         val viewState: MutableList<ViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
-            .observeForever {
-                viewState.add(it)
-            }
+//        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+//            .observeForever {
+//                viewState.add(it)
+//            }
 
         val processing: MutableList<Boolean> = mutableListOf()
         viewModel.processing.observeForever {
@@ -191,7 +191,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"))
+            .isEqualTo(ViewState.PaymentSheet.Ready)
         assertThat(processing[1]).isFalse()
     }
 
@@ -202,10 +202,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
         val viewState: MutableList<ViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
-            .observeForever {
-                viewState.add(it)
-            }
+//        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+//            .observeForever {
+//                viewState.add(it)
+//            }
 
         val processing: MutableList<Boolean> = mutableListOf()
         viewModel.processing.observeForever {
@@ -229,7 +229,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd"))
+            .isEqualTo(ViewState.PaymentSheet.Ready)
         assertThat(processing[1]).isFalse()
         assertThat(userMessage[1]).isEqualTo(UserMessage.Error("Test exception"))
     }
@@ -367,7 +367,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(viewState)
             .isEqualTo(
-                ViewState.PaymentSheet.Ready(amount = 1099, currencyCode = "usd")
+                ViewState.PaymentSheet.Ready
             )
     }
 

@@ -30,22 +30,6 @@ internal class PaymentSheetAddCardFragment(
         )
     }
 
-    private val googleViewStateObserver = { viewState: ViewState.PaymentSheet? ->
-        when (viewState) {
-            is ViewState.PaymentSheet.Ready -> googlePayButton.updateState(
-                PrimaryButton.State.Ready()
-            )
-            is ViewState.PaymentSheet.StartProcessing -> googlePayButton.updateState(
-                PrimaryButton.State.StartProcessing
-            )
-            is ViewState.PaymentSheet.FinishProcessing -> googlePayButton.updateState(
-                PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            )
-            is ViewState.PaymentSheet.ProcessResult<*> -> {
-            }
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val config = arguments?.getParcelable<FragmentConfig>(
@@ -76,12 +60,26 @@ internal class PaymentSheetAddCardFragment(
         }
 
         sheetViewModel.viewState.observe(viewLifecycleOwner) { viewState ->
+            if (sheetViewModel.checkoutIdentifier == CheckoutIdentifier.AddFragmentTopGooglePay) {
+                googlePayButton.updateState(convert(viewState))
+            }
+
             if (viewState is ViewState.PaymentSheet.Ready) {
                 updateSelection()
             }
         }
+    }
 
-        sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
-            .observe(viewLifecycleOwner, googleViewStateObserver)
+    // TODO: Make this conversion function shareable with PaymentSheetAddCardFragment
+    private fun convert(viewState: ViewState.PaymentSheet?): PrimaryButton.State? {
+        return when (viewState) {
+            is ViewState.PaymentSheet.Ready ->
+                PrimaryButton.State.Ready
+            is ViewState.PaymentSheet.StartProcessing ->
+                PrimaryButton.State.StartProcessing
+            is ViewState.PaymentSheet.FinishProcessing ->
+                PrimaryButton.State.FinishProcessing(viewState.onComplete)
+            else -> null
+        }
     }
 }

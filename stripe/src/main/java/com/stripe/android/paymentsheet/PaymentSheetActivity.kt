@@ -29,6 +29,7 @@ import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.Stripe3ds2CompletionContract
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.Amount
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -92,42 +93,30 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private val currencyFormatter = CurrencyFormatter()
-    private fun getLabelText(viewState: ViewState.PaymentSheet.Ready): String {
-        return resources.getString(
-            R.string.stripe_paymentsheet_pay_button_amount,
-            currencyFormatter.format(viewState.amount, viewState.currencyCode)
-        )
-    }
 
-    private val buyButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
-        when (viewState) {
-            is ViewState.PaymentSheet.Ready -> viewBinding.buyButton.updateState(
-                PrimaryButton.State.Ready(getLabelText(viewState))
-            )
-            is ViewState.PaymentSheet.StartProcessing -> viewBinding.buyButton.updateState(
-                PrimaryButton.State.StartProcessing
-            )
-            is ViewState.PaymentSheet.FinishProcessing -> viewBinding.buyButton.updateState(
-                PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            )
-            is ViewState.PaymentSheet.ProcessResult<*> -> {
+    private val viewStateObserver = { viewState: ViewState.PaymentSheet ->
+        when (viewModel.checkoutIdentifier) {
+            CheckoutIdentifier.SheetBottomBuy -> {
+                viewBinding.buyButton.updateState(convert(viewState))
+            }
+            CheckoutIdentifier.SheetBottomGooglePay -> {
+                viewBinding.googlePayButton.updateState(convert(viewState))
+            }
+            else -> {
             }
         }
     }
 
-    private val googlePayButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
-        when (viewState) {
-            is ViewState.PaymentSheet.Ready -> viewBinding.googlePayButton.updateState(
-                PrimaryButton.State.Ready()
-            )
-            is ViewState.PaymentSheet.StartProcessing -> viewBinding.googlePayButton.updateState(
+    // TODO: Make this conversion function shareable with PaymentSheetAddCardFragment
+    private fun convert(viewState: ViewState.PaymentSheet?): PrimaryButton.State? {
+        return when (viewState) {
+            is ViewState.PaymentSheet.Ready ->
+                PrimaryButton.State.Ready
+            is ViewState.PaymentSheet.StartProcessing ->
                 PrimaryButton.State.StartProcessing
-            )
-            is ViewState.PaymentSheet.FinishProcessing -> viewBinding.googlePayButton.updateState(
+            is ViewState.PaymentSheet.FinishProcessing ->
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            )
-            is ViewState.PaymentSheet.ProcessResult<*> -> {
-            }
+            else -> null
         }
     }
 
@@ -315,11 +304,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupBuyButton() {
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
-            .observe(this, googlePayButtonStateObserver)
+        viewModel.amount.observe(this) {
+            viewBinding.buyButton.setLabel(getLabelText(it))
+        }
 
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observe(this, buyButtonStateObserver)
+        viewModel.viewState.observe(this, viewStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
             val shouldShowGooglePay =
@@ -346,6 +335,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.ctaEnabled.observe(this) { isEnabled ->
             viewBinding.buyButton.isEnabled = isEnabled
         }
+    }
+
+    private fun getLabelText(amount: Amount): String {
+        return resources.getString(
+            R.string.stripe_paymentsheet_pay_button_amount,
+            currencyFormatter.format(amount.value, amount.currencyCode)
+        )
     }
 
     private fun processResult(stripeIntentResult: StripeIntentResult<*>) {

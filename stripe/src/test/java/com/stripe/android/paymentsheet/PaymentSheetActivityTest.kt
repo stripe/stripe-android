@@ -355,10 +355,7 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
-                viewModel._viewState.value = ViewState.PaymentSheet.Ready(
-                    amount = 1099,
-                    currencyCode = "usd"
-                )
+                viewModel._viewState.value = ViewState.PaymentSheet.Ready
 
                 idleLooper()
 
@@ -366,8 +363,6 @@ internal class PaymentSheetActivityTest {
 
                 assertThat(buyBinding.confirmedIcon.isVisible)
                     .isFalse()
-                assertThat(buyBinding.label.text)
-                    .isEqualTo("Pay $10.99")
 
                 idleLooper()
 
@@ -401,6 +396,7 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
                 viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
 
                 idleLooper()
@@ -419,6 +415,8 @@ internal class PaymentSheetActivityTest {
             it.onActivity { _ ->
                 // wait for bottom sheet to animate in
                 idleLooper()
+
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
                 var finishProcessingCalled = false
                 viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing {
@@ -439,10 +437,11 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).use {
             it.onActivity { activity ->
-                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
+
                 // wait for bottom sheet to animate in
                 idleLooper()
 
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
                 viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
 
                 idleLooper()
@@ -519,6 +518,8 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 testDispatcher.advanceTimeBy(500)
                 idleLooper()
+
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
                 viewModel.onPaymentFlowResult(
                     PaymentFlowResult.Unvalidated(
