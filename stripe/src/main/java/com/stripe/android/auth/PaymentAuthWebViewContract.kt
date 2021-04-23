@@ -18,14 +18,10 @@ import kotlinx.parcelize.Parcelize
  */
 internal class PaymentAuthWebViewContract(
     private val defaultReturnUrl: DefaultReturnUrl,
-    private val isCustomTabsSupported: (Context) -> Boolean
+    private val isCustomTabsSupported: (Context) -> Boolean = { context ->
+        CustomTabsCapabilities(context).isSupported()
+    }
 ) : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
-    constructor(
-        defaultReturnUrl: DefaultReturnUrl
-    ) : this(
-        defaultReturnUrl,
-        { context -> CustomTabsCapabilities(context).isSupported() }
-    )
 
     override fun createIntent(
         context: Context,
