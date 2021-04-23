@@ -8,6 +8,7 @@
 * [#3606](https://github.com/stripe/stripe-android/pull/3606) Upgrade Gradle to `7.0`
 * [#3626](https://github.com/stripe/stripe-android/pull/3626) Upgrade Fragment to `1.3.3`
 * [#3632](https://github.com/stripe/stripe-android/pull/3632) Upgrade 3DS2 SDK to `5.3.0`
+    * Gracefully handle unknown directory servers
 
 ## 16.5.0 - 2021-04-08
 * [#3557](https://github.com/stripe/stripe-android/pull/3557) Add suspending function variants of API methods
