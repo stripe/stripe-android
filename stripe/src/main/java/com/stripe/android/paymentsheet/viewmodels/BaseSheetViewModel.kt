@@ -214,7 +214,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 content
             }
         }
-
         /**
          * Returns the content, even if it's already been handled.
          */

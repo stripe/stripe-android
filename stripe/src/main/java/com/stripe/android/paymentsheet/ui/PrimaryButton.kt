@@ -22,6 +22,10 @@ internal class PrimaryButton @JvmOverloads constructor(
     private var state: State? = null
     private val animator = PrimaryButtonAnimator(context)
 
+    // This is the text set by the client.  The internal label text is set to this value
+    // in the on ready state and it is temporarily replaced during the processing and finishing states.
+    private var externalLabel: String? = null
+
     internal val viewBinding = PrimaryButtonBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -54,12 +58,19 @@ internal class PrimaryButton @JvmOverloads constructor(
         return text
     }
 
-    private fun onReadyState(text: String?) {
+    fun setLabel(text: String?) {
+        externalLabel = text
+        externalLabel?.let {
+            viewBinding.label.text = text
+        }
+    }
+
+    private fun onReadyState() {
+        externalLabel?.let {
+            viewBinding.label.text = it
+        }
         defaultTintList?.let {
             backgroundTintList = it
-        }
-        text?.let {
-            viewBinding.label.text = text
         }
         viewBinding.confirmingIcon.isVisible = false
     }
@@ -99,7 +110,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
         when (state) {
             is State.Ready -> {
-                onReadyState(state.label)
+                onReadyState()
             }
             State.StartProcessing -> {
                 onStartProcessing()
@@ -122,7 +133,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         /**
          * The label will be applied if the value is not null.
          */
-        data class Ready(val label: String? = null) : State()
+        object Ready : State()
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
     }
