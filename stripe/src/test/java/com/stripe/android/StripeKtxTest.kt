@@ -414,7 +414,7 @@ internal class StripeKtxTest {
         }
 
     @Test
-    fun `When controller returns correct value then confirmAlipayPayment should succeed`(): Unit =
+    fun `When controller throws exception then confirmAlipayPayment should throw same exception`(): Unit =
         testDispatcher.runBlockingTest {
             whenever(
                 mockPaymentController.confirmAndAuthenticateAlipay(any(), any(), any())
@@ -430,7 +430,7 @@ internal class StripeKtxTest {
         }
 
     @Test
-    fun `When controller throws exception then confirmAlipayPayment should throw same exception`(): Unit =
+    fun `When controller returns correct value then confirmAlipayPayment should succeed`(): Unit =
         testDispatcher.runBlockingTest {
             val expectedApiObj = mock<PaymentIntentResult>()
 
