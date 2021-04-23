@@ -144,7 +144,7 @@ internal class PaymentSheetViewModel internal constructor(
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)
             }.fold(
-                onSuccess = ::onFetchPaymentIntentResponse,
+                onSuccess = ::onPaymentIntentResponse,
                 onFailure = {
                     _paymentIntent.value = null
                     onFatal(it)
@@ -153,9 +153,9 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun onFetchPaymentIntentResponse(paymentIntent: PaymentIntent) {
+    private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
         if (paymentIntent.isConfirmed) {
-            onFetchConfirmedPaymentIntent(paymentIntent)
+            onConfirmedPaymentIntent(paymentIntent)
         } else {
             runCatching {
                 paymentIntentValidator.requireValid(paymentIntent)
@@ -174,7 +174,7 @@ internal class PaymentSheetViewModel internal constructor(
      *
      * See [How intents work](https://stripe.com/docs/payments/intents) for more details.
      */
-    private fun onFetchConfirmedPaymentIntent(paymentIntent: PaymentIntent) {
+    private fun onConfirmedPaymentIntent(paymentIntent: PaymentIntent) {
         logger.info(
             """
             PaymentIntent with id=${paymentIntent.id}" has already been confirmed.
