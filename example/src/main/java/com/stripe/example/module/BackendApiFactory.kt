@@ -60,7 +60,7 @@ internal class BackendApiFactory internal constructor(private val backendUrl: St
 
         return Retrofit.Builder()
             .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
-            .baseUrl("https://complex-various-kryptops.glitch.me/")
+            .baseUrl("https://stripe-mobile-payment-sheet-test-playground-v3.glitch.me/")
             .client(httpClient)
             .build()
             .create(CheckoutBackendApi::class.java)

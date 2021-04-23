@@ -1,6 +1,5 @@
 package com.stripe.example.activity
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.view.Menu
 import android.view.MenuItem
@@ -16,8 +15,7 @@ import com.stripe.example.paymentsheet.PaymentSheetViewModel
 internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val viewModel: PaymentSheetViewModel by viewModels {
         PaymentSheetViewModel.Factory(
-            application,
-            getPreferences(Context.MODE_PRIVATE)
+            application
         )
     }
 
@@ -77,10 +75,8 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
                 PaymentSheetConfigBottomSheet.TAG
             )
             return true
-        } else if (item.itemId == R.id.refresh_key) {
-            viewModel.clearKeys()
-            onRefreshEphemeralKey()
         }
+
         return super.onOptionsItemSelected(item)
     }
 
@@ -111,37 +107,9 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
             }
     }
 
-    protected fun fetchEphemeralKey(
-        onSuccess: (PaymentSheet.CustomerConfiguration) -> Unit = {}
-    ) {
-        viewModel.fetchEphemeralKey()
-            .observe(this) { newEphemeralKey ->
-                if (newEphemeralKey != null) {
-                    onSuccess(
-                        PaymentSheet.CustomerConfiguration(
-                            id = newEphemeralKey.customer,
-                            ephemeralKeySecret = newEphemeralKey.key
-                        )
-                    )
-                }
-            }
-    }
-
-    protected fun onPaymentSheetResult(
+    protected open fun onPaymentSheetResult(
         paymentResult: PaymentSheetResult
     ) {
         viewModel.status.value = paymentResult.toString()
     }
-
-    protected fun onError(error: Throwable) {
-        viewModel.status.postValue(
-            """
-            ${viewModel.status.value}
-            
-            Failed: ${error.message}
-            """.trimIndent()
-        )
-    }
-
-    abstract fun onRefreshEphemeralKey()
 }

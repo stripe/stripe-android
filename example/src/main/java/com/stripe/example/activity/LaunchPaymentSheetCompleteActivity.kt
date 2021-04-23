@@ -49,8 +49,4 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
             }
         }
     }
-
-    override fun onRefreshEphemeralKey() {
-//        fetchEphemeralKey()
-    }
 }
