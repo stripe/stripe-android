@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.example.R
@@ -30,6 +31,9 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val isCustomerEnabled: Boolean
         get() = prefsManager.getBoolean("enable_customer", true)
 
+    protected val isReturningCustomer: Boolean
+        get() = prefsManager.getBoolean("returning_customer", true)
+
     protected val isSetupIntent: Boolean
         get() = prefsManager.getBoolean("setup_intent", false)
 
@@ -45,6 +49,20 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
                 false -> null
             }
         }
+
+    protected val customer: String
+        get() = if (isCustomerEnabled && isReturningCustomer) {
+            "returning"
+        } else if (isCustomerEnabled) {
+            temporaryCustomerId ?: "new"
+        } else {
+            "new"
+        }
+
+    protected val mode: String
+        get() = if (isSetupIntent) "setup" else "payment"
+
+    protected var temporaryCustomerId: String? = null
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -64,6 +82,33 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
             onRefreshEphemeralKey()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    protected fun prepareCheckout(
+        onSuccess: (PaymentSheet.CustomerConfiguration, String) -> Unit
+    ) {
+        viewModel.prepareCheckout(customer, mode)
+            .observe(this) { checkoutResponse ->
+                if (checkoutResponse != null) {
+                    temporaryCustomerId = if (isCustomerEnabled && !isReturningCustomer) {
+                        checkoutResponse.customerId
+                    } else {
+                        null
+                    }
+
+                    // Re-initing here because the ExampleApplication inits with the key from
+                    // gradle properties
+                    PaymentConfiguration.init(this, checkoutResponse.publishableKey)
+
+                    onSuccess(
+                        PaymentSheet.CustomerConfiguration(
+                            id = checkoutResponse.customerId,
+                            ephemeralKeySecret = checkoutResponse.customerEphemeralKeySecret
+                        ),
+                        checkoutResponse.intentClientSecret
+                    )
+                }
+            }
     }
 
     protected fun fetchEphemeralKey(

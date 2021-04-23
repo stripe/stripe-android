@@ -2,6 +2,8 @@ package com.stripe.example.paymentsheet
 
 import android.content.SharedPreferences
 import com.stripe.example.service.BackendApi
+import com.stripe.example.service.CheckoutBackendApi
+import com.stripe.example.service.CheckoutRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -10,6 +12,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class DefaultRepository(
     private val backendApi: BackendApi,
+    private val checkoutBackendApi: CheckoutBackendApi,
     private val sharedPrefs: SharedPreferences,
     private val workContext: CoroutineContext
 ) : Repository {
@@ -45,6 +48,18 @@ internal class DefaultRepository(
                     .putString(PREF_EK, key)
                     .putString(PREF_CUSTOMER, customer)
                     .apply()
+            }
+        )
+    }
+
+    override suspend fun checkout(
+        customer: String,
+        currency: String,
+        mode: String
+    ) = withContext(workContext) {
+        flowOf(
+            kotlin.runCatching {
+                checkoutBackendApi.checkout(CheckoutRequest(customer, currency, mode))
             }
         )
     }

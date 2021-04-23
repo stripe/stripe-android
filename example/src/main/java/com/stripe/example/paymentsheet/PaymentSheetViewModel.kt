@@ -50,6 +50,31 @@ internal class PaymentSheetViewModel(
         }
     }
 
+    fun prepareCheckout(customer: String, mode: String) = liveData {
+        inProgress.postValue(true)
+        status.postValue("Preparing checkout...")
+
+        val checkoutResponse = repository.checkout(
+            customer, CURRENCY, mode
+        ).single()
+
+        checkoutResponse.fold(
+            onSuccess = { response ->
+                status.postValue(
+                    "${status.value}\n\nReady to checkout: $response"
+                )
+            },
+            onFailure = {
+                status.postValue(
+                    "${status.value}\n\nPreparing checkout failed\n${it.message}"
+                )
+            }
+        )
+
+        inProgress.postValue(false)
+        emit(checkoutResponse.getOrNull())
+    }
+
     internal class Factory(
         private val application: Application,
         private val sharedPrefs: SharedPreferences,
@@ -57,9 +82,11 @@ internal class PaymentSheetViewModel(
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val backendApi = BackendApiFactory(application).create()
+            val checkoutBackendApi = BackendApiFactory(application).createCheckout()
 
             val repository = DefaultRepository(
                 backendApi,
+                checkoutBackendApi,
                 sharedPrefs,
                 workContext
             )
@@ -69,5 +96,9 @@ internal class PaymentSheetViewModel(
                 repository
             ) as T
         }
+    }
+
+    private companion object {
+        private const val CURRENCY = "usd"
     }
 }

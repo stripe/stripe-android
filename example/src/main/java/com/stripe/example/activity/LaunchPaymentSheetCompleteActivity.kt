@@ -1,7 +1,7 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
-import android.view.View
+import androidx.core.view.isInvisible
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.example.databinding.ActivityPaymentSheetCompleteBinding
 
@@ -17,75 +17,17 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
         val paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
 
         viewModel.inProgress.observe(this) {
-            viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
+            viewBinding.progressBar.isInvisible = !it
             viewBinding.launch.isEnabled = !it
         }
+
         viewModel.status.observe(this) {
             viewBinding.status.text = it
         }
 
         viewBinding.launch.setOnClickListener {
-            if (isCustomerEnabled) {
-                fetchEphemeralKey { customerConfig ->
-                    createIntent(paymentSheet, customerConfig)
-                }
-            } else {
-                createIntent(paymentSheet, null)
-            }
-        }
-    }
-
-    private fun createIntent(
-        paymentSheet: PaymentSheet,
-        customerConfig: PaymentSheet.CustomerConfiguration?
-    ) {
-        if (isSetupIntent) {
-            createSetupIntent(paymentSheet, customerConfig)
-        } else {
-            createPaymentIntent(paymentSheet, customerConfig)
-        }
-    }
-
-    private fun createPaymentIntent(
-        paymentSheet: PaymentSheet,
-        customerConfig: PaymentSheet.CustomerConfiguration?
-    ) {
-        viewModel.createPaymentIntent(
-            COUNTRY_CODE,
-            customerId = customerConfig?.id
-        ).observe(this) {
-            it.fold(
-                onSuccess = { json ->
-                    val clientSecret = json.getString("secret")
-                    viewModel.inProgress.postValue(false)
-
-                    paymentSheet.presentWithPaymentIntent(
-                        clientSecret,
-                        PaymentSheet.Configuration(
-                            merchantDisplayName = merchantName,
-                            customer = customerConfig,
-                            googlePay = googlePayConfig,
-                        )
-                    )
-                },
-                onFailure = ::onError
-            )
-        }
-    }
-
-    private fun createSetupIntent(
-        paymentSheet: PaymentSheet,
-        customerConfig: PaymentSheet.CustomerConfiguration?
-    ) {
-        viewModel.createSetupIntent(
-            COUNTRY_CODE,
-            customerId = customerConfig?.id
-        ).observe(this) {
-            it.fold(
-                onSuccess = { json ->
-                    val clientSecret = json.getString("secret")
-                    viewModel.inProgress.postValue(false)
-
+            prepareCheckout { customerConfig, clientSecret ->
+                if (isSetupIntent) {
                     paymentSheet.presentWithSetupIntent(
                         clientSecret,
                         PaymentSheet.Configuration(
@@ -94,17 +36,21 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
                             googlePay = googlePayConfig,
                         )
                     )
-                },
-                onFailure = ::onError
-            )
+                } else {
+                    paymentSheet.presentWithPaymentIntent(
+                        clientSecret,
+                        PaymentSheet.Configuration(
+                            merchantDisplayName = merchantName,
+                            customer = customerConfig,
+                            googlePay = googlePayConfig,
+                        )
+                    )
+                }
+            }
         }
     }
 
     override fun onRefreshEphemeralKey() {
-        fetchEphemeralKey()
-    }
-
-    private companion object {
-        private const val COUNTRY_CODE = "us"
+//        fetchEphemeralKey()
     }
 }
