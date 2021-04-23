@@ -23,13 +23,6 @@ internal interface PaymentController {
         requestOptions: ApiRequest.Options
     )
 
-    fun startConfirmAlipay(
-        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<PaymentIntentResult>
-    )
-
     /**
      * Confirm a Alipay [PaymentIntent], authenticate it and return the [PaymentIntent].
      *

@@ -160,34 +160,6 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    override fun startConfirmAlipay(
-        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<PaymentIntentResult>
-    ) {
-        CoroutineScope(workContext).launch {
-            runCatching {
-                confirmPaymentIntent(
-                    confirmPaymentIntentParams,
-                    requestOptions
-                )
-            }.fold(
-                onSuccess = { paymentIntent ->
-                    authenticateAlipayWithCallback(
-                        paymentIntent,
-                        authenticator,
-                        requestOptions,
-                        callback
-                    )
-                },
-                onFailure = {
-                    dispatchError(it, callback)
-                }
-            )
-        }
-    }
-
     override suspend fun confirmAndAuthenticateAlipay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
@@ -505,48 +477,6 @@ internal class StripePaymentController internal constructor(
             outcome,
             failureMessageFactory.create(refreshedPaymentIntent, outcome)
         )
-    }
-
-    @VisibleForTesting
-    internal suspend fun authenticateAlipayWithCallback(
-        paymentIntent: PaymentIntent,
-        authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<PaymentIntentResult>
-    ) {
-        runCatching {
-            authenticateAlipay(paymentIntent, authenticator, requestOptions)
-        }.fold(
-            onSuccess = {
-                dispatchPaymentIntentResult(it, callback)
-            },
-            onFailure = {
-                dispatchError(it, callback)
-            }
-        )
-    }
-
-    private suspend fun dispatchPaymentIntentResult(
-        paymentIntentResult: PaymentIntentResult,
-        callback: ApiResultCallback<PaymentIntentResult>
-    ) = withContext(Dispatchers.Main) {
-        logger.debug("Dispatching PaymentIntentResult for ${paymentIntentResult.intent.id}")
-        callback.onSuccess(paymentIntentResult)
-    }
-
-    private suspend fun dispatchSetupIntentResult(
-        setupIntentResult: SetupIntentResult,
-        callback: ApiResultCallback<SetupIntentResult>
-    ) = withContext(Dispatchers.Main) {
-        logger.debug("Dispatching SetupIntentResult for ${setupIntentResult.intent.id}")
-        callback.onSuccess(setupIntentResult)
-    }
-
-    private suspend fun dispatchError(
-        throwable: Throwable,
-        callback: ApiResultCallback<*>
-    ) = withContext(Dispatchers.Main) {
-        callback.onError(StripeException.create(throwable))
     }
 
     private suspend fun handleError(
@@ -1151,7 +1081,7 @@ internal class StripePaymentController internal constructor(
             )
         }
 
-        private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
+        internal val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         internal val CHALLENGE_DELAY = TimeUnit.SECONDS.toMillis(2L)
 
         private const val REQUIRED_ERROR = "API request returned an invalid response."
