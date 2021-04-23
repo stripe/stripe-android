@@ -381,11 +381,12 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("123")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString())
@@ -403,11 +404,12 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("94107")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString()).isEmpty()
@@ -424,11 +426,12 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.CA
             viewBinding.billingAddress.postalCodeView.setText("!@#")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString())
@@ -446,11 +449,12 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.CA
             viewBinding.billingAddress.postalCodeView.setText("A1G9Z9")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString()).isEmpty()
@@ -467,11 +471,12 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("")
-            viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()!!
-                .onFocusChange(
-                    viewBinding.billingAddress.postalCodeView,
-                    false
-                )
+            requireNotNull(
+                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
+            ).onFocusChange(
+                viewBinding.billingAddress.postalCodeView,
+                false
+            )
             idleLooper()
 
             assertThat(viewBinding.billingErrors.text.toString()).isEmpty()

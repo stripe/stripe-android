@@ -53,7 +53,7 @@ data class ConfirmPaymentIntentParams internal constructor(
      *
      * See [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url).
      */
-    var returnUrl: String? = null,
+    override var returnUrl: String? = null,
 
     /**
      * If the PaymentIntent has a `payment_method` and a `customer` or if you’re attaching a payment

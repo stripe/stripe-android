@@ -33,7 +33,7 @@ import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionsViewModelTest {
+internal class PaymentOptionsViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
     private val testDispatcher = TestCoroutineDispatcher()
