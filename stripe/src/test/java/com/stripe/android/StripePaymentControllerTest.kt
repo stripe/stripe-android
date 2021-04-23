@@ -18,6 +18,7 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
 import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.AlipayAuthResult
@@ -80,7 +81,7 @@ internal class StripePaymentControllerTest {
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter =
         mock()
-    private val alipayRepository = FakeAlipayRepostiory()
+    private val alipayRepository = mock<AlipayRepository>()
     private val stripeRepository = FakeStripeRepository()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -611,31 +612,37 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `authenticateAlipay() should return expected outcome`() = testDispatcher.runBlockingTest {
-        val results = mutableListOf<Result<PaymentIntentResult>>()
-        controller.authenticateAlipay(
-            PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
-            {
-                mapOf("key" to "value")
-            },
-            REQUEST_OPTIONS,
-            object : ApiResultCallback<PaymentIntentResult> {
-                override fun onSuccess(result: PaymentIntentResult) {
-                    results.add(Result.success(result))
-                }
+    fun `confirmAndAuthenticateAlipay() should return expected outcome`() =
+        testDispatcher.runBlockingTest {
+            whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
+                AlipayAuthResult(
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+            stripeRepository.retrievePaymentIntentResponse =
+                PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
 
-                override fun onError(e: Exception) {
-                    results.add(Result.failure(e))
-                }
-            }
-        )
+            val actualResponse = controller.confirmAndAuthenticateAlipay(
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    "pm_123",
+                    "client_secret",
+                    ""
+                ),
+                mock(),
+                REQUEST_OPTIONS
+            )
 
-        assertThat(results)
-            .hasSize(1)
-        val paymentIntentResult = requireNotNull(results.first().getOrNull())
-        assertThat(paymentIntentResult.outcome)
-            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
-    }
+            assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.shouldUseStripeSdk()).isTrue()
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].second).isSameInstanceAs(
+                REQUEST_OPTIONS
+            )
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].third).isSameInstanceAs(
+                EXPAND_PAYMENT_METHOD
+            )
+            assertThat(actualResponse.intent).isEqualTo(PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION)
+            assertThat(actualResponse.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+        }
 
     @Test
     fun `bypassAuth() with ActivityResultLauncher should use ActivityResultLauncher`() = testDispatcher.runBlockingTest {
@@ -708,10 +715,13 @@ internal class StripePaymentControllerTest {
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         var retrievePaymentIntentResponse = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
         var cancelPaymentIntentResponse = PaymentIntentFixtures.CANCELLED
+        var confirmPaymentIntentResponse = PaymentIntentFixtures.PI_WITH_SHIPPING
 
         val retrievePaymentIntentArgs =
             mutableListOf<Triple<String, ApiRequest.Options, List<String>>>()
         val cancelPaymentIntentArgs = mutableListOf<Triple<String, String, ApiRequest.Options>>()
+        val confirmPaymentIntentArgs =
+            mutableListOf<Triple<ConfirmPaymentIntentParams, ApiRequest.Options, List<String>>>()
 
         override suspend fun retrieveSetupIntent(
             clientSecret: String,
@@ -752,6 +762,17 @@ internal class StripePaymentControllerTest {
             sourceId: String,
             options: ApiRequest.Options
         ) = SetupIntentFixtures.CANCELLED
+
+        override suspend fun confirmPaymentIntent(
+            confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+            options: ApiRequest.Options,
+            expandFields: List<String>
+        ): PaymentIntent {
+            confirmPaymentIntentArgs.add(
+                Triple(confirmPaymentIntentParams, options, expandFields)
+            )
+            return confirmPaymentIntentResponse
+        }
     }
 
     private fun verifyAnalytics(event: AnalyticsEvent) {
@@ -761,14 +782,6 @@ internal class StripePaymentControllerTest {
         assertThat(
             analyticsRequest.compactParams?.get(AnalyticsDataFactory.FIELD_EVENT)
         ).isEqualTo(event.toString())
-    }
-
-    private class FakeAlipayRepostiory : AlipayRepository {
-        override suspend fun authenticate(
-            paymentIntent: PaymentIntent,
-            authenticator: AlipayAuthenticator,
-            requestOptions: ApiRequest.Options
-        ) = AlipayAuthResult(StripeIntentResult.Outcome.SUCCEEDED)
     }
 
     private companion object {
