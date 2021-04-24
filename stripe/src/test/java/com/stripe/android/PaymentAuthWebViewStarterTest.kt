@@ -2,11 +2,13 @@ package com.stripe.android
 
 import android.app.Activity
 import android.content.Intent
+import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
 import org.junit.runner.RunWith
@@ -24,19 +26,25 @@ class PaymentAuthWebViewStarterTest {
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
     private val requestCodeCaptor: KArgumentCaptor<Int> = argumentCaptor()
 
-    private val paymentAuthWebViewContract = PaymentAuthWebViewContract()
-    private val host: AuthActivityStarter.Host = AuthActivityStarter.Host.create(activity)
+    private val defaultReturnUrl = DefaultReturnUrl.create(
+        ApplicationProvider.getApplicationContext()
+    )
+    private val host = AuthActivityStarter.Host.create(activity)
+    private val legacyStarter = PaymentAuthWebViewStarter.Legacy(
+        host,
+        defaultReturnUrl
+    )
 
     @Test
     fun start_startsWithCorrectIntentAndRequestCode() {
-        PaymentAuthWebViewStarter.Legacy(host).start(DATA)
+        legacyStarter.start(DATA)
         verify(activity).startActivityForResult(
             intentArgumentCaptor.capture(),
             requestCodeCaptor.capture()
         )
 
         val args = requireNotNull(
-            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
+            PaymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
         )
         assertNull(args.toolbarCustomization)
         assertEquals(DATA.clientSecret, args.clientSecret)
@@ -44,7 +52,7 @@ class PaymentAuthWebViewStarterTest {
 
     @Test
     fun start_startsWithCorrectIntentAndRequestCodeAndCustomization() {
-        PaymentAuthWebViewStarter.Legacy(host).start(
+        legacyStarter.start(
             DATA.copy(
                 toolbarCustomization = StripeToolbarCustomization()
             )
@@ -55,7 +63,7 @@ class PaymentAuthWebViewStarterTest {
         )
 
         val args = requireNotNull(
-            paymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
+            PaymentAuthWebViewContract.parseArgs(intentArgumentCaptor.firstValue)
         )
         assertNotNull(args.toolbarCustomization)
         assertEquals(DATA.clientSecret, args.clientSecret)

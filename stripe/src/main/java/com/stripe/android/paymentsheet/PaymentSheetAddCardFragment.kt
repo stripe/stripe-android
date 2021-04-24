@@ -5,6 +5,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -50,14 +51,17 @@ internal class PaymentSheetAddCardFragment(
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
-                sheetViewModel.checkout()
+                sheetViewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
             }
         }
 
-        sheetViewModel.viewState.observe(viewLifecycleOwner) { viewState ->
-            if (viewState is ViewState.PaymentSheet.Ready) {
-                updateSelection()
+        sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+            .observe(viewLifecycleOwner) { viewState ->
+                googlePayButton.updateState(viewState?.convert())
+
+                if (viewState is ViewState.PaymentSheet.Ready) {
+                    updateSelection()
+                }
             }
-        }
     }
 }

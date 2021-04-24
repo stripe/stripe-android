@@ -7,6 +7,7 @@ import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
@@ -22,12 +23,34 @@ internal interface PaymentController {
         requestOptions: ApiRequest.Options
     )
 
-    fun startConfirmAlipay(
+    /**
+     * Confirm a Alipay [PaymentIntent], authenticate it and return the [PaymentIntent].
+     *
+     * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
+     * [PaymentIntent]
+     * @param authenticator a [AlipayAuthenticator] used to interface with the Alipay SDK
+     * @param requestOptions a [ApiRequest.Options] to associate with theis request
+     *
+     * @return a [PaymentIntentResult] object
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+     * @throws IllegalArgumentException if the PaymentIntent response's JsonParser returns null
+     */
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class,
+        IllegalArgumentException::class
+    )
+    suspend fun confirmAndAuthenticateAlipay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<PaymentIntentResult>
-    )
+        requestOptions: ApiRequest.Options
+    ): PaymentIntentResult
 
     suspend fun startAuth(
         host: AuthActivityStarter.Host,
@@ -130,6 +153,7 @@ internal interface PaymentController {
     suspend fun handleNextAction(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
+        returnUrl: String?,
         requestOptions: ApiRequest.Options
     )
 

@@ -180,15 +180,16 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        paymentController.startConfirmAlipay(
-            confirmPaymentIntentParams,
-            authenticator,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            callback
-        )
+        executeAsync(callback) {
+            paymentController.confirmAndAuthenticateAlipay(
+                confirmPaymentIntentParams,
+                authenticator,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
     }
 
     /**
