@@ -99,7 +99,10 @@ internal class StripePaymentControllerTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
-    private val paymentAuthWebViewContract = PaymentAuthWebViewContract(defaultReturnUrl)
+    private val paymentAuthWebViewContract = PaymentAuthWebViewContract(
+        defaultReturnUrl,
+        isCustomTabsSupported = { true }
+    )
     private val controller = createController()
 
     @BeforeTest
