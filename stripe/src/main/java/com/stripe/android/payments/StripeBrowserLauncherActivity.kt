@@ -19,7 +19,9 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  * The eventual replacement for [PaymentAuthWebViewActivity].
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
-    private val viewModel: StripeBrowserLauncherViewModel by viewModels()
+    private val viewModel: StripeBrowserLauncherViewModel by viewModels {
+        StripeBrowserLauncherViewModel.Factory(application)
+    }
 
     private val customTabsCapabilities: CustomTabsCapabilities by lazy {
         CustomTabsCapabilities(this)
@@ -47,7 +49,10 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             ::onResult
         )
 
-        if (customTabsCapabilities.isSupported()) {
+        val shouldUseCustomTabs = customTabsCapabilities.isSupported()
+        viewModel.logAnalytics(shouldUseCustomTabs)
+
+        if (shouldUseCustomTabs) {
             // use Custom Tabs
             val customTabsIntent = CustomTabsIntent.Builder()
                 .setShareState(CustomTabsIntent.SHARE_STATE_OFF)

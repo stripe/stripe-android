@@ -79,6 +79,13 @@ internal class PaymentAuthWebViewActivityViewModel(
             ),
             uri
         )
+
+        fireAnalytics(
+            analyticsDataFactory.createParams(
+                AnalyticsEvent.AuthWithWebView
+            ),
+            uri = null
+        )
     }
 
     /**
