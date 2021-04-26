@@ -314,7 +314,7 @@ internal class DefaultFlowController internal constructor(
                 }
             }
             else -> null
-        }?.let {
+        }.let {
             viewModel.paymentSelection = it
         }
 
