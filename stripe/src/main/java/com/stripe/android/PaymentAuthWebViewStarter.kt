@@ -16,11 +16,16 @@ internal interface PaymentAuthWebViewStarter :
     AuthActivityStarter<PaymentAuthWebViewContract.Args> {
     class Legacy(
         private val host: AuthActivityStarter.Host,
+        private val isCustomTabsSupported: Boolean,
         private val defaultReturnUrl: DefaultReturnUrl
     ) : PaymentAuthWebViewStarter {
         override fun start(args: PaymentAuthWebViewContract.Args) {
+            val shouldUseCustomTabs = args.shouldUseCustomTabs(
+                isCustomTabsSupported,
+                defaultReturnUrl
+            )
             host.startActivityForResult(
-                when (args.shouldUseBrowser(defaultReturnUrl)) {
+                when (shouldUseCustomTabs) {
                     true -> StripeBrowserLauncherActivity::class.java
                     false -> PaymentAuthWebViewActivity::class.java
                 },

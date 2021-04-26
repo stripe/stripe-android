@@ -17,6 +17,9 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  * Custom Tabs (if available) or a browser.
  *
  * The eventual replacement for [PaymentAuthWebViewActivity].
+ *
+ * [StripeBrowserLauncherActivity] will only be used if Custom Tabs are enabled. See
+ * [PaymentAuthWebViewContract.Args.shouldUseCustomTabs].
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {

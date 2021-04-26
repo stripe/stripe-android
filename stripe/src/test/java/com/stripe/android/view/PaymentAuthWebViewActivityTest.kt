@@ -27,7 +27,8 @@ class PaymentAuthWebViewActivityTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = PaymentAuthWebViewContract(
-        DefaultReturnUrl.create(context)
+        DefaultReturnUrl.create(context),
+        isCustomTabsSupported = { true }
     )
 
     @BeforeTest
