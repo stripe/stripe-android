@@ -24,7 +24,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
