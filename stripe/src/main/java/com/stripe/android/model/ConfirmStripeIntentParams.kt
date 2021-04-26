@@ -9,6 +9,8 @@ interface ConfirmStripeIntentParams : StripeParamsModel {
 
     val clientSecret: String
 
+    var returnUrl: String?
+
     fun shouldUseStripeSdk(): Boolean
 
     fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmStripeIntentParams

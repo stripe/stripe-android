@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -19,6 +20,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -58,6 +60,8 @@ internal class PaymentSheetViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val paymentFlowResultProcessor = FakePaymentFlowResultProcessor()
+    private val application = ApplicationProvider.getApplicationContext<Application>()
+    private val defaultReturnUrl = DefaultReturnUrl.create(application)
 
     @AfterTest
     fun cleanup() {
@@ -131,7 +135,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
                     CLIENT_SECRET,
-                    returnUrl = "stripe://return_url"
+                    returnUrl = defaultReturnUrl.value
                 )
             )
     }
@@ -157,7 +161,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,
-                    returnUrl = "stripe://return_url",
+                    returnUrl = defaultReturnUrl.value,
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 )
             )
@@ -560,8 +564,9 @@ internal class PaymentSheetViewModelTest {
             prefsRepository,
             eventReporter,
             args,
+            defaultReturnUrl = defaultReturnUrl,
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext()
+            application = application
         )
     }
 

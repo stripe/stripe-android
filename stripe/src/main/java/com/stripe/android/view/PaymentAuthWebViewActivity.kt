@@ -31,7 +31,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     private val _args: PaymentAuthWebViewContract.Args? by lazy {
-        PaymentAuthWebViewContract().parseArgs(intent)
+        PaymentAuthWebViewContract.parseArgs(intent)
     }
 
     private val logger: Logger by lazy {

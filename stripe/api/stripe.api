@@ -912,6 +912,8 @@ public final class com/stripe/android/StripeIntentResult$Outcome$Companion {
 }
 
 public final class com/stripe/android/StripeKtxKt {
+	public static final fun confirmAlipayPayment (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun confirmAlipayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun confirmPaymentIntent (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun confirmPaymentIntent$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun confirmSetupIntent (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1804,7 +1806,7 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams : com/str
 	public final fun getPaymentMethodId ()Ljava/lang/String;
 	public final fun getPaymentMethodOptions ()Lcom/stripe/android/model/PaymentMethodOptionsParams;
 	public final fun getReceiptEmail ()Ljava/lang/String;
-	public final fun getReturnUrl ()Ljava/lang/String;
+	public fun getReturnUrl ()Ljava/lang/String;
 	public final fun getSavePaymentMethod ()Ljava/lang/Boolean;
 	public final fun getSetupFutureUsage ()Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
 	public final fun getShipping ()Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;
@@ -1815,7 +1817,7 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams : com/str
 	public final fun setMandateId (Ljava/lang/String;)V
 	public final fun setPaymentMethodOptions (Lcom/stripe/android/model/PaymentMethodOptionsParams;)V
 	public final fun setReceiptEmail (Ljava/lang/String;)V
-	public final fun setReturnUrl (Ljava/lang/String;)V
+	public fun setReturnUrl (Ljava/lang/String;)V
 	public final fun setSavePaymentMethod (Ljava/lang/Boolean;)V
 	public final fun setSetupFutureUsage (Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)V
 	public final fun setShipping (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)V
@@ -1921,11 +1923,11 @@ public final class com/stripe/android/model/ConfirmSetupIntentParams : android/o
 	public synthetic fun getClientSecret ()Ljava/lang/String;
 	public final fun getMandateData ()Lcom/stripe/android/model/MandateDataParams;
 	public final fun getMandateId ()Ljava/lang/String;
-	public final fun getReturnUrl ()Ljava/lang/String;
+	public fun getReturnUrl ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun setMandateData (Lcom/stripe/android/model/MandateDataParams;)V
 	public final fun setMandateId (Ljava/lang/String;)V
-	public final fun setReturnUrl (Ljava/lang/String;)V
+	public fun setReturnUrl (Ljava/lang/String;)V
 	public fun shouldUseStripeSdk ()Z
 	public fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
@@ -1961,6 +1963,8 @@ public class com/stripe/android/model/ConfirmSetupIntentParams$Creator : android
 public abstract interface class com/stripe/android/model/ConfirmStripeIntentParams : com/stripe/android/model/StripeParamsModel {
 	public static final field Companion Lcom/stripe/android/model/ConfirmStripeIntentParams$Companion;
 	public abstract fun getClientSecret ()Ljava/lang/String;
+	public abstract fun getReturnUrl ()Ljava/lang/String;
+	public abstract fun setReturnUrl (Ljava/lang/String;)V
 	public abstract fun shouldUseStripeSdk ()Z
 	public abstract fun withShouldUseStripeSdk (Z)Lcom/stripe/android/model/ConfirmStripeIntentParams;
 }
