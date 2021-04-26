@@ -15,6 +15,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.PrimaryButtonBinding
+import com.stripe.android.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -24,8 +25,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -62,6 +65,7 @@ internal class PaymentSheetActivityTest {
     private val googlePayRepository = FakeGooglePayRepository(true)
     private val eventReporter = mock<EventReporter>()
 
+    private val defaultReturnUrl = DefaultReturnUrl.create(context)
     private val viewModel = createViewModel()
 
     private val contract = PaymentSheetContract()
@@ -314,7 +318,7 @@ internal class PaymentSheetActivityTest {
                         ConfirmPaymentIntentParams(
                             clientSecret = "client_secret",
                             paymentMethodId = "pm_123456789",
-                            returnUrl = "stripe://return_url"
+                            returnUrl = defaultReturnUrl.value
                         )
                     )
             }
@@ -353,10 +357,7 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
-                viewModel._viewState.value = ViewState.PaymentSheet.Ready(
-                    amount = 1099,
-                    currencyCode = "usd"
-                )
+                viewModel._viewState.value = ViewState.PaymentSheet.Ready
 
                 idleLooper()
 
@@ -364,8 +365,6 @@ internal class PaymentSheetActivityTest {
 
                 assertThat(buyBinding.confirmedIcon.isVisible)
                     .isFalse()
-                assertThat(buyBinding.label.text)
-                    .isEqualTo("Pay $10.99")
 
                 idleLooper()
 
@@ -399,6 +398,7 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
                 viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
 
                 idleLooper()
@@ -414,7 +414,55 @@ internal class PaymentSheetActivityTest {
     fun `Verify FinishProcessing state calls the callback`() {
         val scenario = activityScenario()
         scenario.launch(intent).use {
-            it.onActivity { _ ->
+            it.onActivity {
+                // wait for bottom sheet to animate in
+                idleLooper()
+
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
+
+                var finishProcessingCalled = false
+                viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                    finishProcessingCalled = true
+                }
+
+                idleLooper()
+
+                testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+
+                assertThat(finishProcessingCalled).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `Verify StartProcessing state updates the google button label`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+
+                // wait for bottom sheet to animate in
+                idleLooper()
+
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
+                viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
+
+                idleLooper()
+
+                val googlePayButton =
+                    StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
+                assertThat(googlePayButton.primaryButton.viewBinding.label.text)
+                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
+            }
+        }
+    }
+
+    @Test
+    fun `Verify FinishProcessing state calls the callback on google pay view state observer`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).use {
+            it.onActivity {
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
+
                 // wait for bottom sheet to animate in
                 idleLooper()
 
@@ -472,6 +520,8 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 testDispatcher.advanceTimeBy(500)
                 idleLooper()
+
+                viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
                 viewModel.onPaymentFlowResult(
                     PaymentFlowResult.Unvalidated(
@@ -647,6 +697,7 @@ internal class PaymentSheetActivityTest {
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
             args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            defaultReturnUrl = defaultReturnUrl,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
         )

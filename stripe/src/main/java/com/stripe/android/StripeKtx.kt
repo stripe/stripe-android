@@ -29,6 +29,44 @@ import com.stripe.android.model.Token
 import com.stripe.android.networking.ApiRequest
 
 /**
+ * Confirm and authenticate a [PaymentIntent] using the Alipay SDK
+ * @see <a href="https://intl.alipay.com/docs/ac/app/sdk_integration">Alipay Documentation</a>
+ *
+ * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
+ * [PaymentIntent]
+ * @param authenticator a [AlipayAuthenticator] used to interface with the Alipay SDK
+ * @param stripeAccountId Optional, the Connect account to associate with this request.
+ * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+ *
+ * @return a [PaymentIntentResult] object
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.confirmAlipayPayment(
+    confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+    authenticator: AlipayAuthenticator,
+    stripeAccountId: String? = this.stripeAccountId
+): PaymentIntentResult = runApiRequest {
+    paymentController.confirmAndAuthenticateAlipay(
+        confirmPaymentIntentParams,
+        authenticator,
+        ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    )
+}
+
+/**
  * Create a [PaymentMethod] from a coroutine.
  *
  * See [Create a PaymentMethod](https://stripe.com/docs/api/payment_methods/create).

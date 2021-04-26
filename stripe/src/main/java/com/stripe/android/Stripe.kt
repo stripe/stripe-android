@@ -175,15 +175,16 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        paymentController.startConfirmAlipay(
-            confirmPaymentIntentParams,
-            authenticator,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            callback
-        )
+        executeAsync(callback) {
+            paymentController.confirmAndAuthenticateAlipay(
+                confirmPaymentIntentParams,
+                authenticator,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
     }
 
     /**
@@ -1692,7 +1693,7 @@ class Stripe internal constructor(
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
-        internal const val VERSION_NAME = "16.5.0"
+        internal const val VERSION_NAME = "16.6.1"
         const val VERSION: String = "AndroidBindings/$VERSION_NAME"
 
         /**

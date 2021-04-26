@@ -12,6 +12,7 @@ import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.Stripe3ds2CompletionContract
@@ -53,6 +54,7 @@ internal class DefaultFlowController internal constructor(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val sessionId: SessionId,
+    private val defaultReturnUrl: DefaultReturnUrl,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback
 ) : PaymentSheet.FlowController {
@@ -84,7 +86,7 @@ internal class DefaultFlowController internal constructor(
     }
 
     private val paymentAuthWebViewLauncher = activityLauncherFactory.create(
-        PaymentAuthWebViewContract()
+        PaymentAuthWebViewContract(defaultReturnUrl)
     ) { result ->
         onPaymentFlowResult(result)
     }
@@ -213,6 +215,7 @@ internal class DefaultFlowController internal constructor(
         initData: InitData
     ) {
         val confirmParamsFactory = ConfirmParamsFactory(
+            defaultReturnUrl,
             PaymentIntentClientSecret(initData.paymentIntent.clientSecret.orEmpty())
         )
         when (paymentSelection) {
