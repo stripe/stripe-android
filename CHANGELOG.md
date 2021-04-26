@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.6.0 - 2021-04-26
+## 16.6.1 - 2021-04-26
 * [#3568](https://github.com/stripe/stripe-android/pull/3568) Add suspending function variants for payment confirmation methods
 * [#3587](https://github.com/stripe/stripe-android/pull/3587) Upgrade Kotlin to `1.4.32`
 * [#3606](https://github.com/stripe/stripe-android/pull/3606) Upgrade Gradle to `7.0`
