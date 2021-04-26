@@ -78,7 +78,8 @@ internal class StripePaymentController internal constructor(
     private val paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
     private val paymentAuthWebViewLauncher: ActivityResultLauncher<PaymentAuthWebViewContract.Args>? = null,
     private val stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? = null,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val workContext: CoroutineContext = Dispatchers.IO,
+    private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
     private val paymentFlowResultProcessor = DefaultPaymentFlowResultProcessor(
@@ -124,57 +125,51 @@ internal class StripePaymentController internal constructor(
     /**
      * Confirm the Stripe Intent and resolve any next actions
      */
-    override fun startConfirmAndAuth(
+    override suspend fun startConfirmAndAuth(
         host: AuthActivityStarter.Host,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
     ) {
-        CoroutineScope(workContext).launch {
-            val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-                ?: defaultReturnUrl.value
+        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+            ?: defaultReturnUrl.value
 
-            val result = runCatching {
-                when (confirmStripeIntentParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        confirmPaymentIntent(
-                            confirmStripeIntentParams.also {
-                                it.returnUrl = returnUrl
-                            },
-                            requestOptions
-                        )
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        confirmSetupIntent(
-                            confirmStripeIntentParams.also {
-                                it.returnUrl = returnUrl
-                            },
-                            requestOptions
-                        )
-                    }
-                    else -> error("Confirmation params must be ConfirmPaymentIntentParams or ConfirmSetupIntentParams")
+        runCatching {
+            when (confirmStripeIntentParams) {
+                is ConfirmPaymentIntentParams -> {
+                    confirmPaymentIntent(
+                        confirmStripeIntentParams.also {
+                            it.returnUrl = returnUrl
+                        },
+                        requestOptions
+                    )
                 }
+                is ConfirmSetupIntentParams -> {
+                    confirmSetupIntent(
+                        confirmStripeIntentParams.also {
+                            it.returnUrl = returnUrl
+                        },
+                        requestOptions
+                    )
+                }
+                else -> error("Confirmation params must be ConfirmPaymentIntentParams or ConfirmSetupIntentParams")
             }
-
-            withContext(Dispatchers.Main) {
-                result.fold(
-                    onSuccess = { intent ->
-                        handleNextAction(
-                            host,
-                            intent,
-                            returnUrl,
-                            requestOptions
-                        )
-                    },
-                    onFailure = {
-                        handleError(
-                            host,
-                            getRequestCode(confirmStripeIntentParams),
-                            it
-                        )
-                    }
+        }.fold(
+            onSuccess = { intent ->
+                handleNextAction(
+                    host,
+                    intent,
+                    returnUrl,
+                    requestOptions
+                )
+            },
+            onFailure = {
+                handleError(
+                    host,
+                    getRequestCode(confirmStripeIntentParams),
+                    it
                 )
             }
-        }
+        )
     }
 
     override suspend fun confirmAndAuthenticateAlipay(
@@ -226,61 +221,55 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    override fun startAuth(
+    override suspend fun startAuth(
         host: AuthActivityStarter.Host,
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         type: PaymentController.StripeIntentType
     ) {
-        CoroutineScope(workContext).launch {
-            val stripeIntentResult = runCatching {
-                val stripeIntent = when (type) {
-                    PaymentController.StripeIntentType.PaymentIntent -> {
-                        stripeRepository.retrievePaymentIntent(
-                            clientSecret,
-                            requestOptions
-                        )
-                    }
-                    PaymentController.StripeIntentType.SetupIntent -> {
-                        stripeRepository.retrieveSetupIntent(
-                            clientSecret,
-                            requestOptions
-                        )
-                    }
+        runCatching {
+            val stripeIntent = when (type) {
+                PaymentController.StripeIntentType.PaymentIntent -> {
+                    stripeRepository.retrievePaymentIntent(
+                        clientSecret,
+                        requestOptions
+                    )
                 }
-                requireNotNull(stripeIntent)
+                PaymentController.StripeIntentType.SetupIntent -> {
+                    stripeRepository.retrieveSetupIntent(
+                        clientSecret,
+                        requestOptions
+                    )
+                }
             }
-
-            withContext(Dispatchers.Main) {
-                stripeIntentResult.fold(
-                    onSuccess = { stripeIntent ->
-                        handleNextAction(
-                            host = host,
-                            stripeIntent = stripeIntent,
-                            returnUrl = null,
-                            requestOptions = requestOptions
-                        )
+            requireNotNull(stripeIntent)
+        }.fold(
+            onSuccess = { stripeIntent ->
+                handleNextAction(
+                    host = host,
+                    stripeIntent = stripeIntent,
+                    returnUrl = null,
+                    requestOptions = requestOptions
+                )
+            },
+            onFailure = {
+                handleError(
+                    host,
+                    when (type) {
+                        PaymentController.StripeIntentType.PaymentIntent -> {
+                            PAYMENT_REQUEST_CODE
+                        }
+                        PaymentController.StripeIntentType.SetupIntent -> {
+                            SETUP_REQUEST_CODE
+                        }
                     },
-                    onFailure = {
-                        handleError(
-                            host,
-                            when (type) {
-                                PaymentController.StripeIntentType.PaymentIntent -> {
-                                    PAYMENT_REQUEST_CODE
-                                }
-                                PaymentController.StripeIntentType.SetupIntent -> {
-                                    SETUP_REQUEST_CODE
-                                }
-                            },
-                            it
-                        )
-                    }
+                    it
                 )
             }
-        }
+        )
     }
 
-    override fun startAuthenticateSource(
+    override suspend fun startAuthenticateSource(
         host: AuthActivityStarter.Host,
         source: Source,
         requestOptions: ApiRequest.Options
@@ -294,32 +283,26 @@ internal class StripePaymentController internal constructor(
             )
         )
 
-        CoroutineScope(workContext).launch {
-            val sourceResult = runCatching {
-                requireNotNull(
-                    stripeRepository.retrieveSource(
-                        sourceId = source.id.orEmpty(),
-                        clientSecret = source.clientSecret.orEmpty(),
-                        options = requestOptions
-                    )
+        runCatching {
+            requireNotNull(
+                stripeRepository.retrieveSource(
+                    sourceId = source.id.orEmpty(),
+                    clientSecret = source.clientSecret.orEmpty(),
+                    options = requestOptions
+                )
+            )
+        }.fold(
+            onSuccess = { retrievedSourced ->
+                onSourceRetrieved(host, retrievedSourced, requestOptions)
+            },
+            onFailure = {
+                handleError(
+                    host,
+                    SOURCE_REQUEST_CODE,
+                    it
                 )
             }
-
-            withContext(Dispatchers.Main) {
-                sourceResult.fold(
-                    onSuccess = { retrievedSourced ->
-                        onSourceRetrieved(host, retrievedSourced, requestOptions)
-                    },
-                    onFailure = {
-                        handleError(
-                            host,
-                            SOURCE_REQUEST_CODE,
-                            it
-                        )
-                    }
-                )
-            }
-        }
+        )
     }
 
     private suspend fun onSourceRetrieved(
@@ -342,7 +325,7 @@ internal class StripePaymentController internal constructor(
         paymentAuthWebViewStarter: PaymentAuthWebViewStarter,
         source: Source,
         requestOptions: ApiRequest.Options
-    ) = withContext(Dispatchers.Main) {
+    ) = withContext(uiContext) {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
                 analyticsDataFactory.createAuthSourceParams(
@@ -366,14 +349,14 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * Decide whether [handlePaymentResult] should be called.
+     * Decide whether [getPaymentIntentResult] should be called.
      */
     override fun shouldHandlePaymentResult(requestCode: Int, data: Intent?): Boolean {
         return requestCode == PAYMENT_REQUEST_CODE && data != null
     }
 
     /**
-     * Decide whether [handleSetupResult] should be called.
+     * Decide whether [getSetupIntentResult] should be called.
      */
     override fun shouldHandleSetupResult(requestCode: Int, data: Intent?): Boolean {
         return requestCode == SETUP_REQUEST_CODE && data != null
@@ -471,6 +454,7 @@ internal class StripePaymentController internal constructor(
                 )
             )
         )
+
         return requireNotNull(
             stripeRepository.retrieveSource(
                 sourceId,
@@ -494,6 +478,7 @@ internal class StripePaymentController internal constructor(
                 expandFields = EXPAND_PAYMENT_METHOD
             )
         )
+
         return PaymentIntentResult(
             refreshedPaymentIntent,
             outcome,
@@ -505,7 +490,7 @@ internal class StripePaymentController internal constructor(
         host: AuthActivityStarter.Host,
         requestCode: Int,
         throwable: Throwable
-    ) = withContext(Dispatchers.Main) {
+    ) = withContext(uiContext) {
         paymentRelayStarterFactory(host)
             .start(
                 PaymentRelayStarter.Args.ErrorArgs(
@@ -637,7 +622,6 @@ internal class StripePaymentController internal constructor(
             nextActionData.url,
             requestOptions.stripeAccount,
             returnUrl = returnUrl,
-            enableLogging = enableLogging,
             // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
             shouldCancelSource = true
         )
@@ -665,8 +649,7 @@ internal class StripePaymentController internal constructor(
             stripeIntent.clientSecret.orEmpty(),
             nextActionData.url.toString(),
             requestOptions.stripeAccount,
-            nextActionData.returnUrl,
-            enableLogging = enableLogging
+            nextActionData.returnUrl
         )
     }
 
@@ -698,8 +681,7 @@ internal class StripePaymentController internal constructor(
             stripeIntent.clientSecret.orEmpty(),
             nextActionData.webViewUrl.toString(),
             requestOptions.stripeAccount,
-            nextActionData.returnUrl,
-            enableLogging = enableLogging
+            nextActionData.returnUrl
         )
     }
 
@@ -718,7 +700,6 @@ internal class StripePaymentController internal constructor(
                 stripeIntent.clientSecret.orEmpty(),
                 nextActionData.hostedVoucherUrl,
                 requestOptions.stripeAccount,
-                enableLogging = enableLogging,
                 shouldCancelIntentOnUserNavigation = false
             )
         } else {
@@ -732,7 +713,7 @@ internal class StripePaymentController internal constructor(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         stripeAccountId: String?
-    ) = withContext(Dispatchers.Main) {
+    ) = withContext(uiContext) {
         paymentRelayStarterFactory(host)
             .start(
                 PaymentRelayStarter.Args.create(stripeIntent, stripeAccountId)
@@ -743,14 +724,14 @@ internal class StripePaymentController internal constructor(
         host: AuthActivityStarter.Host,
         source: Source,
         stripeAccountId: String?
-    ) = withContext(Dispatchers.Main) {
+    ) = withContext(uiContext) {
         paymentRelayStarterFactory(host)
             .start(
                 PaymentRelayStarter.Args.SourceArgs(source, stripeAccountId)
             )
     }
 
-    private fun begin3ds2Auth(
+    private suspend fun begin3ds2Auth(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         stripe3ds2Fingerprint: Stripe3ds2Fingerprint,
@@ -840,7 +821,7 @@ internal class StripePaymentController internal constructor(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
-    ) = withContext(Dispatchers.Main) {
+    ) {
         val ares = result.ares
         if (ares != null) {
             if (ares.isChallenge) {
@@ -911,7 +892,6 @@ internal class StripePaymentController internal constructor(
             stripeIntent.clientSecret.orEmpty(),
             fallbackRedirectUrl,
             requestOptions.stripeAccount,
-            enableLogging = enableLogging,
             // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
             shouldCancelSource = true
         )
@@ -920,7 +900,7 @@ internal class StripePaymentController internal constructor(
     private suspend fun startFrictionlessFlow(
         paymentRelayStarter: PaymentRelayStarter,
         stripeIntent: StripeIntent
-    ) = withContext(Dispatchers.Main) {
+    ) = withContext(uiContext) {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
                 analyticsDataFactory.createAuthParams(
@@ -995,11 +975,41 @@ internal class StripePaymentController internal constructor(
         throwable: Throwable,
         requestCode: Int,
         paymentRelayStarter: PaymentRelayStarter
-    ) = withContext(Dispatchers.Main) {
+    ) = withContext(uiContext) {
         paymentRelayStarter.start(
             PaymentRelayStarter.Args.ErrorArgs(
                 StripeException.create(throwable),
                 requestCode
+            )
+        )
+    }
+
+    /**
+     * Start in-app WebView activity.
+     */
+    private suspend fun beginWebAuth(
+        paymentWebWebViewStarter: PaymentAuthWebViewStarter,
+        stripeIntent: StripeIntent,
+        requestCode: Int,
+        clientSecret: String,
+        authUrl: String,
+        stripeAccount: String?,
+        returnUrl: String? = null,
+        shouldCancelSource: Boolean = false,
+        shouldCancelIntentOnUserNavigation: Boolean = true
+    ) = withContext(uiContext) {
+        logger.debug("PaymentAuthWebViewStarter#start()")
+        paymentWebWebViewStarter.start(
+            PaymentAuthWebViewContract.Args(
+                objectId = stripeIntent.id.orEmpty(),
+                requestCode,
+                clientSecret,
+                authUrl,
+                returnUrl,
+                enableLogging,
+                stripeAccountId = stripeAccount,
+                shouldCancelSource = shouldCancelSource,
+                shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
             )
         )
     }
@@ -1065,37 +1075,6 @@ internal class StripePaymentController internal constructor(
             } else {
                 SETUP_REQUEST_CODE
             }
-        }
-
-        /**
-         * Start in-app WebView activity.
-         */
-        private suspend fun beginWebAuth(
-            paymentWebWebViewStarter: PaymentAuthWebViewStarter,
-            stripeIntent: StripeIntent,
-            requestCode: Int,
-            clientSecret: String,
-            authUrl: String,
-            stripeAccount: String?,
-            returnUrl: String? = null,
-            enableLogging: Boolean = false,
-            shouldCancelSource: Boolean = false,
-            shouldCancelIntentOnUserNavigation: Boolean = true
-        ) = withContext(Dispatchers.Main) {
-            Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
-            paymentWebWebViewStarter.start(
-                PaymentAuthWebViewContract.Args(
-                    objectId = stripeIntent.id.orEmpty(),
-                    requestCode,
-                    clientSecret,
-                    authUrl,
-                    returnUrl,
-                    enableLogging,
-                    stripeAccountId = stripeAccount,
-                    shouldCancelSource = shouldCancelSource,
-                    shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
-                )
-            )
         }
 
         @JvmStatic

@@ -565,7 +565,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun startAuthenticateSource_withNoneFlowSource_shouldBypassAuth() {
+    fun startAuthenticateSource_withNoneFlowSource_shouldBypassAuth() = testDispatcher.runBlockingTest {
         controller.startAuthenticateSource(
             host = host,
             source = SourceFixtures.SOURCE_WITH_SOURCE_ORDER.copy(
@@ -708,7 +708,8 @@ internal class StripePaymentControllerTest {
             alipayRepository,
             paymentRelayLauncher = paymentRelayLauncher,
             paymentAuthWebViewLauncher = paymentAuthWebViewLauncher,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            uiContext = testDispatcher
         )
     }
 
