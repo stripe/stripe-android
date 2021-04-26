@@ -143,11 +143,7 @@ class ConfirmPaymentIntentParamsTest {
         val params = ConfirmPaymentIntentParams
             .createWithPaymentMethodId(
                 "pm_123",
-                CLIENT_SECRET,
-                extraParams = mapOf(
-                    "animal" to "dog",
-                    "color" to "brown"
-                )
+                CLIENT_SECRET
             )
             .toParamMap()
 
@@ -156,9 +152,7 @@ class ConfirmPaymentIntentParamsTest {
                 mapOf(
                     "client_secret" to CLIENT_SECRET,
                     "use_stripe_sdk" to false,
-                    "payment_method" to "pm_123",
-                    "animal" to "dog",
-                    "color" to "brown"
+                    "payment_method" to "pm_123"
                 )
             )
     }
