@@ -144,6 +144,48 @@ class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `getPaymentOption() for new customer without saved payment methods returns null`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(5)
+        val last4 = paymentMethods.first().card?.last4.orEmpty()
+
+        // Initially configure for a customer with saved payment methods
+        val flowControllerInitializer = FakeFlowControllerInitializer(
+            paymentMethods = paymentMethods,
+            savedSelection = SavedSelection.PaymentMethod(
+                requireNotNull(paymentMethods.first().id)
+            )
+        )
+
+        val flowController = createFlowController(flowControllerInitializer)
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+        assertThat(flowController.getPaymentOption())
+            .isEqualTo(
+                PaymentOption(
+                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
+                    label = "····$last4"
+                )
+            )
+
+        // Simulate a real FlowControllerInitializer that fetches the payment methods for the new
+        // customer, who doesn't have any saved payment methods
+        flowControllerInitializer.paymentMethods = emptyList()
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_MINIMUM
+        ) { _, _ ->
+        }
+        // Should return null instead of any cached value from the previous customer
+        assertThat(flowController.getPaymentOption())
+            .isNull()
+    }
+
+    @Test
     fun `init with failure should return expected value`() {
         var result = Pair<Boolean, Throwable?>(false, null)
         createFlowController(
@@ -534,7 +576,7 @@ class DefaultFlowControllerTest {
     }
 
     private class FakeFlowControllerInitializer(
-        private val paymentMethods: List<PaymentMethod>,
+        var paymentMethods: List<PaymentMethod>,
         private val savedSelection: SavedSelection = SavedSelection.None,
         private val delayMillis: Long = 0L
     ) : FlowControllerInitializer {
