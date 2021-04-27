@@ -136,6 +136,8 @@ internal class StripePaymentController internal constructor(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
     ) {
+        logReturnUrl(confirmStripeIntentParams.returnUrl)
+
         val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
             ?: defaultReturnUrl.value
 
@@ -1018,6 +1020,26 @@ internal class StripePaymentController internal constructor(
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
             )
         )
+    }
+
+    private fun logReturnUrl(returnUrl: String?) {
+        when (returnUrl) {
+            defaultReturnUrl.value -> {
+                AnalyticsEvent.ConfirmReturnUrlDefault
+            }
+            null -> {
+                AnalyticsEvent.ConfirmReturnUrlNull
+            }
+            else -> {
+                AnalyticsEvent.ConfirmReturnUrlCustom
+            }
+        }.let { event ->
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.create(
+                    analyticsDataFactory.createParams(event)
+                )
+            )
+        }
     }
 
     internal interface ChallengeProgressActivityStarter {
