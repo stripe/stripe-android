@@ -83,7 +83,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AnalyticsDataFactory(context, publishableKey),
     private val fingerprintParamsUtils: FingerprintParamsUtils = FingerprintParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
-    apiVersion: String = ApiVersion.get().withBetas(betas).code,
+    apiVersion: String = ApiVersion(betas = betas).code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
     private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)

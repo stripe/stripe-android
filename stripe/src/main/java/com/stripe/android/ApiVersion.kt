@@ -9,19 +9,33 @@ package com.stripe.android
  * See [https://stripe.com/docs/upgrades](https://stripe.com/docs/upgrades) for latest
  * API changes.
  */
-internal data class ApiVersion internal constructor(internal val code: String) {
+internal data class ApiVersion internal constructor(
+    internal val version: String,
+    internal var betas: Set<StripeApiBeta>? = null
+) {
+    constructor(
+        betas: Set<StripeApiBeta>
+    ) : this(API_VERSION_CODE, betas)
+
+    val code: String
+        get() =
+            betas?.let {
+                listOf(this.version)
+                    .plus(
+                        betas!!.map { it.code }
+                    )
+                    .joinToString(";")
+            } ?: version
 
     override fun toString(): String {
-        return code
+        return betas?.let {
+            listOf(this.version)
+                .plus(
+                    betas!!.map { it.code }
+                )
+                .joinToString(";")
+        } ?: version
     }
-
-    fun withBetas(betas: Set<StripeApiBeta>): ApiVersion =
-        if (betas.isNullOrEmpty()) INSTANCE else
-            ApiVersion(
-                listOf(this.code)
-                    .plus(betas.map { it.code })
-                    .joinToString(";")
-            )
 
     internal companion object {
         const val API_VERSION_CODE: String = "2020-03-02"

@@ -857,6 +857,7 @@ public final class com/stripe/android/Stripe$Companion {
 }
 
 public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
+	public static final field AlipayV1 Lcom/stripe/android/StripeApiBeta;
 	public static final field WechatPayV1 Lcom/stripe/android/StripeApiBeta;
 	public final fun getCode ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/StripeApiBeta;
