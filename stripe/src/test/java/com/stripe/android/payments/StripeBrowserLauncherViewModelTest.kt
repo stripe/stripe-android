@@ -30,8 +30,8 @@ class StripeBrowserLauncherViewModelTest {
     )
 
     @Test
-    fun `fireAnalytics() when shouldUseCustomTabs = true should log expected event`() {
-        viewModel.fireAnalytics(shouldUseCustomTabs = true)
+    fun `logCapabilities() when shouldUseCustomTabs = true should log expected event`() {
+        viewModel.logCapabilities(shouldUseCustomTabs = true)
 
         assertThat(analyticsRequests)
             .hasSize(1)
@@ -41,8 +41,8 @@ class StripeBrowserLauncherViewModelTest {
     }
 
     @Test
-    fun `fireAnalytics() when shouldUseCustomTabs = false should log expected event`() {
-        viewModel.fireAnalytics(shouldUseCustomTabs = false)
+    fun `logCapabilities() when shouldUseCustomTabs = false should log expected event`() {
+        viewModel.logCapabilities(shouldUseCustomTabs = false)
 
         assertThat(analyticsRequests)
             .hasSize(1)

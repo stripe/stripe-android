@@ -29,7 +29,7 @@ internal class StripeBrowserLauncherViewModel(
         )
     }
 
-    fun fireAnalytics(
+    fun logCapabilities(
         shouldUseCustomTabs: Boolean
     ) {
         analyticsRequestExecutor.executeAsync(
