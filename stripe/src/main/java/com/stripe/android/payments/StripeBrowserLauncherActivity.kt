@@ -53,7 +53,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         )
 
         val shouldUseCustomTabs = customTabsCapabilities.isSupported()
-        viewModel.logAnalytics(shouldUseCustomTabs)
+        viewModel.fireAnalytics(shouldUseCustomTabs)
 
         if (shouldUseCustomTabs) {
             // use Custom Tabs
