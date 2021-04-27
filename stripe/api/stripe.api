@@ -520,7 +520,7 @@ public final class com/stripe/android/PaymentIntentResult : com/stripe/android/S
 	public static synthetic fun copy$default (Lcom/stripe/android/PaymentIntentResult;Lcom/stripe/android/model/PaymentIntent;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/PaymentIntentResult;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFailureMessage ()Ljava/lang/String;
+	public fun getFailureMessage ()Ljava/lang/String;
 	public fun getIntent ()Lcom/stripe/android/model/PaymentIntent;
 	public synthetic fun getIntent ()Lcom/stripe/android/model/StripeIntent;
 	public fun hashCode ()I
@@ -671,7 +671,7 @@ public final class com/stripe/android/SetupIntentResult : com/stripe/android/Str
 	public static synthetic fun copy$default (Lcom/stripe/android/SetupIntentResult;Lcom/stripe/android/model/SetupIntent;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/SetupIntentResult;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFailureMessage ()Ljava/lang/String;
+	public fun getFailureMessage ()Ljava/lang/String;
 	public fun getIntent ()Lcom/stripe/android/model/SetupIntent;
 	public synthetic fun getIntent ()Lcom/stripe/android/model/StripeIntent;
 	public fun hashCode ()I
@@ -890,6 +890,7 @@ public class com/stripe/android/StripeError$Creator : android/os/Parcelable$Crea
 }
 
 public abstract class com/stripe/android/StripeIntentResult : com/stripe/android/model/StripeModel {
+	public abstract fun getFailureMessage ()Ljava/lang/String;
 	public abstract fun getIntent ()Lcom/stripe/android/model/StripeIntent;
 	public final fun getOutcome ()I
 }
