@@ -18,9 +18,8 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.networking.AnalyticsDataFactory
-import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,8 +42,7 @@ class CardNumberEditText internal constructor(
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequest.Factory,
-    private val analyticsDataFactory: AnalyticsDataFactory
+    private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -74,8 +72,7 @@ class CardNumberEditText internal constructor(
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         DefaultStaticCardAccountRanges(),
         AnalyticsRequestExecutor.Default(),
-        AnalyticsRequest.Factory(),
-        AnalyticsDataFactory(
+        AnalyticsRequestFactory(
             context,
             publishableKeySupplier = publishableKeySupplier
         )
@@ -299,9 +296,7 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createParams(AnalyticsEvent.CardMetadataLoadedTooSlow)
-            )
+            analyticsRequestFactory.createRequest(AnalyticsEvent.CardMetadataLoadedTooSlow)
         )
     }
 

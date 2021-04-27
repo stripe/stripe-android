@@ -78,13 +78,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AnalyticsRequestExecutor.Default(logger),
     private val fingerprintDataRepository: FingerprintDataRepository =
         FingerprintDataRepository.Default(context),
-    private val analyticsDataFactory: AnalyticsDataFactory =
-        AnalyticsDataFactory(context, publishableKey),
+    private val analyticsRequestFactory: AnalyticsRequestFactory =
+        AnalyticsRequestFactory(context, publishableKey),
     private val fingerprintParamsUtils: FingerprintParamsUtils = FingerprintParamsUtils(),
     apiVersion: String = ApiVersion.get().code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
-    private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
         apiVersion = apiVersion,
@@ -137,7 +136,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
                     ?: confirmPaymentIntentParams.sourceParams?.type
             fireAnalyticsRequest(
-                analyticsDataFactory.createPaymentIntentConfirmationParams(
+                analyticsRequestFactory.createPaymentIntentConfirmation(
                     paymentMethodType,
                     requestId = requestId
                 )
@@ -176,7 +175,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentIntentJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createPaymentIntentRetrieveParams(
+                analyticsRequestFactory.createPaymentIntentRetrieve(
                     paymentIntentId,
                     requestId = requestId
                 )
@@ -253,7 +252,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SetupIntentJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createSetupIntentConfirmationParams(
+                analyticsRequestFactory.createSetupIntentConfirmation(
                     confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
                     setupIntentId,
                     requestId = requestId
@@ -293,7 +292,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SetupIntentJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createSetupIntentRetrieveParams(
+                analyticsRequestFactory.createSetupIntentRetrieveParams(
                     setupIntentId,
                     requestId = requestId
                 )
@@ -361,7 +360,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SourceJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createSourceCreationParams(
+                analyticsRequestFactory.createSourceCreation(
                     sourceParams.type,
                     sourceParams.attribution,
                     requestId = requestId
@@ -398,7 +397,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SourceJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createSourceRetrieveParams(
+                analyticsRequestFactory.createSourceRetrieve(
                     sourceId,
                     requestId
                 )
@@ -431,7 +430,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentMethodJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createPaymentMethodCreationParams(
+                analyticsRequestFactory.createPaymentMethodCreation(
                     paymentMethodCreateParams.type,
                     productUsageTokens = paymentMethodCreateParams.attribution,
                     requestId = requestId
@@ -474,7 +473,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             TokenJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createTokenCreationParams(
+                analyticsRequestFactory.createTokenCreation(
                     productUsageTokens = tokenParams.attribution,
                     tokenType = tokenParams.tokenType,
                     requestId = requestId
@@ -510,7 +509,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SourceJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createAddSourceParams(
+                analyticsRequestFactory.createAddSource(
                     productUsageTokens,
                     sourceType,
                     requestId = requestId
@@ -544,7 +543,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SourceJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createDeleteSourceParams(
+                analyticsRequestFactory.createDeleteSource(
                     productUsageTokens,
                     requestId = requestId
                 )
@@ -580,8 +579,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentMethodJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory
-                    .createAttachPaymentMethodParams(
+                analyticsRequestFactory
+                    .createAttachPaymentMethod(
                         productUsageTokens,
                         requestId = requestId
                     )
@@ -613,8 +612,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentMethodJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory
-                    .createDetachPaymentMethodParams(
+                analyticsRequestFactory
+                    .createDetachPaymentMethod(
                         productUsageTokens,
                         requestId = requestId
                     )
@@ -649,7 +648,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentMethodsListJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createParams(
+                analyticsRequestFactory.createRequest(
                     AnalyticsEvent.CustomerRetrievePaymentMethods,
                     requestId = requestId,
                     productUsageTokens = productUsageTokens
@@ -687,7 +686,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             CustomerJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createParams(
+                analyticsRequestFactory.createRequest(
                     event = AnalyticsEvent.CustomerSetDefaultSource,
                     requestId = requestId,
                     productUsageTokens = productUsageTokens,
@@ -723,7 +722,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             CustomerJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createParams(
+                analyticsRequestFactory.createRequest(
                     AnalyticsEvent.CustomerSetShippingInfo,
                     requestId = requestId,
                     productUsageTokens = productUsageTokens
@@ -755,7 +754,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             CustomerJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createParams(
+                analyticsRequestFactory.createRequest(
                     AnalyticsEvent.CustomerRetrieve,
                     requestId = requestId,
                     productUsageTokens = productUsageTokens
@@ -898,7 +897,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             Stripe3ds2AuthResultJsonParser()
         ) { requestId ->
             fireAnalyticsRequest(
-                analyticsDataFactory.createAuthParams(
+                analyticsRequestFactory.createAuth(
                     AnalyticsEvent.Auth3ds2Start,
                     stripeIntentId,
                     requestId
@@ -1122,7 +1121,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         requestId: RequestId?
     ) {
         fireAnalyticsRequest(
-            analyticsDataFactory.createParams(
+            analyticsRequestFactory.createRequest(
                 event,
                 requestId
             )
@@ -1131,11 +1130,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     @VisibleForTesting
     internal fun fireAnalyticsRequest(
-        params: Map<String, Any>
+        params: AnalyticsRequest
     ) {
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(params)
-        )
+        analyticsRequestExecutor.executeAsync(params)
     }
 
     private fun createClientSecretParam(

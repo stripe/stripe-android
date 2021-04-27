@@ -8,14 +8,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.AnalyticsEvent
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.auth.PaymentAuthWebViewContract
-import com.stripe.android.networking.AnalyticsDataFactory
-import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 
 internal class StripeBrowserLauncherViewModel(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequest.Factory,
-    private val analyticsDataFactory: AnalyticsDataFactory
+    private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : ViewModel() {
 
     fun getResultIntent(args: PaymentAuthWebViewContract.Args): Intent {
@@ -33,13 +31,11 @@ internal class StripeBrowserLauncherViewModel(
         shouldUseCustomTabs: Boolean
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createParams(
-                    when (shouldUseCustomTabs) {
-                        true -> AnalyticsEvent.AuthWithCustomTabs
-                        false -> AnalyticsEvent.AuthWithDefaultBrowser
-                    }
-                )
+            analyticsRequestFactory.createRequest(
+                when (shouldUseCustomTabs) {
+                    true -> AnalyticsEvent.AuthWithCustomTabs
+                    false -> AnalyticsEvent.AuthWithDefaultBrowser
+                }
             )
         )
     }
@@ -49,19 +45,13 @@ internal class StripeBrowserLauncherViewModel(
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val config = PaymentConfiguration.getInstance(application)
-            val analyticsDataFactory = AnalyticsDataFactory(
-                application,
-                config.publishableKey
-            )
-
-            val analyticsRequestFactory = AnalyticsRequest.Factory()
-
-            val analyticsRequestExecutor = AnalyticsRequestExecutor.Default()
 
             return StripeBrowserLauncherViewModel(
-                analyticsRequestExecutor,
-                analyticsRequestFactory,
-                analyticsDataFactory
+                AnalyticsRequestExecutor.Default(),
+                AnalyticsRequestFactory(
+                    application,
+                    config.publishableKey
+                )
             ) as T
         }
     }

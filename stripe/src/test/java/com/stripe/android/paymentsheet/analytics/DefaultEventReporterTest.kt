@@ -6,9 +6,8 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.AnalyticsDataFactory
-import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,8 +24,7 @@ class DefaultEventReporterTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
-    private val analyticsRequestFactory = AnalyticsRequest.Factory()
-    private val analyticsDataFactory = AnalyticsDataFactory(
+    private val analyticsRequestFactory = AnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
@@ -40,7 +38,6 @@ class DefaultEventReporterTest {
             FakeDeviceIdRepository(),
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            analyticsDataFactory,
             testDispatcher
         )
     }
