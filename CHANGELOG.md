@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 16.6.2 - unreleased
+* [#3567](https://github.com/stripe/stripe-android/pull/3567) Use `lifecycleScope` where possible in `Stripe.kt`
+    * When calling payment and setup confirmation methods (e.g. `confirmPayment()`), using
+      a `ComponentActivity` subclass will make the call lifecycle-aware.
+
 ## 16.6.1 - 2021-04-26
 * [#3568](https://github.com/stripe/stripe-android/pull/3568) Add suspending function variants for payment confirmation methods
 * [#3587](https://github.com/stripe/stripe-android/pull/3587) Upgrade Kotlin to `1.4.32`
