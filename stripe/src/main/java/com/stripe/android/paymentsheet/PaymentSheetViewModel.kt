@@ -92,8 +92,8 @@ internal class PaymentSheetViewModel internal constructor(
     private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmStripeIntentParams>> = _startConfirm
 
-    private val _amount = MutableLiveData<Amount>()
-    internal val amount: LiveData<Amount> = _amount
+    private val _primaryButtonLabel = MutableLiveData<String>()
+    internal val primaryButtonLabel: LiveData<String> = _primaryButtonLabel
 
     @VisibleForTesting
     internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
@@ -208,43 +208,30 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun resetViewState(paymentIntent: PaymentIntent) {
-        val amount = paymentIntent.amount
-        val currencyCode = paymentIntent.currency
-        if (amount != null && currencyCode != null) {
-            _amount.value = Amount(amount, currencyCode)
-            _viewState.value = ViewState.PaymentSheet.Ready
-            _processing.value = false
-            checkoutIdentifier = CheckoutIdentifier.None
-        } else {
-            onFatal(
-                IllegalStateException("PaymentIntent could not be parsed correctly.")
-            )
-
     private fun resetViewState(stripeIntent: StripeIntent) {
         if (stripeIntent is PaymentIntent) {
             val amount = stripeIntent.amount
             val currencyCode = stripeIntent.currency
             if (amount != null && currencyCode != null) {
-                _viewState.value = ViewState.PaymentSheet.Ready(
-                    getApplication<Application>().resources.getString(
-                        R.string.stripe_paymentsheet_pay_button_amount,
-                        currencyFormatter.format(amount, currencyCode)
-                    )
+                _primaryButtonLabel.value = getApplication<Application>().resources.getString(
+                    R.string.stripe_paymentsheet_pay_button_amount,
+                    currencyFormatter.format(amount, currencyCode)
                 )
+                _viewState.value = ViewState.PaymentSheet.Ready
                 _processing.value = false
+                checkoutIdentifier = CheckoutIdentifier.None
             } else {
                 onFatal(
                     IllegalStateException("PaymentIntent could not be parsed correctly.")
                 )
             }
         } else {
-            _viewState.value = ViewState.PaymentSheet.Ready(
-                getApplication<Application>().resources.getString(
-                    R.string.stripe_paymentsheet_setup_button_label
-                )
+            _primaryButtonLabel.value = getApplication<Application>().resources.getString(
+                R.string.stripe_paymentsheet_setup_button_label
             )
+            _viewState.value = ViewState.PaymentSheet.Ready
             _processing.value = false
+            checkoutIdentifier = CheckoutIdentifier.None
         }
     }
 
@@ -342,7 +329,7 @@ internal class PaymentSheetViewModel internal constructor(
             is StripeGooglePayContract.Result.Error -> {
                 onApiError(googlePayResult.exception)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                paymentIntent.value?.let(::resetViewState)
+                stripeIntent.value?.let(::resetViewState)
             }
             else -> {
                 stripeIntent.value?.let(::resetViewState)
@@ -473,11 +460,6 @@ internal class PaymentSheetViewModel internal constructor(
             ) as T
         }
     }
-
-    /**
-     * This class represents the long value amount to charge and the currency code of the amount.
-     */
-    data class Amount(val value: Long, val currencyCode: String)
 
     /**
      * This is the identifier of the caller of the [checkout] function.  It is used in

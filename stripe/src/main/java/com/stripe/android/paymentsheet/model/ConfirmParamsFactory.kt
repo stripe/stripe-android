@@ -24,7 +24,7 @@ internal class ConfirmParamsFactory(
                 ConfirmSetupIntentParams.create(
                     paymentMethodId = paymentSelection.paymentMethod.id.orEmpty(),
                     clientSecret = clientSecret.value,
-                    returnUrl = RETURN_URL
+                    returnUrl = defaultReturnUrl.value
                 )
             }
         }
@@ -49,7 +49,7 @@ internal class ConfirmParamsFactory(
                 ConfirmSetupIntentParams.create(
                     paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
                     clientSecret = clientSecret.value,
-                    returnUrl = RETURN_URL
+                    returnUrl = defaultReturnUrl.value
                 )
             }
         }
