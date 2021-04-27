@@ -1,12 +1,8 @@
 package com.stripe.android
 
+/**
+ * Enums of beta headers allowed to be override when initializing [Stripe].
+ */
 enum class StripeApiBeta(val code: String) {
-    AlipayV1("alipay_beta=v1"),
-    OxxoV1("oxxo_beta=v1");
-
-    internal companion object {
-        internal fun fromCode(code: String): StripeApiBeta? {
-            return values().firstOrNull { it.code == code }
-        }
-    }
+    WechatPayV1("wechat_pay_beta=v1");
 }

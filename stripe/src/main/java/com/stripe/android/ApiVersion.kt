@@ -15,8 +15,16 @@ internal data class ApiVersion internal constructor(internal val code: String) {
         return code
     }
 
+    fun withBetas(betas: Set<StripeApiBeta>): ApiVersion =
+        if (betas.isNullOrEmpty()) INSTANCE else
+            ApiVersion(
+                listOf(this.code)
+                    .plus(betas.map { it.code })
+                    .joinToString(";")
+            )
+
     internal companion object {
-        private const val API_VERSION_CODE: String = "2020-03-02"
+        const val API_VERSION_CODE: String = "2020-03-02"
 
         private val INSTANCE = ApiVersion(API_VERSION_CODE)
 

@@ -75,20 +75,25 @@ class Stripe internal constructor(
      * @param enableLogging enable logging in the Stripe and Stripe 3DS2 SDKs; disabled by default.
      * It is recommended to disable logging in production. Logs can be accessed from the command line using
      * `adb logcat -s StripeSdk`
+     * @param betas optional, set of beta flags to pass to the Stripe API. Setting this property is
+     * not sufficient to participate in a beta, and passing a beta you are not registered
+     * in will result in API errors.
      */
     @JvmOverloads
     constructor(
         context: Context,
         publishableKey: String,
         stripeAccountId: String? = null,
-        enableLogging: Boolean = false
+        enableLogging: Boolean = false,
+        betas: Set<StripeApiBeta> = emptySet()
     ) : this(
         context.applicationContext,
         StripeApiRepository(
             context.applicationContext,
             publishableKey,
             appInfo,
-            Logger.getInstance(enableLogging)
+            Logger.getInstance(enableLogging),
+            betas = betas
         ),
         ApiKeyValidator.get().requireValid(publishableKey),
         stripeAccountId,
