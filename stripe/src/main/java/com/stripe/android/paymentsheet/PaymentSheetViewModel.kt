@@ -202,7 +202,7 @@ internal class PaymentSheetViewModel internal constructor(
                             StripeIntentResult.Outcome.SUCCEEDED
                         )
                     }
-                    else -> throw IllegalStateException()
+                    else -> error("StripeIntent must be PaymentIntent or SetupIntent")
                 }
             )
         }
@@ -244,10 +244,10 @@ internal class PaymentSheetViewModel internal constructor(
         val paymentSelection = selection.value
 
         if (paymentSelection is PaymentSelection.GooglePay) {
-            stripeIntent.value?.let { stripeIntent ->
+            (stripeIntent.value as? PaymentIntent)?.let { stripeIntent ->
                 _launchGooglePay.value = Event(
                     StripeGooglePayContract.Args(
-                        paymentIntent = stripeIntent as PaymentIntent,
+                        paymentIntent = stripeIntent,
                         config = StripeGooglePayContract.GooglePayConfig(
                             environment = when (args.config?.googlePay?.environment) {
                                 PaymentSheet.GooglePayConfiguration.Environment.Production ->

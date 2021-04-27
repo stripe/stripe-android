@@ -190,9 +190,12 @@ internal class DefaultFlowController internal constructor(
         val config = initData.config
         val paymentSelection = viewModel.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
+            if (initData.stripeIntent !is PaymentIntent) {
+                error("Google Pay currently supported only for PaymentIntents")
+            }
             googlePayLauncher(
                 StripeGooglePayContract.Args(
-                    paymentIntent = initData.stripeIntent as PaymentIntent,
+                    paymentIntent = initData.stripeIntent,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -217,9 +220,11 @@ internal class DefaultFlowController internal constructor(
     ) {
         val confirmParamsFactory = ConfirmParamsFactory(
             defaultReturnUrl,
-            if (initData.stripeIntent is PaymentIntent)
-                PaymentIntentClientSecret(initData.stripeIntent.clientSecret.orEmpty()) else
+            if (initData.stripeIntent is PaymentIntent) {
+                PaymentIntentClientSecret(initData.stripeIntent.clientSecret.orEmpty())
+            } else {
                 SetupIntentClientSecret(initData.stripeIntent.clientSecret.orEmpty())
+            }
         )
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -367,7 +372,7 @@ internal class DefaultFlowController internal constructor(
                     is SetupIntent -> {
                         paymentFlowResultProcessor.processSetupIntent(paymentFlowResult)
                     }
-                    else -> throw IllegalStateException("<error message>")
+                    else -> error("StripeIntent must be PaymentIntent or SetupIntent")
                 }
             }.fold(
                 onSuccess = {
@@ -403,6 +408,13 @@ internal class DefaultFlowController internal constructor(
                 PaymentSheetResult.Failed(
                     error = IllegalArgumentException(
                         "Failed to confirm PaymentIntent. ${stripeIntent.lastPaymentError.message}"
+                    )
+                )
+            }
+            stripeIntent is SetupIntent && stripeIntent.lastSetupError != null -> {
+                PaymentSheetResult.Failed(
+                    error = IllegalArgumentException(
+                        "Failed to confirm SetupIntent. ${stripeIntent.lastSetupError.message}"
                     )
                 )
             }
