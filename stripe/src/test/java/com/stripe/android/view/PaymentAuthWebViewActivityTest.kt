@@ -12,6 +12,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentAuthWebViewContract
 import com.stripe.android.exception.StripeException
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -25,7 +26,9 @@ class PaymentAuthWebViewActivityTest {
     val rule = InstantTaskExecutorRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val contract = PaymentAuthWebViewContract()
+    private val contract = PaymentAuthWebViewContract(
+        DefaultReturnUrl.create(context)
+    )
 
     @BeforeTest
     fun before() {
