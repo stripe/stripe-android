@@ -312,7 +312,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createParams(
         event: AnalyticsEvent,
-        requestId: RequestId?,
+        requestId: RequestId? = null,
         productUsageTokens: Set<String>? = null,
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,

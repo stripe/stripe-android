@@ -227,14 +227,16 @@ internal class DefaultFlowController internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            paymentController.startConfirmAndAuth(
-                authHostSupplier(),
-                confirmParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+            lifecycleScope.launch {
+                paymentController.startConfirmAndAuth(
+                    authHostSupplier(),
+                    confirmParams,
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
                 )
-            )
+            }
         }
     }
 
