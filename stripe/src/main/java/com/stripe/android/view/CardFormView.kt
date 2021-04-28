@@ -35,7 +35,7 @@ import com.stripe.android.view.CardValidCallback.Fields
  * To access the [CardParams], see details in [cardParams] property.
  * To get notified if the current card params are valid, set a [CardValidCallback] object with [setCardValidCallback].
  */
-internal class CardFormView @JvmOverloads constructor(
+class CardFormView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -271,7 +271,7 @@ internal class CardFormView @JvmOverloads constructor(
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_card_form_view_text_input_layout_background)
         cardMultilineWidget.cvcEditText.doAfterTextChanged { cvcText ->
-            if (cardMultilineWidget.brand.isMaxCvc(cvcText.toString())) {
+            if (postalCodeContainer.isVisible && cardMultilineWidget.brand.isMaxCvc(cvcText.toString())) {
                 postalCodeView.requestFocus()
             }
         }
