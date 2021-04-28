@@ -1,9 +1,17 @@
 # CHANGELOG
 
-## 16.6.2 - unreleased
+## 16.7.0 - unreleased
 * [#3567](https://github.com/stripe/stripe-android/pull/3567) Use `lifecycleScope` where possible in `Stripe.kt`
     * When calling payment and setup confirmation methods (e.g. `confirmPayment()`), using
-      a `ComponentActivity` subclass will make the call lifecycle-aware.
+      a `ComponentActivity` subclass (e.g. `AppCompatActivity`) will make the call lifecycle-aware.
+* [#3644](https://github.com/stripe/stripe-android/pull/3644) Use Custom Tabs for payment authentication when available
+    * When a `ConfirmPaymentIntentParams` or `ConfirmSetupIntentParams` instance is created
+      **without** a custom `return_url` value and used to confirm a `PaymentIntent` or
+      `SetupIntent` **and** the device supports
+      [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/), 
+      use Custom Tabs instead of a WebView to render the authentication page. 
+* [#3646](https://github.com/stripe/stripe-android/pull/3646) Upgrade 3DS2 SDK to `5.3.1`
+    * Gracefully handle unknown directory server ids
 
 ## 16.6.1 - 2021-04-26
 * [#3568](https://github.com/stripe/stripe-android/pull/3568) Add suspending function variants for payment confirmation methods
