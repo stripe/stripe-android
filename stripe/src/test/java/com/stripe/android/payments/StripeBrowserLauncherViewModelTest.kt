@@ -3,9 +3,9 @@ package com.stripe.android.payments
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -16,17 +16,14 @@ class StripeBrowserLauncherViewModelTest {
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {
         analyticsRequests.add(it)
     }
-    private val analyticsRequestFactory = AnalyticsRequest.Factory()
-
-    private val analyticsDataFactory = AnalyticsDataFactory(
+    private val analyticsRequestFactory = AnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
 
     private val viewModel = StripeBrowserLauncherViewModel(
         analyticsRequestExecutor,
-        analyticsRequestFactory,
-        analyticsDataFactory
+        analyticsRequestFactory
     )
 
     @Test

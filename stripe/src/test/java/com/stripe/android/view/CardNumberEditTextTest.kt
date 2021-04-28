@@ -36,9 +36,9 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
@@ -83,17 +83,15 @@ internal class CardNumberEditTextTest {
     private val cardAccountRangeRepository = FakeCardAccountRangeRepository()
 
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
-    private val analyticsRequestFactory = AnalyticsRequest.Factory()
-    private val analyticsDataFactory =
-        AnalyticsDataFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+    private val analyticsRequestFactory =
+        AnalyticsRequestFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
     private val cardNumberEditText = CardNumberEditText(
         context,
         workContext = testDispatcher,
         cardAccountRangeRepository = cardAccountRangeRepository,
         analyticsRequestExecutor = analyticsRequestExecutor,
-        analyticsRequestFactory = analyticsRequestFactory,
-        analyticsDataFactory = analyticsDataFactory
+        analyticsRequestFactory = analyticsRequestFactory
     ).also {
         it.completionCallback = completionCallback
         it.brandChangeCallback = brandChangeCallback
@@ -262,8 +260,7 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory
+            analyticsRequestFactory = analyticsRequestFactory
         )
 
         var callbacks = 0
@@ -294,8 +291,7 @@ internal class CardNumberEditTextTest {
                 ) = listOf(AccountRangeFixtures.UNIONPAY19)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory
+            analyticsRequestFactory = analyticsRequestFactory
         )
 
         var callbacks = 0
@@ -326,8 +322,7 @@ internal class CardNumberEditTextTest {
                 ) = emptyList<AccountRange>()
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory
+            analyticsRequestFactory = analyticsRequestFactory
         )
 
         cardNumberEditText.setText("6216828050000000000")
@@ -344,8 +339,7 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory
+            analyticsRequestFactory = analyticsRequestFactory
         )
 
         cardNumberEditText.setText(UNIONPAY_NO_SPACES)
@@ -703,8 +697,7 @@ internal class CardNumberEditTextTest {
                         workContext = testDispatcher,
                         cardAccountRangeRepository = DelayedCardAccountRangeRepository(),
                         analyticsRequestExecutor = analyticsRequestExecutor,
-                        analyticsRequestFactory = analyticsRequestFactory,
-                        analyticsDataFactory = analyticsDataFactory
+                        analyticsRequestFactory = analyticsRequestFactory
                     )
 
                     val root = activity.findViewById<ViewGroup>(R.id.add_payment_method_card).also {
@@ -740,8 +733,7 @@ internal class CardNumberEditTextTest {
                 override val loading: Flow<Boolean> = flowOf(false)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory
+            analyticsRequestFactory = analyticsRequestFactory
         )
 
         cardNumberEditText.setText(VISA_BIN)
@@ -838,8 +830,7 @@ internal class CardNumberEditTextTest {
                 override val loading: Flow<Boolean> = flowOf(false)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory
+            analyticsRequestFactory = analyticsRequestFactory
         )
 
         // 620000 - valid BIN, call repo
@@ -899,8 +890,7 @@ internal class CardNumberEditTextTest {
             analyticsRequestExecutor = {
                 analyticsRequests.add(it)
             },
-            analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory
+            analyticsRequestFactory = analyticsRequestFactory
         )
         cardNumberEditText.setText(UNIONPAY_NO_SPACES)
         idleLooper()

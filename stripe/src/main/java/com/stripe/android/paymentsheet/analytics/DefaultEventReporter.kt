@@ -2,9 +2,8 @@ package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.networking.AnalyticsDataFactory
-import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
@@ -17,8 +16,7 @@ internal class DefaultEventReporter internal constructor(
     private val sessionId: SessionId?,
     private val deviceIdRepository: DeviceIdRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequest.Factory,
-    private val analyticsDataFactory: AnalyticsDataFactory,
+    private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val workContext: CoroutineContext
 ) : EventReporter {
 
@@ -32,8 +30,7 @@ internal class DefaultEventReporter internal constructor(
         sessionId,
         DefaultDeviceIdRepository(context, workContext),
         AnalyticsRequestExecutor.Default(),
-        AnalyticsRequest.Factory(),
-        AnalyticsDataFactory(
+        AnalyticsRequestFactory(
             context,
             PaymentConfiguration.getInstance(context).publishableKey
         ),
@@ -106,12 +103,10 @@ internal class DefaultEventReporter internal constructor(
         CoroutineScope(workContext).launch {
             val deviceId = deviceIdRepository.get()
             analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.create(
-                    analyticsDataFactory.createParams(
-                        event,
-                        sessionId,
-                        deviceId
-                    )
+                analyticsRequestFactory.createRequest(
+                    event,
+                    sessionId,
+                    deviceId
                 )
             )
         }

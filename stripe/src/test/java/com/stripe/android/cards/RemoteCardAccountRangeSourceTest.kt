@@ -13,8 +13,8 @@ import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,8 +44,7 @@ internal class RemoteCardAccountRangeSourceTest {
             REQUEST_OPTIONS,
             cardAccountRangeStore,
             { },
-            AnalyticsRequest.Factory(),
-            AnalyticsDataFactory(
+            AnalyticsRequestFactory(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
             )
@@ -73,98 +72,98 @@ internal class RemoteCardAccountRangeSourceTest {
     }
 
     @Test
-    fun `getAccountRange() when CardMetadata is empty should return null`() = testDispatcher.runBlockingTest {
-        val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
-            FakeStripeRepository(EMPTY_METADATA),
-            REQUEST_OPTIONS,
-            cardAccountRangeStore,
-            { },
-            AnalyticsRequest.Factory(),
-            AnalyticsDataFactory(
-                ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+    fun `getAccountRange() when CardMetadata is empty should return null`() =
+        testDispatcher.runBlockingTest {
+            val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
+                FakeStripeRepository(EMPTY_METADATA),
+                REQUEST_OPTIONS,
+                cardAccountRangeStore,
+                { },
+                AnalyticsRequestFactory(
+                    ApplicationProvider.getApplicationContext(),
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                )
             )
-        )
 
-        assertThat(
-            remoteCardAccountRangeSource.getAccountRange(
-                CardNumberFixtures.VISA
+            assertThat(
+                remoteCardAccountRangeSource.getAccountRange(
+                    CardNumberFixtures.VISA
+                )
+            ).isNull()
+            verify(cardAccountRangeStore).save(
+                BinFixtures.VISA,
+                emptyList()
             )
-        ).isNull()
-        verify(cardAccountRangeStore).save(
-            BinFixtures.VISA,
-            emptyList()
-        )
-    }
+        }
 
     @Test
-    fun `getAccountRange() when card number is less than required BIN length should return null`() = testDispatcher.runBlockingTest {
-        val repository = mock<StripeRepository>()
+    fun `getAccountRange() when card number is less than required BIN length should return null`() =
+        testDispatcher.runBlockingTest {
+            val repository = mock<StripeRepository>()
 
-        val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
-            repository,
-            REQUEST_OPTIONS,
-            cardAccountRangeStore,
-            { },
-            AnalyticsRequest.Factory(),
-            AnalyticsDataFactory(
-                ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
+                repository,
+                REQUEST_OPTIONS,
+                cardAccountRangeStore,
+                { },
+                AnalyticsRequestFactory(
+                    ApplicationProvider.getApplicationContext(),
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                )
             )
-        )
 
-        assertThat(
-            remoteCardAccountRangeSource.getAccountRange(
-                CardNumber.Unvalidated("42")
-            )
-        ).isNull()
+            assertThat(
+                remoteCardAccountRangeSource.getAccountRange(
+                    CardNumber.Unvalidated("42")
+                )
+            ).isNull()
 
-        verify(repository, never()).getCardMetadata(any(), any())
-        verify(cardAccountRangeStore, never()).save(any(), any())
-    }
+            verify(repository, never()).getCardMetadata(any(), any())
+            verify(cardAccountRangeStore, never()).save(any(), any())
+        }
 
     @Test
-    fun `getAccountRange() should fire missing range analytics request when response is not empty but card number does not match`() = testDispatcher.runBlockingTest {
-        val analyticsRequests = mutableListOf<AnalyticsRequest>()
+    fun `getAccountRange() should fire missing range analytics request when response is not empty but card number does not match`() =
+        testDispatcher.runBlockingTest {
+            val analyticsRequests = mutableListOf<AnalyticsRequest>()
 
-        val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
-            FakeStripeRepository(
-                CardMetadata(
-                    bin = BinFixtures.VISA,
-                    accountRanges = listOf(
-                        AccountRange(
-                            binRange = BinRange(
-                                low = "4242420000000000",
-                                high = "4242424200000000"
-                            ),
-                            panLength = 16,
-                            brandInfo = AccountRange.BrandInfo.Visa,
-                            country = "GB"
+            val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
+                FakeStripeRepository(
+                    CardMetadata(
+                        bin = BinFixtures.VISA,
+                        accountRanges = listOf(
+                            AccountRange(
+                                binRange = BinRange(
+                                    low = "4242420000000000",
+                                    high = "4242424200000000"
+                                ),
+                                panLength = 16,
+                                brandInfo = AccountRange.BrandInfo.Visa,
+                                country = "GB"
+                            )
                         )
                     )
+                ),
+                REQUEST_OPTIONS,
+                cardAccountRangeStore,
+                {
+                    analyticsRequests.add(it)
+                },
+                AnalyticsRequestFactory(
+                    ApplicationProvider.getApplicationContext(),
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
                 )
-            ),
-            REQUEST_OPTIONS,
-            cardAccountRangeStore,
-            {
-                analyticsRequests.add(it)
-            },
-            AnalyticsRequest.Factory(),
-            AnalyticsDataFactory(
-                ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
             )
-        )
 
-        remoteCardAccountRangeSource.getAccountRange(
-            CardNumber.Unvalidated("4242424242424242")
-        )
+            remoteCardAccountRangeSource.getAccountRange(
+                CardNumber.Unvalidated("4242424242424242")
+            )
 
-        assertThat(analyticsRequests)
-            .hasSize(1)
-        assertThat(analyticsRequests.first().params["event"])
-            .isEqualTo("stripe_android.card_metadata_missing_range")
-    }
+            assertThat(analyticsRequests)
+                .hasSize(1)
+            assertThat(analyticsRequests.first().params["event"])
+                .isEqualTo("stripe_android.card_metadata_missing_range")
+        }
 
     private class FakeStripeRepository(
         private val cardMetadata: CardMetadata

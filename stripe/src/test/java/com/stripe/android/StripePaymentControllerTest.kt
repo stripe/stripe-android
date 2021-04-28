@@ -35,9 +35,9 @@ import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
@@ -85,7 +85,7 @@ internal class StripePaymentControllerTest {
     private val stripeRepository = FakeStripeRepository()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val analyticsDataFactory = AnalyticsDataFactory(
+    private val analyticsRequestFactory = AnalyticsRequestFactory(
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
@@ -173,9 +173,9 @@ internal class StripePaymentControllerTest {
             verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture())
             val analyticsParams = requireNotNull(analyticsRequestArgumentCaptor.firstValue.params)
-            assertThat(analyticsParams[AnalyticsDataFactory.FIELD_EVENT])
+            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
                 .isEqualTo(AnalyticsEvent.Auth3ds2Fingerprint.toString())
-            assertThat(analyticsParams[AnalyticsDataFactory.FIELD_INTENT_ID])
+            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID])
                 .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.id)
         }
 
@@ -290,9 +290,9 @@ internal class StripePaymentControllerTest {
         verify(analyticsRequestExecutor)
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsParams = requireNotNull(analyticsRequestArgumentCaptor.firstValue.params)
-        assertThat(analyticsParams[AnalyticsDataFactory.FIELD_EVENT])
+        assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
             .isEqualTo(AnalyticsEvent.AuthRedirect.toString())
-        assertThat(analyticsParams[AnalyticsDataFactory.FIELD_INTENT_ID])
+        assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID])
             .isEqualTo("pi_1EZlvVCRMbs6FrXfKpq2xMmy")
     }
 
@@ -400,9 +400,9 @@ internal class StripePaymentControllerTest {
                 .executeAsync(analyticsRequestArgumentCaptor.capture())
             val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
             val analyticsParams = requireNotNull(analyticsRequest.params)
-            assertThat(analyticsParams[AnalyticsDataFactory.FIELD_EVENT])
+            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
                 .isEqualTo(AnalyticsEvent.Auth3ds2Frictionless.toString())
-            assertThat(analyticsParams[AnalyticsDataFactory.FIELD_INTENT_ID]).isEqualTo("pi_1ExkUeAWhjPjYwPiXph9ouXa")
+            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID]).isEqualTo("pi_1ExkUeAWhjPjYwPiXph9ouXa")
         }
 
     @Test
@@ -434,7 +434,7 @@ internal class StripePaymentControllerTest {
                 .executeAsync(analyticsRequestArgumentCaptor.capture())
             val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
             assertThat(
-                requireNotNull(analyticsRequest.params)[AnalyticsDataFactory.FIELD_EVENT]
+                requireNotNull(analyticsRequest.params)[AnalyticsRequestFactory.FIELD_EVENT]
             ).isEqualTo(AnalyticsEvent.Auth3ds2Fallback.toString())
         }
 
@@ -706,7 +706,7 @@ internal class StripePaymentControllerTest {
             CONFIG,
             threeDs2Service,
             analyticsRequestExecutor,
-            analyticsDataFactory,
+            analyticsRequestFactory,
             challengeProgressActivityStarter,
             alipayRepository,
             paymentRelayLauncher = paymentRelayLauncher,
@@ -784,7 +784,7 @@ internal class StripePaymentControllerTest {
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
         assertThat(
-            analyticsRequest.compactParams?.get(AnalyticsDataFactory.FIELD_EVENT)
+            analyticsRequest.compactParams?.get(AnalyticsRequestFactory.FIELD_EVENT)
         ).isEqualTo(event.toString())
     }
 
