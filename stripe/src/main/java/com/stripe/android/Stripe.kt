@@ -3,10 +3,13 @@ package com.stripe.android
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -147,14 +150,16 @@ class Stripe internal constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startConfirmAndAuth(
-            AuthActivityStarter.Host.create(activity),
-            confirmPaymentIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        getLifecycleScope(activity).launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmPaymentIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -203,14 +208,16 @@ class Stripe internal constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startConfirmAndAuth(
-            AuthActivityStarter.Host.create(fragment),
-            confirmPaymentIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        fragment.lifecycleScope.launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(fragment),
+                confirmPaymentIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -226,16 +233,21 @@ class Stripe internal constructor(
         ReplaceWith("handleNextActionForPayment(activity, clientSecret)")
     )
     @UiThread
-    fun authenticatePayment(activity: Activity, clientSecret: String) {
-        paymentController.startAuth(
-            AuthActivityStarter.Host.create(activity),
-            PaymentIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            PaymentController.StripeIntentType.PaymentIntent
-        )
+    fun authenticatePayment(
+        activity: Activity,
+        clientSecret: String
+    ) {
+        getLifecycleScope(activity).launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                PaymentIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.PaymentIntent
+            )
+        }
     }
 
     /**
@@ -257,15 +269,17 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startAuth(
-            AuthActivityStarter.Host.create(activity),
-            PaymentIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            PaymentController.StripeIntentType.PaymentIntent
-        )
+        getLifecycleScope(activity).launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                PaymentIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.PaymentIntent
+            )
+        }
     }
 
     /**
@@ -281,16 +295,21 @@ class Stripe internal constructor(
         ReplaceWith("handleNextActionForPayment(fragment, clientSecret)")
     )
     @UiThread
-    fun authenticatePayment(fragment: Fragment, clientSecret: String) {
-        paymentController.startAuth(
-            AuthActivityStarter.Host.create(fragment),
-            PaymentIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            PaymentController.StripeIntentType.PaymentIntent
-        )
+    fun authenticatePayment(
+        fragment: Fragment,
+        clientSecret: String
+    ) {
+        fragment.lifecycleScope.launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(fragment),
+                PaymentIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.PaymentIntent
+            )
+        }
     }
 
     /**
@@ -312,15 +331,17 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startAuth(
-            AuthActivityStarter.Host.create(fragment),
-            PaymentIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            PaymentController.StripeIntentType.PaymentIntent
-        )
+        fragment.lifecycleScope.launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(fragment),
+                PaymentIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.PaymentIntent
+            )
+        }
     }
 
     /**
@@ -476,14 +497,16 @@ class Stripe internal constructor(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startConfirmAndAuth(
-            AuthActivityStarter.Host.create(activity),
-            confirmSetupIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        getLifecycleScope(activity).launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmSetupIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -500,14 +523,16 @@ class Stripe internal constructor(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startConfirmAndAuth(
-            AuthActivityStarter.Host.create(fragment),
-            confirmSetupIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        fragment.lifecycleScope.launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(fragment),
+                confirmSetupIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -522,16 +547,21 @@ class Stripe internal constructor(
         ReplaceWith("handleNextActionForSetupIntent(activity, clientSecret)")
     )
     @UiThread
-    fun authenticateSetup(activity: Activity, clientSecret: String) {
-        paymentController.startAuth(
-            AuthActivityStarter.Host.create(activity),
-            SetupIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            PaymentController.StripeIntentType.SetupIntent
-        )
+    fun authenticateSetup(
+        activity: Activity,
+        clientSecret: String
+    ) {
+        getLifecycleScope(activity).launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                SetupIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.SetupIntent
+            )
+        }
     }
 
     /**
@@ -551,15 +581,17 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startAuth(
-            AuthActivityStarter.Host.create(activity),
-            SetupIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            PaymentController.StripeIntentType.SetupIntent
-        )
+        getLifecycleScope(activity).launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                SetupIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.SetupIntent
+            )
+        }
     }
 
     /**
@@ -574,16 +606,21 @@ class Stripe internal constructor(
         ReplaceWith("handleNextActionForSetupIntent(fragment, clientSecret)")
     )
     @UiThread
-    fun authenticateSetup(fragment: Fragment, clientSecret: String) {
-        paymentController.startAuth(
-            AuthActivityStarter.Host.create(fragment),
-            SetupIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            PaymentController.StripeIntentType.SetupIntent
-        )
+    fun authenticateSetup(
+        fragment: Fragment,
+        clientSecret: String
+    ) {
+        fragment.lifecycleScope.launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(fragment),
+                SetupIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.SetupIntent
+            )
+        }
     }
 
     /**
@@ -603,15 +640,17 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startAuth(
-            AuthActivityStarter.Host.create(fragment),
-            SetupIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            PaymentController.StripeIntentType.SetupIntent
-        )
+        fragment.lifecycleScope.launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(fragment),
+                SetupIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.SetupIntent
+            )
+        }
     }
 
     /**
@@ -851,11 +890,13 @@ class Stripe internal constructor(
         source: Source,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startAuthenticateSource(
-            AuthActivityStarter.Host.create(activity),
-            source,
-            ApiRequest.Options(publishableKey, stripeAccountId)
-        )
+        getLifecycleScope(activity).launch {
+            paymentController.startAuthenticateSource(
+                AuthActivityStarter.Host.create(activity),
+                source,
+                ApiRequest.Options(publishableKey, stripeAccountId)
+            )
+        }
     }
 
     /**
@@ -875,11 +916,13 @@ class Stripe internal constructor(
         source: Source,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        paymentController.startAuthenticateSource(
-            AuthActivityStarter.Host.create(fragment),
-            source,
-            ApiRequest.Options(publishableKey, stripeAccountId)
-        )
+        fragment.lifecycleScope.launchWhenCreated {
+            paymentController.startAuthenticateSource(
+                AuthActivityStarter.Host.create(fragment),
+                source,
+                ApiRequest.Options(publishableKey, stripeAccountId)
+            )
+        }
     }
 
     /**
@@ -1689,11 +1732,22 @@ class Stripe internal constructor(
         )
     }
 
+    /**
+     * Get a [LifecycleCoroutineScope] if available. Otherwise, default to a [CoroutineScope]
+     * using [Dispatchers.IO].
+     */
+    private fun getLifecycleScope(
+        activity: Activity
+    ): CoroutineScope = when (activity) {
+        is ComponentActivity -> activity.lifecycleScope
+        else -> CoroutineScope(workContext)
+    }
+
     companion object {
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
-        internal const val VERSION_NAME = "16.5.0"
+        internal const val VERSION_NAME = "16.6.1"
         const val VERSION: String = "AndroidBindings/$VERSION_NAME"
 
         /**

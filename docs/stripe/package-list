@@ -555,6 +555,7 @@ $dokka.location:com.stripe.android.model/ConfirmSetupIntentParams/withShouldUseS
 $dokka.location:com.stripe.android.model/ConfirmStripeIntentParams.Companion///PointingToDeclaration/stripe/com.stripe.android.model/-confirm-stripe-intent-params/-companion/index.html
 $dokka.location:com.stripe.android.model/ConfirmStripeIntentParams///PointingToDeclaration/stripe/com.stripe.android.model/-confirm-stripe-intent-params/index.html
 $dokka.location:com.stripe.android.model/ConfirmStripeIntentParams/clientSecret/#/PointingToDeclaration/stripe/com.stripe.android.model/-confirm-stripe-intent-params/client-secret.html
+$dokka.location:com.stripe.android.model/ConfirmStripeIntentParams/returnUrl/#/PointingToDeclaration/stripe/com.stripe.android.model/-confirm-stripe-intent-params/return-url.html
 $dokka.location:com.stripe.android.model/ConfirmStripeIntentParams/shouldUseStripeSdk/#/PointingToDeclaration/stripe/com.stripe.android.model/-confirm-stripe-intent-params/should-use-stripe-sdk.html
 $dokka.location:com.stripe.android.model/ConfirmStripeIntentParams/withShouldUseStripeSdk/#kotlin.Boolean/PointingToDeclaration/stripe/com.stripe.android.model/-confirm-stripe-intent-params/with-should-use-stripe-sdk.html
 $dokka.location:com.stripe.android.model/Customer.Companion///PointingToDeclaration/stripe/com.stripe.android.model/-customer/-companion/index.html
@@ -795,6 +796,7 @@ $dokka.location:com.stripe.android.model/PaymentIntent/created/#/PointingToDecla
 $dokka.location:com.stripe.android.model/PaymentIntent/currency/#/PointingToDeclaration/stripe/com.stripe.android.model/-payment-intent/currency.html
 $dokka.location:com.stripe.android.model/PaymentIntent/description/#/PointingToDeclaration/stripe/com.stripe.android.model/-payment-intent/description.html
 $dokka.location:com.stripe.android.model/PaymentIntent/id/#/PointingToDeclaration/stripe/com.stripe.android.model/-payment-intent/id.html
+$dokka.location:com.stripe.android.model/PaymentIntent/isConfirmed/#/PointingToDeclaration/stripe/com.stripe.android.model/-payment-intent/is-confirmed.html
 $dokka.location:com.stripe.android.model/PaymentIntent/isLiveMode/#/PointingToDeclaration/stripe/com.stripe.android.model/-payment-intent/is-live-mode.html
 $dokka.location:com.stripe.android.model/PaymentIntent/lastPaymentError/#/PointingToDeclaration/stripe/com.stripe.android.model/-payment-intent/last-payment-error.html
 $dokka.location:com.stripe.android.model/PaymentIntent/nextAction/#/PointingToDeclaration/stripe/com.stripe.android.model/-payment-intent/next-action.html
@@ -1250,6 +1252,7 @@ $dokka.location:com.stripe.android.model/SetupIntent/clientSecret/#/PointingToDe
 $dokka.location:com.stripe.android.model/SetupIntent/created/#/PointingToDeclaration/stripe/com.stripe.android.model/-setup-intent/created.html
 $dokka.location:com.stripe.android.model/SetupIntent/description/#/PointingToDeclaration/stripe/com.stripe.android.model/-setup-intent/description.html
 $dokka.location:com.stripe.android.model/SetupIntent/id/#/PointingToDeclaration/stripe/com.stripe.android.model/-setup-intent/id.html
+$dokka.location:com.stripe.android.model/SetupIntent/isConfirmed/#/PointingToDeclaration/stripe/com.stripe.android.model/-setup-intent/is-confirmed.html
 $dokka.location:com.stripe.android.model/SetupIntent/isLiveMode/#/PointingToDeclaration/stripe/com.stripe.android.model/-setup-intent/is-live-mode.html
 $dokka.location:com.stripe.android.model/SetupIntent/lastSetupError/#/PointingToDeclaration/stripe/com.stripe.android.model/-setup-intent/last-setup-error.html
 $dokka.location:com.stripe.android.model/SetupIntent/nextActionData/#/PointingToDeclaration/stripe/com.stripe.android.model/-setup-intent/next-action-data.html
@@ -1746,6 +1749,7 @@ $dokka.location:com.stripe.android.model/StripeIntent/clientSecret/#/PointingToD
 $dokka.location:com.stripe.android.model/StripeIntent/created/#/PointingToDeclaration/stripe/com.stripe.android.model/-stripe-intent/created.html
 $dokka.location:com.stripe.android.model/StripeIntent/description/#/PointingToDeclaration/stripe/com.stripe.android.model/-stripe-intent/description.html
 $dokka.location:com.stripe.android.model/StripeIntent/id/#/PointingToDeclaration/stripe/com.stripe.android.model/-stripe-intent/id.html
+$dokka.location:com.stripe.android.model/StripeIntent/isConfirmed/#/PointingToDeclaration/stripe/com.stripe.android.model/-stripe-intent/is-confirmed.html
 $dokka.location:com.stripe.android.model/StripeIntent/isLiveMode/#/PointingToDeclaration/stripe/com.stripe.android.model/-stripe-intent/is-live-mode.html
 $dokka.location:com.stripe.android.model/StripeIntent/nextActionData/#/PointingToDeclaration/stripe/com.stripe.android.model/-stripe-intent/next-action-data.html
 $dokka.location:com.stripe.android.model/StripeIntent/nextActionType/#/PointingToDeclaration/stripe/com.stripe.android.model/-stripe-intent/next-action-type.html
@@ -1835,9 +1839,6 @@ $dokka.location:com.stripe.android.paymentsheet.model/PaymentOption///PointingTo
 $dokka.location:com.stripe.android.paymentsheet.model/PaymentOption/PaymentOption/#kotlin.Int#kotlin.String/PointingToDeclaration/stripe/com.stripe.android.paymentsheet.model/-payment-option/-payment-option.html
 $dokka.location:com.stripe.android.paymentsheet.model/PaymentOption/drawableResourceId/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet.model/-payment-option/drawable-resource-id.html
 $dokka.location:com.stripe.android.paymentsheet.model/PaymentOption/label/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet.model/-payment-option/label.html
-$dokka.location:com.stripe.android.paymentsheet.ui////PointingToDeclaration/stripe/com.stripe.android.paymentsheet.ui/index.html
-$dokka.location:com.stripe.android.paymentsheet.ui/GooglePayButton///PointingToDeclaration/stripe/com.stripe.android.paymentsheet.ui/-google-pay-button/index.html
-$dokka.location:com.stripe.android.paymentsheet.ui/GooglePayButton/GooglePayButton/#android.content.Context#android.util.AttributeSet?#kotlin.Int/PointingToDeclaration/stripe/com.stripe.android.paymentsheet.ui/-google-pay-button/-google-pay-button.html
 $dokka.location:com.stripe.android.paymentsheet////PointingToDeclaration/stripe/com.stripe.android.paymentsheet/index.html
 $dokka.location:com.stripe.android.paymentsheet/GooglePayRepository.Disabled///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-google-pay-repository/-disabled/index.html
 $dokka.location:com.stripe.android.paymentsheet/GooglePayRepository.Disabled/isReady/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-google-pay-repository/-disabled/is-ready.html
@@ -1845,31 +1846,12 @@ $dokka.location:com.stripe.android.paymentsheet/GooglePayRepository///PointingTo
 $dokka.location:com.stripe.android.paymentsheet/GooglePayRepository/isReady/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-google-pay-repository/is-ready.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentOptionCallback///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-option-callback/index.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentOptionCallback/onPaymentOption/#com.stripe.android.paymentsheet.model.PaymentOption?/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-option-callback/on-payment-option.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Canceled///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-canceled/index.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Canceled/Canceled/#kotlin.Throwable?#com.stripe.android.model.PaymentIntent?/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-canceled/-canceled.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Canceled/mostRecentError/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-canceled/most-recent-error.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Canceled/paymentIntent/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-canceled/payment-intent.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Completed///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-completed/index.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Completed/Completed/#com.stripe.android.model.PaymentIntent/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-completed/-completed.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Completed/paymentIntent/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-completed/payment-intent.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Failed///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-failed/index.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Failed/Failed/#kotlin.Throwable#com.stripe.android.model.PaymentIntent?/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-failed/-failed.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Failed/error/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-failed/error.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult.Failed/paymentIntent/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/-failed/payment-intent.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentResult///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-result/index.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.BillingAddressCollectionLevel.Automatic///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-billing-address-collection-level/-automatic/index.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.BillingAddressCollectionLevel.Automatic/name/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-billing-address-collection-level/-automatic/name.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.BillingAddressCollectionLevel.Automatic/ordinal/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-billing-address-collection-level/-automatic/ordinal.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.BillingAddressCollectionLevel.Required///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-billing-address-collection-level/-required/index.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.BillingAddressCollectionLevel.Required/name/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-billing-address-collection-level/-required/name.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.BillingAddressCollectionLevel.Required/ordinal/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-billing-address-collection-level/-required/ordinal.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.BillingAddressCollectionLevel///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-billing-address-collection-level/index.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.Configuration///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-configuration/index.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.Configuration/Configuration/#kotlin.String#com.stripe.android.paymentsheet.PaymentSheet.CustomerConfiguration?#com.stripe.android.paymentsheet.PaymentSheet.GooglePayConfiguration?#com.stripe.android.paymentsheet.PaymentSheet.BillingAddressCollectionLevel/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-configuration/-configuration.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.Configuration/billingAddressCollection/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-configuration/billing-address-collection.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.Configuration/Configuration/#kotlin.String#com.stripe.android.paymentsheet.PaymentSheet.CustomerConfiguration?#com.stripe.android.paymentsheet.PaymentSheet.GooglePayConfiguration?#android.content.res.ColorStateList?/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-configuration/-configuration.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.Configuration/customer/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-configuration/customer.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.Configuration/googlePay/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-configuration/google-pay.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.Configuration/merchantDisplayName/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-configuration/merchant-display-name.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheet.Configuration/primaryButtonColor/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-configuration/primary-button-color.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.CustomerConfiguration///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-customer-configuration/index.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.CustomerConfiguration/CustomerConfiguration/#kotlin.String#kotlin.String/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-customer-configuration/-customer-configuration.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.CustomerConfiguration/ephemeralKeySecret/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-customer-configuration/ephemeral-key-secret.html
@@ -1886,8 +1868,14 @@ $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.GooglePayConfigurat
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.GooglePayConfiguration/countryCode/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-google-pay-configuration/country-code.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet.GooglePayConfiguration/environment/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/-google-pay-configuration/environment.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheet///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet/index.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheetResult.Canceled///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result/-canceled/index.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheetResult.Completed///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result/-completed/index.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheetResult.Failed///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result/-failed/index.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheetResult.Failed/Failed/#kotlin.Throwable/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result/-failed/-failed.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheetResult.Failed/error/#/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result/-failed/error.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheetResult///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result/index.html
 $dokka.location:com.stripe.android.paymentsheet/PaymentSheetResultCallback///PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result-callback/index.html
-$dokka.location:com.stripe.android.paymentsheet/PaymentSheetResultCallback/onPaymentResult/#com.stripe.android.paymentsheet.PaymentResult/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result-callback/on-payment-result.html
+$dokka.location:com.stripe.android.paymentsheet/PaymentSheetResultCallback/onPaymentSheetResult/#com.stripe.android.paymentsheet.PaymentSheetResult/PointingToDeclaration/stripe/com.stripe.android.paymentsheet/-payment-sheet-result-callback/on-payment-sheet-result.html
 $dokka.location:com.stripe.android.view.i18n////PointingToDeclaration/stripe/com.stripe.android.view.i18n/index.html
 $dokka.location:com.stripe.android.view.i18n/ErrorMessageTranslator///PointingToDeclaration/stripe/com.stripe.android.view.i18n/-error-message-translator/index.html
 $dokka.location:com.stripe.android.view.i18n/ErrorMessageTranslator/translate/#kotlin.Int#kotlin.String?#com.stripe.android.StripeError?/PointingToDeclaration/stripe/com.stripe.android.view.i18n/-error-message-translator/translate.html
@@ -2037,6 +2025,9 @@ $dokka.location:com.stripe.android.view/CardValidCallback.Fields.Expiry/ordinal/
 $dokka.location:com.stripe.android.view/CardValidCallback.Fields.Number///PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/-fields/-number/index.html
 $dokka.location:com.stripe.android.view/CardValidCallback.Fields.Number/name/#/PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/-fields/-number/name.html
 $dokka.location:com.stripe.android.view/CardValidCallback.Fields.Number/ordinal/#/PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/-fields/-number/ordinal.html
+$dokka.location:com.stripe.android.view/CardValidCallback.Fields.Postal///PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/-fields/-postal/index.html
+$dokka.location:com.stripe.android.view/CardValidCallback.Fields.Postal/name/#/PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/-fields/-postal/name.html
+$dokka.location:com.stripe.android.view/CardValidCallback.Fields.Postal/ordinal/#/PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/-fields/-postal/ordinal.html
 $dokka.location:com.stripe.android.view/CardValidCallback.Fields///PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/-fields/index.html
 $dokka.location:com.stripe.android.view/CardValidCallback///PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/index.html
 $dokka.location:com.stripe.android.view/CardValidCallback/onInputChanged/#kotlin.Boolean#kotlin.collections.Set[com.stripe.android.view.CardValidCallback.Fields]/PointingToDeclaration/stripe/com.stripe.android.view/-card-valid-callback/on-input-changed.html
@@ -2153,11 +2144,13 @@ $dokka.location:com.stripe.android.view/StripeEditText.ErrorMessageListener///Po
 $dokka.location:com.stripe.android.view/StripeEditText.ErrorMessageListener/displayErrorMessage/#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/-error-message-listener/display-error-message.html
 $dokka.location:com.stripe.android.view/StripeEditText///PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/index.html
 $dokka.location:com.stripe.android.view/StripeEditText/StripeEditText/#android.content.Context#android.util.AttributeSet?#kotlin.Int/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/-stripe-edit-text.html
+$dokka.location:com.stripe.android.view/StripeEditText/addTextChangedListener/#android.text.TextWatcher?/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/add-text-changed-listener.html
 $dokka.location:com.stripe.android.view/StripeEditText/cachedColorStateList/#/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/cached-color-state-list.html
 $dokka.location:com.stripe.android.view/StripeEditText/defaultErrorColorInt/#/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/default-error-color-int.html
 $dokka.location:com.stripe.android.view/StripeEditText/getOnFocusChangeListener/#/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/get-on-focus-change-listener.html
 $dokka.location:com.stripe.android.view/StripeEditText/onCreateInputConnection/#android.view.inputmethod.EditorInfo/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/on-create-input-connection.html
 $dokka.location:com.stripe.android.view/StripeEditText/onInitializeAccessibilityNodeInfo/#android.view.accessibility.AccessibilityNodeInfo/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/on-initialize-accessibility-node-info.html
+$dokka.location:com.stripe.android.view/StripeEditText/removeTextChangedListener/#android.text.TextWatcher?/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/remove-text-changed-listener.html
 $dokka.location:com.stripe.android.view/StripeEditText/setAfterTextChangedListener/#com.stripe.android.view.StripeEditText.AfterTextChangedListener?/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/set-after-text-changed-listener.html
 $dokka.location:com.stripe.android.view/StripeEditText/setDeleteEmptyListener/#com.stripe.android.view.StripeEditText.DeleteEmptyListener?/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/set-delete-empty-listener.html
 $dokka.location:com.stripe.android.view/StripeEditText/setErrorColor/#kotlin.Int/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/set-error-color.html
@@ -2168,6 +2161,7 @@ $dokka.location:com.stripe.android.view/StripeEditText/setTextColor/#android.con
 $dokka.location:com.stripe.android.view/StripeEditText/setTextColor/#kotlin.Int/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/set-text-color.html
 $dokka.location:com.stripe.android.view/StripeEditText/shouldShowError/#/PointingToDeclaration/stripe/com.stripe.android.view/-stripe-edit-text/should-show-error.html
 $dokka.location:com.stripe.android////PointingToDeclaration/stripe/com.stripe.android/index.html
+$dokka.location:com.stripe.android//confirmAlipayPayment/com.stripe.android.Stripe#com.stripe.android.model.ConfirmPaymentIntentParams#com.stripe.android.AlipayAuthenticator#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/confirm-alipay-payment.html
 $dokka.location:com.stripe.android//confirmPaymentIntent/com.stripe.android.Stripe#com.stripe.android.model.ConfirmPaymentIntentParams#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/confirm-payment-intent.html
 $dokka.location:com.stripe.android//confirmSetupIntent/com.stripe.android.Stripe#com.stripe.android.model.ConfirmSetupIntentParams#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/confirm-setup-intent.html
 $dokka.location:com.stripe.android//createAccountToken/com.stripe.android.Stripe#com.stripe.android.model.AccountParams#kotlin.String?#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/create-account-token.html
@@ -2179,6 +2173,9 @@ $dokka.location:com.stripe.android//createPaymentMethod/com.stripe.android.Strip
 $dokka.location:com.stripe.android//createPersonToken/com.stripe.android.Stripe#com.stripe.android.model.PersonTokenParams#kotlin.String?#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/create-person-token.html
 $dokka.location:com.stripe.android//createPiiToken/com.stripe.android.Stripe#kotlin.String#kotlin.String?#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/create-pii-token.html
 $dokka.location:com.stripe.android//createSource/com.stripe.android.Stripe#com.stripe.android.model.SourceParams#kotlin.String?#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/create-source.html
+$dokka.location:com.stripe.android//getAuthenticateSourceResult/com.stripe.android.Stripe#kotlin.Int#android.content.Intent/PointingToDeclaration/stripe/com.stripe.android/get-authenticate-source-result.html
+$dokka.location:com.stripe.android//getPaymentIntentResult/com.stripe.android.Stripe#kotlin.Int#android.content.Intent/PointingToDeclaration/stripe/com.stripe.android/get-payment-intent-result.html
+$dokka.location:com.stripe.android//getSetupIntentResult/com.stripe.android.Stripe#kotlin.Int#android.content.Intent/PointingToDeclaration/stripe/com.stripe.android/get-setup-intent-result.html
 $dokka.location:com.stripe.android//retrievePaymentIntent/com.stripe.android.Stripe#kotlin.String#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/retrieve-payment-intent.html
 $dokka.location:com.stripe.android//retrieveSetupIntent/com.stripe.android.Stripe#kotlin.String#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/retrieve-setup-intent.html
 $dokka.location:com.stripe.android//retrieveSource/com.stripe.android.Stripe#kotlin.String#kotlin.String#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/retrieve-source.html
@@ -2510,6 +2507,8 @@ $dokka.location:com.stripe.android/Stripe/handleNextActionForPayment/#androidx.f
 $dokka.location:com.stripe.android/Stripe/handleNextActionForSetupIntent/#android.app.Activity#kotlin.String#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/-stripe/handle-next-action-for-setup-intent.html
 $dokka.location:com.stripe.android/Stripe/handleNextActionForSetupIntent/#androidx.fragment.app.Fragment#kotlin.String#kotlin.String?/PointingToDeclaration/stripe/com.stripe.android/-stripe/handle-next-action-for-setup-intent.html
 $dokka.location:com.stripe.android/Stripe/isAuthenticateSourceResult/#kotlin.Int#android.content.Intent?/PointingToDeclaration/stripe/com.stripe.android/-stripe/is-authenticate-source-result.html
+$dokka.location:com.stripe.android/Stripe/isPaymentResult/#kotlin.Int#android.content.Intent?/PointingToDeclaration/stripe/com.stripe.android/-stripe/is-payment-result.html
+$dokka.location:com.stripe.android/Stripe/isSetupResult/#kotlin.Int#android.content.Intent?/PointingToDeclaration/stripe/com.stripe.android/-stripe/is-setup-result.html
 $dokka.location:com.stripe.android/Stripe/onAuthenticateSourceResult/#android.content.Intent#com.stripe.android.ApiResultCallback[com.stripe.android.model.Source]/PointingToDeclaration/stripe/com.stripe.android/-stripe/on-authenticate-source-result.html
 $dokka.location:com.stripe.android/Stripe/onPaymentResult/#kotlin.Int#android.content.Intent?#com.stripe.android.ApiResultCallback[com.stripe.android.PaymentIntentResult]/PointingToDeclaration/stripe/com.stripe.android/-stripe/on-payment-result.html
 $dokka.location:com.stripe.android/Stripe/onSetupResult/#kotlin.Int#android.content.Intent?#com.stripe.android.ApiResultCallback[com.stripe.android.SetupIntentResult]/PointingToDeclaration/stripe/com.stripe.android/-stripe/on-setup-result.html
@@ -2547,7 +2546,6 @@ com.stripe.android.model.wallets
 com.stripe.android.payments
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.model
-com.stripe.android.paymentsheet.ui
 com.stripe.android.view
 com.stripe.android.view.i18n
 

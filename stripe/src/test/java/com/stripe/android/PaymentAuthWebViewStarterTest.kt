@@ -32,6 +32,7 @@ class PaymentAuthWebViewStarterTest {
     private val host = AuthActivityStarter.Host.create(activity)
     private val legacyStarter = PaymentAuthWebViewStarter.Legacy(
         host,
+        isCustomTabsSupported = true,
         defaultReturnUrl
     )
 
