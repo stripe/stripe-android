@@ -383,6 +383,32 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withWechatPayPaymentMethodOptions_shouldCreateExpectedMap() {
+        val appId = "appId123456"
+        assertThat(
+            ConfirmPaymentIntentParams(
+                paymentMethodId = "pm_123",
+                paymentMethodOptions = PaymentMethodOptionsParams.WechatPay(
+                    appId = appId
+                ),
+                clientSecret = CLIENT_SECRET
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "payment_method" to "pm_123",
+                "payment_method_options" to mapOf(
+                    PaymentMethod.Type.WechatPay.code to mapOf(
+                        PaymentMethodOptionsParams.WechatPay.PARAM_CLIENT to "android",
+                        PaymentMethodOptionsParams.WechatPay.PARAM_APP_ID to appId,
+                    )
+                ),
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to false
+            )
+        )
+    }
+
+    @Test
     fun toParamMap_withReceiptEmail_shouldCreateExpectedMap() {
         assertThat(
             ConfirmPaymentIntentParams(

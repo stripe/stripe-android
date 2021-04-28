@@ -4,6 +4,7 @@ import android.net.Uri
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.WeChat
 import org.json.JSONObject
 
 internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionData> {
@@ -19,6 +20,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
             StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
+            StripeIntent.NextActionType.WechatPayRedirect -> WechatPayRedirectParser()
             else -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
@@ -147,6 +149,37 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         ModelJsonParser<StripeIntent.NextActionData.BlikAuthorize> {
         override fun parse(json: JSONObject): StripeIntent.NextActionData.BlikAuthorize {
             return StripeIntent.NextActionData.BlikAuthorize
+        }
+    }
+
+    internal class WechatPayRedirectParser :
+        ModelJsonParser<StripeIntent.NextActionData.WechatPayRedirect> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.WechatPayRedirect {
+            return StripeIntent.NextActionData.WechatPayRedirect(
+                WeChat(
+                    appId = json.optString(APP_ID),
+                    nonce = json.optString(NONCE_STR),
+                    packageValue = json.optString(
+                        PACKAGE
+                    ),
+                    partnerId = json.optString(PARTNER_ID),
+                    prepayId = json.optString(
+                        PREPAY_ID
+                    ),
+                    timestamp = json.optString(TIMESTAMP),
+                    sign = json.optString(SIGN)
+                )
+            )
+        }
+
+        private companion object {
+            private const val APP_ID = "app_id"
+            private const val NONCE_STR = "nonce_str"
+            private const val PACKAGE = "package"
+            private const val PARTNER_ID = "partner_id"
+            private const val PREPAY_ID = "prepay_id"
+            private const val TIMESTAMP = "timestamp"
+            private const val SIGN = "sign"
         }
     }
 

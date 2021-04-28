@@ -203,7 +203,8 @@ data class PaymentMethodCreateParams internal constructor(
         AfterpayClearpay("afterpay_clearpay"),
         Upi("upi"),
         Netbanking("netbanking"),
-        Blik("blik")
+        Blik("blik"),
+        WechatPay("wechat_pay")
     }
 
     @Parcelize
@@ -765,6 +766,19 @@ data class PaymentMethodCreateParams internal constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = Type.Blik,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createWechatPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.WechatPay,
                 billingDetails = billingDetails,
                 metadata = metadata
             )

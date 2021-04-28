@@ -324,4 +324,18 @@ internal class PaymentMethodEndToEndTest {
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Blik)
     }
+
+    @Test
+    fun createPaymentMethod_withWechatPay_shouldCreateObject() {
+        val params = PaymentMethodCreateParams.createWechatPay()
+        val paymentMethod =
+            Stripe(
+                context,
+                ApiKeyFixtures.WECHAT_PAY_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.WechatPayV1)
+            )
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.WechatPay)
+    }
 }

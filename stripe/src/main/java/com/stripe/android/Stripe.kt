@@ -198,6 +198,42 @@ class Stripe internal constructor(
     }
 
     /**
+     * Confirm a [PaymentIntent] for Wechat Pay. Extract params from [WechatPayNextAction] to pass to Wechat Pay SDK.
+     * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">Wechat Pay Documentation</a>
+     *
+     * Wechat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WechatPayV1] to enable this API.
+     *
+     * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
+     * [PaymentIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the [Stripe] object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     *
+     * Possible callback errors:
+     * [AuthenticationException] failure to properly authenticate yourself (check your key)
+     * [InvalidRequestException] your request has invalid parameters
+     * [APIConnectionException] failure to connect to Stripe's API
+     * [APIException] any other type of problem (for instance, a temporary issue with Stripe's servers)
+     * [InvalidRequestException] if the payment intent's next action data is not for Wechat Pay
+     */
+    @JvmOverloads
+    fun confirmWechatPayPayment(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<WechatPayNextAction>
+    ) {
+        executeAsync(callback) {
+            paymentController.confirmWechatPay(
+                confirmPaymentIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
      * Confirm and, if necessary, authenticate a [PaymentIntent].
      * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
      *

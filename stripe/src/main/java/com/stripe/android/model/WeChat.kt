@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class WeChat internal constructor(
-    val statementDescriptor: String?,
+    val statementDescriptor: String? = null,
     val appId: String?,
     val nonce: String?,
     val packageValue: String?,

@@ -569,6 +569,39 @@ suspend fun Stripe.confirmSetupIntent(
 }
 
 /**
+ * Suspend function to confirm a [PaymentIntent] for Wechat Pay. Extract params from [WechatPayNextAction] to pass to Wechat Pay SDK.
+ * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">Wechat Pay Documentation</a>
+ *
+ * Wechat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WechatPayV1] to enable this API.
+ *
+ * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
+ * [PaymentIntent]
+ * @param stripeAccountId Optional, the Connect account to associate with this request.
+ * By default, will use the Connect account that was used to instantiate the [Stripe] object, if specified.
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+suspend fun Stripe.confirmWechatPayPayment(
+    confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+    stripeAccountId: String? = this.stripeAccountId,
+): WechatPayNextAction {
+    return runCatching {
+        paymentController.confirmWechatPay(
+            confirmPaymentIntentParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
+        )
+    }.getOrElse {
+        throw StripeException.create(it)
+    }
+}
+
+/**
  * Suspend function to confirm a [PaymentIntent] object.
  *
  * See [Confirm a PaymentIntent](https://stripe.com/docs/api/payment_intents/confirm).

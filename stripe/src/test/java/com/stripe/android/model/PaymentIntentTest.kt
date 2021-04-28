@@ -49,6 +49,15 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun parsePaymentIntentWithWechatPayPaymentMethods() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
+        assertThat(paymentIntent.requiresAction())
+            .isTrue()
+        assertThat(paymentIntent.paymentMethodTypes)
+            .containsExactly("wechat_pay")
+    }
+
+    @Test
     fun getNextActionData_whenUseStripeSdkWith3ds2() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         assertThat(paymentIntent.nextActionData)
@@ -88,6 +97,23 @@ class PaymentIntentTest {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE
         assertThat(paymentIntent.nextActionData)
             .isInstanceOf(StripeIntent.NextActionData.BlikAuthorize::class.java)
+    }
+
+    @Test
+    fun getNextActionData_whenWechatPay() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
+        assertThat(paymentIntent.nextActionData)
+            .isInstanceOf(StripeIntent.NextActionData.WechatPayRedirect::class.java)
+        val weChat = (paymentIntent.nextActionData as StripeIntent.NextActionData.WechatPayRedirect).weChat
+        assertThat(weChat.appId).isEqualTo("wx65997d6307c3827d")
+        assertThat(weChat.nonce).isEqualTo("some_random_string")
+        assertThat(weChat.packageValue).isEqualTo("Sign=WXPay")
+        assertThat(weChat.partnerId).isEqualTo("wx65997d6307c3827d")
+        assertThat(weChat.prepayId).isEqualTo("test_transaction")
+        assertThat(weChat.timestamp).isEqualTo("1619638941")
+        assertThat(weChat.sign).isEqualTo("8B26124BABC816D7140034DDDC7D3B2F1036CCB2D910E52592687F6A44790D5E")
+        assertThat(weChat.statementDescriptor).isNull()
+        assertThat(weChat.qrCodeUrl).isNull()
     }
 
     @Test

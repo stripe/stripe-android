@@ -54,4 +54,21 @@ sealed class PaymentMethodOptionsParams(
             const val PARAM_CODE = "code"
         }
     }
+
+    @Parcelize
+    data class WechatPay(
+        var appId: String,
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.WechatPay) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_CLIENT to "android",
+                PARAM_APP_ID to appId
+            )
+        }
+
+        internal companion object {
+            const val PARAM_CLIENT = "client"
+            const val PARAM_APP_ID = "app_id"
+        }
+    }
 }

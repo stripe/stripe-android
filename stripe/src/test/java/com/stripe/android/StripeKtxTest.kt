@@ -516,6 +516,55 @@ internal class StripeKtxTest {
             stripe::getAuthenticateSourceResult
         )
 
+    @Test
+    fun `When controller returns correct value then confirmWeChatPayPayment should succeed`(): Unit =
+        testDispatcher.runBlockingTest {
+            val expectedApiObj = mock<WechatPayNextAction>()
+
+            whenever(
+                mockPaymentController.confirmWechatPay(any(), any())
+            ).thenReturn(expectedApiObj)
+
+            val actualObj = stripe.confirmWechatPayPayment(
+                mock(),
+                TEST_STRIPE_ACCOUNT_ID
+            )
+
+            assertSame(expectedApiObj, actualObj)
+        }
+
+    @Test
+    fun `When controller throws exception then confirmWeChatPayPayment should throw same exception`(): Unit =
+        testDispatcher.runBlockingTest {
+            whenever(
+                mockPaymentController.confirmWechatPay(any(), any())
+            ).thenThrow(mock<AuthenticationException>())
+
+            assertFailsWith<AuthenticationException> {
+                stripe.confirmWechatPayPayment(
+                    mock(),
+                    TEST_STRIPE_ACCOUNT_ID
+                )
+            }
+        }
+
+    @Test
+    fun `When nextAction is not for Wechatpay then should throw InvalidRequestException`(): Unit =
+        // when nextAction is not for Wechatpay, mockPaymentController fails in `require` and
+        // throws an IllegalArgumentException
+        testDispatcher.runBlockingTest {
+            whenever(
+                mockPaymentController.confirmWechatPay(any(), any())
+            ).thenThrow(mock<IllegalArgumentException>())
+
+            assertFailsWith<InvalidRequestException> {
+                stripe.confirmWechatPayPayment(
+                    mock(),
+                    TEST_STRIPE_ACCOUNT_ID
+                )
+            }
+        }
+
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI then returns correct result`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,

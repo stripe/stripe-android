@@ -193,6 +193,24 @@ internal class StripePaymentController internal constructor(
         )
     }
 
+    override suspend fun confirmWechatPay(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        requestOptions: ApiRequest.Options
+    ): WechatPayNextAction {
+        confirmPaymentIntent(
+            confirmPaymentIntentParams,
+            requestOptions
+        ).let { paymentIntent ->
+            require(paymentIntent.nextActionData is StripeIntent.NextActionData.WechatPayRedirect) {
+                "Unable to confirm Payment Intent with WechatPay SDK"
+            }
+            return WechatPayNextAction(
+                paymentIntent,
+                paymentIntent.nextActionData.weChat,
+            )
+        }
+    }
+
     private suspend fun confirmPaymentIntent(
         confirmStripeIntentParams: ConfirmPaymentIntentParams,
         requestOptions: ApiRequest.Options

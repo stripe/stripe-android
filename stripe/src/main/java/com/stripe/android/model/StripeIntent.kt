@@ -67,7 +67,8 @@ interface StripeIntent : StripeModel {
         UseStripeSdk("use_stripe_sdk"),
         DisplayOxxoDetails("oxxo_display_details"),
         AlipayRedirect("alipay_handle_redirect"),
-        BlikAuthorize("blik_authorize");
+        BlikAuthorize("blik_authorize"),
+        WechatPayRedirect("wechat_pay_redirect_to_android_app");
 
         override fun toString(): String {
             return code
@@ -237,5 +238,8 @@ interface StripeIntent : StripeModel {
                 return this === other
             }
         }
+
+        @Parcelize
+        internal data class WechatPayRedirect(val weChat: WeChat) : NextActionData()
     }
 }
