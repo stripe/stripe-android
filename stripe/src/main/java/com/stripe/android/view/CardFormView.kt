@@ -270,6 +270,11 @@ internal class CardFormView @JvmOverloads constructor(
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_card_form_view_text_input_layout_background)
+        cardMultilineWidget.cvcEditText.doAfterTextChanged { cvcText ->
+            if (cardMultilineWidget.brand.isMaxCvc(cvcText.toString())) {
+                postalCodeView.requestFocus()
+            }
+        }
 
         val layoutMarginHorizontal =
             resources.getDimensionPixelSize(R.dimen.stripe_card_form_view_text_margin_horizontal)
@@ -280,7 +285,7 @@ internal class CardFormView @JvmOverloads constructor(
             cardMultilineWidget.expiryTextInputLayout,
             cardMultilineWidget.cvcInputLayout
         ).forEach { layout ->
-            layout.updateLayoutParams<LinearLayout.LayoutParams> {
+            layout.updateLayoutParams<LayoutParams> {
                 marginStart = layoutMarginHorizontal
                 marginEnd = layoutMarginHorizontal
                 topMargin = layoutMarginVertical
