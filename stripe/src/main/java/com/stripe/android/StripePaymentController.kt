@@ -1014,9 +1014,7 @@ internal class StripePaymentController internal constructor(
             }
         }.let { event ->
             analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.create(
-                    analyticsDataFactory.createParams(event)
-                )
+                analyticsRequestFactory.createRequest(event)
             )
         }
     }
