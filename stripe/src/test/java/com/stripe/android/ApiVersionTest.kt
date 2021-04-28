@@ -15,10 +15,4 @@ class ApiVersionTest {
         assertThat(ApiVersion(setOf(StripeApiBeta.WechatPayV1)).code)
             .isEqualTo("$API_VERSION_CODE;${StripeApiBeta.WechatPayV1.code}")
     }
-
-    @Test
-    fun `multiple beta headers should have correct code`() {
-        assertThat(ApiVersion(setOf(StripeApiBeta.WechatPayV1, StripeApiBeta.AlipayV1)).code)
-            .isEqualTo("$API_VERSION_CODE;${StripeApiBeta.WechatPayV1.code};${StripeApiBeta.AlipayV1.code}")
-    }
 }
