@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.AnalyticsEvent
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 
@@ -16,7 +16,7 @@ internal class StripeBrowserLauncherViewModel(
     private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : ViewModel() {
 
-    fun getResultIntent(args: PaymentAuthWebViewContract.Args): Intent {
+    fun getResultIntent(args: PaymentBrowserAuthContract.Args): Intent {
         val url = Uri.parse(args.url)
         return Intent().putExtras(
             PaymentFlowResult.Unvalidated(

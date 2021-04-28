@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -155,7 +155,7 @@ class PaymentAuthWebViewActivityViewModelTest {
     }
 
     private fun createViewModel(
-        args: PaymentAuthWebViewContract.Args
+        args: PaymentBrowserAuthContract.Args
     ): PaymentAuthWebViewActivityViewModel {
         return PaymentAuthWebViewActivityViewModel(
             args,
@@ -165,7 +165,7 @@ class PaymentAuthWebViewActivityViewModelTest {
     }
 
     private companion object {
-        val ARGS = PaymentAuthWebViewContract.Args(
+        val ARGS = PaymentBrowserAuthContract.Args(
             objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = 100,
             clientSecret = "client_secret",
