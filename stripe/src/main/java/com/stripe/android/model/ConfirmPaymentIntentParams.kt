@@ -327,11 +327,13 @@ data class ConfirmPaymentIntentParams internal constructor(
         fun create(
             clientSecret: String,
             returnUrl: String? = null,
-            shipping: Shipping? = null
+            shipping: Shipping? = null,
+            setupFutureUsage: SetupFutureUsage? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 returnUrl = returnUrl,
+                setupFutureUsage = setupFutureUsage,
                 shipping = shipping
             )
         }
@@ -342,7 +344,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         @Deprecated(
-            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] to specify a value for setup_future_usage."
+            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] paramter to specify a value for setup_future_usage."
         )
         fun create(
             clientSecret: String,
@@ -429,7 +431,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         @Deprecated(
-            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] to specify a value for setup_future_usage."
+            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] parameter to specify a value for setup_future_usage."
         )
         fun createWithPaymentMethodId(
             paymentMethodId: String,
@@ -524,7 +526,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         @Deprecated(
-            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] to specify a value for setup_future_usage."
+            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] parameter to specify a value for setup_future_usage."
         )
         fun createWithPaymentMethodCreateParams(
             paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -603,7 +605,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         @Deprecated(
-            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] to specify a value for setup_future_usage."
+            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] parameter to specify a value for setup_future_usage."
         )
         fun createWithSourceId(
             sourceId: String,
@@ -672,7 +674,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         @Deprecated(
-            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] to specify a value for setup_future_usage."
+            "The [extraParams] property is deprecated and will be removed in an upcoming major version. Use the [setupFutureUsage] parameter to specify a value for setup_future_usage."
         )
         fun createWithSourceParams(
             sourceParams: SourceParams,
