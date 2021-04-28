@@ -4,9 +4,8 @@ import android.content.Context
 import com.stripe.android.AnalyticsEvent
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.AccountRange
-import com.stripe.android.networking.AnalyticsDataFactory
-import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.flow.Flow
@@ -19,15 +18,13 @@ import kotlinx.coroutines.flow.flowOf
  */
 internal class DefaultCardAccountRangeRepositoryFactory(
     context: Context,
-    private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequest.Factory
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
 
     constructor(context: Context) : this(
         context,
-        AnalyticsRequestExecutor.Default(),
-        AnalyticsRequest.Factory()
+        AnalyticsRequestExecutor.Default()
     )
 
     @Throws(IllegalStateException::class)
@@ -68,8 +65,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
                     ),
                     DefaultCardAccountRangeStore(appContext),
                     AnalyticsRequestExecutor.Default(),
-                    AnalyticsRequest.Factory(),
-                    AnalyticsDataFactory(appContext, publishableKey)
+                    AnalyticsRequestFactory(appContext, publishableKey)
                 )
             },
             onFailure = {
@@ -83,12 +79,10 @@ internal class DefaultCardAccountRangeRepositoryFactory(
         event: AnalyticsEvent
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                AnalyticsDataFactory(
-                    appContext,
-                    publishableKey
-                ).createParams(event)
-            )
+            AnalyticsRequestFactory(
+                appContext,
+                publishableKey
+            ).createRequest(event)
         )
     }
 

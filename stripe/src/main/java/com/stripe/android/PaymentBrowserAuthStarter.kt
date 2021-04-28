@@ -1,25 +1,24 @@
 package com.stripe.android
 
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
- * A class that manages starting a [PaymentAuthWebViewActivity] with [PaymentAuthWebViewContract.Args].
- *
- * TODO(mshafrir-stripe): use a more generic class name
+ * A class that manages starting a [StripeBrowserLauncherActivity] or [PaymentAuthWebViewActivity]
+ * with a [PaymentBrowserAuthContract.Args].
  */
-internal interface PaymentAuthWebViewStarter :
-    AuthActivityStarter<PaymentAuthWebViewContract.Args> {
+internal interface PaymentBrowserAuthStarter :
+    AuthActivityStarter<PaymentBrowserAuthContract.Args> {
     class Legacy(
         private val host: AuthActivityStarter.Host,
         private val isCustomTabsSupported: Boolean,
         private val defaultReturnUrl: DefaultReturnUrl
-    ) : PaymentAuthWebViewStarter {
-        override fun start(args: PaymentAuthWebViewContract.Args) {
+    ) : PaymentBrowserAuthStarter {
+        override fun start(args: PaymentBrowserAuthContract.Args) {
             val shouldUseCustomTabs = args.shouldUseCustomTabs(
                 isCustomTabsSupported,
                 defaultReturnUrl
@@ -36,9 +35,9 @@ internal interface PaymentAuthWebViewStarter :
     }
 
     class Modern(
-        private val launcher: ActivityResultLauncher<PaymentAuthWebViewContract.Args>
-    ) : PaymentAuthWebViewStarter {
-        override fun start(args: PaymentAuthWebViewContract.Args) {
+        private val launcher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>
+    ) : PaymentBrowserAuthStarter {
+        override fun start(args: PaymentBrowserAuthContract.Args) {
             launcher.launch(args)
         }
     }

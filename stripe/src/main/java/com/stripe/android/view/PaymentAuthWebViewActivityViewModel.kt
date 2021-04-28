@@ -10,19 +10,18 @@ import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentAuthWebViewContract
-import com.stripe.android.networking.AnalyticsDataFactory
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeClientUserAgentHeaderFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 
 internal class PaymentAuthWebViewActivityViewModel(
-    private val args: PaymentAuthWebViewContract.Args,
+    private val args: PaymentBrowserAuthContract.Args,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequest.Factory,
-    private val analyticsDataFactory: AnalyticsDataFactory
+    private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : ViewModel() {
     val extraHeaders: Map<String, String> by lazy {
         StripeClientUserAgentHeaderFactory().create(Stripe.appInfo)
@@ -73,18 +72,18 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logStart(uri: Uri?) {
         fireAnalytics(
-            analyticsDataFactory.createAuthParams(
+            analyticsRequestFactory.createAuth(
                 AnalyticsEvent.Auth3ds1ChallengeStart,
-                args.objectId
-            ),
-            uri
+                args.objectId,
+                extraParams = uri.createAnalyticsChallengeUri()
+            )
         )
 
         fireAnalytics(
-            analyticsDataFactory.createParams(
-                AnalyticsEvent.AuthWithWebView
-            ),
-            uri = null
+            analyticsRequestFactory.createRequest(
+                AnalyticsEvent.AuthWithWebView,
+                extraParams = uri.createAnalyticsChallengeUri()
+            )
         )
     }
 
@@ -96,16 +95,16 @@ internal class PaymentAuthWebViewActivityViewModel(
         error: Throwable
     ) {
         fireAnalytics(
-            analyticsDataFactory.createAuthParams(
+            analyticsRequestFactory.createAuth(
                 AnalyticsEvent.Auth3ds1ChallengeError,
-                args.objectId
-            ).plus(
-                mapOf(
+                args.objectId,
+                extraParams = mapOf(
                     FIELD_ERROR_MESSAGE to error.message.orEmpty(),
                     FIELD_ERROR_STACKTRACE to error.stackTraceToString()
+                ).plus(
+                    uri.createAnalyticsChallengeUri()
                 )
-            ),
-            uri
+            )
         )
     }
 
@@ -114,32 +113,27 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logComplete(uri: Uri?) {
         fireAnalytics(
-            analyticsDataFactory.createAuthParams(
+            analyticsRequestFactory.createAuth(
                 AnalyticsEvent.Auth3ds1ChallengeComplete,
-                args.objectId
-            ),
-            uri
+                args.objectId,
+                extraParams = uri.createAnalyticsChallengeUri()
+            )
         )
     }
 
     private fun fireAnalytics(
-        event: Map<String, Any>,
-        uri: Uri?
+        request: AnalyticsRequest
     ) {
-        val sanitizedUri = if (uri != null) {
-            "${uri.scheme}://${uri.host}"
+        analyticsRequestExecutor.executeAsync(request)
+    }
+
+    private fun Uri?.createAnalyticsChallengeUri(): Map<String, String> {
+        val sanitizedUri = if (this != null) {
+            "${this.scheme}://${this.host}"
         } else {
             ""
         }
-
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                event
-                    .plus(
-                        mapOf(FIELD_CHALLENGE_URI to sanitizedUri)
-                    )
-            )
-        )
+        return mapOf(FIELD_CHALLENGE_URI to sanitizedUri)
     }
 
     internal data class ToolbarTitleData(
@@ -150,7 +144,7 @@ internal class PaymentAuthWebViewActivityViewModel(
     internal class Factory(
         private val application: Application,
         private val logger: Logger,
-        private val args: PaymentAuthWebViewContract.Args
+        private val args: PaymentBrowserAuthContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
@@ -158,8 +152,7 @@ internal class PaymentAuthWebViewActivityViewModel(
             return PaymentAuthWebViewActivityViewModel(
                 args,
                 AnalyticsRequestExecutor.Default(logger),
-                AnalyticsRequest.Factory(logger),
-                AnalyticsDataFactory(application, publishableKey)
+                AnalyticsRequestFactory(application, publishableKey)
             ) as T
         }
     }

@@ -10,7 +10,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.StripeException
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
@@ -26,7 +26,7 @@ class PaymentAuthWebViewActivityTest {
     val rule = InstantTaskExecutorRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val contract = PaymentAuthWebViewContract(
+    private val contract = PaymentBrowserAuthContract(
         DefaultReturnUrl.create(context),
         isCustomTabsSupported = { true }
     )
@@ -97,7 +97,7 @@ class PaymentAuthWebViewActivityTest {
         private const val REQUEST_CODE = 1000
         private const val CLIENT_SECRET = "client_secret"
 
-        private val ARGS = PaymentAuthWebViewContract.Args(
+        private val ARGS = PaymentBrowserAuthContract.Args(
             objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = REQUEST_CODE,
             clientSecret = CLIENT_SECRET,

@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -21,9 +21,8 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.AnalyticsDataFactory
-import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.StripeRepository
@@ -71,13 +70,13 @@ internal class StripePaymentController internal constructor(
         StripeThreeDs2ServiceImpl(context, enableLogging),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
-    private val analyticsDataFactory: AnalyticsDataFactory =
-        AnalyticsDataFactory(context.applicationContext, publishableKey),
+    private val analyticsRequestFactory: AnalyticsRequestFactory =
+        AnalyticsRequestFactory(context.applicationContext, publishableKey),
     private val challengeProgressActivityStarter: ChallengeProgressActivityStarter =
         ChallengeProgressActivityStarter.Default(),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
-    private val paymentAuthWebViewLauncher: ActivityResultLauncher<PaymentAuthWebViewContract.Args>? = null,
+    private val paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? = null,
     private val stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? = null,
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val uiContext: CoroutineContext = Dispatchers.Main
@@ -92,7 +91,6 @@ internal class StripePaymentController internal constructor(
     )
 
     private val logger = Logger.getInstance(enableLogging)
-    private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
     private val paymentRelayStarterFactory = { host: AuthActivityStarter.Host ->
@@ -105,10 +103,10 @@ internal class StripePaymentController internal constructor(
         CustomTabsCapabilities(context).isSupported()
     }
 
-    private val paymentAuthWebViewStarterFactory = { host: AuthActivityStarter.Host ->
-        paymentAuthWebViewLauncher?.let {
-            PaymentAuthWebViewStarter.Modern(it)
-        } ?: PaymentAuthWebViewStarter.Legacy(
+    private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarter.Host ->
+        paymentBrowserAuthLauncher?.let {
+            PaymentBrowserAuthStarter.Modern(it)
+        } ?: PaymentBrowserAuthStarter.Legacy(
             host,
             isCustomTabsSupported,
             defaultReturnUrl
@@ -136,6 +134,8 @@ internal class StripePaymentController internal constructor(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
     ) {
+        logReturnUrl(confirmStripeIntentParams.returnUrl)
+
         val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
             ?: defaultReturnUrl.value
 
@@ -281,11 +281,9 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthSourceParams(
-                    AnalyticsEvent.AuthSourceStart,
-                    source.id
-                )
+            analyticsRequestFactory.createAuthSource(
+                AnalyticsEvent.AuthSourceStart,
+                source.id
             )
         )
 
@@ -318,7 +316,7 @@ internal class StripePaymentController internal constructor(
     ) {
         if (source.flow == Source.Flow.Redirect) {
             startSourceAuth(
-                paymentAuthWebViewStarterFactory(host),
+                paymentBrowserAuthStarterFactory(host),
                 source,
                 requestOptions
             )
@@ -328,21 +326,19 @@ internal class StripePaymentController internal constructor(
     }
 
     private suspend fun startSourceAuth(
-        paymentAuthWebViewStarter: PaymentAuthWebViewStarter,
+        paymentBrowserAuthStarter: PaymentBrowserAuthStarter,
         source: Source,
         requestOptions: ApiRequest.Options
     ) = withContext(uiContext) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthSourceParams(
-                    AnalyticsEvent.AuthSourceRedirect,
-                    source.id
-                )
+            analyticsRequestFactory.createAuthSource(
+                AnalyticsEvent.AuthSourceRedirect,
+                source.id
             )
         )
 
-        paymentAuthWebViewStarter.start(
-            PaymentAuthWebViewContract.Args(
+        paymentBrowserAuthStarter.start(
+            PaymentBrowserAuthContract.Args(
                 objectId = source.id.orEmpty(),
                 requestCode = SOURCE_REQUEST_CODE,
                 clientSecret = source.clientSecret.orEmpty(),
@@ -453,11 +449,9 @@ internal class StripePaymentController internal constructor(
         )
 
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthSourceParams(
-                    AnalyticsEvent.AuthSourceResult,
-                    sourceId
-                )
+            analyticsRequestFactory.createAuthSource(
+                AnalyticsEvent.AuthSourceResult,
+                sourceId
             )
         )
 
@@ -582,11 +576,9 @@ internal class StripePaymentController internal constructor(
         nextActionData: StripeIntent.NextActionData.SdkData.Use3DS2
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthParams(
-                    AnalyticsEvent.Auth3ds2Fingerprint,
-                    stripeIntent.id.orEmpty()
-                )
+            analyticsRequestFactory.createAuth(
+                AnalyticsEvent.Auth3ds2Fingerprint,
+                stripeIntent.id.orEmpty()
             )
         )
         try {
@@ -613,15 +605,13 @@ internal class StripePaymentController internal constructor(
         returnUrl: String?
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthParams(
-                    AnalyticsEvent.Auth3ds1Sdk,
-                    stripeIntent.id.orEmpty()
-                )
+            analyticsRequestFactory.createAuth(
+                AnalyticsEvent.Auth3ds1Sdk,
+                stripeIntent.id.orEmpty()
             )
         )
         beginWebAuth(
-            paymentAuthWebViewStarterFactory(host),
+            paymentBrowserAuthStarterFactory(host),
             stripeIntent,
             getRequestCode(stripeIntent),
             stripeIntent.clientSecret.orEmpty(),
@@ -640,16 +630,14 @@ internal class StripePaymentController internal constructor(
         nextActionData: StripeIntent.NextActionData.RedirectToUrl
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthParams(
-                    AnalyticsEvent.AuthRedirect,
-                    stripeIntent.id.orEmpty()
-                )
+            analyticsRequestFactory.createAuth(
+                AnalyticsEvent.AuthRedirect,
+                stripeIntent.id.orEmpty()
             )
         )
 
         beginWebAuth(
-            paymentAuthWebViewStarterFactory(host),
+            paymentBrowserAuthStarterFactory(host),
             stripeIntent,
             getRequestCode(stripeIntent),
             stripeIntent.clientSecret.orEmpty(),
@@ -672,16 +660,14 @@ internal class StripePaymentController internal constructor(
         nextActionData: StripeIntent.NextActionData.AlipayRedirect
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthParams(
-                    AnalyticsEvent.AuthRedirect,
-                    stripeIntent.id.orEmpty()
-                )
+            analyticsRequestFactory.createAuth(
+                AnalyticsEvent.AuthRedirect,
+                stripeIntent.id.orEmpty()
             )
         )
 
         beginWebAuth(
-            paymentAuthWebViewStarterFactory(host),
+            paymentBrowserAuthStarterFactory(host),
             stripeIntent,
             getRequestCode(stripeIntent),
             stripeIntent.clientSecret.orEmpty(),
@@ -700,7 +686,7 @@ internal class StripePaymentController internal constructor(
         // TODO(smaskell): add analytics event
         if (nextActionData.hostedVoucherUrl != null) {
             beginWebAuth(
-                paymentAuthWebViewStarterFactory(host),
+                paymentBrowserAuthStarterFactory(host),
                 stripeIntent,
                 getRequestCode(stripeIntent),
                 stripeIntent.clientSecret.orEmpty(),
@@ -884,15 +870,13 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthParams(
-                    AnalyticsEvent.Auth3ds2Fallback,
-                    stripeIntent.id.orEmpty()
-                )
+            analyticsRequestFactory.createAuth(
+                AnalyticsEvent.Auth3ds2Fallback,
+                stripeIntent.id.orEmpty()
             )
         )
         beginWebAuth(
-            paymentAuthWebViewStarterFactory(host),
+            paymentBrowserAuthStarterFactory(host),
             stripeIntent,
             getRequestCode(stripeIntent),
             stripeIntent.clientSecret.orEmpty(),
@@ -908,11 +892,9 @@ internal class StripePaymentController internal constructor(
         stripeIntent: StripeIntent
     ) = withContext(uiContext) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.createAuthParams(
-                    AnalyticsEvent.Auth3ds2Frictionless,
-                    stripeIntent.id.orEmpty()
-                )
+            analyticsRequestFactory.createAuth(
+                AnalyticsEvent.Auth3ds2Frictionless,
+                stripeIntent.id.orEmpty()
             )
         )
         paymentRelayStarter.start(
@@ -959,9 +941,8 @@ internal class StripePaymentController internal constructor(
                         sourceId,
                         requestOptions,
                         analyticsRequestExecutor,
-                        analyticsDataFactory,
-                        transaction,
                         analyticsRequestFactory,
+                        transaction,
                         workContext = workContext
                     ),
                     maxTimeout
@@ -994,7 +975,7 @@ internal class StripePaymentController internal constructor(
      * Start in-app WebView activity.
      */
     private suspend fun beginWebAuth(
-        paymentWebWebViewStarter: PaymentAuthWebViewStarter,
+        paymentBrowserWebStarter: PaymentBrowserAuthStarter,
         stripeIntent: StripeIntent,
         requestCode: Int,
         clientSecret: String,
@@ -1004,9 +985,9 @@ internal class StripePaymentController internal constructor(
         shouldCancelSource: Boolean = false,
         shouldCancelIntentOnUserNavigation: Boolean = true
     ) = withContext(uiContext) {
-        logger.debug("PaymentAuthWebViewStarter#start()")
-        paymentWebWebViewStarter.start(
-            PaymentAuthWebViewContract.Args(
+        logger.debug("PaymentBrowserAuthStarter#start()")
+        paymentBrowserWebStarter.start(
+            PaymentBrowserAuthContract.Args(
                 objectId = stripeIntent.id.orEmpty(),
                 requestCode,
                 clientSecret,
@@ -1018,6 +999,24 @@ internal class StripePaymentController internal constructor(
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
             )
         )
+    }
+
+    private fun logReturnUrl(returnUrl: String?) {
+        when (returnUrl) {
+            defaultReturnUrl.value -> {
+                AnalyticsEvent.ConfirmReturnUrlDefault
+            }
+            null -> {
+                AnalyticsEvent.ConfirmReturnUrlNull
+            }
+            else -> {
+                AnalyticsEvent.ConfirmReturnUrlCustom
+            }
+        }.let { event ->
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.createRequest(event)
+            )
+        }
     }
 
     internal interface ChallengeProgressActivityStarter {

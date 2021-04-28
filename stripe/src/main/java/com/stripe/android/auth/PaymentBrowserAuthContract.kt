@@ -14,14 +14,15 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
 import kotlinx.parcelize.Parcelize
 
 /**
- * TODO(mshafrir-stripe): use a more generic class name
+ * An [ActivityResultContract] for completing payment authentication in a browser. This will
+ * be handled in either [StripeBrowserLauncherActivity] or [PaymentAuthWebViewActivity].
  */
-internal class PaymentAuthWebViewContract(
+internal class PaymentBrowserAuthContract(
     private val defaultReturnUrl: DefaultReturnUrl,
     private val isCustomTabsSupported: (Context) -> Boolean = { context ->
         CustomTabsCapabilities(context).isSupported()
     }
-) : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
+) : ActivityResultContract<PaymentBrowserAuthContract.Args, PaymentFlowResult.Unvalidated>() {
 
     override fun createIntent(
         context: Context,
@@ -80,17 +81,10 @@ internal class PaymentAuthWebViewContract(
             isCustomTabsSupported: Boolean,
             defaultReturnUrl: DefaultReturnUrl
         ): Boolean {
-            return IS_BROWSER_ENABLED &&
-                isCustomTabsSupported &&
-                returnUrl == defaultReturnUrl.value
+            return isCustomTabsSupported && returnUrl == defaultReturnUrl.value
         }
 
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
-
-        private companion object {
-            // TODO(mshafrir-stripe): enable when ready to launch
-            private const val IS_BROWSER_ENABLED = false
-        }
     }
 
     companion object {

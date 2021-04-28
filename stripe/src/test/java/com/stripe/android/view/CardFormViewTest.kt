@@ -183,6 +183,17 @@ class CardFormViewTest {
     }
 
     @Test
+    fun `when cvc becomes valid then postal should get focus`() {
+        setValuesToStandardUI(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, INVALID_CVC)
+
+        assertThat(standardBinding!!.postalCode.hasFocus()).isFalse()
+
+        standardBinding!!.cardMultilineWidget.cvcEditText.append("3")
+
+        assertThat(standardBinding!!.postalCode.hasFocus()).isTrue()
+    }
+
+    @Test
     fun verifyStandardStyle() {
         idleLooper()
         standardBinding!!.let {
@@ -349,14 +360,16 @@ class CardFormViewTest {
         month: String,
         year: String,
         cvc: String,
-        zip: String
+        zip: String? = null
     ) {
         standardBinding!!.let {
             it.cardMultilineWidget.cardNumberEditText.setText(visa)
             it.cardMultilineWidget.expiryDateEditText.append(month)
             it.cardMultilineWidget.expiryDateEditText.append(year)
             it.cardMultilineWidget.cvcEditText.append(cvc)
-            it.postalCode.setText(zip)
+            zip?.let { zipString ->
+                it.postalCode.setText(zipString)
+            }
         }
     }
 
