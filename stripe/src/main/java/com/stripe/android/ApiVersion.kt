@@ -11,7 +11,7 @@ package com.stripe.android
  */
 internal data class ApiVersion internal constructor(
     internal val version: String,
-    internal var betas: Set<StripeApiBeta>? = null
+    internal val betas: Set<StripeApiBeta> = emptySet()
 ) {
     constructor(
         betas: Set<StripeApiBeta>
@@ -19,13 +19,11 @@ internal data class ApiVersion internal constructor(
 
     val code: String
         get() =
-            betas?.let { betas ->
-                listOf(this.version)
-                    .plus(
-                        betas.map { it.code }
-                    )
-                    .joinToString(";")
-            } ?: version
+            listOf(this.version)
+                .plus(
+                    betas.map { it.code }
+                )
+                .joinToString(";")
 
     internal companion object {
         const val API_VERSION_CODE: String = "2020-03-02"
