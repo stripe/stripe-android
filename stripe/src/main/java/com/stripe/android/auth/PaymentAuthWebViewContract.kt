@@ -80,17 +80,10 @@ internal class PaymentAuthWebViewContract(
             isCustomTabsSupported: Boolean,
             defaultReturnUrl: DefaultReturnUrl
         ): Boolean {
-            return IS_BROWSER_ENABLED &&
-                isCustomTabsSupported &&
-                returnUrl == defaultReturnUrl.value
+            return isCustomTabsSupported && returnUrl == defaultReturnUrl.value
         }
 
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
-
-        private companion object {
-            // TODO(mshafrir-stripe): enable when ready to launch
-            private const val IS_BROWSER_ENABLED = false
-        }
     }
 
     companion object {

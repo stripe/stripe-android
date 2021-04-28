@@ -3,7 +3,6 @@ package com.stripe.android.networking
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Logger
 import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.InvalidRequestException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,7 +27,6 @@ internal fun interface AnalyticsRequestExecutor {
          * @return the response status code. Used for testing purposes.
          */
         @VisibleForTesting
-        @Throws(APIConnectionException::class, InvalidRequestException::class)
         internal fun execute(request: AnalyticsRequest): Int {
             connectionFactory.create(request).use {
                 try {
@@ -41,6 +39,8 @@ internal fun interface AnalyticsRequestExecutor {
         }
 
         override fun executeAsync(request: AnalyticsRequest) {
+            logger.info("Event: ${request.params[AnalyticsRequestFactory.FIELD_EVENT]}")
+
             CoroutineScope(workContext).launch {
                 runCatching {
                     execute(request)
