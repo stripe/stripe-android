@@ -35,7 +35,7 @@ import com.stripe.android.view.CardValidCallback.Fields
  * To access the [CardParams], see details in [cardParams] property.
  * To get notified if the current card params are valid, set a [CardValidCallback] object with [setCardValidCallback].
  */
-class CardFormView @JvmOverloads constructor(
+internal class CardFormView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
