@@ -143,7 +143,8 @@ class ConfirmPaymentIntentParamsTest {
         val params = ConfirmPaymentIntentParams
             .createWithPaymentMethodId(
                 "pm_123",
-                CLIENT_SECRET
+                CLIENT_SECRET,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
             )
             .toParamMap()
 
@@ -152,7 +153,8 @@ class ConfirmPaymentIntentParamsTest {
                 mapOf(
                     "client_secret" to CLIENT_SECRET,
                     "use_stripe_sdk" to false,
-                    "payment_method" to "pm_123"
+                    "payment_method" to "pm_123",
+                    "setup_future_usage" to "on_session"
                 )
             )
     }
