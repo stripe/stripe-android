@@ -248,9 +248,9 @@ internal class CardFormView @JvmOverloads constructor(
                 resources.getDimension(R.dimen.stripe_card_form_view_textsize)
             )
             editText.setTextColor(
-                ContextCompat.getColor(
+                ContextCompat.getColorStateList(
                     context,
-                    R.color.stripe_card_form_view_textinput_color
+                    R.color.stripe_card_form_view_text_color
                 )
             )
 
