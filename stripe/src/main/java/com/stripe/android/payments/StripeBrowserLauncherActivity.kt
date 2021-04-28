@@ -9,17 +9,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
- * A transparent activity that launches [PaymentAuthWebViewContract.Args.url] in either
+ * A transparent activity that launches [PaymentBrowserAuthContract.Args.url] in either
  * Custom Tabs (if available) or a browser.
  *
  * The eventual replacement for [PaymentAuthWebViewActivity].
  *
  * [StripeBrowserLauncherActivity] will only be used if Custom Tabs are enabled. See
- * [PaymentAuthWebViewContract.Args.shouldUseCustomTabs].
+ * [PaymentBrowserAuthContract.Args.shouldUseCustomTabs].
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
@@ -33,7 +33,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = PaymentAuthWebViewContract.parseArgs(intent)
+        val args = PaymentBrowserAuthContract.parseArgs(intent)
         if (args == null) {
             // handle failures
             finish()

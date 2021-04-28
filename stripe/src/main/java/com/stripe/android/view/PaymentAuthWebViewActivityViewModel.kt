@@ -10,7 +10,7 @@ import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -19,7 +19,7 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 
 internal class PaymentAuthWebViewActivityViewModel(
-    private val args: PaymentAuthWebViewContract.Args,
+    private val args: PaymentBrowserAuthContract.Args,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : ViewModel() {
@@ -144,7 +144,7 @@ internal class PaymentAuthWebViewActivityViewModel(
     internal class Factory(
         private val application: Application,
         private val logger: Logger,
-        private val args: PaymentAuthWebViewContract.Args
+        private val args: PaymentBrowserAuthContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
