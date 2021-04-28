@@ -694,7 +694,8 @@ public final class com/stripe/android/Stripe {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Z)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun authenticatePayment (Landroid/app/Activity;Ljava/lang/String;)V
 	public final fun authenticatePayment (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
 	public final fun authenticateSetup (Landroid/app/Activity;Ljava/lang/String;)V
@@ -853,6 +854,13 @@ public final class com/stripe/android/Stripe$Companion {
 	public final fun getAppInfo ()Lcom/stripe/android/AppInfo;
 	public final fun setAdvancedFraudSignalsEnabled (Z)V
 	public final fun setAppInfo (Lcom/stripe/android/AppInfo;)V
+}
+
+public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
+	public static final field WechatPayV1 Lcom/stripe/android/StripeApiBeta;
+	public final fun getCode ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/StripeApiBeta;
+	public static fun values ()[Lcom/stripe/android/StripeApiBeta;
 }
 
 public final class com/stripe/android/StripeError : com/stripe/android/model/StripeModel, java/io/Serializable {
