@@ -2,8 +2,7 @@
 
 ## 16.7.0 - unreleased
 * [#3653](https://github.com/stripe/stripe-android/pull/3653) Support WeChat Pay for creating a `PaymentMethod` and confirming a `PaymentIntent`
-    * WeChat is still in beta, need to pass `StripeApiBeta.WeChatPayV1` parameter to `Stripe` to enable.
-
+    * WeChat Pay is still in beta. To enable support in API bindings, pass the `StripeApiBeta.WeChatPayV1` as an argument when instantiating a `Stripe` instance.
 * [#3567](https://github.com/stripe/stripe-android/pull/3567) Use `lifecycleScope` where possible in `Stripe.kt`
     * When calling payment and setup confirmation methods (e.g. `confirmPayment()`), using
       a `ComponentActivity` subclass (e.g. `AppCompatActivity`) will make the call lifecycle-aware.
