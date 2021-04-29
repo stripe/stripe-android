@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
@@ -463,6 +464,18 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `isGooglePayReady for SetupIntent should emit false`() {
+        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP)
+        var isReady: Boolean? = null
+        viewModel.isGooglePayReady.observeForever {
+            isReady = it
+        }
+        viewModel.fetchIsGooglePayReady()
+        assertThat(isReady)
+            .isFalse()
+    }
+
+    @Test
     fun `fetchFragmentConfig() when all data is ready should emit value`() {
         viewModel.fetchStripeIntent()
         viewModel.fetchIsGooglePayReady()
@@ -504,6 +517,27 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(isEnabled)
             .isTrue()
+    }
+
+    @Test
+    fun `Primary button label shows amount for PaymentIntent`() {
+        viewModel.fetchStripeIntent()
+
+        assertThat(viewModel.primaryButtonLabel.value)
+            .isEqualTo("Pay \$10.99")
+    }
+
+    @Test
+    fun `Primary button label shows correct text for SetupIntent`() {
+        val viewModel = createViewModel(
+            stripeIntentRepository = StripeIntentRepository.Static(
+                SETUP_INTENT
+            )
+        )
+        viewModel.fetchStripeIntent()
+
+        assertThat(viewModel.primaryButtonLabel.value)
+            .isEqualTo("Set up")
     }
 
     @Test
@@ -582,6 +616,7 @@ internal class PaymentSheetViewModelTest {
 
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
+        val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_RESULT = PaymentIntentResult(
             intent = PAYMENT_INTENT,

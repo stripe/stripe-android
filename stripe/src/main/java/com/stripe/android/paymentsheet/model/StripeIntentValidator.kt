@@ -32,7 +32,6 @@ internal class StripeIntentValidator {
                     """.trimIndent()
                 )
             }
-            // TODO: What is a valid SetupIntent?
             stripeIntent is SetupIntent &&
                 stripeIntent.status != StripeIntent.Status.RequiresPaymentMethod -> {
                 error(

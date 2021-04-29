@@ -22,7 +22,7 @@ class SetupIntentJsonParserTest {
     @Test
     fun parse_withExpandedPaymentMethod_shouldCreateExpectedObject() {
         val setupIntent = requireNotNull(
-            SetupIntentJsonParser().parse(SetupIntentFixtures.EXPANDED_PAYMENT_METHOD)
+            SetupIntentJsonParser().parse(SetupIntentFixtures.SI_EXPANDED_PAYMENT_METHOD_JSON)
         )
         assertThat(setupIntent.paymentMethodId)
             .isEqualTo("pm_1GSmaGCRMbs6F")

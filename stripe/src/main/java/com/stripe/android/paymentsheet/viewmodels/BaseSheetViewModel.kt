@@ -50,7 +50,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
     internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
 
-    protected val _stripeIntent = MutableLiveData<StripeIntent?>()
+    @VisibleForTesting
+    internal val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()

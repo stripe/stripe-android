@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
@@ -18,8 +19,11 @@ import com.stripe.android.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -176,6 +180,8 @@ class PaymentSheetAddCardFragmentTest {
     @Test
     fun `selection when save card checkbox enabled and then valid card entered should create expected PaymentSelection`() {
         createFragment { fragment, viewBinding ->
+            assertThat(viewBinding.saveCardCheckbox.isVisible)
+                .isTrue()
             viewBinding.saveCardCheckbox.isChecked = false
 
             var paymentSelection: PaymentSelection? = null
@@ -190,6 +196,8 @@ class PaymentSheetAddCardFragmentTest {
             viewBinding.cardMultilineWidget.setCvcCode("123")
             viewBinding.billingAddress.countryView.setText("United States")
             viewBinding.billingAddress.postalCodeView.setText("94107")
+
+            idleLooper()
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
@@ -202,6 +210,8 @@ class PaymentSheetAddCardFragmentTest {
     @Test
     fun `selection when valid card entered and then save card checkbox enabled should create expected PaymentSelection`() {
         createFragment { fragment, viewBinding ->
+            assertThat(viewBinding.saveCardCheckbox.isVisible)
+                .isTrue()
             viewBinding.saveCardCheckbox.isChecked = false
 
             var paymentSelection: PaymentSelection? = null
@@ -217,12 +227,22 @@ class PaymentSheetAddCardFragmentTest {
 
             viewBinding.saveCardCheckbox.isChecked = true
 
+            idleLooper()
+
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isTrue()
 
             assertThat(fragment.sheetViewModel.newCard?.brand)
                 .isEqualTo(CardBrand.Visa)
+        }
+    }
+
+    @Test
+    fun `when processing SetupIntent should hide saveCardCheckbox`() {
+        createFragment(stripeIntent = mock<SetupIntent>()) { _, viewBinding ->
+            assertThat(viewBinding.saveCardCheckbox.isVisible)
+                .isFalse()
         }
     }
 
@@ -550,7 +570,8 @@ class PaymentSheetAddCardFragmentTest {
     private fun createFragment(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
-        onReady: (PaymentSheetAddCardFragment, FragmentPaymentsheetAddCardBinding) -> Unit
+        stripeIntent: StripeIntent? = mock<PaymentIntent>(),
+        onReady: (PaymentSheetAddCardFragment, FragmentPaymentsheetAddCardBinding) -> Unit,
     ) {
         launchFragmentInContainer<PaymentSheetAddCardFragment>(
             bundleOf(
@@ -558,14 +579,19 @@ class PaymentSheetAddCardFragmentTest {
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args
             ),
             R.style.StripePaymentSheetDefaultTheme,
-            factory = PaymentSheetFragmentFactory(eventReporter)
+            factory = PaymentSheetFragmentFactory(eventReporter),
+            initialState = Lifecycle.State.INITIALIZED
         ).onFragment { fragment ->
-            onReady(
-                fragment,
-                FragmentPaymentsheetAddCardBinding.bind(
-                    requireNotNull(fragment.view)
+            // Mock sheetViewModel loading the StripeIntent before the Fragment is created
+            fragment.sheetViewModel._stripeIntent.value = stripeIntent
+        }.moveToState(Lifecycle.State.STARTED)
+            .onFragment { fragment ->
+                onReady(
+                    fragment,
+                    FragmentPaymentsheetAddCardBinding.bind(
+                        requireNotNull(fragment.view)
+                    )
                 )
-            )
-        }
+            }
     }
 }

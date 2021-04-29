@@ -18,6 +18,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
+import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
@@ -27,6 +28,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
@@ -40,6 +42,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -129,7 +132,7 @@ class DefaultFlowControllerTest {
                 requireNotNull(paymentMethods.first().id)
             )
         )
-        flowController.configureWithPaymentIntent(
+        flowController.configureWithSetupIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -193,6 +196,40 @@ class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `presentPaymentOptions() with SetupIntent after successful init should launch with expected args`() {
+        var launchArgs: PaymentOptionContract.Args? = null
+        flowController.paymentOptionLauncher = {
+            launchArgs = it
+        }
+
+        var isReadyState = false
+        flowController.configureWithSetupIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { isReady, _ ->
+            isReadyState = isReady
+        }
+        assertThat(isReadyState)
+            .isTrue()
+        flowController.presentPaymentOptions()
+
+        assertThat(launchArgs)
+            .isEqualTo(
+                PaymentOptionContract.Args(
+                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+                    paymentMethods = emptyList(),
+                    sessionId = SESSION_ID,
+                    config = null,
+                    isGooglePayReady = false,
+                    newCard = null,
+                    statusBarColor = ContextCompat.getColor(
+                        activity,
+                        R.color.stripe_toolbar_color_default_dark
+                    )
+                )
+            )
+    }
+
+    @Test
     fun `presentPaymentOptions() without successful init should fail`() {
         assertFailsWith<IllegalStateException> {
             flowController.presentPaymentOptions()
@@ -224,7 +261,7 @@ class DefaultFlowControllerTest {
             savedSelection = SavedSelection.GooglePay
         )
 
-        flowController.configureWithPaymentIntent(
+        flowController.configureWithSetupIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -266,7 +303,7 @@ class DefaultFlowControllerTest {
                 requireNotNull(initialPaymentMethods.first().id)
             )
         )
-        flowController.configureWithPaymentIntent(
+        flowController.configureWithSetupIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -311,7 +348,7 @@ class DefaultFlowControllerTest {
             savedSelection = SavedSelection.GooglePay
         )
 
-        flowController.configureWithPaymentIntent(
+        flowController.configureWithSetupIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ) { _, _ ->
@@ -368,6 +405,23 @@ class DefaultFlowControllerTest {
                     )
                 )
             )
+    }
+
+    @Test
+    fun `confirmPayment() with GooglePay using SetupIntent should fail`() {
+        flowController.configureWithSetupIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+        )
+        assertFailsWith<IllegalStateException>(
+            "Google Pay currently supported only for PaymentIntents"
+        ) {
+            flowController.confirm()
+        }
     }
 
     @Test
@@ -436,7 +490,42 @@ class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `onPaymentFlowResult with SetupIntent when succeeded should invoke callback with Completed`() {
+        flowController.configureWithSetupIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { success, error ->
+            assertThat(success).isTrue()
+            assertThat(error).isNull()
+        }
+
+        paymentFlowResultProcessor.setupIntentResult = SetupIntentResult(
+            SetupIntentFixtures.SI_SUCCEEDED,
+            StripeIntentResult.Outcome.SUCCEEDED
+        )
+
+        flowController.onPaymentFlowResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                flowOutcome = StripeIntentResult.Outcome.CANCELED
+            )
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(
+            argWhere { paymentResult ->
+                paymentResult is PaymentSheetResult.Completed
+            }
+        )
+    }
+
+    @Test
     fun `onPaymentFlowResult when succeeded should invoke callback with Completed`() {
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { success, error ->
+            assertThat(success).isTrue()
+            assertThat(error).isNull()
+        }
+
         paymentFlowResultProcessor.paymentIntentResult = PaymentIntentResult(
             PaymentIntentFixtures.PI_WITH_SHIPPING,
             StripeIntentResult.Outcome.SUCCEEDED
@@ -458,6 +547,13 @@ class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentFlowResult when canceled should invoke callback with Cancelled`() {
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { success, error ->
+            assertThat(success).isTrue()
+            assertThat(error).isNull()
+        }
+
         paymentFlowResultProcessor.paymentIntentResult = PaymentIntentResult(
             PaymentIntentFixtures.CANCELLED,
             StripeIntentResult.Outcome.CANCELED
@@ -473,6 +569,27 @@ class DefaultFlowControllerTest {
         verify(paymentResultCallback).onPaymentSheetResult(
             argWhere { paymentResult ->
                 paymentResult is PaymentSheetResult.Canceled
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentFlowResult when error in SetupIntent should invoke callback with Failed`() {
+        paymentFlowResultProcessor.setupIntentResult = SetupIntentResult(
+            SetupIntentFixtures.SI_WITH_LAST_SETUP_ERROR,
+            StripeIntentResult.Outcome.FAILED
+        )
+
+        flowController.onPaymentFlowResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                flowOutcome = StripeIntentResult.Outcome.CANCELED
+            )
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(
+            argWhere { paymentResult ->
+                paymentResult is PaymentSheetResult.Failed
             }
         )
     }
@@ -546,7 +663,11 @@ class DefaultFlowControllerTest {
             return FlowControllerInitializer.InitResult.Success(
                 InitData(
                     configuration,
-                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    if (clientSecret is PaymentIntentClientSecret) {
+                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+                    } else {
+                        SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+                    },
                     listOf(PaymentMethod.Type.Card),
                     paymentMethods,
                     savedSelection,

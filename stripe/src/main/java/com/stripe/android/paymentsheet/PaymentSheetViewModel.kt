@@ -244,10 +244,10 @@ internal class PaymentSheetViewModel internal constructor(
         val paymentSelection = selection.value
 
         if (paymentSelection is PaymentSelection.GooglePay) {
-            (stripeIntent.value as? PaymentIntent)?.let { stripeIntent ->
+            (stripeIntent.value as? PaymentIntent)?.let { paymentIntent ->
                 _launchGooglePay.value = Event(
                     StripeGooglePayContract.Args(
-                        paymentIntent = stripeIntent,
+                        paymentIntent = paymentIntent,
                         config = StripeGooglePayContract.GooglePayConfig(
                             environment = when (args.config?.googlePay?.environment) {
                                 PaymentSheet.GooglePayConfiguration.Environment.Production ->
