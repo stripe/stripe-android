@@ -71,8 +71,7 @@ internal class StripePaymentAuthTest {
         val stripe = createStripe()
         val confirmSetupIntentParams = ConfirmSetupIntentParams.create(
             "pm_card_threeDSecure2Required",
-            "client_secret",
-            "yourapp://post-authentication-return-url"
+            "client_secret"
         )
         stripe.confirmSetupIntent(activity, confirmSetupIntentParams)
         verify(paymentController).startConfirmAndAuth(
