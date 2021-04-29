@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="blurple">#5851df</color>
+
     <color name="primary">#a3acb9</color>
     <color name="primaryDark">#000000</color>
     <color name="appPrimaryDark">#242424</color>

@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.view.PaymentAuthWebViewActivity
@@ -56,9 +57,20 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         viewModel.logCapabilities(shouldUseCustomTabs)
 
         if (shouldUseCustomTabs) {
+            val customTabColorSchemeParams = args.statusBarColor?.let { statusBarColor ->
+                CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(statusBarColor)
+                    .build()
+            }
+
             // use Custom Tabs
             val customTabsIntent = CustomTabsIntent.Builder()
                 .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                .also {
+                    if (customTabColorSchemeParams != null) {
+                        it.setDefaultColorSchemeParams(customTabColorSchemeParams)
+                    }
+                }
                 .build()
             customTabsIntent.intent.data = url
             launcher.launch(customTabsIntent.intent)
