@@ -20,6 +20,7 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -191,6 +192,24 @@ internal class StripePaymentController internal constructor(
             authenticator,
             requestOptions
         )
+    }
+
+    override suspend fun confirmWeChatPay(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        requestOptions: ApiRequest.Options
+    ): WeChatPayNextAction {
+        confirmPaymentIntent(
+            confirmPaymentIntentParams,
+            requestOptions
+        ).let { paymentIntent ->
+            require(paymentIntent.nextActionData is StripeIntent.NextActionData.WeChatPayRedirect) {
+                "Unable to confirm Payment Intent with WeChatPay SDK"
+            }
+            return WeChatPayNextAction(
+                paymentIntent,
+                paymentIntent.nextActionData.weChat,
+            )
+        }
     }
 
     private suspend fun confirmPaymentIntent(

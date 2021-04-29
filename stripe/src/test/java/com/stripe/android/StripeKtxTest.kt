@@ -13,6 +13,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.StripeParamsModel
+import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -515,6 +516,55 @@ internal class StripeKtxTest {
             mockPaymentController::shouldHandleSourceResult,
             stripe::getAuthenticateSourceResult
         )
+
+    @Test
+    fun `When controller returns correct value then confirmWeChatPayPayment should succeed`(): Unit =
+        testDispatcher.runBlockingTest {
+            val expectedApiObj = mock<WeChatPayNextAction>()
+
+            whenever(
+                mockPaymentController.confirmWeChatPay(any(), any())
+            ).thenReturn(expectedApiObj)
+
+            val actualObj = stripe.confirmWeChatPayPayment(
+                mock(),
+                TEST_STRIPE_ACCOUNT_ID
+            )
+
+            assertSame(expectedApiObj, actualObj)
+        }
+
+    @Test
+    fun `When controller throws exception then confirmWeChatPayPayment should throw same exception`(): Unit =
+        testDispatcher.runBlockingTest {
+            whenever(
+                mockPaymentController.confirmWeChatPay(any(), any())
+            ).thenThrow(mock<AuthenticationException>())
+
+            assertFailsWith<AuthenticationException> {
+                stripe.confirmWeChatPayPayment(
+                    mock(),
+                    TEST_STRIPE_ACCOUNT_ID
+                )
+            }
+        }
+
+    @Test
+    fun `When nextAction is not for WeChatPay then should throw InvalidRequestException`(): Unit =
+        // when nextAction is not for WeChatPay, mockPaymentController fails in `require` and
+        // throws an IllegalArgumentException
+        testDispatcher.runBlockingTest {
+            whenever(
+                mockPaymentController.confirmWeChatPay(any(), any())
+            ).thenThrow(mock<IllegalArgumentException>())
+
+            assertFailsWith<InvalidRequestException> {
+                stripe.confirmWeChatPayPayment(
+                    mock(),
+                    TEST_STRIPE_ACCOUNT_ID
+                )
+            }
+        }
 
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI then returns correct result`(

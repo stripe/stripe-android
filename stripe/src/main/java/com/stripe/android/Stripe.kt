@@ -37,6 +37,7 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -250,6 +251,42 @@ class Stripe internal constructor(
             paymentController.confirmAndAuthenticateAlipay(
                 confirmPaymentIntentParams,
                 authenticator,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
+     * Confirm a [PaymentIntent] for WeChat Pay. Extract params from [WeChatPayNextAction] to pass to WeChat Pay SDK.
+     * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">WeChat Pay Documentation</a>
+     *
+     * WeChat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WeChatPayV1] to enable this API.
+     *
+     * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
+     * [PaymentIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the [Stripe] object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     *
+     * Possible callback errors:
+     * [AuthenticationException] failure to properly authenticate yourself (check your key)
+     * [InvalidRequestException] your request has invalid parameters
+     * [APIConnectionException] failure to connect to Stripe's API
+     * [APIException] any other type of problem (for instance, a temporary issue with Stripe's servers)
+     * [InvalidRequestException] if the payment intent's next action data is not for WeChat Pay
+     */
+    @JvmOverloads
+    fun confirmWeChatPayPayment(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<WeChatPayNextAction>
+    ) {
+        executeAsync(callback) {
+            paymentController.confirmWeChatPay(
+                confirmPaymentIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId

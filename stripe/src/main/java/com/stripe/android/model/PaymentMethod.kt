@@ -144,7 +144,8 @@ data class PaymentMethod internal constructor(
         PayPal("paypal", isReusable = false),
         AfterpayClearpay("afterpay_clearpay", isReusable = false),
         Netbanking("netbanking", isReusable = false),
-        Blik("blik", isReusable = false);
+        Blik("blik", isReusable = false),
+        WeChatPay("wechat_pay", isReusable = false);
 
         override fun toString(): String {
             return code
