@@ -33,7 +33,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val messageView: TextView
     abstract val fragmentContainerParent: ViewGroup
 
-    abstract fun onUserCancel()
     abstract fun setActivityResult(result: ResultType)
 
     private val keyboardController: KeyboardController by lazy {
@@ -86,7 +85,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         toolbar.setNavigationOnClickListener {
             if (toolbar.isEnabled) {
                 if (supportFragmentManager.backStackEntryCount == 0) {
-                    onUserCancel()
+                    viewModel.onUserCancel()
                 } else {
                     onUserBack()
                 }
@@ -110,13 +109,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             viewModel.onBackPressed()
             super.onBackPressed()
         } else {
-            onUserCancel()
+            viewModel.onUserCancel()
         }
     }
 
     protected fun closeSheet(
         result: ResultType
     ) {
+        // TODO(mlb): Consider if this needs to be an abstract function
         setActivityResult(result)
         bottomSheetController.hide()
     }
@@ -142,7 +142,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         if (!isProcessing) {
             // Handle taps outside of bottom sheet
             rootView.setOnClickListener {
-                onUserCancel()
+                viewModel.onUserCancel()
             }
         } else {
             rootView.setOnClickListener(null)
@@ -150,7 +150,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
     }
 
-    protected fun onUserBack() {
+    private fun onUserBack() {
         keyboardController.hide()
         onBackPressed()
     }
