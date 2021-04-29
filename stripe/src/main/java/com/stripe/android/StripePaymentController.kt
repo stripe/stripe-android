@@ -962,6 +962,9 @@ internal class StripePaymentController internal constructor(
                         analyticsRequestExecutor,
                         analyticsRequestFactory,
                         transaction,
+                        {
+                            transaction.close()
+                        },
                         workContext = workContext
                     ),
                     maxTimeout
