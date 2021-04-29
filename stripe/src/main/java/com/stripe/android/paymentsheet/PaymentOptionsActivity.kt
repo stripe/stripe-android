@@ -88,9 +88,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
                 PrimaryButton.State.FinishProcessing(viewState.onComplete)
             )
-            is ViewState.PaymentOptions.ProcessResult -> processResult(
-                viewState.result
-            )
         }
     }
 
@@ -108,10 +105,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
         setContentView(viewBinding.root)
 
-        viewModel.fatal.observe(this) {
-            closeSheet(
-                PaymentOptionResult.Failed(it)
-            )
+        viewModel.paymentOptionResult.observe(this) {
+            closeSheet(it)
         }
 
         setupAddButton(viewBinding.addButton)
@@ -226,20 +221,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
     }
 
-    private fun processResult(result: PaymentOptionResult) {
-        closeSheet(result)
-    }
-
     override fun setActivityResult(result: PaymentOptionResult) {
         setResult(
             result.resultCode,
             Intent()
                 .putExtras(result.toBundle())
         )
-    }
-
-    override fun onUserCancel() {
-        closeSheet(PaymentOptionResult.Canceled(mostRecentError = viewModel.fatal.value))
     }
 
     internal companion object {

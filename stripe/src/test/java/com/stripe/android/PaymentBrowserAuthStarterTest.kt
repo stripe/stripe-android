@@ -2,8 +2,11 @@ package com.stripe.android
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argWhere
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -29,9 +32,9 @@ class PaymentBrowserAuthStarterTest {
     private val defaultReturnUrl = DefaultReturnUrl.create(
         ApplicationProvider.getApplicationContext()
     )
-    private val host = AuthActivityStarter.Host.create(activity)
+
     private val legacyStarter = PaymentBrowserAuthStarter.Legacy(
-        host,
+        AuthActivityStarter.Host.create(activity),
         isCustomTabsSupported = true,
         defaultReturnUrl
     )
@@ -68,6 +71,29 @@ class PaymentBrowserAuthStarterTest {
         )
         assertNotNull(args.toolbarCustomization)
         assertEquals(DATA.clientSecret, args.clientSecret)
+    }
+
+    @Test
+    fun `intent extras should include statusBarColor when available`() {
+        val legacyStarter = PaymentBrowserAuthStarter.Legacy(
+            AuthActivityStarter.Host(
+                activity,
+                fragment = null,
+                statusBarColor = Color.RED
+            ),
+            isCustomTabsSupported = true,
+            defaultReturnUrl
+        )
+        legacyStarter.start(DATA)
+        verify(activity).startActivityForResult(
+            argWhere { intent ->
+                val args = requireNotNull(
+                    intent.getParcelableExtra<PaymentBrowserAuthContract.Args>("extra_args")
+                )
+                args.statusBarColor == Color.RED
+            },
+            any()
+        )
     }
 
     private companion object {

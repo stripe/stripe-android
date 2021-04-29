@@ -1,5 +1,6 @@
 package com.stripe.android.auth
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
@@ -33,6 +34,15 @@ internal class PaymentBrowserAuthContract(
             defaultReturnUrl
         )
 
+        val statusBarColor = when (context) {
+            is Activity -> context.window?.statusBarColor
+            else -> null
+        }
+
+        val extras = input
+            .copy(statusBarColor = statusBarColor)
+            .toBundle()
+
         return Intent(
             context,
             when (shouldUseCustomTabs) {
@@ -40,7 +50,7 @@ internal class PaymentBrowserAuthContract(
                 false -> PaymentAuthWebViewActivity::class.java
             }
         ).also { intent ->
-            intent.putExtras(input.toBundle())
+            intent.putExtras(extras)
         }
     }
 
@@ -71,7 +81,9 @@ internal class PaymentBrowserAuthContract(
          * Simply displaying the web view is all we need to do, and we expect the user to
          * navigate away after this.
          */
-        val shouldCancelIntentOnUserNavigation: Boolean = true
+        val shouldCancelIntentOnUserNavigation: Boolean = true,
+
+        val statusBarColor: Int? = null
     ) : Parcelable {
         /**
          * If true, use [StripeBrowserLauncherActivity].

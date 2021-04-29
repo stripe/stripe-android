@@ -22,7 +22,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.R
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
@@ -168,10 +167,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
         setContentView(viewBinding.root)
 
-        viewModel.fatal.observe(this) {
-            closeSheet(PaymentSheetResult.Failed(it))
-        }
-
         rootView.doOnNextLayout {
             // Show bottom sheet only after the Activity has been laid out so that it animates in
             bottomSheetController.expand()
@@ -214,12 +209,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        // This needs to be handled in the case where the google pay button on the add
-        // fragment is listening for events.  The page still needs to know to close the sheet.
-        viewModel.viewState.observe(this) { viewState ->
-            if (viewState is ViewState.PaymentSheet.ProcessResult<*>) {
-                processResult(viewState.result)
-            }
+        viewModel.paymentSheetResult.observe(this) {
+            closeSheet(it)
         }
     }
 
@@ -335,27 +326,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         )
     }
 
-    private fun processResult(stripeIntentResult: StripeIntentResult<*>) {
-        when (stripeIntentResult.outcome) {
-            StripeIntentResult.Outcome.SUCCEEDED -> {
-                closeSheet(PaymentSheetResult.Completed)
-            }
-            else -> {
-                // TODO(mshafrir-stripe): handle other outcomes
-            }
-        }
-    }
-
     override fun setActivityResult(result: PaymentSheetResult) {
         setResult(
             Activity.RESULT_OK,
             Intent()
                 .putExtras(PaymentSheetContract.Result(result).toBundle())
         )
-    }
-
-    override fun onUserCancel() {
-        closeSheet(PaymentSheetResult.Canceled)
     }
 
     internal companion object {

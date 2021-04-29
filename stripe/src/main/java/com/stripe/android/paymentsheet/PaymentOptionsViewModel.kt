@@ -34,6 +34,10 @@ internal class PaymentOptionsViewModel(
     )
     internal val viewState: LiveData<ViewState.PaymentOptions> = _viewState.distinctUntilChanged()
 
+    @VisibleForTesting
+    internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
+    internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
+
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newCard = args.newCard
@@ -54,6 +58,16 @@ internal class PaymentOptionsViewModel(
         _processing.postValue(false)
     }
 
+    override fun onFatal(throwable: Throwable) {
+        _fatal.value = throwable
+        _paymentOptionResult.value = PaymentOptionResult.Failed(throwable)
+    }
+
+    override fun onUserCancel() {
+        _paymentOptionResult.value =
+            PaymentOptionResult.Canceled(mostRecentError = _fatal.value)
+    }
+
     fun onUserSelection() {
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
@@ -71,17 +85,13 @@ internal class PaymentOptionsViewModel(
     private fun processExistingCard(paymentSelection: PaymentSelection) {
         _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
-        _viewState.value = ViewState.PaymentOptions.ProcessResult(
-            PaymentOptionResult.Succeeded(paymentSelection)
-        )
+        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
     private fun processNewCard(paymentSelection: PaymentSelection) {
         _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
-        _viewState.value = ViewState.PaymentOptions.ProcessResult(
-            PaymentOptionResult.Succeeded(paymentSelection)
-        )
+        _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
     fun resolveTransitionTarget(config: FragmentConfig) {

@@ -1,12 +1,18 @@
 package com.stripe.android.auth
 
+import android.app.Activity
+import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.StripeBrowserLauncherActivity
+import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.PaymentAuthWebViewActivity
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -16,13 +22,28 @@ class PaymentBrowserAuthContractTest {
         "com.example.app"
     )
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
+    private lateinit var activity: Activity
+
+    @BeforeTest
+    fun setup() {
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+        activityScenarioFactory.createAddPaymentMethodActivity().use { activityScenario ->
+            activityScenario.onActivity {
+                activity = it
+            }
+        }
+    }
+
     @Test
     fun `createIntent() when custom tabs supported and custom return_url should use PaymentAuthWebViewActivity`() {
         val intent = PaymentBrowserAuthContract(
             defaultReturnUrl,
             isCustomTabsSupported = { true }
         ).createIntent(
-            ApplicationProvider.getApplicationContext(),
+            activity,
             ARGS.copy(
                 returnUrl = "myapp://custom"
             )
@@ -38,7 +59,7 @@ class PaymentBrowserAuthContractTest {
             defaultReturnUrl,
             isCustomTabsSupported = { true }
         ).createIntent(
-            ApplicationProvider.getApplicationContext(),
+            activity,
             ARGS.copy(
                 returnUrl = defaultReturnUrl.value
             )
@@ -54,7 +75,7 @@ class PaymentBrowserAuthContractTest {
             defaultReturnUrl,
             isCustomTabsSupported = { false }
         ).createIntent(
-            ApplicationProvider.getApplicationContext(),
+            activity,
             ARGS.copy(
                 returnUrl = defaultReturnUrl.value
             )
@@ -62,6 +83,25 @@ class PaymentBrowserAuthContractTest {
 
         assertThat(intent.component?.className)
             .isEqualTo(PaymentAuthWebViewActivity::class.java.name)
+    }
+
+    @Test
+    fun `createIntent() should set statusBarColor from activity`() {
+        val intent = PaymentBrowserAuthContract(
+            defaultReturnUrl,
+            isCustomTabsSupported = { false }
+        ).createIntent(
+            activity,
+            ARGS
+        )
+
+        val args = requireNotNull(
+            intent.getParcelableExtra<PaymentBrowserAuthContract.Args>("extra_args")
+        )
+        assertThat(args.statusBarColor)
+            .isNotNull()
+        assertThat(args.statusBarColor)
+            .isEqualTo(activity.window.statusBarColor)
     }
 
     private companion object {

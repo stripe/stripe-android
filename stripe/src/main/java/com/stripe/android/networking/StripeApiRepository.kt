@@ -9,6 +9,7 @@ import com.stripe.android.FingerprintData
 import com.stripe.android.FingerprintDataRepository
 import com.stripe.android.Logger
 import com.stripe.android.Stripe
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -81,7 +82,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsRequestFactory: AnalyticsRequestFactory =
         AnalyticsRequestFactory(context, publishableKey),
     private val fingerprintParamsUtils: FingerprintParamsUtils = FingerprintParamsUtils(),
-    apiVersion: String = ApiVersion.get().code,
+    betas: Set<StripeApiBeta> = emptySet(),
+    apiVersion: String = ApiVersion(betas = betas).code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
     private val apiRequestFactory = ApiRequest.Factory(
