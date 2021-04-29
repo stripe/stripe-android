@@ -727,9 +727,9 @@ public final class com/stripe/android/Stripe {
 	public final fun confirmSetupIntentSynchronous (Lcom/stripe/android/model/ConfirmSetupIntentParams;)Lcom/stripe/android/model/SetupIntent;
 	public final fun confirmSetupIntentSynchronous (Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;)Lcom/stripe/android/model/SetupIntent;
 	public static synthetic fun confirmSetupIntentSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SetupIntent;
-	public final fun confirmWechatPayPayment (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/ApiResultCallback;)V
-	public final fun confirmWechatPayPayment (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
-	public static synthetic fun confirmWechatPayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
+	public final fun confirmWeChatPayPayment (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/ApiResultCallback;)V
+	public final fun confirmWeChatPayPayment (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
+	public static synthetic fun confirmWeChatPayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
 	public final fun createAccountToken (Lcom/stripe/android/model/AccountParams;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createAccountToken (Lcom/stripe/android/model/AccountParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createAccountToken (Lcom/stripe/android/model/AccountParams;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
@@ -860,7 +860,7 @@ public final class com/stripe/android/Stripe$Companion {
 }
 
 public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
-	public static final field WechatPayV1 Lcom/stripe/android/StripeApiBeta;
+	public static final field WeChatPayV1 Lcom/stripe/android/StripeApiBeta;
 	public final fun getCode ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/StripeApiBeta;
 	public static fun values ()[Lcom/stripe/android/StripeApiBeta;
@@ -929,8 +929,8 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun confirmPaymentIntent$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun confirmSetupIntent (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun confirmWechatPayPayment (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun confirmWechatPayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun confirmWeChatPayPayment (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun confirmWeChatPayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createAccountToken (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/AccountParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createAccountToken$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/AccountParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createBankAccountToken (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/BankAccountTokenParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -963,29 +963,6 @@ public final class com/stripe/android/StripeKtxKt {
 public final class com/stripe/android/StripeTextUtils {
 	public static final field INSTANCE Lcom/stripe/android/StripeTextUtils;
 	public static final fun removeSpacesAndHyphens (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class com/stripe/android/WechatPayNextAction : com/stripe/android/model/StripeModel {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public final fun component1 ()Lcom/stripe/android/model/PaymentIntent;
-	public final fun component2 ()Lcom/stripe/android/model/WeChat;
-	public final fun copy (Lcom/stripe/android/model/PaymentIntent;Lcom/stripe/android/model/WeChat;)Lcom/stripe/android/WechatPayNextAction;
-	public static synthetic fun copy$default (Lcom/stripe/android/WechatPayNextAction;Lcom/stripe/android/model/PaymentIntent;Lcom/stripe/android/model/WeChat;ILjava/lang/Object;)Lcom/stripe/android/WechatPayNextAction;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getIntent ()Lcom/stripe/android/model/PaymentIntent;
-	public final fun getWechat ()Lcom/stripe/android/model/WeChat;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public class com/stripe/android/WechatPayNextAction$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/WechatPayNextAction;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/WechatPayNextAction;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/exception/APIConnectionException : com/stripe/android/exception/StripeException {
@@ -3039,7 +3016,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field SepaDebit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Sofort Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Upi Lcom/stripe/android/model/PaymentMethod$Type;
-	public static final field WechatPay Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field WeChatPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public final field code Ljava/lang/String;
 	public final field isReusable Z
 	public fun describeContents ()I
@@ -3144,9 +3121,9 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createP24 (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createPayPal ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createPayPal (Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static final fun createWechatPay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static final fun createWechatPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static final fun createWechatPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createWeChatPay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createWeChatPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createWeChatPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getTypeCode ()Ljava/lang/String;
@@ -3316,10 +3293,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createPayPal ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createPayPal (Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createPayPal$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public final fun createWechatPay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public final fun createWechatPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public final fun createWechatPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static synthetic fun createWechatPay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createWeChatPay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createWeChatPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createWeChatPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createWeChatPay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 }
 
 public class com/stripe/android/model/PaymentMethodCreateParams$Creator : android/os/Parcelable$Creator {
@@ -3545,15 +3522,15 @@ public class com/stripe/android/model/PaymentMethodOptionsParams$Card$Creator : 
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethodOptionsParams$WechatPay : com/stripe/android/model/PaymentMethodOptionsParams {
+public final class com/stripe/android/model/PaymentMethodOptionsParams$WeChatPay : com/stripe/android/model/PaymentMethodOptionsParams {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/model/PaymentMethodOptionsParams$WechatPay$Companion;
+	public static final field Companion Lcom/stripe/android/model/PaymentMethodOptionsParams$WeChatPay$Companion;
 	public static final field PARAM_APP_ID Ljava/lang/String;
 	public static final field PARAM_CLIENT Ljava/lang/String;
 	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodOptionsParams$WechatPay;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethodOptionsParams$WechatPay;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodOptionsParams$WechatPay;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodOptionsParams$WeChatPay;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethodOptionsParams$WeChatPay;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodOptionsParams$WeChatPay;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppId ()Ljava/lang/String;
@@ -3563,11 +3540,11 @@ public final class com/stripe/android/model/PaymentMethodOptionsParams$WechatPay
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public class com/stripe/android/model/PaymentMethodOptionsParams$WechatPay$Creator : android/os/Parcelable$Creator {
+public class com/stripe/android/model/PaymentMethodOptionsParams$WeChatPay$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodOptionsParams$WechatPay;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodOptionsParams$WeChatPay;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodOptionsParams$WechatPay;
+	public final fun newArray (I)[Lcom/stripe/android/model/PaymentMethodOptionsParams$WeChatPay;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -4922,7 +4899,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionType : java/l
 	public static final field DisplayOxxoDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field RedirectToUrl Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field UseStripeSdk Lcom/stripe/android/model/StripeIntent$NextActionType;
-	public static final field WechatPayRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
+	public static final field WeChatPayRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public final fun getCode ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/StripeIntent$NextActionType;
@@ -5070,6 +5047,29 @@ public class com/stripe/android/model/WeChat$Creator : android/os/Parcelable$Cre
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/WeChat;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/WeChat;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/WeChatPayNextAction : com/stripe/android/model/StripeModel {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final fun component1 ()Lcom/stripe/android/model/PaymentIntent;
+	public final fun component2 ()Lcom/stripe/android/model/WeChat;
+	public final fun copy (Lcom/stripe/android/model/PaymentIntent;Lcom/stripe/android/model/WeChat;)Lcom/stripe/android/model/WeChatPayNextAction;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/WeChatPayNextAction;Lcom/stripe/android/model/PaymentIntent;Lcom/stripe/android/model/WeChat;ILjava/lang/Object;)Lcom/stripe/android/model/WeChatPayNextAction;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentIntent ()Lcom/stripe/android/model/PaymentIntent;
+	public final fun getWeChat ()Lcom/stripe/android/model/WeChat;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/model/WeChatPayNextAction$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/WeChatPayNextAction;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/WeChatPayNextAction;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
