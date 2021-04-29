@@ -38,7 +38,7 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val transaction: Transaction,
-    private val endChallenge: () -> Unit,
+    private val onEndChallenge: () -> Unit,
     private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier(),
     enableLogging: Boolean = false,
     private val workContext: CoroutineContext
@@ -225,7 +225,7 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     private suspend fun startCompletionActivity(
         flowOutcome: ChallengeFlowOutcome
     ) = withContext(Dispatchers.Main) {
-        endChallenge()
+        onEndChallenge()
 
         stripe3ds2CompletionStarter.start(
             PaymentFlowResult.Unvalidated(
