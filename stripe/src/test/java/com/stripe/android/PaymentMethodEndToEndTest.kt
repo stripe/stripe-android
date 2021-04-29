@@ -326,16 +326,16 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withWechatPay_shouldCreateObject() {
-        val params = PaymentMethodCreateParams.createWechatPay()
+    fun createPaymentMethod_withWeChatPay_shouldCreateObject() {
+        val params = PaymentMethodCreateParams.createWeChatPay()
         val paymentMethod =
             Stripe(
                 context,
                 ApiKeyFixtures.WECHAT_PAY_PUBLISHABLE_KEY,
-                betas = setOf(StripeApiBeta.WechatPayV1)
+                betas = setOf(StripeApiBeta.WeChatPayV1)
             )
                 .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod?.type)
-            .isEqualTo(PaymentMethod.Type.WechatPay)
+            .isEqualTo(PaymentMethod.Type.WeChatPay)
     }
 }

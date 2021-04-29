@@ -56,9 +56,9 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class WechatPay(
+    data class WeChatPay(
         var appId: String,
-    ) : PaymentMethodOptionsParams(PaymentMethod.Type.WechatPay) {
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
                 PARAM_CLIENT to "android",

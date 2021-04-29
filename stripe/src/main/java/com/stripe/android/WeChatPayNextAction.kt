@@ -6,7 +6,7 @@ import com.stripe.android.model.WeChat
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class WechatPayNextAction internal constructor(
-    val intent: PaymentIntent,
-    val wechat: WeChat,
+data class WeChatPayNextAction internal constructor(
+    val paymentIntent: PaymentIntent,
+    val weChat: WeChat,
 ) : StripeModel

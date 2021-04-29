@@ -519,13 +519,13 @@ internal class StripeKtxTest {
     @Test
     fun `When controller returns correct value then confirmWeChatPayPayment should succeed`(): Unit =
         testDispatcher.runBlockingTest {
-            val expectedApiObj = mock<WechatPayNextAction>()
+            val expectedApiObj = mock<WeChatPayNextAction>()
 
             whenever(
-                mockPaymentController.confirmWechatPay(any(), any())
+                mockPaymentController.confirmWeChatPay(any(), any())
             ).thenReturn(expectedApiObj)
 
-            val actualObj = stripe.confirmWechatPayPayment(
+            val actualObj = stripe.confirmWeChatPayPayment(
                 mock(),
                 TEST_STRIPE_ACCOUNT_ID
             )
@@ -537,11 +537,11 @@ internal class StripeKtxTest {
     fun `When controller throws exception then confirmWeChatPayPayment should throw same exception`(): Unit =
         testDispatcher.runBlockingTest {
             whenever(
-                mockPaymentController.confirmWechatPay(any(), any())
+                mockPaymentController.confirmWeChatPay(any(), any())
             ).thenThrow(mock<AuthenticationException>())
 
             assertFailsWith<AuthenticationException> {
-                stripe.confirmWechatPayPayment(
+                stripe.confirmWeChatPayPayment(
                     mock(),
                     TEST_STRIPE_ACCOUNT_ID
                 )
@@ -549,16 +549,16 @@ internal class StripeKtxTest {
         }
 
     @Test
-    fun `When nextAction is not for Wechatpay then should throw InvalidRequestException`(): Unit =
-        // when nextAction is not for Wechatpay, mockPaymentController fails in `require` and
+    fun `When nextAction is not for WeChatPay then should throw InvalidRequestException`(): Unit =
+        // when nextAction is not for WeChatPay, mockPaymentController fails in `require` and
         // throws an IllegalArgumentException
         testDispatcher.runBlockingTest {
             whenever(
-                mockPaymentController.confirmWechatPay(any(), any())
+                mockPaymentController.confirmWeChatPay(any(), any())
             ).thenThrow(mock<IllegalArgumentException>())
 
             assertFailsWith<InvalidRequestException> {
-                stripe.confirmWechatPayPayment(
+                stripe.confirmWeChatPayPayment(
                     mock(),
                     TEST_STRIPE_ACCOUNT_ID
                 )

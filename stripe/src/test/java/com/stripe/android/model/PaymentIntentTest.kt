@@ -49,7 +49,7 @@ class PaymentIntentTest {
     }
 
     @Test
-    fun parsePaymentIntentWithWechatPayPaymentMethods() {
+    fun parsePaymentIntentWithWeChatPayPaymentMethods() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
         assertThat(paymentIntent.requiresAction())
             .isTrue()
@@ -100,12 +100,12 @@ class PaymentIntentTest {
     }
 
     @Test
-    fun getNextActionData_whenWechatPay() {
+    fun getNextActionData_whenWeChatPay() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
         assertThat(paymentIntent.nextActionData)
-            .isInstanceOf(StripeIntent.NextActionData.WechatPayRedirect::class.java)
+            .isInstanceOf(StripeIntent.NextActionData.WeChatPayRedirect::class.java)
         val weChat =
-            (paymentIntent.nextActionData as StripeIntent.NextActionData.WechatPayRedirect).weChat
+            (paymentIntent.nextActionData as StripeIntent.NextActionData.WeChatPayRedirect).weChat
         assertThat(weChat).isEqualTo(
             WeChat(
                 appId = "wx65997d6307c3827d",

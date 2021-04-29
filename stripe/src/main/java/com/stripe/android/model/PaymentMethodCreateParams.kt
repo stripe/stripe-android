@@ -204,7 +204,7 @@ data class PaymentMethodCreateParams internal constructor(
         Upi("upi"),
         Netbanking("netbanking"),
         Blik("blik"),
-        WechatPay("wechat_pay")
+        WeChatPay("wechat_pay")
     }
 
     @Parcelize
@@ -773,12 +773,12 @@ data class PaymentMethodCreateParams internal constructor(
 
         @JvmStatic
         @JvmOverloads
-        fun createWechatPay(
+        fun createWeChatPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
-                type = Type.WechatPay,
+                type = Type.WeChatPay,
                 billingDetails = billingDetails,
                 metadata = metadata
             )

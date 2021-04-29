@@ -20,7 +20,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
             StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
-            StripeIntent.NextActionType.WechatPayRedirect -> WechatPayRedirectParser()
+            StripeIntent.NextActionType.WeChatPayRedirect -> WeChatPayRedirectParser()
             else -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
@@ -152,10 +152,10 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         }
     }
 
-    internal class WechatPayRedirectParser :
-        ModelJsonParser<StripeIntent.NextActionData.WechatPayRedirect> {
-        override fun parse(json: JSONObject): StripeIntent.NextActionData.WechatPayRedirect {
-            return StripeIntent.NextActionData.WechatPayRedirect(
+    internal class WeChatPayRedirectParser :
+        ModelJsonParser<StripeIntent.NextActionData.WeChatPayRedirect> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.WeChatPayRedirect {
+            return StripeIntent.NextActionData.WeChatPayRedirect(
                 WeChat(
                     appId = json.optString(APP_ID),
                     nonce = json.optString(NONCE_STR),

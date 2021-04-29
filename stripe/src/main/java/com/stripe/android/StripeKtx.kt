@@ -569,10 +569,10 @@ suspend fun Stripe.confirmSetupIntent(
 }
 
 /**
- * Suspend function to confirm a [PaymentIntent] for Wechat Pay. Extract params from [WechatPayNextAction] to pass to Wechat Pay SDK.
- * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">Wechat Pay Documentation</a>
+ * Suspend function to confirm a [PaymentIntent] for WeChat Pay. Extract params from [WeChatPayNextAction] to pass to WeChat Pay SDK.
+ * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">WeChat Pay Documentation</a>
  *
- * Wechat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WechatPayV1] to enable this API.
+ * WeChat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WeChatPayV1] to enable this API.
  *
  * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
  * [PaymentIntent]
@@ -584,12 +584,12 @@ suspend fun Stripe.confirmSetupIntent(
  * @throws APIConnectionException failure to connect to Stripe's API
  * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
  */
-suspend fun Stripe.confirmWechatPayPayment(
+suspend fun Stripe.confirmWeChatPayPayment(
     confirmPaymentIntentParams: ConfirmPaymentIntentParams,
     stripeAccountId: String? = this.stripeAccountId,
-): WechatPayNextAction {
+): WeChatPayNextAction {
     return runCatching {
-        paymentController.confirmWechatPay(
+        paymentController.confirmWeChatPay(
             confirmPaymentIntentParams,
             ApiRequest.Options(
                 apiKey = publishableKey,
