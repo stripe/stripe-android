@@ -49,6 +49,15 @@ internal class BackendApiFactory internal constructor(private val backendUrl: St
 
     @OptIn(ExperimentalSerializationApi::class)
     fun createCheckout(): CheckoutBackendApi {
+        if (Settings.PAYMENT_SHEET_BASE_URL.isNullOrEmpty() ||
+            Settings.PAYMENT_SHEET_PUBLISHABLE_KEY.isNullOrEmpty()
+        ) {
+            error(
+                "Settings.PAYMENT_SHEET_BASE_URL and Settings.PAYMENT_SHEET_PUBLISHABLE_KEY " +
+                    "must be set for PaymentSheet example"
+            )
+        }
+
         val logging = HttpLoggingInterceptor()
             .setLevel(HttpLoggingInterceptor.Level.BODY)
 
@@ -60,7 +69,7 @@ internal class BackendApiFactory internal constructor(private val backendUrl: St
 
         return Retrofit.Builder()
             .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
-            .baseUrl(backendUrl)
+            .baseUrl(Settings.PAYMENT_SHEET_BASE_URL)
             .client(httpClient)
             .build()
             .create(CheckoutBackendApi::class.java)
