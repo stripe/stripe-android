@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.WeChat
+import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.view.AuthActivityStarter
 

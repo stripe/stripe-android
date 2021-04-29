@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.model
 
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeModel

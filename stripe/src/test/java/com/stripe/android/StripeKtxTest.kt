@@ -13,6 +13,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.StripeParamsModel
+import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
