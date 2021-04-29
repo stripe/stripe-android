@@ -4,14 +4,45 @@
 * [#3567](https://github.com/stripe/stripe-android/pull/3567) Use `lifecycleScope` where possible in `Stripe.kt`
     * When calling payment and setup confirmation methods (e.g. `confirmPayment()`), using
       a `ComponentActivity` subclass (e.g. `AppCompatActivity`) will make the call lifecycle-aware.
-* [#3644](https://github.com/stripe/stripe-android/pull/3644) Use Custom Tabs for payment authentication when available
+* [#3635](https://github.com/stripe/stripe-android/pull/3635) Deprecate `extraParams` in `ConfirmPaymentIntentParams`
+    * Use `setupFutureUsage` instead.
+      ```kotlin
+      // before
+      ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+          params,
+          clientSecret,
+          extraParams = mapOf("setup_future_usage" to "off_session")
+      )
+      
+      // after
+      ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+          params,
+          clientSecret,
+          setupFutureUsage = SetupFutureUsage.OffSession
+      )
+      ```
+* [#3640](https://github.com/stripe/stripe-android/pull/3640) Add support for beta headers using `StripeApiBeta`
+    * The following example includes the `wechat_pay_beta=v1` flag in API requests:
+      ```kotlin
+      Stripe(
+          context,
+          publishableKey,
+          betas = setOf(StripeApiBeta.WechatPayV1)
+      )
+      ```
+* [#3644](https://github.com/stripe/stripe-android/pull/3644) Use Custom Tabs for 3DS1 payment authentication when available
     * When a `ConfirmPaymentIntentParams` or `ConfirmSetupIntentParams` instance is created
       **without** a custom `return_url` value and used to confirm a `PaymentIntent` or
       `SetupIntent` **and** the device supports
       [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/), 
-      use Custom Tabs instead of a WebView to render the authentication page. 
+      use Custom Tabs instead of a WebView to render the authentication page.
+    * See [Stripe#confirmPayment()](https://github.com/stripe/stripe-android/blob/8bf5b738878362c6b9e4ac79edc7c515d9ba63ef/stripe/src/main/java/com/stripe/android/Stripe.kt#L145)
+      for more details.
 * [#3646](https://github.com/stripe/stripe-android/pull/3646) Upgrade 3DS2 SDK to `5.3.1`
     * Gracefully handle unknown directory server ids
+* [#3656](https://github.com/stripe/stripe-android/pull/3656) Deprecate `return_url` in `ConfirmSetupIntentParams`
+    * Setting a custom `return_url` prevents authenticating 3DS1 with Custom Tabs.
+      Instead, a WebView fallback will be used.
 
 ## 16.6.1 - 2021-04-26
 * [#3568](https://github.com/stripe/stripe-android/pull/3568) Add suspending function variants for payment confirmation methods
