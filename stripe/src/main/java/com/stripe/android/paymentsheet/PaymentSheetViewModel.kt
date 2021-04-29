@@ -319,7 +319,7 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun processResult(stripeIntentResult: PaymentIntentResult) {
+    private fun processResult(stripeIntentResult: StripeIntentResult<*>) {
         when (stripeIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 _paymentSheetResult.value = PaymentSheetResult.Completed
