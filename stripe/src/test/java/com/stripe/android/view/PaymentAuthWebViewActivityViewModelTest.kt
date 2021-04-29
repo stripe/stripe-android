@@ -6,10 +6,10 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentAuthWebViewContract
-import com.stripe.android.networking.AnalyticsDataFactory
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import org.junit.runner.RunWith
@@ -18,12 +18,12 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewActivityViewModelTest {
-    private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-    private val analyticsDataFactory = AnalyticsDataFactory(
+    private val analyticsRequests = mutableListOf<AnalyticsRequest>()
+    private val analyticsRequestExecutor = AnalyticsRequestExecutor { analyticsRequests.add(it) }
+    private val analyticsRequestFactory = AnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
-    private val analyticsRequestFactory = AnalyticsRequest.Factory()
 
     @Test
     fun cancellationResult() {
@@ -113,7 +113,6 @@ class PaymentAuthWebViewActivityViewModelTest {
             ActivityNotFoundException("Failed to find activity")
         )
 
-        val analyticsRequests = analyticsRequestExecutor.requests
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_error")
@@ -133,7 +132,6 @@ class PaymentAuthWebViewActivityViewModelTest {
             Uri.parse("https://example.com/path?secret=password")
         )
 
-        val analyticsRequests = analyticsRequestExecutor.requests
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_complete")
@@ -149,7 +147,6 @@ class PaymentAuthWebViewActivityViewModelTest {
             uri = null
         )
 
-        val analyticsRequests = analyticsRequestExecutor.requests
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_complete")
@@ -158,26 +155,17 @@ class PaymentAuthWebViewActivityViewModelTest {
     }
 
     private fun createViewModel(
-        args: PaymentAuthWebViewContract.Args
+        args: PaymentBrowserAuthContract.Args
     ): PaymentAuthWebViewActivityViewModel {
         return PaymentAuthWebViewActivityViewModel(
             args,
             analyticsRequestExecutor,
-            analyticsRequestFactory,
-            analyticsDataFactory
+            analyticsRequestFactory
         )
     }
 
-    private class FakeAnalyticsRequestExecutor : AnalyticsRequestExecutor {
-        val requests = mutableListOf<AnalyticsRequest>()
-
-        override fun executeAsync(request: AnalyticsRequest) {
-            requests.add(request)
-        }
-    }
-
     private companion object {
-        val ARGS = PaymentAuthWebViewContract.Args(
+        val ARGS = PaymentBrowserAuthContract.Args(
             objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = 100,
             clientSecret = "client_secret",

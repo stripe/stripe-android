@@ -17,7 +17,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
 import com.stripe.android.exception.StripeException
 import com.stripe.android.payments.PaymentFlowResult
@@ -30,8 +30,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         PaymentAuthWebViewActivityBinding.inflate(layoutInflater)
     }
 
-    private val _args: PaymentAuthWebViewContract.Args? by lazy {
-        PaymentAuthWebViewContract.parseArgs(intent)
+    private val _args: PaymentBrowserAuthContract.Args? by lazy {
+        PaymentBrowserAuthContract.parseArgs(intent)
     }
 
     private val logger: Logger by lazy {

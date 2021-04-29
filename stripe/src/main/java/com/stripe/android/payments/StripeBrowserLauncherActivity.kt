@@ -9,17 +9,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
- * A transparent activity that launches [PaymentAuthWebViewContract.Args.url] in either
+ * A transparent activity that launches [PaymentBrowserAuthContract.Args.url] in either
  * Custom Tabs (if available) or a browser.
  *
  * The eventual replacement for [PaymentAuthWebViewActivity].
+ *
+ * [StripeBrowserLauncherActivity] will only be used if Custom Tabs are enabled. See
+ * [PaymentBrowserAuthContract.Args.shouldUseCustomTabs].
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
-    private val viewModel: StripeBrowserLauncherViewModel by viewModels()
+    private val viewModel: StripeBrowserLauncherViewModel by viewModels {
+        StripeBrowserLauncherViewModel.Factory(application)
+    }
 
     private val customTabsCapabilities: CustomTabsCapabilities by lazy {
         CustomTabsCapabilities(this)
@@ -28,7 +33,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = PaymentAuthWebViewContract.parseArgs(intent)
+        val args = PaymentBrowserAuthContract.parseArgs(intent)
         if (args == null) {
             // handle failures
             finish()
@@ -47,7 +52,10 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             ::onResult
         )
 
-        if (customTabsCapabilities.isSupported()) {
+        val shouldUseCustomTabs = customTabsCapabilities.isSupported()
+        viewModel.logCapabilities(shouldUseCustomTabs)
+
+        if (shouldUseCustomTabs) {
             // use Custom Tabs
             val customTabsIntent = CustomTabsIntent.Builder()
                 .setShareState(CustomTabsIntent.SHARE_STATE_OFF)

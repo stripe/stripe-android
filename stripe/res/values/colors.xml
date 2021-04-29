@@ -51,6 +51,7 @@
 
     <!-- CardFormView -->
     <color name="stripe_card_form_view_textinput_color">#e61a1a1a</color>
+    <color name="stripe_card_form_view_textinput_disabled_color">#61000000</color>
     <color name="stripe_card_form_view_background_default">@android:color/transparent</color>
     <color name="stripe_card_form_view_background_disabled">#f8f8f8</color>
     <color name="stripe_card_form_view_form_error">#cf6679</color>

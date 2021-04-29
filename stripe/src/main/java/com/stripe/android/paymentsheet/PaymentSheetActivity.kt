@@ -14,6 +14,7 @@ import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -22,7 +23,7 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.networking.ApiRequest
@@ -37,6 +38,7 @@ import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.view.AuthActivityStarter
+import kotlinx.coroutines.launch
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @VisibleForTesting
@@ -117,8 +119,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         ) {
             viewModel.onPaymentFlowResult(it)
         }
-        val paymentAuthWebViewLauncher = registerForActivityResult(
-            PaymentAuthWebViewContract(
+        val paymentBrowserAuthLauncher = registerForActivityResult(
+            PaymentBrowserAuthContract(
                 DefaultReturnUrl.create(application)
             )
         ) {
@@ -138,7 +140,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             ),
             true,
             paymentRelayLauncher = paymentRelayLauncher,
-            paymentAuthWebViewLauncher = paymentAuthWebViewLauncher,
+            paymentBrowserAuthLauncher = paymentBrowserAuthLauncher,
             stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
         )
 
@@ -195,14 +197,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.startConfirm.observe(this) { event ->
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
-                paymentController.startConfirmAndAuth(
-                    AuthActivityStarter.Host.create(this),
-                    confirmParams,
-                    ApiRequest.Options(
-                        apiKey = paymentConfig.publishableKey,
-                        stripeAccount = paymentConfig.stripeAccountId
+                lifecycleScope.launch {
+                    paymentController.startConfirmAndAuth(
+                        AuthActivityStarter.Host.create(this@PaymentSheetActivity),
+                        confirmParams,
+                        ApiRequest.Options(
+                            apiKey = paymentConfig.publishableKey,
+                            stripeAccount = paymentConfig.stripeAccountId
+                        )
                     )
-                )
+                }
             }
         }
 

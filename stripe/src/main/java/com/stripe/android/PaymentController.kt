@@ -17,7 +17,7 @@ internal interface PaymentController {
     /**
      * Confirm the Stripe Intent and resolve any next actions
      */
-    fun startConfirmAndAuth(
+    suspend fun startConfirmAndAuth(
         host: AuthActivityStarter.Host,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
@@ -52,14 +52,14 @@ internal interface PaymentController {
         requestOptions: ApiRequest.Options
     ): PaymentIntentResult
 
-    fun startAuth(
+    suspend fun startAuth(
         host: AuthActivityStarter.Host,
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         type: StripeIntentType
     )
 
-    fun startAuthenticateSource(
+    suspend fun startAuthenticateSource(
         host: AuthActivityStarter.Host,
         source: Source,
         requestOptions: ApiRequest.Options

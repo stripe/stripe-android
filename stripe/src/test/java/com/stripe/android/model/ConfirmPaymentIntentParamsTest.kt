@@ -144,10 +144,7 @@ class ConfirmPaymentIntentParamsTest {
             .createWithPaymentMethodId(
                 "pm_123",
                 CLIENT_SECRET,
-                extraParams = mapOf(
-                    "animal" to "dog",
-                    "color" to "brown"
-                )
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
             )
             .toParamMap()
 
@@ -157,8 +154,7 @@ class ConfirmPaymentIntentParamsTest {
                     "client_secret" to CLIENT_SECRET,
                     "use_stripe_sdk" to false,
                     "payment_method" to "pm_123",
-                    "animal" to "dog",
-                    "color" to "brown"
+                    "setup_future_usage" to "on_session"
                 )
             )
     }
