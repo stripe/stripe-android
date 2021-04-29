@@ -60,7 +60,6 @@ internal fun ViewState.PaymentSheet.convert(): PrimaryButton.State? {
             PrimaryButton.State.StartProcessing
         is ViewState.PaymentSheet.FinishProcessing ->
             PrimaryButton.State.FinishProcessing(this.onComplete)
-        else -> null
     }
 }
 
@@ -88,6 +87,10 @@ internal class PaymentSheetViewModel internal constructor(
         defaultReturnUrl,
         args.clientSecret
     )
+
+    @VisibleForTesting
+    internal val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
+    internal val paymentSheetResult: LiveData<PaymentSheetResult> = _paymentSheetResult
 
     private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmStripeIntentParams>> = _startConfirm
@@ -188,7 +191,7 @@ internal class PaymentSheetViewModel internal constructor(
             """.trimIndent()
         )
         _viewState.value = ViewState.PaymentSheet.FinishProcessing {
-            _viewState.value = ViewState.PaymentSheet.ProcessResult(
+            processResult(
                 when (stripeIntent) {
                     is PaymentIntent -> {
                         PaymentIntentResult(
@@ -299,7 +302,7 @@ internal class PaymentSheetViewModel internal constructor(
                 }
 
                 _viewState.value = ViewState.PaymentSheet.FinishProcessing {
-                    _viewState.value = ViewState.PaymentSheet.ProcessResult(stripeIntentResult)
+                    processResult(stripeIntentResult)
                 }
             }
             else -> {
@@ -312,6 +315,17 @@ internal class PaymentSheetViewModel internal constructor(
                     onSuccess = ::resetViewState,
                     onFailure = ::onFatal
                 )
+            }
+        }
+    }
+
+    private fun processResult(stripeIntentResult: PaymentIntentResult) {
+        when (stripeIntentResult.outcome) {
+            StripeIntentResult.Outcome.SUCCEEDED -> {
+                _paymentSheetResult.value = PaymentSheetResult.Completed
+            }
+            else -> {
+                // TODO(mshafrir-stripe): handle other outcomes
             }
         }
     }
@@ -366,6 +380,15 @@ internal class PaymentSheetViewModel internal constructor(
                 }
             )
         }
+    }
+
+    override fun onFatal(throwable: Throwable) {
+        _fatal.value = throwable
+        _paymentSheetResult.value = PaymentSheetResult.Failed(throwable)
+    }
+
+    override fun onUserCancel() {
+        _paymentSheetResult.value = PaymentSheetResult.Canceled
     }
 
     internal sealed class TransitionTarget {

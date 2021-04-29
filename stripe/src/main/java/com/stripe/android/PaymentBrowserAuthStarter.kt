@@ -19,6 +19,10 @@ internal interface PaymentBrowserAuthStarter :
         private val defaultReturnUrl: DefaultReturnUrl
     ) : PaymentBrowserAuthStarter {
         override fun start(args: PaymentBrowserAuthContract.Args) {
+            val extras = args
+                .copy(statusBarColor = host.statusBarColor)
+                .toBundle()
+
             val shouldUseCustomTabs = args.shouldUseCustomTabs(
                 isCustomTabsSupported,
                 defaultReturnUrl
@@ -28,7 +32,7 @@ internal interface PaymentBrowserAuthStarter :
                     true -> StripeBrowserLauncherActivity::class.java
                     false -> PaymentAuthWebViewActivity::class.java
                 },
-                args.toBundle(),
+                extras,
                 args.requestCode
             )
         }

@@ -254,6 +254,11 @@ internal class PaymentSheetViewModelTest {
                 viewState.add(it)
             }
 
+            var paymentSheetResult: PaymentSheetResult? = null
+            viewModel.paymentSheetResult.observeForever {
+                paymentSheetResult = it
+            }
+
             viewModel.onPaymentFlowResult(
                 PaymentFlowResult.Unvalidated(
                     "client_secret",
@@ -265,8 +270,8 @@ internal class PaymentSheetViewModelTest {
 
             (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
 
-            assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult<*>).result)
-                .isEqualTo(PAYMENT_INTENT_RESULT)
+            assertThat(paymentSheetResult)
+                .isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -296,6 +301,11 @@ internal class PaymentSheetViewModelTest {
                 viewState.add(it)
             }
 
+            var paymentSheetResult: PaymentSheetResult? = null
+            viewModel.paymentSheetResult.observeForever {
+                paymentSheetResult = it
+            }
+
             viewModel.onPaymentFlowResult(
                 PaymentFlowResult.Unvalidated(
                     "client_secret",
@@ -307,8 +317,8 @@ internal class PaymentSheetViewModelTest {
 
             (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
 
-            assertThat((viewState[2] as ViewState.PaymentSheet.ProcessResult<*>).result)
-                .isEqualTo(PAYMENT_INTENT_RESULT_WITH_PM)
+            assertThat(paymentSheetResult)
+                .isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -391,12 +401,12 @@ internal class PaymentSheetViewModelTest {
                 workContext = testDispatcher
             )
         )
-        var error: Throwable? = null
-        viewModel.fatal.observeForever {
-            error = it
+        var result: PaymentSheetResult? = null
+        viewModel.paymentSheetResult.observeForever {
+            result = it
         }
         viewModel.fetchStripeIntent()
-        assertThat(error?.message)
+        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo("Could not parse PaymentIntent.")
     }
 
@@ -409,12 +419,12 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
-        var error: Throwable? = null
-        viewModel.fatal.observeForever {
-            error = it
+        var result: PaymentSheetResult? = null
+        viewModel.paymentSheetResult.observeForever {
+            result = it
         }
         viewModel.fetchStripeIntent()
-        assertThat(error?.message)
+        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method"
@@ -428,12 +438,12 @@ internal class PaymentSheetViewModelTest {
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
             )
         )
-        var error: Throwable? = null
-        viewModel.fatal.observeForever {
-            error = it
+        var result: PaymentSheetResult? = null
+        viewModel.paymentSheetResult.observeForever {
+            result = it
         }
         viewModel.fetchStripeIntent()
-        assertThat(error?.message)
+        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method"
@@ -558,21 +568,19 @@ internal class PaymentSheetViewModelTest {
                 viewStates.add(it)
             }
         }
+
+        var paymentSheetResult: PaymentSheetResult? = null
+        viewModel.paymentSheetResult.observeForever {
+            paymentSheetResult = it
+        }
+
         viewModel.fetchStripeIntent()
 
         assertThat(viewStates)
-            .hasSize(2)
+            .hasSize(1)
         assertThat(viewStates[0])
             .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
-        assertThat(viewStates[1])
-            .isEqualTo(
-                ViewState.PaymentSheet.ProcessResult(
-                    PaymentIntentResult(
-                        PaymentIntentFixtures.PI_SUCCEEDED,
-                        StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                )
-            )
+        assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
     }
 
     private fun createViewModel(

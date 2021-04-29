@@ -702,27 +702,36 @@ public final class com/stripe/android/Stripe {
 	public final fun authenticateSetup (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
 	public final fun authenticateSource (Landroid/app/Activity;Lcom/stripe/android/model/Source;)V
 	public final fun authenticateSource (Landroid/app/Activity;Lcom/stripe/android/model/Source;Ljava/lang/String;)V
+	public final fun authenticateSource (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/Source;)V
+	public final fun authenticateSource (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/Source;Ljava/lang/String;)V
 	public final fun authenticateSource (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/Source;)V
 	public final fun authenticateSource (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/Source;Ljava/lang/String;)V
 	public static synthetic fun authenticateSource$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Lcom/stripe/android/model/Source;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun authenticateSource$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/Source;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun authenticateSource$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/Source;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun confirmAlipayPayment (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun confirmAlipayPayment (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public static synthetic fun confirmAlipayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
 	public final fun confirmPayment (Landroid/app/Activity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
 	public final fun confirmPayment (Landroid/app/Activity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;)V
+	public final fun confirmPayment (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
+	public final fun confirmPayment (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;)V
 	public final fun confirmPayment (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
 	public final fun confirmPayment (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;)V
 	public static synthetic fun confirmPayment$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun confirmPayment$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun confirmPayment$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun confirmPaymentIntentSynchronous (Lcom/stripe/android/model/ConfirmPaymentIntentParams;)Lcom/stripe/android/model/PaymentIntent;
 	public final fun confirmPaymentIntentSynchronous (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;)Lcom/stripe/android/model/PaymentIntent;
 	public static synthetic fun confirmPaymentIntentSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
 	public final fun confirmSetupIntent (Landroid/app/Activity;Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
 	public final fun confirmSetupIntent (Landroid/app/Activity;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;)V
+	public final fun confirmSetupIntent (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
+	public final fun confirmSetupIntent (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;)V
 	public final fun confirmSetupIntent (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
 	public final fun confirmSetupIntent (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;)V
 	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun confirmSetupIntentSynchronous (Lcom/stripe/android/model/ConfirmSetupIntentParams;)Lcom/stripe/android/model/SetupIntent;
 	public final fun confirmSetupIntentSynchronous (Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;)Lcom/stripe/android/model/SetupIntent;
@@ -811,15 +820,21 @@ public final class com/stripe/android/Stripe {
 	public static final fun getAppInfo ()Lcom/stripe/android/AppInfo;
 	public final fun handleNextActionForPayment (Landroid/app/Activity;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun handleNextActionForPayment (Landroidx/activity/ComponentActivity;Ljava/lang/String;)V
+	public final fun handleNextActionForPayment (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;)V
 	public static synthetic fun handleNextActionForPayment$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun handleNextActionForPayment$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForPayment$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun handleNextActionForSetupIntent (Landroid/app/Activity;Ljava/lang/String;)V
 	public final fun handleNextActionForSetupIntent (Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun handleNextActionForSetupIntent (Landroidx/activity/ComponentActivity;Ljava/lang/String;)V
+	public final fun handleNextActionForSetupIntent (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun handleNextActionForSetupIntent (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
 	public final fun handleNextActionForSetupIntent (Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;)V
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun isAuthenticateSourceResult (ILandroid/content/Intent;)Z
 	public final fun isPaymentResult (ILandroid/content/Intent;)Z

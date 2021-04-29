@@ -16,7 +16,6 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -651,7 +650,7 @@ internal class StripePaymentControllerTest {
     @Test
     fun `bypassAuth() with ActivityResultLauncher should use ActivityResultLauncher`() =
         testDispatcher.runBlockingTest {
-            verifyZeroInteractions(activity)
+            verify(activity).window
 
             val launcher = FakeActivityResultLauncher(PaymentRelayContract())
             createController(
@@ -672,7 +671,7 @@ internal class StripePaymentControllerTest {
     @Test
     fun `on3ds2AuthFallback() with ActivityResultLauncher should use ActivityResultLauncher`() =
         testDispatcher.runBlockingTest {
-            verifyZeroInteractions(activity)
+            verify(activity).window
 
             val launcher = FakeActivityResultLauncher(paymentBrowserAuthContract)
             createController(

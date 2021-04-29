@@ -24,7 +24,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
@@ -488,12 +487,7 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
-                viewModel._viewState.value = ViewState.PaymentSheet.ProcessResult(
-                    PaymentIntentResult(
-                        intent = PAYMENT_INTENT.copy(status = StripeIntent.Status.Succeeded),
-                        outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                )
+                viewModel._paymentSheetResult.value = PaymentSheetResult.Completed
 
                 idleLooper()
 

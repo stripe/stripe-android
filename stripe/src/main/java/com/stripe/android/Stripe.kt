@@ -156,6 +156,48 @@ class Stripe internal constructor(
      * | No return_url     | Custom Tabs            | WebView                  |
      * | Custom return_url | WebView                | WebView                  |
      *
+     * @param activity the `Activity` that is launching the payment authentication flow
+     * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
+     * [PaymentIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     */
+    @JvmOverloads
+    @UiThread
+    fun confirmPayment(
+        activity: ComponentActivity,
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        stripeAccountId: String? = this.stripeAccountId
+    ) {
+        activity.lifecycleScope.launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmPaymentIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
+     * Confirm and, if necessary, authenticate a [PaymentIntent].
+     * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
+     *
+     * For confirmation attempts that require 3DS1 authentication,
+     * [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) will be used
+     * to render the 3DS1 page if both of the following are true:
+     * - Custom Tabs are supported on the device
+     * - The [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     *   in the confirmation request is not set (i.e. set to `null`)
+     *
+     * Otherwise, a WebView will be used.
+     *
+     * |                   | Custom Tabs available? | Custom Tabs unavailable? |
+     * |-------------------|------------------------|--------------------------|
+     * | No return_url     | Custom Tabs            | WebView                  |
+     * | Custom return_url | WebView                | WebView                  |
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
@@ -165,6 +207,10 @@ class Stripe internal constructor(
      */
     @JvmOverloads
     @UiThread
+    @Deprecated(
+        "ComponentActivity will be required in an upcoming major version.",
+        ReplaceWith("confirmPayment(ComponentActivity)")
+    )
     fun confirmPayment(
         activity: Activity,
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
@@ -298,6 +344,42 @@ class Stripe internal constructor(
      */
     @JvmOverloads
     @UiThread
+    fun handleNextActionForPayment(
+        activity: ComponentActivity,
+        clientSecret: String,
+        stripeAccountId: String? = this.stripeAccountId
+    ) {
+        activity.lifecycleScope.launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                PaymentIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.PaymentIntent
+            )
+        }
+    }
+
+    /**
+     * Handle the [next_action](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action)
+     * for a previously confirmed [PaymentIntent].
+     *
+     * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow) flow.
+     *
+     * @param activity the `Activity` that is launching the payment authentication flow
+     * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     * property of a confirmed [PaymentIntent] object
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     */
+    @JvmOverloads
+    @UiThread
+    @Deprecated(
+        "ComponentActivity will be required in an upcoming major version.",
+        ReplaceWith("handleNextActionForPayment(ComponentActivity)")
+    )
     fun handleNextActionForPayment(
         activity: Activity,
         clientSecret: String,
@@ -541,6 +623,49 @@ class Stripe internal constructor(
      */
     @JvmOverloads
     fun confirmSetupIntent(
+        activity: ComponentActivity,
+        confirmSetupIntentParams: ConfirmSetupIntentParams,
+        stripeAccountId: String? = this.stripeAccountId
+    ) {
+        activity.lifecycleScope.launch {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmSetupIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
+     * Confirm and, if necessary, authenticate a [SetupIntent].
+     *
+     * For confirmation attempts that require 3DS1 authentication,
+     * [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) will be used
+     * to render the 3DS1 page if both of the following are true:
+     * - Custom Tabs are supported on the device
+     * - The [return_url](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-return_url)
+     *   in the confirmation request is not set (i.e. set to `null`)
+     *
+     * Otherwise, a WebView will be used.
+     *
+     * |                   | Custom Tabs available? | Custom Tabs unavailable? |
+     * |-------------------|------------------------|--------------------------|
+     * | No return_url     | Custom Tabs            | WebView                  |
+     * | Custom return_url | WebView                | WebView                  |
+     *
+     * @param activity the `Activity` that is launching the payment authentication flow
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     */
+    @JvmOverloads
+    @Deprecated(
+        "ComponentActivity will be required in an upcoming major version.",
+        ReplaceWith("confirmSetupIntent(ComponentActivity)")
+    )
+    fun confirmSetupIntent(
         activity: Activity,
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         stripeAccountId: String? = this.stripeAccountId
@@ -638,6 +763,40 @@ class Stripe internal constructor(
      */
     @UiThread
     @JvmOverloads
+    fun handleNextActionForSetupIntent(
+        activity: ComponentActivity,
+        clientSecret: String,
+        stripeAccountId: String? = this.stripeAccountId
+    ) {
+        activity.lifecycleScope.launch {
+            paymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                SetupIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                ),
+                PaymentController.StripeIntentType.SetupIntent
+            )
+        }
+    }
+
+    /**
+     * Handle [next_action](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-next_action)
+     * for a previously confirmed [SetupIntent]. Used for manual confirmation flow.
+     *
+     * @param activity the `Activity` that is launching the payment authentication flow
+     * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
+     * property of a confirmed [SetupIntent] object
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     */
+    @UiThread
+    @JvmOverloads
+    @Deprecated(
+        "ComponentActivity will be required in an upcoming major version.",
+        ReplaceWith("handleNextActionForSetupIntent(ComponentActivity)")
+    )
     fun handleNextActionForSetupIntent(
         activity: Activity,
         clientSecret: String,
@@ -947,6 +1106,36 @@ class Stripe internal constructor(
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @JvmOverloads
+    fun authenticateSource(
+        activity: ComponentActivity,
+        source: Source,
+        stripeAccountId: String? = this.stripeAccountId
+    ) {
+        activity.lifecycleScope.launch {
+            paymentController.startAuthenticateSource(
+                AuthActivityStarter.Host.create(activity),
+                source,
+                ApiRequest.Options(publishableKey, stripeAccountId)
+            )
+        }
+    }
+
+    /**
+     * Authenticate a [Source] that requires user action via a redirect (i.e. [Source.flow] is
+     * [Source.Flow.Redirect].
+     *
+     * The result of this operation will be returned via `Activity#onActivityResult(int, int, Intent)}}`
+     *
+     * @param activity the `Activity` that is launching the [Source] authentication flow
+     * @param source the [Source] to confirm
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     */
+    @JvmOverloads
+    @Deprecated(
+        "ComponentActivity will be required in an upcoming major version.",
+        ReplaceWith("authenticateSource(ComponentActivity)")
+    )
     fun authenticateSource(
         activity: Activity,
         source: Source,
