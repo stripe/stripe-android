@@ -23,8 +23,7 @@ internal class ConfirmParamsFactory(
             is SetupIntentClientSecret -> {
                 ConfirmSetupIntentParams.create(
                     paymentMethodId = paymentSelection.paymentMethod.id.orEmpty(),
-                    clientSecret = clientSecret.value,
-                    returnUrl = defaultReturnUrl.value
+                    clientSecret = clientSecret.value
                 )
             }
         }
@@ -48,8 +47,7 @@ internal class ConfirmParamsFactory(
             is SetupIntentClientSecret -> {
                 ConfirmSetupIntentParams.create(
                     paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
-                    clientSecret = clientSecret.value,
-                    returnUrl = defaultReturnUrl.value
+                    clientSecret = clientSecret.value
                 )
             }
         }

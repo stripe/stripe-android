@@ -102,6 +102,9 @@ data class SetupIntent internal constructor(
             StripeIntent.Status.Succeeded
         ).contains(status)
 
+    override val lastErrorMessage: String?
+        get() = lastSetupError?.message
+
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
     }

@@ -122,7 +122,7 @@ internal class PaymentSheetViewModel internal constructor(
 
     fun fetchIsGooglePayReady() {
         if (isGooglePayReady.value == null) {
-            if (args.isGooglePayEnabled && args.clientSecret is PaymentIntentClientSecret) {
+            if (args.isGooglePayEnabled) {
                 viewModelScope.launch {
                     val isGooglePayReady = withContext(workContext) {
                         googlePayRepository.isReady().first()

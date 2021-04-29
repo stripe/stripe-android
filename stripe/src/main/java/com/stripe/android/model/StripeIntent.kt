@@ -55,6 +55,8 @@ interface StripeIntent : StripeModel {
      */
     val isConfirmed: Boolean
 
+    val lastErrorMessage: String?
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean

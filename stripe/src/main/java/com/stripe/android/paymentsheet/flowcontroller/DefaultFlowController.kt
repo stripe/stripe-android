@@ -171,7 +171,7 @@ internal class DefaultFlowController internal constructor(
                 paymentMethods = initData.paymentMethods,
                 sessionId = sessionId,
                 config = initData.config,
-                isGooglePayReady = initData.isGooglePayReady && initData.stripeIntent is PaymentIntent,
+                isGooglePayReady = initData.isGooglePayReady,
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
                 statusBarColor = statusBarColor()
             )
@@ -406,17 +406,11 @@ internal class DefaultFlowController internal constructor(
             stripeIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
                 PaymentSheetResult.Canceled
             }
-            stripeIntent is PaymentIntent && stripeIntent.lastPaymentError != null -> {
+            stripeIntent.lastErrorMessage != null -> {
                 PaymentSheetResult.Failed(
                     error = IllegalArgumentException(
-                        "Failed to confirm PaymentIntent. ${stripeIntent.lastPaymentError.message}"
-                    )
-                )
-            }
-            stripeIntent is SetupIntent && stripeIntent.lastSetupError != null -> {
-                PaymentSheetResult.Failed(
-                    error = IllegalArgumentException(
-                        "Failed to confirm SetupIntent. ${stripeIntent.lastSetupError.message}"
+                        "Failed to confirm ${stripeIntent.javaClass.simpleName}:" +
+                            " ${stripeIntent.lastErrorMessage}"
                     )
                 )
             }

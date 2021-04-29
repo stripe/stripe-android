@@ -8,6 +8,7 @@ import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -39,7 +40,9 @@ internal class PaymentSheetContract :
         val config: PaymentSheet.Configuration?
     ) : ActivityStarter.Args {
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
-        val isGooglePayEnabled: Boolean get() = googlePayConfig != null
+        val isGooglePayEnabled: Boolean
+            get() = googlePayConfig != null &&
+                clientSecret is PaymentIntentClientSecret
 
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {

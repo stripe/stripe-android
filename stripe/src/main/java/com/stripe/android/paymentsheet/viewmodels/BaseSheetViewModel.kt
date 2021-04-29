@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.R
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.BaseAddCardFragment
@@ -100,6 +101,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             MutableLiveData(!isProcessing && paymentSelection != null)
         }
     }
+
+    val shouldShowSaveCardCheckbox = customerConfig != null && stripeIntent.value is PaymentIntent
 
     init {
         fetchSavedSelection()
