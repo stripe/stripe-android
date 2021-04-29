@@ -1,10 +1,12 @@
 package com.stripe.android.auth
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.payments.CustomTabsCapabilities
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.StripeBrowserLauncherActivity
@@ -13,23 +15,42 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
 import kotlinx.parcelize.Parcelize
 
 /**
- * TODO(mshafrir-stripe): use a more generic class name
+ * An [ActivityResultContract] for completing payment authentication in a browser. This will
+ * be handled in either [StripeBrowserLauncherActivity] or [PaymentAuthWebViewActivity].
  */
-internal class PaymentAuthWebViewContract(
-    private val defaultReturnUrl: DefaultReturnUrl
-) : ActivityResultContract<PaymentAuthWebViewContract.Args, PaymentFlowResult.Unvalidated>() {
+internal class PaymentBrowserAuthContract(
+    private val defaultReturnUrl: DefaultReturnUrl,
+    private val isCustomTabsSupported: (Context) -> Boolean = { context ->
+        CustomTabsCapabilities(context).isSupported()
+    }
+) : ActivityResultContract<PaymentBrowserAuthContract.Args, PaymentFlowResult.Unvalidated>() {
+
     override fun createIntent(
         context: Context,
         input: Args
     ): Intent {
+        val shouldUseCustomTabs = input.shouldUseCustomTabs(
+            isCustomTabsSupported(context),
+            defaultReturnUrl
+        )
+
+        val statusBarColor = when (context) {
+            is Activity -> context.window?.statusBarColor
+            else -> null
+        }
+
+        val extras = input
+            .copy(statusBarColor = statusBarColor)
+            .toBundle()
+
         return Intent(
             context,
-            when (input.shouldUseBrowser(defaultReturnUrl)) {
+            when (shouldUseCustomTabs) {
                 true -> StripeBrowserLauncherActivity::class.java
                 false -> PaymentAuthWebViewActivity::class.java
             }
         ).also { intent ->
-            intent.putExtras(input.toBundle())
+            intent.putExtras(extras)
         }
     }
 
@@ -60,22 +81,22 @@ internal class PaymentAuthWebViewContract(
          * Simply displaying the web view is all we need to do, and we expect the user to
          * navigate away after this.
          */
-        val shouldCancelIntentOnUserNavigation: Boolean = true
+        val shouldCancelIntentOnUserNavigation: Boolean = true,
+
+        val statusBarColor: Int? = null
     ) : Parcelable {
         /**
          * If true, use [StripeBrowserLauncherActivity].
          * If false, use [PaymentAuthWebViewActivity].
          */
-        internal fun shouldUseBrowser(defaultReturnUrl: DefaultReturnUrl): Boolean {
-            return IS_BROWSER_ENABLED && returnUrl == defaultReturnUrl.value
+        internal fun shouldUseCustomTabs(
+            isCustomTabsSupported: Boolean,
+            defaultReturnUrl: DefaultReturnUrl
+        ): Boolean {
+            return isCustomTabsSupported && returnUrl == defaultReturnUrl.value
         }
 
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
-
-        private companion object {
-            // TODO(mshafrir-stripe): enable when ready to launch
-            private const val IS_BROWSER_ENABLED = false
-        }
     }
 
     companion object {

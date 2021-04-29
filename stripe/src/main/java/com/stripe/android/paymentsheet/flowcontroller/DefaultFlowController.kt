@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentAuthWebViewContract
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.StripeIntent
@@ -85,8 +85,8 @@ internal class DefaultFlowController internal constructor(
         onPaymentFlowResult(result)
     }
 
-    private val paymentAuthWebViewLauncher = activityLauncherFactory.create(
-        PaymentAuthWebViewContract(defaultReturnUrl)
+    private val paymentBrowserAuthLauncher = activityLauncherFactory.create(
+        PaymentBrowserAuthContract(defaultReturnUrl)
     ) { result ->
         onPaymentFlowResult(result)
     }
@@ -102,7 +102,7 @@ internal class DefaultFlowController internal constructor(
 
     private val paymentController = paymentControllerFactory.create(
         paymentRelayLauncher = paymentRelayLauncher,
-        paymentAuthWebViewLauncher = paymentAuthWebViewLauncher,
+        paymentBrowserAuthLauncher = paymentBrowserAuthLauncher,
         stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
     )
 
@@ -227,14 +227,16 @@ internal class DefaultFlowController internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            paymentController.startConfirmAndAuth(
-                authHostSupplier(),
-                confirmParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+            lifecycleScope.launch {
+                paymentController.startConfirmAndAuth(
+                    authHostSupplier(),
+                    confirmParams,
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -314,7 +316,7 @@ internal class DefaultFlowController internal constructor(
                 }
             }
             else -> null
-        }?.let {
+        }.let {
             viewModel.paymentSelection = it
         }
 

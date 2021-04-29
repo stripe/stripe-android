@@ -31,7 +31,7 @@ import com.stripe.android.model.StripeFileParams;
 import com.stripe.android.model.StripeFilePurpose;
 import com.stripe.android.model.Token;
 import com.stripe.android.model.WeChat;
-import com.stripe.android.networking.AnalyticsDataFactory;
+import com.stripe.android.networking.AnalyticsRequestFactory;
 import com.stripe.android.networking.AnalyticsRequest;
 import com.stripe.android.networking.AnalyticsRequestExecutor;
 import com.stripe.android.networking.DefaultApiRequestExecutor;
@@ -1137,7 +1137,7 @@ public class StripeTest {
                 .isEqualTo(AnalyticsRequest.HOST);
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsDataFactory.FIELD_SOURCE_TYPE)
+                        .get(AnalyticsRequestFactory.FIELD_SOURCE_TYPE)
         ).isEqualTo("card");
     }
 
@@ -1172,7 +1172,7 @@ public class StripeTest {
 
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsDataFactory.FIELD_SOURCE_TYPE)
+                        .get(AnalyticsRequestFactory.FIELD_SOURCE_TYPE)
         ).isEqualTo("ideal");
     }
 
@@ -1201,7 +1201,7 @@ public class StripeTest {
         assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsDataFactory.FIELD_SOURCE_TYPE)
+                        .get(AnalyticsRequestFactory.FIELD_SOURCE_TYPE)
         ).isEqualTo("fpx");
     }
 

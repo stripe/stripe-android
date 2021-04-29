@@ -16,10 +16,10 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
     private val analyticsRequests = mutableListOf<AnalyticsRequest>()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val factory = DefaultCardAccountRangeRepositoryFactory(
-        context,
-        { analyticsRequests.add(it) },
-        AnalyticsRequest.Factory()
-    )
+        context
+    ) {
+        analyticsRequests.add(it)
+    }
 
     @BeforeTest
     fun setup() {

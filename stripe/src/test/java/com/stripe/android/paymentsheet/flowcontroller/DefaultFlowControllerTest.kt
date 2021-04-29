@@ -53,6 +53,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -63,7 +64,7 @@ import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class DefaultFlowControllerTest {
+internal class DefaultFlowControllerTest {
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
@@ -141,6 +142,48 @@ class DefaultFlowControllerTest {
                     label = "····$last4"
                 )
             )
+    }
+
+    @Test
+    fun `getPaymentOption() for new customer without saved payment methods returns null`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(5)
+        val last4 = paymentMethods.first().card?.last4.orEmpty()
+
+        // Initially configure for a customer with saved payment methods
+        val flowControllerInitializer = FakeFlowControllerInitializer(
+            paymentMethods = paymentMethods,
+            savedSelection = SavedSelection.PaymentMethod(
+                requireNotNull(paymentMethods.first().id)
+            )
+        )
+
+        val flowController = createFlowController(flowControllerInitializer)
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ ->
+        }
+        assertThat(flowController.getPaymentOption())
+            .isEqualTo(
+                PaymentOption(
+                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
+                    label = "····$last4"
+                )
+            )
+
+        // Simulate a real FlowControllerInitializer that fetches the payment methods for the new
+        // customer, who doesn't have any saved payment methods
+        flowControllerInitializer.paymentMethods = emptyList()
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_MINIMUM
+        ) { _, _ ->
+        }
+        // Should return null instead of any cached value from the previous customer
+        assertThat(flowController.getPaymentOption())
+            .isNull()
     }
 
     @Test
@@ -274,7 +317,6 @@ class DefaultFlowControllerTest {
 
         // Add a saved card payment method so that we can make sure it is added when we open
         // up the payment option launcher
-        val newSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(SAVE_NEW_CARD_SELECTION))
 
         // Save off the actual launch arguments when paymentOptionLauncher is called
@@ -390,29 +432,30 @@ class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onGooglePayResult() when PaymentData result should invoke startConfirmAndAuth() with expected params`() {
-        flowController.configureWithPaymentIntent(
-            PaymentSheetFixtures.CLIENT_SECRET,
-            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ) { _, _ ->
-        }
+    fun `onGooglePayResult() when PaymentData result should invoke startConfirmAndAuth() with expected params`() =
+        testDispatcher.runBlockingTest {
+            flowController.configureWithPaymentIntent(
+                PaymentSheetFixtures.CLIENT_SECRET,
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            ) { _, _ ->
+            }
 
-        flowController.onGooglePayResult(
-            StripeGooglePayContract.Result.PaymentData(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                shippingInformation = null
+            flowController.onGooglePayResult(
+                StripeGooglePayContract.Result.PaymentData(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    shippingInformation = null
+                )
             )
-        )
 
-        verify(paymentController).startConfirmAndAuth(
-            any(),
-            argWhere {
-                val params = (it as ConfirmPaymentIntentParams)
-                params.paymentMethodId == "pm_123456789"
-            },
-            any()
-        )
-    }
+            verify(paymentController).startConfirmAndAuth(
+                any(),
+                argWhere {
+                    val params = (it as ConfirmPaymentIntentParams)
+                    params.paymentMethodId == "pm_123456789"
+                },
+                any()
+            )
+        }
 
     @Test
     fun `configure() when scope is cancelled before completion should not call onInit lambda`() {
@@ -534,7 +577,7 @@ class DefaultFlowControllerTest {
     }
 
     private class FakeFlowControllerInitializer(
-        private val paymentMethods: List<PaymentMethod>,
+        var paymentMethods: List<PaymentMethod>,
         private val savedSelection: SavedSelection = SavedSelection.None,
         private val delayMillis: Long = 0L
     ) : FlowControllerInitializer {

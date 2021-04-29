@@ -30,6 +30,7 @@
 
     <!-- CardFormView -->
     <color name="stripe_card_form_view_textinput_color">#deffffff</color>
+    <color name="stripe_card_form_view_textinput_disabled_color">#61ffffff</color>
     <color name="stripe_card_form_view_background_default">#1fffffff</color>
     <color name="stripe_card_form_view_background_disabled">#1fffffff</color>
     <color name="stripe_card_form_view_form_border">#3dffffff</color>

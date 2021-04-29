@@ -41,8 +41,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val customerConfig = config?.customer
 
     // a fatal error
-    private val _fatal = MutableLiveData<Throwable>()
-    internal val fatal: LiveData<Throwable> = _fatal
+    protected val _fatal = MutableLiveData<Throwable>()
 
     protected val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
@@ -93,6 +92,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * described above, and when you have an unsaved card.
      */
     abstract var newCard: PaymentSelection.New.Card?
+
+    abstract fun onFatal(throwable: Throwable)
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         selection.switchMap { paymentSelection ->
@@ -145,10 +146,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _transition.postValue(Event(target))
     }
 
-    fun onFatal(throwable: Throwable) {
-        _fatal.postValue(throwable)
-    }
-
     fun onApiError(errorMessage: String?) {
         _userMessage.value = errorMessage?.let { UserMessage.Error(it) }
         _processing.value = false
@@ -185,6 +182,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             _savedSelection.value = savedSelection
         }
     }
+
+    abstract fun onUserCancel()
 
     sealed class UserMessage {
         abstract val message: String

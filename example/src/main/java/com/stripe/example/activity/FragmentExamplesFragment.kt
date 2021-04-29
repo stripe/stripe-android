@@ -219,8 +219,7 @@ class FragmentExamplesFragment : Fragment() {
             this,
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
                 PAYMENT_METHOD_3DS2_REQUIRED,
-                paymentIntentClientSecret,
-                RETURN_URL
+                paymentIntentClientSecret
             )
         )
     }
@@ -231,8 +230,7 @@ class FragmentExamplesFragment : Fragment() {
             this,
             ConfirmSetupIntentParams.create(
                 PAYMENT_METHOD_3DS2_REQUIRED,
-                setupIntentClientSecret,
-                RETURN_URL
+                setupIntentClientSecret
             )
         )
     }
@@ -294,6 +292,5 @@ class FragmentExamplesFragment : Fragment() {
 
     private companion object {
         private const val PAYMENT_METHOD_3DS2_REQUIRED = "pm_card_threeDSecure2Required"
-        private const val RETURN_URL = "stripe://payment_auth"
     }
 }

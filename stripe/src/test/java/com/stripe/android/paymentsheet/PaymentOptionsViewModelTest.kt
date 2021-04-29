@@ -64,31 +64,34 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() {
-        var viewState: ViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
+        var paymentOptionResult: PaymentOptionResult? = null
+        viewModel.paymentOptionResult.observeForever {
+            paymentOptionResult = it
         }
         viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
 
         viewModel.onUserSelection()
 
-        assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
-            .isEqualTo(PaymentOptionResult.Succeeded(SELECTION_SAVED_PAYMENT_METHOD))
+        assertThat(paymentOptionResult).isEqualTo(
+            PaymentOptionResult.Succeeded(
+                SELECTION_SAVED_PAYMENT_METHOD
+            )
+        )
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
     @Test
     fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
         testDispatcher.runBlockingTest {
-            var viewState: ViewState? = null
-            viewModel.viewState.observeForever {
-                viewState = it
+            var paymentOptionResult: PaymentOptionResult? = null
+            viewModel.paymentOptionResult.observeForever {
+                paymentOptionResult = it
             }
             viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
 
             viewModel.onUserSelection()
 
-            assertThat((viewState as ViewState.PaymentOptions.ProcessResult).result)
+            assertThat(paymentOptionResult)
                 .isEqualTo(
                     PaymentOptionResult.Succeeded(
                         NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION
@@ -110,6 +113,11 @@ internal class PaymentOptionsViewModelTest {
                 viewState.add(it)
             }
 
+            var paymentOptionResult: PaymentOptionResult? = null
+            viewModel.paymentOptionResult.observeForever {
+                paymentOptionResult = it
+            }
+
             viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
 
             viewModel.onUserSelection()
@@ -118,8 +126,7 @@ internal class PaymentOptionsViewModelTest {
                 .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
 
             val paymentOptionResultSucceeded =
-                (viewState[1] as ViewState.PaymentOptions.ProcessResult)
-                    .result as PaymentOptionResult.Succeeded
+                paymentOptionResult as PaymentOptionResult.Succeeded
             assertThat((paymentOptionResultSucceeded).paymentSelection)
                 .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
             verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)

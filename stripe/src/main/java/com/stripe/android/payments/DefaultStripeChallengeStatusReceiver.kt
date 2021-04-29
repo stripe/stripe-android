@@ -5,9 +5,8 @@ import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AnalyticsDataFactory
-import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
@@ -37,9 +36,8 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     private val sourceId: String,
     private val requestOptions: ApiRequest.Options,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsDataFactory: AnalyticsDataFactory,
+    private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val transaction: Transaction,
-    private val analyticsRequestFactory: AnalyticsRequest.Factory,
     private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier(),
     enableLogging: Boolean = false,
     private val workContext: CoroutineContext
@@ -53,12 +51,10 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     ) {
         super.completed(completionEvent, uiTypeCode, flowOutcome)
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.create3ds2ChallengeParams(
-                    AnalyticsEvent.Auth3ds2ChallengeCompleted,
-                    stripeIntent.id.orEmpty(),
-                    uiTypeCode
-                )
+            analyticsRequestFactory.create3ds2Challenge(
+                AnalyticsEvent.Auth3ds2ChallengeCompleted,
+                stripeIntent.id.orEmpty(),
+                uiTypeCode
             )
         )
         log3ds2ChallengePresented()
@@ -71,12 +67,10 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     ) {
         super.cancelled(uiTypeCode)
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.create3ds2ChallengeParams(
-                    AnalyticsEvent.Auth3ds2ChallengeCanceled,
-                    stripeIntent.id.orEmpty(),
-                    uiTypeCode
-                )
+            analyticsRequestFactory.create3ds2Challenge(
+                AnalyticsEvent.Auth3ds2ChallengeCanceled,
+                stripeIntent.id.orEmpty(),
+                uiTypeCode
             )
         )
         log3ds2ChallengePresented()
@@ -89,12 +83,10 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     ) {
         super.timedout(uiTypeCode)
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.create3ds2ChallengeParams(
-                    AnalyticsEvent.Auth3ds2ChallengeTimedOut,
-                    stripeIntent.id.orEmpty(),
-                    uiTypeCode
-                )
+            analyticsRequestFactory.create3ds2Challenge(
+                AnalyticsEvent.Auth3ds2ChallengeTimedOut,
+                stripeIntent.id.orEmpty(),
+                uiTypeCode
             )
         )
         log3ds2ChallengePresented()
@@ -107,11 +99,9 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     ) {
         super.protocolError(protocolErrorEvent)
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.create3ds2ChallengeErrorParams(
-                    stripeIntent.id.orEmpty(),
-                    protocolErrorEvent
-                )
+            analyticsRequestFactory.create3ds2ChallengeErrorParams(
+                stripeIntent.id.orEmpty(),
+                protocolErrorEvent
             )
         )
         log3ds2ChallengePresented()
@@ -124,11 +114,9 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     ) {
         super.runtimeError(runtimeErrorEvent)
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.create3ds2ChallengeErrorParams(
-                    stripeIntent.id.orEmpty(),
-                    runtimeErrorEvent
-                )
+            analyticsRequestFactory.create3ds2ChallengeError(
+                stripeIntent.id.orEmpty(),
+                runtimeErrorEvent
             )
         )
         log3ds2ChallengePresented()
@@ -138,12 +126,10 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
 
     private fun log3ds2ChallengePresented() {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create(
-                analyticsDataFactory.create3ds2ChallengeParams(
-                    AnalyticsEvent.Auth3ds2ChallengePresented,
-                    stripeIntent.id.orEmpty(),
-                    transaction.initialChallengeUiType.orEmpty()
-                )
+            analyticsRequestFactory.create3ds2Challenge(
+                AnalyticsEvent.Auth3ds2ChallengePresented,
+                stripeIntent.id.orEmpty(),
+                transaction.initialChallengeUiType.orEmpty()
             )
         )
     }

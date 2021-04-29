@@ -217,7 +217,7 @@
         <item name="android:maxLines">1</item>
         <item name="android:textSize">@dimen/stripe_card_form_view_textsize</item>
         <item name="android:letterSpacing">-0.01</item>
-        <item name="android:textColor">@color/stripe_card_form_view_textinput_color</item>
+        <item name="android:textColor">@color/stripe_card_form_view_text_color</item>
         <item name="android:paddingTop">13dp</item>
         <item name="android:paddingBottom">13dp</item>
     </style>
@@ -232,7 +232,7 @@
 
     <style name="StripeCardFormEditText">
         <item name="android:imeOptions">actionDone</item>
-        <item name="android:textColor">@color/stripe_card_form_view_textinput_color</item>
+        <item name="android:textColor">@color/stripe_card_form_view_text_color</item>
         <item name="android:textSize">@dimen/stripe_card_form_view_textsize</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:minHeight">@dimen/stripe_card_form_view_text_minheight</item>

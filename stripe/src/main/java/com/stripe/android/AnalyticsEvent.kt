@@ -44,6 +44,16 @@ internal enum class AnalyticsEvent(internal val code: String) {
     Auth3ds1ChallengeError("3ds1_challenge_error"),
     Auth3ds1ChallengeComplete("3ds1_challenge_complete"),
 
+    // URL authentication method
+    AuthWithWebView("auth_with_webview"),
+    AuthWithCustomTabs("auth_with_customtabs"),
+    AuthWithDefaultBrowser("auth_with_defaultbrowser"),
+
+    // Return URL in confirmation request
+    ConfirmReturnUrlNull("confirm_returnurl_null"),
+    ConfirmReturnUrlDefault("confirm_returnurl_default"),
+    ConfirmReturnUrlCustom("confirm_returnurl_custom"),
+
     // FPX
     FpxBankStatusesRetrieve("retrieve_fpx_bank_statuses"),
 
