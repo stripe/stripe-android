@@ -103,7 +103,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val shouldShowSaveCardCheckbox = customerConfig != null && stripeIntent.value is PaymentIntent
+    val shouldShowSaveCardCheckbox: Boolean
+        get() = customerConfig != null && stripeIntent.value is PaymentIntent
 
     init {
         fetchSavedSelection()
@@ -218,6 +219,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 content
             }
         }
+
         /**
          * Returns the content, even if it's already been handled.
          */
