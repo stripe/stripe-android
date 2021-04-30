@@ -57,6 +57,7 @@ internal class PaymentSheetAddCardFragment(
 
         sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner) { viewState ->
+                // Need to update any error message in the view
                 googlePayButton.updateState(viewState?.convert())
 
                 if (viewState is ViewState.PaymentSheet.Ready) {
