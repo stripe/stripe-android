@@ -244,7 +244,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
         }
 
         internalFocusChangeListeners.add { _, hasFocus ->
-            if (!hasFocus && !isDateValid) {
+            if (!hasFocus && !text.isNullOrEmpty() && !isDateValid) {
                 shouldShowError = true
             }
         }
