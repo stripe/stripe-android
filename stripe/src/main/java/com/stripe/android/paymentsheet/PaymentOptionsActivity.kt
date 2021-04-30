@@ -75,11 +75,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    @VisibleForTesting
-    private val viewStateObserver = { _: ViewState.PaymentOptionsReady ->
-        viewBinding.addButton.updateState(PrimaryButton.State.Ready)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -148,7 +143,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun setupAddButton(addButton: PrimaryButton) {
-        viewModel.viewState.observe(this, viewStateObserver)
+        viewBinding.addButton.updateState(PrimaryButton.State.Ready)
 
         viewModel.config?.primaryButtonColor?.let {
             viewBinding.addButton.backgroundTintList = it

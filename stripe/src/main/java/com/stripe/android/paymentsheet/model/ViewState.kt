@@ -15,9 +15,4 @@ internal sealed class ViewState {
             val onComplete: () -> Unit
         ) : PaymentSheet()
     }
-
-    /**
-     * The PaymentOptions does not do any processing
-     */
-    object PaymentOptionsReady : ViewState()
 }

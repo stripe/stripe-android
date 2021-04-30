@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -108,11 +107,6 @@ internal class PaymentOptionsViewModelTest {
         testDispatcher.runBlockingTest {
             paymentMethodRepository.savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-            val viewState: MutableList<ViewState?> = mutableListOf()
-            viewModel.viewState.observeForever {
-                viewState.add(it)
-            }
-
             var paymentOptionResult: PaymentOptionResult? = null
             viewModel.paymentOptionResult.observeForever {
                 paymentOptionResult = it
@@ -122,27 +116,12 @@ internal class PaymentOptionsViewModelTest {
 
             viewModel.onUserSelection()
 
-            assertThat(viewState[0])
-                .isInstanceOf(ViewState.PaymentOptionsReady::class.java)
-
             val paymentOptionResultSucceeded =
                 paymentOptionResult as PaymentOptionResult.Succeeded
             assertThat((paymentOptionResultSucceeded).paymentSelection)
                 .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
             verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
         }
-
-    @Test
-    fun `onUserSelection() when selection has not been made should not emit`() {
-        var viewState: ViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
-        }
-        viewModel.onUserSelection()
-
-        assertThat(viewState)
-            .isInstanceOf(ViewState.PaymentOptionsReady::class.java)
-    }
 
     @Test
     fun `resolveTransitionTarget no new card`() {

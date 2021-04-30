@@ -171,8 +171,6 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel._viewState.value = ViewState.PaymentOptionsReady
-
                 idleLooper()
 
                 val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)

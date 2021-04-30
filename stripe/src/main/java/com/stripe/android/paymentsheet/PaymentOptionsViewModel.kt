@@ -29,10 +29,6 @@ internal class PaymentOptionsViewModel(
     application = application
 ) {
     @VisibleForTesting
-    internal val _viewState = MutableLiveData(ViewState.PaymentOptionsReady)
-    internal val viewState: LiveData<ViewState.PaymentOptionsReady> = _viewState.distinctUntilChanged()
-
-    @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
 
@@ -81,13 +77,11 @@ internal class PaymentOptionsViewModel(
     }
 
     private fun processExistingCard(paymentSelection: PaymentSelection) {
-        _viewState.value = ViewState.PaymentOptionsReady
         prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
     private fun processNewCard(paymentSelection: PaymentSelection) {
-        _viewState.value = ViewState.PaymentOptionsReady
         prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
