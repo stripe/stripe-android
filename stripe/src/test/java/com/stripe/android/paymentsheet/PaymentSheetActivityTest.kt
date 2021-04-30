@@ -356,7 +356,7 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
-                viewModel._viewState.value = ViewState.PaymentSheet.Ready
+                viewModel._viewState.value = ViewState.PaymentSheet.Ready(null)
 
                 idleLooper()
 

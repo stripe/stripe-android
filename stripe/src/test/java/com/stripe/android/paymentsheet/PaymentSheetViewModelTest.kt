@@ -195,7 +195,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(ViewState.PaymentSheet.Ready)
+            .isEqualTo(ViewState.PaymentSheet.Ready(null))
         assertThat(processing[1]).isFalse()
     }
 
@@ -216,11 +216,6 @@ internal class PaymentSheetViewModelTest {
             processing.add(it)
         }
 
-        val userErrorMessage: MutableList<UserErrorMessage?> = mutableListOf()
-        viewModel.userErrorMessage.observeForever {
-            userErrorMessage.add(it)
-        }
-
         assertThat(viewState.size).isEqualTo(1)
         assertThat(processing.size).isEqualTo(1)
         assertThat(viewState[0]).isEqualTo(ViewState.PaymentSheet.StartProcessing)
@@ -228,14 +223,12 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.onGooglePayResult(StripeGooglePayContract.Result.Error(Exception("Test exception")))
 
-        // onApiError and resetViewState both set processing state to false
-        assertThat(processing.size).isEqualTo(3)
+        assertThat(processing.size).isEqualTo(2)
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(ViewState.PaymentSheet.Ready)
+            .isEqualTo(ViewState.PaymentSheet.Ready(UserErrorMessage("Test exception")))
         assertThat(processing[1]).isFalse()
-        assertThat(userErrorMessage[1]).isEqualTo(UserErrorMessage("Test exception"))
     }
 
     @Test
@@ -359,16 +352,25 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentFlowResult() should update emit API errors`() {
         paymentFlowResultProcessor.error = RuntimeException("Your card was declined.")
 
-        var userErrorMessage: UserErrorMessage? = null
-        viewModel.userErrorMessage.observeForever {
-            userErrorMessage = it
+        viewModel.fetchStripeIntent()
+
+        var viewStateList = mutableListOf<ViewState.PaymentSheet>()
+        viewModel.viewState.observeForever {
+            viewStateList.add(it)
         }
         viewModel.onPaymentFlowResult(
             PaymentFlowResult.Unvalidated()
         )
-        assertThat(userErrorMessage)
+
+        assertThat(viewStateList[0])
             .isEqualTo(
-                UserErrorMessage("Your card was declined.")
+                ViewState.PaymentSheet.Ready(null)
+            )
+        assertThat(viewStateList[1])
+            .isEqualTo(
+                ViewState.PaymentSheet.Ready(
+                    UserErrorMessage("Your card was declined.")
+                )
             )
     }
 
@@ -381,7 +383,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(viewState)
             .isEqualTo(
-                ViewState.PaymentSheet.Ready
+                ViewState.PaymentSheet.Ready(null)
             )
     }
 

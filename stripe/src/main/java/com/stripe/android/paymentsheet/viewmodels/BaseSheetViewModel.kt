@@ -89,8 +89,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     abstract fun onFatal(throwable: Throwable)
 
-    abstract fun onBackPressed()
-
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         selection.switchMap { paymentSelection ->
             MutableLiveData(!isProcessing && paymentSelection != null)

@@ -154,8 +154,4 @@ internal class PaymentOptionsViewModel(
             ) as T
         }
     }
-
-    override fun onBackPressed() {
-        // No action required
-    }
 }

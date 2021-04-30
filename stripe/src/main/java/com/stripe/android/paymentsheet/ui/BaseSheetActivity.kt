@@ -100,7 +100,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
-            viewModel.onBackPressed()
             super.onBackPressed()
         } else {
             viewModel.onUserCancel()

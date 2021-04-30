@@ -48,7 +48,7 @@ import kotlin.coroutines.CoroutineContext
  * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddCardFragment] classes
  * to convert a [ViewState.PaymentSheet] to a [PrimaryButton.State]
  */
-internal fun ViewState.PaymentSheet.convert(): PrimaryButton.State? {
+internal fun ViewState.PaymentSheet.convert(): PrimaryButton.State {
     return when (this) {
         is ViewState.PaymentSheet.Ready ->
             PrimaryButton.State.Ready
@@ -113,44 +113,22 @@ internal class PaymentSheetViewModel internal constructor(
 
     private val paymentIntentValidator = PaymentIntentValidator()
 
-    // a message shown to the user
-    internal val _errorMessage = MutableLiveData<UserErrorMessage?>()
-    internal val userErrorMessage: LiveData<UserErrorMessage?> = _errorMessage
-
     init {
         fetchIsGooglePayReady()
         eventReporter.onInit(config)
     }
 
-    fun onApiError(errorMessage: String?) {
-        _errorMessage.value = errorMessage?.let { UserErrorMessage(it) }
-        _processing.value = false
-    }
-
-    fun onApiError(throwable: Throwable) {
-        when (throwable) {
+    private fun apiThrowableToString(throwable: Throwable): String? {
+        return when (throwable) {
             is APIConnectionException -> {
-                onApiError(
-                    getApplication<Application>().resources.getString(
-                        R.string.stripe_failure_connection_error
-                    )
+                getApplication<Application>().resources.getString(
+                    R.string.stripe_failure_connection_error
                 )
             }
             else -> {
-                onApiError(throwable.localizedMessage)
+                throwable.localizedMessage
             }
         }
-    }
-
-    override fun transitionTo(target: TransitionTarget) {
-        // This goes away when button is part of the fragment
-        _errorMessage.value = null
-        super.transitionTo(target)
-    }
-
-    override fun onBackPressed() {
-        // This goes away when button is part of the fragment
-        _errorMessage.value = null
     }
 
     fun fetchIsGooglePayReady() {
@@ -202,7 +180,7 @@ internal class PaymentSheetViewModel internal constructor(
             }.fold(
                 onSuccess = {
                     _paymentIntent.value = paymentIntent
-                    resetViewState(paymentIntent)
+                    resetViewState(paymentIntent, userErrorMessage = null)
                 },
                 onFailure = ::onFatal
             )
@@ -230,15 +208,17 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun resetViewState(paymentIntent: PaymentIntent) {
+    private fun resetViewState(paymentIntent: PaymentIntent, userErrorMessage: String?) {
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
+        _processing.value = false
         if (amount != null && currencyCode != null) {
             _amount.value = Amount(amount, currencyCode)
-            _viewState.value = ViewState.PaymentSheet.Ready
-            _processing.value = false
+            _viewState.value =
+                ViewState.PaymentSheet.Ready(userErrorMessage?.let { UserErrorMessage(it) })
             checkoutIdentifier = CheckoutIdentifier.None
         } else {
+            _processing.value = false
             onFatal(
                 IllegalStateException("PaymentIntent could not be parsed correctly.")
             )
@@ -247,7 +227,6 @@ internal class PaymentSheetViewModel internal constructor(
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
         this.checkoutIdentifier = checkoutIdentifier
-        _errorMessage.value = null
         _processing.value = true
         _viewState.value = ViewState.PaymentSheet.StartProcessing
 
@@ -315,11 +294,15 @@ internal class PaymentSheetViewModel internal constructor(
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
 
-                onApiError(paymentIntentResult.failureMessage)
                 runCatching {
                     paymentIntentValidator.requireValid(paymentIntentResult.intent)
                 }.fold(
-                    onSuccess = ::resetViewState,
+                    onSuccess = {
+                        resetViewState(
+                            it,
+                            paymentIntentResult.failureMessage
+                        )
+                    },
                     onFailure = ::onFatal
                 )
             }
@@ -348,12 +331,16 @@ internal class PaymentSheetViewModel internal constructor(
                 confirmPaymentSelection(paymentSelection)
             }
             is StripeGooglePayContract.Result.Error -> {
-                onApiError(googlePayResult.exception)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                paymentIntent.value?.let(::resetViewState)
+                paymentIntent.value?.let {
+                    resetViewState(
+                        it,
+                        apiThrowableToString(googlePayResult.exception)
+                    )
+                }
             }
             else -> {
-                paymentIntent.value?.let(::resetViewState)
+                paymentIntent.value?.let { resetViewState(it, userErrorMessage = null) }
             }
         }
     }
@@ -375,8 +362,7 @@ internal class PaymentSheetViewModel internal constructor(
                         eventReporter.onPaymentFailure(it)
                     }
 
-                    onApiError(error)
-                    paymentIntent.value?.let(::resetViewState)
+                    paymentIntent.value?.let { resetViewState(it, apiThrowableToString(error)) }
                 }
             )
         }

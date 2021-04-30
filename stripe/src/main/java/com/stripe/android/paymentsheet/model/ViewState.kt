@@ -8,15 +8,17 @@ internal sealed class ViewState {
      * PaymentSheet must always go through the processing state.
      * The states always progress as follows: Ready -> StartProcessing -> FinishProcessing -> ProcessResult
      */
-    internal sealed class PaymentSheet(private val userErrorMessage: BaseSheetViewModel.UserErrorMessage) : ViewState() {
-        data class Ready(val message: BaseSheetViewModel.UserErrorMessage) : PaymentSheet(message)
+    internal sealed class PaymentSheet(val errorMessage: BaseSheetViewModel.UserErrorMessage? = null) :
+        ViewState() {
 
-        data class StartProcessing(val message: BaseSheetViewModel.UserErrorMessage) : PaymentSheet(message)
+        data class Ready(private val message: BaseSheetViewModel.UserErrorMessage? = null) :
+            PaymentSheet(message)
+
+        object StartProcessing : PaymentSheet(null)
 
         data class FinishProcessing(
-            val message: BaseSheetViewModel.UserErrorMessage,
             val onComplete: () -> Unit
-        ) : PaymentSheet(message)
+        ) : PaymentSheet()
     }
 
     /**
