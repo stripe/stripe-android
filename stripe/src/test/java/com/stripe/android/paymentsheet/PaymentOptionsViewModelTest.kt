@@ -123,7 +123,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.onUserSelection()
 
             assertThat(viewState[0])
-                .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+                .isInstanceOf(ViewState.PaymentOptionsReady::class.java)
 
             val paymentOptionResultSucceeded =
                 paymentOptionResult as PaymentOptionResult.Succeeded
@@ -141,7 +141,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.onUserSelection()
 
         assertThat(viewState)
-            .isInstanceOf(ViewState.PaymentOptions.Ready::class.java)
+            .isInstanceOf(ViewState.PaymentOptionsReady::class.java)
     }
 
     @Test

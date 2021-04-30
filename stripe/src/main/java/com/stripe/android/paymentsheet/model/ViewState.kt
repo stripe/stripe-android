@@ -17,11 +17,7 @@ internal sealed class ViewState {
     }
 
     /**
-     * The PaymentOptions may or may not go through a processing state. The possible state transitions are:
-     * Ready -> ProcessResult, if no save card is required
-     * Ready -> StartProcessing -> FinishProcessing -> ProcessResult, if requested to save a new card
+     * The PaymentOptions does not do any processing
      */
-    internal sealed class PaymentOptions : ViewState() {
-        object Ready : PaymentOptions()
-    }
+    object PaymentOptionsReady : ViewState()
 }

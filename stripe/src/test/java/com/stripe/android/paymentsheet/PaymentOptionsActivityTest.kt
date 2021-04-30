@@ -171,7 +171,7 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel._viewState.value = ViewState.PaymentOptions.Ready
+                viewModel._viewState.value = ViewState.PaymentOptionsReady
 
                 idleLooper()
 

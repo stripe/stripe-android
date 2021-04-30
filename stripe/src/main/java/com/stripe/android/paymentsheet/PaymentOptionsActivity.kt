@@ -76,13 +76,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     @VisibleForTesting
-    private val viewStateObserver = { viewState: ViewState.PaymentOptions? ->
-        val addButton = viewBinding.addButton
-        when (viewState) {
-            is ViewState.PaymentOptions.Ready -> addButton.updateState(
-                PrimaryButton.State.Ready
-            )
-        }
+    private val viewStateObserver = { _: ViewState.PaymentOptionsReady ->
+        viewBinding.addButton.updateState(PrimaryButton.State.Ready)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
