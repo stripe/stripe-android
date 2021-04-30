@@ -19,16 +19,19 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  *
  * The eventual replacement for [PaymentAuthWebViewActivity].
  *
- * [StripeBrowserLauncherActivity] will only be used if Custom Tabs are enabled. See
- * [PaymentBrowserAuthContract.Args.shouldUseCustomTabs].
+ * [StripeBrowserLauncherActivity] will only be used when the following are true:
+ * - Custom Tabs are available or Chrome is installed
+ * - the confirmation request's `return_url` is set to [DefaultReturnUrl.value]
+ *
+ * See [BrowserCapabilities] and [PaymentBrowserAuthContract.Args.hasDefaultReturnUrl].
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
         StripeBrowserLauncherViewModel.Factory(application)
     }
 
-    private val customTabsCapabilities: CustomTabsCapabilities by lazy {
-        CustomTabsCapabilities(this)
+    private val browserCapabilities: BrowserCapabilities by lazy {
+        BrowserCapabilitiesSupplier(this).get()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +56,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             ::onResult
         )
 
-        val shouldUseCustomTabs = customTabsCapabilities.isSupported()
+        val shouldUseCustomTabs = browserCapabilities == BrowserCapabilities.CustomTabs
         viewModel.logCapabilities(shouldUseCustomTabs)
 
         if (shouldUseCustomTabs) {

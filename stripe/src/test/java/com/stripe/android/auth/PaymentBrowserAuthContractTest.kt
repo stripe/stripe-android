@@ -38,10 +38,10 @@ class PaymentBrowserAuthContractTest {
     }
 
     @Test
-    fun `createIntent() when custom tabs supported and custom return_url should use PaymentAuthWebViewActivity`() {
+    fun `createIntent() when has compatible browser and custom return_url should use PaymentAuthWebViewActivity`() {
         val intent = PaymentBrowserAuthContract(
             defaultReturnUrl,
-            isCustomTabsSupported = { true }
+            hasCompatibleBrowser = { true }
         ).createIntent(
             activity,
             ARGS.copy(
@@ -54,10 +54,10 @@ class PaymentBrowserAuthContractTest {
     }
 
     @Test
-    fun `createIntent() when custom tabs supported and default return_url should use StripeBrowserLauncherActivity`() {
+    fun `createIntent() when has compatible browser and default return_url should use StripeBrowserLauncherActivity`() {
         val intent = PaymentBrowserAuthContract(
             defaultReturnUrl,
-            isCustomTabsSupported = { true }
+            hasCompatibleBrowser = { true }
         ).createIntent(
             activity,
             ARGS.copy(
@@ -70,10 +70,10 @@ class PaymentBrowserAuthContractTest {
     }
 
     @Test
-    fun `createIntent() when custom tabs not supported and default return_url should use StripeBrowserLauncherActivity`() {
+    fun `createIntent() when no compatible browser and default return_url should use StripeBrowserLauncherActivity`() {
         val intent = PaymentBrowserAuthContract(
             defaultReturnUrl,
-            isCustomTabsSupported = { false }
+            hasCompatibleBrowser = { false }
         ).createIntent(
             activity,
             ARGS.copy(
@@ -89,7 +89,7 @@ class PaymentBrowserAuthContractTest {
     fun `createIntent() should set statusBarColor from activity`() {
         val intent = PaymentBrowserAuthContract(
             defaultReturnUrl,
-            isCustomTabsSupported = { false }
+            hasCompatibleBrowser = { false }
         ).createIntent(
             activity,
             ARGS
