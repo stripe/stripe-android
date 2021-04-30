@@ -1,8 +1,12 @@
 package com.stripe.android.payments
 
+import android.app.Application
+import android.content.Intent
+import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -12,19 +16,47 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class StripeBrowserLauncherViewModelTest {
+    private val application = ApplicationProvider.getApplicationContext<Application>()
     private val analyticsRequests = mutableListOf<AnalyticsRequest>()
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {
         analyticsRequests.add(it)
     }
     private val analyticsRequestFactory = AnalyticsRequestFactory(
-        ApplicationProvider.getApplicationContext(),
+        application,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
 
     private val viewModel = StripeBrowserLauncherViewModel(
         analyticsRequestExecutor,
-        analyticsRequestFactory
+        analyticsRequestFactory,
+        BrowserCapabilities.CustomTabs,
+        "Verify your payment"
     )
+
+    @Test
+    fun `createLaunchIntent() should create an intent and wrap in a Chooser Intent`() {
+        val launchIntent = viewModel.createLaunchIntent(
+            PaymentBrowserAuthContract.Args(
+                objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
+                requestCode = 50000,
+                clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
+                url = "https://bank.com"
+            )
+        )
+
+        val browserIntent =
+            requireNotNull(launchIntent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
+        assertThat(browserIntent.action)
+            .isEqualTo(Intent.ACTION_VIEW)
+        assertThat(browserIntent.data)
+            .isEqualTo(Uri.parse("https://bank.com"))
+        assertThat(launchIntent.getStringExtra(Intent.EXTRA_TITLE))
+            .isEqualTo("Verify your payment")
+
+        // createLaunchIntent() should make an analytics request
+        assertThat(analyticsRequests)
+            .hasSize(1)
+    }
 
     @Test
     fun `logCapabilities() when shouldUseCustomTabs = true should log expected event`() {
