@@ -45,7 +45,6 @@ internal class StripeBrowserLauncherViewModel(
                 }
                 .build()
             customTabsIntent.intent.data = url
-            customTabsIntent.intent
 
             Intent.createChooser(
                 customTabsIntent.intent,
