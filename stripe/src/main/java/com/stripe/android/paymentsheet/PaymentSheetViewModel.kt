@@ -210,7 +210,7 @@ internal class PaymentSheetViewModel internal constructor(
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
         this.checkoutIdentifier = checkoutIdentifier
-        _userMessage.value = null
+        _errorMessage.value = null
         _processing.value = true
         _viewState.value = ViewState.PaymentSheet.StartProcessing
 

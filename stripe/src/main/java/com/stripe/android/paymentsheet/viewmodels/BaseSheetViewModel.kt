@@ -80,8 +80,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     val processing: LiveData<Boolean> = _processing
 
     // a message shown to the user
-    protected val _userMessage = MutableLiveData<UserMessage?>()
-    internal val userMessage: LiveData<UserMessage?> = _userMessage
+    protected val _errorMessage = MutableLiveData<UserErrorMessage?>()
+    internal val userErrorMessage: LiveData<UserErrorMessage?> = _errorMessage
 
     /**
      * This should be initialized from the starter args, and then from that
@@ -142,12 +142,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     fun transitionTo(target: TransitionTargetType) {
-        _userMessage.value = null
+        // This goes away when button is part of the fragment
+        _errorMessage.value = null
         _transition.postValue(Event(target))
     }
 
     fun onApiError(errorMessage: String?) {
-        _userMessage.value = errorMessage?.let { UserMessage.Error(it) }
+        _errorMessage.value = errorMessage?.let { UserErrorMessage(it) }
         _processing.value = false
     }
 
@@ -171,7 +172,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     fun onBackPressed() {
-        _userMessage.value = null
+        // This goes away when button is part of the fragment
+        _errorMessage.value = null
     }
 
     private fun fetchSavedSelection() {
@@ -185,13 +187,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     abstract fun onUserCancel()
 
-    sealed class UserMessage {
-        abstract val message: String
-
-        data class Error(
-            override val message: String
-        ) : UserMessage()
-    }
+    data class UserErrorMessage(val message: String)
 
     /**
      * Used as a wrapper for data that is exposed via a LiveData that represents an event.
@@ -214,6 +210,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 content
             }
         }
+
         /**
          * Returns the content, even if it's already been handled.
          */

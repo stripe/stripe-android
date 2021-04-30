@@ -34,7 +34,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserMessage
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -216,9 +216,9 @@ internal class PaymentSheetViewModelTest {
             processing.add(it)
         }
 
-        val userMessage: MutableList<UserMessage?> = mutableListOf()
-        viewModel.userMessage.observeForever {
-            userMessage.add(it)
+        val userErrorMessage: MutableList<UserErrorMessage?> = mutableListOf()
+        viewModel.userErrorMessage.observeForever {
+            userErrorMessage.add(it)
         }
 
         assertThat(viewState.size).isEqualTo(1)
@@ -235,7 +235,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState[1])
             .isEqualTo(ViewState.PaymentSheet.Ready)
         assertThat(processing[1]).isFalse()
-        assertThat(userMessage[1]).isEqualTo(UserMessage.Error("Test exception"))
+        assertThat(userErrorMessage[1]).isEqualTo(UserErrorMessage("Test exception"))
     }
 
     @Test
@@ -359,16 +359,16 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentFlowResult() should update emit API errors`() {
         paymentFlowResultProcessor.error = RuntimeException("Your card was declined.")
 
-        var userMessage: UserMessage? = null
-        viewModel.userMessage.observeForever {
-            userMessage = it
+        var userErrorMessage: UserErrorMessage? = null
+        viewModel.userErrorMessage.observeForever {
+            userErrorMessage = it
         }
         viewModel.onPaymentFlowResult(
             PaymentFlowResult.Unvalidated()
         )
-        assertThat(userMessage)
+        assertThat(userErrorMessage)
             .isEqualTo(
-                UserMessage.Error("Your card was declined.")
+                UserErrorMessage("Your card was declined.")
             )
     }
 

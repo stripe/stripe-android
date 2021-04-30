@@ -72,7 +72,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.userMessage.observe(this) { userMessage ->
+        viewModel.userErrorMessage.observe(this) { userMessage ->
             messageView.isVisible = userMessage != null
             messageView.text = userMessage?.message
         }
