@@ -23,11 +23,5 @@ internal sealed class ViewState {
      */
     internal sealed class PaymentOptions : ViewState() {
         object Ready : PaymentOptions()
-
-        object StartProcessing : PaymentOptions()
-
-        data class FinishProcessing(
-            val onComplete: () -> Unit
-        ) : PaymentOptions()
     }
 }
