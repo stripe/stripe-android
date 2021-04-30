@@ -147,6 +147,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
         )
 
+        viewModel.userErrorMessage.observe(this) { userMessage ->
+            messageView.isVisible = userMessage != null
+            messageView.text = userMessage?.message
+        }
+
         val googlePayLauncher = registerForActivityResult(
             StripeGooglePayContract()
         ) {

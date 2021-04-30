@@ -9,8 +9,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.R
-import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -79,10 +77,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _processing = MutableLiveData(true)
     val processing: LiveData<Boolean> = _processing
 
-    // a message shown to the user
-    protected val _errorMessage = MutableLiveData<UserErrorMessage?>()
-    internal val userErrorMessage: LiveData<UserErrorMessage?> = _errorMessage
-
     /**
      * This should be initialized from the starter args, and then from that
      * point forward it will be the last valid card seen or entered in the add card view.
@@ -94,6 +88,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     abstract var newCard: PaymentSelection.New.Card?
 
     abstract fun onFatal(throwable: Throwable)
+
+    abstract fun onBackPressed()
 
     val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
         selection.switchMap { paymentSelection ->
@@ -141,39 +137,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    fun transitionTo(target: TransitionTargetType) {
-        // This goes away when button is part of the fragment
-        _errorMessage.value = null
+    open fun transitionTo(target: TransitionTargetType) {
         _transition.postValue(Event(target))
-    }
-
-    fun onApiError(errorMessage: String?) {
-        _errorMessage.value = errorMessage?.let { UserErrorMessage(it) }
-        _processing.value = false
-    }
-
-    fun onApiError(throwable: Throwable) {
-        when (throwable) {
-            is APIConnectionException -> {
-                onApiError(
-                    getApplication<Application>().resources.getString(
-                        R.string.stripe_failure_connection_error
-                    )
-                )
-            }
-            else -> {
-                onApiError(throwable.localizedMessage)
-            }
-        }
     }
 
     fun updateSelection(selection: PaymentSelection?) {
         _selection.value = selection
-    }
-
-    fun onBackPressed() {
-        // This goes away when button is part of the fragment
-        _errorMessage.value = null
     }
 
     private fun fetchSavedSelection() {

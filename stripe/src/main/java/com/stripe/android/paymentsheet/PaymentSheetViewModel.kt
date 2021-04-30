@@ -12,7 +12,9 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -111,9 +113,44 @@ internal class PaymentSheetViewModel internal constructor(
 
     private val paymentIntentValidator = PaymentIntentValidator()
 
+    // a message shown to the user
+    internal val _errorMessage = MutableLiveData<UserErrorMessage?>()
+    internal val userErrorMessage: LiveData<UserErrorMessage?> = _errorMessage
+
     init {
         fetchIsGooglePayReady()
         eventReporter.onInit(config)
+    }
+
+    fun onApiError(errorMessage: String?) {
+        _errorMessage.value = errorMessage?.let { UserErrorMessage(it) }
+        _processing.value = false
+    }
+
+    fun onApiError(throwable: Throwable) {
+        when (throwable) {
+            is APIConnectionException -> {
+                onApiError(
+                    getApplication<Application>().resources.getString(
+                        R.string.stripe_failure_connection_error
+                    )
+                )
+            }
+            else -> {
+                onApiError(throwable.localizedMessage)
+            }
+        }
+    }
+
+    override fun transitionTo(target: TransitionTarget) {
+        // This goes away when button is part of the fragment
+        _errorMessage.value = null
+        super.transitionTo(target)
+    }
+
+    override fun onBackPressed() {
+        // This goes away when button is part of the fragment
+        _errorMessage.value = null
     }
 
     fun fetchIsGooglePayReady() {
