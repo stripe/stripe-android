@@ -28,8 +28,8 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -173,7 +173,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
-        val viewState: MutableList<ViewState?> = mutableListOf()
+        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observeForever {
                 viewState.add(it)
@@ -187,7 +187,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState.size).isEqualTo(1)
         assertThat(processing.size).isEqualTo(1)
         assertThat(viewState[0])
-            .isEqualTo(ViewState.PaymentSheet.StartProcessing)
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
         assertThat(processing[0]).isTrue()
 
         viewModel.onGooglePayResult(StripeGooglePayContract.Result.Canceled)
@@ -195,7 +195,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(ViewState.PaymentSheet.Ready)
+            .isEqualTo(PaymentSheetViewState.Ready)
         assertThat(processing[1]).isFalse()
     }
 
@@ -205,7 +205,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
-        val viewState: MutableList<ViewState?> = mutableListOf()
+        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observeForever {
                 viewState.add(it)
@@ -223,7 +223,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewState.size).isEqualTo(1)
         assertThat(processing.size).isEqualTo(1)
-        assertThat(viewState[0]).isEqualTo(ViewState.PaymentSheet.StartProcessing)
+        assertThat(viewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
         assertThat(processing[0]).isTrue()
 
         viewModel.onGooglePayResult(StripeGooglePayContract.Result.Error(Exception("Test exception")))
@@ -233,7 +233,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(ViewState.PaymentSheet.Ready)
+            .isEqualTo(PaymentSheetViewState.Ready)
         assertThat(processing[1]).isFalse()
         assertThat(userMessage[1]).isEqualTo(UserMessage.Error("Test exception"))
     }
@@ -246,7 +246,7 @@ internal class PaymentSheetViewModelTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
-            val viewState: MutableList<ViewState?> = mutableListOf()
+            val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
             viewModel.viewState.observeForever {
                 viewState.add(it)
             }
@@ -263,9 +263,9 @@ internal class PaymentSheetViewModelTest {
                 )
             )
             assertThat(viewState[1])
-                .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
 
-            (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
+            (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
 
             assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
 
@@ -292,7 +292,7 @@ internal class PaymentSheetViewModelTest {
             )
             viewModel.updateSelection(selection)
 
-            val viewState: MutableList<ViewState?> = mutableListOf()
+            val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
             viewModel.viewState.observeForever {
                 viewState.add(it)
             }
@@ -309,9 +309,9 @@ internal class PaymentSheetViewModelTest {
                 )
             )
             assertThat(viewState[1])
-                .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
 
-            (viewState[1] as ViewState.PaymentSheet.FinishProcessing).onComplete()
+            (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
 
             assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
 
@@ -374,14 +374,14 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `fetchPaymentIntent() should update ViewState LiveData`() {
-        var viewState: ViewState? = null
+        var viewState: PaymentSheetViewState? = null
         viewModel.viewState.observeForever {
             viewState = it
         }
         viewModel.fetchStripeIntent()
         assertThat(viewState)
             .isEqualTo(
-                ViewState.PaymentSheet.Ready
+                PaymentSheetViewState.Ready
             )
     }
 
@@ -520,9 +520,9 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        val viewStates = mutableListOf<ViewState>()
+        val viewStates = mutableListOf<PaymentSheetViewState>()
         viewModel.viewState.observeForever { viewState ->
-            if (viewState is ViewState.PaymentSheet.FinishProcessing) {
+            if (viewState is PaymentSheetViewState.FinishProcessing) {
                 // force `onComplete` to be called
                 viewState.onComplete()
             }
@@ -541,7 +541,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewStates)
             .hasSize(1)
         assertThat(viewStates[0])
-            .isInstanceOf(ViewState.PaymentSheet.FinishProcessing::class.java)
+            .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
         assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
     }
 
