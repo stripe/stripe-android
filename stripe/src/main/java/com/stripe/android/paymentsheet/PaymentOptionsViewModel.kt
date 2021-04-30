@@ -6,12 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
@@ -28,12 +26,6 @@ internal class PaymentOptionsViewModel(
     workContext = workContext,
     application = application
 ) {
-    @VisibleForTesting
-    internal val _viewState = MutableLiveData<ViewState.PaymentOptions>(
-        ViewState.PaymentOptions.Ready
-    )
-    internal val viewState: LiveData<ViewState.PaymentOptions> = _viewState.distinctUntilChanged()
-
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
@@ -83,13 +75,11 @@ internal class PaymentOptionsViewModel(
     }
 
     private fun processExistingCard(paymentSelection: PaymentSelection) {
-        _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
     private fun processNewCard(paymentSelection: PaymentSelection) {
-        _viewState.value = ViewState.PaymentOptions.Ready
         prefsRepository.savePaymentSelection(paymentSelection)
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
