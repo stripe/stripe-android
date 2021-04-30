@@ -2471,6 +2471,7 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public final fun getCurrency ()Ljava/lang/String;
 	public fun getDescription ()Ljava/lang/String;
 	public fun getId ()Ljava/lang/String;
+	public fun getLastErrorMessage ()Ljava/lang/String;
 	public final fun getLastPaymentError ()Lcom/stripe/android/model/PaymentIntent$Error;
 	public final fun getNextAction ()Ljava/util/Map;
 	public fun getNextActionData ()Lcom/stripe/android/model/StripeIntent$NextActionData;
@@ -3794,6 +3795,7 @@ public final class com/stripe/android/model/SetupIntent : com/stripe/android/mod
 	public fun getCreated ()J
 	public fun getDescription ()Ljava/lang/String;
 	public fun getId ()Ljava/lang/String;
+	public fun getLastErrorMessage ()Ljava/lang/String;
 	public final fun getLastSetupError ()Lcom/stripe/android/model/SetupIntent$Error;
 	public fun getNextActionData ()Lcom/stripe/android/model/StripeIntent$NextActionData;
 	public fun getNextActionType ()Lcom/stripe/android/model/StripeIntent$NextActionType;
@@ -4758,6 +4760,7 @@ public abstract interface class com/stripe/android/model/StripeIntent : com/stri
 	public abstract fun getCreated ()J
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getLastErrorMessage ()Ljava/lang/String;
 	public abstract fun getNextActionData ()Lcom/stripe/android/model/StripeIntent$NextActionData;
 	public abstract fun getNextActionType ()Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public abstract fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
