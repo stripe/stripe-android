@@ -162,7 +162,6 @@ class CountryTextInputLayoutTest {
         oldCountryTextInputLayout.updatedSelectedCountryCode(CountryCode.CA)
         oldCountryTextInputLayout.updateUiForCountryEntered(CountryCode.CA)
 
-
         assertEquals(CountryCode.CA, oldCountryTextInputLayout.selectedCountryCode)
         assertEquals("Canada", oldCountryTextInputLayout.countryAutocomplete.text.toString())
 
@@ -178,7 +177,6 @@ class CountryTextInputLayoutTest {
 
         assertEquals(CountryCode.CA, oldCountryTextInputLayout.selectedCountryCode)
         assertEquals("Canada", oldCountryTextInputLayout.countryAutocomplete.text.toString())
-
     }
 
     @AfterTest
