@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
@@ -460,7 +459,6 @@ internal class CardFormView @JvmOverloads constructor(
     }
 
     private fun updateErrorsView(errorMessage: String?) {
-        Log.d("MLGB", "errorMessage: $errorMessage")
         errors.text = errorMessage
         errors.isVisible = errorMessage != null
     }
