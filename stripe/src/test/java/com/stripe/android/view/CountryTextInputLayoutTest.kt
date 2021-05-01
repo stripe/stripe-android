@@ -1,6 +1,8 @@
 package com.stripe.android.view
 
+import android.app.Application
 import android.content.Context
+import android.os.Parcelable
 import android.widget.AutoCompleteTextView
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.mock
@@ -13,6 +15,7 @@ import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
+import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -134,6 +137,48 @@ class CountryTextInputLayoutTest {
                 Locale.getDefault()
             )
         )
+    }
+
+    // Test class to expose #onRestoreInstanceState, use this to mimic configuration change.
+    private class TestCountryTextInputLayout(context: Context) : CountryTextInputLayout(context) {
+        fun restoreState(state: Parcelable?) {
+            onRestoreInstanceState(state)
+        }
+    }
+
+    @Test
+    fun `when screen rotates then selected country should carry over`() {
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        application.setTheme(R.style.StripePaymentSheetDefaultTheme)
+        val oldCountryTextInputLayout = CountryTextInputLayout(
+            application
+        )
+
+        idleLooper()
+
+        assertEquals(CountryCode.US, oldCountryTextInputLayout.selectedCountryCode)
+        assertEquals("United States", oldCountryTextInputLayout.countryAutocomplete.text.toString())
+
+        oldCountryTextInputLayout.updatedSelectedCountryCode(CountryCode.CA)
+        oldCountryTextInputLayout.updateUiForCountryEntered(CountryCode.CA)
+
+
+        assertEquals(CountryCode.CA, oldCountryTextInputLayout.selectedCountryCode)
+        assertEquals("Canada", oldCountryTextInputLayout.countryAutocomplete.text.toString())
+
+        // mimic configuration change - the old instance's state is saved and passed to
+        // a new instance's onRestoreInstanceState.
+        // activityScenario.recreate() won't trigger onRestoreInstanceState
+        val oldState = oldCountryTextInputLayout.onSaveInstanceState()
+        val newCountryTextInputLayout = TestCountryTextInputLayout(
+            application
+        )
+        idleLooper()
+        newCountryTextInputLayout.restoreState(oldState)
+
+        assertEquals(CountryCode.CA, oldCountryTextInputLayout.selectedCountryCode)
+        assertEquals("Canada", oldCountryTextInputLayout.countryAutocomplete.text.toString())
+
     }
 
     @AfterTest

@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View.OnFocusChangeListener
@@ -16,6 +17,7 @@ import androidx.core.view.doOnNextLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import com.stripe.android.model.CountryCode
+import kotlinx.parcelize.Parcelize
 import java.util.Locale
 import kotlin.properties.Delegates
 
@@ -29,7 +31,7 @@ import kotlin.properties.Delegates
  * [R.styleable.StripeCountryAutoCompleteTextInputLayout_countryItemLayout], note this layout must
  * be a [TextView].
  */
-internal class CountryTextInputLayout @JvmOverloads constructor(
+internal open class CountryTextInputLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = com.google.android.material.R.attr.textInputStyle
@@ -148,6 +150,36 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         }
     }
 
+    override fun onSaveInstanceState(): Parcelable? {
+        selectedCountry?.let {
+            return CountryTextInputLayoutState(
+                it.code.value,
+                super.onSaveInstanceState()
+            )
+        } ?: run {
+            return super.onSaveInstanceState()
+        }
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if (state is CountryTextInputLayoutState) {
+            super.onRestoreInstanceState(state.superState)
+            CountryCode.create(state.countryCode).let { countryCode ->
+                updatedSelectedCountryCode(countryCode)
+                updateUiForCountryEntered(countryCode)
+                requestLayout()
+            }
+        } else {
+            super.onRestoreInstanceState(state)
+        }
+    }
+
+    @Parcelize
+    data class CountryTextInputLayoutState(
+        val countryCode: String,
+        val superState: Parcelable?
+    ) : Parcelable
+
     /**
      * Initialize the encapsulated [AutoCompleteTextView] with [countryAutoCompleteStyleRes] style
      * resource read from styleable.
@@ -214,7 +246,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         countryAutocomplete.setText(displayCountry?.name)
     }
 
-    private fun updatedSelectedCountryCode(countryCode: CountryCode) {
+    internal fun updatedSelectedCountryCode(countryCode: CountryCode) {
         clearError()
         if (selectedCountryCode != countryCode) {
             selectedCountryCode = countryCode
