@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.app.Application
 import android.content.Context
-import android.os.Parcelable
 import android.widget.AutoCompleteTextView
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.mock
@@ -139,13 +138,6 @@ class CountryTextInputLayoutTest {
         )
     }
 
-    // Test class to expose #onRestoreInstanceState, use this to mimic configuration change.
-    private class TestCountryTextInputLayout(context: Context) : CountryTextInputLayout(context) {
-        fun restoreState(state: Parcelable?) {
-            onRestoreInstanceState(state)
-        }
-    }
-
     @Test
     fun `when screen rotates then selected country should carry over`() {
         val application = ApplicationProvider.getApplicationContext<Application>()
@@ -169,11 +161,13 @@ class CountryTextInputLayoutTest {
         // a new instance's onRestoreInstanceState.
         // activityScenario.recreate() won't trigger onRestoreInstanceState
         val oldState = oldCountryTextInputLayout.onSaveInstanceState()
-        val newCountryTextInputLayout = TestCountryTextInputLayout(
+        val newCountryTextInputLayout = CountryTextInputLayout(
             application
         )
         idleLooper()
-        newCountryTextInputLayout.restoreState(oldState)
+
+        // newCountryTextInputLayout.onResolvePointerIcon() is triggered during configuration change
+        newCountryTextInputLayout.restoreSelectedCountry(oldState as CountryTextInputLayout.SelectedCountryState)
 
         assertEquals(CountryCode.CA, oldCountryTextInputLayout.selectedCountryCode)
         assertEquals("Canada", oldCountryTextInputLayout.countryAutocomplete.text.toString())
