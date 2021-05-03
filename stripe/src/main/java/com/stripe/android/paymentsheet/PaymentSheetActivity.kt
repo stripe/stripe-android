@@ -225,7 +225,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         super.onBackPressed()
     }
 
-    fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
+    private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
         messageView.isVisible = userMessage != null
         messageView.text = userMessage?.message
     }
