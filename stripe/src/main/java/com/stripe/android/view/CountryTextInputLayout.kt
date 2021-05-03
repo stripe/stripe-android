@@ -50,8 +50,9 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     @VisibleForTesting
     var selectedCountryCode: CountryCode? by Delegates.observable(
         null
-    ) { _, _, newCountryValue ->
-        newCountryValue?.let {
+    ) { _, oldCountryValue, newCountryValue ->
+
+        newCountryValue?.takeIf { oldCountryValue != newCountryValue }?.let {
             countryCodeChangeCallback(it)
             CountryUtils.getCountryByCode(it, getLocale())?.let { country ->
                 countryChangeCallback(country)

@@ -14,6 +14,7 @@ import com.stripe.android.model.CountryCode
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.Country
+import com.stripe.android.view.CountryUtils
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -56,10 +57,29 @@ class BillingAddressViewTest {
     }
 
     @Test
-    fun `changing selectedCountry should clear postal code view`() {
+    fun `changing selectedCountry should clear postal code view and show error`() {
+        setupPostalCode(CountryCode.US, "1234")
+        assertThat(billingAddressView.postalCodeView.text.toString())
+            .isNotEqualTo("")
+
         setupPostalCode(CountryCode.GB)
         assertThat(billingAddressView.postalCodeView.text.toString())
             .isEqualTo("")
+        assertThat(billingAddressView.postalCodeView.shouldShowError)
+            .isFalse()
+    }
+
+    @Test
+    fun `Selecting the same country should not clear postal code view and show error`() {
+        setupPostalCode(CountryCode.US, "1234")
+        assertThat(billingAddressView.postalCodeView.text.toString())
+            .isNotEqualTo("")
+
+        setupPostalCode(CountryCode.US)
+        assertThat(billingAddressView.postalCodeView.text.toString())
+            .isEqualTo("1234")
+        assertThat(billingAddressView.postalCodeView.shouldShowError)
+            .isFalse()
     }
 
     @Test
@@ -90,30 +110,6 @@ class BillingAddressViewTest {
         setupPostalCode(CountryCode.US)
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
-    }
-
-    @Test
-    fun `changing selectedCountry to US should show postal code view and set shouldShowError to true`() {
-        billingAddressView.postalCodeView.setText("123")
-
-        // This will have the effect of switching the country selected
-        billingAddressView.countryLayout.selectedCountryCode = CountryCode.GB
-        billingAddressView.countryLayout.updateUiForCountryEntered(CountryCode.US)
-        idleLooper()
-
-        assertThat(billingAddressView.postalCodeLayout.isVisible)
-            .isTrue()
-        assertThat(billingAddressView.postalCodeView.shouldShowError)
-            .isTrue()
-    }
-
-    @Test
-    fun `changing selectedCountry to UK should show postal code view and set shouldShowError to true`() {
-        setupPostalCode(CountryCode.GB, "123")
-        assertThat(billingAddressView.postalCodeLayout.isVisible)
-            .isTrue()
-        assertThat(billingAddressView.postalCodeView.shouldShowError)
-            .isFalse()
     }
 
     @Test
@@ -150,15 +146,15 @@ class BillingAddressViewTest {
     }
 
     @Test
-    fun `when country is changed and zip code is valid then listener's onCountryChanged is correctly called`() {
-        setupPostalCode(CountryCode.US, "94107")
-        verify(mockPostalCodeViewListener).onCountryChanged(USA, true)
-    }
-
-    @Test
     fun `when country is changed and zip code is invalid then listener's onCountryChanged is correctly called`() {
-        setupPostalCode(CountryCode.US, "123")
-        verify(mockPostalCodeViewListener).onCountryChanged(USA, false)
+        setupPostalCode(CountryCode.GB)
+        verify(mockPostalCodeViewListener).onCountryChanged(
+            CountryUtils.getCountryByCode(
+                CountryCode.GB,
+                Locale.ROOT
+            ),
+            false
+        )
     }
 
     @Test
@@ -290,10 +286,10 @@ class BillingAddressViewTest {
         postalCode: String? = null,
         hasFocus: Boolean? = null
     ) {
+        billingAddressView.countryLayout.selectedCountryCode = countryCode
         postalCode?.let {
             billingAddressView.postalCodeView.setText(it)
         }
-        billingAddressView.countryLayout.selectedCountryCode = countryCode
         hasFocus?.let {
             billingAddressView.postalCodeView.getParentOnFocusChangeListener()!!.onFocusChange(
                 billingAddressView.postalCodeView,

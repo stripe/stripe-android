@@ -113,17 +113,10 @@ internal class BillingAddressView @JvmOverloads constructor(
         updateStateView(newCountryCode)
         updatePostalCodeView(newCountryCode)
         _address.value = createAddress()
-
-        postalCodeValidator.isValid(
-            postalCode = postalCodeView.value.orEmpty(),
-            countryCode = newCountryCode.value
-        ).let { isPostalValid ->
-            postalCodeViewListener?.onCountryChanged(
-                CountryUtils.getCountryByCode(newCountryCode, getLocale()),
-                isPostalValid
-            )
-            postalCodeView.shouldShowError = !isPostalValid
-        }
+        postalCodeViewListener?.onCountryChanged(
+            CountryUtils.getCountryByCode(newCountryCode, getLocale()),
+            false
+        )
     }
 
     private val requiredViews = setOf(
@@ -153,7 +146,10 @@ internal class BillingAddressView @JvmOverloads constructor(
     )
 
     init {
-        countryLayout.countryCodeChangeCallback = newCountryCodeCallback
+        countryLayout.countryCodeChangeCallback = {
+            postalCodeView.text = null
+            newCountryCodeCallback(it)
+        }
         // Since the callback is set after CountryAutoCompleteTextView is fully initialized,
         // need to manually trigger the callback once to pick up the initial country
         countryLayout.selectedCountryCode?.let { it ->
@@ -291,7 +287,6 @@ internal class BillingAddressView @JvmOverloads constructor(
         val shouldShowPostalCode = countryCode == null ||
             CountryUtils.doesCountryUsePostalCode(countryCode)
         postalCodeLayout.isVisible = shouldShowPostalCode
-        postalCodeView.text = null
 
         val shouldShowPostalCodeContainer =
             level == BillingAddressCollectionLevel.Required || shouldShowPostalCode
@@ -353,15 +348,14 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     internal fun populate(address: Address?) {
         address?.let { it ->
-            // The postal code needs to be set prior to the country, because the
-            // country will trigger a validation of the postal code, which will be
-            // invalid if not set first.
-            this.postalCodeView.setText(it.postalCode)
-
             it.countryCode?.let {
                 this.countryLayout.selectedCountryCode = it
                 this.countryView.setText(CountryUtils.getDisplayCountry(it, getLocale()))
             }
+            // The postal code needs to be set after to the country, because the
+            // country will clear the postal code
+            this.postalCodeView.setText(it.postalCode)
+
             this.address1View.setText(it.line1)
             this.address2View.setText(it.line2)
             this.cityView.setText(it.city)
