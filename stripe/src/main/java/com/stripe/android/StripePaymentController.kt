@@ -27,7 +27,8 @@ import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.CustomTabsCapabilities
+import com.stripe.android.payments.BrowserCapabilities
+import com.stripe.android.payments.BrowserCapabilitiesSupplier
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.DefaultStripeChallengeStatusReceiver
@@ -100,8 +101,8 @@ internal class StripePaymentController internal constructor(
         } ?: PaymentRelayStarter.Legacy(host)
     }
 
-    private val isCustomTabsSupported: Boolean by lazy {
-        CustomTabsCapabilities(context).isSupported()
+    private val hasCompatibleBrowser: Boolean by lazy {
+        BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
     }
 
     private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarter.Host ->
@@ -109,7 +110,7 @@ internal class StripePaymentController internal constructor(
             PaymentBrowserAuthStarter.Modern(it)
         } ?: PaymentBrowserAuthStarter.Legacy(
             host,
-            isCustomTabsSupported,
+            hasCompatibleBrowser,
             defaultReturnUrl
         )
     }

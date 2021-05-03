@@ -100,7 +100,7 @@ internal class StripePaymentControllerTest {
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
     private val paymentBrowserAuthContract = PaymentBrowserAuthContract(
         defaultReturnUrl,
-        isCustomTabsSupported = { true }
+        hasCompatibleBrowser = { true }
     )
     private val controller = createController()
 

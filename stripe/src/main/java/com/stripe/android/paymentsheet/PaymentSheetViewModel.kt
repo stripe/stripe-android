@@ -32,7 +32,7 @@ import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -46,15 +46,15 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddCardFragment] classes
- * to convert a [ViewState.PaymentSheet] to a [PrimaryButton.State]
+ * to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
  */
-internal fun ViewState.PaymentSheet.convert(): PrimaryButton.State {
+internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     return when (this) {
-        is ViewState.PaymentSheet.Ready ->
+        is PaymentSheetViewState.Ready ->
             PrimaryButton.State.Ready
-        is ViewState.PaymentSheet.StartProcessing ->
+        is PaymentSheetViewState.StartProcessing ->
             PrimaryButton.State.StartProcessing
-        is ViewState.PaymentSheet.FinishProcessing ->
+        is PaymentSheetViewState.FinishProcessing ->
             PrimaryButton.State.FinishProcessing(this.onComplete)
     }
 }
@@ -95,12 +95,12 @@ internal class PaymentSheetViewModel internal constructor(
     internal val amount: LiveData<Amount> = _amount
 
     @VisibleForTesting
-    internal val _viewState = MutableLiveData<ViewState.PaymentSheet>(null)
-    internal val viewState: LiveData<ViewState.PaymentSheet> = _viewState.distinctUntilChanged()
+    internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
+    internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-    internal fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<ViewState.PaymentSheet?> {
-        val outputLiveData = MediatorLiveData<ViewState.PaymentSheet?>()
+    internal fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<PaymentSheetViewState?> {
+        val outputLiveData = MediatorLiveData<PaymentSheetViewState?>()
         outputLiveData.addSource(_viewState) { currentValue ->
             if (this.checkoutIdentifier == checkoutIdentifier) {
                 outputLiveData.value = currentValue
@@ -198,7 +198,7 @@ internal class PaymentSheetViewModel internal constructor(
             PaymentIntent with id=${paymentIntent.id}" has already been confirmed.
             """.trimIndent()
         )
-        _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+        _viewState.value = PaymentSheetViewState.FinishProcessing {
             processResult(
                 PaymentIntentResult(
                     paymentIntent,
@@ -215,7 +215,7 @@ internal class PaymentSheetViewModel internal constructor(
         if (amount != null && currencyCode != null) {
             _amount.value = Amount(amount, currencyCode)
             _viewState.value =
-                ViewState.PaymentSheet.Ready(userErrorMessage?.let { UserErrorMessage(it) })
+                PaymentSheetViewState.Ready(userErrorMessage?.let { UserErrorMessage(it) })
             checkoutIdentifier = CheckoutIdentifier.None
         } else {
             _processing.value = false
@@ -228,7 +228,7 @@ internal class PaymentSheetViewModel internal constructor(
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
         this.checkoutIdentifier = checkoutIdentifier
         _processing.value = true
-        _viewState.value = ViewState.PaymentSheet.StartProcessing
+        _viewState.value = PaymentSheetViewState.StartProcessing
 
         val paymentSelection = selection.value
 
@@ -287,7 +287,7 @@ internal class PaymentSheetViewModel internal constructor(
                     prefsRepository.savePaymentSelection(it)
                 }
 
-                _viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                _viewState.value = PaymentSheetViewState.FinishProcessing {
                     processResult(paymentIntentResult)
                 }
             }

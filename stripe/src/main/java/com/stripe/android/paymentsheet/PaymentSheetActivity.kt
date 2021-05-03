@@ -35,7 +35,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -96,12 +96,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private val currencyFormatter = CurrencyFormatter()
 
-    private val buyButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
+    private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
     }
 
-    private val googlePayButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
+    private val googlePayButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.googlePayButton.updateState(viewState?.convert())
     }
