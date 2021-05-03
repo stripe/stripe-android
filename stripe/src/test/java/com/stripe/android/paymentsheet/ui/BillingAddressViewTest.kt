@@ -56,6 +56,13 @@ class BillingAddressViewTest {
     }
 
     @Test
+    fun `changing selectedCountry should clear postal code view`() {
+        setupPostalCode(CountryCode.GB)
+        assertThat(billingAddressView.postalCodeView.text.toString())
+            .isEqualTo("")
+    }
+
+    @Test
     fun `changing selectedCountry to country without postal code when level=Required should hide postal code view but show city view`() {
         billingAddressView.level = BillingAddressView.BillingAddressCollectionLevel.Required
         billingAddressView.countryLayout.selectedCountryCode = ZIMBABWE
