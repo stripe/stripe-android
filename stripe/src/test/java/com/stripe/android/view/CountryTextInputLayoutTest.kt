@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.app.Application
 import android.content.Context
 import android.widget.AutoCompleteTextView
 import androidx.test.core.app.ApplicationProvider
