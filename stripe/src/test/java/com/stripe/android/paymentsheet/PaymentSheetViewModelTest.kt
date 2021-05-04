@@ -34,7 +34,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserMessage
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -195,8 +195,36 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Ready)
+            .isEqualTo(PaymentSheetViewState.Ready(null))
         assertThat(processing[1]).isFalse()
+    }
+
+    @Test
+    fun `On checkout clear the previous view state error`() {
+
+        val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
+        viewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
+        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+            .observeForever {
+                googleViewState.add(it)
+            }
+
+        val buyViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
+            .observeForever {
+                buyViewState.add(it)
+            }
+
+        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
+        viewModel.viewState.observeForever {
+            viewState.add(it)
+        }
+
+        viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+
+        assertThat(googleViewState[0]).isNull()
+        assertThat(googleViewState[1]).isEqualTo(PaymentSheetViewState.Ready(null))
+        assertThat(buyViewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
     }
 
     @Test
@@ -216,11 +244,6 @@ internal class PaymentSheetViewModelTest {
             processing.add(it)
         }
 
-        val userMessage: MutableList<UserMessage?> = mutableListOf()
-        viewModel.userMessage.observeForever {
-            userMessage.add(it)
-        }
-
         assertThat(viewState.size).isEqualTo(1)
         assertThat(processing.size).isEqualTo(1)
         assertThat(viewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
@@ -228,14 +251,12 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.onGooglePayResult(StripeGooglePayContract.Result.Error(Exception("Test exception")))
 
-        // onApiError and resetViewState both set processing state to false
-        assertThat(processing.size).isEqualTo(3)
+        assertThat(processing.size).isEqualTo(2)
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Ready)
+            .isEqualTo(PaymentSheetViewState.Ready(UserErrorMessage("Test exception")))
         assertThat(processing[1]).isFalse()
-        assertThat(userMessage[1]).isEqualTo(UserMessage.Error("Test exception"))
     }
 
     @Test
@@ -359,16 +380,25 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentFlowResult() should update emit API errors`() {
         paymentFlowResultProcessor.error = RuntimeException("Your card was declined.")
 
-        var userMessage: UserMessage? = null
-        viewModel.userMessage.observeForever {
-            userMessage = it
+        viewModel.fetchStripeIntent()
+
+        var viewStateList = mutableListOf<PaymentSheetViewState>()
+        viewModel.viewState.observeForever {
+            viewStateList.add(it)
         }
         viewModel.onPaymentFlowResult(
             PaymentFlowResult.Unvalidated()
         )
-        assertThat(userMessage)
+
+        assertThat(viewStateList[0])
             .isEqualTo(
-                UserMessage.Error("Your card was declined.")
+                PaymentSheetViewState.Ready(null)
+            )
+        assertThat(viewStateList[1])
+            .isEqualTo(
+                PaymentSheetViewState.Ready(
+                    UserErrorMessage("Your card was declined.")
+                )
             )
     }
 
@@ -381,7 +411,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(viewState)
             .isEqualTo(
-                PaymentSheetViewState.Ready
+                PaymentSheetViewState.Ready(null)
             )
     }
 

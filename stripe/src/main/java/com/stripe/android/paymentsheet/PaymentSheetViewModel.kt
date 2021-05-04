@@ -12,7 +12,9 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -116,6 +118,19 @@ internal class PaymentSheetViewModel internal constructor(
         eventReporter.onInit(config)
     }
 
+    private fun apiThrowableToString(throwable: Throwable): String? {
+        return when (throwable) {
+            is APIConnectionException -> {
+                getApplication<Application>().resources.getString(
+                    R.string.stripe_failure_connection_error
+                )
+            }
+            else -> {
+                throwable.localizedMessage
+            }
+        }
+    }
+
     fun fetchIsGooglePayReady() {
         if (isGooglePayReady.value == null) {
             if (args.isGooglePayEnabled) {
@@ -165,7 +180,7 @@ internal class PaymentSheetViewModel internal constructor(
             }.fold(
                 onSuccess = {
                     _paymentIntent.value = paymentIntent
-                    resetViewState(paymentIntent)
+                    resetViewState(paymentIntent, userErrorMessage = null)
                 },
                 onFailure = ::onFatal
             )
@@ -193,14 +208,14 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun resetViewState(paymentIntent: PaymentIntent) {
+    private fun resetViewState(paymentIntent: PaymentIntent, userErrorMessage: String?) {
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
+        _processing.value = false
         if (amount != null && currencyCode != null) {
             _amount.value = Amount(amount, currencyCode)
-            _viewState.value = PaymentSheetViewState.Ready
-            _processing.value = false
-            checkoutIdentifier = CheckoutIdentifier.None
+            _viewState.value =
+                PaymentSheetViewState.Ready(userErrorMessage?.let { UserErrorMessage(it) })
         } else {
             onFatal(
                 IllegalStateException("PaymentIntent could not be parsed correctly.")
@@ -209,8 +224,10 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
+        // Clear out any previous errors before setting the new button to get updates.
+        _viewState.value = PaymentSheetViewState.Ready(null)
+
         this.checkoutIdentifier = checkoutIdentifier
-        _userMessage.value = null
         _processing.value = true
         _viewState.value = PaymentSheetViewState.StartProcessing
 
@@ -278,11 +295,15 @@ internal class PaymentSheetViewModel internal constructor(
             else -> {
                 eventReporter.onPaymentFailure(selection.value)
 
-                onApiError(paymentIntentResult.failureMessage)
                 runCatching {
                     paymentIntentValidator.requireValid(paymentIntentResult.intent)
                 }.fold(
-                    onSuccess = ::resetViewState,
+                    onSuccess = {
+                        resetViewState(
+                            it,
+                            paymentIntentResult.failureMessage
+                        )
+                    },
                     onFailure = ::onFatal
                 )
             }
@@ -311,12 +332,16 @@ internal class PaymentSheetViewModel internal constructor(
                 confirmPaymentSelection(paymentSelection)
             }
             is StripeGooglePayContract.Result.Error -> {
-                onApiError(googlePayResult.exception)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                paymentIntent.value?.let(::resetViewState)
+                paymentIntent.value?.let {
+                    resetViewState(
+                        it,
+                        apiThrowableToString(googlePayResult.exception)
+                    )
+                }
             }
             else -> {
-                paymentIntent.value?.let(::resetViewState)
+                paymentIntent.value?.let { resetViewState(it, userErrorMessage = null) }
             }
         }
     }
@@ -338,8 +363,7 @@ internal class PaymentSheetViewModel internal constructor(
                         eventReporter.onPaymentFailure(it)
                     }
 
-                    onApiError(error)
-                    paymentIntent.value?.let(::resetViewState)
+                    paymentIntent.value?.let { resetViewState(it, apiThrowableToString(error)) }
                 }
             )
         }
