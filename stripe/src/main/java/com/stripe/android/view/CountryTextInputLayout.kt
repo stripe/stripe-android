@@ -169,6 +169,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         }
     }
 
+    @VisibleForTesting
     internal fun restoreSelectedCountry(state: SelectedCountryState) {
         super.onRestoreInstanceState(state.superState)
         state.countryCode.let { countryCode ->

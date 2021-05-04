@@ -140,11 +140,9 @@ class CountryTextInputLayoutTest {
 
     @Test
     fun `when screen rotates then selected country should carry over`() {
-        val application = ApplicationProvider.getApplicationContext<Application>()
-        application.setTheme(R.style.StripePaymentSheetDefaultTheme)
-        val oldCountryTextInputLayout = CountryTextInputLayout(
-            application
-        )
+        val oldCountryTextInputLayout = activityScenarioFactory.createView { activity ->
+            CountryTextInputLayout(activity)
+        }
 
         idleLooper()
 
@@ -161,12 +159,14 @@ class CountryTextInputLayoutTest {
         // a new instance's onRestoreInstanceState.
         // activityScenario.recreate() won't trigger onRestoreInstanceState
         val oldState = oldCountryTextInputLayout.onSaveInstanceState()
-        val newCountryTextInputLayout = CountryTextInputLayout(
-            application
-        )
+
+        val newCountryTextInputLayout = activityScenarioFactory.createView { activity ->
+            CountryTextInputLayout(activity)
+        }
+
         idleLooper()
 
-        // newCountryTextInputLayout.onResolvePointerIcon() is triggered during configuration change
+        // newCountryTextInputLayout.onRestoreInstanceState() is triggered during configuration change
         newCountryTextInputLayout.restoreSelectedCountry(oldState as CountryTextInputLayout.SelectedCountryState)
 
         assertEquals(CountryCode.CA, oldCountryTextInputLayout.selectedCountryCode)
