@@ -21,7 +21,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -73,22 +72,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             starterArgs?.sessionId,
             application
         )
-    }
-
-    @VisibleForTesting
-    private val viewStateObserver = { viewState: ViewState.PaymentOptions? ->
-        val addButton = viewBinding.addButton
-        when (viewState) {
-            is ViewState.PaymentOptions.Ready -> addButton.updateState(
-                PrimaryButton.State.Ready
-            )
-            is ViewState.PaymentOptions.StartProcessing -> addButton.updateState(
-                PrimaryButton.State.StartProcessing
-            )
-            is ViewState.PaymentOptions.FinishProcessing -> addButton.updateState(
-                PrimaryButton.State.FinishProcessing(viewState.onComplete)
-            )
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,7 +142,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun setupAddButton(addButton: PrimaryButton) {
-        viewModel.viewState.observe(this, viewStateObserver)
+        viewBinding.addButton.updateState(PrimaryButton.State.Ready)
 
         viewModel.config?.primaryButtonColor?.let {
             viewBinding.addButton.backgroundTintList = it

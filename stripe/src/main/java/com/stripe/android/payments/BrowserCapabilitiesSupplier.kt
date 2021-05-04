@@ -6,20 +6,36 @@ import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsServiceConnection
 
 /**
- * A class to check if the device supports Custom Tabs.
+ * Supply the device's [BrowserCapabilities].
  *
- * See https://developer.chrome.com/docs/android/custom-tabs/integration-guide/ for more details.
+ * See https://developer.chrome.com/docs/android/custom-tabs/integration-guide/ for more details
+ * on Custom Tabs.
  */
-internal class CustomTabsCapabilities(
+internal class BrowserCapabilitiesSupplier(
     private val context: Context
 ) {
-    fun isSupported(): Boolean {
+    fun get(): BrowserCapabilities {
+        return when {
+            isCustomTabsSupported() -> BrowserCapabilities.CustomTabs
+            isChromeInstalled() -> BrowserCapabilities.Chrome
+            else -> BrowserCapabilities.Unknown
+        }
+    }
+
+    private fun isCustomTabsSupported(): Boolean {
         return runCatching {
             CustomTabsClient.bindCustomTabsService(
                 context,
                 CHROME_PACKAGE,
                 NoopCustomTabsServiceConnection()
             )
+        }.getOrDefault(false)
+    }
+
+    private fun isChromeInstalled(): Boolean {
+        return runCatching {
+            context.packageManager.getPackageInfo(CHROME_PACKAGE, 0)
+            true
         }.getOrDefault(false)
     }
 

@@ -6,7 +6,8 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.payments.CustomTabsCapabilities
+import com.stripe.android.payments.BrowserCapabilities
+import com.stripe.android.payments.BrowserCapabilitiesSupplier
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.StripeBrowserLauncherActivity
@@ -20,8 +21,8 @@ import kotlinx.parcelize.Parcelize
  */
 internal class PaymentBrowserAuthContract(
     private val defaultReturnUrl: DefaultReturnUrl,
-    private val isCustomTabsSupported: (Context) -> Boolean = { context ->
-        CustomTabsCapabilities(context).isSupported()
+    private val hasCompatibleBrowser: (Context) -> Boolean = { context ->
+        BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
     }
 ) : ActivityResultContract<PaymentBrowserAuthContract.Args, PaymentFlowResult.Unvalidated>() {
 
@@ -29,10 +30,8 @@ internal class PaymentBrowserAuthContract(
         context: Context,
         input: Args
     ): Intent {
-        val shouldUseCustomTabs = input.shouldUseCustomTabs(
-            isCustomTabsSupported(context),
-            defaultReturnUrl
-        )
+        val shouldUseBrowser =
+            hasCompatibleBrowser(context) && input.hasDefaultReturnUrl(defaultReturnUrl)
 
         val statusBarColor = when (context) {
             is Activity -> context.window?.statusBarColor
@@ -45,7 +44,7 @@ internal class PaymentBrowserAuthContract(
 
         return Intent(
             context,
-            when (shouldUseCustomTabs) {
+            when (shouldUseBrowser) {
                 true -> StripeBrowserLauncherActivity::class.java
                 false -> PaymentAuthWebViewActivity::class.java
             }
@@ -86,14 +85,13 @@ internal class PaymentBrowserAuthContract(
         val statusBarColor: Int? = null
     ) : Parcelable {
         /**
-         * If true, use [StripeBrowserLauncherActivity].
+         * Pre-requisite for using [StripeBrowserLauncherActivity].
          * If false, use [PaymentAuthWebViewActivity].
          */
-        internal fun shouldUseCustomTabs(
-            isCustomTabsSupported: Boolean,
+        internal fun hasDefaultReturnUrl(
             defaultReturnUrl: DefaultReturnUrl
         ): Boolean {
-            return isCustomTabsSupported && returnUrl == defaultReturnUrl.value
+            return returnUrl == defaultReturnUrl.value
         }
 
         fun toBundle() = bundleOf(EXTRA_ARGS to this)

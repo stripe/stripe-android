@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
@@ -271,7 +271,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(paymentSelections[1])
                 .isEqualTo(PaymentSelection.GooglePay)
 
-            fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.Ready
+            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Ready
 
             // Back to Ready state, should return to null PaymentSelection
             assertThat(paymentSelections.size)
@@ -510,7 +510,7 @@ class PaymentSheetAddCardFragmentTest {
     fun `google pay button state updated on start processing`() {
         createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
             fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
-            fragment.sheetViewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
+            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.StartProcessing
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(viewBinding.googlePayButton)
@@ -532,7 +532,7 @@ class PaymentSheetAddCardFragmentTest {
 
             var finishProcessingCalled = false
             fragment.sheetViewModel._viewState.value =
-                ViewState.PaymentSheet.FinishProcessing {
+                PaymentSheetViewState.FinishProcessing {
                     finishProcessingCalled = true
                 }
 

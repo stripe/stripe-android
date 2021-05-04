@@ -37,6 +37,7 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -142,19 +143,21 @@ class Stripe internal constructor(
      * Confirm and, if necessary, authenticate a [PaymentIntent].
      * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
      *
-     * For confirmation attempts that require 3DS1 authentication,
-     * [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) will be used
-     * to render the 3DS1 page if both of the following are true:
-     * - Custom Tabs are supported on the device
-     * - The [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     *   in the confirmation request is not set (i.e. set to `null`)
+     * For confirmation attempts that require 3DS1 authentication, if the
+     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
+     * be used:
+     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
+     *   are supported on the device.
+     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
+     * - Otherwise, use a WebView.
      *
-     * Otherwise, a WebView will be used.
+     * If a custom `return_url` value is set, a WebView will always be used.
      *
-     * |                   | Custom Tabs available? | Custom Tabs unavailable? |
-     * |-------------------|------------------------|--------------------------|
-     * | No return_url     | Custom Tabs            | WebView                  |
-     * | Custom return_url | WebView                | WebView                  |
+     * |                   | Custom Tabs available? | Chrome available? | Fallback |
+     * |-------------------|------------------------|-------------------|----------|
+     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
+     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
@@ -185,19 +188,21 @@ class Stripe internal constructor(
      * Confirm and, if necessary, authenticate a [PaymentIntent].
      * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
      *
-     * For confirmation attempts that require 3DS1 authentication,
-     * [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) will be used
-     * to render the 3DS1 page if both of the following are true:
-     * - Custom Tabs are supported on the device
-     * - The [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     *   in the confirmation request is not set (i.e. set to `null`)
+     * For confirmation attempts that require 3DS1 authentication, if the
+     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
+     * be used:
+     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
+     *   are supported on the device.
+     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
+     * - Otherwise, use a WebView.
      *
-     * Otherwise, a WebView will be used.
+     * If a custom `return_url` value is set, a WebView will always be used.
      *
-     * |                   | Custom Tabs available? | Custom Tabs unavailable? |
-     * |-------------------|------------------------|--------------------------|
-     * | No return_url     | Custom Tabs            | WebView                  |
-     * | Custom return_url | WebView                | WebView                  |
+     * |                   | Custom Tabs available? | Chrome available? | Fallback |
+     * |-------------------|------------------------|-------------------|----------|
+     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
+     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
@@ -259,22 +264,60 @@ class Stripe internal constructor(
     }
 
     /**
+     * Confirm a [PaymentIntent] for WeChat Pay. Extract params from [WeChatPayNextAction] to pass to WeChat Pay SDK.
+     * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">WeChat Pay Documentation</a>
+     *
+     * WeChat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WeChatPayV1] to enable this API.
+     *
+     * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
+     * [PaymentIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the [Stripe] object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     *
+     * Possible callback errors:
+     * [AuthenticationException] failure to properly authenticate yourself (check your key)
+     * [InvalidRequestException] your request has invalid parameters
+     * [APIConnectionException] failure to connect to Stripe's API
+     * [APIException] any other type of problem (for instance, a temporary issue with Stripe's servers)
+     * [InvalidRequestException] if the payment intent's next action data is not for WeChat Pay
+     */
+    @JvmOverloads
+    fun confirmWeChatPayPayment(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<WeChatPayNextAction>
+    ) {
+        executeAsync(callback) {
+            paymentController.confirmWeChatPay(
+                confirmPaymentIntentParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
      * Confirm and, if necessary, authenticate a [PaymentIntent].
      * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
      *
-     * For confirmation attempts that require 3DS1 authentication,
-     * [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) will be used
-     * to render the 3DS1 page if both of the following are true:
-     * - Custom Tabs are supported on the device
-     * - The [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     *   in the confirmation request is not set (i.e. set to `null`)
+     * For confirmation attempts that require 3DS1 authentication, if the
+     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
+     * be used:
+     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
+     *   are supported on the device.
+     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
+     * - Otherwise, use a WebView.
      *
-     * Otherwise, a WebView will be used.
+     * If a custom `return_url` value is set, a WebView will always be used.
      *
-     * |                   | Custom Tabs available? | Custom Tabs unavailable? |
-     * |-------------------|------------------------|--------------------------|
-     * | No return_url     | Custom Tabs            | WebView                  |
-     * | Custom return_url | WebView                | WebView                  |
+     * |                   | Custom Tabs available? | Chrome available? | Fallback |
+     * |-------------------|------------------------|-------------------|----------|
+     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
+     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the [PaymentIntent]
@@ -603,19 +646,21 @@ class Stripe internal constructor(
     /**
      * Confirm and, if necessary, authenticate a [SetupIntent].
      *
-     * For confirmation attempts that require 3DS1 authentication,
-     * [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) will be used
-     * to render the 3DS1 page if both of the following are true:
-     * - Custom Tabs are supported on the device
-     * - The [return_url](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-return_url)
-     *   in the confirmation request is not set (i.e. set to `null`)
+     * For confirmation attempts that require 3DS1 authentication, if the
+     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
+     * be used:
+     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
+     *   are supported on the device.
+     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
+     * - Otherwise, use a WebView.
      *
-     * Otherwise, a WebView will be used.
+     * If a custom `return_url` value is set, a WebView will always be used.
      *
-     * |                   | Custom Tabs available? | Custom Tabs unavailable? |
-     * |-------------------|------------------------|--------------------------|
-     * | No return_url     | Custom Tabs            | WebView                  |
-     * | Custom return_url | WebView                | WebView                  |
+     * |                   | Custom Tabs available? | Chrome available? | Fallback |
+     * |-------------------|------------------------|-------------------|----------|
+     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
+     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param stripeAccountId Optional, the Connect account to associate with this request.
@@ -642,19 +687,21 @@ class Stripe internal constructor(
     /**
      * Confirm and, if necessary, authenticate a [SetupIntent].
      *
-     * For confirmation attempts that require 3DS1 authentication,
-     * [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) will be used
-     * to render the 3DS1 page if both of the following are true:
-     * - Custom Tabs are supported on the device
-     * - The [return_url](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-return_url)
-     *   in the confirmation request is not set (i.e. set to `null`)
+     * For confirmation attempts that require 3DS1 authentication, if the
+     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
+     * be used:
+     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
+     *   are supported on the device.
+     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
+     * - Otherwise, use a WebView.
      *
-     * Otherwise, a WebView will be used.
+     * If a custom `return_url` value is set, a WebView will always be used.
      *
-     * |                   | Custom Tabs available? | Custom Tabs unavailable? |
-     * |-------------------|------------------------|--------------------------|
-     * | No return_url     | Custom Tabs            | WebView                  |
-     * | Custom return_url | WebView                | WebView                  |
+     * |                   | Custom Tabs available? | Chrome available? | Fallback |
+     * |-------------------|------------------------|-------------------|----------|
+     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
+     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param stripeAccountId Optional, the Connect account to associate with this request.
@@ -685,19 +732,21 @@ class Stripe internal constructor(
     /**
      * Confirm and, if necessary, authenticate a [SetupIntent].
      *
-     * For confirmation attempts that require 3DS1 authentication,
-     * [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) will be used
-     * to render the 3DS1 page if both of the following are true:
-     * - Custom Tabs are supported on the device
-     * - The [return_url](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-return_url)
-     *   in the confirmation request is not set (i.e. set to `null`)
+     * For confirmation attempts that require 3DS1 authentication, if the
+     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
+     * be used:
+     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
+     *   are supported on the device.
+     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
+     * - Otherwise, use a WebView.
      *
-     * Otherwise, a WebView will be used.
+     * If a custom `return_url` value is set, a WebView will always be used.
      *
-     * |                   | Custom Tabs available? | Custom Tabs unavailable? |
-     * |-------------------|------------------------|--------------------------|
-     * | No return_url     | Custom Tabs            | WebView                  |
-     * | Custom return_url | WebView                | WebView                  |
+     * |                   | Custom Tabs available? | Chrome available? | Fallback |
+     * |-------------------|------------------------|-------------------|----------|
+     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
+     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param stripeAccountId Optional, the Connect account to associate with this request.
@@ -1998,7 +2047,7 @@ class Stripe internal constructor(
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
-        internal const val VERSION_NAME = "16.6.1"
+        internal const val VERSION_NAME = "16.7.1"
         const val VERSION: String = "AndroidBindings/$VERSION_NAME"
 
         /**

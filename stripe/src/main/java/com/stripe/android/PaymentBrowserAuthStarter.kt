@@ -15,7 +15,7 @@ internal interface PaymentBrowserAuthStarter :
     AuthActivityStarter<PaymentBrowserAuthContract.Args> {
     class Legacy(
         private val host: AuthActivityStarter.Host,
-        private val isCustomTabsSupported: Boolean,
+        private val hasCompatibleBrowser: Boolean,
         private val defaultReturnUrl: DefaultReturnUrl
     ) : PaymentBrowserAuthStarter {
         override fun start(args: PaymentBrowserAuthContract.Args) {
@@ -23,12 +23,11 @@ internal interface PaymentBrowserAuthStarter :
                 .copy(statusBarColor = host.statusBarColor)
                 .toBundle()
 
-            val shouldUseCustomTabs = args.shouldUseCustomTabs(
-                isCustomTabsSupported,
-                defaultReturnUrl
-            )
+            val shouldUseBrowser =
+                hasCompatibleBrowser && args.hasDefaultReturnUrl(defaultReturnUrl)
+
             host.startActivityForResult(
-                when (shouldUseCustomTabs) {
+                when (shouldUseBrowser) {
                     true -> StripeBrowserLauncherActivity::class.java
                     false -> PaymentAuthWebViewActivity::class.java
                 },

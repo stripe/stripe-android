@@ -42,6 +42,10 @@ internal class CountryAdapter(
         return suggestions[i]
     }
 
+    override fun getPosition(item: Country?): Int {
+        return suggestions.indexOf(item)
+    }
+
     override fun getItemId(i: Int): Long {
         return getItem(i).hashCode().toLong()
     }

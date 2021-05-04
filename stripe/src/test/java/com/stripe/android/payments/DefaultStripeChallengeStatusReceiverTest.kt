@@ -109,6 +109,7 @@ class DefaultStripeChallengeStatusReceiverTest {
 
         whenever(transaction.initialChallengeUiType).thenReturn("04")
 
+        var endCalled = false
         val receiver = DefaultStripeChallengeStatusReceiver(
             completionStarter,
             stripeRepository,
@@ -118,6 +119,9 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {
+                endCalled = true
+            },
             workContext = testDispatcher
         )
         receiver.completed(
@@ -126,6 +130,7 @@ class DefaultStripeChallengeStatusReceiverTest {
             ChallengeFlowOutcome.CompleteSuccessful
         )
 
+        assertThat(endCalled).isTrue()
         verify(analyticsRequestExecutor, times(2))
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequests = analyticsRequestArgumentCaptor.allValues
@@ -142,6 +147,7 @@ class DefaultStripeChallengeStatusReceiverTest {
 
     @Test
     fun test3ds2Receiver_whenTimedout_shouldFireAnalyticsRequest() {
+        var endCalled = false
         val receiver = DefaultStripeChallengeStatusReceiver(
             completionStarter,
             stripeRepository,
@@ -151,9 +157,14 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {
+                endCalled = true
+            },
             workContext = testDispatcher
         )
         receiver.timedout("01")
+
+        assertThat(endCalled).isTrue()
         verify(analyticsRequestExecutor, times(2))
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequests = analyticsRequestArgumentCaptor.allValues
@@ -167,6 +178,7 @@ class DefaultStripeChallengeStatusReceiverTest {
 
     @Test
     fun test3ds2Receiver_whenCanceled_shouldFireAnalyticsRequest() {
+        var endCalled = false
         val receiver = DefaultStripeChallengeStatusReceiver(
             completionStarter,
             stripeRepository,
@@ -176,10 +188,14 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {
+                endCalled = true
+            },
             workContext = testDispatcher
         )
         receiver.cancelled("01")
 
+        assertThat(endCalled).isTrue()
         verify(analyticsRequestExecutor, times(2))
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequests = analyticsRequestArgumentCaptor.allValues
@@ -198,6 +214,7 @@ class DefaultStripeChallengeStatusReceiverTest {
             errorMessage = "Resource not found"
         )
 
+        var endCalled = false
         val receiver = DefaultStripeChallengeStatusReceiver(
             completionStarter,
             stripeRepository,
@@ -207,10 +224,14 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {
+                endCalled = true
+            },
             workContext = testDispatcher
         )
         receiver.runtimeError(runtimeErrorEvent)
 
+        assertThat(endCalled).isTrue()
         verify(analyticsRequestExecutor, times(2))
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequests = analyticsRequestArgumentCaptor.allValues
@@ -244,6 +265,7 @@ class DefaultStripeChallengeStatusReceiverTest {
             )
         )
 
+        var endCalled = false
         val receiver = DefaultStripeChallengeStatusReceiver(
             completionStarter,
             stripeRepository,
@@ -253,10 +275,14 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {
+                endCalled = true
+            },
             workContext = testDispatcher
         )
         receiver.protocolError(protocolErrorEvent)
 
+        assertThat(endCalled).isTrue()
         verify(analyticsRequestExecutor, times(2))
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequests = analyticsRequestArgumentCaptor.allValues
@@ -292,6 +318,7 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {},
             workContext = testDispatcher
         )
         receiver.cancelled("01")
@@ -340,6 +367,7 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {},
 
             // set to 0 so there is effectively no delay
             retryDelaySupplier = RetryDelaySupplier(incrementSeconds = 0L),
@@ -382,6 +410,7 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {},
 
             // set to 0 so there is effectively no delay
             retryDelaySupplier = RetryDelaySupplier(incrementSeconds = 0L),
@@ -434,6 +463,7 @@ class DefaultStripeChallengeStatusReceiverTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             transaction,
+            onEndChallenge = {},
 
             // set to 0 so there is effectively no delay
             retryDelaySupplier = RetryDelaySupplier(incrementSeconds = 0L),

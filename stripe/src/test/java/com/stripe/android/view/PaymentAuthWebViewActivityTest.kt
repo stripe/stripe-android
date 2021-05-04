@@ -21,14 +21,14 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentAuthWebViewActivityTest {
+internal class PaymentAuthWebViewActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = PaymentBrowserAuthContract(
         DefaultReturnUrl.create(context),
-        isCustomTabsSupported = { true }
+        hasCompatibleBrowser = { true }
     )
 
     @BeforeTest
