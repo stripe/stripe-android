@@ -42,7 +42,7 @@ internal class DefaultPaymentFlowResultProcessorTest {
             PaymentFlowResult.Unvalidated(
                 clientSecret = "client_secret",
                 flowOutcome = StripeIntentResult.Outcome.CANCELED,
-                shouldCancelSource = true
+                canCancelSource = true
             )
         )
 
@@ -61,7 +61,7 @@ internal class DefaultPaymentFlowResultProcessorTest {
             PaymentFlowResult.Unvalidated(
                 clientSecret = "client_secret",
                 flowOutcome = StripeIntentResult.Outcome.CANCELED,
-                shouldCancelSource = true
+                canCancelSource = true
             )
         )
 
