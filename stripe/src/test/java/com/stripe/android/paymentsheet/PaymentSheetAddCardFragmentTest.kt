@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
@@ -522,6 +523,21 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(googlePayPrimaryComponent.label.text).isEqualTo(
                 fragment.getString(R.string.stripe_paymentsheet_primary_button_processing)
             )
+        }
+    }
+
+    @Test
+    fun `google pay button error message displayed`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
+            fragment.sheetViewModel._viewState.value =
+                PaymentSheetViewState.Ready(BaseSheetViewModel.UserErrorMessage("This is my test error message"))
+
+            assertThat(viewBinding.message.text.toString()).isEqualTo("This is my test error message")
+
+            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Ready(null)
+
+            assertThat(viewBinding.message.text.toString()).isEqualTo("")
         }
     }
 

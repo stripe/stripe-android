@@ -17,6 +17,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
+import com.stripe.android.googlepay.getErrorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -337,7 +338,7 @@ internal class PaymentSheetViewModel internal constructor(
                 paymentIntent.value?.let {
                     resetViewState(
                         it,
-                        apiThrowableToString(googlePayResult.exception)
+                        googlePayResult.googlePayStatus?.getErrorMessage()
                     )
                 }
             }
