@@ -261,7 +261,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Ready(UserErrorMessage("An internal error occurred")))
+            .isEqualTo(PaymentSheetViewState.Ready(UserErrorMessage("An internal error occurred.")))
         assertThat(processing[1]).isFalse()
     }
 
