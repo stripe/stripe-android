@@ -436,8 +436,7 @@ internal class CardFormView @JvmOverloads constructor(
                 layoutInflater,
                 countryLayout,
                 false
-            ).root,
-            1
+            ).root
         )
         countryPostalDivider.isVisible = false
 
