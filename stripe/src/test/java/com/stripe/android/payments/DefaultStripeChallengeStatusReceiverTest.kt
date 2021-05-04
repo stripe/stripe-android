@@ -12,7 +12,6 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
@@ -26,6 +25,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
