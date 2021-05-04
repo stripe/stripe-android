@@ -4,6 +4,7 @@ plugins {
     id 'checkstyle'
     id 'org.jetbrains.dokka'
     id 'org.jetbrains.kotlin.plugin.parcelize'
+    id("io.gitlab.arturbosch.detekt").version("1.17.0-RC2")
 
     id 'signing'
     id 'maven-publish'
@@ -150,3 +151,13 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
 }
 
 apply from: 'deploy.gradle'
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config = files("$projectDir/config/detekt.yml")
+
+    reports {
+        html.enabled = true // observe findings in your browser with structure and code snippets
+    }
+}

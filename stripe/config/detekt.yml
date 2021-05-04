@@ -1,0 +1,17 @@
+style:
+  active: true
+  MaxLineLength:
+    active: false
+
+empty-blocks:
+  EmptyFunctionBlock:
+    active: false
+
+naming:
+  VariableNaming:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+    variablePattern: '(_)?[a-z][A-Za-z0-9]*'
+    privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
+    excludeClassPattern: '$^'
+    ignoreOverridden: true
