@@ -22,7 +22,7 @@ internal class PaymentOptionsAdapter(
     private val canClickSelectedItem: Boolean,
     val paymentOptionSelectedListener: (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
     val addCardClickListener: View.OnClickListener
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionViewHolder>() {
     private var items: List<Item> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
 
@@ -151,7 +151,7 @@ internal class PaymentOptionsAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): RecyclerView.ViewHolder {
+    ): PaymentOptionViewHolder {
         return when (ViewType.values()[viewType]) {
             ViewType.AddCard -> AddCardViewHolder(parent).apply {
                 itemView.setOnClickListener(addCardClickListener)
@@ -170,7 +170,7 @@ internal class PaymentOptionsAdapter(
     }
 
     override fun onBindViewHolder(
-        holder: RecyclerView.ViewHolder,
+        holder: PaymentOptionViewHolder,
         position: Int
     ) {
         val item = items[position]
@@ -188,12 +188,12 @@ internal class PaymentOptionsAdapter(
         } else if (holder is GooglePayViewHolder) {
             holder.setSelected(position == selectedItemPosition)
         }
-        holder.itemView.isEnabled = isEnabled
+        holder.setEnabled(isEnabled)
     }
 
     private class CardViewHolder(
         private val binding: LayoutPaymentsheetPaymentMethodItemBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
+    ) : PaymentOptionViewHolder(binding.root) {
         constructor(parent: ViewGroup) : this(
             LayoutPaymentsheetPaymentMethodItemBinding.inflate(
                 LayoutInflater.from(parent.context),
@@ -238,22 +238,42 @@ internal class PaymentOptionsAdapter(
         }
 
         fun setSelected(selected: Boolean) {
-            binding.card.isSelected = selected
+            binding.root.isSelected = selected
             binding.checkIcon.isVisible = selected
+        }
+
+        override fun setEnabled(enabled: Boolean) {
+            binding.card.isEnabled = enabled
+            binding.root.isEnabled = enabled
+            binding.label.isEnabled = enabled
+            binding.brandIcon.alpha = if (enabled) 1F else 0.6F
         }
     }
 
-    private class AddCardViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
-        LayoutPaymentsheetAddCardItemBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        ).root
-    )
+    private class AddCardViewHolder(
+        private val binding: LayoutPaymentsheetAddCardItemBinding
+    ) : PaymentOptionViewHolder(
+        binding.root
+    ) {
+        constructor(parent: ViewGroup) : this(
+            LayoutPaymentsheetAddCardItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
+
+        override fun setEnabled(enabled: Boolean) {
+            binding.card.isEnabled = enabled
+            binding.root.isEnabled = enabled
+            binding.label.isEnabled = enabled
+            binding.plusIcon.alpha = if (enabled) 1F else 0.6F
+        }
+    }
 
     private class GooglePayViewHolder(
         private val binding: LayoutPaymentsheetGooglePayItemBinding
-    ) : RecyclerView.ViewHolder(
+    ) : PaymentOptionViewHolder(
         binding.root
     ) {
         constructor(parent: ViewGroup) : this(
@@ -268,9 +288,21 @@ internal class PaymentOptionsAdapter(
         }
 
         fun setSelected(selected: Boolean) {
-            binding.card.isSelected = selected
+            binding.root.isSelected = selected
             binding.checkIcon.isVisible = selected
         }
+
+        override fun setEnabled(enabled: Boolean) {
+            binding.card.isEnabled = enabled
+            binding.root.isEnabled = enabled
+            binding.label.isEnabled = enabled
+            binding.googlePayMark.alpha = if (enabled) 1F else 0.6F
+        }
+    }
+
+    internal abstract class PaymentOptionViewHolder(parent: ViewGroup) :
+        RecyclerView.ViewHolder(parent) {
+        abstract fun setEnabled(enabled: Boolean)
     }
 
     internal enum class ViewType {
