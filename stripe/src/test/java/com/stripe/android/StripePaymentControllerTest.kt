@@ -34,6 +34,7 @@ import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
