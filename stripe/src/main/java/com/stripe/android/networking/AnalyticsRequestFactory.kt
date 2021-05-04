@@ -5,7 +5,6 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.Source

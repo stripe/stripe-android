@@ -195,7 +195,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Ready(null))
+            .isEqualTo(PaymentSheetViewState.Reset(null))
         assertThat(processing[1]).isFalse()
     }
 
@@ -223,7 +223,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
 
         assertThat(googleViewState[0]).isNull()
-        assertThat(googleViewState[1]).isEqualTo(PaymentSheetViewState.Ready(null))
+        assertThat(googleViewState[1]).isEqualTo(PaymentSheetViewState.Reset(null))
         assertThat(buyViewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
     }
 
@@ -255,7 +255,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Ready(UserErrorMessage("Test exception")))
+            .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("Test exception")))
         assertThat(processing[1]).isFalse()
     }
 
@@ -382,7 +382,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.fetchStripeIntent()
 
-        var viewStateList = mutableListOf<PaymentSheetViewState>()
+        val viewStateList = mutableListOf<PaymentSheetViewState>()
         viewModel.viewState.observeForever {
             viewStateList.add(it)
         }
@@ -392,11 +392,11 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(viewStateList[0])
             .isEqualTo(
-                PaymentSheetViewState.Ready(null)
+                PaymentSheetViewState.Reset(null)
             )
         assertThat(viewStateList[1])
             .isEqualTo(
-                PaymentSheetViewState.Ready(
+                PaymentSheetViewState.Reset(
                     UserErrorMessage("Your card was declined.")
                 )
             )
@@ -411,7 +411,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(viewState)
             .isEqualTo(
-                PaymentSheetViewState.Ready(null)
+                PaymentSheetViewState.Reset(null)
             )
     }
 
