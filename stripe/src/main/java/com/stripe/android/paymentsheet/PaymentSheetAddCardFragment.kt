@@ -59,7 +59,7 @@ internal class PaymentSheetAddCardFragment(
             .observe(viewLifecycleOwner) { viewState ->
                 googlePayButton.updateState(viewState?.convert())
 
-                if (viewState is PaymentSheetViewState.Ready) {
+                if (viewState is PaymentSheetViewState.Reset) {
                     updateSelection()
                 }
             }
