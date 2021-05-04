@@ -218,7 +218,6 @@ internal class PaymentSheetViewModel internal constructor(
             _viewState.value =
                 PaymentSheetViewState.Ready(userErrorMessage?.let { UserErrorMessage(it) })
         } else {
-            _processing.value = false
             onFatal(
                 IllegalStateException("PaymentIntent could not be parsed correctly.")
             )

@@ -13,6 +13,7 @@ import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
+import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -134,6 +135,41 @@ class CountryTextInputLayoutTest {
                 Locale.getDefault()
             )
         )
+    }
+
+    @Test
+    fun `when screen rotates then selected country should carry over`() {
+        val oldCountryTextInputLayout = activityScenarioFactory.createView { activity ->
+            CountryTextInputLayout(activity)
+        }
+
+        idleLooper()
+
+        assertEquals(CountryCode.US, oldCountryTextInputLayout.selectedCountryCode)
+        assertEquals("United States", oldCountryTextInputLayout.countryAutocomplete.text.toString())
+
+        oldCountryTextInputLayout.updatedSelectedCountryCode(CountryCode.CA)
+        oldCountryTextInputLayout.updateUiForCountryEntered(CountryCode.CA)
+
+        assertEquals(CountryCode.CA, oldCountryTextInputLayout.selectedCountryCode)
+        assertEquals("Canada", oldCountryTextInputLayout.countryAutocomplete.text.toString())
+
+        // mimic configuration change - the old instance's state is saved and passed to
+        // a new instance's onRestoreInstanceState.
+        // activityScenario.recreate() won't trigger onRestoreInstanceState
+        val oldState = oldCountryTextInputLayout.onSaveInstanceState()
+
+        val newCountryTextInputLayout = activityScenarioFactory.createView { activity ->
+            CountryTextInputLayout(activity)
+        }
+
+        idleLooper()
+
+        // newCountryTextInputLayout.onRestoreInstanceState() is triggered during configuration change
+        newCountryTextInputLayout.restoreSelectedCountry(oldState as CountryTextInputLayout.SelectedCountryState)
+
+        assertEquals(CountryCode.CA, oldCountryTextInputLayout.selectedCountryCode)
+        assertEquals("Canada", oldCountryTextInputLayout.countryAutocomplete.text.toString())
     }
 
     @AfterTest
