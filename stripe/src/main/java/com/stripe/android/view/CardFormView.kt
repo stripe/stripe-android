@@ -430,14 +430,13 @@ internal class CardFormView @JvmOverloads constructor(
             1
         )
 
-        // add horizontal divider above postalCodeContainer and hide countryPostalDivider
-        postalCodeContainer.addView(
+        // add horizontal divider below countryLayout and hide countryPostalDivider
+        countryLayout.addView(
             StripeHorizontalDividerBinding.inflate(
                 layoutInflater,
                 countryLayout,
                 false
-            ).root,
-            0
+            ).root
         )
         countryPostalDivider.isVisible = false
 
