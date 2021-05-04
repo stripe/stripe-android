@@ -216,7 +216,6 @@ internal class PaymentSheetViewModel internal constructor(
             _amount.value = Amount(amount, currencyCode)
             _viewState.value =
                 PaymentSheetViewState.Ready(userErrorMessage?.let { UserErrorMessage(it) })
-            checkoutIdentifier = CheckoutIdentifier.None
         } else {
             _processing.value = false
             onFatal(
@@ -226,6 +225,9 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
+        // Clear out any previous errors before setting the new button to get updates.
+        _viewState.value = PaymentSheetViewState.Ready(null)
+
         this.checkoutIdentifier = checkoutIdentifier
         _processing.value = true
         _viewState.value = PaymentSheetViewState.StartProcessing

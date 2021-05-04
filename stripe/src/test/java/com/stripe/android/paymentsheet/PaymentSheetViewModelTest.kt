@@ -200,6 +200,34 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `On checkout clear the previous view state error`() {
+
+        val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
+        viewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
+        viewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+            .observeForever {
+                googleViewState.add(it)
+            }
+
+        val buyViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
+            .observeForever {
+                buyViewState.add(it)
+            }
+
+        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
+        viewModel.viewState.observeForever {
+            viewState.add(it)
+        }
+
+        viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+
+        assertThat(googleViewState[0]).isNull()
+        assertThat(googleViewState[1]).isEqualTo(PaymentSheetViewState.Ready(null))
+        assertThat(buyViewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
+    }
+
+    @Test
     fun `Google Pay checkout failed returns to Ready state and shows error`() {
         viewModel.fetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
