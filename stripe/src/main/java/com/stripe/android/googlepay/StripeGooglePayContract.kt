@@ -130,7 +130,7 @@ internal class StripeGooglePayContract :
     }
 }
 
-fun Status.getErrorMessage(): String? {
+internal fun Status.getErrorMessage(): String? {
     return when (this) {
         Status.RESULT_SUCCESS -> null
         Status.RESULT_INTERNAL_ERROR, Status.RESULT_CANCELED, Status.RESULT_DEAD_CLIENT -> "An internal error occurred."

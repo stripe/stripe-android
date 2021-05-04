@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -249,13 +250,18 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
         assertThat(processing[0]).isTrue()
 
-        viewModel.onGooglePayResult(StripeGooglePayContract.Result.Error(Exception("Test exception")))
+        viewModel.onGooglePayResult(
+            StripeGooglePayContract.Result.Error(
+                Exception("Test exception"),
+                Status.RESULT_INTERNAL_ERROR
+            )
+        )
 
         assertThat(processing.size).isEqualTo(2)
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Ready(UserErrorMessage("Test exception")))
+            .isEqualTo(PaymentSheetViewState.Ready(UserErrorMessage("An internal error occurred")))
         assertThat(processing[1]).isFalse()
     }
 
