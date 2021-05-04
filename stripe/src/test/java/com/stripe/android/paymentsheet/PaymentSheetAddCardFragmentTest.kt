@@ -272,7 +272,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(paymentSelections[1])
                 .isEqualTo(PaymentSelection.GooglePay)
 
-            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Ready(null)
+            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
 
             // Back to Ready state, should return to null PaymentSelection
             assertThat(paymentSelections.size)
@@ -531,11 +531,11 @@ class PaymentSheetAddCardFragmentTest {
         createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
             fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
             fragment.sheetViewModel._viewState.value =
-                PaymentSheetViewState.Ready(BaseSheetViewModel.UserErrorMessage("This is my test error message"))
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage("This is my test error message"))
 
             assertThat(viewBinding.message.text.toString()).isEqualTo("This is my test error message")
 
-            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Ready(null)
+            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
 
             assertThat(viewBinding.message.text.toString()).isEqualTo("")
         }

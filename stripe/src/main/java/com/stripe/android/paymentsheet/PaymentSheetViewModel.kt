@@ -51,7 +51,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     return when (this) {
-        is PaymentSheetViewState.Ready ->
+        is PaymentSheetViewState.Reset ->
             PrimaryButton.State.Ready
         is PaymentSheetViewState.StartProcessing ->
             PrimaryButton.State.StartProcessing
@@ -216,7 +216,7 @@ internal class PaymentSheetViewModel internal constructor(
         if (amount != null && currencyCode != null) {
             _amount.value = Amount(amount, currencyCode)
             _viewState.value =
-                PaymentSheetViewState.Ready(userErrorMessage?.let { UserErrorMessage(it) })
+                PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
         } else {
             onFatal(
                 IllegalStateException("PaymentIntent could not be parsed correctly.")
@@ -226,7 +226,7 @@ internal class PaymentSheetViewModel internal constructor(
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
         // Clear out any previous errors before setting the new button to get updates.
-        _viewState.value = PaymentSheetViewState.Ready(null)
+        _viewState.value = PaymentSheetViewState.Reset(null)
 
         this.checkoutIdentifier = checkoutIdentifier
         _processing.value = true
