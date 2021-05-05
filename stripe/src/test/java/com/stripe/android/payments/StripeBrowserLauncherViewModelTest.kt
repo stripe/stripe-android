@@ -35,14 +35,7 @@ class StripeBrowserLauncherViewModelTest {
 
     @Test
     fun `createLaunchIntent() should create an intent and wrap in a Chooser Intent`() {
-        val launchIntent = viewModel.createLaunchIntent(
-            PaymentBrowserAuthContract.Args(
-                objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
-                requestCode = 50000,
-                clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
-                url = "https://bank.com"
-            )
-        )
+        val launchIntent = viewModel.createLaunchIntent(ARGS)
 
         val browserIntent =
             requireNotNull(launchIntent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
@@ -78,5 +71,30 @@ class StripeBrowserLauncherViewModelTest {
 
         assertThat(analyticsRequests.first().params["event"])
             .isEqualTo("stripe_android.auth_with_defaultbrowser")
+    }
+
+    @Test
+    fun `getResultIntent() with shouldCancelSource=true should include expected PaymentFlowResult`() {
+        val intent = viewModel.getResultIntent(
+            ARGS.copy(shouldCancelSource = true)
+        )
+        val result = intent.getParcelableExtra<PaymentFlowResult.Unvalidated>("extra_args")
+        assertThat(result)
+            .isEqualTo(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
+                    canCancelSource = true,
+                    sourceId = ""
+                )
+            )
+    }
+
+    private companion object {
+        private val ARGS = PaymentBrowserAuthContract.Args(
+            objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
+            requestCode = 50000,
+            clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
+            url = "https://bank.com"
+        )
     }
 }

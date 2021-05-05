@@ -62,7 +62,7 @@ internal class PaymentAuthWebViewActivityViewModel(
                     } else {
                         StripeIntentResult.Outcome.SUCCEEDED
                     },
-                    shouldCancelSource = args.shouldCancelSource
+                    canCancelSource = args.shouldCancelSource
                 ).toBundle()
             )
         }

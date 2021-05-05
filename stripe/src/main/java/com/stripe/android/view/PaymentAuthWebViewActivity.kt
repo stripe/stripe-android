@@ -120,7 +120,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
                         .copy(
                             exception = StripeException.create(error),
                             flowOutcome = StripeIntentResult.Outcome.FAILED,
-                            shouldCancelSource = true
+                            canCancelSource = true
                         )
                 )
             )
