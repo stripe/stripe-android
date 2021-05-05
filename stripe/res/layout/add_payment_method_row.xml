@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -16,10 +15,9 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/stripe_ic_add_black_32dp"
         android:tint="?attr/colorAccent"
         android:layout_gravity="center_vertical|start"
-        />
+        app:srcCompat="@drawable/stripe_ic_add_black_32dp" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/label"
@@ -29,7 +27,6 @@
         android:layout_marginStart="@dimen/stripe_list_row_start_padding"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         android:textColor="?attr/colorAccent"
-        android:layout_gravity="center_vertical|start"
-        />
+        android:layout_gravity="center_vertical|start" />
 
 </LinearLayout>
