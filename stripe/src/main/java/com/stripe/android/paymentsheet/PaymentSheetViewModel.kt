@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -212,7 +213,8 @@ internal class PaymentSheetViewModel internal constructor(
     private fun resetViewState(paymentIntent: PaymentIntent, @IntegerRes stringResId: Int?) {
         resetViewState(
             paymentIntent,
-            stringResId?.let { getApplication<Application>().resources.getString(it) })
+            stringResId?.let { getApplication<Application>().resources.getString(it) }
+        )
     }
 
     private fun resetViewState(paymentIntent: PaymentIntent, userErrorMessage: String?) {
