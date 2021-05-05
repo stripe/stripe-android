@@ -110,6 +110,7 @@
 
         <activity android:name=".activity.LaunchPaymentSheetCompleteActivity" />
         <activity android:name=".activity.LaunchPaymentSheetCustomActivity" />
+        <activity android:name=".activity.ToyActivity" />
     </application>
 
 </manifest>
