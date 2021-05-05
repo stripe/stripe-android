@@ -21,6 +21,7 @@
     <color name="stripe_paymentsheet_elements_background_default">#474747</color>
     <color name="stripe_paymentsheet_elements_background_disabled">#474747</color>
     <color name="stripe_paymentsheet_form_border">#3Dffffff</color>
+    <color name="stripe_paymentsheet_toolbar_button_color">#FFFFFF</color>
     <color name="stripe_paymentsheet_add_payment_method_form_stroke">#3Dffffff</color>
 
     <color name="stripe_paymentsheet_googlepay_divider_line">#38383A</color>
