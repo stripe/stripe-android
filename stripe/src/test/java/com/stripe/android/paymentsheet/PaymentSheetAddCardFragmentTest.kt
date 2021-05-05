@@ -47,6 +47,14 @@ class PaymentSheetAddCardFragmentTest {
     }
 
     @Test
+    fun `when processing google pay should be disabled`() {
+        createFragment { fragment, viewBinding ->
+            fragment.sheetViewModel._processing.value = true
+            assertThat(viewBinding.googlePayButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
     fun `required billing fields should not be visible`() {
         createFragment { _, viewBinding ->
             val billingBinding = StripeBillingAddressLayoutBinding.bind(viewBinding.billingAddress)
