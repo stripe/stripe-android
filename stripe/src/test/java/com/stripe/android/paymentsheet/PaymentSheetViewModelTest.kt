@@ -585,8 +585,6 @@ internal class PaymentSheetViewModelTest {
         )
     ): PaymentSheetViewModel {
         return PaymentSheetViewModel(
-            "publishable_key",
-            "stripe_account_id",
             stripeIntentRepository = stripeIntentRepository,
             paymentMethodsRepository = paymentMethodsRepository,
             paymentFlowResultProcessor,
