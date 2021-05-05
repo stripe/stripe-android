@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -17,6 +18,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
+import com.stripe.android.googlepay.getErrorResourceID
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -208,6 +210,13 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
+    private fun resetViewState(paymentIntent: PaymentIntent, @IntegerRes stringResId: Int?) {
+        resetViewState(
+            paymentIntent,
+            stringResId?.let { getApplication<Application>().resources.getString(it) }
+        )
+    }
+
     private fun resetViewState(paymentIntent: PaymentIntent, userErrorMessage: String?) {
         val amount = paymentIntent.amount
         val currencyCode = paymentIntent.currency
@@ -333,10 +342,10 @@ internal class PaymentSheetViewModel internal constructor(
             }
             is StripeGooglePayContract.Result.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                paymentIntent.value?.let {
+                paymentIntent.value?.let { it ->
                     resetViewState(
                         it,
-                        apiThrowableToString(googlePayResult.exception)
+                        googlePayResult.googlePayStatus?.getErrorResourceID()
                     )
                 }
             }
