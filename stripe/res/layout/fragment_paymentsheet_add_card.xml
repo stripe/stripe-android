@@ -45,7 +45,7 @@
         <com.stripe.android.paymentsheet.ui.GooglePayDivider
             android:id="@+id/google_pay_divider"
             android:visibility="gone"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -120,11 +120,18 @@
         android:textSize="@dimen/stripe_paymentsheet_error_textsize"
         android:lineSpacingExtra="5sp"
         android:layout_marginTop="2dp"
-        android:layout_marginBottom="12dp"
         android:layout_marginHorizontal="3dp"
-        app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_space"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/billing_address" />
+
+    <Space
+        android:id="@+id/bottom_space"
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/billing_errors"/>
 
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/save_card_checkbox"
@@ -135,5 +142,5 @@
         android:text="@string/stripe_paymentsheet_save_this_card"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/billing_errors" />
+        app:layout_constraintTop_toBottomOf="@+id/bottom_space" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,7 +13,6 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.FileFactory
 import com.stripe.android.FingerprintDataFixtures
