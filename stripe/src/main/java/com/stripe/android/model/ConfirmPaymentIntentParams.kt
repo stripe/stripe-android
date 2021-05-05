@@ -326,7 +326,27 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmStatic
         fun create(
             clientSecret: String,
-            returnUrl: String? = null,
+            shipping: Shipping? = null,
+            setupFutureUsage: SetupFutureUsage? = null
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                setupFutureUsage = setupFutureUsage,
+                shipping = shipping
+            )
+        }
+
+        /**
+         * Create a [ConfirmPaymentIntentParams] without a payment method.
+         */
+        @JvmOverloads
+        @JvmStatic
+        @Deprecated(
+            "The [returnUrl] property is deprecated and will be removed in an upcoming major version."
+        )
+        fun create(
+            clientSecret: String,
+            returnUrl: String?,
             shipping: Shipping? = null,
             setupFutureUsage: SetupFutureUsage? = null
         ): ConfirmPaymentIntentParams {
@@ -344,7 +364,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         @Deprecated(
-            "The [extraParams] property is deprecated and will be removed in an " +
+            "The [returnUrl] and [extraParams] properties are deprecated and will be removed in an " +
                 "upcoming major version. Use the [setupFutureUsage] parameter to specify a " +
                 "value for setup_future_usage."
         )
@@ -358,6 +378,49 @@ data class ConfirmPaymentIntentParams internal constructor(
                 clientSecret = clientSecret,
                 returnUrl = returnUrl,
                 extraParams = extraParams,
+                shipping = shipping
+            )
+        }
+
+        /**
+         * Create the parameters necessary for confirming a PaymentIntent while attaching a
+         * PaymentMethod that already exits.
+         *
+         * @param paymentMethodId the ID of the PaymentMethod that is being attached to the
+         * PaymentIntent being confirmed
+         * @param clientSecret client secret from the PaymentIntent being confirmed
+         * @param savePaymentMethod Set to `true` to save this PaymentIntent’s payment method to
+         * the associated Customer, if the payment method is not already
+         * attached. This parameter only applies to the payment method passed
+         * in the same request or the current payment method attached to the
+         * PaymentIntent and must be specified again if a new payment method is
+         * added.
+         * @param paymentMethodOptions Optional [PaymentMethodOptionsParams]
+         * @param mandateId Optional ID of the Mandate to be used for this payment.
+         * @param mandateData Optional details about the Mandate to create.
+         * @param setupFutureUsage Optional. See [SetupFutureUsage].
+         * @param shipping Optional. See [Shipping].
+         */
+        @JvmOverloads
+        @JvmStatic
+        fun createWithPaymentMethodId(
+            paymentMethodId: String,
+            clientSecret: String,
+            savePaymentMethod: Boolean? = null,
+            paymentMethodOptions: PaymentMethodOptionsParams? = null,
+            mandateId: String? = null,
+            mandateData: MandateDataParams? = null,
+            setupFutureUsage: SetupFutureUsage? = null,
+            shipping: Shipping? = null
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethodId,
+                savePaymentMethod = savePaymentMethod,
+                paymentMethodOptions = paymentMethodOptions,
+                mandateId = mandateId,
+                mandateData = mandateData,
+                setupFutureUsage = setupFutureUsage,
                 shipping = shipping
             )
         }
@@ -385,10 +448,13 @@ data class ConfirmPaymentIntentParams internal constructor(
          */
         @JvmOverloads
         @JvmStatic
+        @Deprecated(
+            "The [returnUrl] property is deprecated and will be removed in an upcoming major version."
+        )
         fun createWithPaymentMethodId(
             paymentMethodId: String,
             clientSecret: String,
-            returnUrl: String? = null,
+            returnUrl: String?,
             savePaymentMethod: Boolean? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             mandateId: String? = null,
@@ -433,7 +499,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         @Deprecated(
-            "The [extraParams] property is deprecated and will be removed in an " +
+            "The [returnUrl] and [extraParams] properties are deprecated and will be removed in an " +
                 "upcoming major version. Use the [setupFutureUsage] parameter to specify a " +
                 "value for setup_future_usage."
         )
@@ -470,8 +536,6 @@ data class ConfirmPaymentIntentParams internal constructor(
          * @param paymentMethodCreateParams params for the PaymentMethod that will be attached to this
          * PaymentIntent
          * @param clientSecret client secret from the PaymentIntent that is to be confirmed
-         * @param returnUrl the URL the customer should be redirected to after the authorization
-         * process
          * @param savePaymentMethod Set to `true` to save this PaymentIntent’s payment method to
          * the associated Customer, if the payment method is not already
          * attached. This parameter only applies to the payment method passed
@@ -488,7 +552,52 @@ data class ConfirmPaymentIntentParams internal constructor(
         fun createWithPaymentMethodCreateParams(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             clientSecret: String,
-            returnUrl: String? = null,
+            savePaymentMethod: Boolean? = null,
+            mandateId: String? = null,
+            mandateData: MandateDataParams? = null,
+            setupFutureUsage: SetupFutureUsage? = null,
+            shipping: Shipping? = null
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                savePaymentMethod = savePaymentMethod,
+                mandateId = mandateId,
+                mandateData = mandateData,
+                setupFutureUsage = setupFutureUsage,
+                shipping = shipping
+            )
+        }
+
+        /**
+         * Create the parameters necessary for confirming a PaymentIntent while attaching
+         * [PaymentMethodCreateParams] data
+         *
+         * @param paymentMethodCreateParams params for the PaymentMethod that will be attached to this
+         * PaymentIntent
+         * @param clientSecret client secret from the PaymentIntent that is to be confirmed
+         * @param returnUrl the URL the customer should be redirected to after the authorization
+         * process
+         * @param savePaymentMethod Set to `true` to save this PaymentIntent’s payment method to
+         * the associated Customer, if the payment method is not already
+         * attached. This parameter only applies to the payment method passed
+         * in the same request or the current payment method attached to the
+         * PaymentIntent and must be specified again if a new payment method is
+         * added.
+         * @param mandateId optional ID of the Mandate to be used for this payment.
+         * @param mandateData optional details about the Mandate to create.
+         * @param setupFutureUsage Optional. See [SetupFutureUsage].
+         * @param shipping Optional. See [Shipping].
+         */
+        @JvmOverloads
+        @JvmStatic
+        @Deprecated(
+            "The [returnUrl] property is deprecated and will be removed in an upcoming major version."
+        )
+        fun createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams: PaymentMethodCreateParams,
+            clientSecret: String,
+            returnUrl: String?,
             savePaymentMethod: Boolean? = null,
             mandateId: String? = null,
             mandateData: MandateDataParams? = null,
@@ -530,7 +639,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         @Deprecated(
-            "The [extraParams] property is deprecated and will be removed in an " +
+            "The [returnUrl] and [extraParams] properties are deprecated and will be removed in an " +
                 "upcoming major version. Use the [setupFutureUsage] parameter to specify a " +
                 "value for setup_future_usage."
         )
