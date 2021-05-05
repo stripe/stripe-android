@@ -314,8 +314,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     fragmentContainerId
                 ) is PaymentSheetListFragment
 
-            viewBinding.googlePayButton.isVisible = shouldShowGooglePay
-            viewBinding.buyButton.isVisible = !shouldShowGooglePay
+            if (shouldShowGooglePay) {
+                viewBinding.googlePayButton.bringToFront()
+                viewBinding.googlePayButton.isVisible = true
+                viewBinding.buyButton.isVisible = false
+            } else {
+                viewBinding.buyButton.bringToFront()
+                viewBinding.buyButton.isVisible = true
+                viewBinding.googlePayButton.isVisible = false
+            }
         }
 
         viewBinding.googlePayButton.setOnClickListener {
