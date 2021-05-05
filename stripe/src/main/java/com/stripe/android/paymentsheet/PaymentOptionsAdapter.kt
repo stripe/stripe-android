@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 internal class PaymentOptionsAdapter(
@@ -240,6 +241,7 @@ internal class PaymentOptionsAdapter(
         fun setSelected(selected: Boolean) {
             binding.root.isSelected = selected
             binding.checkIcon.isVisible = selected
+            binding.card.strokeWidth = cardStrokeWidth(selected)
         }
 
         override fun setEnabled(enabled: Boolean) {
@@ -290,6 +292,7 @@ internal class PaymentOptionsAdapter(
         fun setSelected(selected: Boolean) {
             binding.root.isSelected = selected
             binding.checkIcon.isVisible = selected
+            binding.card.strokeWidth = cardStrokeWidth(selected)
         }
 
         override fun setEnabled(enabled: Boolean) {
@@ -302,7 +305,20 @@ internal class PaymentOptionsAdapter(
 
     internal abstract class PaymentOptionViewHolder(parent: ViewGroup) :
         RecyclerView.ViewHolder(parent) {
+
         abstract fun setEnabled(enabled: Boolean)
+
+        fun cardStrokeWidth(selected: Boolean): Int {
+            return if (selected) {
+                itemView.resources
+                    .getDimension(R.dimen.stripe_paymentsheet_card_stroke_width_selected)
+                    .roundToInt()
+            } else {
+                itemView.resources
+                    .getDimension(R.dimen.stripe_paymentsheet_card_stroke_width)
+                    .roundToInt()
+            }
+        }
     }
 
     internal enum class ViewType {

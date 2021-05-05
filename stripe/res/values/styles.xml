@@ -71,7 +71,7 @@
         <item name="android:focusable">false</item>
         <item name="rippleColor">@android:color/transparent</item>
         <item name="cardElevation">@dimen/stripe_paymentsheet_card_elevation</item>
-        <item name="strokeWidth">2dp</item>
+        <item name="strokeWidth">@dimen/stripe_paymentsheet_card_stroke_width</item>
         <item name="strokeColor">@color/stripe_paymentsheet_card_stroke</item>
         <item name="cardBackgroundColor">@color/stripe_paymentsheet_elements_background_states</item>
         <item name="cardForegroundColor">@android:color/transparent</item>
