@@ -33,7 +33,7 @@ import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.utils.InjectableActivityScenario
@@ -356,7 +356,7 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
-                viewModel._viewState.value = ViewState.PaymentSheet.Ready
+                viewModel._viewState.value = PaymentSheetViewState.Reset(null)
 
                 idleLooper()
 
@@ -398,7 +398,7 @@ internal class PaymentSheetActivityTest {
                 idleLooper()
 
                 viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-                viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
+                viewModel._viewState.value = PaymentSheetViewState.StartProcessing
 
                 idleLooper()
 
@@ -420,7 +420,7 @@ internal class PaymentSheetActivityTest {
                 viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
                 var finishProcessingCalled = false
-                viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                viewModel._viewState.value = PaymentSheetViewState.FinishProcessing {
                     finishProcessingCalled = true
                 }
 
@@ -443,7 +443,7 @@ internal class PaymentSheetActivityTest {
                 idleLooper()
 
                 viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
-                viewModel._viewState.value = ViewState.PaymentSheet.StartProcessing
+                viewModel._viewState.value = PaymentSheetViewState.StartProcessing
 
                 idleLooper()
 
@@ -466,7 +466,7 @@ internal class PaymentSheetActivityTest {
                 idleLooper()
 
                 var finishProcessingCalled = false
-                viewModel._viewState.value = ViewState.PaymentSheet.FinishProcessing {
+                viewModel._viewState.value = PaymentSheetViewState.FinishProcessing {
                     finishProcessingCalled = true
                 }
 

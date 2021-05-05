@@ -2,14 +2,11 @@ package com.stripe.android.payments
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabColorSchemeParams
-import androidx.browser.customtabs.CustomTabsIntent
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
@@ -30,10 +27,6 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         StripeBrowserLauncherViewModel.Factory(application)
     }
 
-    private val browserCapabilities: BrowserCapabilities by lazy {
-        BrowserCapabilitiesSupplier(this).get()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -43,8 +36,6 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             finish()
             return
         }
-
-        val url = Uri.parse(args.url)
 
         setResult(
             Activity.RESULT_OK,
@@ -56,33 +47,9 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             ::onResult
         )
 
-        val shouldUseCustomTabs = browserCapabilities == BrowserCapabilities.CustomTabs
-        viewModel.logCapabilities(shouldUseCustomTabs)
-
-        if (shouldUseCustomTabs) {
-            val customTabColorSchemeParams = args.statusBarColor?.let { statusBarColor ->
-                CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(statusBarColor)
-                    .build()
-            }
-
-            // use Custom Tabs
-            val customTabsIntent = CustomTabsIntent.Builder()
-                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                .also {
-                    if (customTabColorSchemeParams != null) {
-                        it.setDefaultColorSchemeParams(customTabColorSchemeParams)
-                    }
-                }
-                .build()
-            customTabsIntent.intent.data = url
-            launcher.launch(customTabsIntent.intent)
-        } else {
-            // use default device browser
-            launcher.launch(
-                Intent(Intent.ACTION_VIEW, url)
-            )
-        }
+        launcher.launch(
+            viewModel.createLaunchIntent(args)
+        )
     }
 
     private fun onResult(activityResult: ActivityResult) {

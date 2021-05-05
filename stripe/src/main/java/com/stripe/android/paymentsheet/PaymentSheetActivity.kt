@@ -35,9 +35,10 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.launch
 
@@ -95,11 +96,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private val currencyFormatter = CurrencyFormatter()
 
-    private val buyButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
+    private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
+        updateErrorMessage(viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
     }
 
-    private val googlePayButtonStateObserver = { viewState: ViewState.PaymentSheet? ->
+    private val googlePayButtonStateObserver = { viewState: PaymentSheetViewState? ->
+        updateErrorMessage(viewState?.errorMessage)
         viewBinding.googlePayButton.updateState(viewState?.convert())
     }
 
@@ -175,6 +178,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupBuyButton()
 
         viewModel.transition.observe(this) { event ->
+            updateErrorMessage(userMessage = null)
             val transitionTarget = event.getContentIfNotHandled()
             if (transitionTarget != null) {
                 onTransitionTarget(
@@ -212,6 +216,18 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.paymentSheetResult.observe(this) {
             closeSheet(it)
         }
+    }
+
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            updateErrorMessage(null)
+        }
+        super.onBackPressed()
+    }
+
+    private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
+        messageView.isVisible = userMessage != null
+        messageView.text = userMessage?.message
     }
 
     private fun fetchConfig() {

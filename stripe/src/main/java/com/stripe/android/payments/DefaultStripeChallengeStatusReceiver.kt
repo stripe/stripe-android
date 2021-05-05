@@ -1,10 +1,10 @@
 package com.stripe.android.payments
 
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest

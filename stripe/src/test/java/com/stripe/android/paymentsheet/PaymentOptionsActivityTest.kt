@@ -18,8 +18,6 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.ViewState
-import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -172,8 +170,6 @@ class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                viewModel._viewState.value = ViewState.PaymentOptions.Ready
-
                 idleLooper()
 
                 val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
@@ -185,46 +181,6 @@ class PaymentOptionsActivityTest {
                     .isEqualTo("Add")
 
                 activity.finish()
-            }
-        }
-    }
-
-    @Test
-    fun `Verify StartProcessing state updates the add button label`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity { activity ->
-                viewModel._viewState.value = ViewState.PaymentOptions.StartProcessing
-
-                idleLooper()
-
-                val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
-
-                assertThat(addBinding.label.text)
-                    .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
-            }
-        }
-    }
-
-    @Test
-    fun `Verify FinishProcessing state calls the callback`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent()
-        ).use {
-            it.onActivity {
-                var callbackCalled = false
-                viewModel._viewState.value = ViewState.PaymentOptions.FinishProcessing {
-                    callbackCalled = true
-                }
-                idleLooper()
-
-                // wait animate time...
-                testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
-
-                assertThat(callbackCalled).isTrue()
             }
         }
     }

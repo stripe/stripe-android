@@ -2,7 +2,6 @@ package com.stripe.android.networking
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.FingerprintData

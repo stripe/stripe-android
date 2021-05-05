@@ -3,6 +3,8 @@ package com.stripe.android.view
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.os.Bundle
+import android.os.Parcelable
 import android.text.Editable
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -11,6 +13,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
@@ -346,6 +349,22 @@ internal class CardFormView @JvmOverloads constructor(
         errors.isEnabled = enabled
     }
 
+    override fun onSaveInstanceState(): Parcelable {
+        return bundleOf(
+            STATE_SUPER_STATE to super.onSaveInstanceState(),
+            STATE_ENABLED to isEnabled
+        )
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if (state is Bundle) {
+            super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
+            isEnabled = state.getBoolean(STATE_ENABLED)
+        } else {
+            super.onRestoreInstanceState(state)
+        }
+    }
+
     private fun applyStandardStyle() {
         // add horizontal divider between card number and other fields
         cardMultilineWidget.addView(
@@ -411,14 +430,13 @@ internal class CardFormView @JvmOverloads constructor(
             1
         )
 
-        // add horizontal divider above postalCodeContainer and hide countryPostalDivider
-        postalCodeContainer.addView(
+        // add horizontal divider below countryLayout and hide countryPostalDivider
+        countryLayout.addView(
             StripeHorizontalDividerBinding.inflate(
                 layoutInflater,
                 countryLayout,
                 false
-            ).root,
-            0
+            ).root
         )
         countryPostalDivider.isVisible = false
 
@@ -446,5 +464,7 @@ internal class CardFormView @JvmOverloads constructor(
 
     internal companion object {
         const val CARD_FORM_VIEW = "CardFormView"
+        private const val STATE_ENABLED = "state_enabled"
+        private const val STATE_SUPER_STATE = "state_super_state"
     }
 }

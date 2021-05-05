@@ -11,7 +11,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.R
@@ -72,11 +71,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.userMessage.observe(this) { userMessage ->
-            messageView.isVisible = userMessage != null
-            messageView.text = userMessage?.message
-        }
-
         viewModel.processing.observe(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
             toolbar.isEnabled = !isProcessing
@@ -106,7 +100,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
-            viewModel.onBackPressed()
             super.onBackPressed()
         } else {
             viewModel.onUserCancel()

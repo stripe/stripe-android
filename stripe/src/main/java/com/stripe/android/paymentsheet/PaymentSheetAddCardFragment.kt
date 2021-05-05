@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 
 internal class PaymentSheetAddCardFragment(
@@ -59,7 +59,7 @@ internal class PaymentSheetAddCardFragment(
             .observe(viewLifecycleOwner) { viewState ->
                 googlePayButton.updateState(viewState?.convert())
 
-                if (viewState is ViewState.PaymentSheet.Ready) {
+                if (viewState is PaymentSheetViewState.Reset) {
                     updateSelection()
                 }
             }

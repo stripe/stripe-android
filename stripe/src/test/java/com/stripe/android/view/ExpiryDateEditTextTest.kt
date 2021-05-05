@@ -9,6 +9,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.R
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.testharness.ViewTestUtils
@@ -409,5 +410,45 @@ class ExpiryDateEditTextTest {
         idleLooper()
 
         verify(textChangeListener, times(1)).afterTextChanged(any())
+    }
+
+    @Test
+    fun `when losing focus and has invalid date then error message listener should trigger`() {
+        val errorMessageListener = mock<StripeEditText.ErrorMessageListener>()
+        expiryDateEditText.requestFocus()
+        expiryDateEditText.append("1")
+        expiryDateEditText.setErrorMessageListener(errorMessageListener)
+        expiryDateEditText.clearFocus()
+
+        idleLooper()
+
+        verify(errorMessageListener).displayErrorMessage(context.getString(R.string.incomplete_expiry_date))
+    }
+
+    @Test
+    fun `when losing focus and has valid date then error message listener should not trigger`() {
+        val errorMessageListener = mock<StripeEditText.ErrorMessageListener>()
+        expiryDateEditText.requestFocus()
+        expiryDateEditText.append("12/50")
+        expiryDateEditText.setErrorMessageListener(errorMessageListener)
+        expiryDateEditText.clearFocus()
+
+        idleLooper()
+
+        verifyNoMoreInteractions(errorMessageListener)
+    }
+
+    @Test
+    fun `when losing focus and has empty text then error message listener should not trigger`() {
+        val errorMessageListener = mock<StripeEditText.ErrorMessageListener>()
+        expiryDateEditText.requestFocus()
+        expiryDateEditText.append("1")
+        expiryDateEditText.setText("")
+        expiryDateEditText.setErrorMessageListener(errorMessageListener)
+        expiryDateEditText.clearFocus()
+
+        idleLooper()
+
+        verifyNoMoreInteractions(errorMessageListener)
     }
 }
