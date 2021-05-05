@@ -190,4 +190,6 @@
     <string name="stripe_failure_connection_error" tools:ignore="MissingTranslation">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
 
     <string name="stripe_verify_your_payment" tools:ignore="MissingTranslation">Verify your payment</string>
+    <string name="stripe_google_pay_error_internal" tools:ignore="MissingTranslation">An internal error occurred.</string>
+    <string name="stripe_google_pay_error_resolution_required" tools:ignore="MissingTranslation">Completing the operation requires some form of resolution.</string>
 </resources>

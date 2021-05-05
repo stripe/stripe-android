@@ -536,7 +536,7 @@ internal class StripePaymentControllerTest {
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     sourceId = sourceId,
-                    shouldCancelSource = true,
+                    canCancelSource = true,
                     stripeAccountId = ACCOUNT_ID
                 ).toBundle()
             )
@@ -602,7 +602,7 @@ internal class StripePaymentControllerTest {
             source = SourceFixtures.CARD,
             sourceId = SourceFixtures.CARD.id,
             flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-            shouldCancelSource = true
+            canCancelSource = true
         )
         val resultBundle = ParcelUtils.copy(
             expectedResult.toBundle(),
