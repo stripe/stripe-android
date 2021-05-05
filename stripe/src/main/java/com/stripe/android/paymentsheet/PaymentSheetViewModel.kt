@@ -337,7 +337,7 @@ internal class PaymentSheetViewModel internal constructor(
                 paymentIntent.value?.let {
                     resetViewState(
                         it,
-                        googlePayResult.googlePayStatus?.getErrorMessage()
+                        googlePayResult.googlePayStatus?.getErrorMessage(getApplication<Application>().resources)
                     )
                 }
             }

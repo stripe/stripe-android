@@ -2,6 +2,7 @@ package com.stripe.android.googlepay
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
@@ -10,6 +11,7 @@ import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Status
+import com.stripe.android.R
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
@@ -130,7 +132,7 @@ internal class StripeGooglePayContract :
     }
 }
 
-internal fun Status.getErrorMessage(): String? {
+internal fun Status.getErrorMessage(resources: Resources): String? {
     return when (this) {
         Status.RESULT_SUCCESS -> null
         Status.RESULT_INTERNAL_ERROR, Status.RESULT_CANCELED, Status.RESULT_DEAD_CLIENT -> "An internal error occurred."
@@ -145,13 +147,13 @@ internal fun Status.getErrorMessage(): String? {
                 CommonStatusCodes.SERVICE_DISABLED, // -> "This constant is deprecated. This case handled during connection, not during API requests. No results should be returned with this status code."
                 CommonStatusCodes.SERVICE_VERSION_UPDATE_REQUIRED, // -> " This constant is deprecated.This case handled during connection, not during API requests . No results should be returned with this status code."
                 CommonStatusCodes.SUCCESS, // -> "The operation was successful.SUCCESS_CACHE The operation was successful, but was used the device's cache."
-                CommonStatusCodes.INTERNAL_ERROR -> "An internal error occurred."
-                CommonStatusCodes.RESOLUTION_REQUIRED -> "Completing the operation requires some form of resolution."
-                CommonStatusCodes.NETWORK_ERROR -> "A network error occurred."
-                CommonStatusCodes.SIGN_IN_REQUIRED -> "The client attempted to connect to the service but the user is not signed in."
-                CommonStatusCodes.TIMEOUT -> "Timed out while awaiting the result."
+                CommonStatusCodes.INTERNAL_ERROR -> resources.getString(R.string.stripe_google_pay_error_internal)
+                CommonStatusCodes.RESOLUTION_REQUIRED -> resources.getString(R.string.stripe_google_pay_error_resolution_required)
+                CommonStatusCodes.NETWORK_ERROR -> resources.getString(R.string.stripe_failure_connection_error)
+                CommonStatusCodes.SIGN_IN_REQUIRED -> resources.getString(R.string.stripe_failure_reason_authentication)
+                CommonStatusCodes.TIMEOUT -> resources.getString(R.string.stripe_failure_reason_timed_out)
                 else -> {
-                    "An internal error occurred."
+                    resources.getString(R.string.stripe_google_pay_error_internal)
                 }
             }
         }
