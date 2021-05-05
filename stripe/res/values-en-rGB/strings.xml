@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">Address line 1 (optional)</string>
     <string name="address_label_address_line2_optional">Address line 2 (optional)</string>
     <string name="address_label_address_optional">Address (optional) </string>
-    <string name="address_label_apt">Apt. </string>
+    <string name="address_label_apt">Apt.</string>
     <string name="address_label_apt_optional">Apt. (optional)</string>
     <string name="address_label_city">City</string>
     <string name="address_label_city_optional">City (optional)</string>
@@ -92,6 +92,7 @@
     <string name="price_free">Free</string>
     <string name="removed">Removed %s</string>
     <string name="secure_checkout">Secure Checkout</string>
+    <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
     <string name="stripe_failure_reason_authentication">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
     <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method - please try again</string>
     <string name="stripe_paymentsheet_add_button_label">Add</string>
@@ -109,6 +110,7 @@
     <string name="stripe_paymentsheet_save_this_card">Save this card for future payments</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
     <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+    <string name="stripe_paymentsheet_setup_button_label">Set up</string>
     <string name="title_add_a_card">Add a Card</string>
     <string name="title_add_an_address">Set Address</string>
     <string name="title_bank_account">Bank Account</string>
