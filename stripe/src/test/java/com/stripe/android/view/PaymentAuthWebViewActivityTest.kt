@@ -73,7 +73,7 @@ internal class PaymentAuthWebViewActivityTest {
                         clientSecret = CLIENT_SECRET,
                         exception = StripeException.create(ActivityNotFoundException()),
                         flowOutcome = StripeIntentResult.Outcome.FAILED,
-                        shouldCancelSource = true,
+                        canCancelSource = true,
                         sourceId = ""
                     )
                 )

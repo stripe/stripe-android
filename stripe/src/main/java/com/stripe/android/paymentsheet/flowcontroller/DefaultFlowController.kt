@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.google.android.gms.common.api.Status
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
@@ -270,7 +271,12 @@ internal class DefaultFlowController internal constructor(
             is StripeGooglePayContract.Result.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 paymentResultCallback.onPaymentSheetResult(
-                    PaymentSheetResult.Failed(googlePayResult.exception)
+                    PaymentSheetResult.Failed(
+                        GooglePayException(
+                            googlePayResult.exception,
+                            googlePayResult.googlePayStatus
+                        )
+                    )
                 )
             }
             is StripeGooglePayContract.Result.Canceled -> {
@@ -405,6 +411,11 @@ internal class DefaultFlowController internal constructor(
             }
         }
     }
+
+    class GooglePayException(
+        val throwable: Throwable,
+        val googleStatus: Status?
+    ) : Exception()
 
     @Parcelize
     data class Args(
