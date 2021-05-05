@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 16.8.0 - unreleased
+* [#3687](https://github.com/stripe/stripe-android/pull/3687) Add support for PaymentSheet pre-built UI.
+
 ## 16.7.1 - 2021-04-29
 * [#3653](https://github.com/stripe/stripe-android/pull/3653) Support WeChat Pay for creating a `PaymentMethod` and confirming a `PaymentIntent`
     * WeChat Pay is still in beta. To enable support in API bindings, pass the `StripeApiBeta.WeChatPayV1` as an argument when instantiating a `Stripe` instance.
