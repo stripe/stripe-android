@@ -66,5 +66,9 @@ internal class PaymentSheetAddCardFragment(
                     updateSelection()
                 }
             }
+
+        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            googlePayButton.isEnabled = !isProcessing
+        }
     }
 }
