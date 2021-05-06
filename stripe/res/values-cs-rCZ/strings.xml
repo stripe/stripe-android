@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">1. řádek adresy (volitelně)</string>
     <string name="address_label_address_line2_optional">2. řádek adresy (volitelně)</string>
     <string name="address_label_address_optional">Adresa(volitelně) </string>
-    <string name="address_label_apt">Byt </string>
+    <string name="address_label_apt">Byt</string>
     <string name="address_label_apt_optional">Byt (volitelně)</string>
     <string name="address_label_city">Město</string>
     <string name="address_label_city_optional">Město (volitelně)</string>
@@ -92,6 +92,7 @@
     <string name="price_free">Zdarma</string>
     <string name="removed">Odebráno %s</string>
     <string name="secure_checkout">Bezpečné dokončení platby</string>
+    <string name="stripe_failure_connection_error">Vyskytly se problémy s připojením k našemu poskytovateli plateb. Zkontrolujte prosím připojení k internetu a zkuste to znovu.</string>
     <string name="stripe_failure_reason_authentication">Nemůžeme ověřit Váš způsob platby. Vyberte si jiný způsob platby a zkuste to znovu.</string>
     <string name="stripe_failure_reason_timed_out">Časový limit ověření Vašeho způsobu platby uplynul -- zkuste to znovu</string>
     <string name="stripe_paymentsheet_add_button_label">Přidat</string>
@@ -109,6 +110,7 @@
     <string name="stripe_paymentsheet_save_this_card">Uložit tuto kartu pro budoucí platby</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložit tuto kartu pro budoucí platby %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Vyberte svou platební metodu</string>
+    <string name="stripe_paymentsheet_setup_button_label">Nastavit</string>
     <string name="stripe_paymentsheet_total_amount">Celkem: %s</string>
     <string name="title_add_a_card">Přidat kartu</string>
     <string name="title_add_an_address">Nastavit adresu</string>

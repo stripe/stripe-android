@@ -92,6 +92,7 @@
     <string name="price_free">Ücretsiz</string>
     <string name="removed">%s çıkartıldı</string>
     <string name="secure_checkout">Güvenli Ödeme</string>
+    <string name="stripe_failure_connection_error">Ödeme sağlayıcımıza bağlanmayla ilgili sorun yaşıyoruz. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.</string>
     <string name="stripe_failure_reason_authentication">Ödeme metodunuzu doğrulayamadık. Lütfen farklı bir ödeme metodu seçin ve tekrar deneyin.</string>
     <string name="stripe_failure_reason_timed_out">Ödeme metodunuz doğrulanırken zaman aşımına uğradı -- tekrar deneyin</string>
     <string name="stripe_paymentsheet_add_button_label">Ekle</string>
@@ -109,6 +110,7 @@
     <string name="stripe_paymentsheet_save_this_card">Gelecekteki ödemeler için bu kart kaydedilsin</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
     <string name="stripe_paymentsheet_select_payment_method">Ödeme yönteminizi seçin</string>
+    <string name="stripe_paymentsheet_setup_button_label">Ayarla</string>
     <string name="title_add_a_card">Kart Ekle</string>
     <string name="title_add_an_address">Adresi Ayarla</string>
     <string name="title_bank_account">Banka Hesabı</string>
