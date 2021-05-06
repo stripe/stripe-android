@@ -111,6 +111,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Shrani to kartico za prihodnja plačila trgovcu %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Izberite način plačila</string>
     <string name="stripe_paymentsheet_setup_button_label">Nastavi</string>
+    <string name="stripe_paymentsheet_total_amount">Skupaj: %s</string>
     <string name="title_add_a_card">Dodajte kartico</string>
     <string name="title_add_an_address">Nastavite naslov</string>
     <string name="title_bank_account">Bančni račun</string>

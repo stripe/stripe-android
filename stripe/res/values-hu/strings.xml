@@ -111,6 +111,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">A kártya mentése a(z) %s részére történő fizetésekhez</string>
     <string name="stripe_paymentsheet_select_payment_method">Fizetési mód kiválasztása</string>
     <string name="stripe_paymentsheet_setup_button_label">Beállítás</string>
+    <string name="stripe_paymentsheet_total_amount">Összesen: %s</string>
     <string name="title_add_a_card">Kártya hozzáadása</string>
     <string name="title_add_an_address">Cím beállítása</string>
     <string name="title_bank_account">Bankszámla</string>

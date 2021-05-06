@@ -168,6 +168,8 @@
     <string name="stripe_paymentsheet_back">Back</string>
     <string name="stripe_paymentsheet_close">Close</string>
     <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+    <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+    <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>

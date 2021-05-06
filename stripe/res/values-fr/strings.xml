@@ -111,6 +111,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Enregistrer cette carte pour vos futurs achats auprès de %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Sélectionnez votre moyen de paiement</string>
     <string name="stripe_paymentsheet_setup_button_label">Configurer</string>
+    <string name="stripe_paymentsheet_total_amount">Total : %s</string>
     <string name="title_add_a_card">Ajouter une carte</string>
     <string name="title_add_an_address">Ajouter une adresse</string>
     <string name="title_bank_account">Compte bancaire</string>

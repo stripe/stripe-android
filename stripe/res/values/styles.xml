@@ -106,7 +106,7 @@
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">@color/stripe_paymentsheet_title_text</item>
         <item name="android:lineSpacingExtra">9sp</item>
-        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_height">32dp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -120,6 +120,14 @@
         <item name="android:layout_marginStart">1dp</item>
         <item name="android:layout_marginEnd">1dp</item>
         <item name="android:layout_marginBottom">4dp</item>
+    </style>
+
+    <style name="StripePaymentSheetTotalLabel">
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:textColor">@color/stripe_paymentsheet_header_text</item>
+        <item name="android:lineSpacingExtra">5sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="StripePaymentSheetTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
