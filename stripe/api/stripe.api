@@ -6520,6 +6520,8 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	protected final fun isLastKeyDelete ()Z
 	public fun onCreateInputConnection (Landroid/view/inputmethod/EditorInfo;)Landroid/view/inputmethod/InputConnection;
 	public fun onInitializeAccessibilityNodeInfo (Landroid/view/accessibility/AccessibilityNodeInfo;)V
+	public fun onRestoreInstanceState (Landroid/os/Parcelable;)V
+	public fun onSaveInstanceState ()Landroid/os/Parcelable;
 	public fun removeTextChangedListener (Landroid/text/TextWatcher;)V
 	public final fun setAfterTextChangedListener (Lcom/stripe/android/view/StripeEditText$AfterTextChangedListener;)V
 	public final fun setDeleteEmptyListener (Lcom/stripe/android/view/StripeEditText$DeleteEmptyListener;)V
@@ -6543,6 +6545,14 @@ public abstract interface class com/stripe/android/view/StripeEditText$DeleteEmp
 
 public abstract interface class com/stripe/android/view/StripeEditText$ErrorMessageListener {
 	public abstract fun displayErrorMessage (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/view/StripeEditText$StripeEditTextState$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/view/StripeEditText$StripeEditTextState;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/view/StripeEditText$StripeEditTextState;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public abstract interface class com/stripe/android/view/i18n/ErrorMessageTranslator {
