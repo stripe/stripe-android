@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">1. adreses rindiņa (nav obligāti)</string>
     <string name="address_label_address_line2_optional">2. adreses rindiņa (nav obligāti)</string>
     <string name="address_label_address_optional">Adrese (nav obligāti) </string>
-    <string name="address_label_apt">Dzīv. </string>
+    <string name="address_label_apt">Dzīv.</string>
     <string name="address_label_apt_optional">Dzīv. (nav obligāti)</string>
     <string name="address_label_city">Pilsēta</string>
     <string name="address_label_city_optional">Pilsēta (nav obligāti)</string>
@@ -92,6 +92,7 @@
     <string name="price_free">Bezmaksas</string>
     <string name="removed">%s noņemts</string>
     <string name="secure_checkout">Droša norēķināšanās</string>
+    <string name="stripe_failure_connection_error">Ir radušās problēmas, veidojot savienojumu ar mūsu maksājumu nodrošinātāju. Lūdzu, pārbaudiet savu interneta savienojumu un mēģiniet vēlreiz.</string>
     <string name="stripe_failure_reason_authentication">Nevaram autentificēt jūsu maksājuma metodi. Lūdzu, izvēlieties citu maksājuma metodi un mēģiniet vēlreiz.</string>
     <string name="stripe_failure_reason_timed_out">Autentificējot jūsu maksājuma metodi, iestājās noildze — mēģiniet vēlreiz</string>
     <string name="stripe_paymentsheet_add_button_label">Pievienot</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Saglabāt šo karti maksājumiem nākotnē</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Saglabāt šo karti %s maksājumiem nākotnē</string>
     <string name="stripe_paymentsheet_select_payment_method">Izvēlēties savu maksājuma veidu</string>
+    <string name="stripe_paymentsheet_setup_button_label">Iestatīt</string>
+    <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
     <string name="title_add_a_card">Kartes pievienošana</string>
     <string name="title_add_an_address">Iestatiet adresi</string>
     <string name="title_bank_account">Bankas konts</string>

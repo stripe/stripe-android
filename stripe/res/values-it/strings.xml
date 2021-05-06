@@ -92,6 +92,7 @@
     <string name="price_free">Gratuita</string>
     <string name="removed">Rimozione di %s</string>
     <string name="secure_checkout">Pagamento sicuro</string>
+    <string name="stripe_failure_connection_error">Stiamo riscontrando problemi di connessione con il nostro fornitore di servizi di pagamento. Controlla la connessione a Internet e riprova.</string>
     <string name="stripe_failure_reason_authentication">Impossibile autenticare la modalità di pagamento. Scegline un\'altra e riprova.</string>
     <string name="stripe_failure_reason_timed_out">Timeout durante l\'autenticazione della modalità di pagamento. Riprova.</string>
     <string name="stripe_paymentsheet_add_button_label">Aggiungi</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Salva la carta per i pagamenti futuri</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salva la carta per i pagamenti futuri di %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Seleziona la modalità di pagamento</string>
+    <string name="stripe_paymentsheet_setup_button_label">Imposta</string>
+    <string name="stripe_paymentsheet_total_amount">Totale: %s</string>
     <string name="title_add_a_card">Aggiungi una carta</string>
     <string name="title_add_an_address">Aggiungi un indirizzo</string>
     <string name="title_bank_account">Conto bancario</string>

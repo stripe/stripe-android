@@ -24,7 +24,7 @@
             android:id="@+id/add_card_header"
             style="@style/StripePaymentSheetTitle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
             android:text="@string/stripe_paymentsheet_add_payment_method_title" />
 
         <com.stripe.android.paymentsheet.ui.GooglePayButton
@@ -131,7 +131,7 @@
         android:layout_height="12dp"
         app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/billing_errors"/>
+        app:layout_constraintTop_toBottomOf="@+id/billing_errors" />
 
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/save_card_checkbox"

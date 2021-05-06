@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">Adressrad 1 (valfritt)</string>
     <string name="address_label_address_line2_optional">Adressrad 2 (valfritt)</string>
     <string name="address_label_address_optional">Adress (valfritt)</string>
-    <string name="address_label_apt">Lgh. </string>
+    <string name="address_label_apt">Lgh.</string>
     <string name="address_label_apt_optional">Lgh. (valfritt)</string>
     <string name="address_label_city">Ort</string>
     <string name="address_label_city_optional">Ort (valfritt)</string>
@@ -92,6 +92,7 @@
     <string name="price_free">Gratis</string>
     <string name="removed">Borttaget %s</string>
     <string name="secure_checkout">Säker betalning</string>
+    <string name="stripe_failure_connection_error">Vi har problem med anslutningen till vår leverantör av betalningstjänster. Kontrollera internetanslutningen och försök igen.</string>
     <string name="stripe_failure_reason_authentication">Vi kan inte verifiera din betalningsmetod. Välj en annan betalningsmetod och försök igen.</string>
     <string name="stripe_failure_reason_timed_out">Tidsgränsen passerades vid autentisering av betalningsmetoden – försök igen</string>
     <string name="stripe_paymentsheet_add_button_label">Lägg till</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Spara kortet för framtida betalningar</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spara detta kort för framtiden %s betalningar</string>
     <string name="stripe_paymentsheet_select_payment_method">Välj din betalningsmetod</string>
+    <string name="stripe_paymentsheet_setup_button_label">Konfigurera</string>
+    <string name="stripe_paymentsheet_total_amount">Totalt: %s</string>
     <string name="title_add_a_card">Lägg till kort</string>
     <string name="title_add_an_address">Lägg till adress</string>
     <string name="title_bank_account">Bankkonto</string>

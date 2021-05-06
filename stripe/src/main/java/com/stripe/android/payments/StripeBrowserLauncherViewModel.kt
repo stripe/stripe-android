@@ -65,7 +65,8 @@ internal class StripeBrowserLauncherViewModel(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 sourceId = url.lastPathSegment.orEmpty(),
-                stripeAccountId = args.stripeAccountId
+                stripeAccountId = args.stripeAccountId,
+                canCancelSource = args.shouldCancelSource
             ).toBundle()
         )
     }

@@ -92,6 +92,7 @@
     <string name="price_free">Gratis</string>
     <string name="removed">Fjernet %s</string>
     <string name="secure_checkout">Sikker utsjekking</string>
+    <string name="stripe_failure_connection_error">Det har oppstått et problem under tilkoblingen til betalingstjenesten. Kontroller Internett-forbindelsen og prøv igjen.</string>
     <string name="stripe_failure_reason_authentication">Vi kan ikke godkjenne betalingsmåten din. Vennligst velg en annen betalingsmetode og prøv igjen.</string>
     <string name="stripe_failure_reason_timed_out">Tidsavbrudd ved godkjennelse av betalingsmåten din - prøv igjen</string>
     <string name="stripe_paymentsheet_add_button_label">Legg til</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Lagre kortet til fremtidige betalinger</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Lagre kortet til fremtidige betalinger hos %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Velg betalingsmetode</string>
+    <string name="stripe_paymentsheet_setup_button_label">Konfigurer</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
     <string name="title_add_a_card">Legg til kort</string>
     <string name="title_add_an_address">Angi adresse</string>
     <string name="title_bank_account">Bankkonto</string>

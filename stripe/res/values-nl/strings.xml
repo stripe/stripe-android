@@ -92,6 +92,7 @@
     <string name="price_free">Gratis</string>
     <string name="removed">%s verwijderd</string>
     <string name="secure_checkout">Beveiligd afrekenproces</string>
+    <string name="stripe_failure_connection_error">Er zijn momenteel problemen met de verbinding naar onze betalingsprovider. Controleer je internetverbinding en probeer het opnieuw.</string>
     <string name="stripe_failure_reason_authentication">We kunnen de betaalmethode niet authenticeren. Kies een andere betaalmethode en probeer het nogmaals.</string>
     <string name="stripe_failure_reason_timed_out">Time-out bij authenticatie van de betaalmethode. Probeer het nogmaals</string>
     <string name="stripe_paymentsheet_add_button_label">Toevoegen</string>
@@ -104,11 +105,13 @@
     <string name="stripe_paymentsheet_new_card_button_label">+ Nieuwe kaart</string>
     <string name="stripe_paymentsheet_or_pay_with">Of met een kaart betalen</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s betalen</string>
-    <string name="stripe_paymentsheet_pay_button_label">Betalen</string>
+    <string name="stripe_paymentsheet_pay_button_label">Betaal</string>
     <string name="stripe_paymentsheet_primary_button_processing">Verwerken...</string>
     <string name="stripe_paymentsheet_save_this_card">Deze kaart opslaan voor toekomstige aankopen</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Deze kaart opslaan voor toekomstige aankopen bij %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Betaalmethode selecteren</string>
+    <string name="stripe_paymentsheet_setup_button_label">Instellen</string>
+    <string name="stripe_paymentsheet_total_amount">Totaal: %s</string>
     <string name="title_add_a_card">Een kaart toevoegen</string>
     <string name="title_add_an_address">Voeg een adres toe</string>
     <string name="title_bank_account">Bankrekening</string>

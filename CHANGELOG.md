@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 16.8.0 - unreleased
+* [#3677](https://github.com/stripe/stripe-android/pull/3677) Upgrade Android Gradle Plugin to `4.2.0`
+* [#3680](https://github.com/stripe/stripe-android/pull/3680) Deprecate `returnUrl` in some `ConfirmPaymentIntentParams` create() methods
+* [#3685](https://github.com/stripe/stripe-android/pull/3685) Upgrade Kotlin to `1.5.0`
+
 ## 16.7.1 - 2021-04-29
 * [#3653](https://github.com/stripe/stripe-android/pull/3653) Support WeChat Pay for creating a `PaymentMethod` and confirming a `PaymentIntent`
     * WeChat Pay is still in beta. To enable support in API bindings, pass the `StripeApiBeta.WeChatPayV1` as an argument when instantiating a `Stripe` instance.

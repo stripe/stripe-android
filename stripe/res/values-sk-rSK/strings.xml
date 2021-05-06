@@ -92,6 +92,7 @@
     <string name="price_free">Zdarma</string>
     <string name="removed">Spôsob platby %s odstránený</string>
     <string name="secure_checkout">Bezpečná pokladňa</string>
+    <string name="stripe_failure_connection_error">Vyskytli sa problémy s pripojením k nášmu poskytovateľovi platieb. Skontrolujte pripojenie k internetu a skúste to znova.</string>
     <string name="stripe_failure_reason_authentication">Nemôžeme overiť váš spôsob platby. Vyberte iný spôsob platby a skúste to znova.</string>
     <string name="stripe_failure_reason_timed_out">Vypršal čas autentifikácie vášho spôsobu platby -- skúste znova</string>
     <string name="stripe_paymentsheet_add_button_label">Pridať</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Uložiť túto kartu pre budúce platby</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložiť túto kartu pre budúce platby obchodníkovi %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Vyberte svoj spôsob platby</string>
+    <string name="stripe_paymentsheet_setup_button_label">Nastaviť</string>
+    <string name="stripe_paymentsheet_total_amount">Celkovo: %s</string>
     <string name="title_add_a_card">Pridať kartu</string>
     <string name="title_add_an_address">Zadajte adresu</string>
     <string name="title_bank_account">Bankový účet</string>
