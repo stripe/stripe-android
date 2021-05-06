@@ -175,8 +175,6 @@ internal class StripePaymentControllerTest {
             val analyticsParams = requireNotNull(analyticsRequestArgumentCaptor.firstValue.params)
             assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
                 .isEqualTo(AnalyticsEvent.Auth3ds2Fingerprint.toString())
-            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID])
-                .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.id)
         }
 
     @Test
@@ -292,8 +290,6 @@ internal class StripePaymentControllerTest {
         val analyticsParams = requireNotNull(analyticsRequestArgumentCaptor.firstValue.params)
         assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
             .isEqualTo(AnalyticsEvent.AuthRedirect.toString())
-        assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID])
-            .isEqualTo("pi_1EZlvVCRMbs6FrXfKpq2xMmy")
     }
 
     @Test
@@ -350,8 +346,7 @@ internal class StripePaymentControllerTest {
             StripePaymentController.getRequestCode(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     "pm_123",
-                    "client_secret",
-                    ""
+                    "client_secret"
                 )
             )
         ).isEqualTo(StripePaymentController.PAYMENT_REQUEST_CODE)
@@ -402,7 +397,6 @@ internal class StripePaymentControllerTest {
             val analyticsParams = requireNotNull(analyticsRequest.params)
             assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
                 .isEqualTo(AnalyticsEvent.Auth3ds2Frictionless.toString())
-            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID]).isEqualTo("pi_1ExkUeAWhjPjYwPiXph9ouXa")
         }
 
     @Test
@@ -630,7 +624,6 @@ internal class StripePaymentControllerTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     "pm_123",
                     "client_secret",
-                    ""
                 ),
                 mock(),
                 REQUEST_OPTIONS
