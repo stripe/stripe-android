@@ -295,7 +295,7 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     @Parcelize
-    data class StripeEditTextState(
+    internal data class StripeEditTextState(
         val superState: Parcelable?,
         val errorMessage: String?,
         val shouldShowError: Boolean

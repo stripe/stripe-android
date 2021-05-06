@@ -6546,24 +6546,6 @@ public abstract interface class com/stripe/android/view/StripeEditText$ErrorMess
 	public abstract fun displayErrorMessage (Ljava/lang/String;)V
 }
 
-public final class com/stripe/android/view/StripeEditText$StripeEditTextState : android/os/Parcelable {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Landroid/os/Parcelable;Ljava/lang/String;Z)V
-	public final fun component1 ()Landroid/os/Parcelable;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Z
-	public final fun copy (Landroid/os/Parcelable;Ljava/lang/String;Z)Lcom/stripe/android/view/StripeEditText$StripeEditTextState;
-	public static synthetic fun copy$default (Lcom/stripe/android/view/StripeEditText$StripeEditTextState;Landroid/os/Parcelable;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/view/StripeEditText$StripeEditTextState;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getErrorMessage ()Ljava/lang/String;
-	public final fun getShouldShowError ()Z
-	public final fun getSuperState ()Landroid/os/Parcelable;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/view/StripeEditText$StripeEditTextState$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/view/StripeEditText$StripeEditTextState;
