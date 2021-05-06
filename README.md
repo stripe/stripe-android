@@ -62,7 +62,7 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 **Native UI**: We provide native screens and elements to collect payment. For example, [PaymentSheet](https://stripe.com/payments/accept-a-payment?platform=android) is a view that combines all the steps required to pay - collecting payment details, billing details, and confirming the payment  - into a single sheet that displays on top of your app.
 
-<img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_input.gif"/>
+<img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/payment_sheet_complete.png"/>
 
 **Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
 
