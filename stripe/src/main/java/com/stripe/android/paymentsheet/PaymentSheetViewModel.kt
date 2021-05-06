@@ -62,8 +62,6 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
 }
 
 internal class PaymentSheetViewModel internal constructor(
-    private val publishableKey: String,
-    private val stripeAccountId: String?,
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
     private val paymentFlowResultProcessor: PaymentFlowResultProcessor,
@@ -93,7 +91,8 @@ internal class PaymentSheetViewModel internal constructor(
     private val _startConfirm = MutableLiveData<Event<ConfirmPaymentIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
 
-    private val _amount = MutableLiveData<Amount>()
+    @VisibleForTesting
+    internal val _amount = MutableLiveData<Amount>()
     internal val amount: LiveData<Amount> = _amount
 
     @VisibleForTesting
@@ -453,8 +452,6 @@ internal class PaymentSheetViewModel internal constructor(
             )
 
             return PaymentSheetViewModel(
-                publishableKey,
-                stripeAccountId,
                 stripeIntentRepository,
                 paymentMethodsRepository,
                 DefaultPaymentFlowResultProcessor(

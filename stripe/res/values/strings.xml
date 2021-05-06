@@ -168,6 +168,8 @@
     <string name="stripe_paymentsheet_back">Back</string>
     <string name="stripe_paymentsheet_close">Close</string>
     <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+    <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+    <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
@@ -177,9 +179,13 @@
     <string name="stripe_paymentsheet_or_pay_with">Or pay with a card</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
 
-    <!-- The payment amount (e.g. "Pay $25.00") -->
+    <!-- Label for a button that starts payment processing -->
     <string name="stripe_paymentsheet_pay_button_label">Pay</string>
+    <!-- Label for a button that starts payment processing for a given amount (e.g. "Pay $25.00") -->
     <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
+    <!-- Label for a button that sets up a payment method for future use -->
+    <string name="stripe_paymentsheet_setup_button_label">Set up</string>
+    <!-- Label shown while the payment is being processed -->
     <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
 
     <string name="stripe_paymentsheet_add_button_label">Add</string>
@@ -187,7 +193,7 @@
     <!-- Failure Reason -->
     <string name="stripe_failure_reason_authentication">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
     <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method -- try again</string>
-    <string name="stripe_failure_connection_error" tools:ignore="MissingTranslation">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
+    <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
 
     <string name="stripe_verify_your_payment" tools:ignore="MissingTranslation">Verify your payment</string>
     <string name="stripe_google_pay_error_internal" tools:ignore="MissingTranslation">An internal error occurred.</string>

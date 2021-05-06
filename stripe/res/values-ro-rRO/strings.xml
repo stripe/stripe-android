@@ -2,7 +2,7 @@
 <resources>
     <string name="acc_label_card_number">Număr card</string>
     <string name="acc_label_card_number_node">%s, Număr card</string>
-    <string name="acc_label_cvc_node">%s, Cod de securitate card</string>
+    <string name="acc_label_cvc_node">%s, Cod CVC</string>
     <string name="acc_label_expiry_date">Data de expirare</string>
     <string name="acc_label_expiry_date_node">%s, Data de expirare</string>
     <string name="acc_label_zip">Cod poștal</string>
@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">Rândul 1 pentru adresă (opțional)</string>
     <string name="address_label_address_line2_optional">Rândul 2 pentru adresă (opțional)</string>
     <string name="address_label_address_optional">Adresă (opțional)</string>
-    <string name="address_label_apt">Apartament </string>
+    <string name="address_label_apt">Apartament</string>
     <string name="address_label_apt_optional">Apartament (opțional)</string>
     <string name="address_label_city">Oraș</string>
     <string name="address_label_city_optional">Oraș (opțional)</string>
@@ -92,6 +92,7 @@
     <string name="price_free">Expediere gratuită</string>
     <string name="removed">%s a fost eliminat</string>
     <string name="secure_checkout">Validare securizată</string>
+    <string name="stripe_failure_connection_error">Întâmpinăm probleme de conectare cu furnizorul nostru de plăți. Verificați conexiunea la internet și încercați din nou.</string>
     <string name="stripe_failure_reason_authentication">Nu vă putem autentifica metoda de plată. Alegeți o altă metodă de plată și încercați din nou.</string>
     <string name="stripe_failure_reason_timed_out">Timpul de autentificare a metodei dvs. de plată a expirat -- încercați din nou</string>
     <string name="stripe_paymentsheet_add_button_label">Adăugare</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Salvați acest card pentru plăți viitoare</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salvați acest card pentru plăți viitoare către %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Selectați metoda de plată</string>
+    <string name="stripe_paymentsheet_setup_button_label">Configurare</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
     <string name="title_add_a_card">Adăugare card</string>
     <string name="title_add_an_address">Adăugare adresă</string>
     <string name="title_bank_account">Cont bancar</string>

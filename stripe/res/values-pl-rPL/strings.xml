@@ -92,6 +92,7 @@
     <string name="price_free">Bezpłatnie</string>
     <string name="removed">Usunięto: %s</string>
     <string name="secure_checkout">Bezpieczna płatność</string>
+    <string name="stripe_failure_connection_error">Wystąpiły trudności z nawiązaniem połączenia z dostawcą usług płatniczych. Sprawdź połączenie z Internetem i spróbuj ponownie.</string>
     <string name="stripe_failure_reason_authentication">Nie możemy wykonać uwierzytelnienia Twojej metody płatności. Wybierz inną metodę i spróbuj ponownie.</string>
     <string name="stripe_failure_reason_timed_out">Przekroczono czas uwierzytelnienia metody płatności – spróbuj ponownie</string>
     <string name="stripe_paymentsheet_add_button_label">Dodaj</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Zapisz dane tej karty do przyszłych płatności</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Zapisz dane tej karty do przyszłych płatności %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Wybierz metodę płatności</string>
+    <string name="stripe_paymentsheet_setup_button_label">Ustaw</string>
+    <string name="stripe_paymentsheet_total_amount">Razem: %s</string>
     <string name="title_add_a_card">Dodaj kartę</string>
     <string name="title_add_an_address">Ustaw adres</string>
     <string name="title_bank_account">Konto bankowe</string>

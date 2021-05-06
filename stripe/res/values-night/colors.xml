@@ -25,7 +25,9 @@
     <color name="stripe_paymentsheet_add_payment_method_form_stroke">#3Dffffff</color>
 
     <color name="stripe_paymentsheet_googlepay_divider_line">#38383A</color>
-    <color name="stripe_paymentsheet_googlepay_divider_background">@color/stripe_paymentsheet_background</color>
+    <color name="stripe_paymentsheet_googlepay_divider_background">
+        @color/stripe_paymentsheet_background
+    </color>
     <color name="stripe_paymentsheet_googlepay_divider_text">#99FFFFFF</color>
 
     <!-- CardFormView -->

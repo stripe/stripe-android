@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.children
@@ -14,6 +15,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -28,6 +30,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetListFragmentTest {
@@ -155,6 +158,18 @@ class PaymentSheetListFragmentTest {
         ).onFragment { fragment ->
             assertThat((fragment.sheetViewModel.paymentSheetResult.value as PaymentSheetResult.Failed).error.message)
                 .isEqualTo("Failed to start existing payment options fragment.")
+        }
+    }
+
+    @Test
+    fun `total amount label correctly displays amount`() {
+        createScenario().onFragment { fragment ->
+            shadowOf(getMainLooper()).idle()
+            fragment.sheetViewModel._amount.value = PaymentSheetViewModel.Amount(399, "USD")
+            val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(fragment.view!!)
+
+            assertThat(viewBinding.total.text)
+                .isEqualTo("Total: $3.99")
         }
     }
 

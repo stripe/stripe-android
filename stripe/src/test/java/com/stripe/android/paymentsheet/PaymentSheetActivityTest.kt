@@ -682,8 +682,6 @@ internal class PaymentSheetActivityTest {
         }
 
         return PaymentSheetViewModel(
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = null,
             stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
             paymentMethodsRepository = FakePaymentMethodsRepository(paymentMethods),
             paymentFlowResultProcessor = paymentFlowResultProcessor,
