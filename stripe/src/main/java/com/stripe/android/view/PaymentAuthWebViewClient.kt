@@ -16,7 +16,7 @@ internal class PaymentAuthWebViewClient(
     private val clientSecret: String,
     returnUrl: String?,
     private val activityStarter: (Intent) -> Unit,
-    private val activityFinisher: (Uri?, Throwable?) -> Unit
+    private val activityFinisher: (Throwable?) -> Unit
 ) : WebViewClient() {
     // user-specified return URL
     private val userReturnUri: Uri? = returnUrl?.let { Uri.parse(it) }
@@ -42,7 +42,7 @@ internal class PaymentAuthWebViewClient(
             onAuthCompleted(
                 runCatching {
                     Uri.parse(url)
-                }.getOrNull()
+                }.exceptionOrNull()
             )
         }
     }
@@ -63,7 +63,7 @@ internal class PaymentAuthWebViewClient(
 
         return if (isReturnUrl(url)) {
             logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - handle return URL")
-            onAuthCompleted(url)
+            onAuthCompleted()
             true
         } else if ("intent".equals(url.scheme, ignoreCase = true)) {
             openIntentScheme(url)
@@ -72,7 +72,6 @@ internal class PaymentAuthWebViewClient(
             // Non-network URLs are likely deep-links into banking apps. If the deep-link can be
             // opened via an Intent, start it. Otherwise, stop the authentication attempt.
             openIntent(
-                url,
                 Intent(Intent.ACTION_VIEW, url)
             )
             true
@@ -85,12 +84,11 @@ internal class PaymentAuthWebViewClient(
         logger.debug("PaymentAuthWebViewClient#openIntentScheme()")
         runCatching {
             openIntent(
-                uri,
                 Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
             )
         }.onFailure { error ->
             logger.error("Failed to start Intent.", error)
-            onAuthCompleted(uri, error)
+            onAuthCompleted(error)
         }
     }
 
@@ -99,7 +97,6 @@ internal class PaymentAuthWebViewClient(
      * for more details on app-to-app interaction.
      */
     private fun openIntent(
-        uri: Uri,
         intent: Intent
     ) {
         logger.debug("PaymentAuthWebViewClient#openIntent()")
@@ -115,7 +112,7 @@ internal class PaymentAuthWebViewClient(
                 // irrespective of whether or not the app is installed.
                 // If this intent fails to resolve, we should still let the user
                 // continue on the mobile site.
-                onAuthCompleted(uri, error)
+                onAuthCompleted(error)
             }
         }
     }
@@ -176,11 +173,10 @@ internal class PaymentAuthWebViewClient(
      * Invoked when authentication flow has completed, whether succeeded or failed.
      */
     private fun onAuthCompleted(
-        uri: Uri?,
         error: Throwable? = null
     ) {
         logger.debug("PaymentAuthWebViewClient#onAuthCompleted()")
-        activityFinisher(uri, error)
+        activityFinisher(error)
     }
 
     internal companion object {

@@ -1,7 +1,5 @@
 package com.stripe.android.view
 
-import android.content.ActivityNotFoundException
-import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -108,10 +106,7 @@ class PaymentAuthWebViewActivityViewModelTest {
     fun `logError() should fire expected event`() {
         val viewModel = createViewModel(ARGS)
 
-        viewModel.logError(
-            Uri.parse("https://example.com/path?secret=password"),
-            ActivityNotFoundException("Failed to find activity")
-        )
+        viewModel.logError()
 
         val params = analyticsRequests.first().params
         assertThat(params["event"])
@@ -128,9 +123,7 @@ class PaymentAuthWebViewActivityViewModelTest {
     fun `logComplete() should fire expected event`() {
         val viewModel = createViewModel(ARGS)
 
-        viewModel.logComplete(
-            Uri.parse("https://example.com/path?secret=password")
-        )
+        viewModel.logComplete()
 
         val params = analyticsRequests.first().params
         assertThat(params["event"])
@@ -143,9 +136,7 @@ class PaymentAuthWebViewActivityViewModelTest {
     fun `logComplete() with uri=null should fire expected event`() {
         val viewModel = createViewModel(ARGS)
 
-        viewModel.logComplete(
-            uri = null
-        )
+        viewModel.logComplete()
 
         val params = analyticsRequests.first().params
         assertThat(params["event"])
