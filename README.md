@@ -56,6 +56,10 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 ## Features
 
+**Native UI**: We provide native screens and elements to collect payment. For example, [PaymentSheet](https://stripe.com/payments/accept-a-payment?platform=android) is a view that combines all the steps required to pay - collecting payment details, billing details, and confirming the payment  - into a single sheet that displays on top of your app.
+
+<img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_input.gif"/>
+
 **Simplified Security**: Use the SDK to collect credit card numbers and remain [PCI compliant](https://stripe.com/docs/security#pci-dss-guidelines). This means sensitive data is sent directly to Stripe instead of passing through your server. For more information, see our [Integration Security Guide](https://stripe.com/docs/security).
 
 **Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
@@ -63,10 +67,6 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 **Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build your own entirely custom UI on top of this layer.
 
 **SCA-Ready**: The SDK automatically performs native [3D Secure authentication](https://stripe.com/docs/payments/3d-secure) to comply with [Strong Customer Authentication](https://stripe.com/docs/strong-customer-authentication) regulation in Europe.
-
-**Native UI**: We provide native screens and elements to collect payment and shipping details. For example, [CardInputWidget](https://stripe.dev/stripe-android/stripe/com.stripe.android.view/-card-input-widget/index.html) is a view that collects and validates card details. You can use these individually, or take all of the prebuilt UI in one flow by following the [Basic Integration guide](https://stripe.com/docs/mobile/android/basic).
-
-<img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_input.gif"/>
 
 ## Getting Started
 
@@ -81,9 +81,8 @@ new Stripe(context, "pk_test_yourkey");
 ```
 
 ## Examples
-
+- The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates using our prebuild ui (single-step), prebuild UI (multi-step), card element, and API bindings, including how to create Payment Intents, and Payment Methods; how to use the Stripe class's synchronous and asynchronous methods; and how to use the CardInputWidget.
 - [Accept a card payment](https://github.com/stripe-samples/accept-a-card-payment) (PaymentIntents API)
 - [Save a card without payment](https://github.com/stripe-samples/mobile-saving-card-without-payment) (SetupIntents API)
 - [Accept a card payment](https://github.com/stripe-samples/card-payment-charges-api) (Charges API)
-- The [stripe-samples/sample-store-android](https://github.com/stripe-samples/sample-store-android) repo demonstrates how to build a payment flow using our prebuilt UI components ([Basic Integration](https://stripe.com/docs/mobile/android/basic))
-- The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates using our API bindings and UI components, including how to create Tokens, Sources, and Payment Methods; how to use the Stripe class's synchronous and asynchronous methods; and how to use the CardInputWidget.
+
