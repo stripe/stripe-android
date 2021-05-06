@@ -1038,6 +1038,7 @@ public final class com/stripe/android/StripeError$Creator : android/os/Parcelabl
 public abstract class com/stripe/android/StripeIntentResult : com/stripe/android/model/StripeModel {
 	public abstract fun getIntent ()Lcom/stripe/android/model/StripeIntent;
 	public final fun getOutcome ()I
+	protected abstract fun getOutcomeFromFlow ()I
 }
 
 public abstract interface annotation class com/stripe/android/StripeIntentResult$Outcome : java/lang/annotation/Annotation {
