@@ -114,4 +114,5 @@
     <string name="title_bank_account">Банковский счет</string>
     <string name="title_payment_method">Метод оплаты</string>
     <string name="title_select_shipping_method">Выберите метод доставки</string>
+    <string name="stripe_paymentsheet_total_amount">Всего: %s</string>
 </resources>

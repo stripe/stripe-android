@@ -114,4 +114,5 @@
     <string name="title_bank_account">은행 계좌</string>
     <string name="title_payment_method">결제 수단</string>
     <string name="title_select_shipping_method">배송 방법 선택</string>
+    <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
 </resources>

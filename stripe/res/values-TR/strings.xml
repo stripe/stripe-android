@@ -114,4 +114,5 @@
     <string name="title_bank_account">Banka Hesabı</string>
     <string name="title_payment_method">Ödeme Metodu</string>
     <string name="title_select_shipping_method">Gönderi Metodunu Seçin</string>
+    <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
 </resources>

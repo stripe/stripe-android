@@ -109,6 +109,7 @@
     <string name="stripe_paymentsheet_save_this_card">Запазете тази карта за следващи плащания</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Запазете тази карта за следващи %s плащания</string>
     <string name="stripe_paymentsheet_select_payment_method">Изберете метод на плащане</string>
+    <string name="stripe_paymentsheet_total_amount">Общо: %s</string>
     <string name="title_add_a_card">Добавяне на карта</string>
     <string name="title_add_an_address">Задаване на адрес</string>
     <string name="title_bank_account">Банкова сметка</string>

@@ -114,4 +114,5 @@
     <string name="title_bank_account">Bankas konts</string>
     <string name="title_payment_method">Maksājuma metode</string>
     <string name="title_select_shipping_method">Atlasiet piegādes metodi</string>
+    <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
 </resources>

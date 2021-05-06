@@ -109,6 +109,7 @@
     <string name="stripe_paymentsheet_save_this_card">Guarda esta tarjeta para futuros pagos</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Guardar esta tarjeta para futuros pagos de %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Selecciona el método de pago</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
     <string name="title_add_a_card">Agrega una tarjeta</string>
     <string name="title_add_an_address">Establece la dirección</string>
     <string name="title_bank_account">Cuenta bancaria</string>

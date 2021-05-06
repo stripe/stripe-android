@@ -114,4 +114,5 @@
     <string name="title_bank_account">Conta bancária</string>
     <string name="title_payment_method">Forma de pagamento</string>
     <string name="title_select_shipping_method">Selecionar forma de envio</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
 </resources>

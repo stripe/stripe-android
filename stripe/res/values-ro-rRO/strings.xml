@@ -114,4 +114,5 @@
     <string name="title_bank_account">Cont bancar</string>
     <string name="title_payment_method">Metoda de plată</string>
     <string name="title_select_shipping_method">Selectare metodă de plată</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
 </resources>

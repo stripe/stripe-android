@@ -114,4 +114,5 @@
     <string name="title_bank_account">Pangakonto</string>
     <string name="title_payment_method">Makseviis</string>
     <string name="title_select_shipping_method">Valige tarneviis</string>
+    <string name="stripe_paymentsheet_total_amount">Kokku: %s</string>
 </resources>

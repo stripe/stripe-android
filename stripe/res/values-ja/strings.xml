@@ -114,4 +114,5 @@
     <string name="title_bank_account">銀行口座</string>
     <string name="title_payment_method">お支払い方法</string>
     <string name="title_select_shipping_method">配送方法を選択してください</string>
+    <string name="stripe_paymentsheet_total_amount">合計: %s</string>
 </resources>
