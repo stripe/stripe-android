@@ -17,15 +17,33 @@ Table of contents
 =================
 
 <!--ts-->
+   * [Features](#features)
+   * [Releases](#releases)
    * [Installation](#installation)
       * [Requirements](#requirements)
       * [Configuration](#configuration)
-      * [Releases](#releases)
       * [Proguard](#proguard)
-   * [Features](#features)
    * [Getting Started](#getting-started)
    * [Examples](#examples)
 <!--te-->
+
+## Features
+
+**Simplified Security**: Use the SDK to collect credit card numbers and remain [PCI compliant](https://stripe.com/docs/security#pci-dss-guidelines). This means sensitive data is sent directly to Stripe instead of passing through your server. For more information, see our [Integration Security Guide](https://stripe.com/docs/security).
+
+**SCA-Ready**: The SDK automatically performs native [3D Secure authentication](https://stripe.com/docs/payments/3d-secure) to comply with [Strong Customer Authentication](https://stripe.com/docs/strong-customer-authentication) regulation in Europe.
+
+**Native UI**: We provide native screens and elements to collect payment. For example, [PaymentSheet](https://stripe.com/payments/accept-a-payment?platform=android) is a prebuilt UI that combines all the steps required to pay - collecting payment details, billing details, and confirming the payment  - into a single sheet that displays on top of your app.
+
+<img src="https://raw.githubusercontent.com/stripe/stripe-android/michelleb/mc-update-readme/assets/payment_sheet_complete.png"/>
+
+**Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
+
+**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build your own entirely custom UI on top of this layer.
+
+## Releases
+* The [changelog](CHANGELOG.md) provides a summary of changes in each release.
+* The [migration guide](MIGRATING.md) provides instructions on upgrading from older versions.
 
 ## Installation
 
@@ -49,25 +67,6 @@ dependencies {
 ### Proguard
 
 The Stripe Android SDK will configure your app's Proguard rules using [proguard-rules.txt](stripe/proguard-rules.txt).
-
-## Releases
-* The [changelog](CHANGELOG.md) provides a summary of changes in each release.
-* The [migration guide](MIGRATING.md) provides instructions on upgrading from older versions.
-
-## Features
-
-**Simplified Security**: Use the SDK to collect credit card numbers and remain [PCI compliant](https://stripe.com/docs/security#pci-dss-guidelines). This means sensitive data is sent directly to Stripe instead of passing through your server. For more information, see our [Integration Security Guide](https://stripe.com/docs/security).
-
-**SCA-Ready**: The SDK automatically performs native [3D Secure authentication](https://stripe.com/docs/payments/3d-secure) to comply with [Strong Customer Authentication](https://stripe.com/docs/strong-customer-authentication) regulation in Europe.
-
-**Native UI**: We provide native screens and elements to collect payment. For example, [PaymentSheet](https://stripe.com/payments/accept-a-payment?platform=android) is a prebuilt UI that combines all the steps required to pay - collecting payment details, billing details, and confirming the payment  - into a single sheet that displays on top of your app.
-
-<img src="https://raw.githubusercontent.com/stripe/stripe-android/michelleb/mc-update-readme/assets/payment_sheet_complete.png"/>
-
-**Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
-
-**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build your own entirely custom UI on top of this layer.
-
 
 ## Getting Started
 
