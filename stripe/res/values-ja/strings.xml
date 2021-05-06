@@ -92,6 +92,7 @@
     <string name="price_free">無料</string>
     <string name="removed">%s が削除されました</string>
     <string name="secure_checkout">安全なチェックアウト</string>
+    <string name="stripe_failure_connection_error">決済代行会社への接続中に問題が発生しました。インターネット接続をご確認の上、もう一度お試しください。</string>
     <string name="stripe_failure_reason_authentication">お客様の支払い方法を認証できませんでした。別の支払い方法を選択してもう一度お試しください。</string>
     <string name="stripe_failure_reason_timed_out">支払い方法の認証がタイムアウトしました。もう一度お試しください</string>
     <string name="stripe_paymentsheet_add_button_label">追加する</string>
@@ -104,11 +105,12 @@
     <string name="stripe_paymentsheet_new_card_button_label">新しいカードを追加</string>
     <string name="stripe_paymentsheet_or_pay_with">または、カードで支払う</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s を支払う</string>
-    <string name="stripe_paymentsheet_pay_button_label">支払い額</string>
+    <string name="stripe_paymentsheet_pay_button_label">支払う: </string>
     <string name="stripe_paymentsheet_primary_button_processing">処理中...</string>
     <string name="stripe_paymentsheet_save_this_card">今後の支払いのためにこのカードを保存する</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">今後の %s の支払いのためにこのカードを保存する</string>
     <string name="stripe_paymentsheet_select_payment_method">支払い方法を選択してください</string>
+    <string name="stripe_paymentsheet_setup_button_label">設定</string>
     <string name="title_add_a_card">カードを追加</string>
     <string name="title_add_an_address">住所を設定してください</string>
     <string name="title_bank_account">銀行口座</string>

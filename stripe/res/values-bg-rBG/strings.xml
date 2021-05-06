@@ -92,6 +92,7 @@
     <string name="price_free">Безплатно</string>
     <string name="removed">%s е премахнато</string>
     <string name="secure_checkout">Защитено финализиране</string>
+    <string name="stripe_failure_connection_error">Възникна проблем при свързването с нашия доставчик на платежни услуги. Моля, проверете Вашата интернет връзка и опитайте отново.</string>
     <string name="stripe_failure_reason_authentication">Не можем да удостоверим Вашия метод на плащане. Моля, изберете различен метод на плащане и опитайте отново.</string>
     <string name="stripe_failure_reason_timed_out">Времето на изчакване на удостоверяването на Вашия метод на плащане изтече -- опитайте отново</string>
     <string name="stripe_paymentsheet_add_button_label">Добавяне</string>
@@ -109,6 +110,7 @@
     <string name="stripe_paymentsheet_save_this_card">Запазете тази карта за следващи плащания</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Запазете тази карта за следващи %s плащания</string>
     <string name="stripe_paymentsheet_select_payment_method">Изберете метод на плащане</string>
+    <string name="stripe_paymentsheet_setup_button_label">Създаване</string>
     <string name="title_add_a_card">Добавяне на карта</string>
     <string name="title_add_an_address">Задаване на адрес</string>
     <string name="title_bank_account">Банкова сметка</string>

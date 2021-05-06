@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">Adresselinje 1 (valgfrit)</string>
     <string name="address_label_address_line2_optional">Adresselinje 2 (valgfrit)</string>
     <string name="address_label_address_optional">Adresse (valgfrit) </string>
-    <string name="address_label_apt">Lejl. </string>
+    <string name="address_label_apt">Lejl.</string>
     <string name="address_label_apt_optional">Lejl. (valgfrit)</string>
     <string name="address_label_city">By</string>
     <string name="address_label_city_optional">By (valgfrit)</string>
@@ -92,6 +92,7 @@
     <string name="price_free">Gratis</string>
     <string name="removed">Slettet %s</string>
     <string name="secure_checkout">Sikker Checkout</string>
+    <string name="stripe_failure_connection_error">Vi har problemer med at oprette forbindelse til vores betalingsudbyder. Kontroller din internetforbindelse, og prøv igen.</string>
     <string name="stripe_failure_reason_authentication">Vi kunne ikke bekræfte din betalingsmetode. Vælg venligst en anden betalingsmetode, og prøv igen.</string>
     <string name="stripe_failure_reason_timed_out">Bekræftelsen af din betalingsmetode udløb -- prøv igen.</string>
     <string name="stripe_paymentsheet_add_button_label">Tilføj</string>
@@ -107,8 +108,9 @@
     <string name="stripe_paymentsheet_pay_button_label">Betal</string>
     <string name="stripe_paymentsheet_primary_button_processing">Behandler...</string>
     <string name="stripe_paymentsheet_save_this_card">Gem dette kort til fremtidige betalinger</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Gem dette kort til fremtidige%s betalinger</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Gem dette kort til fremtidige %s betalinger</string>
     <string name="stripe_paymentsheet_select_payment_method">Vælg din betalingsmetode</string>
+    <string name="stripe_paymentsheet_setup_button_label">Opsætning</string>
     <string name="title_add_a_card">Tilføj et kort</string>
     <string name="title_add_an_address">Tilføj en adresse</string>
     <string name="title_bank_account">Bankkonto</string>
