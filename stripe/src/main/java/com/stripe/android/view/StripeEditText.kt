@@ -222,9 +222,9 @@ open class StripeEditText @JvmOverloads constructor(
 
     override fun onSaveInstanceState(): Parcelable {
         return StripeEditTextState(
+            super.onSaveInstanceState(),
             errorMessage,
-            shouldShowError,
-            super.onSaveInstanceState()
+            shouldShowError
         )
     }
 
@@ -296,8 +296,8 @@ open class StripeEditText @JvmOverloads constructor(
 
     @Parcelize
     data class StripeEditTextState(
+        val superState: Parcelable?,
         val errorMessage: String?,
-        val shouldShowError: Boolean,
-        val superState: Parcelable?
+        val shouldShowError: Boolean
     ) : Parcelable
 }
