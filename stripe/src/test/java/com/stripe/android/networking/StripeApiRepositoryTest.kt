@@ -54,8 +54,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.assertIs
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -202,13 +201,13 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun createSource_shouldLogSourceCreation_andReturnSource() = testDispatcher.runBlockingTest {
-        val source = stripeApiRepository.createSource(
-            SourceParams.createCardParams(CARD_PARAMS),
-            DEFAULT_OPTIONS
-        )
-
         // Check that we get a token back; we don't care about its fields for this test.
-        assertNotNull(source)
+        requireNotNull(
+            stripeApiRepository.createSource(
+                SourceParams.createCardParams(CARD_PARAMS),
+                DEFAULT_OPTIONS
+            )
+        )
     }
 
     @Test
@@ -260,13 +259,17 @@ internal class StripeApiRepositoryTest {
     @Test
     fun createSource_withConnectAccount_keepsHeaderInAccount() = testDispatcher.runBlockingTest {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
-        val source = stripeApiRepository.createSource(
-            SourceParams.createCardParams(CARD_PARAMS),
-            ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, connectAccountId)
-        )
 
         // Check that we get a source back; we don't care about its fields for this test.
-        assertNotNull(source)
+        requireNotNull(
+            stripeApiRepository.createSource(
+                SourceParams.createCardParams(CARD_PARAMS),
+                ApiRequest.Options(
+                    ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+                    connectAccountId
+                )
+            )
+        )
     }
 
     @Test
@@ -280,19 +283,18 @@ internal class StripeApiRepositoryTest {
             .thenReturn(stripeResponse)
 
         val sourceId = "src_19t3xKBZqEXluyI4uz2dxAfQ"
-        val source = create().retrieveSource(
-            sourceId,
-            "mocked",
-            DEFAULT_OPTIONS
+        val source = requireNotNull(
+            create().retrieveSource(
+                sourceId,
+                "mocked",
+                DEFAULT_OPTIONS
+            )
         )
 
-        assertNotNull(source)
-        assertThat(source.id).isEqualTo(sourceId)
+        assertThat(source.id)
+            .isEqualTo(sourceId)
 
-        verifyAnalyticsRequest(
-            AnalyticsEvent.SourceRetrieve,
-            sourceId = sourceId
-        )
+        verifyAnalyticsRequest(AnalyticsEvent.SourceRetrieve)
     }
 
     @Test
@@ -341,7 +343,8 @@ internal class StripeApiRepositoryTest {
                         DEFAULT_OPTIONS
                     )
                 }
-            assertEquals(HttpURLConnection.HTTP_NOT_FOUND, invalidRequestException.statusCode)
+            assertThat(invalidRequestException.statusCode)
+                .isEqualTo(HttpURLConnection.HTTP_NOT_FOUND)
             assertEquals("source", invalidRequestException.stripeError?.param)
             assertEquals("resource_missing", invalidRequestException.stripeError?.code)
         }
@@ -359,18 +362,19 @@ internal class StripeApiRepositoryTest {
     fun requestData_withConnectAccount_shouldReturnCorrectResponseHeaders() =
         testDispatcher.runBlockingTest {
             val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
-            val response = stripeApiRepository.makeApiRequest(
-                DEFAULT_API_REQUEST_FACTORY.createPost(
-                    StripeApiRepository.sourcesUrl,
-                    ApiRequest.Options(
-                        ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
-                        connectAccountId
+            val response = requireNotNull(
+                stripeApiRepository.makeApiRequest(
+                    DEFAULT_API_REQUEST_FACTORY.createPost(
+                        StripeApiRepository.sourcesUrl,
+                        ApiRequest.Options(
+                            ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+                            connectAccountId
+                        ),
+                        SourceParams.createCardParams(CARD_PARAMS).toParamMap()
                     ),
-                    SourceParams.createCardParams(CARD_PARAMS).toParamMap()
+                    onResponse = {}
                 )
-            ) {
-            }
-            assertNotNull(response)
+            )
 
             val accountsHeader = requireNotNull(
                 response.getHeaderValue(STRIPE_ACCOUNT_RESPONSE_HEADER)
@@ -399,10 +403,10 @@ internal class StripeApiRepositoryTest {
             val confirmPaymentIntentParams =
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    clientSecret,
-                    "yourapp://post-authentication-return-url"
+                    clientSecret
                 )
-            val paymentIntent = requireNotNull(
+
+            requireNotNull(
                 create().confirmPaymentIntent(
                     confirmPaymentIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -410,17 +414,18 @@ internal class StripeApiRepositoryTest {
             )
 
             verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-            val paymentMethodDataParams =
-                apiRequest.params?.get("payment_method_data") as Map<String, *>
-            assertTrue(paymentMethodDataParams["muid"] is String)
-            assertTrue(paymentMethodDataParams["guid"] is String)
-            assertEquals("card", paymentMethodDataParams["type"])
+            val requestParams = apiRequestArgumentCaptor.firstValue.params.orEmpty()
+            val paymentMethodParams = assertIs<Map<String, *>>(requestParams["payment_method_data"])
+            assertIs<String>(paymentMethodParams["muid"])
+            assertIs<String>(paymentMethodParams["guid"])
+            assertThat(paymentMethodParams["type"])
+                .isEqualTo("card")
 
             verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
 
             val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-            assertEquals(PaymentMethod.Type.Card.code, analyticsRequest.params["source_type"])
+            assertThat(analyticsRequest.params["source_type"])
+                .isEqualTo(PaymentMethod.Type.Card.code)
         }
 
     @Ignore("requires a secret key")
@@ -435,11 +440,12 @@ internal class StripeApiRepositoryTest {
                 clientSecret,
                 "yourapp://post-authentication-return-url"
             )
-            val paymentIntent = stripeApiRepository.confirmPaymentIntent(
-                confirmPaymentIntentParams,
-                ApiRequest.Options(publishableKey)
+            requireNotNull(
+                stripeApiRepository.confirmPaymentIntent(
+                    confirmPaymentIntentParams,
+                    ApiRequest.Options(publishableKey)
+                )
             )
-            assertNotNull(paymentIntent)
         }
 
     @Ignore("requires a secret key")
@@ -448,11 +454,12 @@ internal class StripeApiRepositoryTest {
             val clientSecret = "temporarily put a private key here simulate the backend"
             val publishableKey = "put a public key that matches the private key here"
 
-            val paymentIntent = stripeApiRepository.retrievePaymentIntent(
-                clientSecret,
-                ApiRequest.Options(publishableKey)
+            requireNotNull(
+                stripeApiRepository.retrievePaymentIntent(
+                    clientSecret,
+                    ApiRequest.Options(publishableKey)
+                )
             )
-            assertNotNull(paymentIntent)
         }
 
     @Test
@@ -467,11 +474,13 @@ internal class StripeApiRepositoryTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             fingerprintDataRepository = fingerprintDataRepository
         )
-        val source = stripeApiRepository.createSource(
-            SourceParams.createCardParams(CARD_PARAMS),
-            DEFAULT_OPTIONS
+
+        requireNotNull(
+            stripeApiRepository.createSource(
+                SourceParams.createCardParams(CARD_PARAMS),
+                DEFAULT_OPTIONS
+            )
         )
-        assertNotNull(source)
 
         verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.SourceCreate)
     }
@@ -954,8 +963,7 @@ internal class StripeApiRepositoryTest {
 
     private fun verifyAnalyticsRequest(
         event: AnalyticsEvent,
-        productUsage: List<String>? = null,
-        sourceId: String? = null
+        productUsage: List<String>? = null
     ) {
         verify(analyticsRequestExecutor)
             .executeAsync(analyticsRequestArgumentCaptor.capture())
@@ -970,11 +978,6 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             productUsage,
             analyticsParams["product_usage"]
-        )
-
-        assertEquals(
-            sourceId,
-            analyticsParams["source_id"]
         )
     }
 

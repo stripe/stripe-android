@@ -111,12 +111,6 @@ class PaymentAuthWebViewActivityViewModelTest {
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_error")
-        assertThat(params["error_message"])
-            .isEqualTo("Failed to find activity")
-        assertThat(params["error_stacktrace"].toString())
-            .startsWith("android.content.ActivityNotFoundException: Failed to find activity\n")
-        assertThat(params["challenge_uri"])
-            .isEqualTo("https://example.com")
     }
 
     @Test
@@ -128,8 +122,6 @@ class PaymentAuthWebViewActivityViewModelTest {
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_complete")
-        assertThat(params["challenge_uri"])
-            .isEqualTo("https://example.com")
     }
 
     @Test
@@ -141,8 +133,6 @@ class PaymentAuthWebViewActivityViewModelTest {
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_complete")
-        assertThat(params["challenge_uri"])
-            .isEqualTo("")
     }
 
     private fun createViewModel(
