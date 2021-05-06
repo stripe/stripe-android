@@ -37,8 +37,20 @@ class LauncherActivity : AppCompatActivity() {
     ) : RecyclerView.Adapter<ExamplesAdapter.ExamplesViewHolder>() {
         private val items = listOf(
             Item(
-                activity.getString(R.string.toy),
-                ToyActivity::class.java
+                activity.getString(R.string.border_bg),
+                CFVBorderBG::class.java
+            ),
+            Item(
+                activity.getString(R.string.borderless_bg),
+                CFVBorderlessBG::class.java
+            ),
+            Item(
+                activity.getString(R.string.border_no_bg),
+                CFVBorderNoBG::class.java
+            ),
+            Item(
+                activity.getString(R.string.borderless_no_bg),
+                CFVBorderlessNoBG::class.java
             ),
             Item(
                 activity.getString(R.string.payment_auth_example),

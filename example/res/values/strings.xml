@@ -93,6 +93,11 @@
     <!-- <UPI> -->
     <string name="vpa_layout_hint">Virtual Payment Address (VPA)</string>
     <string name="vpa_input_hint">something@stripeupi</string>
-    <string name="toy">Toy</string>
+
+    <!-- CFV test -->
+    <string name="border_bg">CFV_border_background</string>
+    <string name="borderless_bg">CFV_borderless_background</string>
+    <string name="border_no_bg">CFV_border_no_background</string>
+    <string name="borderless_no_bg">CFV_borderless_no_background</string>
 
 </resources>

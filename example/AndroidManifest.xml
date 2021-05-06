@@ -110,7 +110,10 @@
 
         <activity android:name=".activity.LaunchPaymentSheetCompleteActivity" />
         <activity android:name=".activity.LaunchPaymentSheetCustomActivity" />
-        <activity android:name=".activity.ToyActivity" />
+        <activity android:name=".activity.CFVBorderNoBG" />
+        <activity android:name=".activity.CFVBorderBG" />
+        <activity android:name=".activity.CFVBorderlessBG" />
+        <activity android:name=".activity.CFVBorderlessNoBG" />
     </application>
 
 </manifest>

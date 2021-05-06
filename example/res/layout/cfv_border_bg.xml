@@ -5,33 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".activity.ToyActivity">
+    tools:context=".activity.BaseCFVActvity">
 
-
-    <!--    borderless-->
-    <!--    <com.stripe.android.view.CardFormView-->
-    <!--        android:id="@+id/card_form_view"-->
-    <!--        style="@style/StripeCardFormView.Borderless"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
-
-    <!--    borderless with background override-->
-    <!--    <com.stripe.android.view.CardFormView-->
-    <!--        android:id="@+id/card_form_view"-->
-    <!--        style="@style/StripeCardFormView.Borderless"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        app:backgroundColorStateList="@color/card_form_view_bg_color_overriden"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
-
-    <!--    default-->
+    <!-- with border, with background override -->
     <com.stripe.android.view.CardFormView
         android:id="@+id/card_form_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:backgroundColorStateList="@color/card_form_view_bg_color_overriden"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -55,5 +36,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/toggle"
         app:layout_constraintTop_toBottomOf="@id/card_form_view" />
+
+    <TextView
+        android:id="@+id/result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_params" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
