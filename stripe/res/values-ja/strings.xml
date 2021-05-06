@@ -111,10 +111,10 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">今後の %s の支払いのためにこのカードを保存する</string>
     <string name="stripe_paymentsheet_select_payment_method">支払い方法を選択してください</string>
     <string name="stripe_paymentsheet_setup_button_label">設定</string>
+    <string name="stripe_paymentsheet_total_amount">合計: %s</string>
     <string name="title_add_a_card">カードを追加</string>
     <string name="title_add_an_address">住所を設定してください</string>
     <string name="title_bank_account">銀行口座</string>
     <string name="title_payment_method">お支払い方法</string>
     <string name="title_select_shipping_method">配送方法を選択してください</string>
-    <string name="stripe_paymentsheet_total_amount">合計: %s</string>
 </resources>

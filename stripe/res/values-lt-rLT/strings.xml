@@ -111,10 +111,10 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Išsaugoti kortelę vėlesniems %s mokėjimams</string>
     <string name="stripe_paymentsheet_select_payment_method">Pasirinkite mokėjimo būdą</string>
     <string name="stripe_paymentsheet_setup_button_label">Nustatyti</string>
+    <string name="stripe_paymentsheet_total_amount">Bendra suma: %s</string>
     <string name="title_add_a_card">Pridėti kortelę</string>
     <string name="title_add_an_address">Nustatyti adresą</string>
     <string name="title_bank_account">Banko sąskaita</string>
     <string name="title_payment_method">Mokėjimo būdas</string>
     <string name="title_select_shipping_method">Pasirinkti siuntimo būdą</string>
-    <string name="stripe_paymentsheet_total_amount">Bendra suma: %s</string>
 </resources>

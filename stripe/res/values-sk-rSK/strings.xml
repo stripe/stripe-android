@@ -111,10 +111,10 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložiť túto kartu pre budúce platby obchodníkovi %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Vyberte svoj spôsob platby</string>
     <string name="stripe_paymentsheet_setup_button_label">Nastaviť</string>
+    <string name="stripe_paymentsheet_total_amount">Celkovo: %s</string>
     <string name="title_add_a_card">Pridať kartu</string>
     <string name="title_add_an_address">Zadajte adresu</string>
     <string name="title_bank_account">Bankový účet</string>
     <string name="title_payment_method">Spôsob platby</string>
     <string name="title_select_shipping_method">Zvoľte spôsob dodania</string>
-    <string name="stripe_paymentsheet_total_amount">Celkovo: %s</string>
 </resources>

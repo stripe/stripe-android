@@ -111,10 +111,10 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salva la carta per i pagamenti futuri di %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Seleziona la modalità di pagamento</string>
     <string name="stripe_paymentsheet_setup_button_label">Imposta</string>
+    <string name="stripe_paymentsheet_total_amount">Totale: %s</string>
     <string name="title_add_a_card">Aggiungi una carta</string>
     <string name="title_add_an_address">Aggiungi un indirizzo</string>
     <string name="title_bank_account">Conto bancario</string>
     <string name="title_payment_method">Modalità di pagamento</string>
     <string name="title_select_shipping_method">Scegli metodo spedizione</string>
-    <string name="stripe_paymentsheet_total_amount">Totale: %s</string>
 </resources>
