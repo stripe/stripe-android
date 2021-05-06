@@ -1,47 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:context=".activity.BaseCFVActvity">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
-    <!-- borderless, no background override -->
-    <com.stripe.android.view.CardFormView
-        android:id="@+id/card_form_view"
-        style="@style/StripeCardFormView.Borderless"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        tools:context=".activity.BaseCFVActvity">
 
-    <Button
-        android:id="@+id/toggle"
-        android:text="toggle_Enabled"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        app:layout_constraintEnd_toStartOf="@id/card_params"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_form_view" />
+        <!-- borderless, no background override -->
+        <com.stripe.android.view.CardFormView
+            android:id="@+id/card_form_view"
+            style="@style/StripeCardFormView.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/card_params"
-        android:enabled="false"
-        android:text="get_cardParams"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/toggle"
-        app:layout_constraintTop_toBottomOf="@id/card_form_view" />
+        <Button
+            android:id="@+id/toggle"
+            android:text="toggle_Enabled"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            app:layout_constraintEnd_toStartOf="@id/card_params"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_form_view" />
 
-    <TextView
-        android:id="@+id/result"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_params" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/card_params"
+            android:enabled="false"
+            android:text="get_cardParams"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/toggle"
+            app:layout_constraintTop_toBottomOf="@id/card_form_view" />
+
+        <TextView
+            android:id="@+id/result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_params" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
