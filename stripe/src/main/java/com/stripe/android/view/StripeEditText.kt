@@ -2,6 +2,8 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.os.Bundle
+import android.os.Parcelable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.KeyEvent
@@ -12,6 +14,7 @@ import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
@@ -218,6 +221,24 @@ open class StripeEditText @JvmOverloads constructor(
         fun displayErrorMessage(message: String?)
     }
 
+    override fun onSaveInstanceState(): Parcelable {
+        return bundleOf(
+            STATE_SUPER_STATE to super.onSaveInstanceState(),
+            STATE_ERROR_MESSAGE to errorMessage,
+            STATE_SHOULD_SHOW_ERROR to shouldShowError
+        )
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if (state is Bundle) {
+            super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
+            errorMessage = state.getString(STATE_ERROR_MESSAGE)
+            shouldShowError = state.getBoolean(STATE_SHOULD_SHOW_ERROR)
+        } else {
+            super.onRestoreInstanceState(state)
+        }
+    }
+
     private class SoftDeleteInputConnection constructor(
         target: InputConnection,
         mutable: Boolean,
@@ -274,5 +295,11 @@ open class StripeEditText @JvmOverloads constructor(
         textWatchers.forEach {
             super.addTextChangedListener(it)
         }
+    }
+
+    companion object {
+        const val STATE_SUPER_STATE = "state_super_state"
+        const val STATE_SHOULD_SHOW_ERROR = "state_should_show_error"
+        const val STATE_ERROR_MESSAGE = "state_error_message"
     }
 }
