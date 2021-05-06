@@ -93,7 +93,8 @@ internal class PaymentSheetViewModel internal constructor(
     private val _startConfirm = MutableLiveData<Event<ConfirmPaymentIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
 
-    private val _amount = MutableLiveData<Amount>()
+    @VisibleForTesting
+    internal val _amount = MutableLiveData<Amount>()
     internal val amount: LiveData<Amount> = _amount
 
     @VisibleForTesting
