@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -14,10 +13,10 @@ import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
+import kotlinx.parcelize.Parcelize
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -222,20 +221,18 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        return bundleOf(
-            STATE_SUPER_STATE to super.onSaveInstanceState(),
-            STATE_ERROR_MESSAGE to errorMessage,
-            STATE_SHOULD_SHOW_ERROR to shouldShowError
+        return StripeEditTextState(
+            errorMessage,
+            shouldShowError,
+            super.onSaveInstanceState()
         )
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
-        if (state is Bundle) {
-            super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
-            errorMessage = state.getString(STATE_ERROR_MESSAGE)
-            shouldShowError = state.getBoolean(STATE_SHOULD_SHOW_ERROR)
-        } else {
-            super.onRestoreInstanceState(state)
+        (state as StripeEditTextState).let {
+            super.onRestoreInstanceState(it.superState)
+            errorMessage = it.errorMessage
+            shouldShowError = it.shouldShowError
         }
     }
 
@@ -297,9 +294,10 @@ open class StripeEditText @JvmOverloads constructor(
         }
     }
 
-    companion object {
-        const val STATE_SUPER_STATE = "state_super_state"
-        const val STATE_SHOULD_SHOW_ERROR = "state_should_show_error"
-        const val STATE_ERROR_MESSAGE = "state_error_message"
-    }
+    @Parcelize
+    data class StripeEditTextState(
+        val errorMessage: String?,
+        val shouldShowError: Boolean,
+        val superState: Parcelable?
+    ) : Parcelable
 }
