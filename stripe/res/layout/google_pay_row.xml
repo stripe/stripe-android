@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/stripe_list_row_height"
@@ -16,12 +15,11 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_height="wrap_content"
         android:layout_width="@dimen/stripe_masked_card_icon_width"
-        app:srcCompat="@drawable/stripe_google_pay_mark"
         android:scaleType="centerInside"
         android:focusableInTouchMode="false"
         android:clickable="false"
         android:layout_gravity="center_vertical|start"
-        />
+        app:srcCompat="@drawable/stripe_google_pay_mark" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/label"
@@ -33,16 +31,14 @@
         android:text="@string/google_pay"
         android:focusableInTouchMode="false"
         android:clickable="false"
-        android:layout_gravity="center_vertical|start"
-        />
+        android:layout_gravity="center_vertical|start" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/check_icon"
         android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        app:srcCompat="@drawable/stripe_ic_checkmark"
         android:visibility="invisible"
-        />
+        app:srcCompat="@drawable/stripe_ic_checkmark" />
 
 </LinearLayout>

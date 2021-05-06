@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:indeterminate="true"
         android:layout_gravity="center"
+        app:indicatorColor="?colorOnSurface"
         app:indicatorSize="24dp"
-        app:trackThickness="2dp"
-        app:indicatorColor="?colorOnSurface"/>
+        app:trackThickness="2dp" />
 </FrameLayout>
