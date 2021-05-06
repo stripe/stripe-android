@@ -136,11 +136,11 @@ class GooglePayJsonFactory constructor(
         transactionInfo: TransactionInfo
     ): JSONObject {
         return JSONObject()
-            .put("currencyCode", transactionInfo.currencyCode.toUpperCase(Locale.ROOT))
+            .put("currencyCode", transactionInfo.currencyCode.uppercase())
             .put("totalPriceStatus", transactionInfo.totalPriceStatus.code)
             .apply {
                 transactionInfo.countryCode?.let {
-                    put("countryCode", it.toUpperCase(Locale.ROOT))
+                    put("countryCode", it.uppercase())
                 }
 
                 transactionInfo.transactionId?.let {
@@ -153,7 +153,7 @@ class GooglePayJsonFactory constructor(
                         PayWithGoogleUtils.getPriceString(
                             it,
                             Currency.getInstance(
-                                transactionInfo.currencyCode.toUpperCase(Locale.ROOT)
+                                transactionInfo.currencyCode.uppercase()
                             )
                         )
                     )
@@ -370,7 +370,7 @@ class GooglePayJsonFactory constructor(
         internal val normalizedAllowedCountryCodes: Set<String>
             get() {
                 return allowedCountryCodes.map {
-                    it.toUpperCase(Locale.ROOT)
+                    it.uppercase()
                 }.toSet()
             }
 
