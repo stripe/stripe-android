@@ -38,12 +38,7 @@ internal class PaymentAuthWebViewClient(
 
         if (url != null && isCompletionUrl(url)) {
             logger.debug("$url is a completion URL")
-
-            onAuthCompleted(
-                runCatching {
-                    Uri.parse(url)
-                }.exceptionOrNull()
-            )
+            onAuthCompleted()
         }
     }
 
