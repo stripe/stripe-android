@@ -77,12 +77,14 @@ The `PaymentSheet` class is the entry-point to the pre-built UI. It must be inst
 
 When testing, you can use a test publishable key. Remember to replace the test key with your live key in production. You can view your API keys in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
 
-```java
+```kotlin
 PaymentConfiguration.init(getApplicationContext(), "pk_test_...");
 ```
 
 ## Examples
-- The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates using our prebuilt ui (single-step and multi-step), card element, and API bindings, including how to create Payment Intents, and Payment Methods; how to use the Stripe class's synchronous and asynchronous methods; and how to use the CardInputWidget.
-- [Accept a card payment](https://github.com/stripe-samples/accept-a-card-payment) (PaymentIntents API)
-- [Save a card without payment](https://github.com/stripe-samples/mobile-saving-card-without-payment) (SetupIntents API)
+- The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates:
+    - using our prebuilt ui (single-step and multi-step)
+    - how to use the Stripe class's synchronous and asynchronous methods
+    - how to use the CardInputWidget.
+
 
