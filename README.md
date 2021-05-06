@@ -46,13 +46,13 @@ dependencies {
 }
 ```
 
-### Releases
-* The [changelog](CHANGELOG.md) provides a summary of changes in each release.
-* The [migration guide](MIGRATING.md) provides instructions on upgrading from older versions.
-
 ### Proguard
 
 The Stripe Android SDK will configure your app's Proguard rules using [proguard-rules.txt](stripe/proguard-rules.txt).
+
+## Releases
+* The [changelog](CHANGELOG.md) provides a summary of changes in each release.
+* The [migration guide](MIGRATING.md) provides instructions on upgrading from older versions.
 
 ## Features
 
