@@ -8,7 +8,7 @@
 
 The Stripe Android SDK makes it quick and easy to build an excellent payment experience in your Android app. We provide powerful and customizable UI elements that can be used out-of-the-box to collect your users' payment details. We also expose the low-level APIs that power those UIs so that you can build fully custom experiences. 
 
-Get started with our [📚 integration guides](https://stripe.com/docs/payments) and [example projects](#examples), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
+Get started with our [📚 integration guides](https://stripe.com/docs/payments/accept-a-payment?platform=android) and [example projects](#examples), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
 
 > Updating to a newer version of the SDK? See our [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) and [changelog](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md).
 
