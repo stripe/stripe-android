@@ -33,7 +33,7 @@ Table of contents
 
 **SCA-Ready**: The SDK automatically performs native [3D Secure authentication](https://stripe.com/docs/payments/3d-secure) to comply with [Strong Customer Authentication](https://stripe.com/docs/strong-customer-authentication) regulation in Europe.
 
-**Native UI**: We provide native screens and elements to collect payment. For example, [PaymentSheet](https://stripe.com/payments/accept-a-payment?platform=android) is a prebuilt UI that combines all the steps required to pay - collecting payment details, billing details, and confirming the payment  - into a single sheet that displays on top of your app.
+**Native UI**: We provide native screens and elements to collect payment. For example, [PaymentSheet](https://stripe.com/payments/accept-a-payment?platform=android) is a prebuilt UI that combines all the steps required to pay - collecting payment details, and confirming the payment  - into a single sheet that displays on top of your app.
 
 <img src="https://raw.githubusercontent.com/stripe/stripe-android/michelleb/mc-update-readme/assets/payment_sheet_complete.png"/>
 
@@ -70,9 +70,9 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 ## Getting Started
 
-Get started with our [📚 integration guides](https://stripe.com/docs/payments) and [example projects](#examples), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
+Get started with our [📚 integration guides](https://stripe.com/docs/payments/accept-a-payment?platform=android) and [example projects](#examples), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
 
-The `PaymentSheet` class is the entry-point to the pre-built UI. It must be instantiated with a [Stripe publishable key](https://stripe.com/docs/keys) and application context.
+The [`PaymentSheet`](https://stripe.dev/stripe-android/docs/stripe/com.stripe.android.paymentsheet/-payment-sheet/index.html) class is the entry-point to the pre-built UI. It must be instantiated with a [Stripe publishable key](https://stripe.com/docs/keys) and application context.
 
 When testing, you can use a test publishable key. Remember to replace the test key with your live key in production. You can view your API keys in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
 
@@ -85,5 +85,6 @@ PaymentConfiguration.init(getApplicationContext(), "pk_test_...");
     - using our prebuilt ui (single-step and multi-step)
     - how to use the Stripe class's synchronous and asynchronous methods
     - how to use the CardInputWidget.
+
 
 
