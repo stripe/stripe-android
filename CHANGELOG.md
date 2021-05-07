@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 16.8.0 - unreleased
+## 16.8.0 - 2021-05-07
+This release adds a prebuilt UI.   It combines all the steps required to pay - collecting payment details and confirming the payment - into a single sheet that displays on top of your app.  See the [guide](https://stripe.com/docs/payments/accept-a-payment?platform=android) for more details.
+
 * [#3663](https://github.com/stripe/stripe-android/pull/3663) Add support for using Chrome to host a 3DS1 authentication page when Custom Tabs are not available
 * [#3677](https://github.com/stripe/stripe-android/pull/3677) Upgrade Android Gradle Plugin to `4.2.0`
 * [#3680](https://github.com/stripe/stripe-android/pull/3680) Deprecate `returnUrl` in some `ConfirmPaymentIntentParams` create() methods
