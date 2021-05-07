@@ -35,7 +35,7 @@ Table of contents
 
 **Native UI**: We provide native screens and elements to collect payment. For example, [PaymentSheet](https://stripe.com/payments/accept-a-payment?platform=android) is a prebuilt UI that combines all the steps required to pay - collecting payment details, and confirming the payment  - into a single sheet that displays on top of your app.
 
-<img src="https://raw.githubusercontent.com/stripe/stripe-android/michelleb/mc-update-readme/assets/payment_sheet_complete.png"/>
+<img src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/payment_sheet_complete.png"/>
 
 **Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
 
