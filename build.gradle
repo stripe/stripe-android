@@ -92,5 +92,5 @@ apply plugin: 'binary-compatibility-validator'
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
-    ignoredProjects += ["example"]
+    ignoredProjects += ["example", "paymentsheet-example"]
 }
