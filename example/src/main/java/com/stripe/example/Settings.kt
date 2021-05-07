@@ -64,10 +64,12 @@ class Settings(context: Context) {
 
         // Example payment sheet backend with a "/checkout" endpoint
         // Remix from https://glitch.com/edit/#!/stripe-mobile-payment-sheet-test-playground-v3
-        internal const val PAYMENT_SHEET_BASE_URL = ""
+        internal const val PAYMENT_SHEET_BASE_URL =
+            "https://project-name.glitch.me/"
 
-        // Publishable key for example payment sheet backend
-        internal const val PAYMENT_SHEET_PUBLISHABLE_KEY = ""
+        // Publishable key for example payment sheet backend.  Find this in the .env file on your Glitch project
+        internal const val PAYMENT_SHEET_PUBLISHABLE_KEY =
+            "pk_test_..."
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.example.metadata.backend_url"

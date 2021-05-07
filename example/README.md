@@ -3,6 +3,8 @@
 **Contents**
 1. [Setup](#setup)
 2. [Examples](#examples)
+   - [Payment Sheet](#payment-sheet)
+   - [SDK](#SDK)
    - [Google Pay](#google-pay)
 
 ## Setup
@@ -10,22 +12,39 @@
 ### Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
-3. After [deploying the example backend to Heroku](#deploy-the-example-backend-to-heroku) and [configuring the app](#configure-the-app), build and run the project.
 
-<img width="215" height="108" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/run.png" />
+## Examples
+### Payment Sheet
+#### Setup example merchant server
+1. Navigate to [example mobile backend repo](https://glitch.com/edit/#!/stripe-mobile-payment-sheet-test-playground-v3) and follow the README instructions for remixing.
 
-### Deploy the example backend to Heroku
+#### Configure the app
+1. If it doesn't exist, create a `gradle.properties` in a location defined in the
+   [Gradle Build Environment docs](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties).
+   For example, the default location on macOS is `~/.gradle/gradle.properties`.
+2. Append the following entries to `gradle.properties`.
+
+```
+# Set to example backend deployed to Glitch
+STRIPE_EXAMPLE_BACKEND_URL=https://project-name.glitch.me/
+
+# Set to a test publishable key from https://dashboard.stripe.com/test/apikeys.  Same one used in glitch
+STRIPE_EXAMPLE_PUBLISHABLE_KEY=pk_test_...
+```
+
+### SDK
+#### Deploy the example backend to Heroku
 1. [Create a Heroku account](https://signup.heroku.com/) if you don't have one.
 2. Navigate to the [example mobile backend repo](https://github.com/stripe/example-mobile-backend/tree/v19.0.0)
    and click "Deploy to Heroku".
 3. Set an _App Name_ of your choice (e.g. Stripe Example Mobile Backend).
-4. Under _Config Vars_, set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys)
+4. Under _Config Vars_, set your [Stripe test mode secret key](https://dashboard.stripe.com/test/apikeys)
    for the `STRIPE_TEST_SECRET_KEY` field.
 5. Click "Deploy for Free".
 
 <img width="700" height="793" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/heroku.png" />
 
-### Configure the app
+#### Configure the app
 1. If it doesn't exist, create a `gradle.properties` in a location defined in the
    [Gradle Build Environment docs](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties).
    For example, the default location on macOS is `~/.gradle/gradle.properties`.
@@ -42,7 +61,6 @@ STRIPE_EXAMPLE_PUBLISHABLE_KEY=pk_test_mykey
 STRIPE_ACCOUNT_ID=
 ```
 
-## Examples
 
 ### Google Pay
 
