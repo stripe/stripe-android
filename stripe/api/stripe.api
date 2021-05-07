@@ -5701,8 +5701,14 @@ public final class com/stripe/android/paymentsheet/PaymentOptionResult$Succeeded
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet {
-	public final fun presentWithPaymentIntent$stripe_release (Ljava/lang/String;)V
-	public final fun presentWithSetupIntent$stripe_release (Ljava/lang/String;)V
+	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)V
+	public final fun presentWithPaymentIntent (Ljava/lang/String;)V
+	public final fun presentWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)V
+	public static synthetic fun presentWithPaymentIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)V
+	public final fun presentWithSetupIntent (Ljava/lang/String;)V
+	public final fun presentWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)V
+	public static synthetic fun presentWithSetupIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : android/os/Parcelable {
@@ -5763,6 +5769,43 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfigur
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$FlowController {
+	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion;
+	public abstract fun configureWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
+	public abstract fun configureWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
+	public abstract fun confirm ()V
+	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public abstract fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public abstract fun presentPaymentOptions ()V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+}
+
+public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback {
+	public abstract fun onConfigured (ZLjava/lang/Throwable;)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$DefaultImpls {
+	public static synthetic fun configureWithPaymentIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
+	public static synthetic fun configureWithSetupIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
+}
+
+public abstract class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Result {
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Result$Failure : com/stripe/android/paymentsheet/PaymentSheet$FlowController$Result {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Result$Success : com/stripe/android/paymentsheet/PaymentSheet$FlowController$Result {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Result$Success;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration : android/os/Parcelable {

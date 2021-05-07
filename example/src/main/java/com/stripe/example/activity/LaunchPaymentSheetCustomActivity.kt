@@ -1,11 +1,15 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
-import android.view.View
-import com.stripe.android.paymentsheet.PaymentOptionCallback
+import android.view.Menu
+import android.view.MenuItem
+import androidx.core.view.isInvisible
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.example.R
+import com.stripe.example.Settings
 import com.stripe.example.databinding.ActivityPaymentSheetCustomBinding
 
 internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
@@ -13,56 +17,99 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         ActivityPaymentSheetCustomBinding.inflate(layoutInflater)
     }
 
+    private lateinit var flowController: PaymentSheet.FlowController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        val paymentOptionCallback = PaymentOptionCallback { paymentOption ->
-            onPaymentOption(paymentOption)
-        }
-        val paymentResultCallback = PaymentSheetResultCallback { paymentResult ->
-            onPaymentSheetResult(paymentResult)
-        }
+        // TODO(brnunes-stripe): Remove this once FlowController initialization is refactored.
+        PaymentConfiguration.init(this, Settings.PAYMENT_SHEET_PUBLISHABLE_KEY)
+
+        flowController = PaymentSheet.FlowController.create(
+            this,
+            ::onPaymentOption,
+            ::onPaymentSheetResult
+        )
 
         viewModel.inProgress.observe(this) {
-            viewBinding.progressBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
+            viewBinding.progressBar.isInvisible = !it
         }
+
         viewModel.status.observe(this) {
             viewBinding.status.text = it
         }
 
-        viewBinding.buyButton.setOnClickListener {
-            // TODO(mshafrir-stripe): handle click
-        }
-        fetchEphemeralKey()
+        startCheckout()
     }
 
-    private fun createPaymentSheetFlowController(
-        customerConfig: PaymentSheet.CustomerConfiguration?
-    ) {
-        viewModel.createPaymentIntent(
-            COUNTRY_CODE,
-            customerConfig?.id
-        ).observe(this) { responseResult ->
-            responseResult.fold(
-                onSuccess = { json ->
-                    viewModel.inProgress.postValue(false)
-                    val paymentIntentClientSecret = json.getString("secret")
-                    onPaymentIntent(paymentIntentClientSecret, customerConfig)
-                },
-                onFailure = ::onError
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.payment_sheet_custom, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.refresh_key) {
+            resetViews()
+            startCheckout()
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun startCheckout() {
+        prepareCheckout { customerConfig, clientSecret ->
+            if (isSetupIntent) {
+                flowController.configureWithSetupIntent(
+                    clientSecret,
+                    makeConfiguration(customerConfig),
+                    ::onConfigured
+                )
+            } else {
+                flowController.configureWithPaymentIntent(
+                    clientSecret,
+                    makeConfiguration(customerConfig),
+                    ::onConfigured
+                )
+            }
+        }
+    }
+
+    private fun makeConfiguration(
+        customerConfig: PaymentSheet.CustomerConfiguration? = null
+    ): PaymentSheet.Configuration {
+        return PaymentSheet.Configuration(
+            merchantDisplayName = merchantName,
+            customer = customerConfig,
+            googlePay = googlePayConfig
+        )
+    }
+
+    private fun onConfigured(success: Boolean, error: Throwable?) {
+        if (success) {
+            onFlowControllerReady()
+        } else {
+            viewModel.status.postValue(
+                "Failed to configure PaymentSheetFlowController: ${error?.message}"
             )
         }
     }
 
-    private fun onPaymentIntent(
-        paymentIntentClientSecret: String,
-        customerConfig: PaymentSheet.CustomerConfiguration? = null
-    ) {
-        // handle result
+    private fun onFlowControllerReady() {
+        viewBinding.paymentMethod.setOnClickListener {
+            flowController.presentPaymentOptions()
+        }
+        viewBinding.buyButton.setOnClickListener {
+            flowController.confirm()
+        }
+        onPaymentOption(flowController.getPaymentOption())
     }
 
     private fun onPaymentOption(paymentOption: PaymentOption?) {
+        viewBinding.paymentMethod.isEnabled = true
+
         if (paymentOption != null) {
             viewBinding.paymentMethod.text = paymentOption.label
             viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
@@ -84,17 +131,26 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         }
     }
 
-    override fun onRefreshEphemeralKey() {
-        if (isCustomerEnabled) {
-            fetchEphemeralKey { customerConfig ->
-                createPaymentSheetFlowController(customerConfig)
-            }
-        } else {
-            createPaymentSheetFlowController(null)
-        }
+    private fun resetViews() {
+        viewBinding.paymentMethod.text = "Loading..."
+        viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            null,
+            null,
+            null,
+            null
+        )
+        disableViews()
     }
 
-    private companion object {
-        private const val COUNTRY_CODE = "us"
+    private fun disableViews() {
+        viewBinding.paymentMethod.isEnabled = false
+        viewBinding.buyButton.isEnabled = false
+    }
+
+    override fun onPaymentSheetResult(
+        paymentResult: PaymentSheetResult
+    ) {
+        super.onPaymentSheetResult(paymentResult)
+        disableViews()
     }
 }
