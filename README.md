@@ -39,7 +39,7 @@ Table of contents
 
 **Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
 
-**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build your own entirely custom UI on top of this layer.
+**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build a custom UI on top of this layer.
 
 ## Releases
 * The [changelog](CHANGELOG.md) provides a summary of changes in each release.
@@ -70,17 +70,10 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 ## Getting Started
 
+### Integration
 Get started with our [📚 integration guides](https://stripe.com/docs/payments/accept-a-payment?platform=android) and [example projects](#examples), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
 
-The [`PaymentSheet`](https://stripe.dev/stripe-android/docs/stripe/com.stripe.android.paymentsheet/-payment-sheet/index.html) class is the entry-point to the pre-built UI. It must be instantiated with a [Stripe publishable key](https://stripe.com/docs/keys) and application context.
-
-When testing, you can use a test publishable key. Remember to replace the test key with your live key in production. You can view your API keys in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
-
-```kotlin
-PaymentConfiguration.init(getApplicationContext(), "pk_test_...");
-```
-
-## Examples
+### Examples
 - The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates:
     - using our prebuilt ui (single-step and multi-step)
     - how to use the Stripe class's synchronous and asynchronous methods
