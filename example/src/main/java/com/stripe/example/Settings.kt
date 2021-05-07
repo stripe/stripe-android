@@ -69,7 +69,8 @@ class Settings(context: Context) {
 
         // Publishable key for example payment sheet backend.  Find this in the .env file on your Glitch project
         internal const val PAYMENT_SHEET_PUBLISHABLE_KEY =
-            "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
+            "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRt" +
+                "Wun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.example.metadata.backend_url"
