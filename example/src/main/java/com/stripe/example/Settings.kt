@@ -36,7 +36,7 @@ class Settings(context: Context) {
             .takeIf { it?.isNotBlank() == true }
     }
 
-    private companion object {
+    internal companion object {
         /**
          * Note: only necessary if not configured via `gradle.properties`.
          *
@@ -61,6 +61,13 @@ class Settings(context: Context) {
          * See https://dashboard.stripe.com/test/connect/accounts/overview
          */
         private val STRIPE_ACCOUNT_ID: String? = null
+
+        // Example payment sheet backend with a "/checkout" endpoint
+        // Remix from https://glitch.com/edit/#!/stripe-mobile-payment-sheet-test-playground-v3
+        internal const val PAYMENT_SHEET_BASE_URL = ""
+
+        // Publishable key for example payment sheet backend
+        internal const val PAYMENT_SHEET_PUBLISHABLE_KEY = ""
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.example.metadata.backend_url"
