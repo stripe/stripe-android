@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.os.Parcelable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.KeyEvent
@@ -15,6 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
+import kotlinx.parcelize.Parcelize
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -218,6 +220,22 @@ open class StripeEditText @JvmOverloads constructor(
         fun displayErrorMessage(message: String?)
     }
 
+    override fun onSaveInstanceState(): Parcelable {
+        return StripeEditTextState(
+            super.onSaveInstanceState(),
+            errorMessage,
+            shouldShowError
+        )
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        (state as StripeEditTextState).let {
+            super.onRestoreInstanceState(it.superState)
+            errorMessage = it.errorMessage
+            shouldShowError = it.shouldShowError
+        }
+    }
+
     private class SoftDeleteInputConnection constructor(
         target: InputConnection,
         mutable: Boolean,
@@ -275,4 +293,11 @@ open class StripeEditText @JvmOverloads constructor(
             super.addTextChangedListener(it)
         }
     }
+
+    @Parcelize
+    internal data class StripeEditTextState(
+        val superState: Parcelable?,
+        val errorMessage: String?,
+        val shouldShowError: Boolean
+    ) : Parcelable
 }

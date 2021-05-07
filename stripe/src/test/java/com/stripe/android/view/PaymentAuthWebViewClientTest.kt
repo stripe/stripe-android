@@ -19,7 +19,6 @@ class PaymentAuthWebViewClientTest {
     private val isPageLoaded = MutableLiveData(false)
 
     private val onAuthCompletedErrors = mutableListOf<Throwable>()
-    private val onAuthCompleteUris = mutableListOf<Uri>()
     private var activityFinished = false
 
     private val webView = WebView(ApplicationProvider.getApplicationContext())
@@ -40,8 +39,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(url))
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -64,8 +61,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(url))
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -85,8 +80,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(url))
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -106,8 +99,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(url))
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -125,8 +116,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isFalse()
 
-        assertThat(onAuthCompleteUris)
-            .isEmpty()
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -145,8 +134,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(url))
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -161,8 +148,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(isPageLoaded.value)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(url))
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -175,8 +160,6 @@ class PaymentAuthWebViewClientTest {
         createWebViewClient("pi_123_secret_456")
             .onPageFinished(webView, url)
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(url))
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -196,8 +179,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .isEmpty()
         assertThat(onAuthCompletedErrors)
             .isEmpty()
     }
@@ -217,8 +198,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(url))
         assertThat(onAuthCompletedErrors)
             .hasSize(1)
         assertThat(activityFinished)
@@ -237,8 +216,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(shouldOverrideUrlLoading)
             .isTrue()
 
-        assertThat(onAuthCompleteUris)
-            .isEmpty()
         assertThat(onAuthCompletedErrors)
             .isEmpty()
         assertThat(activityFinished)
@@ -270,8 +247,6 @@ class PaymentAuthWebViewClientTest {
         assertThat(intent.dataString)
             .isEqualTo("https://example.com/")
 
-        assertThat(onAuthCompleteUris)
-            .containsExactly(Uri.parse(deepLink))
         assertThat(onAuthCompletedErrors)
             .hasSize(1)
         assertThat(activityFinished)
@@ -295,9 +270,6 @@ class PaymentAuthWebViewClientTest {
             .isEqualTo(
                 "https://hooks.stripe.com/redirect/complete/src_X9Y8Z7?client_secret=src_client_secret_abc123"
             )
-
-        assertThat(onAuthCompleteUris)
-            .isEmpty()
     }
 
     @Test
@@ -315,9 +287,6 @@ class PaymentAuthWebViewClientTest {
 
         assertThat(webViewClient.completionUrlParam)
             .isNull()
-
-        assertThat(onAuthCompleteUris)
-            .isEmpty()
     }
 
     @Test
@@ -390,8 +359,7 @@ class PaymentAuthWebViewClientTest {
             clientSecret,
             returnUrl,
             activityStarter,
-        ) { uri, error ->
-            uri?.let(onAuthCompleteUris::add)
+        ) { error ->
             error?.let(onAuthCompletedErrors::add)
             activityFinished = true
         }

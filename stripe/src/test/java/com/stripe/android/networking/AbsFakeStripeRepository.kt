@@ -217,7 +217,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
 
     override suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
-        stripeIntentId: String,
         requestOptions: ApiRequest.Options
     ) = Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW
 
