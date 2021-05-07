@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -97,9 +96,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         viewBinding.webView.webViewClient = webViewClient
         viewBinding.webView.webChromeClient = PaymentAuthWebChromeClient(this, logger)
 
-        viewModel.logStart(
-            runCatching { Uri.parse(args.url) }.getOrNull()
-        )
+        viewModel.logStart()
         viewBinding.webView.loadUrl(
             args.url,
             viewModel.extraHeaders
@@ -108,11 +105,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     @VisibleForTesting
     internal fun onAuthComplete(
-        uri: Uri?,
         error: Throwable?
     ) {
         if (error != null) {
-            viewModel.logError(uri, error)
+            viewModel.logError()
             setResult(
                 Activity.RESULT_OK,
                 createResultIntent(
@@ -125,7 +121,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
                 )
             )
         } else {
-            viewModel.logComplete(uri)
+            viewModel.logComplete()
         }
         finish()
     }

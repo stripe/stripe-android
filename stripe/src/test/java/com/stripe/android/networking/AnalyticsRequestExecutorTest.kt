@@ -30,8 +30,7 @@ class AnalyticsRequestExecutorTest {
         AnalyticsRequestFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
             .createPaymentMethodCreation(
                 PaymentMethodCreateParams.Type.Card,
-                emptySet(),
-                RequestId("req_123")
+                emptySet()
             )
 
     @Test

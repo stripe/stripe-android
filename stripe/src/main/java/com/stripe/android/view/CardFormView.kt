@@ -181,11 +181,7 @@ internal class CardFormView @JvmOverloads constructor(
 
     private fun setupCountryAndPostal() {
         // wire up postal code and country
-        postalCodeView.config = if (CountryCode.isUS(countryLayout.selectedCountryCode)) {
-            PostalCodeEditText.Config.US
-        } else {
-            PostalCodeEditText.Config.Global
-        }
+        updatePostalCodeViewLocale(countryLayout.selectedCountryCode)
 
         // color in sync with CardMultilineWidget
         postalCodeView.setErrorColor(
@@ -209,15 +205,28 @@ internal class CardFormView @JvmOverloads constructor(
             onFieldError(Fields.Postal, null)
         }
 
+        postalCodeView.setErrorMessageListener { errorMessage ->
+            onFieldError(
+                Fields.Postal,
+                errorMessage
+            )
+        }
+
         countryLayout.countryCodeChangeCallback = { countryCode ->
-            postalCodeView.config = if (CountryCode.isUS(countryCode)) {
-                PostalCodeEditText.Config.US
-            } else {
-                PostalCodeEditText.Config.Global
-            }
+            updatePostalCodeViewLocale(countryCode)
             postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(countryCode)
             postalCodeView.shouldShowError = false
             postalCodeView.text = null
+        }
+    }
+
+    private fun updatePostalCodeViewLocale(countryCode: CountryCode?) {
+        if (CountryCode.isUS(countryCode)) {
+            postalCodeView.config = PostalCodeEditText.Config.US
+            postalCodeView.setErrorMessage(resources.getString(R.string.address_zip_invalid))
+        } else {
+            postalCodeView.config = PostalCodeEditText.Config.Global
+            postalCodeView.setErrorMessage(resources.getString(R.string.address_postal_code_invalid))
         }
     }
 
@@ -232,11 +241,7 @@ internal class CardFormView @JvmOverloads constructor(
     private fun showPostalError() {
         onFieldError(
             Fields.Postal,
-            if (countryLayout.selectedCountryCode == null || CountryCode.isUS(countryLayout.selectedCountryCode!!)) {
-                resources.getString(R.string.address_zip_invalid)
-            } else {
-                resources.getString(R.string.address_postal_code_invalid)
-            }
+            postalCodeView.errorMessage
         )
     }
 
