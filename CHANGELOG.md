@@ -1,10 +1,17 @@
 # CHANGELOG
 
 ## 16.8.0 - unreleased
+* [#3663](https://github.com/stripe/stripe-android/pull/3663) Add support for using Chrome to host a 3DS1 authentication page when Custom Tabs are not available
 * [#3677](https://github.com/stripe/stripe-android/pull/3677) Upgrade Android Gradle Plugin to `4.2.0`
 * [#3680](https://github.com/stripe/stripe-android/pull/3680) Deprecate `returnUrl` in some `ConfirmPaymentIntentParams` create() methods
+   * A custom `return_url` is not needed to return control to the app after an authentication attempt 
+* [#3681](https://github.com/stripe/stripe-android/pull/3681) Reset PaymentIntent and SetupIntent status after 3DS1 cancellation in Custom Tabs
+   * When a customer closed a 3DS1 authentication page hosted in Custom Tabs, the Intent's `status` was not reset
+     from `requires_action` to `requires_payment_method`. This is now fixed.
 * [#3685](https://github.com/stripe/stripe-android/pull/3685) Upgrade Kotlin to `1.5.0`
 * [#3687](https://github.com/stripe/stripe-android/pull/3687) Add support for PaymentSheet pre-built UI.
+* [#3696](https://github.com/stripe/stripe-android/pull/3696) Upgrade `activity-ktx` to `1.2.3`
+
 
 ## 16.7.1 - 2021-04-29
 * [#3653](https://github.com/stripe/stripe-android/pull/3653) Support WeChat Pay for creating a `PaymentMethod` and confirming a `PaymentIntent`
