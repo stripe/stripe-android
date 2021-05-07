@@ -15,9 +15,6 @@
 
 ## Examples
 ### Payment Sheet
-#### Setup example merchant server
-1. Navigate to [example mobile backend repo](https://glitch.com/edit/#!/stripe-mobile-payment-sheet-test-playground-v3) and follow the README instructions for remixing.
-
 #### Configure the app
 1. If it doesn't exist, create a `gradle.properties` in a location defined in the
    [Gradle Build Environment docs](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties).
@@ -26,10 +23,7 @@
 
 ```
 # Set to example backend deployed to Glitch
-STRIPE_EXAMPLE_BACKEND_URL=https://project-name.glitch.me/
-
-# Set to a test publishable key from https://dashboard.stripe.com/test/apikeys.  Same one used in glitch
-STRIPE_EXAMPLE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_EXAMPLE_BACKEND_URL=https://stripe-mobile-payment-sheet-test-playground-v3.glitch.me/
 ```
 
 ### SDK
