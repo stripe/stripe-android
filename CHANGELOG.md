@@ -11,7 +11,7 @@ This release adds a prebuilt UI.   It combines all the steps required to pay - c
    * When a customer closed a 3DS1 authentication page hosted in Custom Tabs, the Intent's `status` was not reset
      from `requires_action` to `requires_payment_method`. This is now fixed.
 * [#3685](https://github.com/stripe/stripe-android/pull/3685) Upgrade Kotlin to `1.5.0`
-* [#3687](https://github.com/stripe/stripe-android/pull/3687) Add support for PaymentSheet pre-built UI.
+* [#3687](https://github.com/stripe/stripe-android/pull/3687) Add support for PaymentSheet prebuilt UI.
 * [#3696](https://github.com/stripe/stripe-android/pull/3696) Upgrade `activity-ktx` to `1.2.3`
 
 
