@@ -83,14 +83,11 @@ complexity:
     ignorePrivate: false #default
     ignoreOverridden: false #default
     excludes: [ '**/Stripe.kt', '**/StripeKtx.kt', '**/StripePaymentController.kt', '**/StripeApiRepository.kt', '**/StripeRepository.kt', '**/CardInputWidget.kt',  '**/CardMultilineWidget.kt',  '**/src/test/**' ]
-    #    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ] #default
-
 
 empty-blocks:
   EmptyFunctionBlock:
     active: false
-#    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
-#    exceptionNames:
+
 
 naming:
   VariableNaming:
@@ -98,13 +95,6 @@ naming:
     excludes: [ '**/src/test/**' ]
     variablePattern: '(_)?[a-z][A-Za-z0-9]*' # Updated to include underscore
     privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
-    excludeClassPattern: '$^'
-    ignoreOverridden: true
-  ConstructorParameterNaming:
-    active: true
-    excludes: [ '**/src/test/**' ]
-    parameterPattern: '[a-z][A-Za-z0-9]*'
-    privateParameterPattern: '[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
     ignoreOverridden: true
 
