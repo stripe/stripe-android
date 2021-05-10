@@ -3,7 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'checkstyle'
     id 'org.jetbrains.kotlin.plugin.parcelize'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.30'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.0'
 }
 
 assemble.dependsOn('lint')
