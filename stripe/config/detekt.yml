@@ -96,7 +96,7 @@ naming:
   VariableNaming:
     active: true
     excludes: [ '**/src/test/**' ]
-    variablePattern: '(_)?[a-z][A-Za-z0-9]*'
+    variablePattern: '(_)?[a-z][A-Za-z0-9]*' # Updated to include underscore
     privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
     ignoreOverridden: true
@@ -107,3 +107,30 @@ naming:
     privateParameterPattern: '[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
     ignoreOverridden: true
+
+formatting:
+  active: true
+  android: true
+  autoCorrect: true
+  MaximumLineLength:
+    active: false
+  SpacingAroundParens:
+    active: true
+    autoCorrect: true
+  ArgumentListWrapping:
+    active: true
+    autoCorrect: true
+    indentSize: 4
+    maxLineLength: 120
+  ParameterListWrapping:
+    active: false
+    autoCorrect: true
+    indentSize: 4
+    maxLineLength: 120
+  EnumEntryNameCase:
+    active: false
+    autoCorrect: true
+  ImportOrdering:
+    active: false
+    autoCorrect: true
+    layout: '*,java.**,javax.**,kotlin.**,^'

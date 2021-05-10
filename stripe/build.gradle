@@ -35,6 +35,7 @@ dependencies {
     implementation "androidx.activity:activity-ktx:1.2.2"
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
     implementation "com.google.android.material:material:$materialVersion"
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.0-RC2")
 
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
@@ -154,10 +155,14 @@ apply from: 'deploy.gradle'
 
 detekt {
     buildUponDefaultConfig = true
-    allRules = false
+    allRules = true
     config = files("$projectDir/config/detekt.yml")
 
     reports {
         html.enabled = true // observe findings in your browser with structure and code snippets
     }
+}
+
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
+    autoCorrect = true
 }
