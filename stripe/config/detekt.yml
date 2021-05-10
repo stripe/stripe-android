@@ -117,20 +117,8 @@ formatting:
   SpacingAroundParens:
     active: true
     autoCorrect: true
-  ArgumentListWrapping:
+  ParameterListWrapping:
     active: true
     autoCorrect: true
     indentSize: 4
     maxLineLength: 120
-  ParameterListWrapping:
-    active: false
-    autoCorrect: true
-    indentSize: 4
-    maxLineLength: 120
-  EnumEntryNameCase:
-    active: false
-    autoCorrect: true
-  ImportOrdering:
-    active: false
-    autoCorrect: true
-    layout: '*,java.**,javax.**,kotlin.**,^'
