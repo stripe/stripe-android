@@ -2,16 +2,108 @@ style:
   active: true
   MaxLineLength:
     active: false
+  MagicNumber:
+    active: false
+  UnusedPrivateMember:
+    active: true
+    allowedNames: '(_|ignored|expected|serialVersionUID)' # default
+  VarCouldBeVal:
+    active: true
+  ReturnCount:
+    active: true
+    max: 2 #default
+    excludedFunctions: 'equals' #default
+    excludeLabeled: false #default
+    excludeReturnFromLambda: true #default
+    excludeGuardClauses: false #default
+    excludes: [ '**/ShippingInfoWidget.kt', '**/DateUtils.kt','**/WalletJsonParser.kt','**/FingerprintDataJsonParser.kt','**/PaymentAuthWebViewClient.kt','**/PaymentSession.kt', '**/CardUtils.kt','**/', ]
+  UnnecessaryAbstractClass:
+    active: true
+    excludeAnnotatedClasses: [ 'dagger.Module' ] #default
+  ThrowsCount:
+    active: true
+    max: 2 #default
+
+exceptions:
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes: #default
+      - InterruptedException
+      - NumberFormatException
+      - ParseException
+      - MalformedURLException
+    allowedExceptionNameRegex: '_|(ignore|expected).*' #default
+    excludes: [ '**/Stripe.kt','**/StripeJsonUtils.kt','**/PaymentUtils.kt' ]
+  TooGenericExceptionThrown:
+    active: true
+    exceptionNames:
+      - Error
+      - Exception
+      - Throwable
+      - RuntimeException
+    excludes: [ '**/src/test/**' ]
+complexity:
+  active: true
+  ComplexCondition:
+    active: true
+    threshold: 5 # default: 4
+    excludes: [ '**/PaymentMethodJsonParser.kt','**/SourceJsonParser.kt' ]
+  ComplexMethod:
+    active: true
+    threshold: 18 #default: 15
+    ignoreSingleWhenExpression: false #default
+    ignoreSimpleWhenEntries: false #default
+    ignoreNestingFunctions: false #default
+    nestingFunctions: [ 'run', 'let', 'apply', 'with', 'also', 'use', 'forEach', 'isNotNull', 'ifNull' ] #default
+    excludes: [ '**/CardInputWidgetPlacement.kt', '**/PaymentMethodJsonParser.kt' ]
+  LargeClass:
+    active: true
+    threshold: 600 #default
+    excludes: [ '**/StripePaymentController.kt', '**/Stripe.kt', '**/StripeApiRepository.kt', '**/CardInputWidget.kt',  '**/src/test/**' ]
+  LongMethod:
+    active: true
+    threshold: 100 # default: 60
+    excludes: [ '**/CustomerSessionOperationExecutor.kt',  '**/src/test/**' ]
+  LongParameterList:
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 7
+    ignoreDefaultParameters: false #default
+    ignoreDataClasses: true #default
+    ignoreAnnotated: [ ] #default
+    excludes: [ '**/DefaultFlowController.kt', '**/FlowControllerFactory.kt', '**/PaymentSheetViewModel.kt', '**/StripeRepository.kt', '**/CardBrand.kt','**/SourceParams.kt','**/AnalyticsRequestFactory.kt','**/StripeApiRepository.kt', '**/CardNumberEditText.kt', '**/CustomerSession.kt', '**/PaymentSession.kt', '**/StripePaymentController.kt', '**/ConfirmPaymentIntentParams.kt', '**/DefaultStripeChallengeStatusReceiver.kt',  '**/src/test/**' ]
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 11 #default: 11
+    thresholdInClasses: 25  #default: 11
+    thresholdInInterfaces: 13 #default: 11
+    thresholdInObjects: 25 #default: 11
+    thresholdInEnums: 11 #default: 11
+    ignoreDeprecated: false #default
+    ignorePrivate: false #default
+    ignoreOverridden: false #default
+    excludes: [ '**/Stripe.kt', '**/StripeKtx.kt', '**/StripePaymentController.kt', '**/StripeApiRepository.kt', '**/StripeRepository.kt', '**/CardInputWidget.kt',  '**/CardMultilineWidget.kt',  '**/src/test/**' ]
+    #    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ] #default
+
 
 empty-blocks:
   EmptyFunctionBlock:
     active: false
+#    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+#    exceptionNames:
 
 naming:
   VariableNaming:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+    excludes: [ '**/src/test/**' ]
     variablePattern: '(_)?[a-z][A-Za-z0-9]*'
     privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
+    excludeClassPattern: '$^'
+    ignoreOverridden: true
+  ConstructorParameterNaming:
+    active: true
+    excludes: [ '**/src/test/**' ]
+    parameterPattern: '[a-z][A-Za-z0-9]*'
+    privateParameterPattern: '[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
     ignoreOverridden: true
