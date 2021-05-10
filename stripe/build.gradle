@@ -8,9 +8,6 @@ plugins {
 
     id 'signing'
     id 'maven-publish'
-
-    // make sure this line comes *after* you apply the Android plugin
-    id 'com.getkeepsafe.dexcount'
 }
 
 assemble.dependsOn('lint')
@@ -32,7 +29,7 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation "androidx.activity:activity-ktx:1.2.2"
+    implementation "androidx.activity:activity-ktx:1.2.3"
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
     implementation "com.google.android.material:material:$materialVersion"
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.0-RC2")

@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">Γραμμή διεύθυνσης 1 (προαιρετικό)</string>
     <string name="address_label_address_line2_optional">Γραμμή διεύθυνσης 2 (προαιρετικό)</string>
     <string name="address_label_address_optional">Διεύθυνση (προαιρετικό) </string>
-    <string name="address_label_apt">Διαμ. </string>
+    <string name="address_label_apt">Διαμ.</string>
     <string name="address_label_apt_optional">Διαμ. (προαιρετικό)</string>
     <string name="address_label_city">Πόλη</string>
     <string name="address_label_city_optional">Πόλη (προαιρετικό)</string>
@@ -91,6 +91,7 @@
     <string name="price_free">Δωρεάν</string>
     <string name="removed">Αφαιρέθηκε %s</string>
     <string name="secure_checkout">Ασφαλές Checkout</string>
+    <string name="stripe_failure_connection_error">Αντιμετωπίζουμε προβλήματα κατά τη σύνδεση με τον πάροχο υπηρεσιών πληρωμής μας. Ελέγξτε τη σύνδεσή σας στο διαδίκτυο και δοκιμάστε ξανά.</string>
     <string name="stripe_failure_reason_authentication">Δεν μπορούμε να επαληθεύσουμε τη μέθοδο πληρωμής σας. Επιλέξτε διαφορετική μέθοδο πληρωμής και προσπαθήστε ξανά.</string>
     <string name="stripe_failure_reason_timed_out">Έληξε το χρονικό όριο επαλήθευσης της μεθόδου πληρωμής σας -- δοκιμάστε ξανά</string>
     <string name="stripe_paymentsheet_add_button_label">Προσθήκη</string>
@@ -108,6 +109,8 @@
     <string name="stripe_paymentsheet_save_this_card">Αποθηκεύστε αυτή την κάρτα για μελλοντικές πληρωμές</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Αποθηκεύστε αυτή την κάρτα για μελλοντικές %s πληρωμές</string>
     <string name="stripe_paymentsheet_select_payment_method">Επιλέξτε τη μέθοδο πληρωμής σας</string>
+    <string name="stripe_paymentsheet_setup_button_label">Διαμόρφωση</string>
+    <string name="stripe_paymentsheet_total_amount">Σύνολο: %s</string>
     <string name="title_add_a_card">Προσθήκη κάρτας</string>
     <string name="title_add_an_address">Καθορισμός διεύθυνσης</string>
     <string name="title_bank_account">Τραπεζικός λογαριασμός</string>

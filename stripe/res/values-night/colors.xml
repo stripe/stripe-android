@@ -16,16 +16,18 @@
     <color name="stripe_paymentsheet_textinputlayout_hint">#61FFFFFF</color>
     <color name="stripe_paymentsheet_textinput_color">#DEFFFFFF</color>
     <color name="stripe_paymentsheet_payment_option_unselected_stroke">#1FFFFFFF</color>
-    <color name="stripe_paymentsheet_payment_method_label_text">#ffffff</color>
-    <color name="stripe_paymentsheet_toolbar_button_background">#1FFFFFFF</color>
-    <color name="stripe_paymentsheet_form_background_default">#1Fffffff</color>
-    <color name="stripe_paymentsheet_form_background_disabled">#1Fffffff</color>
+    <color name="stripe_paymentsheet_payment_method_label_text">#DEFFFFFF</color>
+    <color name="stripe_paymentsheet_payment_method_label_text_disabled">#61FFFFFF</color>
+    <color name="stripe_paymentsheet_elements_background_default">#474747</color>
+    <color name="stripe_paymentsheet_elements_background_disabled">#474747</color>
     <color name="stripe_paymentsheet_form_border">#3Dffffff</color>
-    <color name="stripe_paymentsheet_add_card_background">#c0ffffff</color>
+    <color name="stripe_paymentsheet_toolbar_button_color">#FFFFFF</color>
     <color name="stripe_paymentsheet_add_payment_method_form_stroke">#3Dffffff</color>
 
     <color name="stripe_paymentsheet_googlepay_divider_line">#38383A</color>
-    <color name="stripe_paymentsheet_googlepay_divider_background">@color/stripe_paymentsheet_background</color>
+    <color name="stripe_paymentsheet_googlepay_divider_background">
+        @color/stripe_paymentsheet_background
+    </color>
     <color name="stripe_paymentsheet_googlepay_divider_text">#99FFFFFF</color>
 
     <!-- CardFormView -->

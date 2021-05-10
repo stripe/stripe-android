@@ -92,6 +92,7 @@
     <string name="price_free">Brezplačno</string>
     <string name="removed">Način plačila %s je odstranjen</string>
     <string name="secure_checkout">Varen zaključek nakupa</string>
+    <string name="stripe_failure_connection_error">Pri vzpostavljanju povezave z našim ponudnikom plačil prihaja do težav. Preverite povezavo z internetom in poskusite znova.</string>
     <string name="stripe_failure_reason_authentication">Pristnosti vašega načina plačila ni mogoče preveriti. Izberite drugačen način plačila in poskusite znova.</string>
     <string name="stripe_failure_reason_timed_out">Pri preverjanju pristnosti vašega načina plačila je potekla časovna omejitev. Poskusite znova.</string>
     <string name="stripe_paymentsheet_add_button_label">Dodaj</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Shrani to kartico za prihodnja plačila</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Shrani to kartico za prihodnja plačila trgovcu %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Izberite način plačila</string>
+    <string name="stripe_paymentsheet_setup_button_label">Nastavi</string>
+    <string name="stripe_paymentsheet_total_amount">Skupaj: %s</string>
     <string name="title_add_a_card">Dodajte kartico</string>
     <string name="title_add_an_address">Nastavite naslov</string>
     <string name="title_bank_account">Bančni račun</string>

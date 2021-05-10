@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -61,7 +60,6 @@ internal class PaymentAuthWebViewActivityTest {
         runOnActivityScenario { activityScenario ->
             activityScenario.onActivity {
                 it.onAuthComplete(
-                    Uri.parse("https://example.com"),
                     ActivityNotFoundException()
                 )
                 it.finish()
@@ -73,7 +71,7 @@ internal class PaymentAuthWebViewActivityTest {
                         clientSecret = CLIENT_SECRET,
                         exception = StripeException.create(ActivityNotFoundException()),
                         flowOutcome = StripeIntentResult.Outcome.FAILED,
-                        shouldCancelSource = true,
+                        canCancelSource = true,
                         sourceId = ""
                     )
                 )

@@ -2,8 +2,8 @@
 <resources>
     <declare-styleable name="CardInputView">
         <attr name="cardHintText" format="string" />
-        <attr name="cardTint" format="color"/>
-        <attr name="cardTextErrorColor" format="color"/>
+        <attr name="cardTint" format="color" />
+        <attr name="cardTextErrorColor" format="color" />
         <attr name="android:focusedByDefault" />
     </declare-styleable>
 
@@ -24,8 +24,8 @@
 
     <declare-styleable name="StripeCardFormView">
         <attr name="cardFormStyle" format="enum">
-            <enum name="standard" value="0"/>
-            <enum name="borderless" value="1"/>
+            <enum name="standard" value="0" />
+            <enum name="borderless" value="1" />
         </attr>
         <attr name="backgroundColorStateList" format="reference" />
     </declare-styleable>

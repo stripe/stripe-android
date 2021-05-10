@@ -5,12 +5,12 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -62,7 +62,7 @@ internal class PaymentAuthWebViewActivityViewModel(
                     } else {
                         StripeIntentResult.Outcome.SUCCEEDED
                     },
-                    shouldCancelSource = args.shouldCancelSource
+                    canCancelSource = args.shouldCancelSource
                 ).toBundle()
             )
         }
@@ -70,19 +70,14 @@ internal class PaymentAuthWebViewActivityViewModel(
     /**
      * Log that 3DS1 challenge started.
      */
-    fun logStart(uri: Uri?) {
+    fun logStart() {
         fireAnalytics(
-            analyticsRequestFactory.createAuth(
-                AnalyticsEvent.Auth3ds1ChallengeStart,
-                args.objectId,
-                extraParams = uri.createAnalyticsChallengeUri()
-            )
+            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds1ChallengeStart)
         )
 
         fireAnalytics(
             analyticsRequestFactory.createRequest(
-                AnalyticsEvent.AuthWithWebView,
-                extraParams = uri.createAnalyticsChallengeUri()
+                AnalyticsEvent.AuthWithWebView
             )
         )
     }
@@ -90,34 +85,18 @@ internal class PaymentAuthWebViewActivityViewModel(
     /**
      * Log that 3DS1 challenge completed with an error.
      */
-    fun logError(
-        uri: Uri?,
-        error: Throwable
-    ) {
+    fun logError() {
         fireAnalytics(
-            analyticsRequestFactory.createAuth(
-                AnalyticsEvent.Auth3ds1ChallengeError,
-                args.objectId,
-                extraParams = mapOf(
-                    FIELD_ERROR_MESSAGE to error.message.orEmpty(),
-                    FIELD_ERROR_STACKTRACE to error.stackTraceToString()
-                ).plus(
-                    uri.createAnalyticsChallengeUri()
-                )
-            )
+            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds1ChallengeError)
         )
     }
 
     /**
      * Log that 3DS1 challenge completed without an error.
      */
-    fun logComplete(uri: Uri?) {
+    fun logComplete() {
         fireAnalytics(
-            analyticsRequestFactory.createAuth(
-                AnalyticsEvent.Auth3ds1ChallengeComplete,
-                args.objectId,
-                extraParams = uri.createAnalyticsChallengeUri()
-            )
+            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds1ChallengeComplete)
         )
     }
 
@@ -125,15 +104,6 @@ internal class PaymentAuthWebViewActivityViewModel(
         request: AnalyticsRequest
     ) {
         analyticsRequestExecutor.executeAsync(request)
-    }
-
-    private fun Uri?.createAnalyticsChallengeUri(): Map<String, String> {
-        val sanitizedUri = if (this != null) {
-            "${this.scheme}://${this.host}"
-        } else {
-            ""
-        }
-        return mapOf(FIELD_CHALLENGE_URI to sanitizedUri)
     }
 
     internal data class ToolbarTitleData(
@@ -155,11 +125,5 @@ internal class PaymentAuthWebViewActivityViewModel(
                 AnalyticsRequestFactory(application, publishableKey)
             ) as T
         }
-    }
-
-    private companion object {
-        private const val FIELD_CHALLENGE_URI = "challenge_uri"
-        private const val FIELD_ERROR_MESSAGE = "error_message"
-        private const val FIELD_ERROR_STACKTRACE = "error_stacktrace"
     }
 }

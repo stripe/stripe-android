@@ -92,6 +92,7 @@
     <string name="price_free">Ingyenes</string>
     <string name="removed">%s eltávolítva</string>
     <string name="secure_checkout">Biztonságos kifizetés</string>
+    <string name="stripe_failure_connection_error">Hibákat tapasztalunk a fizetésszolgáltatónkhoz való kapcsolódáskor. Ellenőrizze az internetkapcsolatát, és próbálja meg újból.</string>
     <string name="stripe_failure_reason_authentication">Nem tudjuk hitelesíteni a fizetési módját. Kérjük, válasszon másik fizetési módot, és próbálkozzon újból.</string>
     <string name="stripe_failure_reason_timed_out">Fizetési módjának hitelesítésénél időtúllépés történt, próbálja újra.</string>
     <string name="stripe_paymentsheet_add_button_label">Hozzáadás</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">A kártya mentése a későbbi fizetésekhez</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">A kártya mentése a(z) %s részére történő fizetésekhez</string>
     <string name="stripe_paymentsheet_select_payment_method">Fizetési mód kiválasztása</string>
+    <string name="stripe_paymentsheet_setup_button_label">Beállítás</string>
+    <string name="stripe_paymentsheet_total_amount">Összesen: %s</string>
     <string name="title_add_a_card">Kártya hozzáadása</string>
     <string name="title_add_an_address">Cím beállítása</string>
     <string name="title_bank_account">Bankszámla</string>

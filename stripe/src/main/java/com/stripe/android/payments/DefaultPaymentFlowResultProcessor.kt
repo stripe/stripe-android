@@ -6,6 +6,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.withContext
@@ -38,7 +39,7 @@ internal class DefaultPaymentFlowResultProcessor(
                 expandFields = EXPAND_PAYMENT_METHOD
             )
         ).let { paymentIntent ->
-            if (result.shouldCancelSource && paymentIntent.requiresAction()) {
+            if (shouldCancelIntent(paymentIntent, result.canCancelSource)) {
                 cancelPaymentIntent(
                     paymentIntent,
                     requestOptions,
@@ -73,7 +74,7 @@ internal class DefaultPaymentFlowResultProcessor(
                 expandFields = EXPAND_PAYMENT_METHOD
             )
         ).let { setupIntent ->
-            if (result.shouldCancelSource && setupIntent.requiresAction()) {
+            if (shouldCancelIntent(setupIntent, result.canCancelSource)) {
                 cancelSetupIntent(
                     setupIntent,
                     requestOptions,
@@ -89,6 +90,20 @@ internal class DefaultPaymentFlowResultProcessor(
                 failureMessageFactory.create(setupIntent, result.flowOutcome)
             )
         }
+    }
+
+    /**
+     * It is very important to check `requiresAction()` because we can't always tell what
+     * action the customer took during payment authentication (e.g. when using Custom Tabs).
+     *
+     * We don't want to cancel if required actions have been resolved and the payment is ready
+     * for capture.
+     */
+    private fun shouldCancelIntent(
+        stripeIntent: StripeIntent,
+        shouldCancelSource: Boolean
+    ): Boolean {
+        return shouldCancelSource && stripeIntent.requiresAction()
     }
 
     private suspend fun cancelPaymentIntent(

@@ -1,14 +1,12 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="20dp"
-    android:height="20dp"
-    android:viewportWidth="20"
-    android:viewportHeight="20">
-  <path
-      android:pathData="M0,10C0,15.5228 4.4771,20 10,20C15.5228,20 20,15.5228 20,10C20,4.4771 15.5228,0 10,0C4.4771,0 0,4.4771 0,10Z"
-      android:fillColor="#ffffff"/>
-  <path
-      android:pathData="M8.5728,9.1L10.6364,7.0364C10.9879,6.6849 10.9879,6.1151 10.6364,5.7636C10.2849,5.4121 9.7151,5.4121 9.3636,5.7636L5.7636,9.3636C5.4121,9.7151 5.4121,10.2849 5.7636,10.6364L9.3636,14.2364C9.7151,14.5879 10.2849,14.5879 10.6364,14.2364C10.9879,13.8849 10.9879,13.3151 10.6364,12.9636L8.5728,10.9H13.6C14.0971,10.9 14.5,10.4971 14.5,10C14.5,9.5029 14.0971,9.1 13.6,9.1H8.5728Z"
-      android:fillColor="#000000"
-      android:fillAlpha="0.6"
-      android:fillType="evenOdd"/>
+    android:autoMirrored="true"
+    android:height="13dp"
+    android:viewportHeight="13"
+    android:viewportWidth="14"
+    android:width="14dp">
+    <path
+        android:pathData="M3.0728,5.6L7.1364,1.5364C7.4879,1.1849 7.4879,0.6151 7.1364,0.2636C6.7849,-0.0879 6.2151,-0.0879 5.8636,0.2636L0.2636,5.8636C-0.0879,6.2151 -0.0879,6.7849 0.2636,7.1364L5.8636,12.7364C6.2151,13.0879 6.7849,13.0879 7.1364,12.7364C7.4879,12.3849 7.4879,11.8151 7.1364,11.4636L3.0728,7.4H13.1C13.5971,7.4 14,6.9971 14,6.5C14,6.0029 13.5971,5.6 13.1,5.6H3.0728Z"
+        android:fillColor="@color/stripe_paymentsheet_toolbar_button_color"
+        android:fillAlpha="0.6"
+        android:fillType="evenOdd" />
 </vector>

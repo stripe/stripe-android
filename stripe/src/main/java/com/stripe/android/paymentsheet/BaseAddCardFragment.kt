@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.LinearLayout
+import android.widget.Space
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
@@ -47,6 +48,7 @@ internal abstract class BaseAddCardFragment(
     private lateinit var cardErrors: TextView
     private lateinit var billingErrors: TextView
     private lateinit var saveCardCheckbox: CheckBox
+    private lateinit var bottomSpace: Space
     private lateinit var addCardHeader: TextView
 
     /**
@@ -102,6 +104,7 @@ internal abstract class BaseAddCardFragment(
         cardErrors = viewBinding.cardErrors
         billingErrors = viewBinding.billingErrors
         saveCardCheckbox = viewBinding.saveCardCheckbox
+        bottomSpace = viewBinding.bottomSpace
         addCardHeader = viewBinding.addCardHeader
 
         // This must be done prior to setting up the card widget or the save card checkbox won't
@@ -139,7 +142,7 @@ internal abstract class BaseAddCardFragment(
             billingAddressView.isEnabled = !isProcessing
         }
 
-        setupSaveCardCheckbox(saveCardCheckbox)
+        setupSaveCardCheckbox()
 
         eventReporter.onShowNewPaymentOptionForm()
     }
@@ -197,7 +200,7 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget.setCvcPlaceholderText("")
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
-        cardMultilineWidget.setBackgroundResource(R.drawable.stripe_paymentsheet_form_states)
+        cardMultilineWidget.setBackgroundResource(R.color.stripe_paymentsheet_elements_background_states)
 
         // add vertical divider between expiry date and CVC
         cardMultilineWidget.secondRowLayout.addView(
@@ -329,7 +332,7 @@ internal abstract class BaseAddCardFragment(
         cardErrors.isVisible = error != null
     }
 
-    private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
+    private fun setupSaveCardCheckbox() {
         val merchantDisplayName = sheetViewModel.config?.merchantDisplayName.takeUnless {
             it.isNullOrBlank()
         }
@@ -338,6 +341,7 @@ internal abstract class BaseAddCardFragment(
         } ?: getString(R.string.stripe_paymentsheet_save_this_card)
 
         saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
+        bottomSpace.isVisible = !saveCardCheckbox.isVisible
 
         saveCardCheckbox.setOnCheckedChangeListener { _, _ ->
             onSaveCardCheckboxChanged()

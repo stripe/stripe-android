@@ -7,10 +7,10 @@ import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 
@@ -65,7 +65,8 @@ internal class StripeBrowserLauncherViewModel(
             PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 sourceId = url.lastPathSegment.orEmpty(),
-                stripeAccountId = args.stripeAccountId
+                stripeAccountId = args.stripeAccountId,
+                canCancelSource = args.shouldCancelSource
             ).toBundle()
         )
     }

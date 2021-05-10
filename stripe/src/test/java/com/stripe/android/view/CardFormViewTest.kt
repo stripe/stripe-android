@@ -273,8 +273,8 @@ class CardFormViewTest {
             // 1 horizontal divider added below tl_cvc, now it has 2 child views
             assertThat(it.cardMultilineWidget.cvcInputLayout.childCount).isEqualTo(2)
 
-            // 1 horizontal divider added above postalCodeContainer, now it has 2 child views
-            assertThat(it.postalCodeContainer.childCount).isEqualTo(2)
+            // 1 horizontal divider added below countryLayout, now it has 2 child views
+            assertThat(it.countryLayout.childCount).isEqualTo(2)
 
             // divider with width=match_parent is invisible
             assertThat(it.countryPostalDivider.isVisible).isFalse()

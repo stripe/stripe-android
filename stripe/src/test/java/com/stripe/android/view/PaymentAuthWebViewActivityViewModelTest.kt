@@ -1,7 +1,5 @@
 package com.stripe.android.view
 
-import android.content.ActivityNotFoundException
-import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -37,7 +35,7 @@ class PaymentAuthWebViewActivityViewModelTest {
         val resultIntent = PaymentFlowResult.Unvalidated.fromIntent(intent)
         assertThat(resultIntent.flowOutcome)
             .isEqualTo(StripeIntentResult.Outcome.CANCELED)
-        assertThat(resultIntent.shouldCancelSource)
+        assertThat(resultIntent.canCancelSource)
             .isTrue()
     }
 
@@ -54,7 +52,7 @@ class PaymentAuthWebViewActivityViewModelTest {
         val resultIntent = PaymentFlowResult.Unvalidated.fromIntent(intent)
         assertThat(resultIntent.flowOutcome)
             .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
-        assertThat(resultIntent.shouldCancelSource)
+        assertThat(resultIntent.canCancelSource)
             .isTrue()
     }
 
@@ -108,50 +106,33 @@ class PaymentAuthWebViewActivityViewModelTest {
     fun `logError() should fire expected event`() {
         val viewModel = createViewModel(ARGS)
 
-        viewModel.logError(
-            Uri.parse("https://example.com/path?secret=password"),
-            ActivityNotFoundException("Failed to find activity")
-        )
+        viewModel.logError()
 
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_error")
-        assertThat(params["error_message"])
-            .isEqualTo("Failed to find activity")
-        assertThat(params["error_stacktrace"].toString())
-            .startsWith("android.content.ActivityNotFoundException: Failed to find activity\n")
-        assertThat(params["challenge_uri"])
-            .isEqualTo("https://example.com")
     }
 
     @Test
     fun `logComplete() should fire expected event`() {
         val viewModel = createViewModel(ARGS)
 
-        viewModel.logComplete(
-            Uri.parse("https://example.com/path?secret=password")
-        )
+        viewModel.logComplete()
 
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_complete")
-        assertThat(params["challenge_uri"])
-            .isEqualTo("https://example.com")
     }
 
     @Test
     fun `logComplete() with uri=null should fire expected event`() {
         val viewModel = createViewModel(ARGS)
 
-        viewModel.logComplete(
-            uri = null
-        )
+        viewModel.logComplete()
 
         val params = analyticsRequests.first().params
         assertThat(params["event"])
             .isEqualTo("stripe_android.3ds1_challenge_complete")
-        assertThat(params["challenge_uri"])
-            .isEqualTo("")
     }
 
     private fun createViewModel(

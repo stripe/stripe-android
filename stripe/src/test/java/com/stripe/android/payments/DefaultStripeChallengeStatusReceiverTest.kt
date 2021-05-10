@@ -12,7 +12,6 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
@@ -26,6 +25,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -240,15 +240,6 @@ class DefaultStripeChallengeStatusReceiverTest {
         assertThat(analyticsParamsFirst[AnalyticsRequestFactory.FIELD_EVENT])
             .isEqualTo(AnalyticsEvent.Auth3ds2ChallengeErrored.toString())
 
-        assertThat(analyticsParamsFirst[AnalyticsRequestFactory.FIELD_ERROR_DATA])
-            .isEqualTo(
-                mapOf(
-                    "type" to "runtime_error_event",
-                    "error_code" to "404",
-                    "error_message" to "Resource not found"
-                )
-            )
-
         assertThat(requireNotNull(analyticsRequests[1].params)[AnalyticsRequestFactory.FIELD_EVENT])
             .isEqualTo(AnalyticsEvent.Auth3ds2ChallengePresented.toString())
     }
@@ -290,18 +281,6 @@ class DefaultStripeChallengeStatusReceiverTest {
         val analyticsParamsFirst = requireNotNull(analyticsRequests[0].params)
         assertThat(analyticsParamsFirst[AnalyticsRequestFactory.FIELD_EVENT])
             .isEqualTo(AnalyticsEvent.Auth3ds2ChallengeErrored.toString())
-
-        assertThat(analyticsParamsFirst[AnalyticsRequestFactory.FIELD_ERROR_DATA])
-            .isEqualTo(
-                mapOf(
-                    "type" to "protocol_error_event",
-                    "error_code" to "201",
-                    "sdk_trans_id" to sdkTransactionId.value,
-                    "error_description" to "Required element missing",
-                    "error_details" to "eci",
-                    "trans_id" to "047f76a6-d1d4-48a2-aa65-786abb6f7f46"
-                )
-            )
 
         assertThat(requireNotNull(analyticsRequests[1].params)[AnalyticsRequestFactory.FIELD_EVENT])
             .isEqualTo(AnalyticsEvent.Auth3ds2ChallengePresented.toString())

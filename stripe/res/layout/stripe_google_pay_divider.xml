@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<merge
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -15,7 +14,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="2dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:background="@color/stripe_paymentsheet_googlepay_divider_background"
         android:textColor="@color/stripe_paymentsheet_googlepay_divider_text"
         android:layout_centerHorizontal="true"

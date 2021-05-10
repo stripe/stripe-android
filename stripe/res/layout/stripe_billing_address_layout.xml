@@ -4,9 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.google.android.material.card.MaterialCardView
+        style="@style/StripePaymentAddPaymentMethodMaterialCard"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/StripePaymentAddPaymentMethodMaterialCard">
+        android:layout_height="wrap_content">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -17,22 +17,21 @@
                 style="@style/StripePaymentSheetAutocompleteTextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:helperTextEnabled="false"
                 app:countryAutoCompleteStyle="@style/StripePaymentSheetCountryItem"
                 app:countryItemLayout="@layout/stripe_country_dropdown_item"
-            />
+                app:helperTextEnabled="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <View
                 android:id="@+id/address1_divider"
-                android:visibility="gone"
                 style="@style/StripePaymentSheetFormDivider"
-                app:layout_constraintTop_toBottomOf="@+id/country_layout"
+                android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/address1_layout"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/country_layout" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/address1_layout"
@@ -40,10 +39,10 @@
                 android:hint="@string/address_label_address_line1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/address1_divider"
                 app:layout_constraintBottom_toTopOf="@+id/address2_divider"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/address1_divider">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/address1"
@@ -54,24 +53,24 @@
 
             <View
                 android:id="@+id/address2_divider"
-                android:visibility="gone"
                 style="@style/StripePaymentSheetFormDivider"
-                app:layout_constraintTop_toBottomOf="@+id/address1_layout"
+                android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/address2_layout"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/address1_layout" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/address2_layout"
-                android:visibility="gone"
                 style="@style/StripePaymentSheetTextInputLayout"
+                android:visibility="gone"
                 android:hint="@string/address_label_address_line2_optional"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/address2_divider"
                 app:layout_constraintBottom_toTopOf="@+id/city_postal_divider"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/address2_divider">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/address2"
@@ -83,21 +82,21 @@
             <View
                 android:id="@+id/city_postal_divider"
                 style="@style/StripePaymentSheetFormDivider"
-                app:layout_constraintTop_toBottomOf="@+id/address2_layout"
                 app:layout_constraintBottom_toTopOf="@+id/city_postal_container"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/address2_layout" />
 
             <LinearLayout
                 android:id="@+id/city_postal_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintTop_toBottomOf="@+id/city_postal_divider"
+                android:baselineAligned="false"
                 app:layout_constraintBottom_toTopOf="@+id/state_divider"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:baselineAligned="false">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/city_postal_divider">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/city_layout"
@@ -133,10 +132,10 @@
             <View
                 android:id="@+id/state_divider"
                 style="@style/StripePaymentSheetFormDivider"
-                app:layout_constraintTop_toBottomOf="@+id/city_postal_container"
                 app:layout_constraintBottom_toTopOf="@+id/state_layout"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/city_postal_container" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/state_layout"
@@ -144,10 +143,10 @@
                 android:hint="@string/address_label_state"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/state_divider"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/state_divider">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/state"

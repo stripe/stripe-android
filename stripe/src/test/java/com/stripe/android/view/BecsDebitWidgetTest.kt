@@ -156,7 +156,7 @@ internal class BecsDebitWidgetTest {
 
     @Test
     fun companyName_shouldUpdateMandateAcceptanceTextView() {
-        assertThat(becsDebitWidget.viewBinding.mandateAcceptanceTextView.text.toString())
+        assertThat(becsDebitWidget.viewBinding.mandateAcceptanceTextView.text.toString().trim())
             .isEqualTo(
                 """
                 By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the Direct Debit Request service agreement, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of Rocketship Inc. (the Merchant) for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above.

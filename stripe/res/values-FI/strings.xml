@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">Osoiterivi 1 (valinnainen)</string>
     <string name="address_label_address_line2_optional">Osoiterivi 2 (valinnainen)</string>
     <string name="address_label_address_optional">Osoite (valinnainen) </string>
-    <string name="address_label_apt">Asunto </string>
+    <string name="address_label_apt">Asunto</string>
     <string name="address_label_apt_optional">Asunto (valinnainen)</string>
     <string name="address_label_city">Paikkakunta</string>
     <string name="address_label_city_optional">Paikkakunta (valinnainen)</string>
@@ -92,6 +92,7 @@
     <string name="price_free">Maksuton</string>
     <string name="removed">Poistettu %s</string>
     <string name="secure_checkout">Turvallinen maksu</string>
+    <string name="stripe_failure_connection_error">Yhteydessä maksun käsittelijään esiintyi ongelmia. Tarkista Internet-yhteys ja yritä uudelleen.</string>
     <string name="stripe_failure_reason_authentication">Emme pystyneet todentamaan maksutapaasi. Valitse toinen maksutapa ja yritä uudelleen.</string>
     <string name="stripe_failure_reason_timed_out">Maksutapasi todennus aikakatkaistiin – yritä uudelleen.</string>
     <string name="stripe_paymentsheet_add_button_label">Lisää</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Tallenna tämä kortti tulevia maksuja varten</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Tallenna tämä kortti tulevia maksuja (%s) varten</string>
     <string name="stripe_paymentsheet_select_payment_method">Valitse maksutapa</string>
+    <string name="stripe_paymentsheet_setup_button_label">Määritä</string>
+    <string name="stripe_paymentsheet_total_amount">Yhteensä: %s</string>
     <string name="title_add_a_card">Lisää kortti</string>
     <string name="title_add_an_address">Lisää osoite</string>
     <string name="title_bank_account">Pankkitili</string>

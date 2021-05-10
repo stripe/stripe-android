@@ -356,7 +356,7 @@ internal class PaymentSheetActivityTest {
                 // wait for bottom sheet to animate in
                 idleLooper()
 
-                viewModel._viewState.value = PaymentSheetViewState.Ready
+                viewModel._viewState.value = PaymentSheetViewState.Reset(null)
 
                 idleLooper()
 
@@ -682,8 +682,6 @@ internal class PaymentSheetActivityTest {
         }
 
         return PaymentSheetViewModel(
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = null,
             stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
             paymentMethodsRepository = FakePaymentMethodsRepository(paymentMethods),
             paymentFlowResultProcessor = paymentFlowResultProcessor,

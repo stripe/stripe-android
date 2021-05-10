@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
@@ -44,6 +45,14 @@ class PaymentSheetAddCardFragmentTest {
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+    }
+
+    @Test
+    fun `when processing google pay should be disabled`() {
+        createFragment { fragment, viewBinding ->
+            fragment.sheetViewModel._processing.value = true
+            assertThat(viewBinding.googlePayButton.isEnabled).isFalse()
+        }
     }
 
     @Test
@@ -271,7 +280,7 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(paymentSelections[1])
                 .isEqualTo(PaymentSelection.GooglePay)
 
-            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Ready
+            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
 
             // Back to Ready state, should return to null PaymentSelection
             assertThat(paymentSelections.size)
@@ -522,6 +531,21 @@ class PaymentSheetAddCardFragmentTest {
             assertThat(googlePayPrimaryComponent.label.text).isEqualTo(
                 fragment.getString(R.string.stripe_paymentsheet_primary_button_processing)
             )
+        }
+    }
+
+    @Test
+    fun `google pay button error message displayed`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+            fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
+            fragment.sheetViewModel._viewState.value =
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage("This is my test error message"))
+
+            assertThat(viewBinding.message.text.toString()).isEqualTo("This is my test error message")
+
+            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
+
+            assertThat(viewBinding.message.text.toString()).isEqualTo("")
         }
     }
 

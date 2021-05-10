@@ -92,6 +92,7 @@
     <string name="price_free">Kostenlos</string>
     <string name="removed">%s entfernt</string>
     <string name="secure_checkout">Sicherer Checkout</string>
+    <string name="stripe_failure_connection_error">Wir haben Schwierigkeiten, eine Verbindung zu unserem Zahlungsanbieter herzustellen. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es noch einmal.</string>
     <string name="stripe_failure_reason_authentication">Wir können Ihre Zahlungsmethode nicht authentifizieren. Bitte wählen Sie eine andere Zahlungsmethode und versuchen Sie es noch einmal.</string>
     <string name="stripe_failure_reason_timed_out">Zeitüberschreitung bei der Authentifizierung Ihrer Zahlungsmethode – versuchen Sie es noch einmal.</string>
     <string name="stripe_paymentsheet_add_button_label">Hinzufügen</string>
@@ -109,6 +110,8 @@
     <string name="stripe_paymentsheet_save_this_card">Karte für zukünftige Zahlungen speichern</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Karte für zukünftige Zahlungen von %s speichern</string>
     <string name="stripe_paymentsheet_select_payment_method">Zahlungsmethode auswählen</string>
+    <string name="stripe_paymentsheet_setup_button_label">Einrichten</string>
+    <string name="stripe_paymentsheet_total_amount">Gesamt: %s</string>
     <string name="title_add_a_card">Karte hinzufügen</string>
     <string name="title_add_an_address">Adresse hinzufügen</string>
     <string name="title_bank_account">Bankkonto</string>

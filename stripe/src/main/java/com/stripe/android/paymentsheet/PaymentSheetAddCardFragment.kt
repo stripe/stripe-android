@@ -37,6 +37,7 @@ internal class PaymentSheetAddCardFragment(
 
         val viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
         val googlePayButton = viewBinding.googlePayButton
+        val messageView = viewBinding.message
         val addCardHeader = viewBinding.addCardHeader
         val googlePayDivider = viewBinding.googlePayDivider
 
@@ -57,11 +58,17 @@ internal class PaymentSheetAddCardFragment(
 
         sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner) { viewState ->
+                messageView.isVisible = viewState?.errorMessage != null
+                messageView.text = viewState?.errorMessage?.message
                 googlePayButton.updateState(viewState?.convert())
 
-                if (viewState is PaymentSheetViewState.Ready) {
+                if (viewState is PaymentSheetViewState.Reset) {
                     updateSelection()
                 }
             }
+
+        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            googlePayButton.isEnabled = !isProcessing
+        }
     }
 }

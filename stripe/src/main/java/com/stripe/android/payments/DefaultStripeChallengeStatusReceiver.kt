@@ -1,10 +1,10 @@
 package com.stripe.android.payments
 
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
@@ -54,7 +54,6 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create3ds2Challenge(
                 AnalyticsEvent.Auth3ds2ChallengeCompleted,
-                stripeIntent.id.orEmpty(),
                 uiTypeCode
             )
         )
@@ -70,7 +69,6 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create3ds2Challenge(
                 AnalyticsEvent.Auth3ds2ChallengeCanceled,
-                stripeIntent.id.orEmpty(),
                 uiTypeCode
             )
         )
@@ -86,7 +84,6 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create3ds2Challenge(
                 AnalyticsEvent.Auth3ds2ChallengeTimedOut,
-                stripeIntent.id.orEmpty(),
                 uiTypeCode
             )
         )
@@ -100,10 +97,7 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     ) {
         super.protocolError(protocolErrorEvent)
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create3ds2ChallengeErrorParams(
-                stripeIntent.id.orEmpty(),
-                protocolErrorEvent
-            )
+            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2ChallengeErrored)
         )
         log3ds2ChallengePresented()
 
@@ -115,10 +109,7 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
     ) {
         super.runtimeError(runtimeErrorEvent)
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create3ds2ChallengeError(
-                stripeIntent.id.orEmpty(),
-                runtimeErrorEvent
-            )
+            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2ChallengeErrored)
         )
         log3ds2ChallengePresented()
 
@@ -129,7 +120,6 @@ internal class DefaultStripeChallengeStatusReceiver internal constructor(
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create3ds2Challenge(
                 AnalyticsEvent.Auth3ds2ChallengePresented,
-                stripeIntent.id.orEmpty(),
                 transaction.initialChallengeUiType.orEmpty()
             )
         )

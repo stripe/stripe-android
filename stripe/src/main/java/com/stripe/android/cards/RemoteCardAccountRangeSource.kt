@@ -1,7 +1,7 @@
 package com.stripe.android.cards
 
-import com.stripe.android.AnalyticsEvent
 import com.stripe.android.model.AccountRange
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest

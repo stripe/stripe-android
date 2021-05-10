@@ -285,7 +285,7 @@
     - `PaymentSession#onDestroy()` has been removed; the `listener` instance is now released
       automatically when the host `Activity` or `Fragment` is destroyed
     - Remove `PaymentSessionData.paymentSessionData`; this data will be returned via
-      `PaymentSessionListener#onPaymentSessionDataChanged()
+      `PaymentSessionListener#onPaymentSessionDataChanged()`
 - Changes to `StripeSourceTypeModel`
     - Rename to `SourceTypeModel` and make a sealed class
     - Move `SourceCardData` subclass to `SourceTypeModel.Card`

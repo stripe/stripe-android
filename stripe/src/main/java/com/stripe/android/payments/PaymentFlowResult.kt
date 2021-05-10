@@ -19,14 +19,13 @@ import kotlinx.parcelize.Parcelize
  * [Parcel#writeException()](https://developer.android.com/reference/android/os/Parcel#writeException(java.lang.Exception))
  * for more details.
  */
-
 sealed class PaymentFlowResult {
     @Parcelize
     internal data class Unvalidated internal constructor(
         internal val clientSecret: String? = null,
         @StripeIntentResult.Outcome internal val flowOutcome: Int = StripeIntentResult.Outcome.UNKNOWN,
         internal val exception: StripeException? = null,
-        internal val shouldCancelSource: Boolean = false,
+        internal val canCancelSource: Boolean = false,
         internal val sourceId: String? = null,
         internal val source: Source? = null,
         internal val stripeAccountId: String? = null
@@ -45,7 +44,7 @@ sealed class PaymentFlowResult {
             return Validated(
                 clientSecret = clientSecret,
                 flowOutcome = flowOutcome,
-                shouldCancelSource = shouldCancelSource,
+                canCancelSource = canCancelSource,
                 sourceId = sourceId,
                 source = source,
                 stripeAccountId = stripeAccountId
@@ -58,7 +57,7 @@ sealed class PaymentFlowResult {
                     clientSecret = parcel.readString(),
                     flowOutcome = parcel.readInt(),
                     exception = parcel.readSerializable() as? StripeException?,
-                    shouldCancelSource = parcel.readInt() == 1,
+                    canCancelSource = parcel.readInt() == 1,
                     sourceId = parcel.readString(),
                     source = parcel.readParcelable(Source::class.java.classLoader),
                     stripeAccountId = parcel.readString()
@@ -69,7 +68,7 @@ sealed class PaymentFlowResult {
                 parcel.writeString(clientSecret)
                 parcel.writeInt(flowOutcome)
                 parcel.writeSerializable(exception)
-                parcel.writeInt(1.takeIf { shouldCancelSource } ?: 0)
+                parcel.writeInt(1.takeIf { canCancelSource } ?: 0)
                 parcel.writeString(sourceId)
                 parcel.writeParcelable(source, flags)
                 parcel.writeString(stripeAccountId)
@@ -91,7 +90,13 @@ sealed class PaymentFlowResult {
     internal data class Validated internal constructor(
         val clientSecret: String,
         @StripeIntentResult.Outcome internal val flowOutcome: Int,
-        internal val shouldCancelSource: Boolean = false,
+
+        /**
+         * The Source is eligible for cancellation.
+         * See [DefaultPaymentFlowResultProcessor.shouldCancelSource] for usage.
+         */
+        internal val canCancelSource: Boolean = false,
+
         internal val sourceId: String? = null,
         internal val source: Source? = null,
         internal val stripeAccountId: String? = null

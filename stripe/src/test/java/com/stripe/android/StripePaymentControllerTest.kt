@@ -34,6 +34,7 @@ import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
+import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -174,8 +175,6 @@ internal class StripePaymentControllerTest {
             val analyticsParams = requireNotNull(analyticsRequestArgumentCaptor.firstValue.params)
             assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
                 .isEqualTo(AnalyticsEvent.Auth3ds2Fingerprint.toString())
-            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID])
-                .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.id)
         }
 
     @Test
@@ -291,8 +290,6 @@ internal class StripePaymentControllerTest {
         val analyticsParams = requireNotNull(analyticsRequestArgumentCaptor.firstValue.params)
         assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
             .isEqualTo(AnalyticsEvent.AuthRedirect.toString())
-        assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID])
-            .isEqualTo("pi_1EZlvVCRMbs6FrXfKpq2xMmy")
     }
 
     @Test
@@ -349,8 +346,7 @@ internal class StripePaymentControllerTest {
             StripePaymentController.getRequestCode(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     "pm_123",
-                    "client_secret",
-                    ""
+                    "client_secret"
                 )
             )
         ).isEqualTo(StripePaymentController.PAYMENT_REQUEST_CODE)
@@ -401,7 +397,6 @@ internal class StripePaymentControllerTest {
             val analyticsParams = requireNotNull(analyticsRequest.params)
             assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
                 .isEqualTo(AnalyticsEvent.Auth3ds2Frictionless.toString())
-            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_INTENT_ID]).isEqualTo("pi_1ExkUeAWhjPjYwPiXph9ouXa")
         }
 
     @Test
@@ -535,7 +530,7 @@ internal class StripePaymentControllerTest {
                 PaymentFlowResult.Unvalidated(
                     clientSecret = clientSecret,
                     sourceId = sourceId,
-                    shouldCancelSource = true,
+                    canCancelSource = true,
                     stripeAccountId = ACCOUNT_ID
                 ).toBundle()
             )
@@ -601,7 +596,7 @@ internal class StripePaymentControllerTest {
             source = SourceFixtures.CARD,
             sourceId = SourceFixtures.CARD.id,
             flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-            shouldCancelSource = true
+            canCancelSource = true
         )
         val resultBundle = ParcelUtils.copy(
             expectedResult.toBundle(),
@@ -629,7 +624,6 @@ internal class StripePaymentControllerTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     "pm_123",
                     "client_secret",
-                    ""
                 ),
                 mock(),
                 REQUEST_OPTIONS

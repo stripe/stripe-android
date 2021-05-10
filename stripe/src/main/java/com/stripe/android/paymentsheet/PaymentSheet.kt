@@ -22,7 +22,7 @@ class PaymentSheet internal constructor(
      * @param activity  the Activity that is presenting the payment sheet.
      * @param callback  called with the result of the payment after the payment sheet is dismissed.
      */
-    internal constructor(
+    constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
@@ -35,7 +35,7 @@ class PaymentSheet internal constructor(
      * @param fragment the Fragment that is presenting the payment sheet.
      * @param callback called with the result of the payment after the payment sheet is dismissed.
      */
-    internal constructor(
+    constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
@@ -51,7 +51,7 @@ class PaymentSheet internal constructor(
      * @param configuration optional [PaymentSheet] settings.
      */
     @JvmOverloads
-    internal fun presentWithPaymentIntent(
+    fun presentWithPaymentIntent(
         paymentIntentClientSecret: String,
         configuration: Configuration? = null
     ) {
@@ -67,7 +67,7 @@ class PaymentSheet internal constructor(
      * @param configuration optional [PaymentSheet] settings.
      */
     @JvmOverloads
-    internal fun presentWithSetupIntent(
+    fun presentWithSetupIntent(
         setupIntentClientSecret: String,
         configuration: Configuration? = null
     ) {
@@ -141,7 +141,7 @@ class PaymentSheet internal constructor(
     /**
      * A class that presents the individual steps of a payment sheet flow.
      */
-    internal interface FlowController {
+    interface FlowController {
 
         /**
          * Configure the FlowController to process a [PaymentIntent].
