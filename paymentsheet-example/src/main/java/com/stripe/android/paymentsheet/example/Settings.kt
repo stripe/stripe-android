@@ -1,4 +1,4 @@
-package com.stripe.example
+package com.stripe.android.paymentsheet.example
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -11,7 +11,6 @@ class Settings(context: Context) {
     private val appContext = context.applicationContext
     private val backendMetadata = getMetadata(METADATA_KEY_BACKEND_URL_KEY)
     private val publishableKeyMetadata = getMetadata(METADATA_KEY_PUBLISHABLE_KEY)
-    private val stripeAccountIdMetadata = getMetadata(METADATA_KEY_STRIPE_ACCOUNT_ID)
 
     val backendUrl: String
         get() {
@@ -23,11 +22,6 @@ class Settings(context: Context) {
             return publishableKeyMetadata ?: PUBLISHABLE_KEY
         }
 
-    val stripeAccountId: String?
-        get() {
-            return stripeAccountIdMetadata ?: STRIPE_ACCOUNT_ID
-        }
-
     private fun getMetadata(key: String): String? {
         return appContext.packageManager
             .getApplicationInfo(appContext.packageName, PackageManager.GET_META_DATA)
@@ -36,7 +30,7 @@ class Settings(context: Context) {
             .takeIf { it?.isNotBlank() == true }
     }
 
-    private companion object {
+    internal companion object {
         /**
          * Note: only necessary if not configured via `gradle.properties`.
          *
@@ -53,20 +47,9 @@ class Settings(context: Context) {
          */
         private const val PUBLISHABLE_KEY = "pk_test_your_key_goes_here"
 
-        /**
-         * Note: only necessary if not configured via `gradle.properties`.
-         *
-         * Optionally, set to a Connect Account id to use for API requests to test Connect
-         *
-         * See https://dashboard.stripe.com/test/connect/accounts/overview
-         */
-        private val STRIPE_ACCOUNT_ID: String? = null
-
         private const val METADATA_KEY_BACKEND_URL_KEY =
-            "com.stripe.example.metadata.backend_url"
+            "com.stripe.android.paymentsheet.example.metadata.backend_url"
         private const val METADATA_KEY_PUBLISHABLE_KEY =
-            "com.stripe.example.metadata.publishable_key"
-        private const val METADATA_KEY_STRIPE_ACCOUNT_ID =
-            "com.stripe.example.metadata.stripe_account_id"
+            "com.stripe.android.paymentsheet.example.metadata.publishable_key"
     }
 }

@@ -1,6 +1,6 @@
-package com.stripe.example.paymentsheet
+package com.stripe.android.paymentsheet.example.repository
 
-import com.stripe.example.service.CheckoutResponse
+import com.stripe.android.paymentsheet.example.service.CheckoutResponse
 import kotlinx.coroutines.flow.Flow
 
 internal interface Repository {

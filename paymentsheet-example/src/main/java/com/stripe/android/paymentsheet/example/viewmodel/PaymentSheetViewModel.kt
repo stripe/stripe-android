@@ -1,11 +1,14 @@
-package com.stripe.example.paymentsheet
+package com.stripe.android.paymentsheet.example.viewmodel
 
 import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
-import com.stripe.example.module.BackendApiFactory
-import com.stripe.example.module.StripeIntentViewModel
+import com.stripe.android.paymentsheet.example.repository.DefaultRepository
+import com.stripe.android.paymentsheet.example.repository.Repository
+import com.stripe.android.paymentsheet.example.service.BackendApiFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.single
 import kotlin.coroutines.CoroutineContext
@@ -13,7 +16,9 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentSheetViewModel(
     application: Application,
     private val repository: Repository
-) : StripeIntentViewModel(application) {
+) : AndroidViewModel(application) {
+    val inProgress = MutableLiveData<Boolean>()
+    val status = MutableLiveData<String>()
 
     fun prepareCheckout(customer: String, mode: String) = liveData {
         inProgress.postValue(true)

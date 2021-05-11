@@ -3,7 +3,6 @@ plugins {
     id 'kotlin-android'
     id 'checkstyle'
     id 'org.jetbrains.kotlin.plugin.parcelize'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.0'
 }
 
 assemble.dependsOn('lint')
@@ -70,7 +69,6 @@ dependencies {
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
 
@@ -78,7 +76,6 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 

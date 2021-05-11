@@ -1,4 +1,4 @@
-package com.stripe.example.activity
+package com.stripe.android.paymentsheet.example.config
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.stripe.example.R
-import com.stripe.example.databinding.PaymentSheetConfigBottomSheetBinding
+import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.databinding.ConfigBottomSheetBinding
 
-class PaymentSheetConfigBottomSheet : BottomSheetDialogFragment() {
-    private var _viewBinding: PaymentSheetConfigBottomSheetBinding? = null
+class ConfigBottomSheet : BottomSheetDialogFragment() {
+    private var _viewBinding: ConfigBottomSheetBinding? = null
     private val viewBinding get() = requireNotNull(_viewBinding)
 
     override fun onCreateView(
@@ -19,7 +19,7 @@ class PaymentSheetConfigBottomSheet : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _viewBinding = PaymentSheetConfigBottomSheetBinding.inflate(
+        _viewBinding = ConfigBottomSheetBinding.inflate(
             requireActivity().layoutInflater,
             container,
             false
@@ -61,6 +61,6 @@ class PaymentSheetConfigBottomSheet : BottomSheetDialogFragment() {
     }
 
     internal companion object {
-        val TAG = PaymentSheetConfigBottomSheet::class.java.simpleName
+        val TAG = ConfigBottomSheet::class.java.simpleName
     }
 }

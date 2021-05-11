@@ -4,12 +4,21 @@
     package="com.stripe.android.paymentsheet.example">
 
     <application
+        android:name=".PaymentSheetExampleApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
+
+        <meta-data
+            android:name="com.stripe.android.paymentsheet.example.metadata.backend_url"
+            android:value="${BACKEND_URL}" />
+        <meta-data
+            android:name="com.stripe.android.paymentsheet.example.metadata.publishable_key"
+            android:value="${PUBLISHABLE_KEY}" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -20,6 +29,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".activity.LaunchPaymentSheetCompleteActivity" />
+        <activity android:name=".activity.LaunchPaymentSheetCustomActivity" />
     </application>
 
 </manifest>
