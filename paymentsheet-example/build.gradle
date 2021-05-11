@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'io.gitlab.arturbosch.detekt' version '1.17.0-RC2'
 }
 
 dependencies {
@@ -19,6 +20,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.0-RC2")
 }
 
 android {
@@ -52,4 +55,20 @@ android {
     buildFeatures {
         viewBinding true
     }
+}
+
+check.dependsOn('detekt')
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = true
+    config = files("$projectDir/../config/detekt.yml")
+
+    reports {
+        html.enabled = true // observe findings in your browser with structure and code snippets
+    }
+}
+
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
+    autoCorrect = true
 }

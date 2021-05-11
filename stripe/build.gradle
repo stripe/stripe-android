@@ -4,7 +4,7 @@ plugins {
     id 'checkstyle'
     id 'org.jetbrains.dokka'
     id 'org.jetbrains.kotlin.plugin.parcelize'
-    id("io.gitlab.arturbosch.detekt").version("1.17.0-RC2")
+    id 'io.gitlab.arturbosch.detekt' version '1.17.0-RC2'
 
     id 'signing'
     id 'maven-publish'
@@ -15,7 +15,6 @@ check.dependsOn('checkstyle')
 
 configurations {
     javadocDeps
-    ktlint
 }
 
 dependencies {
@@ -32,7 +31,6 @@ dependencies {
     implementation "androidx.activity:activity-ktx:1.2.3"
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
     implementation "com.google.android.material:material:$materialVersion"
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.0-RC2")
 
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
@@ -64,9 +62,8 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
-
     dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:$dokkaVersion")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.0-RC2")
 }
 
 android {
@@ -130,30 +127,12 @@ android {
     }
 }
 
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    main = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    main = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
-}
-
-apply from: 'deploy.gradle'
+check.dependsOn('detekt')
 
 detekt {
     buildUponDefaultConfig = true
     allRules = true
-    config = files("$projectDir/config/detekt.yml")
+    config = files("$projectDir/../config/detekt.yml")
 
     reports {
         html.enabled = true // observe findings in your browser with structure and code snippets
@@ -163,3 +142,5 @@ detekt {
 tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
     autoCorrect = true
 }
+
+apply from: 'deploy.gradle'
