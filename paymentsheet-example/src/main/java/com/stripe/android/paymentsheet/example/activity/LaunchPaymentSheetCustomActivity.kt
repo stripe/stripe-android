@@ -10,8 +10,7 @@ import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetCustomBinding
 import com.stripe.android.paymentsheet.model.PaymentOption
 
-internal class LaunchPaymentSheetCustomActivity :
-    com.stripe.android.paymentsheet.example.activity.BasePaymentSheetActivity() {
+internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
     private val viewBinding by lazy {
         ActivityPaymentSheetCustomBinding.inflate(layoutInflater)
     }

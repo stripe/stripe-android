@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import com.stripe.android.paymentsheet.example.repository.DefaultRepository
+import com.stripe.android.paymentsheet.example.repository.Repository
 import com.stripe.android.paymentsheet.example.service.BackendApiFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.single
@@ -14,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel(
     application: Application,
-    private val repository: com.stripe.android.paymentsheet.example.repository.Repository
+    private val repository: Repository
 ) : AndroidViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
