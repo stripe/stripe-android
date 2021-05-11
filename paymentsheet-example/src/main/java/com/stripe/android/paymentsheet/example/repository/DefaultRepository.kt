@@ -1,7 +1,7 @@
-package com.stripe.example.paymentsheet
+package com.stripe.android.paymentsheet.example.repository
 
-import com.stripe.example.service.CheckoutBackendApi
-import com.stripe.example.service.CheckoutRequest
+import com.stripe.android.paymentsheet.example.service.CheckoutBackendApi
+import com.stripe.android.paymentsheet.example.service.CheckoutRequest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext

@@ -1,9 +1,9 @@
-package com.stripe.example.activity
+package com.stripe.android.paymentsheet.example.activity
 
 import android.os.Bundle
 import androidx.core.view.isInvisible
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.example.databinding.ActivityPaymentSheetCompleteBinding
+import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetCompleteBinding
 
 internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
     private val viewBinding by lazy {

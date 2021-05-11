@@ -107,9 +107,6 @@
 
         <activity android:name=".activity.SimpleConfirmationActivity" />
         <activity android:name=".activity.ConnectExampleActivity" />
-
-        <activity android:name=".activity.LaunchPaymentSheetCompleteActivity" />
-        <activity android:name=".activity.LaunchPaymentSheetCustomActivity" />
     </application>
 
 </manifest>

@@ -1,18 +1,17 @@
-package com.stripe.example.activity
+package com.stripe.android.paymentsheet.example.activity
 
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.view.isInvisible
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetCustomBinding
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.example.R
-import com.stripe.example.Settings
-import com.stripe.example.databinding.ActivityPaymentSheetCustomBinding
 
-internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
+internal class LaunchPaymentSheetCustomActivity :
+    com.stripe.android.paymentsheet.example.activity.BasePaymentSheetActivity() {
     private val viewBinding by lazy {
         ActivityPaymentSheetCustomBinding.inflate(layoutInflater)
     }
@@ -22,9 +21,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
-
-        // TODO(brnunes-stripe): Remove this once FlowController initialization is refactored.
-        PaymentConfiguration.init(this, Settings.PAYMENT_SHEET_PUBLISHABLE_KEY)
 
         flowController = PaymentSheet.FlowController.create(
             this,

@@ -1,4 +1,4 @@
-package com.stripe.example.activity
+package com.stripe.android.paymentsheet.example.activity
 
 import android.content.SharedPreferences
 import android.view.Menu
@@ -9,8 +9,9 @@ import androidx.preference.PreferenceManager
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.example.R
-import com.stripe.example.paymentsheet.PaymentSheetViewModel
+import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.config.ConfigBottomSheet
+import com.stripe.android.paymentsheet.example.viewmodel.PaymentSheetViewModel
 
 internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val viewModel: PaymentSheetViewModel by viewModels {
@@ -70,9 +71,9 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.config) {
-            PaymentSheetConfigBottomSheet().show(
+            ConfigBottomSheet().show(
                 supportFragmentManager,
-                PaymentSheetConfigBottomSheet.TAG
+                ConfigBottomSheet.TAG
             )
             return true
         }

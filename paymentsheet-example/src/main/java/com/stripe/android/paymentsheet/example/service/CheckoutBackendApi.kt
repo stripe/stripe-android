@@ -1,4 +1,4 @@
-package com.stripe.example.service
+package com.stripe.android.paymentsheet.example.service
 
 import kotlinx.serialization.Serializable
 import retrofit2.http.Body
