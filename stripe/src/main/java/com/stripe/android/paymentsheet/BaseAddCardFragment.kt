@@ -200,7 +200,6 @@ internal abstract class BaseAddCardFragment(
         cardMultilineWidget.setCvcPlaceholderText("")
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
-        cardMultilineWidget.setBackgroundResource(R.color.stripe_paymentsheet_elements_background_states)
 
         // add vertical divider between expiry date and CVC
         cardMultilineWidget.secondRowLayout.addView(

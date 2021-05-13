@@ -133,7 +133,8 @@
         <item name="boxStrokeWidth">0dp</item>
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
-        <item name="android:background">@color/stripe_paymentsheet_elements_background_states</item>
+        <item name="android:background">@android:color/white</item>
+        <item name="android:backgroundTint">@color/stripe_paymentsheet_elements_background_states</item>
         <item name="android:textColorHint">@color/stripe_paymentsheet_textinputlayout_hint</item>
     </style>
 
@@ -142,7 +143,8 @@
         <item name="boxStrokeWidth">0dp</item>
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
-        <item name="android:background">@color/stripe_paymentsheet_elements_background_states</item>
+        <item name="android:background">@android:color/white</item>
+        <item name="android:backgroundTint">@color/stripe_paymentsheet_elements_background_states</item>
     </style>
 
     <style name="StripePaymentSheetTextInputEditText">
