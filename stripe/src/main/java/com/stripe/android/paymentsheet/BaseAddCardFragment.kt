@@ -201,19 +201,6 @@ internal abstract class BaseAddCardFragment(
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
 
-        context?.let {
-            cardMultilineWidget.setBackgroundColor(
-                ContextCompat.getColor(
-                    it,
-                    android.R.color.white,
-                )
-            )
-            cardMultilineWidget.backgroundTintList = ContextCompat.getColorStateList(
-                it,
-                R.color.stripe_paymentsheet_elements_background_states
-            )
-        }
-
         // add vertical divider between expiry date and CVC
         cardMultilineWidget.secondRowLayout.addView(
             StripeVerticalDividerBinding.inflate(
