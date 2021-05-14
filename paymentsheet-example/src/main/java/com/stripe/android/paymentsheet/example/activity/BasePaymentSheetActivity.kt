@@ -93,8 +93,8 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
                         null
                     }
 
-                    // Re-initing here because the ExampleApplication inits with the key from
-                    // gradle properties
+                    // Init PaymentConfiguration with the publishable key returned from the backend,
+                    // which will be used on all Stripe API calls
                     PaymentConfiguration.init(this, checkoutResponse.publishableKey)
 
                     onSuccess(

@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.gms.common.api.Status
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
@@ -13,6 +16,7 @@ import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
@@ -33,6 +37,8 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +48,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 
 internal class DefaultFlowController internal constructor(
+    private val appContext: Context,
     viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleScope: CoroutineScope,
     activityLauncherFactory: ActivityLauncherFactory,
@@ -50,10 +57,8 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor,
+    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor,
     private val eventReporter: EventReporter,
-    private val publishableKey: String,
-    private val stripeAccountId: String?,
     private val sessionId: SessionId,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -101,11 +106,34 @@ internal class DefaultFlowController internal constructor(
     private val viewModel =
         ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
 
-    private val paymentController = paymentControllerFactory.create(
-        paymentRelayLauncher = paymentRelayLauncher,
-        paymentBrowserAuthLauncher = paymentBrowserAuthLauncher,
-        stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
-    )
+    // The properties below are lazily initialized to allow the developer to set the publishableKey
+    // and stripeAccountId in PaymentConfiguration any time before configuring the FlowController
+    // through configureWithPaymentIntent or configureWithSetupIntent.
+
+    private val paymentConfiguration: PaymentConfiguration by lazy {
+        PaymentConfiguration.getInstance(appContext)
+    }
+
+    private val stripeApiRepository: StripeApiRepository by lazy {
+        StripeApiRepository(
+            appContext,
+            paymentConfiguration.publishableKey
+        )
+    }
+
+    private val paymentFlowResultProcessor: PaymentFlowResultProcessor by lazy {
+        paymentFlowResultProcessorFactory(paymentConfiguration.publishableKey, stripeApiRepository)
+    }
+
+    private val paymentController: PaymentController by lazy {
+        paymentControllerFactory.create(
+            paymentConfiguration.publishableKey,
+            stripeApiRepository,
+            paymentRelayLauncher = paymentRelayLauncher,
+            paymentBrowserAuthLauncher = paymentBrowserAuthLauncher,
+            stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
+        )
+    }
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
@@ -139,6 +167,20 @@ internal class DefaultFlowController internal constructor(
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
                 clientSecret,
+                StripeIntentRepository.Api(
+                    stripeRepository = stripeApiRepository,
+                    requestOptions = ApiRequest.Options(
+                        paymentConfiguration.publishableKey,
+                        paymentConfiguration.stripeAccountId
+                    ),
+                    workContext = Dispatchers.IO
+                ),
+                PaymentMethodsApiRepository(
+                    stripeRepository = stripeApiRepository,
+                    publishableKey = paymentConfiguration.publishableKey,
+                    stripeAccountId = paymentConfiguration.stripeAccountId,
+                    workContext = Dispatchers.IO
+                ),
                 configuration
             )
 
@@ -161,7 +203,9 @@ internal class DefaultFlowController internal constructor(
             viewModel.initData
         }.getOrElse {
             error(
-                "FlowController must be successfully initialized using configure() before calling presentPaymentOptions()"
+                "FlowController must be successfully initialized using " +
+                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
+                    "before calling presentPaymentOptions()"
             )
         }
 
@@ -183,7 +227,9 @@ internal class DefaultFlowController internal constructor(
             viewModel.initData
         }.getOrElse {
             error(
-                "FlowController must be successfully initialized using configure() before calling confirmPayment()"
+                "FlowController must be successfully initialized using " +
+                    "configureWithPaymentIntent() or configureWithSetupIntent() " +
+                    "before calling presentPaymentOptions()"
             )
         }
 
@@ -233,8 +279,8 @@ internal class DefaultFlowController internal constructor(
                     authHostSupplier(),
                     confirmParams,
                     ApiRequest.Options(
-                        apiKey = publishableKey,
-                        stripeAccount = stripeAccountId
+                        apiKey = paymentConfiguration.publishableKey,
+                        stripeAccount = paymentConfiguration.stripeAccountId
                     )
                 )
             }
