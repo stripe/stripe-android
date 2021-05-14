@@ -5,6 +5,7 @@
 * [3710](https://github.com/stripe/stripe-android/pull/3710) Upgrade kotlinx-serialization-json to `1.2.0`
 * [3711](https://github.com/stripe/stripe-android/pull/3711) Upgrade Gradle to `7.0.1`
 * [3712](https://github.com/stripe/stripe-android/pull/3712) Move PaymentSheet example into its own app
+* [3717](https://github.com/stripe/stripe-android/pull/3717) Upgrade mockito-core to `3.10.0`
 * [3721](https://github.com/stripe/stripe-android/pull/3721) Fix crash on Android 8 and 9 when opening the PaymentSheet
 * [3722](https://github.com/stripe/stripe-android/pull/3722) Upgrade Android Gradle Plugin to `4.2.1`
 
