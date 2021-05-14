@@ -14,30 +14,37 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultFlowControllerInitializer(
-    private val stripeIntentRepository: StripeIntentRepository,
-    private val paymentMethodsRepository: PaymentMethodsRepository,
     private val prefsRepositoryFactory: (String, Boolean) -> PrefsRepository,
     private val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean,
     private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
     private val paymentIntentValidator = PaymentIntentValidator()
 
+    private lateinit var stripeIntentRepository: StripeIntentRepository
+    private lateinit var paymentMethodsRepository: PaymentMethodsRepository
+
     override suspend fun init(
         clientSecret: ClientSecret,
-        configuration: PaymentSheet.Configuration?
+        stripeIntentRepository: StripeIntentRepository,
+        paymentMethodsRepository: PaymentMethodsRepository,
+        paymentSheetConfiguration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
+        this@DefaultFlowControllerInitializer.stripeIntentRepository = stripeIntentRepository
+        this@DefaultFlowControllerInitializer.paymentMethodsRepository = paymentMethodsRepository
+
         val isGooglePayReady =
-            configuration?.let { isGooglePayReadySupplier(it.googlePay?.environment) } ?: false
-        configuration?.customer?.let { customerConfig ->
+            paymentSheetConfiguration?.let { isGooglePayReadySupplier(it.googlePay?.environment) }
+                ?: false
+        paymentSheetConfiguration?.customer?.let { customerConfig ->
             createWithCustomer(
                 clientSecret,
                 customerConfig,
-                configuration,
+                paymentSheetConfiguration,
                 isGooglePayReady
             )
         } ?: createWithoutCustomer(
             clientSecret,
-            configuration,
+            paymentSheetConfiguration,
             isGooglePayReady
         )
     }

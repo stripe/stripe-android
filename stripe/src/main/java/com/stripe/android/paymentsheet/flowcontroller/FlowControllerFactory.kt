@@ -5,10 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripePaymentController
-import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
@@ -21,8 +18,6 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +31,6 @@ internal class FlowControllerFactory(
     private val statusBarColor: () -> Int?,
     private val authHostSupplier: () -> AuthActivityStarter.Host,
     private val paymentOptionFactory: PaymentOptionFactory,
-    private val config: PaymentConfiguration,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback
 ) {
@@ -52,7 +46,6 @@ internal class FlowControllerFactory(
         { activity.window.statusBarColor },
         { AuthActivityStarter.Host.create(activity) },
         PaymentOptionFactory(activity.resources),
-        PaymentConfiguration.getInstance(activity),
         paymentOptionCallback,
         paymentResultCallback
     )
@@ -69,7 +62,6 @@ internal class FlowControllerFactory(
         { fragment.activity?.window?.statusBarColor },
         { AuthActivityStarter.Host.create(fragment) },
         PaymentOptionFactory(fragment.resources),
-        PaymentConfiguration.getInstance(fragment.requireContext()),
         paymentOptionCallback,
         paymentResultCallback
     )
@@ -77,16 +69,13 @@ internal class FlowControllerFactory(
     fun create(): PaymentSheet.FlowController {
         val sessionId = SessionId()
 
-        val stripeRepository = StripeApiRepository(
-            appContext,
-            config.publishableKey
-        )
-
         val paymentControllerFactory =
-            PaymentControllerFactory { paymentRelayLauncher, paymentBrowserAuthLauncher, stripe3ds2ChallengeLauncher ->
+            PaymentControllerFactory { publishableKey, stripeRepository, paymentRelayLauncher,
+                paymentBrowserAuthLauncher, stripe3ds2ChallengeLauncher ->
+
                 StripePaymentController(
                     appContext,
-                    config.publishableKey,
+                    publishableKey,
                     stripeRepository,
                     enableLogging = true,
                     paymentRelayLauncher = paymentRelayLauncher,
@@ -94,14 +83,6 @@ internal class FlowControllerFactory(
                     stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
                 )
             }
-
-        val paymentFlowResultProcessor = DefaultPaymentFlowResultProcessor(
-            appContext,
-            config.publishableKey,
-            stripeRepository,
-            enableLogging = false,
-            Dispatchers.IO
-        )
 
         val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean =
             { environment ->
@@ -123,23 +104,8 @@ internal class FlowControllerFactory(
             )
         }
 
-        val paymentMethodsRepository = PaymentMethodsApiRepository(
-            stripeRepository = stripeRepository,
-            publishableKey = config.publishableKey,
-            stripeAccountId = config.stripeAccountId,
-            workContext = Dispatchers.IO
-        )
-
-        val stripeIntentRepository = StripeIntentRepository.Api(
-            stripeRepository = stripeRepository,
-            requestOptions = ApiRequest.Options(
-                config.publishableKey,
-                config.stripeAccountId
-            ),
-            workContext = Dispatchers.IO
-        )
-
         return DefaultFlowController(
+            appContext = appContext,
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleScope = lifecycleScope,
             activityLauncherFactory = activityLauncherFactory,
@@ -147,21 +113,25 @@ internal class FlowControllerFactory(
             authHostSupplier = authHostSupplier,
             paymentOptionFactory = paymentOptionFactory,
             flowControllerInitializer = DefaultFlowControllerInitializer(
-                stripeIntentRepository = stripeIntentRepository,
-                paymentMethodsRepository = paymentMethodsRepository,
                 prefsRepositoryFactory = prefsRepositoryFactory,
                 isGooglePayReadySupplier = isGooglePayReadySupplier,
                 workContext = Dispatchers.IO
             ),
             paymentControllerFactory = paymentControllerFactory,
-            paymentFlowResultProcessor = paymentFlowResultProcessor,
+            paymentFlowResultProcessorFactory = { publishableKey, stripeApiRepository ->
+                DefaultPaymentFlowResultProcessor(
+                    appContext,
+                    publishableKey,
+                    stripeApiRepository,
+                    enableLogging = false,
+                    Dispatchers.IO
+                )
+            },
             eventReporter = DefaultEventReporter(
                 mode = EventReporter.Mode.Custom,
                 sessionId,
                 appContext
             ),
-            publishableKey = config.publishableKey,
-            stripeAccountId = config.stripeAccountId,
             sessionId = sessionId,
             defaultReturnUrl = DefaultReturnUrl.create(appContext),
             paymentOptionCallback = paymentOptionCallback,

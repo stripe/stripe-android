@@ -9,10 +9,6 @@ def getBackendUrl() {
     return getValue('STRIPE_PAYMENTSHEET_EXAMPLE_BACKEND_URL')
 }
 
-def getPublishableKey() {
-    return getValue('STRIPE_PAYMENTSHEET_EXAMPLE_PUBLISHABLE_KEY')
-}
-
 private def getValue(key) {
     // first try to get the value from Gradle properties
     // see https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties
@@ -80,8 +76,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [
-                BACKEND_URL: getBackendUrl(),
-                PUBLISHABLE_KEY: getPublishableKey()
+                BACKEND_URL: getBackendUrl()
         ]
     }
 

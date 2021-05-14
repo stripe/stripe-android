@@ -44,6 +44,8 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
@@ -558,17 +560,16 @@ internal class DefaultFlowControllerTest {
     ): DefaultFlowController {
         return DefaultFlowController(
             activity,
+            activity,
             testScope,
             ActivityLauncherFactory.ActivityHost(activity),
             statusBarColor = { activity.window.statusBarColor },
             authHostSupplier = { AuthActivityStarter.Host.create(activity) },
             paymentOptionFactory = PaymentOptionFactory(activity.resources),
             flowControllerInitializer,
-            { _, _, _ -> paymentController },
-            paymentFlowResultProcessor,
+            { _, _, _, _, _ -> paymentController },
+            { _, _ -> paymentFlowResultProcessor },
             eventReporter,
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            null,
             sessionId = SESSION_ID,
             defaultReturnUrl = DefaultReturnUrl.create(activity),
             paymentOptionCallback,
@@ -583,12 +584,14 @@ internal class DefaultFlowControllerTest {
     ) : FlowControllerInitializer {
         override suspend fun init(
             clientSecret: ClientSecret,
-            configuration: PaymentSheet.Configuration?
+            stripeIntentRepository: StripeIntentRepository,
+            paymentMethodsRepository: PaymentMethodsRepository,
+            paymentSheetConfiguration: PaymentSheet.Configuration?
         ): FlowControllerInitializer.InitResult {
             delay(delayMillis)
             return FlowControllerInitializer.InitResult.Success(
                 InitData(
-                    configuration,
+                    paymentSheetConfiguration,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     paymentMethods,
@@ -602,7 +605,9 @@ internal class DefaultFlowControllerTest {
     private class FailingFlowControllerInitializer : FlowControllerInitializer {
         override suspend fun init(
             clientSecret: ClientSecret,
-            configuration: PaymentSheet.Configuration?
+            stripeIntentRepository: StripeIntentRepository,
+            paymentMethodsRepository: PaymentMethodsRepository,
+            paymentSheetConfiguration: PaymentSheet.Configuration?
         ): FlowControllerInitializer.InitResult {
             return FlowControllerInitializer.InitResult.Failure(
                 IllegalStateException("Failed to initialize")
