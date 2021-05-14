@@ -1,8 +1,8 @@
 # CHANGELOG
 
 ## 16.8.1 - unreleased
-* [3709](https://github.com/stripe/stripe-android/pull/3709) Bump org.jetbrains.kotlin.plugin.serialization to `1.5.0`
-* [3710](https://github.com/stripe/stripe-android/pull/3710) Bump kotlinx-serialization-json to `1.2.0`
+* [3709](https://github.com/stripe/stripe-android/pull/3709) Upgrade org.jetbrains.kotlin.plugin.serialization to `1.5.0`
+* [3710](https://github.com/stripe/stripe-android/pull/3710) Upgrade kotlinx-serialization-json to `1.2.0`
 * [3711](https://github.com/stripe/stripe-android/pull/3711) Upgrade Gradle to `7.0.1`
 * [3712](https://github.com/stripe/stripe-android/pull/3712) Move PaymentSheet example into its own app
 * [3721](https://github.com/stripe/stripe-android/pull/3721) Fix crash on Android 8 and 9 when opening the PaymentSheet
