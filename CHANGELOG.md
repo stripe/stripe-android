@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 16.8.1 - unreleased
+* [3709](https://github.com/stripe/stripe-android/pull/3709) Bump org.jetbrains.kotlin.plugin.serialization to `1.5.0`
+* [3710](https://github.com/stripe/stripe-android/pull/3710) Bump kotlinx-serialization-json to `1.2.0`
+* [3711](https://github.com/stripe/stripe-android/pull/3711) Upgrade Gradle to `7.0.1`
+* [3712](https://github.com/stripe/stripe-android/pull/3712) Move PaymentSheet example into its own app
+* [3721](https://github.com/stripe/stripe-android/pull/3721) Fix crash on Android 8 and 9 when opening the PaymentSheet
+* [3722](https://github.com/stripe/stripe-android/pull/3722) Upgrade Android Gradle Plugin to `4.2.1`
+
 ## 16.8.0 - 2021-05-07
 This release adds a prebuilt UI.   It combines all the steps required to pay - collecting payment details and confirming the payment - into a single sheet that displays on top of your app.  See the [guide](https://stripe.com/docs/payments/accept-a-payment?platform=android) for more details.
 
