@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.8.1 - unreleased
+## 16.8.1 - 2021-05-14
 * [3709](https://github.com/stripe/stripe-android/pull/3709) Upgrade org.jetbrains.kotlin.plugin.serialization to `1.5.0`
 * [3710](https://github.com/stripe/stripe-android/pull/3710) Upgrade kotlinx-serialization-json to `1.2.0`
 * [3711](https://github.com/stripe/stripe-android/pull/3711) Upgrade Gradle to `7.0.1`
