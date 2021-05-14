@@ -4,10 +4,13 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 
 internal fun interface PaymentControllerFactory {
     fun create(
+        publishableKey: String,
+        stripeRepository: StripeRepository,
         paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>,
         paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>,
         stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>

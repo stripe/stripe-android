@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 
 /**
  * An interface for a class that can initialize a [PaymentSheet.FlowController].
@@ -9,7 +11,9 @@ import com.stripe.android.paymentsheet.model.ClientSecret
 internal interface FlowControllerInitializer {
     suspend fun init(
         clientSecret: ClientSecret,
-        configuration: PaymentSheet.Configuration? = null
+        stripeIntentRepository: StripeIntentRepository,
+        paymentMethodsRepository: PaymentMethodsRepository,
+        paymentSheetConfiguration: PaymentSheet.Configuration? = null
     ): InitResult
 
     sealed class InitResult {
