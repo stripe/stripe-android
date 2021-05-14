@@ -25,7 +25,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Detekt # style formatter and static analysis
-        run: ./gradlew paymentsheet-example:detekt stripe:detekt stripe-test-e2e:detekt
+        run: ./gradlew detekt
       - name: Checkstyle
         run: ./gradlew checkstyle
       - name: Lint
