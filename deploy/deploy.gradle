@@ -43,21 +43,21 @@ afterEvaluate { project ->
         publications {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
-                // Applies the component for the release build variant.
-                from components.release
-
                 // Adds Javadocs and Sources as separate jars.
                 artifact androidJavadocsJar
                 artifact androidSourcesJar
+                artifact bundleReleaseAar
 
-                groupId = "com.stripe"
-                artifactId = "stripe-android"
+                groupId = GROUP
+                artifactId = project.artifactId
                 version = VERSION_NAME
 
+                logger.lifecycle("publishing $groupId:$artifactId:$version")
+
                 pom {
-                    name = "stripe-android"
+                    name = project.artifactName
                     packaging = "aar"
-                    description = "Stripe Android SDK"
+                    description = project.artifactDescrption
                     url = "https://github.com/stripe/stripe-android"
 
                     scm {
@@ -81,6 +81,43 @@ afterEvaluate { project ->
                         }
                     }
                 }
+
+                pom.withXml {
+                    final dependenciesNode = asNode().appendNode("dependencies")
+                    ext.addDependency = { dep, scope ->
+                        logger.lifecycle("updating dep $dep")
+                        if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified")
+                            return // invalid dependencies should be ignored
+
+                        final depGroup = dep.group
+                        final depName = dep.name
+                        final depVersion = dep.version != 'unspecified' ? dep.version : VERSION_NAME
+
+                        final dependencyNode = dependenciesNode.appendNode("dependency")
+                        dependencyNode.appendNode("groupId", depGroup)
+                        dependencyNode.appendNode("artifactId", depName)
+                        dependencyNode.appendNode("version", depVersion)
+                        dependencyNode.appendNode("scope", scope)
+
+                        if (!dep.transitive) {
+                            // In case of non transitive dependency, all its dependencies should be force excluded from them POM file
+                            final exclusionNode = dependencyNode.appendNode('exclusions').appendNode('exclusion')
+                            exclusionNode.appendNode('groupId', '*')
+                            exclusionNode.appendNode('artifactId', '*')
+                        } else if (!dep.properties.excludeRules.empty) {
+                            // For transitive with exclusions, all exclude rules should be added to the POM file
+                            final exclusions = dependencyNode.appendNode('exclusions')
+                            dep.properties.excludeRules.each { ExcludeRule rule ->
+                                final exclusionNode = exclusions.appendNode('exclusion')
+                                exclusionNode.appendNode('groupId', rule.group ?: '*')
+                                exclusionNode.appendNode('artifactId', rule.module ?: '*')
+                            }
+                        }
+                    }
+                    configurations.api.getDependencies().each { dep -> addDependency(dep, "compile") }
+                    configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
+                }
+
             }
         }
         repositories {
