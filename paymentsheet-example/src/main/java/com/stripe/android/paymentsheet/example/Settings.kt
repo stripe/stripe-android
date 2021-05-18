@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 /**
- * See [Configure the app](https://github.com/stripe/stripe-android/tree/master/example#configure-the-app)
- * for instructions on how to configure the example app before running it.
+ * See [Configure the app](https://github.com/stripe/stripe-android/tree/master/paymentsheet-example#configure-the-app)
+ * for instructions on how to configure the PaymentSheet example app before running it.
  */
 class Settings(context: Context) {
     private val appContext = context.applicationContext
@@ -26,8 +26,10 @@ class Settings(context: Context) {
 
     internal companion object {
         /**
+         * The base URL of your test backend, implementing a `/checkout` endpoint akin to our
+         * [integration guide](https://stripe.com/docs/payments/accept-a-payment?platform=android#add-server-endpoint).
+         *
          * Note: only necessary if not configured via `gradle.properties`.
-         * Set to the base URL of your test backend.
          */
         private const val BASE_URL = "https://stripe-mobile-payment-sheet.glitch.me/"
 
