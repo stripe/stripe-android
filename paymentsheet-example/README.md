@@ -1,6 +1,7 @@
 # Stripe PaymentSheet Example App
 
 This app demonstrates how to integrate with Stripe, using our prebuilt ui (single-step and multi-step).
+
 See the [integration guide](https://stripe.com/docs/payments/accept-a-payment?platform=android) for more details.
 
 ## Install
