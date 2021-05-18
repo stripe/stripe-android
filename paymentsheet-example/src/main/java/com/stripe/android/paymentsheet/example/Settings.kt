@@ -27,12 +27,9 @@ class Settings(context: Context) {
     internal companion object {
         /**
          * Note: only necessary if not configured via `gradle.properties`.
-         *
-         * Set to the base URL of your test backend. If you are using
-         * [example-mobile-backend](https://github.com/stripe/example-mobile-backend),
-         * the URL will be something like `https://hidden-beach-12345.herokuapp.com/`.
+         * Set to the base URL of your test backend.
          */
-        private const val BASE_URL = "put your base url here"
+        private const val BASE_URL = "https://stripe-mobile-payment-sheet.glitch.me/"
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.android.paymentsheet.example.metadata.backend_url"

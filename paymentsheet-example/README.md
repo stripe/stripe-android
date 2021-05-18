@@ -7,7 +7,8 @@ For step-by-step instructions, follow our [Integration Guide](https://stripe.com
 ## Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
-3. After [remixing the Glitch example backend](#remix-the-glitch-example-backend) and [configuring the app](#configure-the-app), build and run the `paymentsheet-example` project.
+3. Build and run the `paymentsheet-example` project.
+    - If you want to use your own Stripe account, follow the steps below to [remix the Glitch example backend](#remix-the-glitch-example-backend) and [configure the app](#configure-the-app).
 
 ## Remix the Glitch example backend
 1. [Remix the example project on Glitch](https://glitch.com/edit/#!/remix/stripe-mobile-payment-sheet).
