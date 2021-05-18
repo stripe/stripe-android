@@ -1,5 +1,8 @@
 # Stripe PaymentSheet Example App
 
+This app demonstrates how to integrate with Stripe, using our prebuilt ui (single-step and multi-step).
+See the [integration guide](https://stripe.com/docs/payments/accept-a-payment?platform=android) for more details.
+
 ## Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
