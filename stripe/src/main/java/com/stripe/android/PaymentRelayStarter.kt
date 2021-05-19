@@ -130,6 +130,9 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
                     is SetupIntent -> {
                         SetupIntentArgs(stripeIntent, stripeAccountId)
                     }
+                    else -> {
+                        error("StripeIntent must either be a PaymentIntent or SetupIntent.")
+                    }
                 }
             }
         }

@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * An interface for methods available in [PaymentIntent] and [SetupIntent]
  */
-sealed interface StripeIntent : StripeModel {
+interface StripeIntent : StripeModel {
     /**
      * Unique identifier for the object.
      */
