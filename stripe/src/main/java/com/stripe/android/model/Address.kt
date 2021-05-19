@@ -4,6 +4,7 @@ import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.AddressJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.util.Locale
 
 /**
  * Model for an owner [address](https://stripe.com/docs/api#source_object-owner-address)
@@ -45,7 +46,7 @@ data class Address internal constructor(
         }
 
         fun setCountry(country: String?): Builder = apply {
-            this.country = country?.uppercase()
+            this.country = country?.toUpperCase(Locale.ROOT)
         }
 
         internal fun setCountryCode(countryCode: CountryCode?): Builder = apply {

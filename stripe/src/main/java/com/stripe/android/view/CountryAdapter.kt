@@ -10,6 +10,7 @@ import android.widget.Filter
 import android.widget.TextView
 import com.stripe.android.R
 import java.lang.ref.WeakReference
+import java.util.Locale
 
 /**
  * Adapter that populates a list of countries for a spinner.
@@ -127,8 +128,8 @@ internal class CountryAdapter(
         private fun getSuggestedCountries(constraint: CharSequence?): List<Country> {
             return unfilteredCountries
                 .filter {
-                    it.name.lowercase().startsWith(
-                        constraint.toString().lowercase()
+                    it.name.toLowerCase(Locale.ROOT).startsWith(
+                        constraint.toString().toLowerCase(Locale.ROOT)
                     )
                 }
         }

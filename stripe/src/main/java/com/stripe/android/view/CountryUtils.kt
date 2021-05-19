@@ -46,7 +46,7 @@ internal object CountryUtils {
         return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
                 localizedCountries(currentLocale)
-                    .sortedBy { it.name.lowercase() }
+                    .sortedBy { it.name.toLowerCase(Locale.ROOT) }
                     .filterNot { it.code == currentLocale.getCountryCode() }
             )
     }
@@ -60,7 +60,7 @@ internal object CountryUtils {
     )
     @JvmSynthetic
     internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.uppercase())
+        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.toUpperCase(Locale.ROOT))
     }
 
     @JvmSynthetic
