@@ -37,8 +37,7 @@ internal interface FingerprintDataRepository {
     class Default(
         private val localStore: FingerprintDataStore,
         private val fingerprintRequestFactory: FingerprintRequestFactory,
-        private val fingerprintRequestExecutor: FingerprintRequestExecutor =
-            FingerprintRequestExecutor.Default(),
+        private val fingerprintRequestExecutor: FingerprintRequestExecutor,
         private val workContext: CoroutineContext
     ) : FingerprintDataRepository {
         private var cachedFingerprintData: FingerprintData? = null
@@ -54,6 +53,9 @@ internal interface FingerprintDataRepository {
         ) : this(
             localStore = FingerprintDataStore.Default(context, workContext),
             fingerprintRequestFactory = FingerprintRequestFactory.Default(context),
+            fingerprintRequestExecutor = FingerprintRequestExecutor.Default(
+                workContext = workContext
+            ),
             workContext = workContext
         )
 

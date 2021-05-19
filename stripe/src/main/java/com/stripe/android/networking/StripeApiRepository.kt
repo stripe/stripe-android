@@ -78,7 +78,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger
     ),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
-        AnalyticsRequestExecutor.Default(logger),
+        AnalyticsRequestExecutor.Default(logger, workContext),
     private val fingerprintDataRepository: FingerprintDataRepository =
         FingerprintDataRepository.Default(context, workContext),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
