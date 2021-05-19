@@ -14,7 +14,6 @@ import com.stripe.android.compose.StripeTheme
 import com.stripe.android.compose.forms.SofortForm
 import com.stripe.android.compose.forms.SofortFormViewModel
 
-
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
