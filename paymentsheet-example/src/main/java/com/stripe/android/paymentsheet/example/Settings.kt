@@ -5,8 +5,7 @@ import android.content.pm.PackageManager
 import com.stripe.android.paymentsheet.example.service.CheckoutBackendApi
 
 /**
- * See [Configure the app](https://github.com/stripe/stripe-android/tree/master/paymentsheet-example#configure-the-app)
- * for instructions on how to configure the PaymentSheet example app before running it.
+ * Class that provides global app settings.
  */
 class Settings(context: Context) {
     private val appContext = context.applicationContext
