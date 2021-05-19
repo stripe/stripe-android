@@ -1,8 +1,6 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.annotation.UiThread
-import androidx.annotation.WorkerThread
 import com.stripe.android.networking.FingerprintRequestExecutor
 import com.stripe.android.networking.FingerprintRequestFactory
 import kotlinx.coroutines.CoroutineScope
@@ -13,13 +11,11 @@ import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
 
 internal interface FingerprintDataRepository {
-    @UiThread
     fun refresh()
 
     /**
      * Get the cached [FingerprintData]. This is not a blocking request.
      */
-    @UiThread
     fun getCached(): FingerprintData?
 
     /**
@@ -28,10 +24,8 @@ internal interface FingerprintDataRepository {
      * 1. From [FingerprintDataStore] if that value is not expired.
      * 2. Otherwise, from the network.
      */
-    @WorkerThread
     suspend fun getLatest(): FingerprintData?
 
-    @UiThread
     fun save(fingerprintData: FingerprintData)
 
     class Default(
