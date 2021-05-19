@@ -39,6 +39,7 @@ task androidSourcesJar(type: Jar) {
 afterEvaluate { project ->
     // See https://developer.android.com/studio/build/maven-publish-plugin
     // and https://docs.gradle.org/current/userguide/publishing_maven.html
+    // and https://proandroiddev.com/android-maven-publish-for-your-libraries-b76ad47677df
     publishing {
         publications {
             // Creates a Maven publication called "release".
@@ -48,7 +49,7 @@ afterEvaluate { project ->
                 artifact androidSourcesJar
                 artifact bundleReleaseAar
 
-                groupId = GROUP
+                groupId = "com.stripe"
                 artifactId = project.artifactId
                 version = VERSION_NAME
 
@@ -99,20 +100,6 @@ afterEvaluate { project ->
                         dependencyNode.appendNode("version", depVersion)
                         dependencyNode.appendNode("scope", scope)
 
-                        if (!dep.transitive) {
-                            // In case of non transitive dependency, all its dependencies should be force excluded from them POM file
-                            final exclusionNode = dependencyNode.appendNode('exclusions').appendNode('exclusion')
-                            exclusionNode.appendNode('groupId', '*')
-                            exclusionNode.appendNode('artifactId', '*')
-                        } else if (!dep.properties.excludeRules.empty) {
-                            // For transitive with exclusions, all exclude rules should be added to the POM file
-                            final exclusions = dependencyNode.appendNode('exclusions')
-                            dep.properties.excludeRules.each { ExcludeRule rule ->
-                                final exclusionNode = exclusions.appendNode('exclusion')
-                                exclusionNode.appendNode('groupId', rule.group ?: '*')
-                                exclusionNode.appendNode('artifactId', rule.module ?: '*')
-                            }
-                        }
                     }
                     configurations.api.getDependencies().each { dep -> addDependency(dep, "compile") }
                     configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
