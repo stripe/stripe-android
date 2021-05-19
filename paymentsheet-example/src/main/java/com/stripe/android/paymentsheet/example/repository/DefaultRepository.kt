@@ -11,13 +11,13 @@ internal class DefaultRepository(
     private val workContext: CoroutineContext
 ) : Repository {
     override suspend fun checkout(
-        customer: String,
-        currency: String,
-        mode: String
+        customer: Repository.CheckoutCustomer,
+        currency: Repository.CheckoutCurrency,
+        mode: Repository.CheckoutMode
     ) = withContext(workContext) {
         flowOf(
             kotlin.runCatching {
-                checkoutBackendApi.checkout(CheckoutRequest(customer, currency, mode))
+                checkoutBackendApi.checkout(CheckoutRequest(customer.value, currency.value, mode.value))
             }
         )
     }

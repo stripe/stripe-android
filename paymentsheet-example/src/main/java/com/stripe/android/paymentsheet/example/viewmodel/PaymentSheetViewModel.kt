@@ -20,30 +20,31 @@ internal class PaymentSheetViewModel(
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
 
-    fun prepareCheckout(customer: String, mode: String) = liveData {
-        inProgress.postValue(true)
-        status.postValue("Preparing checkout...")
+    fun prepareCheckout(customer: Repository.CheckoutCustomer, mode: Repository.CheckoutMode) =
+        liveData {
+            inProgress.postValue(true)
+            status.postValue("Preparing checkout...")
 
-        val checkoutResponse = repository.checkout(
-            customer, CURRENCY, mode
-        ).single()
+            val checkoutResponse = repository.checkout(
+                customer, Repository.CheckoutCurrency.USD, mode
+            ).single()
 
-        checkoutResponse.fold(
-            onSuccess = { response ->
-                status.postValue(
-                    "${status.value}\n\nReady to checkout: $response"
-                )
-            },
-            onFailure = {
-                status.postValue(
-                    "${status.value}\n\nPreparing checkout failed\n${it.message}"
-                )
-            }
-        )
+            checkoutResponse.fold(
+                onSuccess = { response ->
+                    status.postValue(
+                        "${status.value}\n\nReady to checkout: $response"
+                    )
+                },
+                onFailure = {
+                    status.postValue(
+                        "${status.value}\n\nPreparing checkout failed\n${it.message}"
+                    )
+                }
+            )
 
-        inProgress.postValue(false)
-        emit(checkoutResponse.getOrNull())
-    }
+            inProgress.postValue(false)
+            emit(checkoutResponse.getOrNull())
+        }
 
     internal class Factory(
         private val application: Application,
@@ -62,9 +63,5 @@ internal class PaymentSheetViewModel(
                 repository
             ) as T
         }
-    }
-
-    private companion object {
-        private const val CURRENCY = "usd"
     }
 }
