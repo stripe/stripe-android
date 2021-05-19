@@ -306,7 +306,8 @@ enum class CardBrand(
                 ).first()
         }
 
-        internal fun getCardBrands(cardNumber: String?): List<CardBrand> {
+        // Had to be public to expose to the compose module.
+        fun getCardBrands(cardNumber: String?): List<CardBrand> {
             if (cardNumber.isNullOrBlank()) {
                 return listOf(Unknown)
             }

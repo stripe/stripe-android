@@ -4,7 +4,7 @@ import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
 import java.util.Locale
 
-internal object CountryUtils {
+object CountryUtils {
 
     internal val NO_POSTAL_CODE_COUNTRIES = setOf(
         "AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF", "CG",
@@ -41,7 +41,7 @@ internal object CountryUtils {
     }
 
     @JvmSynthetic
-    internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
+    fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
@@ -59,12 +59,12 @@ internal object CountryUtils {
         )
     )
     @JvmSynthetic
-    internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
+    fun doesCountryUsePostalCode(countryCode: String): Boolean {
         return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.toUpperCase(Locale.ROOT))
     }
 
     @JvmSynthetic
-    internal fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
+    fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
         return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
     }
 }

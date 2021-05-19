@@ -7,7 +7,7 @@ import java.util.Locale
 internal fun Locale.getCountryCode(): CountryCode = CountryCode.create(this.country)
 
 @Parcelize
-internal data class CountryCode private constructor(
+data class CountryCode private constructor(
     val value: String,
 ) : Parcelable {
     companion object {
