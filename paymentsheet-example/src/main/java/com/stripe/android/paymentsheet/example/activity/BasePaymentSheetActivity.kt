@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.config.ConfigBottomSheet
+import com.stripe.android.paymentsheet.example.repository.Repository
 import com.stripe.android.paymentsheet.example.viewmodel.PaymentSheetViewModel
 
 internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
@@ -49,17 +50,23 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
             }
         }
 
-    protected val customer: String
+    protected val customer: Repository.CheckoutCustomer
         get() = if (isCustomerEnabled && isReturningCustomer) {
-            "returning"
+            Repository.CheckoutCustomer.Returning
         } else if (isCustomerEnabled) {
-            temporaryCustomerId ?: "new"
+            temporaryCustomerId?.let {
+                Repository.CheckoutCustomer.WithId(it)
+            } ?: Repository.CheckoutCustomer.New
         } else {
-            "new"
+            Repository.CheckoutCustomer.New
         }
 
-    protected val mode: String
-        get() = if (isSetupIntent) "setup" else "payment"
+    protected val mode: Repository.CheckoutMode
+        get() = if (isSetupIntent) {
+            Repository.CheckoutMode.Setup
+        } else {
+            Repository.CheckoutMode.Payment
+        }
 
     protected var temporaryCustomerId: String? = null
 

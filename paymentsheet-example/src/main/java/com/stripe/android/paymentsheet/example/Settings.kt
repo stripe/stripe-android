@@ -2,10 +2,10 @@ package com.stripe.android.paymentsheet.example
 
 import android.content.Context
 import android.content.pm.PackageManager
+import com.stripe.android.paymentsheet.example.service.CheckoutBackendApi
 
 /**
- * See [Configure the app](https://github.com/stripe/stripe-android/tree/master/example#configure-the-app)
- * for instructions on how to configure the example app before running it.
+ * Class that provides global app settings.
  */
 class Settings(context: Context) {
     private val appContext = context.applicationContext
@@ -26,13 +26,13 @@ class Settings(context: Context) {
 
     internal companion object {
         /**
-         * Note: only necessary if not configured via `gradle.properties`.
+         * The base URL of the test backend, implementing a `/checkout` endpoint as defined by
+         * [CheckoutBackendApi].
          *
-         * Set to the base URL of your test backend. If you are using
-         * [example-mobile-backend](https://github.com/stripe/example-mobile-backend),
-         * the URL will be something like `https://hidden-beach-12345.herokuapp.com/`.
+         * Note: only necessary if not configured via `gradle.properties`.
          */
-        private const val BASE_URL = "put your base url here"
+        private const val BASE_URL =
+            "https://stripe-mobile-payment-sheet-test-playground-v3.glitch.me/"
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.android.paymentsheet.example.metadata.backend_url"
