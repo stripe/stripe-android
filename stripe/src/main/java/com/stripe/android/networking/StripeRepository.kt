@@ -15,6 +15,7 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
@@ -322,4 +323,8 @@ internal interface StripeRepository {
         url: String,
         requestOptions: ApiRequest.Options
     ): JSONObject
+
+    suspend fun createRadarSession(
+        requestOptions: ApiRequest.Options
+    ): RadarSession?
 }

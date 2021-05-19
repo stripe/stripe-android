@@ -79,6 +79,8 @@ internal enum class AnalyticsEvent(internal val code: String) {
     AuthSourceRedirect("auth_source_redirect"),
     AuthSourceResult("auth_source_result"),
 
+    RadarSessionCreate("radar_session_create"),
+
     CardMetadataPublishableKeyAvailable("card_metadata_pk_available"),
     CardMetadataPublishableKeyUnavailable("card_metadata_pk_unavailable"),
 

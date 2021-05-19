@@ -39,7 +39,7 @@ class FingerprintDataRepositoryTest {
         val repository = FingerprintDataRepository.Default(context)
         repository.save(expectedFingerprintData)
         repository.refresh()
-        assertThat(repository.get())
+        assertThat(repository.getCached())
             .isEqualTo(expectedFingerprintData)
     }
 
@@ -59,7 +59,7 @@ class FingerprintDataRepositoryTest {
         )
         repository.save(createFingerprintData(elapsedTime = -60L))
         repository.refresh()
-        val actualFingerprintData = repository.get()
+        val actualFingerprintData = repository.getCached()
 
         assertThat(actualFingerprintData)
             .isEqualTo(expectedFingerprintData)

@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
+import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -420,6 +421,31 @@ suspend fun Stripe.createFile(
             idempotencyKey = idempotencyKey
         )
     )
+}
+
+/**
+ * Create a Radar Session.
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.createRadarSession(): RadarSession {
+    return runApiRequest {
+        stripeRepository.createRadarSession(
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            )
+        )
+    }
 }
 
 /**
