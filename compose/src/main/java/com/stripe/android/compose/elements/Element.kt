@@ -25,7 +25,7 @@ open class Element(
     private val mutableElement: MutableElement = MutableElement(config)
 
     /** This is all the information that can be observed on the element */
-    val value: LiveData<String> = mutableElement.value.distinctUntilChanged()
+    val input: LiveData<String> = mutableElement.value.distinctUntilChanged()
     val elementState: LiveData<ElementState> = mutableElement.elementState.distinctUntilChanged()
     val shouldShowError: LiveData<Boolean> = mutableElement.visibleError.distinctUntilChanged()
     private val hasFocus: LiveData<Boolean> = mutableElement.hasFocus.distinctUntilChanged()

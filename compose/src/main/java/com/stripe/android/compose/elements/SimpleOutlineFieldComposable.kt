@@ -65,7 +65,7 @@ fun SimpleTextFieldElement(
     textStyle: TextStyle = LocalTextStyle.current,
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${element.debugLabel}")
-    val value by element.value.observeAsState("")
+    val value by element.input.observeAsState("")
     val shouldShowError by element.shouldShowError.observeAsState(false)
 
     val elementIsFull by element.isFull.observeAsState(false)

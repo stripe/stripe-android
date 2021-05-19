@@ -10,12 +10,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import com.stripe.android.compose.elements.*
+import com.stripe.android.model.PaymentMethodCreateParams
 import compose.R
 
 @Composable
@@ -26,7 +26,7 @@ fun SofortForm(
     val name = FocusRequester()
     val email = FocusRequester()
 
-    val selectedCountry by viewModel.countryElement.value.observeAsState("")
+    val selectedCountry by viewModel.countryElement.input.observeAsState("")
     val nameErrorMessage by viewModel.nameElement.errorMessage.observeAsState(null)
     val emailErrorMessage by viewModel.emailElement.errorMessage.observeAsState(null)
     val countryErrorMessage by viewModel.countryElement.errorMessage.observeAsState(null)
@@ -81,16 +81,16 @@ class SofortFormViewModel : ViewModel() {
 //        nameError ?: (emailError ?: "")
 
     val params: LiveData<String?> = MediatorLiveData<String>().apply {
-        addSource(nameElement.value) { postValue(getParams()) }
+        addSource(nameElement.input) { postValue(getParams()) }
         addSource(nameElement.isComplete) { postValue(getParams()) }
-        addSource(emailElement.value) { postValue(getParams()) }
+        addSource(emailElement.input) { postValue(getParams()) }
         addSource(emailElement.isComplete) { postValue(getParams()) }
-        addSource(countryElement.value) { postValue(getParams()) }
+        addSource(countryElement.input) { postValue(getParams()) }
         addSource(countryElement.isComplete) { postValue(getParams()) }
     }
 
     private fun getParams() =
-        "name: ${nameElement.value.value}, email: ${emailElement.value.value}, country: ${countryElement.value.value}".takeIf {
+        "name: ${nameElement.input.value}, email: ${emailElement.input.value}, country: ${countryElement.input.value}".takeIf {
             Log.e(
                 "APP",
                 "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}, country: ${countryElement.isComplete.value}"
