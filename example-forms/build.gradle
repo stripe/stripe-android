@@ -30,8 +30,6 @@ private def getValue(key) {
 }
 
 dependencies {
-    implementation project(':compose')
-
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
     implementation 'androidx.preference:preference-ktx:1.1.1'
