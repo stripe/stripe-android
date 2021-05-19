@@ -428,6 +428,8 @@ suspend fun Stripe.createFile(
  *
  * [Stripe.advancedFraudSignalsEnabled] must be `true` to use this method.
  *
+ * See the [Radar Session](https://stripe.com/docs/radar/radar-session) docs for more details.
+ *
  * @throws AuthenticationException failure to properly authenticate yourself (check your key)
  * @throws InvalidRequestException your request has invalid parameters
  * @throws APIConnectionException failure to connect to Stripe's API

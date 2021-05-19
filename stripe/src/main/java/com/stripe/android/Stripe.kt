@@ -2012,6 +2012,8 @@ class Stripe internal constructor(
      *
      * [Stripe.advancedFraudSignalsEnabled] must be `true` to use this method.
      *
+     * See the [Radar Session](https://stripe.com/docs/radar/radar-session) docs for more details.
+     *
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
