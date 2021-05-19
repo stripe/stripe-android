@@ -2008,7 +2008,9 @@ class Stripe internal constructor(
     }
 
     /**
-     * Create a Radar Session asynchronously
+     * Create a Radar Session asynchronously.
+     *
+     * [Stripe.advancedFraudSignalsEnabled] must be `true` to use this method.
      *
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
