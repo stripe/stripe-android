@@ -146,4 +146,11 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     args "-F", "src/**/*.kt"
 }
 
-apply from: 'deploy.gradle'
+
+ext {
+    artifactId = "stripe-android"
+    artifactName = "stripe-android"
+    artifactDescrption = "Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
