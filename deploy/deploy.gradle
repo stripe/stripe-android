@@ -39,25 +39,26 @@ task androidSourcesJar(type: Jar) {
 afterEvaluate { project ->
     // See https://developer.android.com/studio/build/maven-publish-plugin
     // and https://docs.gradle.org/current/userguide/publishing_maven.html
+    // and https://proandroiddev.com/android-maven-publish-for-your-libraries-b76ad47677df
     publishing {
         publications {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
-                // Applies the component for the release build variant.
-                from components.release
-
                 // Adds Javadocs and Sources as separate jars.
                 artifact androidJavadocsJar
                 artifact androidSourcesJar
+                artifact bundleReleaseAar
 
-                groupId = "com.stripe"
-                artifactId = "stripe-android"
-                version = VERSION_NAME
+                groupId = rootProject.group_name
+                artifactId = project.artifactId
+                version = rootProject.version_name
+
+                logger.lifecycle("publishing $groupId:$artifactId:$version")
 
                 pom {
-                    name = "stripe-android"
+                    name = project.artifactName
                     packaging = "aar"
-                    description = "Stripe Android SDK"
+                    description = project.artifactDescrption
                     url = "https://github.com/stripe/stripe-android"
 
                     scm {
@@ -81,6 +82,29 @@ afterEvaluate { project ->
                         }
                     }
                 }
+
+                pom.withXml {
+                    final dependenciesNode = asNode().appendNode("dependencies")
+                    ext.addDependency = { dep, scope ->
+                        logger.lifecycle("updating dep $dep")
+                        if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified")
+                            return // invalid dependencies should be ignored
+
+                        final depGroup = dep.group
+                        final depName = dep.name
+                        final depVersion = dep.version != 'unspecified' ? dep.version : VERSION_NAME
+
+                        final dependencyNode = dependenciesNode.appendNode("dependency")
+                        dependencyNode.appendNode("groupId", depGroup)
+                        dependencyNode.appendNode("artifactId", depName)
+                        dependencyNode.appendNode("version", depVersion)
+                        dependencyNode.appendNode("scope", scope)
+
+                    }
+                    configurations.api.getDependencies().each { dep -> addDependency(dep, "compile") }
+                    configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
+                }
+
             }
         }
         repositories {

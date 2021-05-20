@@ -1,11 +1,12 @@
 package com.stripe.android
 
 import android.content.Context
+import androidx.core.content.edit
 import com.stripe.android.model.parsers.FingerprintDataJsonParser
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import kotlin.coroutines.CoroutineContext
 
 internal interface FingerprintDataStore {
     suspend fun get(): FingerprintData?
@@ -13,7 +14,7 @@ internal interface FingerprintDataStore {
 
     class Default(
         context: Context,
-        private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.IO
+        private val workContext: CoroutineContext = Dispatchers.IO
     ) : FingerprintDataStore {
         private val prefs by lazy {
             context.getSharedPreferences(
@@ -22,7 +23,7 @@ internal interface FingerprintDataStore {
             )
         }
 
-        override suspend fun get() = withContext(coroutineDispatcher) {
+        override suspend fun get() = withContext(workContext) {
             runCatching {
                 val json = JSONObject(prefs.getString(KEY_DATA, null).orEmpty())
                 val timestampSupplier = {
@@ -33,9 +34,9 @@ internal interface FingerprintDataStore {
         }
 
         override fun save(fingerprintData: FingerprintData) {
-            prefs.edit()
-                .putString(KEY_DATA, fingerprintData.toJson().toString())
-                .apply()
+            prefs.edit {
+                putString(KEY_DATA, fingerprintData.toJson().toString())
+            }
         }
 
         private companion object {

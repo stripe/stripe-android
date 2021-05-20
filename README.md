@@ -74,10 +74,7 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 Get started with our [📚 integration guides](https://stripe.com/docs/payments/accept-a-payment?platform=android) and [example projects](#examples), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
 
 ### Examples
-- The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates:
-    - using our prebuilt ui (single-step and multi-step)
+- The [PaymentSheet example project](https://github.com/stripe/stripe-android/tree/master/paymentsheet-example) demonstrates how to integrate and use our prebuilt ui (single-step and multi-step).
+- The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates other integrations, that give you more control over the user experience:
     - how to use the Stripe class's synchronous and asynchronous methods
     - how to use the CardInputWidget.
-
-
-
