@@ -14,7 +14,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
-import com.stripe.android.compose.elements.*
+import com.stripe.android.compose.elements.AutoComplete
+import com.stripe.android.compose.elements.CountryElement
+import com.stripe.android.compose.elements.Element
+import com.stripe.android.compose.elements.Email
+import com.stripe.android.compose.elements.Name
+import com.stripe.android.compose.elements.Section
+import com.stripe.android.compose.elements.SimpleTextFieldElement
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import compose.R
 
@@ -54,7 +61,7 @@ fun SofortForm(
             AutoComplete(
                 items = countries,
                 selectedItem = selectedCountry,
-                onValueChange = {viewModel.countryElement.onValueChange(it) }
+                onValueChange = { viewModel.countryElement.onValueChange(it) }
             )
         }
     }
@@ -80,21 +87,41 @@ class SofortFormViewModel : ViewModel() {
 //    private fun getDominantError(nameError: Int?, emailError: String?) =
 //        nameError ?: (emailError ?: "")
 
-    val params: LiveData<String?> = MediatorLiveData<String>().apply {
-        addSource(nameElement.input) { postValue(getParams()) }
-        addSource(nameElement.isComplete) { postValue(getParams()) }
-        addSource(emailElement.input) { postValue(getParams()) }
-        addSource(emailElement.isComplete) { postValue(getParams()) }
-        addSource(countryElement.input) { postValue(getParams()) }
-        addSource(countryElement.isComplete) { postValue(getParams()) }
-    }
-
-    private fun getParams() =
-        "name: ${nameElement.input.value}, email: ${emailElement.input.value}, country: ${countryElement.input.value}".takeIf {
-            Log.e(
-                "APP",
-                "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}, country: ${countryElement.isComplete.value}"
-            )
-            (nameElement.isComplete.value ?: false && emailElement.isComplete.value ?: false && countryElement.isComplete.value ?: false)
+    val params: LiveData<PaymentMethodCreateParams?> =
+        MediatorLiveData<PaymentMethodCreateParams?>().apply {
+            addSource(nameElement.input) { postValue(getParams()) }
+            addSource(nameElement.isComplete) { postValue(getParams()) }
+            addSource(emailElement.input) { postValue(getParams()) }
+            addSource(emailElement.isComplete) { postValue(getParams()) }
+            addSource(countryElement.input) { postValue(getParams()) }
+            addSource(countryElement.isComplete) { postValue(getParams()) }
         }
+
+
+    /**
+     * PaymentMethodCreateParams(type=Sofort, card=null, ideal=null, fpx=null, sepaDebit=null, auBecsDebit=null, bacsDebit=null, sofort=Sofort(country=Deutschland), upi=null, netbanking=null, billingDetails=BillingDetails(address=null, email=sdf@gmail.com, name=sdfsdffffffs, phone=null), metadata=null, productUsage=[])
+     * PaymentMethodCreateParams(type=TYPE, card=null, ideal=null, fpx=null, sepaDebit=null, auBecsDebit=null, bacsDebit=null, sofort=Sofort(country=COUNTRY), upi=null, netbanking=null, billingDetails=BillingDetails(address=null, email=EMAIL, name=NAME, phone=null), metadata=null, productUsage=[])
+     */
+    private fun getParams(): PaymentMethodCreateParams? {
+        Log.e(
+            "APP",
+            "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}, country: ${countryElement.isComplete.value}"
+        )
+        if (nameElement.isComplete.value == true && emailElement.isComplete.value == true && countryElement.isComplete.value == true) {
+            val params = PaymentMethodCreateParams.create(
+                PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.input.value)),
+                PaymentMethod.BillingDetails(
+                    name = nameElement.input.value,
+                    email = emailElement.input.value
+                )
+            )
+
+            Log.e("APP", params.toString())
+            return params
+
+        } else {
+            Log.e("APP", "Params are null")
+            return null
+        }
+    }
 }
