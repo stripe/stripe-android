@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
  */
 internal sealed class ClientSecret : Parcelable {
     abstract val value: String
+    abstract fun createConfirmParamsFactory(): ConfirmStripeIntentParamsFactory<*>
 }
 
 /**
@@ -18,7 +19,10 @@ internal sealed class ClientSecret : Parcelable {
 @Parcelize
 internal data class PaymentIntentClientSecret(
     override val value: String
-) : ClientSecret()
+) : ClientSecret() {
+    override fun createConfirmParamsFactory() =
+        ConfirmPaymentIntentParamsFactory(this)
+}
 
 /**
  * Represents the client secret for a [SetupIntent]
@@ -26,4 +30,7 @@ internal data class PaymentIntentClientSecret(
 @Parcelize
 internal data class SetupIntentClientSecret(
     override val value: String
-) : ClientSecret()
+) : ClientSecret() {
+    override fun createConfirmParamsFactory() =
+        ConfirmSetupIntentParamsFactory(this)
+}

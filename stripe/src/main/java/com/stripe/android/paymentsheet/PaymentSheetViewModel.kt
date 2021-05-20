@@ -19,18 +19,16 @@ import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.getErrorResourceID
-import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
-import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentValidator
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -69,7 +67,6 @@ internal class PaymentSheetViewModel internal constructor(
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
     internal val args: PaymentSheetContract.Args,
-    defaultReturnUrl: DefaultReturnUrl,
     private val logger: Logger = Logger.noop(),
     workContext: CoroutineContext,
     application: Application
@@ -79,17 +76,14 @@ internal class PaymentSheetViewModel internal constructor(
     prefsRepository = prefsRepository,
     workContext = workContext
 ) {
-    private val confirmParamsFactory = ConfirmParamsFactory(
-        defaultReturnUrl,
-        args.clientSecret
-    )
+    private val confirmParamsFactory = args.clientSecret.createConfirmParamsFactory()
 
     @VisibleForTesting
     internal val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
     internal val paymentSheetResult: LiveData<PaymentSheetResult> = _paymentSheetResult
 
-    private val _startConfirm = MutableLiveData<Event<ConfirmPaymentIntentParams>>()
-    internal val startConfirm: LiveData<Event<ConfirmPaymentIntentParams>> = _startConfirm
+    private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
+    internal val startConfirm: LiveData<Event<ConfirmStripeIntentParams>> = _startConfirm
 
     @VisibleForTesting
     internal val _amount = MutableLiveData<Amount>()
@@ -469,7 +463,6 @@ internal class PaymentSheetViewModel internal constructor(
                     application
                 ),
                 starterArgs,
-                defaultReturnUrl = DefaultReturnUrl.create(application),
                 logger = Logger.noop(),
                 workContext = Dispatchers.IO,
                 application = application
