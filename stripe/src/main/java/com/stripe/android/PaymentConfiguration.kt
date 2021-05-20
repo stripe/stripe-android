@@ -18,12 +18,12 @@ data class PaymentConfiguration internal constructor(
     /**
      * Manages saving and loading [PaymentConfiguration] data to SharedPreferences.
      */
-    private class Store internal constructor(context: Context) {
+    private class Store(context: Context) {
         private val prefs: SharedPreferences =
             context.applicationContext.getSharedPreferences(NAME, 0)
 
         @JvmSynthetic
-        internal fun save(
+        fun save(
             publishableKey: String,
             stripeAccountId: String?
         ) {
