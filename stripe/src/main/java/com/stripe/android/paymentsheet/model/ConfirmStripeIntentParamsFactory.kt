@@ -7,7 +7,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 /**
  * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams].
  */
-internal sealed class ConfirmStripeIntentParamsFactory<T : ConfirmStripeIntentParams> {
+internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams> {
 
     abstract fun create(paymentSelection: PaymentSelection.Saved): T
 
