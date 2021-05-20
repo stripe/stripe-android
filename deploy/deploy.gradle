@@ -49,9 +49,9 @@ afterEvaluate { project ->
                 artifact androidSourcesJar
                 artifact bundleReleaseAar
 
-                groupId = "com.stripe"
+                groupId = rootProject.group_name
                 artifactId = project.artifactId
-                version = VERSION_NAME
+                version = rootProject.version_name
 
                 logger.lifecycle("publishing $groupId:$artifactId:$version")
 
