@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
@@ -10,7 +11,9 @@ import kotlinx.parcelize.Parcelize
  */
 internal sealed class ClientSecret : Parcelable {
     abstract val value: String
-    abstract fun createConfirmParamsFactory(): ConfirmStripeIntentParamsFactory<*>
+
+    abstract fun createConfirmParamsFactory():
+        ConfirmStripeIntentParamsFactory<ConfirmStripeIntentParams>
 }
 
 /**
