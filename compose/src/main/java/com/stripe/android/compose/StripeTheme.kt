@@ -83,7 +83,5 @@ fun StripeTheme(
     MaterialTheme(
         colors = myColors,
         content = content,
-//        typography = JetchatTypography,
-//        shapes = JetchatShapes
     )
 }
