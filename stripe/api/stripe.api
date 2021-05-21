@@ -811,6 +811,9 @@ public final class com/stripe/android/Stripe {
 	public final fun createPiiTokenSynchronous (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/Token;
 	public final fun createPiiTokenSynchronous (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/Token;
 	public static synthetic fun createPiiTokenSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Token;
+	public final fun createRadarSession (Lcom/stripe/android/ApiResultCallback;)V
+	public final fun createRadarSession (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
+	public static synthetic fun createRadarSession$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createSource (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
@@ -962,6 +965,7 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun createPersonToken$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/PersonTokenParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createPiiToken (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createPiiToken$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun createRadarSession (Lcom/stripe/android/Stripe;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun createSource (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun createSource$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun getAuthenticateSourceResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -3835,6 +3839,28 @@ public class com/stripe/android/model/PersonTokenParams$Verification$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/RadarSession : com/stripe/android/model/StripeModel {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/model/RadarSession;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/RadarSession;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/RadarSession;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/model/RadarSession$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/RadarSession;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/RadarSession;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/SetupIntent : com/stripe/android/model/StripeIntent {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/SetupIntent$Companion;
@@ -5337,9 +5363,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet {
 	public final fun presentWithPaymentIntent (Ljava/lang/String;)V
 	public final fun presentWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)V
 	public static synthetic fun presentWithPaymentIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)V
-	public final fun presentWithSetupIntent (Ljava/lang/String;)V
-	public final fun presentWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)V
-	public static synthetic fun presentWithSetupIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : android/os/Parcelable {
@@ -5405,7 +5428,6 @@ public class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration$
 public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$FlowController {
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion;
 	public abstract fun configureWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
-	public abstract fun configureWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
 	public abstract fun confirm ()V
 	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
@@ -5424,7 +5446,6 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$Flo
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$DefaultImpls {
 	public static synthetic fun configureWithPaymentIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
-	public static synthetic fun configureWithSetupIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
 }
 
 public abstract class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Result {
@@ -6091,14 +6112,6 @@ public abstract interface class com/stripe/android/view/StripeEditText$DeleteEmp
 
 public abstract interface class com/stripe/android/view/StripeEditText$ErrorMessageListener {
 	public abstract fun displayErrorMessage (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/view/StripeEditText$StripeEditTextState$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/view/StripeEditText$StripeEditTextState;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/view/StripeEditText$StripeEditTextState;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public abstract interface class com/stripe/android/view/i18n/ErrorMessageTranslator {
