@@ -58,22 +58,6 @@ class PaymentSheet internal constructor(
         paymentSheetLauncher.presentWithPaymentIntent(paymentIntentClientSecret, configuration)
     }
 
-    /**
-     * Present the payment sheet to process a [SetupIntent].
-     * If the [SetupIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
-     * with [PaymentSheetResult.Completed].
-     *
-     * @param setupIntentClientSecret the client secret for the [SetupIntent].
-     * @param configuration optional [PaymentSheet] settings.
-     */
-    @JvmOverloads
-    fun presentWithSetupIntent(
-        setupIntentClientSecret: String,
-        configuration: Configuration? = null
-    ) {
-        paymentSheetLauncher.presentWithSetupIntent(setupIntentClientSecret, configuration)
-    }
-
     /** Configuration for [PaymentSheet] **/
     @Parcelize
     data class Configuration @JvmOverloads constructor(
@@ -152,19 +136,6 @@ class PaymentSheet internal constructor(
          */
         fun configureWithPaymentIntent(
             paymentIntentClientSecret: String,
-            configuration: Configuration? = null,
-            callback: ConfigCallback
-        )
-
-        /**
-         * Configure the FlowController to process a [SetupIntent].
-         *
-         * @param setupIntentClientSecret the client secret for the [SetupIntent].
-         * @param configuration optional [PaymentSheet] settings.
-         * @param callback called with the result of configuring the FlowController.
-         */
-        fun configureWithSetupIntent(
-            setupIntentClientSecret: String,
             configuration: Configuration? = null,
             callback: ConfigCallback
         )
