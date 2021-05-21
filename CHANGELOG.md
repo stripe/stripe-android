@@ -5,6 +5,7 @@
 * [3734](https://github.com/stripe/stripe-android/pull/3734) Upgrade `androidx.appcompat:appcompat` to `1.3.0`
 * [3735](https://github.com/stripe/stripe-android/pull/3735) Upgrade `fragment-ktx` to `1.3.4`
 * [3737](https://github.com/stripe/stripe-android/pull/3737) Add `Stripe.createRadarSession()` API binding for `/v1/radar/session`
+* [3739](https://github.com/stripe/stripe-android/pull/3739) Downgrade Kotlin from `1.5.0` to `1.4.32`
 
 ## 16.8.2 - 2021-05-14
 * [3709](https://github.com/stripe/stripe-android/pull/3709) Upgrade org.jetbrains.kotlin.plugin.serialization to `1.5.0`
