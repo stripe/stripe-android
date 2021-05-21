@@ -1,4 +1,4 @@
-package com.stripe.android.model
+package com.stripe.android.compose.elements.country
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

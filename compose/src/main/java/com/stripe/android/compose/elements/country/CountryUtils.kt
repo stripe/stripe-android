@@ -1,9 +1,8 @@
-package com.stripe.android.model
+package com.stripe.android.compose.elements.country
 
 import java.util.Locale
 
-object CountryUtils {
-
+internal object CountryUtils {
     private fun localizedCountries(currentLocale: Locale) =
         Locale.getISOCountries().map { code ->
             Country(

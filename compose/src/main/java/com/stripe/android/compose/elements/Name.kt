@@ -3,7 +3,7 @@ package com.stripe.android.compose.elements
 import androidx.compose.ui.text.input.KeyboardType
 import compose.R
 
-class Name : ConfigInterface {
+internal class Name : ConfigInterface {
     override val debugLabel = "name"
     override val label = R.string.address_label_name
     override val keyboard = KeyboardType.Text

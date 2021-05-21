@@ -1,6 +1,7 @@
 package com.stripe.android.compose.elements
 
-class CountryElement(
+
+internal class CountryElement(
     private val config: Country = Country(),
     val countries: List<String> = config.getCountries()
 ) : Element(config) {

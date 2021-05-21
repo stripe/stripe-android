@@ -13,7 +13,7 @@ import compose.R
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-open class Element(private val config: ConfigInterface) {
+internal open class Element(private val config: ConfigInterface) {
     val debugLabel = config.debugLabel
     private val isDebug = true
 

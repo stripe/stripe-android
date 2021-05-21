@@ -35,7 +35,7 @@ fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequest
  * - calls through to the Elements worker functions for focus change and value change events
  */
 @Composable
-fun SimpleTextFieldElement(
+internal fun SimpleTextFieldElement(
     element: Element,
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,

@@ -23,7 +23,7 @@ object CountryUtils {
         }
 
     @JvmSynthetic
-    fun getDisplayCountry(countryCode: CountryCode, currentLocale: Locale): String =
+    internal fun getDisplayCountry(countryCode: CountryCode, currentLocale: Locale): String =
         getCountryByCode(countryCode, currentLocale)?.name
             ?: Locale("", countryCode.value).getDisplayCountry(currentLocale)
 
@@ -41,7 +41,7 @@ object CountryUtils {
     }
 
     @JvmSynthetic
-    fun getOrderedCountries(currentLocale: Locale): List<Country> {
+    internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
@@ -64,7 +64,7 @@ object CountryUtils {
     }
 
     @JvmSynthetic
-    fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
+    internal fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
         return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
     }
 }

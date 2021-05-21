@@ -5,7 +5,7 @@ package com.stripe.android.compose.elements
  * in each of these cases there might be a reason to show the
  * error in a different way
  */
-abstract class ElementState {
+internal abstract class ElementState {
 
     /**
      * This indicate the Element state has reached the max number of characters

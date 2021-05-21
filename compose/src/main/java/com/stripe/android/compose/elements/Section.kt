@@ -20,7 +20,7 @@ private val SECTION_CARD_ELEVATION = 8.dp
  * by the caller, and an error string.
  */
 @Composable
-fun Section(label: Int, error: Int?, content: @Composable () -> Unit) {
+internal fun Section(label: Int, error: Int?, content: @Composable () -> Unit) {
     Column(modifier = Modifier.padding(top = 16.dp)) {
         Text(
             text = stringResource(id = label)
@@ -43,7 +43,7 @@ fun Section(label: Int, error: Int?, content: @Composable () -> Unit) {
  * This is how error string for the section are displayed.
  */
 @Composable
-fun SectionError(error: String?) {
+internal fun SectionError(error: String?) {
     Text(
         text = error ?: "",
         color = MaterialTheme.colors.error

@@ -1,4 +1,5 @@
-package com.stripe.android.model
+package com.stripe.android.compose.elements.country
+
 
 internal data class Country(
     val code: CountryCode,

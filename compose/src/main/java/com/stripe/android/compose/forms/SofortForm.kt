@@ -66,9 +66,9 @@ fun SofortForm(
 }
 
 class SofortFormViewModel : ViewModel() {
-    var nameElement = Element(Name())
-    var emailElement = Element(Email())
-    var countryElement = CountryElement()
+    internal var nameElement = Element(Name())
+    internal var emailElement = Element(Email())
+    internal var countryElement = CountryElement()
 
     val params: LiveData<PaymentMethodCreateParams?> =
         MediatorLiveData<PaymentMethodCreateParams?>().apply {

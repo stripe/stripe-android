@@ -2,7 +2,7 @@ package com.stripe.android.compose.elements
 
 import androidx.compose.ui.text.input.KeyboardType
 
-interface ConfigInterface {
+internal interface ConfigInterface {
     val debugLabel: String
 
     /** This is the label to describe the element */

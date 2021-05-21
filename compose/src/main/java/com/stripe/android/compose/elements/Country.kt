@@ -1,10 +1,11 @@
 package com.stripe.android.compose.elements
 
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.model.CountryUtils
+import com.stripe.android.compose.elements.country.CountryUtils
 import compose.R
+import java.util.Locale
 
-class Country : ConfigInterface {
+internal class Country : ConfigInterface {
     override val debugLabel = "country"
     override val label = com.stripe.android.R.string.address_label_country
     override val keyboard = KeyboardType.Ascii
@@ -38,7 +39,7 @@ class Country : ConfigInterface {
     companion object {
         // TODO: Need to determine the correct way to pass junit default locale
         val COUNTRIES: List<String> =
-            CountryUtils.getOrderedCountries(java.util.Locale.getDefault()).map {
+            CountryUtils.getOrderedCountries(Locale.getDefault()).map {
                 it.name
             }
 

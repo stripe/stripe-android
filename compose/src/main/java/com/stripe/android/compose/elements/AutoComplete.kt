@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 // TODO: The autocomplete needs some work make this to the filtering functionality.
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AutoComplete(
+internal fun AutoComplete(
     items: List<String>,
     selectedItem: String,
     onValueChange: (String) -> Unit = {}
