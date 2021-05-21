@@ -1,6 +1,4 @@
-package com.stripe.android.view
-
-import com.stripe.android.model.CountryCode
+package com.stripe.android.model
 
 internal data class Country(
     val code: CountryCode,

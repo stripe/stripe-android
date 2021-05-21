@@ -1,7 +1,7 @@
 package com.stripe.android.compose.elements
 
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.view.CountryUtils
+import com.stripe.android.model.CountryUtils
 import compose.R
 
 class Country : ConfigInterface {

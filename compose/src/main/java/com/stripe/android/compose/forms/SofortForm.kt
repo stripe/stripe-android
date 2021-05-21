@@ -1,5 +1,3 @@
-@file:Suppress("UNNECESSARY_SAFE_CALL")
-
 package com.stripe.android.compose.forms
 
 import android.util.Log
