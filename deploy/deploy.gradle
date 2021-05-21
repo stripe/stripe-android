@@ -53,8 +53,6 @@ afterEvaluate { project ->
                 artifactId = project.artifactId
                 version = rootProject.version_name
 
-                logger.lifecycle("publishing $groupId:$artifactId:$version")
-
                 pom {
                     name = project.artifactName
                     packaging = "aar"
@@ -87,8 +85,9 @@ afterEvaluate { project ->
                     final dependenciesNode = asNode().appendNode("dependencies")
                     ext.addDependency = { dep, scope ->
                         logger.lifecycle("updating dep $dep")
-                        if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified")
+                        if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified") {
                             return // invalid dependencies should be ignored
+                        }
 
                         final depGroup = dep.group
                         final depName = dep.name

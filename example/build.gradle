@@ -50,7 +50,7 @@ private def getValue(key) {
 }
 
 dependencies {
-    implementation project(':stripe')
+    implementation project(':payments')
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.0'
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"

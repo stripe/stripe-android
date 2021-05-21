@@ -30,7 +30,7 @@ private def getValue(key) {
 }
 
 dependencies {
-    implementation project(':stripe')
+    implementation project(':payments')
 
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
