@@ -66,7 +66,7 @@ fun SimpleTextFieldElement(
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${element.debugLabel}")
     val value by element.input.observeAsState("")
-    val shouldShowError by element.shouldShowError.observeAsState(false)
+    val shouldShowError by element.visibleError.observeAsState(false)
 
     val elementIsFull by element.isFull.observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
@@ -106,9 +106,9 @@ fun SimpleTextFieldElement(
  */
 @Composable
 fun SimpleTextField(
-    debugLabel: String = "unknown",
     value: String,
     modifier: Modifier = Modifier,
+    debugLabel: String = "unknown",
     onValueChange: (String) -> Unit = {},
     onFocusChange: (Boolean) -> Unit = {},
     label: Int? = null,
@@ -138,7 +138,7 @@ fun SimpleTextField(
 
     OptionalBorderTextField(
         debugLabel = debugLabel,
-        value,
+        value = value,
         onValueChange = {
             onValueChange(it)
         },
@@ -171,11 +171,11 @@ fun SimpleTextField(
 
 @Composable
 fun OptionalBorderTextField(
-    debugLabel: String = "unknown",
     value: String,
-    onValueChange: (String) -> Unit = {},
+    onValueChange: (String) -> Unit,
     isBorder: Boolean,
     modifier: Modifier = Modifier,
+    debugLabel: String = "unknown",
     isError: Boolean = false,
     label: Int? = null,
     enabled: Boolean = true,
@@ -247,10 +247,10 @@ fun OptionalBorderTextField(
 
 @Composable
 fun CustomOutlinedTextField(
-    debugLabel: String = "unknown",
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    debugLabel: String = "unknown",
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
@@ -300,10 +300,10 @@ fun CustomOutlinedTextField(
 
 @Composable
 fun CustomTextFieldNoOutline(
-    debugLabel: String = "unknown",
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    debugLabel: String = "unknown",
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,

@@ -13,57 +13,34 @@ import compose.R
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-open class Element(
-    private val config: ConfigInterface,
-    val label: Int = config.label,
-) {
-    init {
-        Log.d("APP", "creating new element.")
-    }
-
+open class Element(private val config: ConfigInterface) {
     val debugLabel = config.debugLabel
-    private val mutableElement: MutableElement = MutableElement(config)
+    private val isDebug = true
 
     /** This is all the information that can be observed on the element */
-    val input: LiveData<String> = mutableElement.value.distinctUntilChanged()
-    val elementState: LiveData<ElementState> = mutableElement.elementState.distinctUntilChanged()
-    val shouldShowError: LiveData<Boolean> = mutableElement.visibleError.distinctUntilChanged()
-    private val hasFocus: LiveData<Boolean> = mutableElement.hasFocus.distinctUntilChanged()
-    val isFull: LiveData<Boolean> = mutableElement.isFull.distinctUntilChanged()
-    val errorMessage: LiveData<Int> = mutableElement.errorMessage.distinctUntilChanged()
-    val isComplete: LiveData<Boolean> = mutableElement.isComplete.distinctUntilChanged()
+    private val _input: NotNullMutableLiveData<String> = NotNullMutableLiveData("")
+    val input: LiveData<String> = _input.distinctUntilChanged()
 
-    fun onValueChange(new: String) {
-        mutableElement.onValueChange(new)
-    }
-
-    fun onFocusChange(newHasFocus: Boolean) {
-        mutableElement.onFocusChange(newHasFocus)
-    }
-}
-
-/**
- * This is the private class that has all the mutable live data.
- */
-private data class MutableElement(val config: ConfigInterface) {
-    val value: NotNullMutableLiveData<String> = NotNullMutableLiveData("")
-    val hasFocus: NotNullMutableLiveData<Boolean> = NotNullMutableLiveData(false)
-    val elementState: NotNullMutableLiveData<ElementState> = NotNullMutableLiveData(
+    private val _elementState: NotNullMutableLiveData<ElementState> = NotNullMutableLiveData(
         ElementState.ElementStateError(
             R.string.invalid
         )
     )
-    val isDebug = true
-    val isFull = Transformations.map(elementState) { it.isFull() }
-    val isComplete = Transformations.map(elementState) { it.isValid() }
-    val visibleError = MediatorLiveData<Boolean>().apply {
-        addSource(elementState) { postValue(shouldShowError(it, hasFocus.value)) }
-        addSource(hasFocus) { postValue(shouldShowError(elementState.value, it)) }
+    val elementState: LiveData<ElementState> = _elementState.distinctUntilChanged()
+
+    private val _hasFocus: NotNullMutableLiveData<Boolean> = NotNullMutableLiveData(false)
+
+    val _visibleError = MediatorLiveData<Boolean>().apply {
+        addSource(_elementState) { postValue(shouldShowError(it, _hasFocus.value)) }
+        addSource(_hasFocus) { postValue(shouldShowError(_elementState.value, it)) }
         postValue(false)
     }
-    val errorMessage: LiveData<Int> = Transformations.map(visibleError) { visibleError ->
-        elementState.value.getErrorMessageResId()?.takeIf { visibleError }
+    val visibleError: LiveData<Boolean> = _visibleError.distinctUntilChanged()
+    val errorMessage: LiveData<Int> = Transformations.map(_visibleError) { visibleError ->
+        _elementState.value.getErrorMessageResId()?.takeIf { visibleError }
     }
+    val isFull = Transformations.map(_elementState) { it.isFull() }
+    val isComplete = Transformations.map(_elementState) { it.isValid() }
 
     private val shouldShowErrorDebug: (ElementState, Boolean) -> Boolean = { state, hasFocus ->
         when (state) {
@@ -98,17 +75,18 @@ private data class MutableElement(val config: ConfigInterface) {
         }
 
     init {
+        Log.d("APP", "creating new element.")
         onValueChange("")
     }
 
     fun onValueChange(new: String) {
-        value.value = config.filter(new)
-        val newState = determineState(value.value)// Should be filtered value
-        elementState.value = newState
+        _input.value = config.filter(new)
+        val newState = determineState(_input.value)// Should be filtered value
+        _elementState.value = newState
     }
 
     fun onFocusChange(newHasFocus: Boolean) {
-        hasFocus.value = newHasFocus
+        _hasFocus.value = newHasFocus
     }
 
     companion object {
