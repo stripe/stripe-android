@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +32,6 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AutoComplete(
-    debugLabel: String = "unknown",
     items: List<String>,
     selectedItem: String,
     onValueChange: (String) -> Unit = {}
@@ -45,8 +45,7 @@ fun AutoComplete(
             .fillMaxWidth(1f)
 
     ) {
-        SimpleTextField(
-            debugLabel = debugLabel,
+        TextField(
             value = selectedItem,
             onValueChange = {},
             modifier = Modifier
@@ -56,8 +55,7 @@ fun AutoComplete(
                 }
                 .onFocusChanged {
                     dropDownVisible = it == FocusState.Active
-                },
-            isBorder = false
+                }
         )
         AnimatedVisibility(visible = dropDownVisible) {
             LazyColumn(
