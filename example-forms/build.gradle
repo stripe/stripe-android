@@ -66,6 +66,8 @@ dependencies {
     implementation 'androidx.compose.runtime:runtime-rxjava2:1.0.0-beta07'
     implementation project(path: ':compose')
 
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+
     // UI Tests
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-beta07'
 

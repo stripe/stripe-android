@@ -27,25 +27,14 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
 
         viewBinding.launch.setOnClickListener {
             prepareCheckout { customerConfig, clientSecret ->
-                if (isSetupIntent) {
-                    paymentSheet.presentWithSetupIntent(
-                        clientSecret,
-                        PaymentSheet.Configuration(
-                            merchantDisplayName = merchantName,
-                            customer = customerConfig,
-                            googlePay = googlePayConfig,
-                        )
+                paymentSheet.presentWithPaymentIntent(
+                    clientSecret,
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = merchantName,
+                        customer = customerConfig,
+                        googlePay = googlePayConfig,
                     )
-                } else {
-                    paymentSheet.presentWithPaymentIntent(
-                        clientSecret,
-                        PaymentSheet.Configuration(
-                            merchantDisplayName = merchantName,
-                            customer = customerConfig,
-                            googlePay = googlePayConfig,
-                        )
-                    )
-                }
+                )
             }
         }
     }

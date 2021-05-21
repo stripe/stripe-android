@@ -218,6 +218,13 @@ internal class StripeEndToEndTest {
         ).isTrue()
     }
 
+    @Test
+    fun `createRadarSession() should return a valid Radar Session id`() = testDispatcher.runBlockingTest {
+        val radarSession = createStripeWithTestScope().createRadarSession()
+        assertThat(radarSession.id)
+            .startsWith("rse_")
+    }
+
     private fun createStripeWithTestScope(
         publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     ): Stripe {

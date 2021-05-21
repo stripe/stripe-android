@@ -19,7 +19,7 @@ configurations {
 
 dependencies {
     implementation 'androidx.annotation:annotation:1.2.0'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.browser:browser:1.3.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.0'
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
@@ -146,4 +146,11 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     args "-F", "src/**/*.kt"
 }
 
-apply from: 'deploy.gradle'
+
+ext {
+    artifactId = "stripe-android"
+    artifactName = "stripe-android"
+    artifactDescrption = "Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
