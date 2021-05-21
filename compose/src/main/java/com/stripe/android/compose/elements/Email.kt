@@ -2,7 +2,7 @@ package com.stripe.android.compose.elements
 
 import android.util.Patterns
 import androidx.compose.ui.text.input.KeyboardType
-import compose.R
+import com.stripe.android.compose.R
 
 internal class Email : ConfigInterface {
     override val debugLabel = "email"

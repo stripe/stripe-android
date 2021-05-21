@@ -5,8 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.distinctUntilChanged
-import com.stripe.android.viewmodel.common.NotNullMutableLiveData
-import compose.R
+import com.stripe.android.compose.NotNullMutableLiveData
+import com.stripe.android.compose.R
 
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the element's
@@ -26,11 +26,10 @@ internal open class Element(private val config: ConfigInterface) {
             R.string.invalid
         )
     )
-    val elementState: LiveData<ElementState> = _elementState.distinctUntilChanged()
 
     private val _hasFocus: NotNullMutableLiveData<Boolean> = NotNullMutableLiveData(false)
 
-    val _visibleError = MediatorLiveData<Boolean>().apply {
+    private val _visibleError = MediatorLiveData<Boolean>().apply {
         addSource(_elementState) { postValue(shouldShowError(it, _hasFocus.value)) }
         addSource(_hasFocus) { postValue(shouldShowError(_elementState.value, it)) }
         postValue(false)

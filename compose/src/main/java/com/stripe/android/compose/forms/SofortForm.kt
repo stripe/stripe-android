@@ -21,7 +21,7 @@ import com.stripe.android.compose.elements.Section
 import com.stripe.android.compose.elements.SimpleTextFieldElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import compose.R
+import com.stripe.android.compose.R
 
 @Composable
 fun SofortForm(
