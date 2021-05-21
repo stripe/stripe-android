@@ -146,7 +146,7 @@ internal class DefaultFlowController internal constructor(
         )
     }
 
-    override fun configureWithSetupIntent(
+    fun configureWithSetupIntent(
         setupIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
