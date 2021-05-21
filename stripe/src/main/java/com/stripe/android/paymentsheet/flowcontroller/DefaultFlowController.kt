@@ -410,7 +410,10 @@ internal class DefaultFlowController internal constructor(
     ) {
         lifecycleScope.launch {
             runCatching {
-                paymentFlowResultProcessor.processPaymentIntent(paymentFlowResult)
+                viewModel.initData.clientSecret.processPaymentFlowResultWithProcessor(
+                    paymentFlowResult,
+                    paymentFlowResultProcessor
+                ) as PaymentIntentResult
             }.fold(
                 onSuccess = {
                     withContext(Dispatchers.Main) {

@@ -352,7 +352,10 @@ internal class PaymentSheetViewModel internal constructor(
         viewModelScope.launch {
             val result = runCatching {
                 withContext(workContext) {
-                    paymentFlowResultProcessor.processPaymentIntent(paymentFlowResult)
+                    args.clientSecret.processPaymentFlowResultWithProcessor(
+                        paymentFlowResult,
+                        paymentFlowResultProcessor
+                    ) as PaymentIntentResult
                 }
             }
 

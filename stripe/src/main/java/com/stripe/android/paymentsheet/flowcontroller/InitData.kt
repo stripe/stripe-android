@@ -4,12 +4,14 @@ import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class InitData(
     val config: PaymentSheet.Configuration?,
+    val clientSecret: ClientSecret,
     val paymentIntent: PaymentIntent,
     // the allowed payment method types
     val paymentMethodTypes: List<PaymentMethod.Type>,

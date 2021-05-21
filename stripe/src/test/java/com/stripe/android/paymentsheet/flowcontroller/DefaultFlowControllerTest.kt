@@ -592,6 +592,7 @@ internal class DefaultFlowControllerTest {
             return FlowControllerInitializer.InitResult.Success(
                 InitData(
                     paymentSheetConfiguration,
+                    clientSecret,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     paymentMethods,
