@@ -7,6 +7,7 @@ import com.stripe.android.Stripe
 import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.Locale
 
 /**
  * Model for PaymentMethod creation parameters.
@@ -438,7 +439,7 @@ data class PaymentMethodCreateParams internal constructor(
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
-                PARAM_COUNTRY to country.uppercase()
+                PARAM_COUNTRY to country.toUpperCase(Locale.ROOT)
             )
         }
 
@@ -453,7 +454,7 @@ data class PaymentMethodCreateParams internal constructor(
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
-                PARAM_BANK to bank.lowercase()
+                PARAM_BANK to bank.toLowerCase(Locale.ROOT)
             )
         }
 

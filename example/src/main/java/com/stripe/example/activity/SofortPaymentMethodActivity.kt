@@ -7,6 +7,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.databinding.SofortActivityBinding
+import java.util.Locale
 
 class SofortPaymentMethodActivity : StripeIntentActivity() {
     private val viewBinding: SofortActivityBinding by lazy {
@@ -26,7 +27,7 @@ class SofortPaymentMethodActivity : StripeIntentActivity() {
         viewBinding.submit.setOnClickListener {
             keyboardController.hide()
 
-            val country = viewBinding.country.text.toString().lowercase()
+            val country = viewBinding.country.text.toString().toLowerCase(Locale.ROOT)
             createAndConfirmPaymentIntent(
                 country,
                 PaymentMethodCreateParams.create(

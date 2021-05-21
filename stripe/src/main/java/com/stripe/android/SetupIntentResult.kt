@@ -10,6 +10,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SetupIntentResult internal constructor(
     override val intent: SetupIntent,
-    @Outcome override val outcomeFromFlow: Int = 0,
+    @Outcome private val outcomeFromFlow: Int = 0,
     val failureMessage: String? = null
-) : StripeIntentResult<SetupIntent>()
+) : StripeIntentResult<SetupIntent>(outcomeFromFlow)

@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
 import kotlinx.parcelize.Parcelize
+import java.util.Locale
 
 @Parcelize
 data class AddressJapanParams(
@@ -77,7 +78,7 @@ data class AddressJapanParams(
          * @param country Two-letter country code (ISO 3166-1 alpha-2).
          */
         fun setCountry(country: String?): Builder = apply {
-            this.country = country?.uppercase()
+            this.country = country?.toUpperCase(Locale.ROOT)
         }
 
         /**

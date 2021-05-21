@@ -22,6 +22,7 @@ internal class PaymentFlowFailureMessageFactory(
                 is SetupIntent -> {
                     createForSetupIntent(intent)
                 }
+                else -> null
             }
         }
         outcome == StripeIntentResult.Outcome.TIMEDOUT -> {

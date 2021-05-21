@@ -58,7 +58,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -419,12 +419,12 @@ internal class StripeApiRepositoryTest {
             )
 
             verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
-            val requestParams = apiRequestArgumentCaptor.firstValue.params.orEmpty()
-            val paymentMethodParams = assertIs<Map<String, *>>(requestParams["payment_method_data"])
-            assertIs<String>(paymentMethodParams["muid"])
-            assertIs<String>(paymentMethodParams["guid"])
-            assertThat(paymentMethodParams["type"])
-                .isEqualTo("card")
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams =
+                apiRequest.params?.get("payment_method_data") as Map<String, *>
+            assertTrue(paymentMethodDataParams["muid"] is String)
+            assertTrue(paymentMethodDataParams["guid"] is String)
+            assertEquals("card", paymentMethodDataParams["type"])
 
             verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
 
