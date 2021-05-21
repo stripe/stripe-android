@@ -17,6 +17,7 @@ import com.stripe.android.exception.CardException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
+import com.stripe.android.exception.StripeException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -26,6 +27,7 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
@@ -46,6 +48,7 @@ import com.stripe.android.model.parsers.ModelJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodsListJsonParser
+import com.stripe.android.model.parsers.RadarSessionJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
@@ -75,9 +78,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger
     ),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
-        AnalyticsRequestExecutor.Default(logger),
+        AnalyticsRequestExecutor.Default(logger, workContext),
     private val fingerprintDataRepository: FingerprintDataRepository =
-        FingerprintDataRepository.Default(context),
+        FingerprintDataRepository.Default(context, workContext),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
         AnalyticsRequestFactory(context, publishableKey),
     private val fingerprintParamsUtils: FingerprintParamsUtils = FingerprintParamsUtils(),
@@ -92,7 +95,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     )
 
     private val fingerprintData: FingerprintData?
-        get() = fingerprintDataRepository.get()
+        get() = fingerprintDataRepository.getCached()
 
     init {
         fireFingerprintRequest()
@@ -919,6 +922,43 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         return response.responseJson
+    }
+
+    /**
+     * Get the latest [FingerprintData] from [FingerprintDataRepository] and send in POST request
+     * to `/v1/radar/session`.
+     */
+    override suspend fun createRadarSession(
+        requestOptions: ApiRequest.Options
+    ): RadarSession? {
+        return runCatching {
+            require(Stripe.advancedFraudSignalsEnabled) {
+                "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
+            }
+            requireNotNull(fingerprintDataRepository.getLatest()) {
+                "Could not obtain fraud data required to create a Radar Session."
+            }
+        }.map {
+            val params = it.params.plus(
+                mapOf(
+                    "payment_user_agent" to "stripe-android/${Stripe.VERSION_NAME}"
+                )
+            )
+            fetchStripeModel(
+                apiRequestFactory.createPost(
+                    getApiUrl("radar/session"),
+                    requestOptions,
+                    params
+                ),
+                RadarSessionJsonParser()
+            ) {
+                fireAnalyticsRequest(
+                    analyticsRequestFactory.createRequest(AnalyticsEvent.RadarSessionCreate)
+                )
+            }
+        }.getOrElse {
+            throw StripeException.create(it)
+        }
     }
 
     /**

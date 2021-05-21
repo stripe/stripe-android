@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -60,7 +59,7 @@ internal class DefaultFlowController internal constructor(
     paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
-    private val defaultReturnUrl: DefaultReturnUrl,
+    defaultReturnUrl: DefaultReturnUrl,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback
 ) : PaymentSheet.FlowController {
@@ -147,7 +146,7 @@ internal class DefaultFlowController internal constructor(
         )
     }
 
-    override fun configureWithSetupIntent(
+    fun configureWithSetupIntent(
         setupIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
@@ -261,10 +260,10 @@ internal class DefaultFlowController internal constructor(
         paymentSelection: PaymentSelection?,
         initData: InitData
     ) {
-        val confirmParamsFactory = ConfirmParamsFactory(
-            defaultReturnUrl,
+        val confirmParamsFactory =
             PaymentIntentClientSecret(initData.paymentIntent.clientSecret.orEmpty())
-        )
+                .createConfirmParamsFactory()
+
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)

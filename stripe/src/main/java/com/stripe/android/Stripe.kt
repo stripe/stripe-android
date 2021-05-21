@@ -29,6 +29,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
+import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -2001,6 +2002,33 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
+                )
+            )
+        }
+    }
+
+    /**
+     * Create a Radar Session asynchronously.
+     *
+     * [Stripe.advancedFraudSignalsEnabled] must be `true` to use this method.
+     *
+     * See the [Radar Session](https://stripe.com/docs/radar/radar-session) docs for more details.
+     *
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @UiThread
+    @JvmOverloads
+    fun createRadarSession(
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<RadarSession>
+    ) {
+        executeAsync(callback) {
+            stripeRepository.createRadarSession(
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
                 )
             )
         }

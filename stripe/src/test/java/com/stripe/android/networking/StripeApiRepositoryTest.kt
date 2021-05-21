@@ -12,11 +12,15 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.FakeFingerprintDataRepository
 import com.stripe.android.FileFactory
+import com.stripe.android.FingerprintData
 import com.stripe.android.FingerprintDataFixtures
 import com.stripe.android.FingerprintDataRepository
+import com.stripe.android.Stripe
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.BankAccountTokenParamsFixtures
@@ -54,7 +58,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -80,13 +84,14 @@ internal class StripeApiRepositoryTest {
 
     @BeforeTest
     fun before() {
-        whenever(fingerprintDataRepository.get()).thenReturn(
+        whenever(fingerprintDataRepository.getCached()).thenReturn(
             FingerprintDataFixtures.create(Calendar.getInstance().timeInMillis)
         )
     }
 
     @AfterTest
     fun cleanup() {
+        Stripe.advancedFraudSignalsEnabled = true
         testDispatcher.cleanupTestCoroutines()
     }
 
@@ -414,12 +419,12 @@ internal class StripeApiRepositoryTest {
             )
 
             verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
-            val requestParams = apiRequestArgumentCaptor.firstValue.params.orEmpty()
-            val paymentMethodParams = assertIs<Map<String, *>>(requestParams["payment_method_data"])
-            assertIs<String>(paymentMethodParams["muid"])
-            assertIs<String>(paymentMethodParams["guid"])
-            assertThat(paymentMethodParams["type"])
-                .isEqualTo("card")
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams =
+                apiRequest.params?.get("payment_method_data") as Map<String, *>
+            assertTrue(paymentMethodDataParams["muid"] is String)
+            assertTrue(paymentMethodDataParams["guid"] is String)
+            assertEquals("card", paymentMethodDataParams["type"])
 
             verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
 
@@ -950,6 +955,61 @@ internal class StripeApiRepositoryTest {
                 productUsage = null
             )
         }
+
+    @Test
+    fun `createRadarSession() with FingerprintData should return expected value`() = testDispatcher.runBlockingTest {
+        val stripeRepository = StripeApiRepository(
+            context,
+            DEFAULT_OPTIONS.apiKey,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            fingerprintDataRepository = FakeFingerprintDataRepository(
+                FingerprintData(
+                    guid = "8ae65368-76c5-4dd5-81b9-279f61efa591c80a51",
+                    muid = "ac3febde-f658-41b5-8c4d-94905501c7a6f4ca3c",
+                    sid = "02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf"
+                )
+            ),
+            workContext = testDispatcher
+        )
+        val radarSession = requireNotNull(
+            stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+        )
+        assertThat(radarSession.id)
+            .startsWith("rse_")
+
+        verifyAnalyticsRequest(AnalyticsEvent.RadarSessionCreate)
+    }
+
+    @Test
+    fun `createRadarSession() with null FingerprintData should throw an exception`() = testDispatcher.runBlockingTest {
+        val stripeRepository = StripeApiRepository(
+            context,
+            DEFAULT_OPTIONS.apiKey,
+            fingerprintDataRepository = FakeFingerprintDataRepository(
+                null
+            ),
+            workContext = testDispatcher
+        )
+
+        val invalidRequestException = assertFailsWith<InvalidRequestException> {
+            stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+        }
+        assertThat(invalidRequestException.message)
+            .isEqualTo("Could not obtain fraud data required to create a Radar Session.")
+    }
+
+    @Test
+    fun `createRadarSession() with advancedFraudSignalsEnabled set to false should throw an exception`() = testDispatcher.runBlockingTest {
+        verifyZeroInteractions(fingerprintDataRepository)
+
+        Stripe.advancedFraudSignalsEnabled = false
+        val stripeRepository = create()
+        val invalidRequestException = assertFailsWith<InvalidRequestException> {
+            stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+        }
+        assertThat(invalidRequestException.message)
+            .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
+    }
 
     private fun verifyFingerprintAndAnalyticsRequests(
         event: AnalyticsEvent,
