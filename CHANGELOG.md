@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.9.0 - unreleased
+## 16.9.0 - 2021-05-21
 * [3727](https://github.com/stripe/stripe-android/pull/3727) Upgrade Gradle to `7.0.2`
 * [3734](https://github.com/stripe/stripe-android/pull/3734) Upgrade `androidx.appcompat:appcompat` to `1.3.0`
 * [3735](https://github.com/stripe/stripe-android/pull/3735) Upgrade `fragment-ktx` to `1.3.4`
