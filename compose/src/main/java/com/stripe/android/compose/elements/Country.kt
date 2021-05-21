@@ -6,7 +6,7 @@ import compose.R
 
 class Country : ConfigInterface {
     override val debugLabel = "country"
-    override val label = R.string.country
+    override val label = com.stripe.android.R.string.address_label_country
     override val keyboard = KeyboardType.Ascii
 
     override fun filter(userTyped: String) =

@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="email" tools:ignore="MissingTranslation">Email</string>
-    <string name="name" tools:ignore="MissingTranslation">Name</string>
-    <string name="country" tools:ignore="MissingTranslation">Country</string>
-
+    <!-- Use when a required field has not been filled in -->
     <string name="incomplete" tools:ignore="MissingTranslation">%s is incomplete.</string>
+    <!-- Use when a required field is not valid and cannot be corrected. -->
     <string name="malformed" tools:ignore="MissingTranslation">%s is malformed.</string>
+    <!-- Use when a required field is blank and submit is clicked. -->
     <string name="blank_and_required" tools:ignore="MissingTranslation">%s cannot be blank.</string>
-    <string name="too_many_chars" tools:ignore="MissingTranslation">%s has more characters than expected.</string>
-    <string name="invalid_brand" tools:ignore="MissingTranslation">Card brand could not be identified.</string>
-    <string name="invalid_luhn" tools:ignore="MissingTranslation">Card Luhn is incorrect.</string>
+    <!-- Use when is not valid, but the exact problem is unknown. -->
     <string name="invalid" tools:ignore="MissingTranslation">%s is invalid.</string>
-    <string name="unknown">Unknown</string>
 </resources>

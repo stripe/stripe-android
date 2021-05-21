@@ -6,7 +6,7 @@ import compose.R
 
 class Email : ConfigInterface {
     override val debugLabel = "email"
-    override val label = R.string.email
+    override val label = R.string.becs_widget_email
     override val keyboard = KeyboardType.Email
 
     override fun filter(userTyped: String) =

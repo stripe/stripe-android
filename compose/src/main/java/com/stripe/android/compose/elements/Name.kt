@@ -5,7 +5,7 @@ import compose.R
 
 class Name : ConfigInterface {
     override val debugLabel = "name"
-    override val label = R.string.name
+    override val label = R.string.address_label_name
     override val keyboard = KeyboardType.Text
 
     override fun determineState(displayFormatted: String): ElementState {

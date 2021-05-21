@@ -41,14 +41,14 @@ fun SofortForm(
     val countries = viewModel.countryElement.countries
 
     Column(modifier = Modifier.padding(top = 30.dp, start = 16.dp, end = 16.dp)) {
-        Section(R.string.name, nameErrorMessage) {
+        Section(R.string.address_label_name, nameErrorMessage) {
             SimpleTextFieldElement(
                 element = viewModel.nameElement,
                 myFocus = name,
                 nextFocus = email,
             )
         }
-        Section(R.string.email, emailErrorMessage) {
+        Section(R.string.becs_widget_email, emailErrorMessage) {
             SimpleTextFieldElement(
                 element = viewModel.emailElement,
                 myFocus = email,
@@ -56,7 +56,7 @@ fun SofortForm(
             )
         }
 
-        Section(R.string.country, countryErrorMessage) {
+        Section(R.string.address_label_country, countryErrorMessage) {
             // TODO: THis should have my and next focus elements.
             AutoComplete(
                 items = countries,
@@ -68,24 +68,9 @@ fun SofortForm(
 }
 
 class SofortFormViewModel : ViewModel() {
-    // Save the states of each fields and get observables setup
-    // particularly for error message and error message states.
-
     var nameElement = Element(Name())
     var emailElement = Element(Email())
     var countryElement = CountryElement()
-
-//    val nameAndEmailError = MediatorLiveData<Int>().apply {
-//        addSource(nameElement.errorMessage) {
-//            postValue(getDominantError(it, emailElement.errorMessage.value))
-//        }
-//        addSource(emailElement.errorMessage) {
-//            postValue(getDominantError(nameElement.errorMessage.value, it))
-//        }
-//    }
-//
-//    private fun getDominantError(nameError: Int?, emailError: String?) =
-//        nameError ?: (emailError ?: "")
 
     val params: LiveData<PaymentMethodCreateParams?> =
         MediatorLiveData<PaymentMethodCreateParams?>().apply {
@@ -97,18 +82,14 @@ class SofortFormViewModel : ViewModel() {
             addSource(countryElement.isComplete) { postValue(getParams()) }
         }
 
-
-    /**
-     * PaymentMethodCreateParams(type=Sofort, card=null, ideal=null, fpx=null, sepaDebit=null, auBecsDebit=null, bacsDebit=null, sofort=Sofort(country=Deutschland), upi=null, netbanking=null, billingDetails=BillingDetails(address=null, email=sdf@gmail.com, name=sdfsdffffffs, phone=null), metadata=null, productUsage=[])
-     * PaymentMethodCreateParams(type=TYPE, card=null, ideal=null, fpx=null, sepaDebit=null, auBecsDebit=null, bacsDebit=null, sofort=Sofort(country=COUNTRY), upi=null, netbanking=null, billingDetails=BillingDetails(address=null, email=EMAIL, name=NAME, phone=null), metadata=null, productUsage=[])
-     */
     private fun getParams(): PaymentMethodCreateParams? {
-        Log.e(
+        Log.d(
             "APP",
             "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}, country: ${countryElement.isComplete.value}"
         )
-        if (nameElement.isComplete.value == true && emailElement.isComplete.value == true && countryElement.isComplete.value == true) {
-            val params = PaymentMethodCreateParams.create(
+        return if (nameElement.isComplete.value == true && emailElement.isComplete.value == true && countryElement.isComplete.value == true) {
+
+            PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.input.value)),
                 PaymentMethod.BillingDetails(
                     name = nameElement.input.value,
@@ -116,12 +97,8 @@ class SofortFormViewModel : ViewModel() {
                 )
             )
 
-            Log.e("APP", params.toString())
-            return params
-
         } else {
-            Log.e("APP", "Params are null")
-            return null
+            null
         }
     }
 }
