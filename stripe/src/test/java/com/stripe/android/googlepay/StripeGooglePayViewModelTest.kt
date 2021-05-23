@@ -1,18 +1,25 @@
 package com.stripe.android.googlepay
 
 import android.graphics.Color
+import androidx.arch.core.executor.testing.CountingTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.json.JSONObject
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -23,6 +30,10 @@ class StripeGooglePayViewModelTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val viewModel: StripeGooglePayViewModel by lazy { createViewModel() }
+
+    @Rule
+    @JvmField
+    val countingTaskExecutorRule = CountingTaskExecutorRule()
 
     @BeforeTest
     fun setup() {
@@ -156,12 +167,47 @@ class StripeGooglePayViewModelTest {
         )
     }
 
+    @Test
+    fun `createPaymentMethod() with stripeAccount should include stripeAccount in request`() {
+        val stripeAccout = "account_id"
+        var requestOptions: ApiRequest.Options? = null
+        val stripeRepository = object : AbsFakeStripeRepository() {
+            override suspend fun createPaymentMethod(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                options: ApiRequest.Options
+            ): PaymentMethod? {
+                requestOptions = options
+                return null
+            }
+        }
+        val viewModel = StripeGooglePayViewModel(
+            ApplicationProvider.getApplicationContext(),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccout,
+            ARGS,
+            stripeRepository,
+            "App Name",
+            testDispatcher
+        )
+
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
+        )
+
+        viewModel.createPaymentMethod(params).observeForever {
+            assertThat(requestOptions?.stripeAccount).isEqualTo(stripeAccout)
+        }
+
+        countingTaskExecutorRule.drainTasks(3, TimeUnit.SECONDS)
+    }
+
     private fun createViewModel(
         args: StripeGooglePayContract.Args = ARGS
     ): StripeGooglePayViewModel {
         return StripeGooglePayViewModel(
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            null,
             args,
             FakeStripeRepository(),
             "App Name",
