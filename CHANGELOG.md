@@ -259,7 +259,7 @@ This release adds support for 19-digit cards in `CardInputWidget` and `CardMulti
 * [#2641](https://github.com/stripe/stripe-android/pull/2641) Add support for Bank Account as source on `Customer` object
 * [#2643](https://github.com/stripe/stripe-android/pull/2643) Add missing fields to `Customer` model
 * [#2644](https://github.com/stripe/stripe-android/pull/2644) Support new directory server network names
-*    * Enable support for Discover and other new networks
+     * Enable support for Discover and other new networks
 * [#2646](https://github.com/stripe/stripe-android/pull/2646) Allow `CardMultilineWidget`'s `TextInputLayout`s to be styled
 * [#2649](https://github.com/stripe/stripe-android/pull/2649) Add `@JvmOverloads` to `GooglePayJsonFactory` methods
 * [#2651](https://github.com/stripe/stripe-android/pull/2651) Update Kotlin coroutines to `1.3.8`
