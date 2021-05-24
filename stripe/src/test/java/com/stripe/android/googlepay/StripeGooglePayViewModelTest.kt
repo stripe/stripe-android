@@ -1,7 +1,6 @@
 package com.stripe.android.googlepay
 
 import android.graphics.Color
-import androidx.arch.core.executor.testing.CountingTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -16,10 +15,8 @@ import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.json.JSONObject
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -30,10 +27,6 @@ class StripeGooglePayViewModelTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val viewModel: StripeGooglePayViewModel by lazy { createViewModel() }
-
-    @Rule
-    @JvmField
-    val countingTaskExecutorRule = CountingTaskExecutorRule()
 
     @BeforeTest
     fun setup() {
@@ -169,7 +162,7 @@ class StripeGooglePayViewModelTest {
 
     @Test
     fun `createPaymentMethod() with stripeAccount should include stripeAccount in request`() {
-        val stripeAccout = "account_id"
+        val stripeAccount = "account_id"
         var requestOptions: ApiRequest.Options? = null
         val stripeRepository = object : AbsFakeStripeRepository() {
             override suspend fun createPaymentMethod(
@@ -183,7 +176,7 @@ class StripeGooglePayViewModelTest {
         val viewModel = StripeGooglePayViewModel(
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccout,
+            stripeAccount,
             ARGS,
             stripeRepository,
             "App Name",
@@ -195,10 +188,8 @@ class StripeGooglePayViewModelTest {
         )
 
         viewModel.createPaymentMethod(params).observeForever {
-            assertThat(requestOptions?.stripeAccount).isEqualTo(stripeAccout)
+            assertThat(requestOptions?.stripeAccount).isEqualTo(stripeAccount)
         }
-
-        countingTaskExecutorRule.drainTasks(3, TimeUnit.SECONDS)
     }
 
     private fun createViewModel(
