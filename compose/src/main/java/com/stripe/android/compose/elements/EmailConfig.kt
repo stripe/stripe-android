@@ -5,8 +5,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.compose.R
 import com.stripe.android.compose.elements.common.TextFieldConfigInterface
 import com.stripe.android.compose.elements.common.TextFieldElementState
+import java.util.regex.Pattern
 
-internal class EmailConfig : TextFieldConfigInterface {
+internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS) :
+    TextFieldConfigInterface {
     override val debugLabel = "email"
     override val label = R.string.becs_widget_email
     override val keyboard = KeyboardType.Email
@@ -17,7 +19,7 @@ internal class EmailConfig : TextFieldConfigInterface {
     override fun determineState(paramFormatted: String?): TextFieldElementState {
         return when {
             paramFormatted?.isEmpty() ?: true -> Error.BlankAndRequired
-            Patterns.EMAIL_ADDRESS.matcher(paramFormatted).matches() -> {
+            pattern.matcher(paramFormatted).matches() -> {
                 Valid.Limitless
             }
             else -> {
@@ -43,7 +45,8 @@ internal class EmailConfig : TextFieldConfigInterface {
             object Limitless : Valid() // no auto-advance
         }
 
-        sealed class Error(stringResId: Int) : TextFieldElementState.TextFieldElementStateError(stringResId) {
+        sealed class Error(stringResId: Int) :
+            TextFieldElementState.TextFieldElementStateError(stringResId) {
             object Incomplete : Error(R.string.incomplete)
             object BlankAndRequired : Error(R.string.blank_and_required)
         }

@@ -45,7 +45,7 @@ internal fun TextFieldComposable(
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
 
-    val value by textFieldElement.displayValue.observeAsState("")
+    val value by textFieldElement.input.observeAsState("")
     val shouldShowError by textFieldElement.visibleError.observeAsState(false)
     val elementIsFull by textFieldElement.isFull.observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }

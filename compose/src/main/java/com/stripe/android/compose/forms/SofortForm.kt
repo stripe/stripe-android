@@ -66,9 +66,9 @@ class SofortFormViewModel : ViewModel() {
 
     val params: LiveData<PaymentMethodCreateParams?> =
         MediatorLiveData<PaymentMethodCreateParams?>().apply {
-            addSource(nameElement.paramValue) { postValue(getParams()) }
+            addSource(nameElement.input) { postValue(getParams()) }
             addSource(nameElement.isComplete) { postValue(getParams()) }
-            addSource(emailElement.paramValue) { postValue(getParams()) }
+            addSource(emailElement.input) { postValue(getParams()) }
             addSource(emailElement.isComplete) { postValue(getParams()) }
 
             // Country is a dropdown and so will always be complete.
@@ -85,8 +85,8 @@ class SofortFormViewModel : ViewModel() {
             PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.paramValue.value)),
                 PaymentMethod.BillingDetails(
-                    name = nameElement.paramValue.value,
-                    email = emailElement.paramValue.value
+                    name = nameElement.input.value,
+                    email = emailElement.input.value
                 )
             )
         } else {

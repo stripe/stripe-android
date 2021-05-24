@@ -19,9 +19,4 @@ internal interface TextFieldConfigInterface {
 
     /** This works a little like the input filter, removing pasted characters that are invalid */
     fun filter(userTyped: String): String
-
-    fun convertToDisplay(paramFormatted: String?): String = paramFormatted ?: ""
-    fun convertToPaymentMethodParam(displayFormatted: String): String? {
-        return displayFormatted
-    }
 }
