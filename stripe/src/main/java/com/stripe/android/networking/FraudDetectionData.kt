@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import com.stripe.android.model.StripeModel
 import kotlinx.parcelize.Parcelize
@@ -6,7 +6,7 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 @Parcelize
-internal data class FingerprintData(
+internal data class FraudDetectionData(
     internal val guid: String,
     internal val muid: String,
     internal val sid: String,

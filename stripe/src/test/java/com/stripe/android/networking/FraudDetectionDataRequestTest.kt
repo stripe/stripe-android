@@ -2,22 +2,22 @@ package com.stripe.android.networking
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.FingerprintDataFixtures
+import com.stripe.android.FraudDetectionDataFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class FingerprintRequestTest {
-    private val fingerprintRequestParamsFactory = FingerprintRequestParamsFactory(
+class FraudDetectionDataRequestTest {
+    private val fraudDetectionDataRequestParamsFactory = FraudDetectionDataRequestParamsFactory(
         ApplicationProvider.getApplicationContext()
     )
 
     private val request =
-        FingerprintRequest(
-            params = fingerprintRequestParamsFactory.createParams(FINGERPRINT_DATA),
-            guid = FINGERPRINT_DATA.guid
+        FraudDetectionDataRequest(
+            params = fraudDetectionDataRequestParamsFactory.createParams(FRAUD_DETECTION_DATA),
+            guid = FRAUD_DETECTION_DATA.guid
         )
 
     @Test
@@ -31,7 +31,7 @@ class FingerprintRequestTest {
         assertThat(request.headers)
             .isEqualTo(
                 mapOf(
-                    "Cookie" to "m=${FINGERPRINT_DATA.guid}",
+                    "Cookie" to "m=${FRAUD_DETECTION_DATA.guid}",
                     "User-Agent" to RequestHeadersFactory.getUserAgent(),
                     "Accept-Charset" to "UTF-8"
                 )
@@ -48,6 +48,6 @@ class FingerprintRequestTest {
     }
 
     private companion object {
-        private val FINGERPRINT_DATA = FingerprintDataFixtures.create()
+        private val FRAUD_DETECTION_DATA = FraudDetectionDataFixtures.create()
     }
 }

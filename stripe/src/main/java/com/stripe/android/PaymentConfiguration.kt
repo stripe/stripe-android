@@ -96,7 +96,7 @@ data class PaymentConfiguration internal constructor(
                     stripeAccountId = stripeAccountId
                 )
 
-            FingerprintDataRepository.Default(context).refresh()
+            DefaultFraudDetectionDataRepository(context).refresh()
         }
 
         @JvmSynthetic

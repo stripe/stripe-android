@@ -6,24 +6,24 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SourceParams
-import com.stripe.android.networking.FingerprintParamsUtils
+import com.stripe.android.networking.FraudDetectionDataParamsUtils
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class FingerprintParamsUtilsTest {
+class FraudDetectionDataParamsUtilsTest {
 
-    private val fingerprintParamsUtils = FingerprintParamsUtils()
+    private val fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
 
     @Test
     fun addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
-        val updatedParams = fingerprintParamsUtils.addFingerprintData(
+        val updatedParams = fraudDetectionDataParamsUtils.addFraudDetectionData(
             params = mapOf(
                 ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to
                     SourceParams.createCardParams(CardParamsFixtures.DEFAULT).toParamMap()
             ),
-            fingerprintData = FINGERPRINT_DATA
+            fraudDetectionData = FRAUD_DETECTION_DATA
         )
 
         assertThat(updatedParams[ConfirmPaymentIntentParams.PARAM_SOURCE_DATA])
@@ -48,21 +48,21 @@ class FingerprintParamsUtilsTest {
                         "cvc" to "123"
                     ),
                     "metadata" to mapOf("fruit" to "orange"),
-                    "muid" to FINGERPRINT_DATA.muid,
-                    "guid" to FINGERPRINT_DATA.guid,
-                    "sid" to FINGERPRINT_DATA.sid
+                    "muid" to FRAUD_DETECTION_DATA.muid,
+                    "guid" to FRAUD_DETECTION_DATA.guid,
+                    "sid" to FRAUD_DETECTION_DATA.sid
                 )
             )
     }
 
     @Test
     fun addUidParamsToPaymentIntent_withPaymentMethodParams_addsUidAtRightLevel() {
-        val updatedParams = fingerprintParamsUtils.addFingerprintData(
+        val updatedParams = fraudDetectionDataParamsUtils.addFraudDetectionData(
             params = mapOf(
                 PARAM_PAYMENT_METHOD_DATA to
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap()
             ),
-            fingerprintData = FINGERPRINT_DATA
+            fraudDetectionData = FRAUD_DETECTION_DATA
         )
         assertThat(updatedParams[PARAM_PAYMENT_METHOD_DATA])
             .isEqualTo(
@@ -86,14 +86,14 @@ class FingerprintParamsUtilsTest {
                         "exp_year" to 2024,
                         "cvc" to "111"
                     ),
-                    "muid" to FINGERPRINT_DATA.muid,
-                    "guid" to FINGERPRINT_DATA.guid,
-                    "sid" to FINGERPRINT_DATA.sid
+                    "muid" to FRAUD_DETECTION_DATA.muid,
+                    "guid" to FRAUD_DETECTION_DATA.guid,
+                    "sid" to FRAUD_DETECTION_DATA.sid
                 )
             )
     }
 
     private companion object {
-        private val FINGERPRINT_DATA = FingerprintDataFixtures.create()
+        private val FRAUD_DETECTION_DATA = FraudDetectionDataFixtures.create()
     }
 }

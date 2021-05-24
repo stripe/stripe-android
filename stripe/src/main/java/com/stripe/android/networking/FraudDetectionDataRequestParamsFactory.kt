@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.FingerprintData
 import com.stripe.android.Stripe
 import com.stripe.android.utils.ContextUtils.packageInfo
 import java.math.BigDecimal
@@ -13,7 +12,7 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
-internal class FingerprintRequestParamsFactory @VisibleForTesting internal constructor(
+internal class FraudDetectionDataRequestParamsFactory @VisibleForTesting internal constructor(
     private val displayMetrics: DisplayMetrics,
     private val packageName: String,
     private val versionName: String?,
@@ -33,13 +32,13 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
     )
 
     @JvmSynthetic
-    internal fun createParams(fingerprintData: FingerprintData?): Map<String, Any> {
+    internal fun createParams(fraudDetectionData: FraudDetectionData?): Map<String, Any> {
         return mapOf(
             "v2" to 1,
             "tag" to Stripe.VERSION_NAME,
             "src" to "android-sdk",
             "a" to createFirstMap(),
-            "b" to createSecondMap(fingerprintData)
+            "b" to createSecondMap(fraudDetectionData)
         )
     }
 
@@ -52,10 +51,10 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
         )
     }
 
-    private fun createSecondMap(fingerprintData: FingerprintData?): Map<String, Any> {
+    private fun createSecondMap(fraudDetectionData: FraudDetectionData?): Map<String, Any> {
         return mapOf(
-            "d" to fingerprintData?.muid.orEmpty(),
-            "e" to fingerprintData?.sid.orEmpty(),
+            "d" to fraudDetectionData?.muid.orEmpty(),
+            "e" to fraudDetectionData?.sid.orEmpty(),
             "k" to packageName,
             "o" to Build.VERSION.RELEASE,
             "p" to Build.VERSION.SDK_INT,

@@ -4,7 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import com.stripe.android.FingerprintDataFixtures
+import com.stripe.android.FraudDetectionDataFixtures
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -16,10 +16,10 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class FingerprintRequestExecutorTest {
+class FraudDetectionDataRequestExecutorTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val fingerprintRequestFactory = FingerprintRequestFactory.Default(
+    private val fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(
         context = ApplicationProvider.getApplicationContext()
     )
 
@@ -31,22 +31,24 @@ class FingerprintRequestExecutorTest {
     @Test
     fun `execute() when successful should return non-empty values`() {
         testDispatcher.runBlockingTest {
-            val remoteFingerprintData = createFingerprintRequestExecutor().execute(
-                request = fingerprintRequestFactory.create(FINGERPRINT_DATA)
+            val remoteFraudDetectionData = requireNotNull(
+                createFraudDetectionDataRequestExecutor().execute(
+                    request = fraudDetectionDataRequestFactory.create(FRAUD_DETECTION_DATA)
+                )
             )
 
-            assertThat(remoteFingerprintData?.guid)
+            assertThat(remoteFraudDetectionData.guid)
                 .isNotEmpty()
-            assertThat(remoteFingerprintData?.muid)
+            assertThat(remoteFraudDetectionData.muid)
                 .isNotEmpty()
-            assertThat(remoteFingerprintData?.sid)
+            assertThat(remoteFraudDetectionData.sid)
                 .isNotEmpty()
         }
     }
 
     @Test
     fun `execute() when successful should return null`() {
-        val request = fingerprintRequestFactory.create(FINGERPRINT_DATA)
+        val request = fraudDetectionDataRequestFactory.create(FRAUD_DETECTION_DATA)
         val connection = mock<StripeConnection>().also {
             whenever(it.responseCode).thenReturn(500)
         }
@@ -58,7 +60,7 @@ class FingerprintRequestExecutorTest {
 
         testDispatcher.runBlockingTest {
             assertThat(
-                createFingerprintRequestExecutor(connectionFactory = connectionFactory)
+                createFraudDetectionDataRequestExecutor(connectionFactory = connectionFactory)
                     .execute(request = request)
             ).isNull()
         }
@@ -66,27 +68,27 @@ class FingerprintRequestExecutorTest {
 
     @Test
     fun `execute() when connection exception should return null`() {
-        val request = fingerprintRequestFactory.create(FINGERPRINT_DATA)
+        val request = fraudDetectionDataRequestFactory.create(FRAUD_DETECTION_DATA)
         val connectionFactory = mock<ConnectionFactory>().also {
             whenever(it.create(request)).thenThrow(IOException())
         }
 
         testDispatcher.runBlockingTest {
             assertThat(
-                createFingerprintRequestExecutor(connectionFactory = connectionFactory)
+                createFraudDetectionDataRequestExecutor(connectionFactory = connectionFactory)
                     .execute(request = request)
             ).isNull()
         }
     }
 
-    private fun createFingerprintRequestExecutor(
+    private fun createFraudDetectionDataRequestExecutor(
         connectionFactory: ConnectionFactory = ConnectionFactory.Default()
-    ) = FingerprintRequestExecutor.Default(
+    ) = DefaultFraudDetectionDataRequestExecutor(
         connectionFactory = connectionFactory,
         workContext = testDispatcher
     )
 
     private companion object {
-        private val FINGERPRINT_DATA = FingerprintDataFixtures.create()
+        private val FRAUD_DETECTION_DATA = FraudDetectionDataFixtures.create()
     }
 }
