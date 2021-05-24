@@ -37,7 +37,7 @@ val EMOJI_FONT_SIZE = 36.sp
 val MAIN_FONT_SIZE = 18.sp
 val SUB_FONT_SIZE = 14.sp
 val PADDING = 12.dp
-const val ROW_LEFT = .7f
+const val ROW_START = .7f
 val BACKGROUND_COLOR = Color(0xfff2f2f7)
 val BUTTON_COLOR = Color(0xff635BFF)
 
@@ -130,7 +130,7 @@ fun ProductRow(
             fontSize = EMOJI_FONT_SIZE
         )
         Column(
-            Modifier.fillMaxWidth(ROW_LEFT)
+            Modifier.fillMaxWidth(ROW_START)
         ) {
             Text(
                 text = stringResource(productResId),
@@ -144,7 +144,7 @@ fun ProductRow(
         Text(
             text = priceString,
             Modifier.fillMaxWidth(),
-            style = TextStyle.Default.copy(textAlign = TextAlign.Right),
+            style = TextStyle.Default.copy(textAlign = TextAlign.End),
             fontSize = MAIN_FONT_SIZE
         )
     }
@@ -164,14 +164,14 @@ fun ReceiptRow(
 
         Text(
             text = description,
-            modifier = Modifier.fillMaxWidth(ROW_LEFT),
+            modifier = Modifier.fillMaxWidth(ROW_START),
             fontSize = MAIN_FONT_SIZE,
             color = color
         )
         Text(
             text = priceString,
             Modifier.fillMaxWidth(),
-            style = TextStyle.Default.copy(textAlign = TextAlign.Right),
+            style = TextStyle.Default.copy(textAlign = TextAlign.End),
             fontSize = MAIN_FONT_SIZE,
             color = color
         )
