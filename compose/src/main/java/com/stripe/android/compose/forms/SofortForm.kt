@@ -12,16 +12,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
-import com.stripe.android.compose.elements.AutoComplete
-import com.stripe.android.compose.elements.CountryElement
-import com.stripe.android.compose.elements.Element
-import com.stripe.android.compose.elements.Email
-import com.stripe.android.compose.elements.Name
+import com.stripe.android.compose.R
+import com.stripe.android.compose.elements.DropdownElement
+import com.stripe.android.compose.elements.EmailConfig
+import com.stripe.android.compose.elements.NameConfig
 import com.stripe.android.compose.elements.Section
-import com.stripe.android.compose.elements.SimpleTextFieldElement
+import com.stripe.android.compose.elements.TextFieldComposable
+import com.stripe.android.compose.elements.common.DropdownElement
+import com.stripe.android.compose.elements.common.TextFieldElement
+import com.stripe.android.compose.elements.country.CountryConfig
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.compose.R
 
 @Composable
 fun SofortForm(
@@ -31,70 +32,63 @@ fun SofortForm(
     val name = FocusRequester()
     val email = FocusRequester()
 
-    val selectedCountry by viewModel.countryElement.input.observeAsState("")
     val nameErrorMessage by viewModel.nameElement.errorMessage.observeAsState(null)
     val emailErrorMessage by viewModel.emailElement.errorMessage.observeAsState(null)
-    val countryErrorMessage by viewModel.countryElement.errorMessage.observeAsState(null)
-
-    val countries = viewModel.countryElement.countries
 
     Column(modifier = Modifier.padding(top = 30.dp, start = 16.dp, end = 16.dp)) {
         Section(R.string.address_label_name, nameErrorMessage) {
-            SimpleTextFieldElement(
-                element = viewModel.nameElement,
+            TextFieldComposable(
+                textFieldElement = viewModel.nameElement,
                 myFocus = name,
                 nextFocus = email,
             )
         }
         Section(R.string.becs_widget_email, emailErrorMessage) {
-            SimpleTextFieldElement(
-                element = viewModel.emailElement,
+            TextFieldComposable(
+                textFieldElement = viewModel.emailElement,
                 myFocus = email,
                 nextFocus = null,
             )
         }
 
-        Section(R.string.address_label_country, countryErrorMessage) {
-            // TODO: THis should have my and next focus elements.
-            AutoComplete(
-                items = countries,
-                selectedItem = selectedCountry,
-                onValueChange = { viewModel.countryElement.onValueChange(it) }
+        Section(R.string.address_label_country, null) {
+            DropdownElement(
+                element = viewModel.countryElement
             )
         }
     }
 }
 
 class SofortFormViewModel : ViewModel() {
-    internal var nameElement = Element(Name())
-    internal var emailElement = Element(Email())
-    internal var countryElement = CountryElement()
+    internal var nameElement = TextFieldElement(NameConfig())
+    internal var emailElement = TextFieldElement(EmailConfig())
+    internal var countryElement = DropdownElement(CountryConfig())
 
     val params: LiveData<PaymentMethodCreateParams?> =
         MediatorLiveData<PaymentMethodCreateParams?>().apply {
-            addSource(nameElement.input) { postValue(getParams()) }
+            addSource(nameElement.paramValue) { postValue(getParams()) }
             addSource(nameElement.isComplete) { postValue(getParams()) }
-            addSource(emailElement.input) { postValue(getParams()) }
+            addSource(emailElement.paramValue) { postValue(getParams()) }
             addSource(emailElement.isComplete) { postValue(getParams()) }
-            addSource(countryElement.input) { postValue(getParams()) }
-            addSource(countryElement.isComplete) { postValue(getParams()) }
+
+            // Country is a dropdown and so will always be complete.
+            addSource(countryElement.paramValue) { postValue(getParams()) }
         }
 
     private fun getParams(): PaymentMethodCreateParams? {
         Log.d(
             "APP",
-            "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}, country: ${countryElement.isComplete.value}"
+            "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}, country: ${countryElement.isComplete}"
         )
-        return if (nameElement.isComplete.value == true && emailElement.isComplete.value == true && countryElement.isComplete.value == true) {
+        return if (nameElement.isComplete.value == true && emailElement.isComplete.value == true && countryElement.isComplete) {
 
             PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.input.value)),
+                PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.paramValue.value)),
                 PaymentMethod.BillingDetails(
-                    name = nameElement.input.value,
-                    email = emailElement.input.value
+                    name = nameElement.paramValue.value,
+                    email = emailElement.paramValue.value
                 )
             )
-
         } else {
             null
         }

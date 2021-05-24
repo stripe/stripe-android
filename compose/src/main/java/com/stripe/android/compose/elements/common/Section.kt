@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 
-private val SECTION_CARD_VERTICAL_PADDING = 8.dp
+private val SECTION_CARD_VERTICAL_PADDING = 2.dp
 private val SECTION_CARD_ELEVATION = 8.dp
 
 /**
@@ -21,7 +21,7 @@ private val SECTION_CARD_ELEVATION = 8.dp
  */
 @Composable
 internal fun Section(label: Int, error: Int?, content: @Composable () -> Unit) {
-    Column(modifier = Modifier.padding(top = 16.dp)) {
+    Column(modifier = Modifier.padding(top = 2.dp)) {
         Text(
             text = stringResource(id = label)
         )

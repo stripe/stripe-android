@@ -3,8 +3,10 @@ package com.stripe.android.compose.elements
 import android.util.Patterns
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.compose.R
+import com.stripe.android.compose.elements.common.TextFieldConfigInterface
+import com.stripe.android.compose.elements.common.TextFieldElementState
 
-internal class Email : ConfigInterface {
+internal class EmailConfig : TextFieldConfigInterface {
     override val debugLabel = "email"
     override val label = R.string.becs_widget_email
     override val keyboard = KeyboardType.Email
@@ -12,10 +14,10 @@ internal class Email : ConfigInterface {
     override fun filter(userTyped: String) =
         userTyped.filter { Character.isLetterOrDigit(it) || it == '.' || it == '@' }
 
-    override fun determineState(displayFormatted: String): ElementState {
+    override fun determineState(paramFormatted: String?): TextFieldElementState {
         return when {
-            displayFormatted.isEmpty() -> Error.BlankAndRequired
-            Patterns.EMAIL_ADDRESS.matcher(displayFormatted).matches() -> {
+            paramFormatted?.isEmpty() ?: true -> Error.BlankAndRequired
+            Patterns.EMAIL_ADDRESS.matcher(paramFormatted).matches() -> {
                 Valid.Limitless
             }
             else -> {
@@ -24,7 +26,7 @@ internal class Email : ConfigInterface {
         }
     }
 
-    override fun shouldShowError(elementState: ElementState, hasFocus: Boolean) =
+    override fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean) =
         when (elementState) {
             is Error -> {
                 when (elementState) {
@@ -37,11 +39,11 @@ internal class Email : ConfigInterface {
         }
 
     companion object {
-        sealed class Valid : ElementState.ElementStateValid() {
+        sealed class Valid : TextFieldElementState.TextFieldElementStateValid() {
             object Limitless : Valid() // no auto-advance
         }
 
-        sealed class Error(stringResId: Int) : ElementState.ElementStateError(stringResId) {
+        sealed class Error(stringResId: Int) : TextFieldElementState.TextFieldElementStateError(stringResId) {
             object Incomplete : Error(R.string.incomplete)
             object BlankAndRequired : Error(R.string.blank_and_required)
         }

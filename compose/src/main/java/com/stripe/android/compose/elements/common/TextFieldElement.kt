@@ -1,8 +1,9 @@
-package com.stripe.android.compose.elements
+package com.stripe.android.compose.elements.common
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.compose.NotNullMutableLiveData
@@ -13,19 +14,23 @@ import com.stripe.android.compose.R
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal open class Element(private val config: ConfigInterface) {
-    val debugLabel = config.debugLabel
+internal open class TextFieldElement(private val textFieldConfig: TextFieldConfigInterface) {
+    val debugLabel = textFieldConfig.debugLabel
     private val isDebug = true
 
     /** This is all the information that can be observed on the element */
-    private val _input: NotNullMutableLiveData<String> = NotNullMutableLiveData("")
-    val input: LiveData<String> = _input.distinctUntilChanged()
+    private val _paramValue: MutableLiveData<String?> = MutableLiveData(null)
+    val paramValue: LiveData<String?> = _paramValue.distinctUntilChanged()
+    val displayValue: LiveData<String> = Transformations.map(paramValue) {
+        textFieldConfig.convertToDisplay(it)
+    }
 
-    private val _elementState: NotNullMutableLiveData<ElementState> = NotNullMutableLiveData(
-        ElementState.ElementStateError(
-            R.string.invalid
+    private val _elementState: NotNullMutableLiveData<TextFieldElementState> =
+        NotNullMutableLiveData(
+            TextFieldElementState.TextFieldElementStateError(
+                R.string.invalid
+            )
         )
-    )
 
     private val _hasFocus: NotNullMutableLiveData<Boolean> = NotNullMutableLiveData(false)
 
@@ -41,36 +46,38 @@ internal open class Element(private val config: ConfigInterface) {
     val isFull = Transformations.map(_elementState) { it.isFull() }
     val isComplete = Transformations.map(_elementState) { it.isValid() }
 
-    private val shouldShowErrorDebug: (ElementState, Boolean) -> Boolean = { state, hasFocus ->
-        when (state) {
-            is Valid.Full -> false
-            is Error.ShowInFocus -> !hasFocus
-            is Error.ShowAlways -> true
-            else -> config.shouldShowError(state, hasFocus)
+    private val shouldShowErrorDebug: (TextFieldElementState, Boolean) -> Boolean =
+        { state, hasFocus ->
+            when (state) {
+                is Valid.Full -> false
+                is Error.ShowInFocus -> !hasFocus
+                is Error.ShowAlways -> true
+                else -> textFieldConfig.shouldShowError(state, hasFocus)
+            }
         }
-    }
 
-    private val shouldShowError: (ElementState, Boolean) -> Boolean =
+    private val shouldShowError: (TextFieldElementState, Boolean) -> Boolean =
         if (isDebug) {
             shouldShowErrorDebug
         } else { state, hasFocus ->
-            config.shouldShowError(state, hasFocus)
+            textFieldConfig.shouldShowError(state, hasFocus)
         }
 
-    private val determineStateDebug: (String) -> ElementState = { str ->
+    private val determineStateDebug: (String?) -> TextFieldElementState = { str ->
         when {
+            str == null -> textFieldConfig.determineState(str)
             str.contains("full") -> Valid.Full
             str.contains("focus") -> Error.ShowInFocus
             str.contains("always") -> Error.ShowAlways
-            else -> config.determineState(str)
+            else -> textFieldConfig.determineState(str)
         }
     }
 
-    private val determineState: (String) -> ElementState =
+    private val determineState: (String?) -> TextFieldElementState =
         if (isDebug) {
             determineStateDebug
         } else { str ->
-            config.determineState(str)
+            textFieldConfig.determineState(str)
         }
 
     init {
@@ -78,9 +85,11 @@ internal open class Element(private val config: ConfigInterface) {
         onValueChange("")
     }
 
-    fun onValueChange(new: String) {
-        _input.value = config.filter(new)
-        val newState = determineState(_input.value)// Should be filtered value
+    fun onValueChange(displayFormatted: String) {
+        _paramValue.value =
+            textFieldConfig.convertToPaymentMethodParam(textFieldConfig.filter(displayFormatted))
+
+        val newState = determineState(_paramValue.value)// Should be filtered value
         _elementState.value = newState
     }
 
@@ -89,13 +98,14 @@ internal open class Element(private val config: ConfigInterface) {
     }
 
     companion object {
-        sealed class Valid : ElementState.ElementStateValid() {
+        sealed class Valid : TextFieldElementState.TextFieldElementStateValid() {
             object Full : Valid() {
                 override fun isFull() = true
             }
         }
 
-        sealed class Error(stringResId: Int) : ElementState.ElementStateError(stringResId) {
+        sealed class Error(stringResId: Int) :
+            TextFieldElementState.TextFieldElementStateError(stringResId) {
             object ShowInFocus : Error(R.string.invalid)
             object ShowAlways : Error(R.string.invalid)
         }

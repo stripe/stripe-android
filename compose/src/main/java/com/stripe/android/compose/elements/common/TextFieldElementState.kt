@@ -1,11 +1,11 @@
-package com.stripe.android.compose.elements
+package com.stripe.android.compose.elements.common
 
 /**
  * This represents the different states a field can be in,
  * in each of these cases there might be a reason to show the
  * error in a different way
  */
-internal abstract class ElementState {
+internal abstract class TextFieldElementState {
 
     /**
      * This indicate the Element state has reached the max number of characters
@@ -25,13 +25,13 @@ internal abstract class ElementState {
      */
     abstract fun getErrorMessageResId(): Int?
 
-    open class ElementStateValid : ElementState() {
+    open class TextFieldElementStateValid : TextFieldElementState() {
         override fun isValid(): Boolean = true
         override fun isFull(): Boolean = false
         override fun getErrorMessageResId(): Int? = null
     }
 
-    open class ElementStateError(private val stringResId: Int) : ElementState() {
+    open class TextFieldElementStateError(private val stringResId: Int) : TextFieldElementState() {
         override fun isValid(): Boolean = false
         override fun isFull(): Boolean = false
         override fun getErrorMessageResId(): Int? = stringResId

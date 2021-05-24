@@ -22,6 +22,7 @@ import androidx.compose.ui.focus.isFocused
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import com.stripe.android.compose.elements.common.TextFieldElement
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
 fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
@@ -35,18 +36,18 @@ fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequest
  * - calls through to the Elements worker functions for focus change and value change events
  */
 @Composable
-internal fun SimpleTextFieldElement(
-    element: Element,
+internal fun TextFieldComposable(
+    textFieldElement: TextFieldElement,
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,
     modifier: Modifier = Modifier,
     label: Int? = null, // Let the caller choose if they want a label, if it is in a section by itself it might not make sense.
 ) {
-    Log.d("Construct", "SimpleTextFieldElement ${element.debugLabel}")
+    Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
 
-    val value by element.input.observeAsState("")
-    val shouldShowError by element.visibleError.observeAsState(false)
-    val elementIsFull by element.isFull.observeAsState(false)
+    val value by textFieldElement.displayValue.observeAsState("")
+    val shouldShowError by textFieldElement.visibleError.observeAsState(false)
+    val elementIsFull by textFieldElement.isFull.observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
@@ -72,7 +73,7 @@ internal fun SimpleTextFieldElement(
 
     TextField(
         value = value,
-        onValueChange = { element.onValueChange(it) },
+        onValueChange = { textFieldElement.onValueChange(it) },
         isError = shouldShowError,
         label = { label?.let { Text(text = stringResource(it)) } },
         modifier = modifier
@@ -80,8 +81,7 @@ internal fun SimpleTextFieldElement(
             .focusOrder(myFocus) { nextFocus?.requestFocus() }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {
-                    element.onFocusChange(it.isFocused)
-
+                    textFieldElement.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
             },

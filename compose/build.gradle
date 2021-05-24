@@ -52,7 +52,6 @@ android {
 dependencies {
     implementation project(":stripe")
     implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
-
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidLifecycleVersion"
@@ -77,4 +76,23 @@ dependencies {
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
     implementation "androidx.compose.runtime:runtime-rxjava2:$composeVersion"
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.mockito:mockito-core:3.10.0"
+    testImplementation 'org.robolectric:robolectric:4.5.1'
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation 'org.json:json:20210307'
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation 'com.google.truth:truth:1.1.2'
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
+
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test:rules:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+
 }
