@@ -12,11 +12,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.fragment.app.viewModels
 import com.stripe.android.compose.forms.SofortForm
 import com.stripe.android.compose.forms.SofortFormViewModel
 
 class FormFragment : Fragment() {
+    val sofortFormViewModel: SofortFormViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -30,10 +32,9 @@ class FormFragment : Fragment() {
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
-                    val sofortFormViewModel = viewModel<SofortFormViewModel>()
-                    val paramStr by sofortFormViewModel.params.observeAsState("")
+                    val param by sofortFormViewModel.params.observeAsState(null)
                     SofortForm(sofortFormViewModel)
-                    Log.e("APP", "Params: $paramStr")
+                    Log.e("APP", "Params: $param")
                 }
 
             }
