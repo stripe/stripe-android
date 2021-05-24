@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
-import com.stripe.android.FingerprintData
-import com.stripe.android.FingerprintDataRepository
+import com.stripe.android.DefaultFraudDetectionDataRepository
+import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Logger
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
@@ -79,11 +79,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         AnalyticsRequestExecutor.Default(logger, workContext),
-    private val fingerprintDataRepository: FingerprintDataRepository =
-        FingerprintDataRepository.Default(context, workContext),
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository =
+        DefaultFraudDetectionDataRepository(context, workContext),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
         AnalyticsRequestFactory(context, publishableKey),
-    private val fingerprintParamsUtils: FingerprintParamsUtils = FingerprintParamsUtils(),
+    private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas).code,
     sdkVersion: String = Stripe.VERSION
@@ -94,11 +94,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sdkVersion = sdkVersion
     )
 
-    private val fingerprintData: FingerprintData?
-        get() = fingerprintDataRepository.getCached()
+    private val fraudDetectionData: FraudDetectionData?
+        get() = fraudDetectionDataRepository.getCached()
 
     init {
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
     }
 
     /**
@@ -121,16 +121,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): PaymentIntent? {
-        val params = fingerprintParamsUtils.addFingerprintData(
+        val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
             confirmPaymentIntentParams.toParamMap()
                 .plus(createExpandParam(expandFields)),
-            fingerprintData
+            fraudDetectionData
         )
         val apiUrl = getConfirmPaymentIntentUrl(
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
         )
 
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createPost(apiUrl, options, params),
@@ -167,7 +167,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): PaymentIntent? {
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
 
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createGet(
@@ -197,7 +197,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         options: ApiRequest.Options
     ): PaymentIntent? {
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -234,16 +234,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val setupIntentId =
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
 
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 getConfirmSetupIntentUrl(setupIntentId),
                 options,
-                fingerprintParamsUtils.addFingerprintData(
+                fraudDetectionDataParamsUtils.addFraudDetectionData(
                     confirmSetupIntentParams.toParamMap()
                         .plus(createExpandParam(expandFields)),
-                    fingerprintData
+                    fraudDetectionData
                 )
             ),
             SetupIntentJsonParser()
@@ -276,7 +276,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): SetupIntent? {
         val setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId
 
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createGet(
@@ -337,14 +337,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source? {
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 sourcesUrl,
                 options,
                 sourceParams.toParamMap()
-                    .plus(fingerprintData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty())
             ),
             SourceJsonParser()
         ) {
@@ -403,14 +403,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod? {
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 paymentMethodsUrl,
                 options,
                 paymentMethodCreateParams.toParamMap()
-                    .plus(fingerprintData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty())
             ),
             PaymentMethodJsonParser()
         ) {
@@ -445,14 +445,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Token? {
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 tokensUrl,
                 options,
                 tokenParams.toParamMap()
-                    .plus(fingerprintData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty())
             ),
             TokenJsonParser()
         ) {
@@ -549,7 +549,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethod? {
-        fireFingerprintRequest()
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -925,7 +925,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Get the latest [FingerprintData] from [FingerprintDataRepository] and send in POST request
+     * Get the latest [FraudDetectionData] from [FraudDetectionDataRepository] and send in POST request
      * to `/v1/radar/session`.
      */
     override suspend fun createRadarSession(
@@ -935,7 +935,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             require(Stripe.advancedFraudSignalsEnabled) {
                 "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
             }
-            requireNotNull(fingerprintDataRepository.getLatest()) {
+            requireNotNull(fraudDetectionDataRepository.getLatest()) {
                 "Could not obtain fraud data required to create a Radar Session."
             }
         }.map {
@@ -1103,8 +1103,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    private fun fireFingerprintRequest() {
-        fingerprintDataRepository.refresh()
+    private fun fireFraudDetectionDataRequest() {
+        fraudDetectionDataRepository.refresh()
     }
 
     private fun fireAnalyticsRequest(

@@ -15,11 +15,10 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.FakeFingerprintDataRepository
+import com.stripe.android.FakeFraudDetectionDataRepository
 import com.stripe.android.FileFactory
-import com.stripe.android.FingerprintData
-import com.stripe.android.FingerprintDataFixtures
-import com.stripe.android.FingerprintDataRepository
+import com.stripe.android.FraudDetectionDataFixtures
+import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
@@ -75,7 +74,7 @@ internal class StripeApiRepositoryTest {
 
     private val stripeApiRequestExecutor: ApiRequestExecutor = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
-    private val fingerprintDataRepository: FingerprintDataRepository = mock()
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository = mock()
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
     private val fileUploadRequestArgumentCaptor: KArgumentCaptor<FileUploadRequest> =
@@ -84,8 +83,8 @@ internal class StripeApiRepositoryTest {
 
     @BeforeTest
     fun before() {
-        whenever(fingerprintDataRepository.getCached()).thenReturn(
-            FingerprintDataFixtures.create(Calendar.getInstance().timeInMillis)
+        whenever(fraudDetectionDataRepository.getCached()).thenReturn(
+            FraudDetectionDataFixtures.create(Calendar.getInstance().timeInMillis)
         )
     }
 
@@ -230,7 +229,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS
             )
 
-            verifyFingerprintAndAnalyticsRequests(
+            verifyFraudDetectionDataAndAnalyticsRequests(
                 AnalyticsEvent.SourceCreate,
                 productUsage = listOf("CardInputView")
             )
@@ -255,7 +254,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS
             )
 
-            verifyFingerprintAndAnalyticsRequests(
+            verifyFraudDetectionDataAndAnalyticsRequests(
                 AnalyticsEvent.SourceCreate,
                 productUsage = null
             )
@@ -426,7 +425,7 @@ internal class StripeApiRepositoryTest {
             assertTrue(paymentMethodDataParams["guid"] is String)
             assertEquals("card", paymentMethodDataParams["type"])
 
-            verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
+            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
 
             val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
             assertThat(analyticsRequest.params["source_type"])
@@ -477,7 +476,7 @@ internal class StripeApiRepositoryTest {
                 workContext = testDispatcher
             ),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            fingerprintDataRepository = fingerprintDataRepository
+            fraudDetectionDataRepository = fraudDetectionDataRepository
         )
 
         requireNotNull(
@@ -487,7 +486,7 @@ internal class StripeApiRepositoryTest {
             )
         )
 
-        verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.SourceCreate)
+        verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.SourceCreate)
     }
 
     @Test
@@ -884,7 +883,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS
             )
 
-            verifyFingerprintAndAnalyticsRequests(
+            verifyFraudDetectionDataAndAnalyticsRequests(
                 AnalyticsEvent.TokenCreate,
                 listOf("CardInputView")
             )
@@ -903,7 +902,7 @@ internal class StripeApiRepositoryTest {
             DEFAULT_OPTIONS
         )
 
-        verifyFingerprintAndAnalyticsRequests(
+        verifyFraudDetectionDataAndAnalyticsRequests(
             AnalyticsEvent.TokenCreate,
             productUsage = null
         )
@@ -928,7 +927,7 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS
             )
 
-            verifyFingerprintAndAnalyticsRequests(
+            verifyFraudDetectionDataAndAnalyticsRequests(
                 AnalyticsEvent.PaymentMethodCreate,
                 productUsage = listOf("CardInputView")
             )
@@ -950,20 +949,20 @@ internal class StripeApiRepositoryTest {
                 DEFAULT_OPTIONS
             )
 
-            verifyFingerprintAndAnalyticsRequests(
+            verifyFraudDetectionDataAndAnalyticsRequests(
                 AnalyticsEvent.PaymentMethodCreate,
                 productUsage = null
             )
         }
 
     @Test
-    fun `createRadarSession() with FingerprintData should return expected value`() = testDispatcher.runBlockingTest {
+    fun `createRadarSession() with FraudDetectionData should return expected value`() = testDispatcher.runBlockingTest {
         val stripeRepository = StripeApiRepository(
             context,
             DEFAULT_OPTIONS.apiKey,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            fingerprintDataRepository = FakeFingerprintDataRepository(
-                FingerprintData(
+            fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
+                FraudDetectionData(
                     guid = "8ae65368-76c5-4dd5-81b9-279f61efa591c80a51",
                     muid = "ac3febde-f658-41b5-8c4d-94905501c7a6f4ca3c",
                     sid = "02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf"
@@ -981,11 +980,11 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `createRadarSession() with null FingerprintData should throw an exception`() = testDispatcher.runBlockingTest {
+    fun `createRadarSession() with null FraudDetectionData should throw an exception`() = testDispatcher.runBlockingTest {
         val stripeRepository = StripeApiRepository(
             context,
             DEFAULT_OPTIONS.apiKey,
-            fingerprintDataRepository = FakeFingerprintDataRepository(
+            fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
                 null
             ),
             workContext = testDispatcher
@@ -1000,7 +999,7 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun `createRadarSession() with advancedFraudSignalsEnabled set to false should throw an exception`() = testDispatcher.runBlockingTest {
-        verifyZeroInteractions(fingerprintDataRepository)
+        verifyZeroInteractions(fraudDetectionDataRepository)
 
         Stripe.advancedFraudSignalsEnabled = false
         val stripeRepository = create()
@@ -1011,11 +1010,11 @@ internal class StripeApiRepositoryTest {
             .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
     }
 
-    private fun verifyFingerprintAndAnalyticsRequests(
+    private fun verifyFraudDetectionDataAndAnalyticsRequests(
         event: AnalyticsEvent,
         productUsage: List<String>? = null
     ) {
-        verify(fingerprintDataRepository, times(2))
+        verify(fraudDetectionDataRepository, times(2))
             .refresh()
 
         verifyAnalyticsRequest(event, productUsage)
@@ -1048,8 +1047,8 @@ internal class StripeApiRepositoryTest {
             workContext = testDispatcher,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            fingerprintDataRepository = fingerprintDataRepository,
-            fingerprintParamsUtils = FingerprintParamsUtils()
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
+            fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
         )
     }
 

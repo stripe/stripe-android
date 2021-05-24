@@ -1,16 +1,16 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.FingerprintData
+import com.stripe.android.networking.FraudDetectionData
 import org.json.JSONObject
 import kotlin.test.Test
 
-class FingerprintDataJsonParserTest {
+class FraudDetectionDataJsonParserTest {
     @Test
     fun `should parse correctly`() {
-        assertThat(FingerprintDataJsonParser { 100L }.parse(JSON))
+        assertThat(FraudDetectionDataJsonParser { 100L }.parse(JSON))
             .isEqualTo(
-                FingerprintData(
+                FraudDetectionData(
                     guid = "200",
                     muid = "100",
                     sid = "300",

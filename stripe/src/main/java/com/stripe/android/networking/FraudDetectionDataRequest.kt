@@ -3,16 +3,16 @@ package com.stripe.android.networking
 import com.stripe.android.model.StripeJsonUtils
 
 /**
- * A class representing a fingerprint request.
+ * A class representing a [FraudDetectionData] request.
  */
-internal class FingerprintRequest(
+internal class FraudDetectionDataRequest(
     override val params: Map<String, Any>,
     guid: String
 ) : StripeRequest() {
     override val method = Method.POST
     override val baseUrl = URL
     override val mimeType = MimeType.Json
-    override val headersFactory = RequestHeadersFactory.Fingerprint(
+    override val headersFactory = RequestHeadersFactory.FraudDetection(
         guid = guid
     )
 

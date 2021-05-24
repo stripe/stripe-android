@@ -109,9 +109,9 @@ class ApiRequestHeadersFactoryTest {
     }
 
     @Test
-    fun `Fingerprint#create() should return expected map`() {
+    fun `FraudDetection#create() should return expected map`() {
         val guid = UUID.randomUUID().toString()
-        val headers = RequestHeadersFactory.Fingerprint(guid).create()
+        val headers = RequestHeadersFactory.FraudDetection(guid).create()
         assertThat(
             headers
         ).containsKey("User-Agent")

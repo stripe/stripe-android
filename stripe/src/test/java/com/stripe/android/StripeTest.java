@@ -85,8 +85,8 @@ public class StripeTest {
     @NonNull
     private final Context context = ApplicationProvider.getApplicationContext();
     @NonNull
-    private final FingerprintDataRepository defaultFingerprintDataRepository =
-            new FingerprintDataRepository.Default(context);
+    private final FraudDetectionDataRepository defaultFraudDetectionDataRepository =
+            new DefaultFraudDetectionDataRepository(context);
     @NonNull
     private final Stripe defaultStripe = createStripe();
 
@@ -1056,7 +1056,7 @@ public class StripeTest {
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                 new FakeAnalyticsRequestExecutor(),
-                new FakeFingerprintDataRepository()
+                new FakeFraudDetectionDataRepository()
         );
 
         final String idempotencyKey = UUID.randomUUID().toString();
@@ -1299,7 +1299,7 @@ public class StripeTest {
         return createStripe(
                 publishableKey,
                 new FakeAnalyticsRequestExecutor(),
-                defaultFingerprintDataRepository
+                defaultFraudDetectionDataRepository
         );
     }
 
@@ -1311,7 +1311,7 @@ public class StripeTest {
         return createStripe(
                 publishableKey,
                 analyticsRequestExecutor,
-                defaultFingerprintDataRepository
+                defaultFraudDetectionDataRepository
         );
     }
 
@@ -1319,13 +1319,13 @@ public class StripeTest {
     private Stripe createStripe(
             @NonNull String publishableKey,
             @NonNull AnalyticsRequestExecutor analyticsRequestExecutor,
-            @NonNull FingerprintDataRepository fingerprintDataRepository
+            @NonNull FraudDetectionDataRepository fraudDetectionDataRepository
     ) {
         final StripeRepository stripeRepository = createStripeRepository(
                 publishableKey,
                 testDispatcher,
                 analyticsRequestExecutor,
-                fingerprintDataRepository
+                fraudDetectionDataRepository
         );
         return new Stripe(
                 stripeRepository,
@@ -1341,7 +1341,7 @@ public class StripeTest {
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                 workDispatcher,
                 new FakeAnalyticsRequestExecutor(),
-                defaultFingerprintDataRepository
+                defaultFraudDetectionDataRepository
         );
         return new Stripe(
                 stripeRepository,
@@ -1361,7 +1361,7 @@ public class StripeTest {
             @NonNull final String publishableKey,
             @NonNull CoroutineContext workDispatcher,
             @NonNull AnalyticsRequestExecutor analyticsRequestExecutor,
-            @NonNull FingerprintDataRepository fingerprintDataRepository
+            @NonNull FraudDetectionDataRepository fraudDetectionDataRepository
     ) {
         return new StripeApiRepository(
                 context,
@@ -1371,7 +1371,7 @@ public class StripeTest {
                 workDispatcher,
                 new DefaultApiRequestExecutor(workDispatcher),
                 analyticsRequestExecutor,
-                fingerprintDataRepository
+                fraudDetectionDataRepository
         );
     }
 

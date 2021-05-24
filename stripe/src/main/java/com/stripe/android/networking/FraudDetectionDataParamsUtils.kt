@@ -1,39 +1,38 @@
 package com.stripe.android.networking
 
-import com.stripe.android.FingerprintData
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 
 /**
- * Utility class for adding fingerprint data to API params
+ * Utility class for adding fraud detection data to API params
  */
-internal class FingerprintParamsUtils {
-    internal fun addFingerprintData(
+internal class FraudDetectionDataParamsUtils {
+    internal fun addFraudDetectionData(
         params: Map<String, *>,
-        fingerprintData: FingerprintData?
+        fraudDetectionData: FraudDetectionData?
     ): Map<String, *> {
         return setOf(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA, PARAM_PAYMENT_METHOD_DATA)
             .firstOrNull { key ->
                 params.containsKey(key)
             }?.let { key ->
-                addFingerprintData(
+                addFraudDetectionData(
                     params,
                     key,
-                    fingerprintData
+                    fraudDetectionData
                 )
             } ?: params
     }
 
-    private fun addFingerprintData(
+    private fun addFraudDetectionData(
         stripeIntentParams: Map<String, *>,
         key: String,
-        fingerprintData: FingerprintData?
+        fraudDetectionData: FraudDetectionData?
     ): Map<String, *> {
         return (stripeIntentParams[key] as? Map<*, *>)?.let {
             stripeIntentParams.plus(
                 mapOf(
                     key to it.plus(
-                        fingerprintData?.params.orEmpty()
+                        fraudDetectionData?.params.orEmpty()
                     )
                 )
             )

@@ -73,7 +73,7 @@ class StripeRequestCompactParamsTest {
         override val baseUrl: String = "https://example.com"
         override val mimeType: MimeType = MimeType.Form
         override val body: String = ""
-        override val headersFactory = RequestHeadersFactory.Fingerprint(
+        override val headersFactory = RequestHeadersFactory.FraudDetection(
             guid = UUID.randomUUID().toString()
         )
     }

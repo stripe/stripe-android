@@ -33,7 +33,7 @@ internal class DefaultApiRequestExecutorTest {
             override val baseUrl: String = ApiRequest.API_HOST
             override val params: Map<String, *>? = null
             override val mimeType: MimeType = MimeType.Form
-            override val headersFactory = RequestHeadersFactory.Fingerprint(
+            override val headersFactory = RequestHeadersFactory.FraudDetection(
                 UUID.randomUUID().toString()
             )
 
@@ -137,7 +137,7 @@ internal class DefaultApiRequestExecutorTest {
         override val baseUrl: String = ApiRequest.API_HOST
         override val params: Map<String, *>? = null
         override val mimeType: MimeType = MimeType.Form
-        override val headersFactory = RequestHeadersFactory.Fingerprint(
+        override val headersFactory = RequestHeadersFactory.FraudDetection(
             UUID.randomUUID().toString()
         )
 

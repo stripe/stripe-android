@@ -1,18 +1,18 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.FingerprintData
 import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.networking.FraudDetectionData
 import org.json.JSONObject
 
-internal class FingerprintDataJsonParser(
+internal class FraudDetectionDataJsonParser(
     private val timestampSupplier: () -> Long
-) : ModelJsonParser<FingerprintData> {
-    override fun parse(json: JSONObject): FingerprintData? {
+) : ModelJsonParser<FraudDetectionData> {
+    override fun parse(json: JSONObject): FraudDetectionData? {
         val guid = optString(json, FIELD_GUID) ?: return null
         val muid = optString(json, FIELD_MUID) ?: return null
         val sid = optString(json, FIELD_SID) ?: return null
 
-        return FingerprintData(
+        return FraudDetectionData(
             guid = guid,
             muid = muid,
             sid = sid,

@@ -3,7 +3,7 @@ package com.stripe.android.networking
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.FingerprintDataFixtures
+import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.model.CardParamsFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -22,11 +22,11 @@ internal class ApiRequestTest {
             url = StripeApiRepository.sourcesUrl,
             options = OPTIONS,
             params = CardParamsFixtures.MINIMUM.toParamMap()
-                .plus(FINGERPRINT_DATA.params)
+                .plus(FRAUD_DETECTION_DATA.params)
         ).url
 
         assertThat(Uri.parse(url))
-            .isEqualTo(Uri.parse("https://api.stripe.com/v1/sources?muid=${FINGERPRINT_DATA.muid}&guid=${FINGERPRINT_DATA.guid}&card%5Bnumber%5D=4242424242424242&card%5Bexp_month%5D=1&card%5Bcvc%5D=123&card%5Bexp_year%5D=2050&sid=${FINGERPRINT_DATA.sid}"))
+            .isEqualTo(Uri.parse("https://api.stripe.com/v1/sources?muid=${FRAUD_DETECTION_DATA.muid}&guid=${FRAUD_DETECTION_DATA.guid}&card%5Bnumber%5D=4242424242424242&card%5Bexp_month%5D=1&card%5Bcvc%5D=123&card%5Bexp_year%5D=2050&sid=${FRAUD_DETECTION_DATA.sid}"))
     }
 
     @Test
@@ -97,6 +97,6 @@ internal class ApiRequestTest {
 
         private val FACTORY = ApiRequest.Factory()
 
-        private val FINGERPRINT_DATA = FingerprintDataFixtures.create()
+        private val FRAUD_DETECTION_DATA = FraudDetectionDataFixtures.create()
     }
 }

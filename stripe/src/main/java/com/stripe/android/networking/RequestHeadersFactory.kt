@@ -73,7 +73,7 @@ internal sealed class RequestHeadersFactory {
         }
     }
 
-    class Fingerprint(
+    class FraudDetection(
         guid: String
     ) : RequestHeadersFactory() {
         override val extraHeaders = mapOf(HEADER_COOKIE to "m=$guid")
