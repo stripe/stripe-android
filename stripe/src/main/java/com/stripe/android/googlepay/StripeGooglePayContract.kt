@@ -131,12 +131,13 @@ internal class StripeGooglePayContract :
     }
 }
 
-internal fun Status.getErrorResourceID(): Int? {
-    return when (this) {
+internal fun StripeGooglePayContract.Result.Error.getErrorResourceID(): Int? {
+    return when (googlePayStatus) {
         Status.RESULT_SUCCESS -> null
-        Status.RESULT_INTERNAL_ERROR, Status.RESULT_CANCELED, Status.RESULT_DEAD_CLIENT -> R.string.stripe_google_pay_error_internal
+        Status.RESULT_INTERNAL_ERROR, Status.RESULT_CANCELED, Status.RESULT_DEAD_CLIENT, null ->
+            R.string.stripe_google_pay_error_internal
         else -> {
-            when (this.statusCode) {
+            when (googlePayStatus.statusCode) {
                 CommonStatusCodes.API_NOT_CONNECTED, // "The client attempted to call a method from an API that failed to connect."
                 CommonStatusCodes.CANCELED, // -> "The result was canceled either due to client disconnect or PendingResult.cancel()."
                 CommonStatusCodes.DEVELOPER_ERROR, // -> "The application is misconfigured."

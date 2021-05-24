@@ -334,11 +334,12 @@ internal class PaymentSheetViewModel internal constructor(
                 confirmPaymentSelection(paymentSelection)
             }
             is StripeGooglePayContract.Result.Error -> {
+                logger.error("Error processing Google Pay payment", googlePayResult.exception)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 paymentIntent.value?.let { it ->
                     resetViewState(
                         it,
-                        googlePayResult.googlePayStatus?.getErrorResourceID()
+                        googlePayResult.getErrorResourceID()
                     )
                 }
             }

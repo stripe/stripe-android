@@ -5,9 +5,13 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.json.JSONObject
@@ -156,12 +160,45 @@ class StripeGooglePayViewModelTest {
         )
     }
 
+    @Test
+    fun `createPaymentMethod() with stripeAccount should include stripeAccount in request`() {
+        val stripeAccount = "account_id"
+        var requestOptions: ApiRequest.Options? = null
+        val stripeRepository = object : AbsFakeStripeRepository() {
+            override suspend fun createPaymentMethod(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                options: ApiRequest.Options
+            ): PaymentMethod? {
+                requestOptions = options
+                return null
+            }
+        }
+        val viewModel = StripeGooglePayViewModel(
+            ApplicationProvider.getApplicationContext(),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccount,
+            ARGS,
+            stripeRepository,
+            "App Name",
+            testDispatcher
+        )
+
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
+        )
+
+        viewModel.createPaymentMethod(params).observeForever {
+            assertThat(requestOptions?.stripeAccount).isEqualTo(stripeAccount)
+        }
+    }
+
     private fun createViewModel(
         args: StripeGooglePayContract.Args = ARGS
     ): StripeGooglePayViewModel {
         return StripeGooglePayViewModel(
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            null,
             args,
             FakeStripeRepository(),
             "App Name",

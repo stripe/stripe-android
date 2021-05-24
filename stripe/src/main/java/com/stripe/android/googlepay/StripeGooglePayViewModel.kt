@@ -22,6 +22,7 @@ import kotlin.coroutines.CoroutineContext
 internal class StripeGooglePayViewModel(
     application: Application,
     private val publishableKey: String,
+    private val stripeAccountId: String? = null,
     private val args: StripeGooglePayContract.Args,
     private val stripeRepository: StripeRepository,
     private val appName: String,
@@ -77,7 +78,10 @@ internal class StripeGooglePayViewModel(
                     requireNotNull(
                         stripeRepository.createPaymentMethod(
                             params,
-                            ApiRequest.Options(publishableKey)
+                            ApiRequest.Options(
+                                publishableKey,
+                                stripeAccountId
+                            )
                         )
                     )
                 }
@@ -88,13 +92,16 @@ internal class StripeGooglePayViewModel(
     internal class Factory(
         private val application: Application,
         private val publishableKey: String,
+        private val stripeAccountId: String? = null,
         private val args: StripeGooglePayContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val appName = application.applicationInfo.loadLabel(application.packageManager).toString()
+            val appName =
+                application.applicationInfo.loadLabel(application.packageManager).toString()
             return StripeGooglePayViewModel(
                 application,
                 publishableKey,
+                stripeAccountId,
                 args,
                 StripeApiRepository(application, publishableKey),
                 appName,

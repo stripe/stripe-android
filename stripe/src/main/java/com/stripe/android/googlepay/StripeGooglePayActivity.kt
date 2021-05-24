@@ -33,10 +33,14 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
     private val publishableKey: String by lazy {
         PaymentConfiguration.getInstance(this).publishableKey
     }
+    private val stripeAccountId: String? by lazy {
+        PaymentConfiguration.getInstance(this).stripeAccountId
+    }
     private val viewModel: StripeGooglePayViewModel by viewModels {
         StripeGooglePayViewModel.Factory(
             application,
             publishableKey,
+            stripeAccountId,
             args
         )
     }
