@@ -1,10 +1,11 @@
 # CHANGELOG
 
-## 16.9.0 - unreleased
+## 16.9.0 - 2021-05-21
 * [3727](https://github.com/stripe/stripe-android/pull/3727) Upgrade Gradle to `7.0.2`
 * [3734](https://github.com/stripe/stripe-android/pull/3734) Upgrade `androidx.appcompat:appcompat` to `1.3.0`
 * [3735](https://github.com/stripe/stripe-android/pull/3735) Upgrade `fragment-ktx` to `1.3.4`
 * [3737](https://github.com/stripe/stripe-android/pull/3737) Add `Stripe.createRadarSession()` API binding for `/v1/radar/session`
+* [3739](https://github.com/stripe/stripe-android/pull/3739) Downgrade Kotlin from `1.5.0` to `1.4.32`
 
 ## 16.8.2 - 2021-05-14
 * [3709](https://github.com/stripe/stripe-android/pull/3709) Upgrade org.jetbrains.kotlin.plugin.serialization to `1.5.0`
@@ -257,6 +258,8 @@ This release adds support for 19-digit cards in `CardInputWidget` and `CardMulti
 ## 15.0.1 - 2020-07-28
 * [#2641](https://github.com/stripe/stripe-android/pull/2641) Add support for Bank Account as source on `Customer` object
 * [#2643](https://github.com/stripe/stripe-android/pull/2643) Add missing fields to `Customer` model
+* [#2644](https://github.com/stripe/stripe-android/pull/2644) Support new directory server network names
+     * Enable support for Discover and other new networks
 * [#2646](https://github.com/stripe/stripe-android/pull/2646) Allow `CardMultilineWidget`'s `TextInputLayout`s to be styled
 * [#2649](https://github.com/stripe/stripe-android/pull/2649) Add `@JvmOverloads` to `GooglePayJsonFactory` methods
 * [#2651](https://github.com/stripe/stripe-android/pull/2651) Update Kotlin coroutines to `1.3.8`

@@ -1,4 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" tools:ignore="MissingTranslation">PaymentSheet Example</string>
     <string name="action_settings" tools:ignore="MissingTranslation">Settings</string>
+    <string name="product_subtitle" tools:ignore="MissingTranslation">1 x Regular %s</string>
+    <string name="subtotal" tools:ignore="MissingTranslation">Subtotal</string>
+    <string name="sales_tax" tools:ignore="MissingTranslation">Sales tax (8.25%)</string>
+    <string name="total" tools:ignore="MissingTranslation">Total</string>
+    <string name="hot_dog" tools:ignore="MissingTranslation">Hot Dog</string>
+    <string name="salad" tools:ignore="MissingTranslation">Salad</string>
+    <string name="cart_title" tools:ignore="MissingTranslation">Your cart</string>
+    <string name="buy" tools:ignore="MissingTranslation">Buy</string>
 </resources>
