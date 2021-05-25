@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-
 import com.google.common.truth.Truth
 import org.junit.Test
 

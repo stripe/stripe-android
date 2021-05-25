@@ -12,6 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.DropdownElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
@@ -20,9 +23,6 @@ import com.stripe.android.paymentsheet.elements.TextFieldComposable
 import com.stripe.android.paymentsheet.elements.common.DropdownElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.R
 
 @Composable
 fun SofortForm(
@@ -43,6 +43,7 @@ fun SofortForm(
                 nextFocus = email,
             )
         }
+
         Section(R.string.becs_widget_email, emailErrorMessage) {
             TextFieldComposable(
                 textFieldElement = viewModel.emailElement,

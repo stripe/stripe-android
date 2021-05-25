@@ -36,7 +36,6 @@ class FormFragment : Fragment() {
                     SofortForm(sofortFormViewModel)
                     Log.e("APP", "Params: $param")
                 }
-
             }
         }
     }

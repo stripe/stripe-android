@@ -31,6 +31,7 @@ internal class IdealBankConfig : DropdownConfigInterface {
             "Triodos Bank" to "triodos_bank",
             "Van Lanschot" to "van_lanschot",
         )
+
         val PARAM_TO_DISPLAY = mapOf(
             "abn_amro" to "ABN AMRO",
             "asn_bank" to "ASN Bank",
@@ -46,7 +47,5 @@ internal class IdealBankConfig : DropdownConfigInterface {
             "triodos_bank" to "Triodos Bank",
             "van_lanschot" to "Van Lanschot",
         )
-
-
     }
 }

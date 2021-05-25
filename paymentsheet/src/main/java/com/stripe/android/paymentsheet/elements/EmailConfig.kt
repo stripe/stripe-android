@@ -19,12 +19,8 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
     override fun determineState(paramFormatted: String?): TextFieldElementState {
         return when {
             paramFormatted?.isEmpty() ?: true -> Error.BlankAndRequired
-            pattern.matcher(paramFormatted).matches() -> {
-                Valid.Limitless
-            }
-            else -> {
-                Error.Incomplete
-            }
+            pattern.matcher(paramFormatted).matches() -> Valid.Limitless
+            else -> Error.Incomplete
         }
     }
 

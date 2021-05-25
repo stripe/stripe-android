@@ -63,10 +63,12 @@ internal fun Dropdown(
             modifier = Modifier.fillMaxWidth()
         ) {
             items.forEachIndexed { _, s ->
-                DropdownMenuItem(onClick = {
-                    onSelectItem(s)
-                    expanded = false
-                }) {
+                DropdownMenuItem(
+                    onClick = {
+                        onSelectItem(s)
+                        expanded = false
+                    }
+                ) {
                     Text(text = s)
                 }
             }

@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.distinctUntilChanged
 
-
 internal class DropdownElement(
     private val config: DropdownConfigInterface,
 ) {
@@ -27,5 +26,4 @@ internal class DropdownElement(
         _paramValue.value =
             config.convertToPaymentMethodParam(displayFormatted)
     }
-
 }
