@@ -4,9 +4,6 @@ plugins {
     id 'checkstyle'
     id 'org.jetbrains.dokka'
     id 'org.jetbrains.kotlin.plugin.parcelize'
-
-    id 'signing'
-    id 'maven-publish'
 }
 
 assemble.dependsOn('lint')
@@ -148,9 +145,9 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
 
 
 ext {
-    artifactId = "stripe-android"
-    artifactName = "stripe-android"
-    artifactDescrption = "Stripe Android SDK"
+    artifactId = "payments-core"
+    artifactName = "payments-core"
+    artifactDescrption = "The core module of Stripe Payment Android SDK"
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

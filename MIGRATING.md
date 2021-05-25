@@ -774,7 +774,7 @@
     stripe.retrievePaymentIntentSynchronous(clientSecret);
     ```
 
-- `PaymentIntentParams` is now [`ConfirmPaymentIntentParams`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/ConfirmPaymentIntentParams.java) and its method names have been simplified.
+- `PaymentIntentParams` is now [`ConfirmPaymentIntentParams`](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/model/ConfirmPaymentIntentParams.java) and its method names have been simplified.
   See [#1172](https://github.com/stripe/stripe-android/pull/1172).
     ```java
     // before
@@ -933,7 +933,7 @@ StripeIntent.Status.Succeeded
    CustomerSession.getInstance().setCustomerShippingInformation(listener);
    ```
 
-- [`PaymentIntent`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/PaymentIntent.java) has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
+- [`PaymentIntent`](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/model/PaymentIntent.java) has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
     - `PaymentIntent.Status.RequiresSource` is now `PaymentIntent.Status.RequiresPaymentMethod`
     - `PaymentIntent.Status.RequiresSourceAction` is now `PaymentIntent.Status.RequiresAction`
     - `PaymentIntent.NextActionType.AuthorizeWithUrl` has been removed
@@ -942,7 +942,7 @@ StripeIntent.Status.Succeeded
     - `PaymentIntent#requiresAction()` has been added as a convenience
     - `PaymentIntent#getStatus()` now returns a `PaymentIntent.Status` enum value instead of a `String`
 
-- [`Address`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/Address.java) is now immutable and its setters have been removed.
+- [`Address`](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/model/Address.java) is now immutable and its setters have been removed.
   Use `Address.Builder` to create a new `Address` object.
 
 ## Migrating from versions < 7.0.0
