@@ -18,6 +18,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
+import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
@@ -27,9 +28,13 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.FakePaymentIntentFlowResultProcessor
+import com.stripe.android.payments.FakeSetupIntentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -223,7 +228,49 @@ internal class DefaultFlowControllerTest {
         assertThat(launchArgs)
             .isEqualTo(
                 PaymentOptionContract.Args(
-                    paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    paymentMethods = emptyList(),
+                    sessionId = SESSION_ID,
+                    config = null,
+                    isGooglePayReady = false,
+                    newCard = null,
+                    statusBarColor = ContextCompat.getColor(
+                        activity,
+                        R.color.stripe_toolbar_color_default_dark
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `presentPaymentOptions() with SetupIntent after successful init should launch with expected args`() {
+        val flowController = createFlowController(
+            FakeFlowControllerInitializer(
+                emptyList(),
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+            ),
+            FakeSetupIntentFlowResultProcessor()
+        )
+
+        var launchArgs: PaymentOptionContract.Args? = null
+        flowController.paymentOptionLauncher = {
+            launchArgs = it
+        }
+
+        var isReadyState = false
+        flowController.configureWithSetupIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { isReady, _ ->
+            isReadyState = isReady
+        }
+        assertThat(isReadyState)
+            .isTrue()
+        flowController.presentPaymentOptions()
+
+        assertThat(launchArgs)
+            .isEqualTo(
+                PaymentOptionContract.Args(
+                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
                     paymentMethods = emptyList(),
                     sessionId = SESSION_ID,
                     config = null,
@@ -481,11 +528,59 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `onPaymentFlowResult with SetupIntent when succeeded should invoke callback with Completed`() {
+        val setupIntentFlowResultProcessor = FakeSetupIntentFlowResultProcessor()
+        val flowController = createFlowController(
+            FakeFlowControllerInitializer(
+                emptyList(),
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+            ),
+            setupIntentFlowResultProcessor
+        )
+
+        var isReadyState = false
+        flowController.configureWithSetupIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { isReady, _ ->
+            isReadyState = isReady
+        }
+        assertThat(isReadyState)
+            .isTrue()
+
+        setupIntentFlowResultProcessor.setupIntentResult = SetupIntentResult(
+            SetupIntentFixtures.SI_SUCCEEDED,
+            StripeIntentResult.Outcome.SUCCEEDED
+        )
+
+        flowController.onPaymentFlowResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
+            )
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(
+            argWhere { paymentResult ->
+                paymentResult is PaymentSheetResult.Completed
+            }
+        )
+    }
+
+    @Test
     fun `onPaymentFlowResult when succeeded should invoke callback with Completed`() {
         paymentFlowResultProcessor.paymentIntentResult = PaymentIntentResult(
             PaymentIntentFixtures.PI_WITH_SHIPPING,
             StripeIntentResult.Outcome.SUCCEEDED
         )
+
+        var isReadyState = false
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { isReady, error ->
+            isReadyState = isReady
+        }
+        assertThat(isReadyState)
+            .isTrue()
 
         flowController.onPaymentFlowResult(
             PaymentFlowResult.Unvalidated(
@@ -507,6 +602,15 @@ internal class DefaultFlowControllerTest {
             PaymentIntentFixtures.CANCELLED,
             StripeIntentResult.Outcome.CANCELED
         )
+
+        var isReadyState = false
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET
+        ) { isReady, error ->
+            isReadyState = isReady
+        }
+        assertThat(isReadyState)
+            .isTrue()
 
         flowController.onPaymentFlowResult(
             PaymentFlowResult.Unvalidated(
@@ -543,6 +647,31 @@ internal class DefaultFlowControllerTest {
         )
     }
 
+    @Test
+    fun `onPaymentFlowResult when error in SetupIntent should invoke callback with Failed`() {
+        val setupIntentFlowResultProcessor = FakeSetupIntentFlowResultProcessor()
+        val flowController = createFlowController(
+            FakeFlowControllerInitializer(
+                emptyList(),
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+            ),
+            setupIntentFlowResultProcessor
+        )
+
+        flowController.onPaymentFlowResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                flowOutcome = StripeIntentResult.Outcome.CANCELED
+            )
+        )
+
+        verify(paymentResultCallback).onPaymentSheetResult(
+            argWhere { paymentResult ->
+                paymentResult is PaymentSheetResult.Failed
+            }
+        )
+    }
+
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
         savedSelection: SavedSelection = SavedSelection.None
@@ -556,7 +685,8 @@ internal class DefaultFlowControllerTest {
     }
 
     private fun createFlowController(
-        flowControllerInitializer: FlowControllerInitializer
+        flowControllerInitializer: FlowControllerInitializer,
+        flowResultProcessor: PaymentFlowResultProcessor<out StripeIntentResult<*>> = paymentFlowResultProcessor
     ): DefaultFlowController {
         return DefaultFlowController(
             activity,
@@ -568,7 +698,7 @@ internal class DefaultFlowControllerTest {
             paymentOptionFactory = PaymentOptionFactory(activity.resources),
             flowControllerInitializer,
             { _, _, _, _, _ -> paymentController },
-            { _, _ -> paymentFlowResultProcessor },
+            { _, _, _ -> flowResultProcessor },
             eventReporter,
             sessionId = SESSION_ID,
             defaultReturnUrl = DefaultReturnUrl.create(activity),
@@ -580,7 +710,8 @@ internal class DefaultFlowControllerTest {
     private class FakeFlowControllerInitializer(
         var paymentMethods: List<PaymentMethod>,
         private val savedSelection: SavedSelection = SavedSelection.None,
-        private val delayMillis: Long = 0L
+        private val delayMillis: Long = 0L,
+        private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
     ) : FlowControllerInitializer {
         override suspend fun init(
             clientSecret: ClientSecret,
@@ -593,7 +724,7 @@ internal class DefaultFlowControllerTest {
                 InitData(
                     paymentSheetConfiguration,
                     clientSecret,
-                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    stripeIntent,
                     listOf(PaymentMethod.Type.Card),
                     paymentMethods,
                     savedSelection,

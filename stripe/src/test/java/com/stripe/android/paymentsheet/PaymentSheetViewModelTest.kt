@@ -20,6 +20,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.FakePaymentIntentFlowResultProcessor
@@ -365,9 +367,9 @@ internal class PaymentSheetViewModelTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
-        var paymentIntent: PaymentIntent? = null
-        viewModel.paymentIntent.observeForever {
-            paymentIntent = it
+        var stripeIntent: StripeIntent? = null
+        viewModel.stripeIntent.observeForever {
+            stripeIntent = it
         }
 
         viewModel.onPaymentFlowResult(
@@ -376,7 +378,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter)
             .onPaymentFailure(selection)
 
-        assertThat(paymentIntent).isNull()
+        assertThat(stripeIntent).isNull()
     }
 
     @Test
@@ -502,6 +504,18 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `isGooglePayReady for SetupIntent should emit false`() {
+        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP)
+        var isReady: Boolean? = null
+        viewModel.isGooglePayReady.observeForever {
+            isReady = it
+        }
+        viewModel.fetchIsGooglePayReady()
+        assertThat(isReady)
+            .isFalse()
+    }
+
+    @Test
     fun `fetchFragmentConfig() when all data is ready should emit value`() {
         viewModel.fetchStripeIntent()
         viewModel.fetchIsGooglePayReady()
@@ -543,6 +557,24 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(isEnabled)
             .isTrue()
+    }
+
+    @Test
+    fun `Should show amount is true for PaymentIntent`() {
+        viewModel.fetchStripeIntent()
+
+        assertThat(viewModel.shouldShowAmount)
+            .isTrue()
+    }
+
+    @Test
+    fun `Should show amount is false for SetupIntent`() {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
+        )
+
+        assertThat(viewModel.shouldShowAmount)
+            .isFalse()
     }
 
     @Test
@@ -611,11 +643,13 @@ internal class PaymentSheetViewModelTest {
 
     private companion object {
         private const val CLIENT_SECRET = PaymentSheetFixtures.CLIENT_SECRET
+        private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
         private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
 
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
+        val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_RESULT = PaymentIntentResult(
             intent = PAYMENT_INTENT,

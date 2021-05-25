@@ -1,13 +1,14 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.PaymentIntentValidator
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.withContext
@@ -18,7 +19,7 @@ internal class DefaultFlowControllerInitializer(
     private val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean,
     private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
-    private val paymentIntentValidator = PaymentIntentValidator()
+    private val stripeIntentValidator = StripeIntentValidator()
 
     private lateinit var stripeIntentRepository: StripeIntentRepository
     private lateinit var paymentMethodsRepository: PaymentMethodsRepository
@@ -33,8 +34,9 @@ internal class DefaultFlowControllerInitializer(
         this@DefaultFlowControllerInitializer.paymentMethodsRepository = paymentMethodsRepository
 
         val isGooglePayReady =
-            paymentSheetConfiguration?.let { isGooglePayReadySupplier(it.googlePay?.environment) }
-                ?: false
+            clientSecret is PaymentIntentClientSecret && paymentSheetConfiguration?.let {
+                isGooglePayReadySupplier(it.googlePay?.environment)
+            } ?: false
         paymentSheetConfiguration?.customer?.let { customerConfig ->
             createWithCustomer(
                 clientSecret,
@@ -61,10 +63,10 @@ internal class DefaultFlowControllerInitializer(
         )
 
         return runCatching {
-            retrievePaymentIntent(clientSecret)
+            retrieveStripeIntent(clientSecret)
         }.fold(
-            onSuccess = { paymentIntent ->
-                val paymentMethodTypes = paymentIntent.paymentMethodTypes.mapNotNull {
+            onSuccess = { stripeIntent ->
+                val paymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
                     PaymentMethod.Type.fromCode(it)
                 }
                 retrieveAllPaymentMethods(
@@ -78,7 +80,7 @@ internal class DefaultFlowControllerInitializer(
                         InitData(
                             config = config,
                             clientSecret = clientSecret,
-                            paymentIntent = paymentIntent,
+                            stripeIntent = stripeIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
                             savedSelection = prefsRepository.getSavedSelection(),
@@ -99,10 +101,10 @@ internal class DefaultFlowControllerInitializer(
         isGooglePayReady: Boolean
     ): FlowControllerInitializer.InitResult {
         return runCatching {
-            retrievePaymentIntent(clientSecret)
+            retrieveStripeIntent(clientSecret)
         }.fold(
-            onSuccess = { paymentIntent ->
-                val paymentMethodTypes = paymentIntent.paymentMethodTypes
+            onSuccess = { stripeIntent ->
+                val paymentMethodTypes = stripeIntent.paymentMethodTypes
                     .mapNotNull {
                         PaymentMethod.Type.fromCode(it)
                     }
@@ -117,7 +119,7 @@ internal class DefaultFlowControllerInitializer(
                     InitData(
                         config = config,
                         clientSecret = clientSecret,
-                        paymentIntent = paymentIntent,
+                        stripeIntent = stripeIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
                         savedSelection = savedSelection,
@@ -162,10 +164,10 @@ internal class DefaultFlowControllerInitializer(
         }
     }
 
-    private suspend fun retrievePaymentIntent(
+    private suspend fun retrieveStripeIntent(
         clientSecret: ClientSecret
-    ): PaymentIntent {
-        return paymentIntentValidator.requireValid(
+    ): StripeIntent {
+        return stripeIntentValidator.requireValid(
             stripeIntentRepository.get(clientSecret)
         )
     }

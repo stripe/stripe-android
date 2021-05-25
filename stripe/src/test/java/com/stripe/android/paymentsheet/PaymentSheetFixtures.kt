@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.core.graphics.toColorInt
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR = "#121212".toColorInt()
@@ -33,6 +34,13 @@ internal object PaymentSheetFixtures {
 
     internal val CONFIG_CUSTOMER_WITH_GOOGLEPAY = CONFIG_CUSTOMER.copy(
         googlePay = ConfigFixtures.GOOGLE_PAY
+    )
+
+    internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP = PaymentSheetContract.Args(
+        SetupIntentClientSecret(CLIENT_SECRET),
+        SessionId(),
+        STATUS_BAR_COLOR,
+        CONFIG_CUSTOMER_WITH_GOOGLEPAY
     )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetContract.Args(

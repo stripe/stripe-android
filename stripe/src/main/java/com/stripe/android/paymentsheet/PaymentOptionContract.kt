@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
@@ -30,7 +30,7 @@ internal class PaymentOptionContract :
 
     @Parcelize
     internal data class Args(
-        val paymentIntent: PaymentIntent,
+        val stripeIntent: StripeIntent,
         val paymentMethods: List<PaymentMethod>,
         val sessionId: SessionId,
         val config: PaymentSheet.Configuration?,

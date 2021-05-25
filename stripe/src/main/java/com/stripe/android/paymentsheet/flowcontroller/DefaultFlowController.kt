@@ -8,12 +8,12 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.gms.common.api.Status
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -56,7 +57,7 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
-    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor<PaymentIntentResult>,
+    paymentFlowResultProcessorFactory: (ClientSecret, String, StripeApiRepository) -> PaymentFlowResultProcessor<out StripeIntentResult<*>>,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
     defaultReturnUrl: DefaultReturnUrl,
@@ -120,8 +121,12 @@ internal class DefaultFlowController internal constructor(
         )
     }
 
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<PaymentIntentResult> by lazy {
-        paymentFlowResultProcessorFactory(paymentConfiguration.publishableKey, stripeApiRepository)
+    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<out StripeIntentResult<*>> by lazy {
+        paymentFlowResultProcessorFactory(
+            viewModel.initData.clientSecret,
+            paymentConfiguration.publishableKey,
+            stripeApiRepository
+        )
     }
 
     private val paymentController: PaymentController by lazy {
@@ -210,7 +215,7 @@ internal class DefaultFlowController internal constructor(
 
         paymentOptionLauncher(
             PaymentOptionContract.Args(
-                paymentIntent = initData.paymentIntent,
+                stripeIntent = initData.stripeIntent,
                 paymentMethods = initData.paymentMethods,
                 sessionId = sessionId,
                 config = initData.config,
@@ -228,16 +233,19 @@ internal class DefaultFlowController internal constructor(
             error(
                 "FlowController must be successfully initialized using " +
                     "configureWithPaymentIntent() or configureWithSetupIntent() " +
-                    "before calling presentPaymentOptions()"
+                    "before calling confirm()"
             )
         }
 
         val config = initData.config
         val paymentSelection = viewModel.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
+            if (initData.stripeIntent !is PaymentIntent) {
+                error("Google Pay is currently supported only for PaymentIntents")
+            }
             googlePayLauncher(
                 StripeGooglePayContract.Args(
-                    paymentIntent = initData.paymentIntent,
+                    paymentIntent = initData.stripeIntent,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -261,8 +269,7 @@ internal class DefaultFlowController internal constructor(
         initData: InitData
     ) {
         val confirmParamsFactory =
-            PaymentIntentClientSecret(initData.paymentIntent.clientSecret.orEmpty())
-                .createConfirmParamsFactory()
+            ConfirmStripeIntentParamsFactory.createFactory(initData.clientSecret)
 
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -433,21 +440,21 @@ internal class DefaultFlowController internal constructor(
     }
 
     private fun createPaymentSheetResult(
-        paymentIntentResult: PaymentIntentResult
+        stripeIntentResult: StripeIntentResult<*>
     ): PaymentSheetResult {
-        val paymentIntent = paymentIntentResult.intent
+        val stripeIntent = stripeIntentResult.intent
         return when {
-            paymentIntent.status == StripeIntent.Status.Succeeded ||
-                paymentIntent.status == StripeIntent.Status.RequiresCapture -> {
+            stripeIntent.status == StripeIntent.Status.Succeeded ||
+                stripeIntent.status == StripeIntent.Status.RequiresCapture -> {
                 PaymentSheetResult.Completed
             }
-            paymentIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
+            stripeIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
                 PaymentSheetResult.Canceled
             }
-            paymentIntent.lastPaymentError != null -> {
+            stripeIntent.lastErrorMessage != null -> {
                 PaymentSheetResult.Failed(
                     error = IllegalArgumentException(
-                        "Failed to confirm PaymentIntent. ${paymentIntent.lastPaymentError.message}"
+                        "Failed to confirm PaymentIntent. ${stripeIntent.lastErrorMessage}"
                     )
                 )
             }

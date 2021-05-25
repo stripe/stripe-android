@@ -151,6 +151,9 @@ data class PaymentIntent internal constructor(
             StripeIntent.Status.Succeeded
         ).contains(status)
 
+    override val lastErrorMessage: String?
+        get() = lastPaymentError?.message
+
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
     }

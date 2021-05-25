@@ -299,8 +299,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupBuyButton() {
-        viewModel.amount.observe(this) {
-            viewBinding.buyButton.setLabel(getLabelText(it))
+        if (viewModel.shouldShowAmount) {
+            viewModel.amount.observe(this) {
+                viewBinding.buyButton.setLabel(getLabelText(it))
+            }
+        } else {
+            viewBinding.buyButton.setLabel(
+                resources.getString(R.string.stripe_paymentsheet_setup_button_label)
+            )
         }
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)

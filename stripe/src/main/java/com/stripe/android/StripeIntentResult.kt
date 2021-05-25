@@ -13,6 +13,7 @@ import com.stripe.android.model.StripeModel
  */
 sealed class StripeIntentResult<T : StripeIntent> : StripeModel {
     abstract val intent: T
+    abstract val failureMessage: String?
 
     @Outcome
     protected abstract val outcomeFromFlow: Int

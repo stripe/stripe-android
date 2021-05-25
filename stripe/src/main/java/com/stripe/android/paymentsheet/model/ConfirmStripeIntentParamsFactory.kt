@@ -12,6 +12,14 @@ internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeInte
     abstract fun create(paymentSelection: PaymentSelection.Saved): T
 
     abstract fun create(paymentSelection: PaymentSelection.New): T
+
+    companion object {
+        fun createFactory(clientSecret: ClientSecret) =
+            when (clientSecret) {
+                is PaymentIntentClientSecret -> ConfirmPaymentIntentParamsFactory(clientSecret)
+                is SetupIntentClientSecret -> ConfirmSetupIntentParamsFactory(clientSecret)
+            }
+    }
 }
 
 internal class ConfirmPaymentIntentParamsFactory(

@@ -223,7 +223,7 @@ internal class PaymentOptionsViewModelTest {
             false
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
             sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
