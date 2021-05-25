@@ -25,7 +25,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.payments.FakePaymentFlowResultProcessor
+import com.stripe.android.payments.FakePaymentIntentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -677,7 +677,7 @@ internal class PaymentSheetActivityTest {
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         paymentIntentResult: PaymentIntentResult = PaymentIntentResult(paymentIntent)
     ): PaymentSheetViewModel {
-        val paymentFlowResultProcessor = FakePaymentFlowResultProcessor().also {
+        val paymentFlowResultProcessor = FakePaymentIntentFlowResultProcessor().also {
             it.paymentIntentResult = paymentIntentResult
         }
 

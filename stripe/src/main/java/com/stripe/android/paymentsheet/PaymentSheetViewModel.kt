@@ -24,9 +24,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -62,7 +62,7 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
 internal class PaymentSheetViewModel internal constructor(
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor,
+    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<PaymentIntentResult>,
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
@@ -352,9 +352,8 @@ internal class PaymentSheetViewModel internal constructor(
         viewModelScope.launch {
             val result = runCatching {
                 withContext(workContext) {
-                    args.clientSecret.processPaymentFlowResultWithProcessor(
-                        paymentFlowResult,
-                        paymentFlowResultProcessor
+                    paymentFlowResultProcessor.processResult(
+                        paymentFlowResult
                     ) as PaymentIntentResult
                 }
             }
@@ -451,7 +450,7 @@ internal class PaymentSheetViewModel internal constructor(
             return PaymentSheetViewModel(
                 stripeIntentRepository,
                 paymentMethodsRepository,
-                DefaultPaymentFlowResultProcessor(
+                PaymentIntentFlowResultProcessor(
                     application,
                     publishableKey,
                     stripeRepository,

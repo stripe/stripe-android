@@ -22,7 +22,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.payments.FakePaymentFlowResultProcessor
+import com.stripe.android.payments.FakePaymentIntentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -60,7 +60,7 @@ internal class PaymentSheetViewModelTest {
     private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
-    private val paymentFlowResultProcessor = FakePaymentFlowResultProcessor()
+    private val paymentFlowResultProcessor = FakePaymentIntentFlowResultProcessor()
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     @AfterTest

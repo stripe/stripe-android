@@ -28,7 +28,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.payments.FakePaymentFlowResultProcessor
+import com.stripe.android.payments.FakePaymentIntentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -73,7 +73,7 @@ internal class DefaultFlowControllerTest {
     private val paymentController = mock<PaymentController>()
     private val eventReporter = mock<EventReporter>()
 
-    private val paymentFlowResultProcessor = FakePaymentFlowResultProcessor()
+    private val paymentFlowResultProcessor = FakePaymentIntentFlowResultProcessor()
     private val flowController: DefaultFlowController by lazy {
         createFlowController()
     }

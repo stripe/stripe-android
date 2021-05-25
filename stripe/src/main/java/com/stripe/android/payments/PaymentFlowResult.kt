@@ -93,7 +93,7 @@ sealed class PaymentFlowResult {
 
         /**
          * The Source is eligible for cancellation.
-         * See [DefaultPaymentFlowResultProcessor.shouldCancelSource] for usage.
+         * See [PaymentFlowResultProcessor.shouldCancelSource] for usage.
          */
         internal val canCancelSource: Boolean = false,
 

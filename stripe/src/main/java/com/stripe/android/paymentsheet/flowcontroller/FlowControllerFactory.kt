@@ -6,8 +6,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.StripePaymentController
-import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.GooglePayRepository
@@ -119,7 +119,7 @@ internal class FlowControllerFactory(
             ),
             paymentControllerFactory = paymentControllerFactory,
             paymentFlowResultProcessorFactory = { publishableKey, stripeApiRepository ->
-                DefaultPaymentFlowResultProcessor(
+                PaymentIntentFlowResultProcessor(
                     appContext,
                     publishableKey,
                     stripeApiRepository,

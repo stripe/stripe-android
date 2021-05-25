@@ -56,7 +56,7 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
-    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor,
+    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor<PaymentIntentResult>,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
     defaultReturnUrl: DefaultReturnUrl,
@@ -120,7 +120,7 @@ internal class DefaultFlowController internal constructor(
         )
     }
 
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor by lazy {
+    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<PaymentIntentResult> by lazy {
         paymentFlowResultProcessorFactory(paymentConfiguration.publishableKey, stripeApiRepository)
     }
 
@@ -410,10 +410,9 @@ internal class DefaultFlowController internal constructor(
     ) {
         lifecycleScope.launch {
             runCatching {
-                viewModel.initData.clientSecret.processPaymentFlowResultWithProcessor(
-                    paymentFlowResult,
-                    paymentFlowResultProcessor
-                ) as PaymentIntentResult
+                paymentFlowResultProcessor.processResult(
+                    paymentFlowResult
+                )
             }.fold(
                 onSuccess = {
                     withContext(Dispatchers.Main) {
