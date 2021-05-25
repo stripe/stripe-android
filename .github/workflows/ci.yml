@@ -56,12 +56,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Unit tests
-        run: ./gradlew :stripe:testDebugUnitTest
+        run: ./gradlew :payments-core:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: unit-test-report
-          path: stripe/build/reports/tests/testDebugUnitTest/
+          path: payments-core/build/reports/tests/testDebugUnitTest/
 
   end-to-end-tests:
     name: End-to-end tests

@@ -56,19 +56,11 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
     private fun startCheckout() {
         prepareCheckout { customerConfig, clientSecret ->
-            if (isSetupIntent) {
-                flowController.configureWithSetupIntent(
-                    clientSecret,
-                    makeConfiguration(customerConfig),
-                    ::onConfigured
-                )
-            } else {
-                flowController.configureWithPaymentIntent(
-                    clientSecret,
-                    makeConfiguration(customerConfig),
-                    ::onConfigured
-                )
-            }
+            flowController.configureWithPaymentIntent(
+                clientSecret,
+                makeConfiguration(customerConfig),
+                ::onConfigured
+            )
         }
     }
 
