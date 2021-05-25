@@ -9,6 +9,9 @@ import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Processes the result of a [SetupIntent] confirmation.
+ */
 internal class SetupIntentFlowResultProcessor(
     context: Context,
     private val publishableKey: String,

@@ -1,7 +1,12 @@
 package com.stripe.android.payments
 
+import com.stripe.android.PaymentController
 import com.stripe.android.model.StripeIntent
 
+/**
+ * Interface implemented by classes responsible for processing the result of a [PaymentController]
+ * confirm operation.
+ */
 internal interface PaymentFlowResultProcessor<StripeIntentResult> {
 
     suspend fun processResult(

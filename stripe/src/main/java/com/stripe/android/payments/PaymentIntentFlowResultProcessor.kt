@@ -9,6 +9,9 @@ import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Processes the result of a [PaymentIntent] confirmation.
+ */
 internal class PaymentIntentFlowResultProcessor(
     context: Context,
     private val publishableKey: String,
