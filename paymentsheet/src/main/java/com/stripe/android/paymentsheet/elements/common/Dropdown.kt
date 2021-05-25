@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.paymentsheet.elements.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,25 +24,11 @@ import com.stripe.android.paymentsheet.elements.common.DropdownElement
 val textFieldBackgroundColor = Color(0xFFe0e0e0)
 
 @Composable
-internal fun DropdownElement(
+internal fun DropDown(
     element: DropdownElement,
 ) {
     val selectedItem by element.displayValue.observeAsState("")
     val items = element.items
-
-    Dropdown(
-        items = items,
-        selectedItem = selectedItem,
-        onSelectItem = { element.onValueChange(it) }
-    )
-}
-
-@Composable
-internal fun Dropdown(
-    items: List<String>,
-    selectedItem: String?,
-    onSelectItem: (String) -> Unit = {}
-) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(
@@ -65,7 +51,7 @@ internal fun Dropdown(
             items.forEachIndexed { _, s ->
                 DropdownMenuItem(
                     onClick = {
-                        onSelectItem(s)
+                        element.onValueChange(s)
                         expanded = false
                     }
                 ) {

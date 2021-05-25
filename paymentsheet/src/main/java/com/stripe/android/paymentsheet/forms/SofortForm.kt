@@ -15,12 +15,12 @@ import androidx.lifecycle.ViewModel
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.DropdownElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.Section
-import com.stripe.android.paymentsheet.elements.TextFieldComposable
+import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.DropdownElement
+import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 
@@ -37,7 +37,7 @@ fun SofortForm(
 
     Column(modifier = Modifier.padding(top = 30.dp, start = 16.dp, end = 16.dp)) {
         Section(R.string.address_label_name, nameErrorMessage) {
-            TextFieldComposable(
+            TextField(
                 textFieldElement = viewModel.nameElement,
                 myFocus = name,
                 nextFocus = email,
@@ -45,7 +45,7 @@ fun SofortForm(
         }
 
         Section(R.string.becs_widget_email, emailErrorMessage) {
-            TextFieldComposable(
+            TextField(
                 textFieldElement = viewModel.emailElement,
                 myFocus = email,
                 nextFocus = null,
@@ -53,7 +53,7 @@ fun SofortForm(
         }
 
         Section(R.string.address_label_country, null) {
-            DropdownElement(
+            DropDown(
                 element = viewModel.countryElement
             )
         }
@@ -79,9 +79,9 @@ class SofortFormViewModel : ViewModel() {
     private fun getParams(): PaymentMethodCreateParams? {
         Log.d(
             "APP",
-            "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}, country: ${countryElement.isComplete}"
+            "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}"
         )
-        return if (nameElement.isComplete.value == true && emailElement.isComplete.value == true && countryElement.isComplete) {
+        return if (nameElement.isComplete.value == true && emailElement.isComplete.value == true) {
 
             PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.paramValue.value)),

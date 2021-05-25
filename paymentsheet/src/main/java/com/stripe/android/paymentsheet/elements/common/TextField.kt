@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.paymentsheet.elements.common
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +22,6 @@ import androidx.compose.ui.focus.isFocused
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
 fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
@@ -36,7 +35,7 @@ fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequest
  * - calls through to the Elements worker functions for focus change and value change events
  */
 @Composable
-internal fun TextFieldComposable(
+internal fun TextField(
     textFieldElement: TextFieldElement,
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,

@@ -13,7 +13,7 @@ import com.stripe.android.paymentsheet.R
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal open class TextFieldElement(private val textFieldConfig: TextFieldConfigInterface) {
+internal class TextFieldElement(private val textFieldConfig: TextFieldConfig) {
     val debugLabel = textFieldConfig.debugLabel
     private val isDebug = true
 
@@ -22,11 +22,7 @@ internal open class TextFieldElement(private val textFieldConfig: TextFieldConfi
     val input: LiveData<String> = _input.distinctUntilChanged()
 
     private val _elementState: NotNullMutableLiveData<TextFieldElementState> =
-        NotNullMutableLiveData(
-            TextFieldElementState.TextFieldElementStateError(
-                R.string.invalid
-            )
-        )
+        NotNullMutableLiveData(Error.ShowAlways)
 
     private val _hasFocus: NotNullMutableLiveData<Boolean> = NotNullMutableLiveData(false)
 
@@ -59,9 +55,8 @@ internal open class TextFieldElement(private val textFieldConfig: TextFieldConfi
             textFieldConfig.shouldShowError(state, hasFocus)
         }
 
-    private val determineStateDebug: (String?) -> TextFieldElementState = { str ->
+    private val determineStateDebug: (String) -> TextFieldElementState = { str ->
         when {
-            str == null -> textFieldConfig.determineState(str)
             str.contains("full") -> Valid.Full
             str.contains("focus") -> Error.ShowInFocus
             str.contains("always") -> Error.ShowAlways
@@ -69,7 +64,7 @@ internal open class TextFieldElement(private val textFieldConfig: TextFieldConfi
         }
     }
 
-    private val determineState: (String?) -> TextFieldElementState =
+    private val determineState: (String) -> TextFieldElementState =
         if (isDebug) {
             determineStateDebug
         } else { str ->

@@ -6,7 +6,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.common.TextFieldConfigInterface
+import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldElementState
 import org.junit.Rule
@@ -215,7 +215,7 @@ class TextFieldElementTest {
         assertThat(inputValue).isEqualTo("1234")
     }
 
-    private class TestConfig : TextFieldConfigInterface {
+    private class TestConfig : TextFieldConfig {
         override val debugLabel = "debugLabel"
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
@@ -235,7 +235,7 @@ class TextFieldElementTest {
         override fun filter(userTyped: String): String = userTyped
     }
 
-    private class TestConfigErrorBasedOnFocus : TextFieldConfigInterface {
+    private class TestConfigErrorBasedOnFocus : TextFieldConfig {
         override val debugLabel = "debugLabel"
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
@@ -254,7 +254,7 @@ class TextFieldElementTest {
         override fun filter(userTyped: String): String = userTyped
     }
 
-    private class TestConfigFilter : TextFieldConfigInterface {
+    private class TestConfigFilter : TextFieldConfig {
         override val debugLabel = "debugLabel"
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii

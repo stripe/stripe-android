@@ -6,10 +6,9 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.distinctUntilChanged
 
 internal class DropdownElement(
-    private val config: DropdownConfigInterface,
+    private val config: DropdownConfig,
 ) {
     val items: List<String> = config.getItems()
-    val isComplete = true
 
     /** This is all the information that can be observed on the element */
     private val _paramValue: MutableLiveData<String?> = MutableLiveData(null)

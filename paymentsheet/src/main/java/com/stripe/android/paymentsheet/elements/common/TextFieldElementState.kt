@@ -25,13 +25,14 @@ internal abstract class TextFieldElementState {
      */
     abstract fun getErrorMessageResId(): Int?
 
-    open class TextFieldElementStateValid : TextFieldElementState() {
+    abstract class TextFieldElementStateValid : TextFieldElementState() {
         override fun isValid(): Boolean = true
         override fun isFull(): Boolean = false
         override fun getErrorMessageResId(): Int? = null
     }
 
-    open class TextFieldElementStateError(private val stringResId: Int) : TextFieldElementState() {
+    abstract class TextFieldElementStateError(private val stringResId: Int) :
+        TextFieldElementState() {
         override fun isValid(): Boolean = false
         override fun isFull(): Boolean = false
         override fun getErrorMessageResId(): Int? = stringResId

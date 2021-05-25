@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.elements.common
 
-internal interface DropdownConfigInterface {
+internal interface DropdownConfig {
     val debugLabel: String
 
     /** This is the label to describe the element */

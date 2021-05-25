@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.elements.common
 
 import androidx.compose.ui.text.input.KeyboardType
 
-internal interface TextFieldConfigInterface {
+internal interface TextFieldConfig {
     val debugLabel: String
 
     /** This is the label to describe the element */
@@ -12,7 +12,7 @@ internal interface TextFieldConfigInterface {
     val keyboard: KeyboardType
 
     /** This will determine the state of the element based on the text */
-    fun determineState(paramFormatted: String?): TextFieldElementState
+    fun determineState(paramFormatted: String): TextFieldElementState
 
     /** This will determine if the element is in an error state based on the current focus state */
     fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean): Boolean
