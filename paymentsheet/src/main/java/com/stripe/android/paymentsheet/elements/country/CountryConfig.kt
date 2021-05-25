@@ -1,6 +1,6 @@
-package com.stripe.android.compose.elements.country
+package com.stripe.android.paymentsheet.elements.country
 
-import com.stripe.android.compose.elements.common.DropdownConfigInterface
+import com.stripe.android.paymentsheet.elements.common.DropdownConfigInterface
 import java.util.Locale
 
 internal class CountryConfig : DropdownConfigInterface {

@@ -1,14 +1,14 @@
-package com.stripe.android.compose.elements
+package com.stripe.android.paymentsheet.elements
 
 import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.compose.R
-import com.stripe.android.compose.elements.common.TextFieldConfigInterface
-import com.stripe.android.compose.elements.common.TextFieldElement
-import com.stripe.android.compose.elements.common.TextFieldElementState
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.elements.common.TextFieldConfigInterface
+import com.stripe.android.paymentsheet.elements.common.TextFieldElement
+import com.stripe.android.paymentsheet.elements.common.TextFieldElementState
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

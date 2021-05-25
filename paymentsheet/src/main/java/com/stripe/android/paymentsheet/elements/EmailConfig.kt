@@ -1,10 +1,10 @@
-package com.stripe.android.compose.elements
+package com.stripe.android.paymentsheet.elements
 
 import android.util.Patterns
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.compose.R
-import com.stripe.android.compose.elements.common.TextFieldConfigInterface
-import com.stripe.android.compose.elements.common.TextFieldElementState
+import com.stripe.android.paymentsheet.elements.common.TextFieldConfigInterface
+import com.stripe.android.paymentsheet.elements.common.TextFieldElementState
+import com.stripe.android.paymentsheet.R
 import java.util.regex.Pattern
 
 internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS) :

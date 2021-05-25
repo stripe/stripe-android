@@ -1,7 +1,7 @@
-package com.stripe.android.compose.elements
+package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.compose.elements.country.CountryConfig
+import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import org.junit.Test
 
 class CountryConfigTest {

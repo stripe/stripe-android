@@ -1,6 +1,5 @@
-package com.stripe.android.compose
+package com.stripe.android.paymentsheet
 
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 
 internal class NotNullMutableLiveData<T>(value: T) : MutableLiveData<T>(value) {

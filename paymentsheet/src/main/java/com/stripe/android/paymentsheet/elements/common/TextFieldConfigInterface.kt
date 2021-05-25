@@ -1,4 +1,4 @@
-package com.stripe.android.compose.elements.common
+package com.stripe.android.paymentsheet.elements.common
 
 import androidx.compose.ui.text.input.KeyboardType
 

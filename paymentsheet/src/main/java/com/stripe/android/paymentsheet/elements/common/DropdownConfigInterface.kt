@@ -1,4 +1,4 @@
-package com.stripe.android.compose.elements.common
+package com.stripe.android.paymentsheet.elements.common
 
 internal interface DropdownConfigInterface {
     val debugLabel: String

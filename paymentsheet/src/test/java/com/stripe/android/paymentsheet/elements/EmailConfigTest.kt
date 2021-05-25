@@ -1,4 +1,4 @@
-package com.stripe.android.compose.elements
+package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

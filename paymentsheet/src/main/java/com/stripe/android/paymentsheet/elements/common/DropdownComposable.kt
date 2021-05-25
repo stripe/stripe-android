@@ -1,4 +1,4 @@
-package com.stripe.android.compose.elements
+package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stripe.android.compose.elements.common.DropdownElement
+import com.stripe.android.paymentsheet.elements.common.DropdownElement
 
 val textFieldBackgroundColor = Color(0xFFe0e0e0)
 

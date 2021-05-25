@@ -1,4 +1,4 @@
-package com.stripe.android.compose
+package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.util.Log
@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.stripe.android.compose.forms.SofortForm
-import com.stripe.android.compose.forms.SofortFormViewModel
+import com.stripe.android.paymentsheet.forms.SofortForm
+import com.stripe.android.paymentsheet.forms.SofortFormViewModel
 
 class FormFragment : Fragment() {
     val sofortFormViewModel: SofortFormViewModel by viewModels()

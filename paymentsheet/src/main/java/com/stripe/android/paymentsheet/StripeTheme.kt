@@ -1,4 +1,4 @@
-package com.stripe.android.compose
+package com.stripe.android.paymentsheet
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors

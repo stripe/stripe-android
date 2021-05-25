@@ -1,4 +1,4 @@
-package com.stripe.android.compose.elements
+package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

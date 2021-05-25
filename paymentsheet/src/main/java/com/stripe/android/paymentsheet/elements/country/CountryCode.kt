@@ -1,4 +1,4 @@
-package com.stripe.android.compose.elements.country
+package com.stripe.android.paymentsheet.elements.country
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

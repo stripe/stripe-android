@@ -1,4 +1,4 @@
-package com.stripe.android.compose.forms
+package com.stripe.android.paymentsheet.forms
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
@@ -12,17 +12,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
-import com.stripe.android.compose.R
-import com.stripe.android.compose.elements.DropdownElement
-import com.stripe.android.compose.elements.EmailConfig
-import com.stripe.android.compose.elements.NameConfig
-import com.stripe.android.compose.elements.Section
-import com.stripe.android.compose.elements.TextFieldComposable
-import com.stripe.android.compose.elements.common.DropdownElement
-import com.stripe.android.compose.elements.common.TextFieldElement
-import com.stripe.android.compose.elements.country.CountryConfig
+import com.stripe.android.paymentsheet.elements.DropdownElement
+import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.NameConfig
+import com.stripe.android.paymentsheet.elements.Section
+import com.stripe.android.paymentsheet.elements.TextFieldComposable
+import com.stripe.android.paymentsheet.elements.common.DropdownElement
+import com.stripe.android.paymentsheet.elements.common.TextFieldElement
+import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.R
 
 @Composable
 fun SofortForm(

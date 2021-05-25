@@ -1,6 +1,6 @@
-package com.stripe.android.compose.elements;
+package com.stripe.android.paymentsheet.elements;
 
-import com.stripe.android.compose.elements.common.DropdownConfigInterface
+import com.stripe.android.paymentsheet.elements.common.DropdownConfigInterface
 
 internal class IdealBankConfig : DropdownConfigInterface {
     override val debugLabel = "idealBank"

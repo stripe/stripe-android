@@ -1,12 +1,12 @@
-package com.stripe.android.compose.elements.common
+package com.stripe.android.paymentsheet.elements.common
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.distinctUntilChanged
-import com.stripe.android.compose.NotNullMutableLiveData
-import com.stripe.android.compose.R
+import com.stripe.android.paymentsheet.NotNullMutableLiveData
+import com.stripe.android.paymentsheet.R
 
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the element's

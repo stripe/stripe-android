@@ -1,4 +1,4 @@
-package com.stripe.android.compose.elements.country
+package com.stripe.android.paymentsheet.elements.country
 
 
 internal data class Country(
