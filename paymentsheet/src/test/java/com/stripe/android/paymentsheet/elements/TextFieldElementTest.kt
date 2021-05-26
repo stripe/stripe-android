@@ -52,7 +52,7 @@ internal class TextFieldElementTest {
 
         textFieldElement.onValueChange("newValue")
         shadowOf(getMainLooper()).idle()
-        assertThat(errorMessageResId).isEqualTo(R.string.invalid)
+        assertThat(errorMessageResId).isEqualTo(R.string.incomplete)
     }
 
     @Test

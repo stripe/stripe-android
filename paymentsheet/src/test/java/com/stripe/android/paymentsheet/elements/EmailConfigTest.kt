@@ -93,9 +93,9 @@ class EmailConfigTest {
     }
 
     @Test
-    fun `verify that only letters, numbers, periods and @ is allowed in the field`() {
+    fun `verify there is no filter`() {
         assertThat(emailConfig.filter("123^@gmail[\uD83E\uDD57.com"))
-            .isEqualTo("123@gmail.com")
+            .isEqualTo("123^@gmail[\uD83E\uDD57.com")
     }
 
     companion object {
