@@ -57,7 +57,7 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
-    paymentFlowResultProcessorFactory: (ClientSecret, String, StripeApiRepository) -> PaymentFlowResultProcessor<out StripeIntentResult<*>>,
+    paymentFlowResultProcessorFactory: (ClientSecret, String, StripeApiRepository) -> PaymentFlowResultProcessor<StripeIntent, StripeIntentResult>,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
     defaultReturnUrl: DefaultReturnUrl,
@@ -121,7 +121,7 @@ internal class DefaultFlowController internal constructor(
         )
     }
 
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<out StripeIntentResult<*>> by lazy {
+    private val paymentFlowResultProcessor by lazy {
         paymentFlowResultProcessorFactory(
             viewModel.initData.clientSecret,
             paymentConfiguration.publishableKey,
