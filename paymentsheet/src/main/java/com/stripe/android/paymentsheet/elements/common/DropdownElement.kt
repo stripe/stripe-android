@@ -16,10 +16,6 @@ internal class DropdownElement(
 
     val paymentMethodParams = selectedIndex.mapLatest { config.getPaymentMethodParams()[it] }
 
-    init {
-        _selectedIndex.value = 0
-    }
-
     fun onValueChange(index: Int) {
         _selectedIndex.value = index
     }
