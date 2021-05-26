@@ -18,6 +18,7 @@ internal class StripeIntentValidator {
                 error(
                     """
                         PaymentIntent with confirmation_method='automatic' is required.
+                        The current PaymentIntent has confirmation_method ${stripeIntent.confirmationMethod}.
                         See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method.
                     """.trimIndent()
                 )

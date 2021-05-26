@@ -575,7 +575,7 @@ internal class PaymentSheetViewModelTest {
     fun `Should show amount is true for PaymentIntent`() {
         viewModel.fetchStripeIntent()
 
-        assertThat(viewModel.shouldShowAmount)
+        assertThat(viewModel.isProcessingPaymentIntent)
             .isTrue()
     }
 
@@ -585,7 +585,7 @@ internal class PaymentSheetViewModelTest {
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         )
 
-        assertThat(viewModel.shouldShowAmount)
+        assertThat(viewModel.isProcessingPaymentIntent)
             .isFalse()
     }
 

@@ -39,7 +39,7 @@ internal class PaymentSheetListFragment(
 
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
 
-        if (sheetViewModel.shouldShowAmount) {
+        if (sheetViewModel.isProcessingPaymentIntent) {
             sheetViewModel.amount.observe(viewLifecycleOwner) {
                 viewBinding.total.text = getTotalText(it)
             }

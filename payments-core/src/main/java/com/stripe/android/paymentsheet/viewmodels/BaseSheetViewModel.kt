@@ -97,7 +97,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val shouldShowSaveCardCheckbox: Boolean
+    val userCanChooseToSaveCard: Boolean
         get() = customerConfig != null && stripeIntent.value is PaymentIntent
 
     init {

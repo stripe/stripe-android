@@ -57,7 +57,9 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
-    paymentFlowResultProcessorFactory: (ClientSecret, String, StripeApiRepository) -> PaymentFlowResultProcessor<StripeIntent, StripeIntentResult>,
+    paymentFlowResultProcessorFactory:
+        (ClientSecret, String, StripeApiRepository) ->
+        PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
     defaultReturnUrl: DefaultReturnUrl,
@@ -440,7 +442,7 @@ internal class DefaultFlowController internal constructor(
     }
 
     private fun createPaymentSheetResult(
-        stripeIntentResult: StripeIntentResult<*>
+        stripeIntentResult: StripeIntentResult<StripeIntent>
     ): PaymentSheetResult {
         val stripeIntent = stripeIntentResult.intent
         return when {

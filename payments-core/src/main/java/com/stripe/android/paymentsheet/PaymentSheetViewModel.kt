@@ -21,10 +21,12 @@ import com.stripe.android.googlepay.getErrorResourceID
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -65,7 +67,7 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
 internal class PaymentSheetViewModel internal constructor(
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
-    private val paymentFlowResultProcessor: PaymentIntentFlowResultProcessor,
+    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>,
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
@@ -108,7 +110,7 @@ internal class PaymentSheetViewModel internal constructor(
         return outputLiveData
     }
 
-    internal val shouldShowAmount
+    internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
 
     override var newCard: PaymentSelection.New.Card? = null
@@ -213,22 +215,25 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     private fun resetViewState(stripeIntent: StripeIntent, userErrorMessage: String?) {
-        if (stripeIntent is PaymentIntent) {
-            val amount = stripeIntent.amount
-            val currencyCode = stripeIntent.currency
-            if (amount != null && currencyCode != null) {
-                _amount.value = Amount(amount, currencyCode)
+        when (stripeIntent) {
+            is PaymentIntent -> {
+                val amount = stripeIntent.amount
+                val currencyCode = stripeIntent.currency
+                if (amount != null && currencyCode != null) {
+                    _amount.value = Amount(amount, currencyCode)
+                    _viewState.value =
+                        PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
+                } else {
+                    onFatal(
+                        IllegalStateException("PaymentIntent could not be parsed correctly.")
+                    )
+                }
+            }
+            is SetupIntent ->
                 _viewState.value =
                     PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-            } else {
-                onFatal(
-                    IllegalStateException("PaymentIntent could not be parsed correctly.")
-                )
-            }
-        } else {
-            _viewState.value =
-                PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
         }
+
         _processing.value = false
     }
 
@@ -243,6 +248,12 @@ internal class PaymentSheetViewModel internal constructor(
         val paymentSelection = selection.value
 
         if (paymentSelection is PaymentSelection.GooglePay) {
+            if (stripeIntent.value !is PaymentIntent) {
+                logger.error(
+                    "Expected PaymentIntent when checking out with Google Pay," +
+                        " but found '${stripeIntent.value}'"
+                )
+            }
             (stripeIntent.value as? PaymentIntent)?.let { paymentIntent ->
                 _launchGooglePay.value = Event(
                     StripeGooglePayContract.Args(

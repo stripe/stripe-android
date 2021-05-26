@@ -299,7 +299,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupBuyButton() {
-        if (viewModel.shouldShowAmount) {
+        if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
                 viewBinding.buyButton.setLabel(getLabelText(it))
             }
