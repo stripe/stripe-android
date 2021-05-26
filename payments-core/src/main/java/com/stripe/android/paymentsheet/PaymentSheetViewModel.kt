@@ -354,7 +354,7 @@ internal class PaymentSheetViewModel internal constructor(
                 withContext(workContext) {
                     paymentFlowResultProcessor.processResult(
                         paymentFlowResult
-                    ) as PaymentIntentResult
+                    )
                 }
             }
 
