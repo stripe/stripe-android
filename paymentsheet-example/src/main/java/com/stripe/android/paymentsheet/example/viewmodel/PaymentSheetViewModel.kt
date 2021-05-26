@@ -20,21 +20,20 @@ internal class PaymentSheetViewModel(
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
 
+    fun statusDisplayed() {
+        status.value = ""
+    }
+
     fun prepareCheckout(customer: Repository.CheckoutCustomer, mode: Repository.CheckoutMode) =
         liveData {
             inProgress.postValue(true)
-            status.postValue("Preparing checkout...")
 
             val checkoutResponse = repository.checkout(
                 customer, Repository.CheckoutCurrency.USD, mode
             ).single()
 
             checkoutResponse.fold(
-                onSuccess = { response ->
-                    status.postValue(
-                        "${status.value}\n\nReady to checkout: $response"
-                    )
-                },
+                onSuccess = { },
                 onFailure = {
                     status.postValue(
                         "${status.value}\n\nPreparing checkout failed\n${it.message}"

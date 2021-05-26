@@ -43,7 +43,7 @@ android {
 }
 
 dependencies {
-    implementation project(":stripe")
+    implementation project(":payments-core")
     implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"

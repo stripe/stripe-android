@@ -1,6 +1,6 @@
 include ':paymentsheet-example'
-include ':stripe'
 include ':stripe-test-e2e'
 include ':example'
-include ':example-forms'
+include ':payments-core'
+include ':payments'
 include ':paymentsheet'
