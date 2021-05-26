@@ -14,13 +14,12 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -57,7 +56,7 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
-    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>,
+    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentIntentFlowResultProcessor,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
     defaultReturnUrl: DefaultReturnUrl,

@@ -25,7 +25,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -62,7 +61,7 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
 internal class PaymentSheetViewModel internal constructor(
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>,
+    private val paymentFlowResultProcessor: PaymentIntentFlowResultProcessor,
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,
