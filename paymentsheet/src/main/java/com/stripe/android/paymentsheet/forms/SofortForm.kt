@@ -73,18 +73,18 @@ class SofortFormViewModel : ViewModel() {
             addSource(emailElement.isComplete) { postValue(getParams()) }
 
             // Country is a dropdown and so will always be complete.
-            addSource(countryElement.paramValue) { postValue(getParams()) }
+            addSource(countryElement.paymentMethodParams) { postValue(getParams()) }
         }
 
     private fun getParams(): PaymentMethodCreateParams? {
         Log.d(
-            "APP",
+            "Stripe",
             "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}"
         )
         return if (nameElement.isComplete.value == true && emailElement.isComplete.value == true) {
 
             PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.paramValue.value)),
+                PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.paymentMethodParams.value)),
                 PaymentMethod.BillingDetails(
                     name = nameElement.input.value,
                     email = emailElement.input.value

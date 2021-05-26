@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.elements.common.DropdownElement
 
 val textFieldBackgroundColor = Color(0xFFe0e0e0)
 
@@ -27,8 +26,8 @@ val textFieldBackgroundColor = Color(0xFFe0e0e0)
 internal fun DropDown(
     element: DropdownElement,
 ) {
-    val selectedItem by element.displayValue.observeAsState("")
-    val items = element.items
+    val selectedIndex by element.selectedIndex.observeAsState(0)
+    val items = element.displayItems
     var expanded by remember { mutableStateOf(false) }
 
     Box(
@@ -37,7 +36,7 @@ internal fun DropDown(
             .background(textFieldBackgroundColor)
     ) {
         Text(
-            selectedItem ?: "",
+            items[selectedIndex],
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = { expanded = true })
@@ -48,10 +47,10 @@ internal fun DropDown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            items.forEachIndexed { _, s ->
+            items.forEachIndexed { index, s ->
                 DropdownMenuItem(
                     onClick = {
-                        element.onValueChange(s)
+                        element.onValueChange(index)
                         expanded = false
                     }
                 ) {

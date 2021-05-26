@@ -72,7 +72,6 @@ internal class TextFieldElement(private val textFieldConfig: TextFieldConfig) {
         }
 
     init {
-        Log.d("APP", "creating new element.")
         onValueChange("")
     }
 

@@ -8,21 +8,20 @@ import androidx.lifecycle.distinctUntilChanged
 internal class DropdownElement(
     private val config: DropdownConfig,
 ) {
-    val items: List<String> = config.getItems()
+    val displayItems: List<String> = config.getDisplayItems()
 
-    /** This is all the information that can be observed on the element */
-    private val _paramValue: MutableLiveData<String?> = MutableLiveData(null)
-    val paramValue: LiveData<String?> = _paramValue.distinctUntilChanged()
-    val displayValue: LiveData<String> = Transformations.map(paramValue) {
-        config.convertToDisplay(it)
-    }
+    private val _selectedIndex = MutableLiveData<Int>()
+    val selectedIndex: LiveData<Int> = MutableLiveData()
+
+    val paymentMethodParams = Transformations.map(selectedIndex) {
+        config.getPaymentMethodParams()[it]
+    }.distinctUntilChanged()
 
     init {
-        onValueChange(items[0])
+        onValueChange(0)
     }
 
-    fun onValueChange(displayFormatted: String) {
-        _paramValue.value =
-            config.convertToPaymentMethodParam(displayFormatted)
+    fun onValueChange(index: Int) {
+        _selectedIndex.value = index
     }
 }

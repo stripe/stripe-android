@@ -28,7 +28,12 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
         }
     }
 
-    private fun containsNameAndDomain(str: String) = str.contains("@") && str.contains(".")
+    private fun containsNameAndDomain(str: String) = str.contains("@") && str.matches(
+        Regex(
+            "\\." +
+                "[a-zA-Z0-9]"
+        )
+    )
 
     override fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean) =
         when (elementState) {

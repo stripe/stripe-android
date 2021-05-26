@@ -34,7 +34,7 @@ class FormFragment : Fragment() {
                 Column(Modifier.fillMaxSize()) {
                     val param by sofortFormViewModel.params.observeAsState(null)
                     SofortForm(sofortFormViewModel)
-                    Log.e("APP", "Params: $param")
+                    Log.d("Stripe", "Params: $param")
                 }
             }
         }
