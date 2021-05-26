@@ -24,14 +24,13 @@ import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -75,8 +74,7 @@ internal class DefaultFlowControllerTest {
     private val paymentController = mock<PaymentController>()
     private val eventReporter = mock<EventReporter>()
 
-    private val paymentFlowResultProcessor =
-        mock<PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>>()
+    private val paymentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
     private val flowController: DefaultFlowController by lazy {
         createFlowController()
     }
