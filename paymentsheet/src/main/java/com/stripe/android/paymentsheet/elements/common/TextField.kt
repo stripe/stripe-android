@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
-fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
+internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
     ImeAction.Next
 } ?: ImeAction.Done
 

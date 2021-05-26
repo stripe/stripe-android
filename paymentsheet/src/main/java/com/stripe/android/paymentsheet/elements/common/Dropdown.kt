@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-val textFieldBackgroundColor = Color(0xFFe0e0e0)
+internal val textFieldBackgroundColor = Color(0xFFe0e0e0)
 
 @Composable
 internal fun DropDown(

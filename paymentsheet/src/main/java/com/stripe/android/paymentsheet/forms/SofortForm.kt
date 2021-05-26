@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 
 @Composable
-fun SofortForm(
+internal fun SofortForm(
     viewModel: SofortFormViewModel,
 ) {
     val name = FocusRequester()
@@ -59,7 +59,7 @@ fun SofortForm(
     }
 }
 
-class SofortFormViewModel : ViewModel() {
+internal class SofortFormViewModel : ViewModel() {
     internal var nameElement = TextFieldElement(NameConfig())
     internal var emailElement = TextFieldElement(EmailConfig())
     internal var countryElement = DropdownElement(CountryConfig())
