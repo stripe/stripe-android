@@ -62,7 +62,7 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
 internal class PaymentSheetViewModel internal constructor(
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<PaymentIntentResult>,
+    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>,
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val eventReporter: EventReporter,

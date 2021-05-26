@@ -14,6 +14,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
@@ -56,7 +57,7 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
-    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor<PaymentIntentResult>,
+    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
     defaultReturnUrl: DefaultReturnUrl,
@@ -120,7 +121,7 @@ internal class DefaultFlowController internal constructor(
         )
     }
 
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<PaymentIntentResult> by lazy {
+    private val paymentFlowResultProcessor by lazy {
         paymentFlowResultProcessorFactory(paymentConfiguration.publishableKey, stripeApiRepository)
     }
 
