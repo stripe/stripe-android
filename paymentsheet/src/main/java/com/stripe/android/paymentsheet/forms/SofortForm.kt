@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.elements.country.CountryConfig
 fun SofortForm(
     viewModel: SofortFormViewModel,
 ) {
-    // TODO: Do these need to be saved?
     val name = FocusRequester()
     val email = FocusRequester()
 

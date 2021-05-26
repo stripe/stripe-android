@@ -19,19 +19,17 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
      */
     override fun filter(userTyped: String) = userTyped
 
-    override fun determineState(paramFormatted: String): TextFieldElementState {
+    override fun determineState(input: String): TextFieldElementState {
         return when {
-            paramFormatted.isEmpty() -> Error.BlankAndRequired
-            pattern.matcher(paramFormatted).matches() -> Valid.Limitless
-            containsNameAndDomain(paramFormatted) -> Error.Malformed
+            input.isEmpty() -> Error.BlankAndRequired
+            pattern.matcher(input).matches() -> Valid.Limitless
+            containsNameAndDomain(input) -> Error.Malformed
             else -> Error.Incomplete
         }
     }
 
     private fun containsNameAndDomain(str: String) = str.contains("@") && str.matches(
-        Regex(
-            ".*@.*\\..+"
-        )
+        Regex(".*@.*\\..+")
     )
 
     override fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean) =

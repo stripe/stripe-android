@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements.common
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
@@ -13,9 +12,18 @@ import com.stripe.android.paymentsheet.R
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal class TextFieldElement(private val textFieldConfig: TextFieldConfig) {
+internal class TextFieldElement(
+    private val textFieldConfig: TextFieldConfig,
+    // This is here because it is useful to provide text to force the full/invalid/incomplete states
+    private val shouldShowError: (TextFieldElementState, Boolean) -> Boolean = { state, hasFocus ->
+        textFieldConfig.shouldShowError(state, hasFocus)
+    },
+    // This is here because it is useful to provide text to force the full/invalid/incomplete states
+    private val determineState: (String) -> TextFieldElementState = {
+        textFieldConfig.determineState(it)
+    }
+) {
     val debugLabel = textFieldConfig.debugLabel
-    private val isDebug = true
 
     /** This is all the information that can be observed on the element */
     private val _input: NotNullMutableLiveData<String> = NotNullMutableLiveData("")
@@ -37,39 +45,6 @@ internal class TextFieldElement(private val textFieldConfig: TextFieldConfig) {
     }
     val isFull = Transformations.map(_elementState) { it.isFull() }
     val isComplete = Transformations.map(_elementState) { it.isValid() }
-
-    private val shouldShowErrorDebug: (TextFieldElementState, Boolean) -> Boolean =
-        { state, hasFocus ->
-            when (state) {
-                is Valid.Full -> false
-                is Error.ShowInFocus -> !hasFocus
-                is Error.ShowAlways -> true
-                else -> textFieldConfig.shouldShowError(state, hasFocus)
-            }
-        }
-
-    private val shouldShowError: (TextFieldElementState, Boolean) -> Boolean =
-        if (isDebug) {
-            shouldShowErrorDebug
-        } else { state, hasFocus ->
-            textFieldConfig.shouldShowError(state, hasFocus)
-        }
-
-    private val determineStateDebug: (String) -> TextFieldElementState = { str ->
-        when {
-            str.contains("full") -> Valid.Full
-            str.contains("focus") -> Error.ShowInFocus
-            str.contains("always") -> Error.ShowAlways
-            else -> textFieldConfig.determineState(str)
-        }
-    }
-
-    private val determineState: (String) -> TextFieldElementState =
-        if (isDebug) {
-            determineStateDebug
-        } else { str ->
-            textFieldConfig.determineState(str)
-        }
 
     init {
         onValueChange("")
