@@ -88,6 +88,8 @@ internal fun TextField(
                 hasFocus = it.isFocused
             },
         keyboardOptions = KeyboardOptions(imeAction = imeAction(nextFocus)),
-        colors = colors
+        colors = colors,
+        maxLines = 1,
+        singleLine = true
     )
 }
