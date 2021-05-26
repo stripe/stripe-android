@@ -16,10 +16,6 @@ internal class DropdownElement(
         config.getPaymentMethodParams()[it]
     }
 
-    init {
-        _selectedIndex.value = 0
-    }
-
     fun onValueChange(index: Int) {
         _selectedIndex.value = index
     }
