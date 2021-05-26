@@ -70,7 +70,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, S : StripeInt
         }
     }
 
-    fun shouldCancelIntent(
+    private fun shouldCancelIntent(
         stripeIntent: StripeIntent,
         shouldCancelSource: Boolean
     ): Boolean {
@@ -99,7 +99,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, S : StripeInt
         failureMessage: String?
     ): S
 
-    companion object {
+    private companion object {
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
     }
 }
