@@ -456,7 +456,8 @@ internal class DefaultFlowController internal constructor(
             stripeIntent.lastErrorMessage != null -> {
                 PaymentSheetResult.Failed(
                     error = IllegalArgumentException(
-                        "Failed to confirm PaymentIntent. ${stripeIntent.lastErrorMessage}"
+                        "Failed to confirm ${stripeIntent.javaClass.simpleName}: " +
+                            stripeIntent.lastErrorMessage
                     )
                 )
             }

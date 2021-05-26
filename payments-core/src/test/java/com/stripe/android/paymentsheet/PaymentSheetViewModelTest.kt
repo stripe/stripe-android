@@ -469,6 +469,7 @@ internal class PaymentSheetViewModelTest {
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
+                    "The current PaymentIntent has confirmation_method Manual.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
             )
     }
@@ -488,6 +489,7 @@ internal class PaymentSheetViewModelTest {
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
+                    "The current PaymentIntent has confirmation_method Manual.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
             )
     }
