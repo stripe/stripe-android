@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val textFieldBackgroundColor = Color(0xFFe0e0e0)
+internal val textFieldBackgroundColor = Color(0xFFe0e0e0)
 
 @ExperimentalCoroutinesApi
 @Composable

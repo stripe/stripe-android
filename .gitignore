@@ -32,10 +32,14 @@ proguard/
 .idea
 
 # Output
-stripe/target
-stripe/gen
-stripe/bin
-stripe/*.log
+payments/target
+payments/gen
+payments/bin
+payments/*.log
+payments-core/target
+payments-core/gen
+payments-core/bin
+payments-core/*.log
 example/bin
 example/target
 example/gen

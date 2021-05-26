@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
@@ -54,7 +53,7 @@ private val StripeLightPalette = lightColors(
 )
 
 @Composable
-fun StripeTheme(
+internal fun StripeTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {

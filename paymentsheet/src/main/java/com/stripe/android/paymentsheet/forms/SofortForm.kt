@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.combine
 
 @ExperimentalCoroutinesApi
 @Composable
-fun SofortForm(
+internal fun SofortForm(
     viewModel: SofortFormViewModel,
 ) {
     val name = FocusRequester()
@@ -63,7 +63,7 @@ fun SofortForm(
 }
 
 @ExperimentalCoroutinesApi
-class SofortFormViewModel : ViewModel() {
+internal class SofortFormViewModel : ViewModel() {
     internal var nameElement = TextFieldElement(NameConfig())
     internal var emailElement = TextFieldElement(EmailConfig())
     internal var countryElement = DropdownElement(CountryConfig())

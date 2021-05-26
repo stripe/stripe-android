@@ -14,7 +14,7 @@ import com.stripe.android.paymentsheet.forms.SofortForm
 import com.stripe.android.paymentsheet.forms.SofortFormViewModel
 
 class FormFragment : Fragment() {
-    val sofortFormViewModel by activityViewModels<SofortFormViewModel>()
+    private val sofortFormViewModel by activityViewModels<SofortFormViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
