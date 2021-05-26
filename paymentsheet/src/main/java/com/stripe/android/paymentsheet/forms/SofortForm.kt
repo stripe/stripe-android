@@ -9,9 +9,8 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.R
@@ -23,7 +22,11 @@ import com.stripe.android.paymentsheet.elements.common.DropdownElement
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
+@ExperimentalCoroutinesApi
 @Composable
 fun SofortForm(
     viewModel: SofortFormViewModel,
@@ -32,8 +35,8 @@ fun SofortForm(
     val name = FocusRequester()
     val email = FocusRequester()
 
-    val nameErrorMessage by viewModel.nameElement.errorMessage.observeAsState(null)
-    val emailErrorMessage by viewModel.emailElement.errorMessage.observeAsState(null)
+    val nameErrorMessage by viewModel.nameElement.errorMessage.asLiveData().observeAsState(null)
+    val emailErrorMessage by viewModel.emailElement.errorMessage.asLiveData().observeAsState(null)
 
     Column(modifier = Modifier.padding(top = 30.dp, start = 16.dp, end = 16.dp)) {
         Section(R.string.address_label_name, nameErrorMessage) {
@@ -60,34 +63,40 @@ fun SofortForm(
     }
 }
 
+@ExperimentalCoroutinesApi
 class SofortFormViewModel : ViewModel() {
     internal var nameElement = TextFieldElement(NameConfig())
     internal var emailElement = TextFieldElement(EmailConfig())
     internal var countryElement = DropdownElement(CountryConfig())
 
-    val params: LiveData<PaymentMethodCreateParams?> =
-        MediatorLiveData<PaymentMethodCreateParams?>().apply {
-            addSource(nameElement.input) { postValue(getParams()) }
-            addSource(nameElement.isComplete) { postValue(getParams()) }
-            addSource(emailElement.input) { postValue(getParams()) }
-            addSource(emailElement.isComplete) { postValue(getParams()) }
+    val params: Flow<PaymentMethodCreateParams?> = combine(
+        nameElement.input,
+        nameElement.isComplete,
+        emailElement.input,
+        emailElement.isComplete,
+        countryElement.paymentMethodParams
+    ) { nameInput, nameComplete, emailInput, emailComplete, countryPaymentMethodParams ->
+        getParams(nameInput, nameComplete, emailInput, emailComplete, countryPaymentMethodParams)
+    }
 
-            // Country is a dropdown and so will always be complete.
-            addSource(countryElement.paymentMethodParams) { postValue(getParams()) }
-        }
-
-    private fun getParams(): PaymentMethodCreateParams? {
+    private fun getParams(
+        nameInput: String,
+        nameComplete: Boolean,
+        emailInput: String,
+        emailComplete: Boolean,
+        countryPaymentMethodParams: String
+    ): PaymentMethodCreateParams? {
         Log.d(
             "Stripe",
-            "name: ${nameElement.isComplete.value}, email: ${emailElement.isComplete.value}"
+            "name: $nameComplete, email: $emailComplete}"
         )
-        return if (nameElement.isComplete.value == true && emailElement.isComplete.value == true) {
+        return if (nameComplete && emailComplete) {
 
             PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Sofort(requireNotNull(countryElement.paymentMethodParams.value)),
+                PaymentMethodCreateParams.Sofort(countryPaymentMethodParams),
                 PaymentMethod.BillingDetails(
-                    name = nameElement.input.value,
-                    email = emailElement.input.value
+                    name = nameInput,
+                    email = emailInput
                 )
             )
         } else {

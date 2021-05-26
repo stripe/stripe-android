@@ -1,20 +1,20 @@
 package com.stripe.android.paymentsheet.elements.common
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.mapLatest
 
+@ExperimentalCoroutinesApi
 internal class DropdownElement(
     private val config: DropdownConfig,
 ) {
     val displayItems: List<String> = config.getDisplayItems()
 
-    private val _selectedIndex = MutableLiveData(0)
-    val selectedIndex: LiveData<Int> = _selectedIndex
+    private val _selectedIndex = MutableStateFlow(0)
+    val selectedIndex: Flow<Int> = _selectedIndex
 
-    val paymentMethodParams = Transformations.map(selectedIndex) {
-        config.getPaymentMethodParams()[it]
-    }
+    val paymentMethodParams = selectedIndex.mapLatest { config.getPaymentMethodParams()[it] }
 
     init {
         _selectedIndex.value = 0

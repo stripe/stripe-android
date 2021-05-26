@@ -19,14 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.asLiveData
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val textFieldBackgroundColor = Color(0xFFe0e0e0)
 
+@ExperimentalCoroutinesApi
 @Composable
 internal fun DropDown(
     element: DropdownElement,
 ) {
-    val selectedIndex by element.selectedIndex.observeAsState(0)
+    val selectedIndex by element.selectedIndex.asLiveData().observeAsState(0)
     val items = element.displayItems
     var expanded by remember { mutableStateOf(false) }
 

@@ -4,11 +4,13 @@ import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldElementState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,6 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
 internal class TextFieldElementTest {
@@ -31,7 +34,7 @@ internal class TextFieldElementTest {
         config.fakeElementState = Error.Incomplete
 
         var paramValue: String? = null
-        textFieldElement.input
+        textFieldElement.input.asLiveData()
             .observeForever {
                 paramValue = it
             }
@@ -44,8 +47,8 @@ internal class TextFieldElementTest {
         config.fakeElementState = Error.Incomplete
         config.fakeShouldShowError = true
 
-        var errorMessageResId = 5
-        textFieldElement.errorMessage
+        var errorMessageResId: Int? = 5
+        textFieldElement.errorMessage.asLiveData()
             .observeForever {
                 errorMessageResId = it
             }
@@ -62,7 +65,7 @@ internal class TextFieldElementTest {
         }
 
         var isFull = false
-        textFieldElement.isFull
+        textFieldElement.isFull.asLiveData()
             .observeForever {
                 isFull = it
             }
@@ -78,7 +81,7 @@ internal class TextFieldElementTest {
         }
 
         var isFull = false
-        textFieldElement.isFull
+        textFieldElement.isFull.asLiveData()
             .observeForever {
                 isFull = it
             }
@@ -94,7 +97,7 @@ internal class TextFieldElementTest {
         }
 
         var isComplete = true
-        textFieldElement.isComplete
+        textFieldElement.isComplete.asLiveData()
             .observeForever {
                 isComplete = it
             }
@@ -107,7 +110,7 @@ internal class TextFieldElementTest {
     fun `Verify is complete set when the element state changes`() {
 
         var isComplete = false
-        textFieldElement.isComplete
+        textFieldElement.isComplete.asLiveData()
             .observeForever {
                 isComplete = it
             }
@@ -128,16 +131,16 @@ internal class TextFieldElementTest {
     @Test
     fun `Verify is visible error is true when onValueChange and shouldShowError returns true`() {
         var visibleError = false
-        textFieldElement.visibleError
-            .observeForever {
-                visibleError = it
-            }
+        textFieldElement.visibleError.asLiveData().observeForever {
+            visibleError = it
+        }
 
         config.fakeShouldShowError = false
+        textFieldElement.onValueChange("full")
         assertThat(visibleError).isEqualTo(false)
 
         config.fakeShouldShowError = true
-        textFieldElement.onValueChange("newValue")
+        textFieldElement.onValueChange("focus")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
     }
@@ -147,7 +150,7 @@ internal class TextFieldElementTest {
         config.fakeShouldShowError = false
 
         var visibleError = false
-        textFieldElement.visibleError
+        textFieldElement.visibleError.asLiveData()
             .observeForever {
                 visibleError = it
             }
@@ -167,7 +170,7 @@ internal class TextFieldElementTest {
         val textFieldElementErrorBasedOnFocus = TextFieldElement(configErrorBasedOnFocus)
 
         var visibleError = false
-        textFieldElementErrorBasedOnFocus.visibleError
+        textFieldElementErrorBasedOnFocus.visibleError.asLiveData()
             .observeForever {
                 visibleError = it
             }
@@ -186,7 +189,7 @@ internal class TextFieldElementTest {
         val textFieldElementErrorBasedOnFocus = TextFieldElement(configErrorBasedOnFocus)
 
         var visibleError = false
-        textFieldElementErrorBasedOnFocus.visibleError
+        textFieldElementErrorBasedOnFocus.visibleError.asLiveData()
             .observeForever {
                 visibleError = it
             }
@@ -205,7 +208,7 @@ internal class TextFieldElementTest {
         val textFieldElement = TextFieldElement(numberConfigFilter)
 
         var inputValue = ""
-        textFieldElement.input
+        textFieldElement.input.asLiveData()
             .observeForever {
                 inputValue = it
             }
