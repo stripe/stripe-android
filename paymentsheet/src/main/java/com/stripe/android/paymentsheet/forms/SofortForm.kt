@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.DropdownElement
+import com.stripe.android.paymentsheet.elements.common.Mandate
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
@@ -27,6 +29,7 @@ import com.stripe.android.paymentsheet.elements.country.CountryConfig
 @Composable
 internal fun SofortForm(
     viewModel: SofortFormViewModel,
+    merchantName: String
 ) {
     val name = FocusRequester()
     val email = FocusRequester()
@@ -56,6 +59,8 @@ internal fun SofortForm(
                 element = viewModel.countryElement
             )
         }
+
+        Mandate(stringResource(R.string.sofort_mandate_acceptance, merchantName))
     }
 }
 
