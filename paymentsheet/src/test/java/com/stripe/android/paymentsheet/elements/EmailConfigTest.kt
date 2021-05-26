@@ -8,14 +8,18 @@ class EmailConfigTest {
     private val emailConfig = EmailConfig(PATTERN)
 
     @Test
-    fun `verify determine state returns blank and required when empty or null`() {
-        assertThat(emailConfig.determineState(null)).isEqualTo(EmailConfig.Companion.Error.BlankAndRequired)
+    fun `verify determine state returns blank and required when empty`() {
         assertThat(emailConfig.determineState("")).isEqualTo(EmailConfig.Companion.Error.BlankAndRequired)
     }
 
     @Test
     fun `verify the if email doesn't match the pattern it returns incomplete`() {
         assertThat(emailConfig.determineState("sdf")).isEqualTo(EmailConfig.Companion.Error.Incomplete)
+    }
+
+    @Test
+    fun `verify if it doesn't pattern match but has an @ and period it is malformed`() {
+        assertThat(emailConfig.determineState("@.")).isEqualTo(EmailConfig.Companion.Error.Malformed)
     }
 
     @Test
@@ -34,6 +38,22 @@ class EmailConfigTest {
         assertThat(
             emailConfig.shouldShowError(
                 EmailConfig.Companion.Error.Incomplete,
+                false
+            )
+        ).isEqualTo(true)
+    }
+
+    @Test
+    fun `verify malformed are shown when you do and don't have focus`() {
+        assertThat(
+            emailConfig.shouldShowError(
+                EmailConfig.Companion.Error.Malformed,
+                true
+            )
+        ).isEqualTo(true)
+        assertThat(
+            emailConfig.shouldShowError(
+                EmailConfig.Companion.Error.Malformed,
                 false
             )
         ).isEqualTo(true)
@@ -79,13 +99,13 @@ class EmailConfigTest {
 
     companion object {
         val PATTERN: Pattern = Pattern.compile(
-                "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
-                    "\\@" +
-                    "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-                    "(" +
-                    "\\." +
-                    "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-                    ")+"
-            )
+            "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
+                "\\@" +
+                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+                "(" +
+                "\\." +
+                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+                ")+"
+        )
     }
 }

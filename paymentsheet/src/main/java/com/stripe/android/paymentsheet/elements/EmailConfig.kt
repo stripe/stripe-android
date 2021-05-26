@@ -23,15 +23,19 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
         return when {
             paramFormatted.isEmpty() -> Error.BlankAndRequired
             pattern.matcher(paramFormatted).matches() -> Valid.Limitless
+            containsNameAndDomain(paramFormatted) -> Error.Malformed
             else -> Error.Incomplete
         }
     }
+
+    private fun containsNameAndDomain(str: String) = str.contains("@") && str.contains(".")
 
     override fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean) =
         when (elementState) {
             is Error -> {
                 when (elementState) {
                     Error.Incomplete -> !hasFocus
+                    Error.Malformed -> true
                     Error.BlankAndRequired -> false
                 }
             }
@@ -47,6 +51,7 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
         sealed class Error(stringResId: Int) :
             TextFieldElementState.TextFieldElementStateError(stringResId) {
             object Incomplete : Error(R.string.incomplete)
+            object Malformed : Error(R.string.malformed)
             object BlankAndRequired : Error(R.string.blank_and_required)
         }
     }

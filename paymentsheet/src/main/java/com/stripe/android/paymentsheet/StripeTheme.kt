@@ -56,10 +56,9 @@ private val StripeLightPalette = lightColors(
 @Composable
 fun StripeTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
-    colors: Colors? = null,
     content: @Composable () -> Unit
 ) {
-    val myColors = colors ?: if (isDarkTheme) StripeDarkPalette else StripeLightPalette
+    val myColors = if (isDarkTheme) StripeDarkPalette else StripeLightPalette
 
     MaterialTheme(
         colors = myColors,
