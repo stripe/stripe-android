@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-class TextFieldElementTest {
+internal class TextFieldElementTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -28,7 +28,7 @@ class TextFieldElementTest {
 
     @Test
     fun `verify onValueChange sets the paramValue`() {
-        config.fakeElementState = TextFieldElementState.TextFieldElementStateError(R.string.invalid)
+        config.fakeElementState = Error.Incomplete
 
         var paramValue: String? = null
         textFieldElement.input
@@ -41,7 +41,7 @@ class TextFieldElementTest {
 
     @Test
     fun `verify the error message is set when should be visible`() {
-        config.fakeElementState = TextFieldElementState.TextFieldElementStateError(R.string.invalid)
+        config.fakeElementState = Error.Incomplete
         config.fakeShouldShowError = true
 
         var errorMessageResId = 5
@@ -154,7 +154,7 @@ class TextFieldElementTest {
 
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeElementState = TextFieldElementState.TextFieldElementStateError(R.string.invalid)
+        config.fakeElementState = Error.Incomplete
         config.fakeShouldShowError = true
         textFieldElement.onValueChange("newValue")
         shadowOf(getMainLooper()).idle()
@@ -221,10 +221,9 @@ class TextFieldElementTest {
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
         var fakeShouldShowError = false
-        var fakeElementState: TextFieldElementState =
-            TextFieldElementState.TextFieldElementStateValid()
+        var fakeElementState: TextFieldElementState = Valid.Limitless
 
-        override fun determineState(paramFormatted: String?): TextFieldElementState =
+        override fun determineState(paramFormatted: String): TextFieldElementState =
             fakeElementState
 
         override fun shouldShowError(
@@ -240,10 +239,9 @@ class TextFieldElementTest {
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        var fakeElementState: TextFieldElementState =
-            TextFieldElementState.TextFieldElementStateValid()
+        var fakeElementState: TextFieldElementState = Valid.Limitless
 
-        override fun determineState(paramFormatted: String?): TextFieldElementState =
+        override fun determineState(paramFormatted: String): TextFieldElementState =
             fakeElementState
 
         override fun shouldShowError(
@@ -259,8 +257,7 @@ class TextFieldElementTest {
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        override fun determineState(paramFormatted: String?): TextFieldElementState =
-            TextFieldElementState.TextFieldElementStateValid()
+        override fun determineState(paramFormatted: String): TextFieldElementState = Valid.Limitless
 
         override fun shouldShowError(
             elementState: TextFieldElementState,
@@ -268,6 +265,18 @@ class TextFieldElementTest {
         ) = false
 
         override fun filter(userTyped: String): String = userTyped.filter { Character.isDigit(it) }
+    }
+
+    companion object {
+
+        sealed class Valid : TextFieldElementState.TextFieldElementStateValid() {
+            object Limitless : Valid() // no auto-advance
+        }
+
+        sealed class Error(stringResId: Int) :
+            TextFieldElementState.TextFieldElementStateError(stringResId) {
+            object Incomplete : Error(R.string.incomplete)
+        }
     }
 
 }

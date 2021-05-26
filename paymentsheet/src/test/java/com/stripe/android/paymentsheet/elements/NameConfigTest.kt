@@ -9,8 +9,6 @@ class NameConfigTest {
 
     @Test
     fun `verify determine state returns blank and required when empty or null`() {
-        Truth.assertThat(nameConfig.determineState(null))
-            .isEqualTo(NameConfig.Companion.Error.BlankAndRequired)
         Truth.assertThat(nameConfig.determineState(""))
             .isEqualTo(NameConfig.Companion.Error.BlankAndRequired)
     }
