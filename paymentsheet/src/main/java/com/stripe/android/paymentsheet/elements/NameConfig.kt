@@ -10,9 +10,9 @@ internal class NameConfig : TextFieldConfig {
     override val label = R.string.address_label_name
     override val keyboard = KeyboardType.Text
 
-    override fun determineState(paramFormatted: String): TextFieldElementState {
+    override fun determineState(input: String): TextFieldElementState {
         return when {
-            paramFormatted.isEmpty() -> Error.BlankAndRequired
+            input.isEmpty() -> Error.BlankAndRequired
             else -> Valid.Limitless
         }
     }

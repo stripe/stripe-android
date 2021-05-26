@@ -27,7 +27,28 @@ internal class TextFieldElementTest {
     val rule = InstantTaskExecutorRule()
 
     private val config = TestConfig()
-    private val textFieldElement = TextFieldElement(config)
+    private val shouldShowErrorDebug: (TextFieldElementState, Boolean) -> Boolean =
+        { state, hasFocus ->
+            when (state) {
+                is TextFieldElement.Companion.Valid.Full -> false
+                is TextFieldElement.Companion.Error.ShowInFocus -> !hasFocus
+                is TextFieldElement.Companion.Error.ShowAlways -> true
+                else -> config.shouldShowError(state, hasFocus)
+            }
+        }
+
+    private val determineStateDebug: (String) -> TextFieldElementState = { str ->
+        when {
+            str.contains("full") -> TextFieldElement.Companion.Valid.Full
+            str.contains("focus") -> TextFieldElement.Companion.Error.ShowInFocus
+            str.contains("always") -> TextFieldElement.Companion.Error.ShowAlways
+            else -> config.determineState(str)
+        }
+    }
+
+    private val textFieldElement =
+        TextFieldElement(config, shouldShowErrorDebug, determineStateDebug)
+
 
     @Test
     fun `verify onValueChange sets the paramValue`() {
@@ -226,7 +247,7 @@ internal class TextFieldElementTest {
         var fakeShouldShowError = false
         var fakeElementState: TextFieldElementState = Valid.Limitless
 
-        override fun determineState(paramFormatted: String): TextFieldElementState =
+        override fun determineState(input: String): TextFieldElementState =
             fakeElementState
 
         override fun shouldShowError(
@@ -244,7 +265,7 @@ internal class TextFieldElementTest {
 
         var fakeElementState: TextFieldElementState = Valid.Limitless
 
-        override fun determineState(paramFormatted: String): TextFieldElementState =
+        override fun determineState(input: String): TextFieldElementState =
             fakeElementState
 
         override fun shouldShowError(
@@ -260,7 +281,7 @@ internal class TextFieldElementTest {
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        override fun determineState(paramFormatted: String): TextFieldElementState = Valid.Limitless
+        override fun determineState(input: String): TextFieldElementState = Valid.Limitless
 
         override fun shouldShowError(
             elementState: TextFieldElementState,

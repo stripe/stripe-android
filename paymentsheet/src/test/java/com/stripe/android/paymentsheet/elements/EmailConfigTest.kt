@@ -99,6 +99,7 @@ class EmailConfigTest {
     }
 
     companion object {
+        // This is here because it is not defined during unit tests.
         val PATTERN: Pattern = Pattern.compile(
             "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
                 "\\@" +

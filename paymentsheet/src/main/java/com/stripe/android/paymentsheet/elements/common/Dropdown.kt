@@ -50,14 +50,14 @@ internal fun DropDown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            items.forEachIndexed { index, s ->
+            items.forEachIndexed { index, displayValue ->
                 DropdownMenuItem(
                     onClick = {
                         element.onValueChange(index)
                         expanded = false
                     }
                 ) {
-                    Text(text = s)
+                    Text(text = displayValue)
                 }
             }
         }

@@ -13,9 +13,18 @@ import kotlinx.coroutines.flow.mapLatest
  * exposing immutable observers for its data
  */
 @ExperimentalCoroutinesApi
-internal class TextFieldElement(private val textFieldConfig: TextFieldConfig) {
+internal class TextFieldElement(
+    private val textFieldConfig: TextFieldConfig,
+    // This is here because it is useful to provide text to force the full/invalid/incomplete states
+    private val shouldShowError: (TextFieldElementState, Boolean) -> Boolean = { state, hasFocus ->
+        textFieldConfig.shouldShowError(state, hasFocus)
+    },
+    // This is here because it is useful to provide text to force the full/invalid/incomplete states
+    private val determineState: (String) -> TextFieldElementState = {
+        textFieldConfig.determineState(it)
+    }
+) {
     val debugLabel = textFieldConfig.debugLabel
-    private val isDebug = true
 
     /** This is all the information that can be observed on the element */
     private val _input = MutableStateFlow("")
@@ -37,39 +46,6 @@ internal class TextFieldElement(private val textFieldConfig: TextFieldConfig) {
     val isFull: Flow<Boolean> = _elementState.mapLatest { it.isFull() }
 
     val isComplete: Flow<Boolean> = _elementState.mapLatest { it.isValid() }
-
-    private val shouldShowErrorDebug: (TextFieldElementState, Boolean) -> Boolean =
-        { state, hasFocus ->
-            when (state) {
-                is Valid.Full -> false
-                is Error.ShowInFocus -> !hasFocus
-                is Error.ShowAlways -> true
-                else -> textFieldConfig.shouldShowError(state, hasFocus)
-            }
-        }
-
-    private val shouldShowError: (TextFieldElementState, Boolean) -> Boolean =
-        if (isDebug) {
-            shouldShowErrorDebug
-        } else { state, hasFocus ->
-            textFieldConfig.shouldShowError(state, hasFocus)
-        }
-
-    private val determineStateDebug: (String) -> TextFieldElementState = { str ->
-        when {
-            str.contains("full") -> Valid.Full
-            str.contains("focus") -> Error.ShowInFocus
-            str.contains("always") -> Error.ShowAlways
-            else -> textFieldConfig.determineState(str)
-        }
-    }
-
-    private val determineState: (String) -> TextFieldElementState =
-        if (isDebug) {
-            determineStateDebug
-        } else { str ->
-            textFieldConfig.determineState(str)
-        }
 
     init {
         onValueChange("")

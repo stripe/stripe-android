@@ -12,11 +12,13 @@ internal interface TextFieldConfig {
     val keyboard: KeyboardType
 
     /** This will determine the state of the element based on the text */
-    fun determineState(paramFormatted: String): TextFieldElementState
+    fun determineState(input: String): TextFieldElementState
 
     /** This will determine if the element is in an error state based on the current focus state */
     fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean): Boolean
 
-    /** This works a little like the input filter, removing pasted characters that are invalid */
+    /**
+     * This works a little like the input filter, removing pasted characters that are invalid in
+     * the case where the keyboard allows more than the allowed characters, or characters are pasted in */
     fun filter(userTyped: String): String
 }

@@ -43,9 +43,9 @@ internal fun Section(label: Int, error: Int?, content: @Composable () -> Unit) {
  * This is how error string for the section are displayed.
  */
 @Composable
-internal fun SectionError(error: String?) {
+internal fun SectionError(error: String) {
     Text(
-        text = error ?: "",
+        text = error,
         color = MaterialTheme.colors.error
     )
 }

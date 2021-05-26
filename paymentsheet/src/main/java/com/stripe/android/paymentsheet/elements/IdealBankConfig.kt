@@ -7,7 +7,7 @@ internal class IdealBankConfig : DropdownConfig {
     override val label = com.stripe.android.R.string.title_bank_account
 
     override fun getDisplayItems() = DISPLAY_TO_PARAM.map { it.displayName }
-    override fun getPaymentMethodParams() = DISPLAY_TO_PARAM.map { it.paramValue }
+    override fun getPaymentMethodParams() = DISPLAY_TO_PARAM.map { it.paymentMethodParamFieldValue }
 
     companion object {
         val DISPLAY_TO_PARAM: List<Item> = listOf(
@@ -27,5 +27,5 @@ internal class IdealBankConfig : DropdownConfig {
         )
     }
 
-    data class Item(val displayName: String, val paramValue: String)
+    data class Item(val displayName: String, val paymentMethodParamFieldValue: String)
 }
