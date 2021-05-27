@@ -23,17 +23,22 @@ Otherwise, to make it easier to diagnose your issue, please fill out the followi
 
 ## Android version
 <!-- What version of Android are you observing the problem on? -->
+<!-- Is this a new version, or which version are you updating from? -->
 
 ## Impacted devices
 <!-- Are there specific devices that you are observing the problem on? -->
 
 ## Installation method
-<!-- How did you install our SDK? -->
+<!-- How did you install our SDK? Through a gradle dependency or a downloaded aar? -->
 
-## SDK version
+## Dependency Versions
+<!-- What version of our SDK are you using? You can find this by looking at the `dependencies` section of your project's `build.gradle` file.   -->
+stripe-android:
+<!-- What version of gradle are you using?  You can find this by looking at <PROJECT>/gradle/wrapper/gradle-wrapper.properties -->
+Gradle:
 <!--
-What version of our SDK are you using? You can find this by looking at the `dependencies` section of your project's `build.gradle` file.  Is the problem caused by an upgrade?  Which version are you upgrading from and to?
- -->
+Android Gradle Plugin:
+
 
 ## SDK classes
 <!-- Which SDK classes are applicable to your issue? -->
