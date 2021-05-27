@@ -50,6 +50,7 @@ internal class DefaultFlowControllerInitializerTest {
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
                         null,
+                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         listOf(PaymentMethod.Type.Card),
                         emptyList(),
@@ -77,6 +78,7 @@ internal class DefaultFlowControllerInitializerTest {
             FlowControllerInitializer.InitResult.Success(
                 InitData(
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
@@ -106,6 +108,7 @@ internal class DefaultFlowControllerInitializerTest {
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
                         PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         listOf(PaymentMethod.Type.Card),
                         emptyList(),
@@ -133,6 +136,7 @@ internal class DefaultFlowControllerInitializerTest {
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
                         PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         listOf(PaymentMethod.Type.Card),
                         emptyList(),
@@ -160,6 +164,7 @@ internal class DefaultFlowControllerInitializerTest {
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         listOf(PaymentMethod.Type.Card),
                         PAYMENT_METHODS,
@@ -195,6 +200,7 @@ internal class DefaultFlowControllerInitializerTest {
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         listOf(PaymentMethod.Type.Card),
                         emptyList(),
@@ -224,6 +230,7 @@ internal class DefaultFlowControllerInitializerTest {
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         listOf(PaymentMethod.Type.Card),
                         emptyList(),

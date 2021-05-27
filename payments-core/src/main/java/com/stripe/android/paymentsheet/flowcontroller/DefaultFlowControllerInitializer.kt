@@ -77,6 +77,7 @@ internal class DefaultFlowControllerInitializer(
                     FlowControllerInitializer.InitResult.Success(
                         InitData(
                             config = config,
+                            clientSecret = clientSecret,
                             paymentIntent = paymentIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
@@ -115,6 +116,7 @@ internal class DefaultFlowControllerInitializer(
                 FlowControllerInitializer.InitResult.Success(
                     InitData(
                         config = config,
+                        clientSecret = clientSecret,
                         paymentIntent = paymentIntent,
                         paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),

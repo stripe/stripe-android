@@ -150,7 +150,6 @@ fun ProductRow(
     }
 }
 
-
 @Composable
 fun ReceiptRow(
     description: String,

@@ -19,7 +19,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -56,7 +56,7 @@ internal class DefaultFlowController internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
-    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentFlowResultProcessor,
+    paymentFlowResultProcessorFactory: (String, StripeApiRepository) -> PaymentIntentFlowResultProcessor,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
     defaultReturnUrl: DefaultReturnUrl,
@@ -120,7 +120,7 @@ internal class DefaultFlowController internal constructor(
         )
     }
 
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor by lazy {
+    private val paymentFlowResultProcessor by lazy {
         paymentFlowResultProcessorFactory(paymentConfiguration.publishableKey, stripeApiRepository)
     }
 
@@ -410,7 +410,9 @@ internal class DefaultFlowController internal constructor(
     ) {
         lifecycleScope.launch {
             runCatching {
-                paymentFlowResultProcessor.processPaymentIntent(paymentFlowResult)
+                paymentFlowResultProcessor.processResult(
+                    paymentFlowResult
+                )
             }.fold(
                 onSuccess = {
                     withContext(Dispatchers.Main) {
