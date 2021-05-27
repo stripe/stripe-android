@@ -1,6 +1,18 @@
+enableFeaturePreview("VERSION_CATALOGS")
+
 include ':paymentsheet-example'
 include ':stripe-test-e2e'
 include ':example'
 include ':payments-core'
 include ':payments'
 include ':paymentsheet'
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libraries") {
+            from(files(
+                    "gradle/androidx.versions.toml"
+            ))
+        }
+    }
+}
