@@ -1,3 +1,4 @@
 [*.{kt,kts}]
 disabled_rules=import-ordering
 max_line_length=100
+insert_final_newline=true
