@@ -23,7 +23,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.asLiveData
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
 internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
@@ -36,7 +35,6 @@ internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFoc
  * - observes values that impact how things show on the screen
  * - calls through to the Elements worker functions for focus change and value change events
  */
-@ExperimentalCoroutinesApi
 @Composable
 internal fun TextField(
     textFieldElement: TextFieldElement,

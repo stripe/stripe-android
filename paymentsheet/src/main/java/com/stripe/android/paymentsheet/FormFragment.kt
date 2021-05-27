@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.forms.SofortForm
 import com.stripe.android.paymentsheet.forms.SofortFormViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 class FormFragment : Fragment() {
     private val sofortFormViewModel by activityViewModels<SofortFormViewModel>()
 

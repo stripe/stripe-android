@@ -1,11 +1,9 @@
 package com.stripe.android.paymentsheet.elements.common
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.map
 
-@ExperimentalCoroutinesApi
 internal class DropdownElement(
     private val config: DropdownConfig,
 ) {
@@ -14,7 +12,7 @@ internal class DropdownElement(
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: Flow<Int> = _selectedIndex
 
-    val paymentMethodParams = selectedIndex.mapLatest { config.getPaymentMethodParams()[it] }
+    val paymentMethodParams = selectedIndex.map { config.getPaymentMethodParams()[it] }
 
     fun onValueChange(index: Int) {
         _selectedIndex.value = index
