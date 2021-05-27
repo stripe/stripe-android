@@ -22,11 +22,9 @@ import com.stripe.android.paymentsheet.elements.common.DropdownElement
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-@ExperimentalCoroutinesApi
 @Composable
 internal fun SofortForm(
     viewModel: SofortFormViewModel,
@@ -62,7 +60,6 @@ internal fun SofortForm(
     }
 }
 
-@ExperimentalCoroutinesApi
 internal class SofortFormViewModel : ViewModel() {
     internal var nameElement = TextFieldElement(NameConfig())
     internal var emailElement = TextFieldElement(EmailConfig())
