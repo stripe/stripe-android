@@ -11,10 +11,11 @@ import com.stripe.android.model.StripeModel
  *
  * [intent] is a [StripeIntent] retrieved after confirmation/authentication succeeded or failed.
  */
-abstract class StripeIntentResult<T : StripeIntent> internal constructor(
+abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     @Outcome private val outcomeFromFlow: Int
 ) : StripeModel {
     abstract val intent: T
+    abstract val failureMessage: String?
 
     @Outcome
     @get:Outcome

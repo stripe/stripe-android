@@ -4,6 +4,7 @@ import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -173,6 +174,20 @@ class PaymentSheetListFragmentTest {
         }
     }
 
+    @Test
+    fun `total amount label is hidden for SetupIntent`() {
+        createScenario(
+            FRAGMENT_CONFIG,
+            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
+        ).onFragment { fragment ->
+            shadowOf(getMainLooper()).idle()
+            val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(fragment.view!!)
+
+            assertThat(viewBinding.total.isVisible)
+                .isFalse()
+        }
+    }
+
     private fun recyclerView(it: PaymentSheetListFragment) =
         it.requireView().findViewById<RecyclerView>(R.id.recycler)
 
@@ -188,12 +203,13 @@ class PaymentSheetListFragmentTest {
     }
 
     private fun createScenario(
-        fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG
+        fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG,
+        starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): FragmentScenario<PaymentSheetListFragment> {
         return launchFragmentInContainer(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+                PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs
             ),
             R.style.StripePaymentSheetDefaultTheme,
             factory = PaymentSheetFragmentFactory(eventReporter)

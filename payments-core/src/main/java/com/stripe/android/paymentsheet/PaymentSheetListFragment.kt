@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
@@ -38,8 +39,12 @@ internal class PaymentSheetListFragment(
 
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
 
-        sheetViewModel.amount.observe(viewLifecycleOwner) {
-            viewBinding.total.text = getTotalText(it)
+        if (sheetViewModel.isProcessingPaymentIntent) {
+            sheetViewModel.amount.observe(viewLifecycleOwner) {
+                viewBinding.total.text = getTotalText(it)
+            }
+        } else {
+            viewBinding.total.isVisible = false
         }
     }
 

@@ -51,14 +51,14 @@ private def getValue(key) {
 
 dependencies {
     implementation project(':payments')
-    implementation 'androidx.appcompat:appcompat:1.3.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.0'
+    implementation libraries.androidx.appcompat
+    implementation libraries.androidx.recyclerview
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'androidx.preference:preference-ktx:1.1.1'
+    implementation libraries.androidx.constraintlayout
+    implementation libraries.androidx.preferencektx
 
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
 
@@ -93,7 +93,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.2'
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
-    androidTestImplementation 'com.google.truth:truth:1.1.2'
+    androidTestImplementation 'com.google.truth:truth:1.1.3'
 
     // Espresso dependencies
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"

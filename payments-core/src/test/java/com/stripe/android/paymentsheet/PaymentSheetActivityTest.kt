@@ -8,7 +8,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
@@ -25,8 +27,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.payments.FakePaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
@@ -42,6 +44,7 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -676,12 +679,12 @@ internal class PaymentSheetActivityTest {
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         paymentIntentResult: PaymentIntentResult = PaymentIntentResult(paymentIntent)
-    ): PaymentSheetViewModel {
-        val paymentFlowResultProcessor = FakePaymentFlowResultProcessor().also {
-            it.paymentIntentResult = paymentIntentResult
-        }
+    ): PaymentSheetViewModel = runBlocking {
+        val paymentFlowResultProcessor =
+            mock<PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>>()
+        whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(paymentIntentResult)
 
-        return PaymentSheetViewModel(
+        PaymentSheetViewModel(
             stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
             paymentMethodsRepository = FakePaymentMethodsRepository(paymentMethods),
             paymentFlowResultProcessor = paymentFlowResultProcessor,

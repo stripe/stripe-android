@@ -339,7 +339,7 @@ internal abstract class BaseAddCardFragment(
             getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name, it)
         } ?: getString(R.string.stripe_paymentsheet_save_this_card)
 
-        saveCardCheckbox.isVisible = sheetViewModel.customerConfig != null
+        saveCardCheckbox.isVisible = sheetViewModel.userCanChooseToSaveCard
         bottomSpace.isVisible = !saveCardCheckbox.isVisible
 
         saveCardCheckbox.setOnCheckedChangeListener { _, _ ->

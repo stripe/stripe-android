@@ -64,14 +64,25 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
                     buyButtonEnabled = !inProgress,
                     buyButtonClickListener = {
                         prepareCheckout { customerConfig, clientSecret ->
-                            paymentSheet.presentWithPaymentIntent(
-                                clientSecret,
-                                PaymentSheet.Configuration(
-                                    merchantDisplayName = merchantName,
-                                    customer = customerConfig,
-                                    googlePay = googlePayConfig,
+                            if (isSetupIntent) {
+                                paymentSheet.presentWithSetupIntent(
+                                    clientSecret,
+                                    PaymentSheet.Configuration(
+                                        merchantDisplayName = merchantName,
+                                        customer = customerConfig,
+                                        googlePay = googlePayConfig,
+                                    )
                                 )
-                            )
+                            } else {
+                                paymentSheet.presentWithPaymentIntent(
+                                    clientSecret,
+                                    PaymentSheet.Configuration(
+                                        merchantDisplayName = merchantName,
+                                        customer = customerConfig,
+                                        googlePay = googlePayConfig,
+                                    )
+                                )
+                            }
                         }
                     }
                 )
@@ -149,7 +160,6 @@ fun ProductRow(
         )
     }
 }
-
 
 @Composable
 fun ReceiptRow(

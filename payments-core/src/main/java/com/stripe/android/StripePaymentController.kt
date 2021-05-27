@@ -30,11 +30,12 @@ import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.BrowserCapabilities
 import com.stripe.android.payments.BrowserCapabilitiesSupplier
-import com.stripe.android.payments.DefaultPaymentFlowResultProcessor
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.DefaultStripeChallengeStatusReceiver
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentIntentFlowResultProcessor
+import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
@@ -85,7 +86,14 @@ internal class StripePaymentController internal constructor(
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
-    private val paymentFlowResultProcessor = DefaultPaymentFlowResultProcessor(
+    private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
+        context,
+        publishableKey,
+        stripeRepository,
+        enableLogging,
+        workContext
+    )
+    private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
         publishableKey,
         stripeRepository,
@@ -404,7 +412,7 @@ internal class StripePaymentController internal constructor(
         IllegalArgumentException::class
     )
     override suspend fun getPaymentIntentResult(data: Intent) =
-        paymentFlowResultProcessor.processPaymentIntent(
+        paymentIntentFlowResultProcessor.processResult(
             PaymentFlowResult.Unvalidated.fromIntent(data)
         )
 
@@ -429,7 +437,7 @@ internal class StripePaymentController internal constructor(
         IllegalArgumentException::class
     )
     override suspend fun getSetupIntentResult(data: Intent) =
-        paymentFlowResultProcessor.processSetupIntent(
+        setupIntentFlowResultProcessor.processResult(
             PaymentFlowResult.Unvalidated.fromIntent(data)
         )
 
