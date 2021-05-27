@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.BaseAddCardFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import kotlinx.parcelize.Parcelize
@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 internal data class FragmentConfig(
-    val paymentIntent: PaymentIntent,
+    val stripeIntent: StripeIntent,
     val paymentMethods: List<PaymentMethod>,
     val isGooglePayReady: Boolean,
     val savedSelection: SavedSelection

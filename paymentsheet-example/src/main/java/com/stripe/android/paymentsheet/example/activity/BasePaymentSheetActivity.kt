@@ -35,7 +35,7 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
         get() = prefsManager.getBoolean("returning_customer", true)
 
     protected val isSetupIntent: Boolean
-        get() = prefsManager.getBoolean("setup_intent", false)
+        get() = prefsManager.getBoolean("use_setup_intent", false)
 
     protected val googlePayConfig: PaymentSheet.GooglePayConfiguration?
         get() {

@@ -10,8 +10,8 @@ import kotlin.test.Test
 import kotlin.test.assertFails
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentIntentValidatorTest {
-    private val validator = PaymentIntentValidator()
+class StripeIntentValidatorTest {
+    private val validator = StripeIntentValidator()
 
     @Test
     fun `requireValid() should return original PaymentIntent when valid`() {

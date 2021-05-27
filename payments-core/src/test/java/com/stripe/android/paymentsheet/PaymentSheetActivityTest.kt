@@ -28,7 +28,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentIntentFlowResultProcessor
+import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
@@ -680,7 +680,8 @@ internal class PaymentSheetActivityTest {
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         paymentIntentResult: PaymentIntentResult = PaymentIntentResult(paymentIntent)
     ): PaymentSheetViewModel = runBlocking {
-        val paymentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
+        val paymentFlowResultProcessor =
+            mock<PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>>()
         whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(paymentIntentResult)
 
         PaymentSheetViewModel(

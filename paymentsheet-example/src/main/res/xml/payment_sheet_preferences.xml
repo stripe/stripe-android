@@ -23,4 +23,9 @@
         app:title="Enable Google Pay"
         app:defaultValue="true" />
 
+    <SwitchPreferenceCompat
+        app:key="use_setup_intent"
+        app:title="Use Setup Intent"
+        app:defaultValue="false" />
+
 </PreferenceScreen>

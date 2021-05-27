@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.StripePaymentController
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
+import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.GooglePayRepository
@@ -17,7 +18,9 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -118,14 +121,23 @@ internal class FlowControllerFactory(
                 workContext = Dispatchers.IO
             ),
             paymentControllerFactory = paymentControllerFactory,
-            paymentFlowResultProcessorFactory = { publishableKey, stripeApiRepository ->
-                PaymentIntentFlowResultProcessor(
-                    appContext,
-                    publishableKey,
-                    stripeApiRepository,
-                    enableLogging = false,
-                    Dispatchers.IO
-                )
+            paymentFlowResultProcessorFactory = { clientSecret, publishableKey, stripeApiRepository ->
+                when (clientSecret) {
+                    is PaymentIntentClientSecret -> PaymentIntentFlowResultProcessor(
+                        appContext,
+                        publishableKey,
+                        stripeApiRepository,
+                        enableLogging = false,
+                        Dispatchers.IO
+                    )
+                    is SetupIntentClientSecret -> SetupIntentFlowResultProcessor(
+                        appContext,
+                        publishableKey,
+                        stripeApiRepository,
+                        enableLogging = false,
+                        Dispatchers.IO
+                    )
+                }
             },
             eventReporter = DefaultEventReporter(
                 mode = EventReporter.Mode.Custom,
