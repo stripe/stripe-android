@@ -1,4 +1,9 @@
-[libraries.androidx-activityktx]
+[versions]
+androidx-fragment = "1.3.4"
+androidx-lifecycle = "2.3.1"
+androidx-navigation = "2.3.5"
+
+[libraries.androidx-activity-ktx]
 version = "1.2.3"
 module = "androidx.activity:activity-ktx"
 
@@ -18,11 +23,43 @@ module = "androidx.browser:browser"
 version = "2.0.4"
 module = "androidx.constraintlayout:constraintlayout"
 
-[libraries.androidx-corektx]
+[libraries.androidx-core-ktx]
 version = "1.5.0"
 module = "androidx.core:core-ktx"
 
-[libraries.androidx-preferencektx]
+[libraries.androidx-fragment-ktx]
+version.ref = "androidx-fragment"
+module = "androidx.fragment:fragment-ktx"
+
+[libraries.androidx-fragment-testing]
+version.ref = "androidx-fragment"
+module = "androidx.fragment:fragment-testing"
+
+[libraries.androidx-lifecycle-livedata-ktx]
+version.ref = "androidx-lifecycle"
+module = "androidx.lifecycle:lifecycle-livedata-ktx"
+
+[libraries.androidx-lifecycle-viewmodel-savedstate]
+version.ref = "androidx-lifecycle"
+module = "androidx.lifecycle:lifecycle-viewmodel-savedstate"
+
+[libraries.androidx-lifecycle-viewmodel-ktx]
+version.ref = "androidx-lifecycle"
+module = "androidx.lifecycle:lifecycle-viewmodel-ktx"
+
+[libraries.androidx-localbroadcastmanager]
+version = "1.0.0"
+module = "androidx.localbroadcastmanager:localbroadcastmanager"
+
+[libraries.androidx-navigation-fragment-ktx]
+version.ref = "androidx-navigation"
+module = "androidx.navigation:navigation-fragment-ktx"
+
+[libraries.androidx-navigation-ui-ktx]
+version.ref = "androidx-navigation"
+module = "androidx.navigation:navigation-ui-ktx"
+
+[libraries.androidx-preference-ktx]
 version = "1.1.1"
 module = "androidx.preference:preference-ktx"
 

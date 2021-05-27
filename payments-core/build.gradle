@@ -19,13 +19,13 @@ dependencies {
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.browser
     implementation libraries.androidx.recyclerview
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidLifecycleVersion"
-    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
-    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
+    implementation libraries.androidx.lifecycle.livedata.ktx
+    implementation libraries.androidx.lifecycle.viewmodel.ktx
+    implementation libraries.androidx.lifecycle.viewmodel.savedstate
+    implementation libraries.androidx.localbroadcastmanager
+    implementation libraries.androidx.fragment.ktx
     implementation libraries.androidx.constraintlayout
-    implementation libraries.androidx.activityktx
+    implementation libraries.androidx.activity.ktx
     implementation 'com.google.android.gms:play-services-wallet:18.1.2'
     implementation "com.google.android.material:material:$materialVersion"
 
@@ -52,7 +52,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
     testImplementation 'com.google.truth:truth:1.1.3'
     testImplementation "androidx.arch.core:core-testing:2.1.0"
-    testImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
+    testImplementation libraries.androidx.fragment.testing
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"

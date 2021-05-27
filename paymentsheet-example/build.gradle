@@ -32,15 +32,15 @@ private def getValue(key) {
 dependencies {
     implementation project(':payments')
 
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
-    implementation libraries.androidx.preferencektx
-    implementation libraries.androidx.corektx
+    implementation libraries.androidx.lifecycle.livedata.ktx
+    implementation libraries.androidx.lifecycle.viewmodel.ktx
+    implementation libraries.androidx.preference.ktx
+    implementation libraries.androidx.core.ktx
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.constraintlayout
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
-    implementation libraries.androidx.activityktx
+    implementation libraries.androidx.navigation.fragment.ktx
+    implementation libraries.androidx.navigation.ui.ktx
+    implementation libraries.androidx.activity.ktx
     implementation 'com.google.android.material:material:1.3.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
