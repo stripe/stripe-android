@@ -29,6 +29,8 @@
                 style="@style/Header"
                 android:text="@string/create_payment_method_header" />
 
+            <!-- The style and background color for CardFormView are customizable,
+            please refer to the doc for more details-->
             <com.stripe.android.view.CardFormView
                 android:id="@+id/card_form_view"
                 style="@style/StripeCardFormView.Borderless"

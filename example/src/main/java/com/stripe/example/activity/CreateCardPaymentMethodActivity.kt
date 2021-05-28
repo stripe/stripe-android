@@ -39,9 +39,12 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
 
         viewBinding.cardFormView.setCardValidCallback { isValid, invalidFields ->
             viewBinding.createButton.isEnabled = isValid
-            Log.d(TAG, "Card information is " + (if (isValid) " valid" else " invalid"))
+            Log.d(
+                CARD_VALID_CALLBACK_TAG,
+                "Card information is " + (if (isValid) " valid" else " invalid")
+            )
             if (!isValid) {
-                Log.d(TAG, " Invalid fields are $invalidFields")
+                Log.d(CARD_VALID_CALLBACK_TAG, " Invalid fields are $invalidFields")
             }
         }
 
@@ -141,6 +144,6 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
     }
 
     private companion object {
-        private const val TAG = "CardValidCallback"
+        private const val CARD_VALID_CALLBACK_TAG = "CardValidCallback"
     }
 }
