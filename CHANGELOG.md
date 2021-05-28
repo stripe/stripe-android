@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 16.10.0 - 2021-05-28
+* [3752](https://github.com/stripe/stripe-android/pull/3752) Support connected accounts when using Google Pay in PaymentSheet
+* [3761](https://github.com/stripe/stripe-android/pull/3761) Publish `CardFormView`
+* [3762](https://github.com/stripe/stripe-android/pull/3762) Add SetupIntent support in PaymentSheet
+* [3769](https://github.com/stripe/stripe-android/pull/3769) Upgrade Google Pay SDK to `18.1.3`
+
 ## 16.9.0 - 2021-05-21
 * [3727](https://github.com/stripe/stripe-android/pull/3727) Upgrade Gradle to `7.0.2`
 * [3734](https://github.com/stripe/stripe-android/pull/3734) Upgrade `androidx.appcompat:appcompat` to `1.3.0`
