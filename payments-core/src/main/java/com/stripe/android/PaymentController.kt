@@ -31,7 +31,7 @@ internal interface PaymentController {
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
      * @param authenticator a [AlipayAuthenticator] used to interface with the Alipay SDK
-     * @param requestOptions a [ApiRequest.Options] to associate with theis request
+     * @param requestOptions a [ApiRequest.Options] to associate with this request
      *
      * @return a [PaymentIntentResult] object
      *
