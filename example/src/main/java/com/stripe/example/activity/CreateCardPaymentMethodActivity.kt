@@ -1,6 +1,7 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,33 +37,42 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         viewBinding.paymentMethods.layoutManager = LinearLayoutManager(this)
         viewBinding.paymentMethods.adapter = adapter
 
-        viewBinding.cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
-            // added as an example - no-op
+        viewBinding.cardFormView.setCardValidCallback { isValid, invalidFields ->
+            viewBinding.createButton.isEnabled = isValid
+            Log.d(TAG, "Card information is " + (if (isValid) " valid" else " invalid"))
+            if (!isValid) {
+                Log.d(TAG, " Invalid fields are $invalidFields")
+            }
         }
 
         viewBinding.createButton.setOnClickListener {
             keyboardController.hide()
 
-            viewBinding.cardMultilineWidget.paymentMethodCreateParams?.let {
-                createPaymentMethod(it)
+            viewBinding.cardFormView.cardParams?.let {
+                createPaymentMethod(PaymentMethodCreateParams.createCard(it))
             }
+        }
+
+        viewBinding.toggleCardFormView.setOnClickListener {
+            viewBinding.cardFormView.isEnabled = !viewBinding.cardFormView.isEnabled
+            showSnackbar(
+                if (viewBinding.cardFormView.isEnabled) "CardFormView Enabled"
+                else "CardFormView Disabled"
+            )
         }
     }
 
     private fun createPaymentMethod(params: PaymentMethodCreateParams) {
         onCreatePaymentMethodStart()
-        viewModel.createPaymentMethod(params).observe(
-            this,
-            { result ->
-                onCreatePaymentMethodCompleted()
-                result.fold(
-                    onSuccess = ::onCreatedPaymentMethod,
-                    onFailure = {
-                        showSnackbar(it.message.orEmpty())
-                    }
-                )
-            }
-        )
+        viewModel.createPaymentMethod(params).observe(this) { result ->
+            onCreatePaymentMethodCompleted()
+            result.fold(
+                onSuccess = ::onCreatedPaymentMethod,
+                onFailure = {
+                    showSnackbar(it.message.orEmpty())
+                }
+            )
+        }
     }
 
     private fun showSnackbar(message: String) {
@@ -128,5 +138,9 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
                 viewBinding.last4.text = card?.last4.orEmpty()
             }
         }
+    }
+
+    private companion object {
+        private const val TAG = "CardValidCallback"
     }
 }
