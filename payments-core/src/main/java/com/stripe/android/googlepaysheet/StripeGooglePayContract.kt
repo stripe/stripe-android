@@ -1,4 +1,4 @@
-package com.stripe.android.googlepay
+package com.stripe.android.googlepaysheet
 
 import android.content.Context
 import android.content.Intent
@@ -30,7 +30,7 @@ internal class StripeGooglePayContract :
 
     /**
      * Args to start [StripeGooglePayActivity] and collect payment data. If successful, the
-     * result will be returned through [Result.PaymentData].
+     * result will be returned through [GooglePaySheetResult.PaymentData].
      */
     @Parcelize
     data class Args(

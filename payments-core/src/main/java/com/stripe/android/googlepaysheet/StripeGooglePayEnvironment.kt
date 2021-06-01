@@ -1,4 +1,4 @@
-package com.stripe.android.googlepay
+package com.stripe.android.googlepaysheet
 
 internal enum class StripeGooglePayEnvironment {
     Production,

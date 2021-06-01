@@ -1,4 +1,4 @@
-package com.stripe.android.googlepay
+package com.stripe.android.googlepaysheet
 
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
