@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.googlepaysheet
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
@@ -10,13 +10,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.googlepay.StripeGooglePayContract
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class DefaultPaymentSheetLauncherTest {
+class DefaultGooglePaySheetLauncherTest {
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(
@@ -26,8 +27,8 @@ class DefaultPaymentSheetLauncherTest {
     }
 
     @Test
-    fun `init and present should return expected PaymentResult`() {
-        val testRegistry = FakeActivityResultRegistry(PaymentSheetResult.Completed)
+    fun `init and present should return empty results`() {
+        val testRegistry = FakeActivityResultRegistry(StripeGooglePayContract.Result.Canceled)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
@@ -35,21 +36,22 @@ class DefaultPaymentSheetLauncherTest {
             }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<PaymentSheetResult>()
-                val launcher = DefaultPaymentSheetLauncher(fragment, testRegistry) {
+                val results = mutableListOf<StripeGooglePayContract.Result>()
+                val launcher = DefaultGooglePaySheetLauncher(fragment, testRegistry) {
                     results.add(it)
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
-                launcher.presentWithPaymentIntent("pi_fake")
+
+                // this will be empty until DefaultGooglePaySheetLauncher is implemented
                 assertThat(results)
-                    .containsExactly(PaymentSheetResult.Completed)
+                    .isEmpty()
             }
         }
     }
 
     private class FakeActivityResultRegistry(
-        private val result: PaymentSheetResult
+        private val result: StripeGooglePayContract.Result
     ) : ActivityResultRegistry() {
         override fun <I, O> onLaunch(
             requestCode: Int,
