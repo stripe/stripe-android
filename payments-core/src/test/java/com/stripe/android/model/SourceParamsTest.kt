@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
+import com.stripe.android.SourceEndToEndTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -744,8 +745,117 @@ class SourceParamsTest {
         assertEquals("bar_tab", sourceParams.typeRaw)
     }
 
-    private companion object {
+    @Test
+    fun `createKlarna() should create expected params`() {
+        val lineItems = listOf(
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Sku,
+                itemDescription = "towel",
+                totalAmount = 10000,
+                quantity = 1
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Sku,
+                itemDescription = "digital watch",
+                totalAmount = 20000,
+                quantity = 2
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Tax,
+                itemDescription = "taxes",
+                totalAmount = 1500
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Shipping,
+                itemDescription = "ground shipping",
+                totalAmount = 499
+            )
+        )
+        val params = SourceParams.createKlarna(
+            returnUrl = RETURN_URL,
+            currency = "GBP",
+            klarnaParams = KlarnaSourceParams(
+                purchaseCountry = "UK",
+                lineItems = lineItems,
+                billingPhone = "02012267709",
+                billingEmail = "test@example.com",
+                billingAddress = Address(
+                    line1 = "29 Arlington Avenue",
+                    city = "London",
+                    country = "UK",
+                    postalCode = "N1 7BE"
+                ),
+                billingFirstName = "Arthur",
+                billingLastName = "Dent",
+                billingDob = DateOfBirth(11, 3, 1952)
+            )
+        )
 
+        assertThat(
+            params.toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "type" to "klarna",
+                "amount" to 31999L,
+                "currency" to "GBP",
+                "flow" to "redirect",
+                "redirect" to mapOf(
+                    "return_url" to RETURN_URL
+                ),
+                "owner" to mapOf(
+                    "email" to "test@example.com",
+                    "phone" to "02012267709",
+                    "address" to mapOf(
+                        "line1" to "29 Arlington Avenue",
+                        "city" to "London",
+                        "country" to "UK",
+                        "postal_code" to "N1 7BE"
+                    )
+                ),
+                "source_order" to mapOf(
+                    "items" to listOf(
+                        mapOf(
+                            "amount" to 10000,
+                            "currency" to "GBP",
+                            "description" to "towel",
+                            "quantity" to 1,
+                            "type" to "sku"
+                        ),
+                        mapOf(
+                            "amount" to 20000,
+                            "currency" to "GBP",
+                            "description" to "digital watch",
+                            "quantity" to 2,
+                            "type" to "sku"
+                        ),
+                        mapOf(
+                            "amount" to 1500,
+                            "currency" to "GBP",
+                            "description" to "taxes",
+                            "type" to "tax"
+                        ),
+                        mapOf(
+                            "amount" to 499,
+                            "currency" to "GBP",
+                            "description" to "ground shipping",
+                            "type" to "shipping"
+                        )
+                    )
+                ),
+                "klarna" to mapOf(
+                    "product" to "payment",
+                    "purchase_country" to "UK",
+                    "first_name" to "Arthur",
+                    "last_name" to "Dent",
+                    "owner_dob_day" to "11",
+                    "owner_dob_month" to "03",
+                    "owner_dob_year" to "1952"
+                )
+            )
+        )
+    }
+
+    private companion object {
         private val METADATA = mapOf(
             "color" to "blue",
             "animal" to "dog"
