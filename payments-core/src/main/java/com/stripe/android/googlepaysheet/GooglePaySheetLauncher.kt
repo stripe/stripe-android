@@ -1,4 +1,3 @@
 package com.stripe.android.googlepaysheet
 
-internal interface GooglePaySheetLauncher {
-}
+internal interface GooglePaySheetLauncher
