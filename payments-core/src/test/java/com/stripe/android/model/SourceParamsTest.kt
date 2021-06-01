@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
-import com.stripe.android.SourceEndToEndTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
