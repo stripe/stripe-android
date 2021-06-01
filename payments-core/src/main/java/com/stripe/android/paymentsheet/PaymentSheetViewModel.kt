@@ -257,7 +257,6 @@ internal class PaymentSheetViewModel internal constructor(
             (stripeIntent.value as? PaymentIntent)?.let { paymentIntent ->
                 _launchGooglePay.value = Event(
                     StripeGooglePayContract.Args(
-                        paymentIntent = paymentIntent,
                         config = StripeGooglePayContract.GooglePayConfig(
                             environment = when (args.config?.googlePay?.environment) {
                                 PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -265,8 +264,11 @@ internal class PaymentSheetViewModel internal constructor(
                                 else ->
                                     StripeGooglePayEnvironment.Test
                             },
+                            amount = paymentIntent.amount?.toInt(),
                             countryCode = args.googlePayConfig?.countryCode.orEmpty(),
-                            merchantName = args.config?.merchantDisplayName
+                            currencyCode = paymentIntent.currency.orEmpty(),
+                            merchantName = args.config?.merchantDisplayName,
+                            transactionId = paymentIntent.id
                         ),
                         statusBarColor = args.statusBarColor
                     )
@@ -291,7 +293,9 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    private fun onStripeIntentResult(stripeIntentResult: StripeIntentResult<out StripeIntent>) {
+    private fun onStripeIntentResult(
+        stripeIntentResult: StripeIntentResult<StripeIntent>
+    ) {
         when (stripeIntentResult.outcome) {
             StripeIntentResult.Outcome.SUCCEEDED -> {
                 eventReporter.onPaymentSuccess(selection.value)

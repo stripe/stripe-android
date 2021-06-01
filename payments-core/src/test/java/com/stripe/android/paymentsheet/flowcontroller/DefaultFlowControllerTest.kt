@@ -403,11 +403,13 @@ internal class DefaultFlowControllerTest {
         assertThat(launchArgs)
             .isEqualTo(
                 StripeGooglePayContract.Args(
-                    paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = StripeGooglePayEnvironment.Test,
+                        amount = 1099,
                         countryCode = "US",
-                        merchantName = "Widget Store"
+                        currencyCode = "usd",
+                        merchantName = "Widget Store",
+                        transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6"
                     ),
                     statusBarColor = ContextCompat.getColor(
                         activity,

@@ -6,7 +6,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeJsonUtils
@@ -211,12 +210,14 @@ class StripeGooglePayViewModelTest {
     private companion object {
         private val CONFIG = StripeGooglePayContract.GooglePayConfig(
             environment = StripeGooglePayEnvironment.Test,
+            amount = 2000,
             countryCode = "US",
-            isEmailRequired = true
+            currencyCode = "usd",
+            isEmailRequired = true,
+            transactionId = "pi_1ExkUeAWhjPjYwPiXph9ouXa"
         )
 
         private val ARGS = StripeGooglePayContract.Args(
-            paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             config = CONFIG,
             statusBarColor = Color.RED
         )

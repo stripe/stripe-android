@@ -47,14 +47,13 @@ internal class StripeGooglePayViewModel(
     }
 
     fun createPaymentDataRequestForPaymentIntentArgs(): JSONObject {
-        val paymentIntent = args.paymentIntent
         return googlePayJsonFactory.createPaymentDataRequest(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
-                currencyCode = paymentIntent.currency.orEmpty(),
+                currencyCode = args.config.currencyCode,
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                 countryCode = args.config.countryCode,
-                transactionId = paymentIntent.id,
-                totalPrice = paymentIntent.amount?.toInt(),
+                transactionId = args.config.transactionId,
+                totalPrice = args.config.amount,
                 checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
             ),
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
