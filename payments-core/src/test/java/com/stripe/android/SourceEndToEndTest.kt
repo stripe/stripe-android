@@ -10,13 +10,10 @@ import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.SourceOrder
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
-import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
-// TODO: investigate test failures - ANDROID-461
-@Ignore("Klarna end-to-end tests are currently failing")
 @RunWith(RobolectricTestRunner::class)
 internal class SourceEndToEndTest {
     @Test
