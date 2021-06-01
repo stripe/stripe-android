@@ -4571,7 +4571,6 @@ public class com/stripe/android/model/SourceOrderParams$Shipping$Creator : andro
 
 public final class com/stripe/android/model/SourceParams : com/stripe/android/model/StripeParamsModel {
 	public static final field Companion Lcom/stripe/android/model/SourceParams$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public static final fun createAlipayReusableParams (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createAlipaySingleUseParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createBancontactParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
@@ -4598,9 +4597,11 @@ public final class com/stripe/android/model/SourceParams : com/stripe/android/mo
 	public final fun getAmount ()Ljava/lang/Long;
 	public final fun getApiParameterMap ()Ljava/util/Map;
 	public final fun getCurrency ()Ljava/lang/String;
+	public final fun getFlow ()Lcom/stripe/android/model/SourceParams$Flow;
 	public final fun getMetaData ()Ljava/util/Map;
 	public final fun getOwner ()Lcom/stripe/android/model/SourceParams$OwnerParams;
 	public final fun getReturnUrl ()Ljava/lang/String;
+	public final fun getSourceOrder ()Lcom/stripe/android/model/SourceOrderParams;
 	public final fun getType ()Ljava/lang/String;
 	public final fun getTypeRaw ()Ljava/lang/String;
 	public final fun getUsage ()Lcom/stripe/android/model/Source$Usage;
@@ -4609,9 +4610,11 @@ public final class com/stripe/android/model/SourceParams : com/stripe/android/mo
 	public final fun setApiParameterMap (Ljava/util/Map;)Lcom/stripe/android/model/SourceParams;
 	public final fun setCurrency (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public final fun setExtraParams (Ljava/util/Map;)Lcom/stripe/android/model/SourceParams;
+	public final fun setFlow (Lcom/stripe/android/model/SourceParams$Flow;)V
 	public final fun setMetaData (Ljava/util/Map;)Lcom/stripe/android/model/SourceParams;
 	public final fun setOwner (Lcom/stripe/android/model/SourceParams$OwnerParams;)Lcom/stripe/android/model/SourceParams;
 	public final fun setReturnUrl (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
+	public final fun setSourceOrder (Lcom/stripe/android/model/SourceOrderParams;)V
 	public final fun setToken (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public final fun setUsage (Lcom/stripe/android/model/Source$Usage;)Lcom/stripe/android/model/SourceParams;
 	public fun toParamMap ()Ljava/util/Map;
@@ -4648,6 +4651,15 @@ public final class com/stripe/android/model/SourceParams$Companion {
 	public final fun createVisaCheckoutParams (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public final fun createWeChatPayParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static synthetic fun createWeChatPayParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
+}
+
+public final class com/stripe/android/model/SourceParams$Flow : java/lang/Enum {
+	public static final field CodeVerification Lcom/stripe/android/model/SourceParams$Flow;
+	public static final field None Lcom/stripe/android/model/SourceParams$Flow;
+	public static final field Receiver Lcom/stripe/android/model/SourceParams$Flow;
+	public static final field Redirect Lcom/stripe/android/model/SourceParams$Flow;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams$Flow;
+	public static fun values ()[Lcom/stripe/android/model/SourceParams$Flow;
 }
 
 public final class com/stripe/android/model/SourceParams$OwnerParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {

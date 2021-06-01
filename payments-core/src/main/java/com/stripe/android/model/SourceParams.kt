@@ -20,6 +20,22 @@ class SourceParams private constructor(
     @SourceType val typeRaw: String,
 
     /**
+     * The authentication `flow` of the source to create. `flow` is one of `redirect`, `receiver`,
+     * `code_verification`, `none`. It is generally inferred unless a type supports multiple flows.
+     *
+     * See [flow](https://stripe.com/docs/api/sources/create#create_source-flow)
+     */
+    var flow: Flow? = null,
+
+    /**
+     * Information about the items and shipping associated with the source. Required for
+     * transactional credit (for example Klarna) sources before you can charge it.
+     *
+     * See [source_order](https://stripe.com/docs/api/sources/create#create_source-source_order)
+     */
+    var sourceOrder: SourceOrderParams? = null,
+
+    /**
      * A set of identifiers representing the component that created this instance.
      */
     internal val attribution: Set<String> = emptySet()
@@ -116,7 +132,9 @@ class SourceParams private constructor(
     /**
      * @param apiParameterMap a map of parameters specific for this type of source
      */
-    fun setApiParameterMap(apiParameterMap: Map<String, Any?>?): SourceParams = apply {
+    fun setApiParameterMap(
+        apiParameterMap: Map<String, Any?>?
+    ): SourceParams = apply {
         this.apiParameterMap = apiParameterMap
     }
 
@@ -145,6 +163,7 @@ class SourceParams private constructor(
      *
      * @param extraParams a set of params
      */
+    @Deprecated("Will be removed in an upcoming major version.")
     fun setExtraParams(extraParams: Map<String, Any>): SourceParams = apply {
         this.extraParams = extraParams
     }
@@ -214,6 +233,16 @@ class SourceParams private constructor(
             .plus(
                 currency?.let {
                     mapOf(PARAM_CURRENCY to it)
+                }.orEmpty()
+            )
+            .plus(
+                flow?.let {
+                    mapOf(PARAM_FLOW to it.code)
+                }.orEmpty()
+            )
+            .plus(
+                sourceOrder?.let {
+                    mapOf(PARAM_SOURCE_ORDER to it.toParamMap())
                 }.orEmpty()
             )
             .plus(
@@ -348,6 +377,15 @@ class SourceParams private constructor(
             private const val PARAM_NAME = "name"
             private const val PARAM_PHONE = "phone"
         }
+    }
+
+    enum class Flow(
+        internal val code: String
+    ) {
+        Redirect("redirect"),
+        Receiver("receiver"),
+        CodeVerification("code_verification"),
+        None("none")
     }
 
     companion object {
@@ -551,7 +589,11 @@ class SourceParams private constructor(
                     )
                 }
             )
-            return SourceParams(SourceType.KLARNA)
+            return SourceParams(
+                SourceType.KLARNA,
+                flow = Flow.Redirect,
+                sourceOrder = sourceOrderParams
+            )
                 .setAmount(totalAmount.toLong())
                 .setCurrency(currency)
                 .setReturnUrl(returnUrl)
@@ -562,13 +604,7 @@ class SourceParams private constructor(
                         phone = klarnaParams.billingPhone
                     )
                 )
-                .setExtraParams(
-                    mapOf(
-                        PARAM_KLARNA to klarnaParams.toParamMap(),
-                        PARAM_FLOW to Source.Flow.Redirect.code,
-                        PARAM_SOURCE_ORDER to sourceOrderParams.toParamMap()
-                    )
-                )
+                .setApiParameterMap(klarnaParams.toParamMap())
         }
 
         /**
@@ -648,7 +684,10 @@ class SourceParams private constructor(
             tokenId: String,
             attribution: Set<String>
         ): SourceParams {
-            return SourceParams(SourceType.CARD, attribution)
+            return SourceParams(
+                SourceType.CARD,
+                attribution = attribution
+            )
                 .setToken(tokenId)
         }
 
@@ -663,7 +702,10 @@ class SourceParams private constructor(
         @Deprecated("Use createCardParams with CardParams argument.")
         @JvmStatic
         fun createCardParams(card: Card): SourceParams {
-            return SourceParams(SourceType.CARD, card.loggingTokens)
+            return SourceParams(
+                SourceType.CARD,
+                attribution = card.loggingTokens
+            )
                 .setApiParameterMap(
                     mapOf(
                         PARAM_NUMBER to card.number,
@@ -698,7 +740,10 @@ class SourceParams private constructor(
          */
         @JvmStatic
         fun createCardParams(cardParams: CardParams): SourceParams {
-            return SourceParams(SourceType.CARD, cardParams.attribution)
+            return SourceParams(
+                SourceType.CARD,
+                attribution = cardParams.attribution
+            )
                 .setApiParameterMap(
                     mapOf(
                         PARAM_NUMBER to cardParams.number,
