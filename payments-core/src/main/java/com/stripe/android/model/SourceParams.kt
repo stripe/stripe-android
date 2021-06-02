@@ -8,16 +8,21 @@ import com.stripe.android.model.Source.SourceType
 import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.Objects
 
 /**
  * Represents a grouping of parameters needed to create a [Source] object on the server.
  */
-class SourceParams private constructor(
+data class SourceParams internal constructor(
     /**
      * The type of the source to create.
      */
     @SourceType val typeRaw: String,
+
+    private var _amount: Long? = null,
+    private var _currency: String? = null,
+    private var _owner: OwnerParams? = null,
+    private var _usage: Source.Usage? = null,
+    private var _returnUrl: String? = null,
 
     /**
      * The authentication `flow` of the source to create. `flow` is one of `redirect`, `receiver`,
@@ -44,7 +49,8 @@ class SourceParams private constructor(
     private var token: String? = null,
 
     private var weChatParams: WeChatParams? = null,
-
+    private var _metadata: Map<String, String>? = null,
+    private var _apiParameterMap: Map<String, Any?>? = null,
     private var extraParams: Map<String, Any> = emptyMap(),
 
     /**
@@ -67,15 +73,12 @@ class SourceParams private constructor(
      *
      * See [amount](https://stripe.com/docs/api/sources/create#create_source-amount)
      */
-    @IntRange(from = 0)
-    var amount: Long? = null
-        private set
+    val amount: Long? get() = _amount
 
     /**
      * A [Map] of the parameters specific to the Source type.
      */
-    var apiParameterMap: Map<String, Any?>? = null
-        private set
+    val apiParameterMap: Map<String, Any?>? get() = _apiParameterMap
 
     /**
      * Three-letter ISO code for the currency associated with the source.
@@ -83,29 +86,25 @@ class SourceParams private constructor(
      *
      * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
      */
-    var currency: String? = null
-        private set
+    val currency: String? get() = _currency
 
     /**
      * The URL you provide to redirect the customer back to you after they authenticated their
      * payment. It can use your application URI scheme in the context of a mobile application.
      */
-    var returnUrl: String? = null
-        private set
+    val returnUrl: String? get() = _returnUrl
 
     /**
      * Information about the owner of the payment instrument that may be used or required by
      * particular source types.
      */
-    var owner: OwnerParams? = null
-        private set
+    val owner: OwnerParams? get() = _owner
 
     /**
      * Set of key-value pairs that you can attach to an object. This can be useful for storing
      * additional information about the object in a structured format.
      */
-    var metaData: Map<String, String>? = null
-        private set
+    val metaData: Map<String, String>? get() = _metadata
 
     /**
      * Either `reusable` or `single_use`. Whether this source should be reusable or not.
@@ -114,8 +113,7 @@ class SourceParams private constructor(
      *
      * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
-    var usage: Source.Usage? = null
-        private set
+    val usage: Source.Usage? get() = _usage
 
     /*---- Setters ----*/
     /**
@@ -126,7 +124,7 @@ class SourceParams private constructor(
      * See [amount](https://stripe.com/docs/api/sources/create#create_source-amount)
      */
     fun setAmount(@IntRange(from = 0) amount: Long?): SourceParams = apply {
-        this.amount = amount
+        this._amount = amount
     }
 
     /**
@@ -135,7 +133,7 @@ class SourceParams private constructor(
     fun setApiParameterMap(
         apiParameterMap: Map<String, Any?>?
     ): SourceParams = apply {
-        this.apiParameterMap = apiParameterMap
+        this._apiParameterMap = apiParameterMap
     }
 
     /**
@@ -145,7 +143,7 @@ class SourceParams private constructor(
      * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
      */
     fun setCurrency(currency: String): SourceParams = apply {
-        this.currency = currency
+        this._currency = currency
     }
 
     /**
@@ -155,7 +153,7 @@ class SourceParams private constructor(
      * See [owner](https://stripe.com/docs/api/sources/create#create_source-owner)
      */
     fun setOwner(owner: OwnerParams?): SourceParams = apply {
-        this.owner = owner
+        this._owner = owner
     }
 
     /**
@@ -176,7 +174,7 @@ class SourceParams private constructor(
      * See [redirect.return_url](https://stripe.com/docs/api/sources/create#create_source-redirect-return_url)
      */
     fun setReturnUrl(@Size(min = 1) returnUrl: String): SourceParams = apply {
-        this.returnUrl = returnUrl
+        this._returnUrl = returnUrl
     }
 
     /**
@@ -186,7 +184,7 @@ class SourceParams private constructor(
      * See [metadata](https://stripe.com/docs/api/sources/create#create_source-metadata)
      */
     fun setMetaData(metaData: Map<String, String>?): SourceParams = apply {
-        this.metaData = metaData
+        this._metadata = metaData
     }
 
     /**
@@ -207,12 +205,11 @@ class SourceParams private constructor(
      * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
     fun setUsage(usage: Source.Usage): SourceParams = apply {
-        this.usage = usage
+        this._usage = usage
     }
 
-    private fun setWeChatParams(weChatParams: WeChatParams): SourceParams {
+    private fun setWeChatParams(weChatParams: WeChatParams): SourceParams = apply {
         this.weChatParams = weChatParams
-        return this
     }
 
     /**
@@ -301,37 +298,6 @@ class SourceParams private constructor(
             private const val PARAM_APPID = "appid"
             private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
         }
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(
-            amount, apiParameterMap, currency, typeRaw, owner, metaData,
-            returnUrl, extraParams, token, usage, type, weChatParams
-        )
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is SourceParams -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(params: SourceParams): Boolean {
-        return Objects.equals(amount, params.amount) &&
-            Objects.equals(apiParameterMap, params.apiParameterMap) &&
-            Objects.equals(currency, params.currency) &&
-            Objects.equals(typeRaw, params.typeRaw) &&
-            Objects.equals(owner, params.owner) &&
-            Objects.equals(metaData, params.metaData) &&
-            Objects.equals(returnUrl, params.returnUrl) &&
-            Objects.equals(extraParams, params.extraParams) &&
-            Objects.equals(token, params.token) &&
-            Objects.equals(usage, params.usage) &&
-            Objects.equals(type, params.type) &&
-            Objects.equals(weChatParams, params.weChatParams) &&
-            Objects.equals(attribution, params.attribution)
     }
 
     /**
