@@ -27,6 +27,7 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
     IntentAuthenticatorRegistry {
 
     // default authenticators always packaged with the SDK
+    // TODO(ccen) register a singleton instance of each authenticator with registration API
     @Inject
     lateinit var webIntentAuthenticator: WebIntentAuthenticator
 
@@ -69,7 +70,8 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
     companion object {
         // Holding this single instance would in turn holds DaggerAuthenticationComponent instance,
         // which keeps dagger injection graph live.
-        private var instance: IntentAuthenticatorRegistry? = null
+        @Volatile
+        private var INSTANCE: IntentAuthenticatorRegistry? = null
 
         /**
          * Return the singleton instance of [IntentAuthenticatorRegistry].
@@ -89,28 +91,60 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
             challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
             stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
             stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>?
+        ) = INSTANCE ?: synchronized(this) {
+            INSTANCE ?: createInstance(
+                stripeRepository,
+                paymentRelayStarterFactory,
+                paymentBrowserAuthStarterFactory,
+                analyticsRequestExecutor,
+                analyticsRequestFactory,
+                logger,
+                enableLogging,
+                workContext,
+                uiContext,
+                threeDs2Service,
+                messageVersionRegistry,
+                challengeProgressActivityStarter,
+                stripe3ds2Config,
+                stripe3ds2ChallengeLauncher
+            ).also { INSTANCE = it }
+        }
+
+        private fun createInstance(
+            stripeRepository: StripeRepository,
+            paymentRelayStarterFactory: (AuthActivityStarter.Host) -> PaymentRelayStarter,
+            paymentBrowserAuthStarterFactory: (AuthActivityStarter.Host) -> PaymentBrowserAuthStarter,
+            analyticsRequestExecutor: AnalyticsRequestExecutor,
+            analyticsRequestFactory: AnalyticsRequestFactory,
+            logger: Logger,
+            enableLogging: Boolean,
+            workContext: CoroutineContext,
+            uiContext: CoroutineContext,
+            threeDs2Service: StripeThreeDs2Service,
+            messageVersionRegistry: MessageVersionRegistry,
+            challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
+            stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
+            stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>?
         ): IntentAuthenticatorRegistry {
-            if (instance == null) {
-                instance = DaggerAuthenticationComponent.builder().authenticationModule(
-                    AuthenticationModule(
-                        stripeRepository,
-                        paymentRelayStarterFactory,
-                        paymentBrowserAuthStarterFactory,
-                        analyticsRequestExecutor,
-                        analyticsRequestFactory,
-                        logger,
-                        enableLogging,
-                        workContext,
-                        uiContext,
-                        threeDs2Service,
-                        messageVersionRegistry,
-                        challengeProgressActivityStarter,
-                        stripe3ds2Config,
-                        stripe3ds2ChallengeLauncher
-                    )
-                ).build().registry
-            }
-            return instance!!
+            INSTANCE = DaggerAuthenticationComponent.builder().authenticationModule(
+                AuthenticationModule(
+                    stripeRepository,
+                    paymentRelayStarterFactory,
+                    paymentBrowserAuthStarterFactory,
+                    analyticsRequestExecutor,
+                    analyticsRequestFactory,
+                    logger,
+                    enableLogging,
+                    workContext,
+                    uiContext,
+                    threeDs2Service,
+                    messageVersionRegistry,
+                    challengeProgressActivityStarter,
+                    stripe3ds2Config,
+                    stripe3ds2ChallengeLauncher
+                )
+            ).build().registry
+            return INSTANCE as DefaultIntentAuthenticatorRegistry
         }
     }
 }
