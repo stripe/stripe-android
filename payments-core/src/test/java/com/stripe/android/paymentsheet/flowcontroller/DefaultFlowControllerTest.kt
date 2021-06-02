@@ -20,6 +20,8 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.googlepay.GooglePayConfig
+import com.stripe.android.googlepay.GooglePayResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.CardBrand
@@ -403,7 +405,7 @@ internal class DefaultFlowControllerTest {
         assertThat(launchArgs)
             .isEqualTo(
                 StripeGooglePayContract.Args(
-                    config = StripeGooglePayContract.GooglePayConfig(
+                    config = GooglePayConfig(
                         environment = StripeGooglePayEnvironment.Test,
                         amount = 1099,
                         countryCode = "US",
@@ -430,7 +432,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onGooglePayResult(
-            StripeGooglePayContract.Result.Canceled
+            GooglePayResult.Canceled
         )
 
         verify(paymentResultCallback).onPaymentSheetResult(
@@ -448,7 +450,7 @@ internal class DefaultFlowControllerTest {
             }
 
             flowController.onGooglePayResult(
-                StripeGooglePayContract.Result.PaymentData(
+                GooglePayResult.PaymentData(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     shippingInformation = null
                 )

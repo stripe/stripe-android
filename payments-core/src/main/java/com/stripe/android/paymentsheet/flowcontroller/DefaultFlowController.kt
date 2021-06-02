@@ -11,6 +11,8 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.googlepay.GooglePayConfig
+import com.stripe.android.googlepay.GooglePayResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.model.PaymentIntent
@@ -247,7 +249,7 @@ internal class DefaultFlowController internal constructor(
             }
             googlePayLauncher(
                 StripeGooglePayContract.Args(
-                    config = StripeGooglePayContract.GooglePayConfig(
+                    config = GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
                                 StripeGooglePayEnvironment.Production
@@ -299,10 +301,10 @@ internal class DefaultFlowController internal constructor(
 
     @VisibleForTesting
     internal fun onGooglePayResult(
-        googlePayResult: StripeGooglePayContract.Result
+        googlePayResult: GooglePayResult
     ) {
         when (googlePayResult) {
-            is StripeGooglePayContract.Result.PaymentData -> {
+            is GooglePayResult.PaymentData -> {
                 runCatching {
                     viewModel.initData
                 }.fold(
@@ -324,7 +326,7 @@ internal class DefaultFlowController internal constructor(
                     }
                 )
             }
-            is StripeGooglePayContract.Result.Error -> {
+            is GooglePayResult.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
@@ -335,7 +337,7 @@ internal class DefaultFlowController internal constructor(
                     )
                 )
             }
-            is StripeGooglePayContract.Result.Canceled -> {
+            is GooglePayResult.Canceled -> {
                 // don't log cancellations as failures
                 paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
             }

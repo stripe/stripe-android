@@ -2,23 +2,16 @@ package com.stripe.android.googlepay
 
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
-import android.os.Parcel
-import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
-import androidx.core.os.bundleOf
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Status
 import com.stripe.android.R
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.ShippingInformation
 import com.stripe.android.view.ActivityStarter
-import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 
 internal class StripeGooglePayContract :
-    ActivityResultContract<StripeGooglePayContract.Args, StripeGooglePayContract.Result>() {
+    ActivityResultContract<StripeGooglePayContract.Args, GooglePayResult>() {
 
     override fun createIntent(
         context: Context,
@@ -31,8 +24,8 @@ internal class StripeGooglePayContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): Result {
-        return Result.fromIntent(intent)
+    ): GooglePayResult {
+        return GooglePayResult.fromIntent(intent)
     }
 
     /**
@@ -52,107 +45,9 @@ internal class StripeGooglePayContract :
             }
         }
     }
-
-    @Parcelize
-    data class GooglePayConfig(
-        var environment: StripeGooglePayEnvironment,
-
-        /**
-         * Total monetary value of the transaction.
-         *
-         * The value of this field is represented in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal).
-         * For example, when [currencyCode] is `"USD"`, a value of `100` represents 100 cents ($1.00).
-         */
-        internal var amount: Int?,
-
-        /**
-         * ISO 3166-1 alpha-2 country code where the transaction is processed.
-         */
-        internal var countryCode: String,
-
-        /**
-         * ISO 4217 alphabetic currency code.
-         */
-        internal var currencyCode: String,
-
-        /**
-         * Set to true to request an email address.
-         */
-        internal var isEmailRequired: Boolean = false,
-
-        /**
-         * Merchant name encoded as UTF-8.
-         */
-        internal var merchantName: String? = null,
-
-        /**
-         * A unique ID that identifies a transaction attempt. Merchants may use an existing ID or
-         * generate a specific one for Google Pay transaction attempts. This field is required
-         * when you send callbacks to the Google Transaction Events API.
-         */
-        internal var transactionId: String? = null
-    ) : Parcelable
-
-    sealed class Result : ActivityStarter.Result {
-        override fun toBundle(): Bundle {
-            return bundleOf(ActivityStarter.Result.EXTRA to this)
-        }
-
-        @Parcelize
-        class Error(
-            val exception: Throwable,
-            val googlePayStatus: Status? = null,
-            val paymentMethod: PaymentMethod? = null,
-            val shippingInformation: ShippingInformation? = null
-        ) : Result() {
-            companion object : Parceler<Error> {
-                override fun create(parcel: Parcel): Error {
-                    return Error(
-                        exception = parcel.readSerializable() as Throwable,
-                        googlePayStatus = parcel.readParcelable(Status::class.java.classLoader)
-                    )
-                }
-
-                override fun Error.write(parcel: Parcel, flags: Int) {
-                    parcel.writeSerializable(exception)
-                    parcel.writeParcelable(googlePayStatus, flags)
-                }
-            }
-        }
-
-        /**
-         * See [Args]
-         */
-        @Parcelize
-        data class PaymentData(
-            val paymentMethod: PaymentMethod,
-            val shippingInformation: ShippingInformation?
-        ) : Result()
-
-        @Parcelize
-        object Canceled : Result()
-
-        @Parcelize
-        object Unavailable : Result()
-
-        companion object {
-            /**
-             * @return the [Result] object from the given `Intent`
-             */
-            @JvmStatic
-            fun fromIntent(intent: Intent?): Result {
-                val result = intent?.getParcelableExtra<Result>(ActivityStarter.Result.EXTRA)
-                return result ?: Error(
-                    exception = IllegalStateException(
-                        "Error while processing result from Google Pay."
-                    )
-                )
-            }
-        }
-    }
 }
 
-internal fun StripeGooglePayContract.Result.Error.getErrorResourceID(): Int? {
+internal fun GooglePayResult.Error.getErrorResourceID(): Int? {
     return when (googlePayStatus) {
         Status.RESULT_SUCCESS -> null
         Status.RESULT_INTERNAL_ERROR, Status.RESULT_CANCELED, Status.RESULT_DEAD_CLIENT, null ->

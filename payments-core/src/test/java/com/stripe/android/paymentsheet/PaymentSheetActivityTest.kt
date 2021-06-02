@@ -18,7 +18,7 @@ import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
-import com.stripe.android.googlepay.StripeGooglePayContract
+import com.stripe.android.googlepay.GooglePayResult
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -175,7 +175,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
                 assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
-                viewModel.onGooglePayResult(StripeGooglePayContract.Result.Canceled)
+                viewModel.onGooglePayResult(GooglePayResult.Canceled)
 
                 // Update to saved card
                 viewModel.updateSelection(
