@@ -7,7 +7,6 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.UpiPaymentActivityBinding
 
 class UpiPaymentActivity : StripeIntentActivity() {
