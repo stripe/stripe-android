@@ -247,7 +247,6 @@ internal class DefaultFlowController internal constructor(
             }
             googlePayLauncher(
                 StripeGooglePayContract.Args(
-                    paymentIntent = initData.stripeIntent,
                     config = StripeGooglePayContract.GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
@@ -255,8 +254,11 @@ internal class DefaultFlowController internal constructor(
                             else ->
                                 StripeGooglePayEnvironment.Test
                         },
+                        amount = initData.stripeIntent.amount?.toInt(),
                         countryCode = config?.googlePay?.countryCode.orEmpty(),
-                        merchantName = config?.merchantDisplayName
+                        currencyCode = initData.stripeIntent.currency.orEmpty(),
+                        merchantName = config?.merchantDisplayName,
+                        transactionId = initData.stripeIntent.id
                     ),
                     statusBarColor = statusBarColor()
                 )

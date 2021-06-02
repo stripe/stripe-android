@@ -9,8 +9,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentIntentFixtures
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -102,16 +100,14 @@ class StripeGooglePayActivityTest {
     private companion object {
         private val CONFIG = StripeGooglePayContract.GooglePayConfig(
             environment = StripeGooglePayEnvironment.Test,
+            amount = 1000,
             countryCode = "US",
-            isEmailRequired = true
-        )
-
-        private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
-            confirmationMethod = PaymentIntent.ConfirmationMethod.Automatic
+            currencyCode = "usd",
+            isEmailRequired = true,
+            transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6"
         )
 
         private val ARGS = StripeGooglePayContract.Args(
-            paymentIntent = PAYMENT_INTENT,
             config = CONFIG,
             statusBarColor = Color.RED
         )
