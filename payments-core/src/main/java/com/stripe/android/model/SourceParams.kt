@@ -36,6 +36,18 @@ class SourceParams private constructor(
     var sourceOrder: SourceOrderParams? = null,
 
     /**
+     * An optional token used to create the source. When passed, token properties will
+     * override source parameters.
+     *
+     * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
+     */
+    private var token: String? = null,
+
+    private var weChatParams: WeChatParams? = null,
+
+    private var extraParams: Map<String, Any> = emptyMap(),
+
+    /**
      * A set of identifiers representing the component that created this instance.
      */
     internal val attribution: Set<String> = emptySet()
@@ -46,7 +58,7 @@ class SourceParams private constructor(
      */
     @get:SourceType
     @SourceType
-    val type: String = asSourceType(typeRaw)
+    val type: String get() = asSourceType(typeRaw)
 
     /**
      * Amount associated with the source. This is the amount for which the source will
@@ -95,16 +107,6 @@ class SourceParams private constructor(
     var metaData: Map<String, String>? = null
         private set
 
-    private var extraParams: Map<String, Any> = emptyMap()
-
-    /**
-     * An optional token used to create the source. When passed, token properties will
-     * override source parameters.
-     *
-     * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
-     */
-    private var token: String? = null
-
     /**
      * Either `reusable` or `single_use`. Whether this source should be reusable or not.
      * Some source types may or may not be reusable by construction, while others may leave the
@@ -114,8 +116,6 @@ class SourceParams private constructor(
      */
     var usage: Source.Usage? = null
         private set
-
-    private var weChatParams: WeChatParams? = null
 
     /*---- Setters ----*/
     /**
@@ -400,7 +400,6 @@ class SourceParams private constructor(
         private const val PARAM_WECHAT = "wechat"
         private const val PARAM_CLIENT_SECRET = "client_secret"
         private const val PARAM_FLOW = "flow"
-        private const val PARAM_KLARNA = "klarna"
         private const val PARAM_SOURCE_ORDER = "source_order"
         private const val PARAM_BANK = "bank"
         private const val PARAM_CARD = "card"
