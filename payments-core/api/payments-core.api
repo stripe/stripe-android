@@ -5408,9 +5408,6 @@ public final class com/stripe/android/payments/core/injection/AuthenticationModu
 	public static fun provideWebAuthenticator$payments_core_release (Lcom/stripe/android/payments/core/injection/AuthenticationModule;)Lcom/stripe/android/payments/core/authentication/WebIntentAuthenticator;
 }
 
-public abstract interface annotation class com/stripe/android/payments/core/injection/AuthenticationScope : java/lang/annotation/Annotation {
-}
-
 public final class com/stripe/android/payments/core/injection/DaggerAuthenticationComponent : com/stripe/android/payments/core/injection/AuthenticationComponent {
 	public static fun builder ()Lcom/stripe/android/payments/core/injection/DaggerAuthenticationComponent$Builder;
 	public fun getRegistry ()Lcom/stripe/android/payments/core/authentication/DefaultIntentAuthenticatorRegistry;

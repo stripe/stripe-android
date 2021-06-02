@@ -18,6 +18,7 @@ import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.view.AuthActivityStarter
 import dagger.Module
 import dagger.Provides
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -43,13 +44,13 @@ internal class AuthenticationModule(
     private val stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
     private val stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>?,
 ) {
-    @AuthenticationScope
+    @Singleton
     @Provides
     internal fun provideNoOpAuthenticator(): NoOpIntentAuthenticator {
         return NoOpIntentAuthenticator(paymentRelayStarterFactory)
     }
 
-    @AuthenticationScope
+    @Singleton
     @Provides
     internal fun provideWebAuthenticator(): WebIntentAuthenticator {
         return WebIntentAuthenticator(
@@ -62,7 +63,7 @@ internal class AuthenticationModule(
         )
     }
 
-    @AuthenticationScope
+    @Singleton
     @Provides
     internal fun provideStripe3DSAuthenticator(
         webIntentAuthenticator: WebIntentAuthenticator
