@@ -64,7 +64,8 @@ data class SourceParams internal constructor(
      */
     @get:SourceType
     @SourceType
-    val type: String get() = asSourceType(typeRaw)
+    val type: String
+        get() = asSourceType(typeRaw)
 
     /**
      * Amount associated with the source. This is the amount for which the source will
@@ -206,10 +207,6 @@ data class SourceParams internal constructor(
      */
     fun setUsage(usage: Source.Usage): SourceParams = apply {
         this._usage = usage
-    }
-
-    private fun setWeChatParams(weChatParams: WeChatParams): SourceParams = apply {
-        this.weChatParams = weChatParams
     }
 
     /**
@@ -408,16 +405,16 @@ data class SourceParams internal constructor(
             email: String,
             returnUrl: String
         ): SourceParams {
-            return SourceParams(SourceType.P24)
-                .setAmount(amount)
-                .setCurrency(currency)
-                .setReturnUrl(returnUrl)
-                .setOwner(
-                    OwnerParams(
-                        email = email,
-                        name = name
-                    )
+            return SourceParams(
+                SourceType.P24,
+                _amount = amount,
+                _currency = currency,
+                _returnUrl = returnUrl,
+                _owner = OwnerParams(
+                    email = email,
+                    name = name
                 )
+            )
         }
 
         /**
@@ -441,16 +438,16 @@ data class SourceParams internal constructor(
             email: String? = null,
             returnUrl: String
         ): SourceParams {
-            return SourceParams(SourceType.ALIPAY)
-                .setCurrency(currency)
-                .setReturnUrl(returnUrl)
-                .setUsage(Source.Usage.Reusable)
-                .setOwner(
-                    OwnerParams(
-                        email = email,
-                        name = name
-                    )
+            return SourceParams(
+                SourceType.ALIPAY,
+                _currency = currency,
+                _returnUrl = returnUrl,
+                _usage = Source.Usage.Reusable,
+                _owner = OwnerParams(
+                    email = email,
+                    name = name
                 )
+            )
         }
 
         /**
@@ -477,16 +474,16 @@ data class SourceParams internal constructor(
             email: String? = null,
             returnUrl: String
         ): SourceParams {
-            return SourceParams(SourceType.ALIPAY)
-                .setCurrency(currency)
-                .setAmount(amount)
-                .setReturnUrl(returnUrl)
-                .setOwner(
-                    OwnerParams(
-                        email = email,
-                        name = name
-                    )
+            return SourceParams(
+                SourceType.ALIPAY,
+                _currency = currency,
+                _amount = amount,
+                _returnUrl = returnUrl,
+                _owner = OwnerParams(
+                    email = email,
+                    name = name
                 )
+            )
         }
 
         /**
@@ -510,10 +507,15 @@ data class SourceParams internal constructor(
             weChatAppId: String,
             statementDescriptor: String? = null
         ): SourceParams {
-            return SourceParams(SourceType.WECHAT)
-                .setCurrency(currency)
-                .setAmount(amount)
-                .setWeChatParams(WeChatParams(weChatAppId, statementDescriptor))
+            return SourceParams(
+                SourceType.WECHAT,
+                _currency = currency,
+                _amount = amount,
+                weChatParams = WeChatParams(
+                    weChatAppId,
+                    statementDescriptor
+                )
+            )
         }
 
         /**
@@ -557,19 +559,17 @@ data class SourceParams internal constructor(
             return SourceParams(
                 SourceType.KLARNA,
                 flow = Flow.Redirect,
-                sourceOrder = sourceOrderParams
+                sourceOrder = sourceOrderParams,
+                _amount = totalAmount.toLong(),
+                _currency = currency,
+                _returnUrl = returnUrl,
+                _owner = OwnerParams(
+                    address = klarnaParams.billingAddress,
+                    email = klarnaParams.billingEmail,
+                    phone = klarnaParams.billingPhone
+                ),
+                _apiParameterMap = klarnaParams.toParamMap()
             )
-                .setAmount(totalAmount.toLong())
-                .setCurrency(currency)
-                .setReturnUrl(returnUrl)
-                .setOwner(
-                    OwnerParams(
-                        address = klarnaParams.billingAddress,
-                        email = klarnaParams.billingEmail,
-                        phone = klarnaParams.billingPhone
-                    )
-                )
-                .setApiParameterMap(klarnaParams.toParamMap())
         }
 
         /**
@@ -597,14 +597,7 @@ data class SourceParams internal constructor(
             statementDescriptor: String? = null,
             preferredLanguage: String? = null
         ): SourceParams {
-            val params = SourceParams(SourceType.BANCONTACT)
-                .setCurrency(Source.EURO)
-                .setAmount(amount)
-                .setOwner(
-                    OwnerParams(name = name)
-                )
-                .setReturnUrl(returnUrl)
-            val additionalParamsMap = emptyMap<String, Any>()
+            val apiParams = emptyMap<String, Any>()
                 .plus(
                     statementDescriptor?.let {
                         mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
@@ -614,11 +607,16 @@ data class SourceParams internal constructor(
                     preferredLanguage?.let {
                         mapOf(PARAM_PREFERRED_LANGUAGE to it)
                     }.orEmpty()
-                )
-            if (additionalParamsMap.isNotEmpty()) {
-                params.setApiParameterMap(additionalParamsMap)
-            }
-            return params
+                ).takeIf { it.isNotEmpty() }
+
+            return SourceParams(
+                SourceType.BANCONTACT,
+                _currency = Source.EURO,
+                _amount = amount,
+                _owner = OwnerParams(name = name),
+                _returnUrl = returnUrl,
+                _apiParameterMap = apiParams
+            )
         }
 
         /**
@@ -641,19 +639,23 @@ data class SourceParams internal constructor(
          */
         @JvmStatic
         fun createSourceFromTokenParams(tokenId: String): SourceParams {
-            return createSourceFromTokenParams(tokenId, emptySet())
+            return createSourceFromTokenParams(
+                tokenId = tokenId
+            )
         }
 
         @JvmSynthetic
         internal fun createSourceFromTokenParams(
             tokenId: String,
-            attribution: Set<String>
+            attribution: Set<String> = emptySet(),
+            owner: OwnerParams? = null
         ): SourceParams {
             return SourceParams(
                 SourceType.CARD,
-                attribution = attribution
+                attribution = attribution,
+                token = tokenId,
+                _owner = owner
             )
-                .setToken(tokenId)
         }
 
         /**
@@ -669,30 +671,26 @@ data class SourceParams internal constructor(
         fun createCardParams(card: Card): SourceParams {
             return SourceParams(
                 SourceType.CARD,
-                attribution = card.loggingTokens
+                attribution = card.loggingTokens,
+                _owner = OwnerParams(
+                    address = Address.Builder()
+                        .setLine1(card.addressLine1)
+                        .setLine2(card.addressLine2)
+                        .setCity(card.addressCity)
+                        .setState(card.addressState)
+                        .setPostalCode(card.addressZip)
+                        .setCountry(card.addressCountry)
+                        .build(),
+                    name = card.name
+                ),
+                _metadata = card.metadata,
+                _apiParameterMap = mapOf(
+                    PARAM_NUMBER to card.number,
+                    PARAM_EXP_MONTH to card.expMonth,
+                    PARAM_EXP_YEAR to card.expYear,
+                    PARAM_CVC to card.cvc
+                )
             )
-                .setApiParameterMap(
-                    mapOf(
-                        PARAM_NUMBER to card.number,
-                        PARAM_EXP_MONTH to card.expMonth,
-                        PARAM_EXP_YEAR to card.expYear,
-                        PARAM_CVC to card.cvc
-                    )
-                )
-                .setOwner(
-                    OwnerParams(
-                        address = Address.Builder()
-                            .setLine1(card.addressLine1)
-                            .setLine2(card.addressLine2)
-                            .setCity(card.addressCity)
-                            .setState(card.addressState)
-                            .setPostalCode(card.addressZip)
-                            .setCountry(card.addressCountry)
-                            .build(),
-                        name = card.name
-                    )
-                )
-                .setMetaData(card.metadata)
         }
 
         /**
@@ -707,23 +705,19 @@ data class SourceParams internal constructor(
         fun createCardParams(cardParams: CardParams): SourceParams {
             return SourceParams(
                 SourceType.CARD,
-                attribution = cardParams.attribution
+                attribution = cardParams.attribution,
+                _owner = OwnerParams(
+                    address = cardParams.address,
+                    name = cardParams.name
+                ),
+                _metadata = cardParams.metadata,
+                _apiParameterMap = mapOf(
+                    PARAM_NUMBER to cardParams.number,
+                    PARAM_EXP_MONTH to cardParams.expMonth,
+                    PARAM_EXP_YEAR to cardParams.expYear,
+                    PARAM_CVC to cardParams.cvc
+                )
             )
-                .setApiParameterMap(
-                    mapOf(
-                        PARAM_NUMBER to cardParams.number,
-                        PARAM_EXP_MONTH to cardParams.expMonth,
-                        PARAM_EXP_YEAR to cardParams.expYear,
-                        PARAM_CVC to cardParams.cvc
-                    )
-                )
-                .setOwner(
-                    OwnerParams(
-                        address = cardParams.address,
-                        name = cardParams.name
-                    )
-                )
-                .setMetaData(cardParams.metadata)
         }
 
         /**
@@ -742,9 +736,8 @@ data class SourceParams internal constructor(
                 tokenId = token?.id.orEmpty(),
                 attribution = setOfNotNull(
                     token?.card?.tokenizationMethod?.toString()
-                )
-            ).setOwner(
-                OwnerParams(
+                ),
+                owner = OwnerParams(
                     address = googlePayResult.address,
                     email = googlePayResult.email,
                     name = googlePayResult.name,
@@ -773,16 +766,16 @@ data class SourceParams internal constructor(
             returnUrl: String,
             statementDescriptor: String? = null
         ): SourceParams {
-            return SourceParams(SourceType.EPS)
-                .setCurrency(Source.EURO)
-                .setAmount(amount)
-                .setOwner(OwnerParams(name = name))
-                .setReturnUrl(returnUrl)
-                .setApiParameterMap(
-                    statementDescriptor?.let {
-                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
-                    }
-                )
+            return SourceParams(
+                SourceType.EPS,
+                _currency = Source.EURO,
+                _amount = amount,
+                _owner = OwnerParams(name = name),
+                _returnUrl = returnUrl,
+                _apiParameterMap = statementDescriptor?.let {
+                    mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
+                }
+            )
         }
 
         /**
@@ -805,16 +798,16 @@ data class SourceParams internal constructor(
             returnUrl: String,
             statementDescriptor: String? = null
         ): SourceParams {
-            return SourceParams(SourceType.GIROPAY)
-                .setCurrency(Source.EURO)
-                .setAmount(amount)
-                .setOwner(OwnerParams(name = name))
-                .setReturnUrl(returnUrl)
-                .setApiParameterMap(
-                    statementDescriptor?.let {
-                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
-                    }
-                )
+            return SourceParams(
+                SourceType.GIROPAY,
+                _currency = Source.EURO,
+                _amount = amount,
+                _owner = OwnerParams(name = name),
+                _returnUrl = returnUrl,
+                _apiParameterMap = statementDescriptor?.let {
+                    mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
+                }
+            )
         }
 
         /**
@@ -839,13 +832,7 @@ data class SourceParams internal constructor(
             statementDescriptor: String? = null,
             bank: String? = null
         ): SourceParams {
-            val params = SourceParams(SourceType.IDEAL)
-                .setCurrency(Source.EURO)
-                .setAmount(amount)
-                .setReturnUrl(returnUrl)
-                .setOwner(OwnerParams(name = name))
-
-            val additionalParamsMap = emptyMap<String, Any>()
+            val apiParams = emptyMap<String, Any>()
                 .plus(
                     statementDescriptor?.let {
                         mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
@@ -855,12 +842,18 @@ data class SourceParams internal constructor(
                     bank?.let {
                         mapOf(PARAM_BANK to it)
                     }.orEmpty()
-                )
-            if (additionalParamsMap.isNotEmpty()) {
-                params.setApiParameterMap(additionalParamsMap)
-            }
+                ).takeIf {
+                    it.isNotEmpty()
+                }
 
-            return params
+            return SourceParams(
+                SourceType.IDEAL,
+                _currency = Source.EURO,
+                _amount = amount,
+                _returnUrl = returnUrl,
+                _owner = OwnerParams(name = name),
+                _apiParameterMap = apiParams
+            )
         }
 
         /**
@@ -881,11 +874,13 @@ data class SourceParams internal constructor(
             returnUrl: String,
             email: String
         ): SourceParams {
-            return SourceParams(SourceType.MULTIBANCO)
-                .setCurrency(Source.EURO)
-                .setAmount(amount)
-                .setReturnUrl(returnUrl)
-                .setOwner(OwnerParams(email = email))
+            return SourceParams(
+                SourceType.MULTIBANCO,
+                _currency = Source.EURO,
+                _amount = amount,
+                _returnUrl = returnUrl,
+                _owner = OwnerParams(email = email)
+            )
         }
 
         /**
@@ -910,7 +905,15 @@ data class SourceParams internal constructor(
             postalCode: String,
             @Size(2) country: String
         ): SourceParams {
-            return createSepaDebitParams(name, iban, null, addressLine1, city, postalCode, country)
+            return createSepaDebitParams(
+                name,
+                iban,
+                null,
+                addressLine1,
+                city,
+                postalCode,
+                country
+            )
         }
 
         /**
@@ -937,21 +940,23 @@ data class SourceParams internal constructor(
             postalCode: String?,
             @Size(2) country: String?
         ): SourceParams {
-            return SourceParams(SourceType.SEPA_DEBIT)
-                .setCurrency(Source.EURO)
-                .setOwner(
-                    OwnerParams(
-                        address = Address.Builder()
-                            .setLine1(addressLine1)
-                            .setCity(city)
-                            .setPostalCode(postalCode)
-                            .setCountry(country)
-                            .build(),
-                        email = email,
-                        name = name
-                    )
+            return SourceParams(
+                SourceType.SEPA_DEBIT,
+                _currency = Source.EURO,
+                _owner = OwnerParams(
+                    address = Address.Builder()
+                        .setLine1(addressLine1)
+                        .setCity(city)
+                        .setPostalCode(postalCode)
+                        .setCountry(country)
+                        .build(),
+                    email = email,
+                    name = name
+                ),
+                _apiParameterMap = mapOf(
+                    PARAM_IBAN to iban
                 )
-                .setApiParameterMap(mapOf(PARAM_IBAN to iban))
+            )
         }
 
         /**
@@ -980,11 +985,13 @@ data class SourceParams internal constructor(
                         mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
                     }.orEmpty()
                 )
-            return SourceParams(SourceType.SOFORT)
-                .setCurrency(Source.EURO)
-                .setAmount(amount)
-                .setReturnUrl(returnUrl)
-                .setApiParameterMap(sofortData)
+            return SourceParams(
+                SourceType.SOFORT,
+                _currency = Source.EURO,
+                _amount = amount,
+                _returnUrl = returnUrl,
+                _apiParameterMap = sofortData
+            )
         }
 
         /**
@@ -1006,11 +1013,13 @@ data class SourceParams internal constructor(
             returnUrl: String,
             cardId: String
         ): SourceParams {
-            return SourceParams(SourceType.THREE_D_SECURE)
-                .setCurrency(currency)
-                .setAmount(amount)
-                .setReturnUrl(returnUrl)
-                .setApiParameterMap(mapOf(PARAM_CARD to cardId))
+            return SourceParams(
+                SourceType.THREE_D_SECURE,
+                _currency = currency,
+                _amount = amount,
+                _returnUrl = returnUrl,
+                _apiParameterMap = mapOf(PARAM_CARD to cardId)
+            )
         }
 
         /**
@@ -1025,10 +1034,14 @@ data class SourceParams internal constructor(
          */
         @JvmStatic
         fun createVisaCheckoutParams(callId: String): SourceParams {
-            return SourceParams(SourceType.CARD)
-                .setApiParameterMap(
-                    mapOf(PARAM_VISA_CHECKOUT to mapOf(PARAM_CALL_ID to callId))
+            return SourceParams(
+                SourceType.CARD,
+                _apiParameterMap = mapOf(
+                    PARAM_VISA_CHECKOUT to mapOf(
+                        PARAM_CALL_ID to callId
+                    )
                 )
+            )
         }
 
         /**
@@ -1051,12 +1064,15 @@ data class SourceParams internal constructor(
             transactionId: String,
             cartId: String
         ): SourceParams {
-            val map = mapOf(
-                PARAM_TRANSACTION_ID to transactionId,
-                PARAM_CART_ID to cartId
+            return SourceParams(
+                SourceType.CARD,
+                _apiParameterMap = mapOf(
+                    PARAM_MASTERPASS to mapOf(
+                        PARAM_TRANSACTION_ID to transactionId,
+                        PARAM_CART_ID to cartId
+                    )
+                )
             )
-            return SourceParams(SourceType.CARD)
-                .setApiParameterMap(mapOf(PARAM_MASTERPASS to map))
         }
 
         /**
