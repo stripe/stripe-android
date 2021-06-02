@@ -81,9 +81,7 @@ internal class StripeGooglePayContract :
         internal var isEmailRequired: Boolean = false,
 
         /**
-         * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
-         * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant”
-         * message is displayed in the payment sheet.
+         * Merchant name encoded as UTF-8.
          */
         internal var merchantName: String? = null,
 
