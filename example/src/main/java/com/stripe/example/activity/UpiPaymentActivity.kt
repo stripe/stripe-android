@@ -11,9 +11,6 @@ import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.UpiPaymentActivityBinding
 
 class UpiPaymentActivity : StripeIntentActivity() {
-    private val stripe by lazy {
-        StripeFactory(application).create()
-    }
     private val viewBinding: UpiPaymentActivityBinding by lazy {
         UpiPaymentActivityBinding.inflate(layoutInflater)
     }
