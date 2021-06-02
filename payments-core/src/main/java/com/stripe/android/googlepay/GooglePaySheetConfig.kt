@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class GooglePayConfig(
+internal data class GooglePaySheetConfig(
     var environment: StripeGooglePayEnvironment,
 
     /**

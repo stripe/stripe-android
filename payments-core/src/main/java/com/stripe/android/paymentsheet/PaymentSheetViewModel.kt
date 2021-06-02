@@ -15,8 +15,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.googlepay.GooglePayConfig
-import com.stripe.android.googlepay.GooglePayResult
+import com.stripe.android.googlepay.GooglePaySheetConfig
+import com.stripe.android.googlepay.GooglePaySheetResult
 import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.googlepay.StripeGooglePayEnvironment
 import com.stripe.android.googlepay.getErrorResourceID
@@ -259,7 +259,7 @@ internal class PaymentSheetViewModel internal constructor(
             (stripeIntent.value as? PaymentIntent)?.let { paymentIntent ->
                 _launchGooglePay.value = Event(
                     StripeGooglePayContract.Args(
-                        config = GooglePayConfig(
+                        config = GooglePaySheetConfig(
                             environment = when (args.config?.googlePay?.environment) {
                                 PaymentSheet.GooglePayConfiguration.Environment.Production ->
                                     StripeGooglePayEnvironment.Production
@@ -337,16 +337,16 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     internal fun onGooglePayResult(
-        googlePayResult: GooglePayResult
+        googlePayResult: GooglePaySheetResult
     ) {
         when (googlePayResult) {
-            is GooglePayResult.PaymentData -> {
+            is GooglePaySheetResult.PaymentData -> {
                 val paymentSelection = PaymentSelection.Saved(
                     googlePayResult.paymentMethod
                 )
                 confirmPaymentSelection(paymentSelection)
             }
-            is GooglePayResult.Error -> {
+            is GooglePaySheetResult.Error -> {
                 logger.error("Error processing Google Pay payment", googlePayResult.exception)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 stripeIntent.value?.let { it ->
