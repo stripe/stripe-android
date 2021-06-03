@@ -259,7 +259,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     addToBackStack(null)
                     replace(
                         fragmentContainerId,
-                        PaymentSheetAddCardFragment::class.java,
+                        PaymentSheetAddPaymentMethodFragment::class.java,
                         fragmentArgs
                     )
                 }
@@ -285,7 +285,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     )
                     replace(
                         fragmentContainerId,
-                        PaymentSheetAddCardFragment::class.java,
+                        PaymentSheetAddPaymentMethodFragment::class.java,
                         fragmentArgs
                     )
                 }

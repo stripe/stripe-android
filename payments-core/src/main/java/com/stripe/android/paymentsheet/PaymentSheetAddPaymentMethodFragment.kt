@@ -4,26 +4,29 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
-import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
+import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.R
+import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 
-internal class PaymentSheetAddCardFragment(
+internal class PaymentSheetAddPaymentMethodFragment(
     eventReporter: EventReporter
-) : BaseAddCardFragment(eventReporter) {
+) : BaseAddPaymentMethodFragment(eventReporter) {
+    override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
+        { requireActivity().application },
+        {
+            requireNotNull(
+                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+            )
+        }
+    )
+
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {
-        PaymentSheetViewModel.Factory(
-            { requireActivity().application },
-            {
-                requireNotNull(
-                    requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
-                )
-            }
-        )
+        viewModelFactory
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -35,10 +38,9 @@ internal class PaymentSheetAddCardFragment(
             config.isGooglePayReady && config.paymentMethods.isEmpty()
         } ?: false
 
-        val viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
+        val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         val googlePayButton = viewBinding.googlePayButton
         val messageView = viewBinding.message
-        val addCardHeader = viewBinding.addCardHeader
         val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
@@ -46,17 +48,16 @@ internal class PaymentSheetAddCardFragment(
         }
 
         googlePayButton.isVisible = shouldShowGooglePayButton
-
         googlePayDivider.isVisible = shouldShowGooglePayButton
-        addCardHeader.isVisible = !shouldShowGooglePayButton
+        addPaymentMethodHeader.isVisible = !shouldShowGooglePayButton
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
-                sheetViewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
+                sheetViewModel.checkout(PaymentSheetViewModel.CheckoutIdentifier.AddFragmentTopGooglePay)
             }
         }
 
-        sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
+        sheetViewModel.getButtonStateObservable(PaymentSheetViewModel.CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner) { viewState ->
                 messageView.isVisible = viewState?.errorMessage != null
                 messageView.text = viewState?.errorMessage?.message
@@ -70,5 +71,13 @@ internal class PaymentSheetAddCardFragment(
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             googlePayButton.isEnabled = !isProcessing
         }
+    }
+
+    private fun updateSelection() {
+        // TODO(brnunes-stripe): Fix this
+        (
+            childFragmentManager
+                .findFragmentById(R.id.payment_method_fragment_container) as? AddCardFragment<*>
+            )?.updateSelection()
     }
 }

@@ -116,7 +116,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
-                    viewBinding.addButton.isVisible = fragment is PaymentOptionsAddCardFragment
+                    viewBinding.addButton.isVisible = fragment is PaymentOptionsAddPaymentMethodFragment
                 }
             },
             false
@@ -174,7 +174,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
                     replace(
                         fragmentContainerId,
-                        PaymentOptionsAddCardFragment::class.java,
+                        PaymentOptionsAddPaymentMethodFragment::class.java,
                         fragmentArgs
                     )
                 }
@@ -188,7 +188,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 is PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                     replace(
                         fragmentContainerId,
-                        PaymentOptionsAddCardFragment::class.java,
+                        PaymentOptionsAddPaymentMethodFragment::class.java,
                         fragmentArgs
                     )
                 }

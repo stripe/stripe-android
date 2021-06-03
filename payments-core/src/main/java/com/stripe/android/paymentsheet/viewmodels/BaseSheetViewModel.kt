@@ -13,7 +13,7 @@ import com.stripe.android.googlepay.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.BaseAddCardFragment
+import com.stripe.android.paymentsheet.AddCardFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -68,7 +68,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     /**
-     * On [BaseAddCardFragment] this is set every time the details in the add
+     * On [AddCardFragment] this is set every time the details in the add
      * card fragment is determined to be valid (not necessarily selected)
      * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
