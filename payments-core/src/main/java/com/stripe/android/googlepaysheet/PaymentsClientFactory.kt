@@ -1,4 +1,4 @@
-package com.stripe.android.googlepay
+package com.stripe.android.googlepaysheet
 
 import android.content.Context
 import com.google.android.gms.wallet.PaymentsClient

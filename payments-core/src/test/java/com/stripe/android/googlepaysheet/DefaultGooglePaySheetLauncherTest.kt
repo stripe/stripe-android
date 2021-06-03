@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.googlepaysheet
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
@@ -16,7 +16,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class DefaultPaymentSheetLauncherTest {
+class DefaultGooglePaySheetLauncherTest {
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(
@@ -26,8 +26,8 @@ class DefaultPaymentSheetLauncherTest {
     }
 
     @Test
-    fun `init and present should return expected PaymentResult`() {
-        val testRegistry = FakeActivityResultRegistry(PaymentSheetResult.Completed)
+    fun `init and present should return empty results`() {
+        val testRegistry = FakeActivityResultRegistry(GooglePaySheetResult.Canceled)
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
@@ -35,21 +35,22 @@ class DefaultPaymentSheetLauncherTest {
             }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<PaymentSheetResult>()
-                val launcher = DefaultPaymentSheetLauncher(fragment, testRegistry) {
+                val results = mutableListOf<GooglePaySheetResult>()
+                val launcher = DefaultGooglePaySheetLauncher(fragment, testRegistry) {
                     results.add(it)
                 }
 
                 moveToState(Lifecycle.State.RESUMED)
-                launcher.presentWithPaymentIntent("pi_fake")
+
+                // this will be empty until DefaultGooglePaySheetLauncher is implemented
                 assertThat(results)
-                    .containsExactly(PaymentSheetResult.Completed)
+                    .isEmpty()
             }
         }
     }
 
     private class FakeActivityResultRegistry(
-        private val result: PaymentSheetResult
+        private val result: GooglePaySheetResult
     ) : ActivityResultRegistry() {
         override fun <I, O> onLaunch(
             requestCode: Int,
