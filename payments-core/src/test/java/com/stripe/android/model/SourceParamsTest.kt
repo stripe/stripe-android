@@ -865,6 +865,28 @@ class SourceParamsTest {
     }
 
     @Test
+    fun createMasterpassParams_toParamMap_createsExpectedMap() {
+        val params = SourceParams.createMasterpassParams(
+            "abc_123",
+            "cart_456"
+        )
+
+        assertThat(
+            params.toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "type" to Source.SourceType.CARD,
+                "card" to mapOf(
+                    "masterpass" to mapOf(
+                        "transaction_id" to "abc_123",
+                        "cart_id" to "cart_456"
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun createCustomParamsWithSourceTypeParameters_toParamMap_createsExpectedMap() {
         // Using the Giropay constructor to add some free params and expected values,
         // including a source type params

@@ -1149,15 +1149,18 @@ data class SourceParams internal constructor(
         ) : TypeData() {
             override val type: String get() = SourceType.CARD
 
-            override val params: List<Pair<String, String?>>
+            override val params: List<Pair<String, Map<String, String>>>
                 get() = listOf(
-                    PARAM_TRANSACTION_ID to transactionId,
-                    PARAM_CART_ID to cartId
+                    PARAM_MASTERPASS to mapOf(
+                        PARAM_TRANSACTION_ID to transactionId,
+                        PARAM_CART_ID to cartId
+                    )
                 )
 
             private companion object {
-                private const val PARAM_TRANSACTION_ID = "transaction_id"
                 private const val PARAM_CART_ID = "cart_id"
+                private const val PARAM_MASTERPASS = "masterpass"
+                private const val PARAM_TRANSACTION_ID = "transaction_id"
             }
         }
 
