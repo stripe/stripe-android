@@ -1,5 +1,10 @@
 package com.stripe.android.googlepaysheet
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
@@ -10,41 +15,122 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.FakeGooglePayRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class DefaultGooglePaySheetLauncherTest {
+    private val testDispatcher = TestCoroutineDispatcher()
+    private val testScope = TestCoroutineScope(testDispatcher)
+
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @AfterTest
+    fun cleanup() {
+        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
-    fun `init and present should return empty results`() {
+    fun `configure() and present() when Google Pay is ready should return expected result`() {
         val testRegistry = FakeActivityResultRegistry(GooglePaySheetResult.Canceled)
 
+        val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
+            TestFragment()
+        }
+        scenario.onFragment { fragment ->
+            val results = mutableListOf<GooglePaySheetResult>()
+            val launcher = DefaultGooglePaySheetLauncher(
+                fragment,
+                testRegistry,
+                testDispatcher,
+                { FakeGooglePayRepository(true) }
+            ) {
+                results.add(it)
+            }
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            testScope.launch {
+                val isReady = launcher.configure(CONFIG)
+                assertThat(isReady)
+                    .isTrue()
+
+                launcher.present()
+            }
+
+            assertThat(results)
+                .containsExactly(
+                    GooglePaySheetResult.Canceled
+                )
+        }
+    }
+
+    @Test
+    fun `configure() when Google Pay is not ready should throw exception`() {
+        val testRegistry = FakeActivityResultRegistry(GooglePaySheetResult.Canceled)
+
+        val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
+            TestFragment()
+        }
+        scenario.onFragment { fragment ->
+            val results = mutableListOf<GooglePaySheetResult>()
+            val launcher = DefaultGooglePaySheetLauncher(
+                fragment,
+                testRegistry,
+                testDispatcher,
+                { FakeGooglePayRepository(false) }
+            ) {
+                results.add(it)
+            }
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            val exception = assertFailsWith<RuntimeException> {
+                runBlocking { launcher.configure(CONFIG) }
+            }
+            assertThat(exception.message)
+                .isEqualTo("Google Pay is not available.")
+        }
+    }
+
+    @Test
+    fun `present() without configure() should throw error`() {
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
                 TestFragment()
             }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<GooglePaySheetResult>()
-                val launcher = DefaultGooglePaySheetLauncher(fragment, testRegistry) {
-                    results.add(it)
+                val launcher = DefaultGooglePaySheetLauncher(
+                    fragment,
+                    googlePayRepositoryFactory = { FakeGooglePayRepository(true) }
+                ) {
                 }
-
                 moveToState(Lifecycle.State.RESUMED)
 
-                // this will be empty until DefaultGooglePaySheetLauncher is implemented
-                assertThat(results)
-                    .isEmpty()
+                val exception = assertFailsWith<IllegalStateException> {
+                    launcher.present()
+                }
+                assertThat(exception.message)
+                    .isEqualTo("GooglePaySheet must be successfully initialized using configure() before calling present().")
             }
         }
     }
@@ -65,5 +151,20 @@ class DefaultGooglePaySheetLauncherTest {
         }
     }
 
-    internal class TestFragment : Fragment()
+    internal class TestFragment : Fragment() {
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View = FrameLayout(inflater.context)
+    }
+
+    private companion object {
+        val CONFIG = GooglePaySheetConfig(
+            GooglePaySheetEnvironment.Test,
+            amount = 1000,
+            countryCode = "US",
+            currencyCode = "usd"
+        )
+    }
 }

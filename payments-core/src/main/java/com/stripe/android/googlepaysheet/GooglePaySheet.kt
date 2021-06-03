@@ -2,11 +2,16 @@ package com.stripe.android.googlepaysheet
 
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.paymentsheet.DefaultGooglePayRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment.
  */
-internal class GooglePaySheet(
+internal class GooglePaySheet internal constructor(
+    private val lifecycleScope: () -> CoroutineScope,
     private val googlePaySheetLauncher: GooglePaySheetLauncher
 ) {
     /**
@@ -19,7 +24,17 @@ internal class GooglePaySheet(
         activity: ComponentActivity,
         callback: GooglePaySheetResultCallback
     ) : this(
-        DefaultGooglePaySheetLauncher(activity, callback)
+        { activity.lifecycleScope },
+        DefaultGooglePaySheetLauncher(
+            activity,
+            googlePayRepositoryFactory = {
+                DefaultGooglePayRepository(
+                    activity.application,
+                    it
+                )
+            },
+            callback = callback
+        )
     )
 
     /**
@@ -32,16 +47,39 @@ internal class GooglePaySheet(
         fragment: Fragment,
         callback: GooglePaySheetResultCallback
     ) : this(
-        DefaultGooglePaySheetLauncher(fragment, callback)
+        { fragment.viewLifecycleOwner.lifecycleScope },
+        DefaultGooglePaySheetLauncher(
+            fragment,
+            googlePayRepositoryFactory = {
+                DefaultGooglePayRepository(
+                    fragment.requireActivity().application,
+                    it
+                )
+            },
+            callback = callback
+        )
     )
 
     fun configure(
-        configuration: GooglePaySheetConfig? = null,
+        configuration: GooglePaySheetConfig,
         callback: ConfigCallback
     ) {
+        lifecycleScope().launch {
+            runCatching {
+                googlePaySheetLauncher.configure(configuration)
+            }.fold(
+                onSuccess = {
+                    callback.onConfigured(it, null)
+                },
+                onFailure = {
+                    callback.onConfigured(false, it)
+                }
+            )
+        }
     }
 
     fun present() {
+        googlePaySheetLauncher.present()
     }
 
     fun interface ConfigCallback {
