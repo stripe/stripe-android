@@ -125,26 +125,23 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
             challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
             stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
             stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>?
-        ): IntentAuthenticatorRegistry {
-            INSTANCE = DaggerAuthenticationComponent.builder().authenticationModule(
-                AuthenticationModule(
-                    stripeRepository,
-                    paymentRelayStarterFactory,
-                    paymentBrowserAuthStarterFactory,
-                    analyticsRequestExecutor,
-                    analyticsRequestFactory,
-                    logger,
-                    enableLogging,
-                    workContext,
-                    uiContext,
-                    threeDs2Service,
-                    messageVersionRegistry,
-                    challengeProgressActivityStarter,
-                    stripe3ds2Config,
-                    stripe3ds2ChallengeLauncher
-                )
-            ).build().registry
-            return INSTANCE as DefaultIntentAuthenticatorRegistry
-        }
+        ) = DaggerAuthenticationComponent.builder().authenticationModule(
+            AuthenticationModule(
+                stripeRepository,
+                paymentRelayStarterFactory,
+                paymentBrowserAuthStarterFactory,
+                analyticsRequestExecutor,
+                analyticsRequestFactory,
+                logger,
+                enableLogging,
+                workContext,
+                uiContext,
+                threeDs2Service,
+                messageVersionRegistry,
+                challengeProgressActivityStarter,
+                stripe3ds2Config,
+                stripe3ds2ChallengeLauncher
+            )
+        ).build().registry
     }
 }
