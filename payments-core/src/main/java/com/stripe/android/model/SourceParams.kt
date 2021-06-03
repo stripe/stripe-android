@@ -1,10 +1,12 @@
 package com.stripe.android.model
 
+import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.IntRange
 import androidx.annotation.Size
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
+import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
@@ -12,6 +14,7 @@ import org.json.JSONObject
 /**
  * Represents a grouping of parameters needed to create a [Source] object on the server.
  */
+@Parcelize
 data class SourceParams internal constructor(
     /**
      * The type of the source to create.
@@ -52,14 +55,14 @@ data class SourceParams internal constructor(
 
     private var weChatParams: WeChatParams? = null,
     private var _metadata: Map<String, String>? = null,
-    private var _apiParameterMap: Map<String, Any?>? = null,
-    private var extraParams: Map<String, Any> = emptyMap(),
+    private var apiParams: ApiParams = ApiParams(),
+    private var extraParams: ExtraParams = ExtraParams(),
 
     /**
      * A set of identifiers representing the component that created this instance.
      */
     internal val attribution: Set<String> = emptySet()
-) : StripeParamsModel {
+) : StripeParamsModel, Parcelable {
 
     /**
      * The type of the source to create.
@@ -81,7 +84,7 @@ data class SourceParams internal constructor(
     /**
      * A [Map] of the parameters specific to the Source type.
      */
-    val apiParameterMap: Map<String, Any?>? get() = _apiParameterMap
+    val apiParameterMap: Map<String, Any?> get() = apiParams.value
 
     /**
      * Three-letter ISO code for the currency associated with the source.
@@ -136,7 +139,7 @@ data class SourceParams internal constructor(
     fun setApiParameterMap(
         apiParameterMap: Map<String, Any?>?
     ): SourceParams = apply {
-        this._apiParameterMap = apiParameterMap
+        this.apiParams = ApiParams(apiParameterMap.orEmpty())
     }
 
     /**
@@ -165,8 +168,10 @@ data class SourceParams internal constructor(
      * @param extraParams a set of params
      */
     @Deprecated("Will be removed in an upcoming major version.")
-    fun setExtraParams(extraParams: Map<String, Any>): SourceParams = apply {
-        this.extraParams = extraParams
+    fun setExtraParams(
+        extraParams: Map<String, Any>
+    ): SourceParams = apply {
+        this.extraParams = ExtraParams(extraParams)
     }
 
     /**
@@ -217,7 +222,9 @@ data class SourceParams internal constructor(
     override fun toParamMap(): Map<String, Any> {
         return mapOf<String, Any>(PARAM_TYPE to typeRaw)
             .plus(
-                apiParameterMap?.let {
+                apiParams.value.takeIf {
+                    it.isNotEmpty()
+                }?.let {
                     mapOf(typeRaw to it)
                 }.orEmpty()
             )
@@ -269,7 +276,7 @@ data class SourceParams internal constructor(
                     mapOf(PARAM_USAGE to it.code)
                 }.orEmpty()
             )
-            .plus(extraParams)
+            .plus(extraParams.value.orEmpty())
             .plus(
                 weChatParams?.let {
                     mapOf(PARAM_WECHAT to it.toParamMap())
@@ -557,7 +564,7 @@ data class SourceParams internal constructor(
                     email = klarnaParams.billingEmail,
                     phone = klarnaParams.billingPhone
                 ),
-                _apiParameterMap = klarnaParams.toParamMap()
+                apiParams = ApiParams(klarnaParams.toParamMap())
             )
         }
 
@@ -1026,6 +1033,29 @@ data class SourceParams internal constructor(
             @Size(min = 1) clientSecret: String
         ): Map<String, String> {
             return mapOf(PARAM_CLIENT_SECRET to clientSecret)
+        }
+    }
+
+    @Parcelize
+    internal data class ApiParams(
+        val value: Map<String, Any?> = emptyMap()
+    ) : Parcelable {
+        internal companion object : Parceler<ApiParams> {
+            override fun ApiParams.write(parcel: Parcel, flags: Int) {
+                parcel.writeString(
+                    StripeJsonUtils.mapToJsonObject(value)?.toString()
+                )
+            }
+
+            override fun create(parcel: Parcel): ApiParams {
+                return ApiParams(
+                    StripeJsonUtils.jsonObjectToMap(
+                        parcel.readString()?.let {
+                            JSONObject(it)
+                        }
+                    ).orEmpty()
+                )
+            }
         }
     }
 

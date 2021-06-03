@@ -15,6 +15,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * Model representing parameters for [confirming a PaymentIntent](https://stripe.com/docs/api/payment_intents/confirm).
  */
+@Parcelize
 data class ConfirmPaymentIntentParams internal constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
 
@@ -28,8 +29,7 @@ data class ConfirmPaymentIntentParams internal constructor(
     val sourceParams: SourceParams? = null,
     val sourceId: String? = null,
 
-    @Deprecated("Will be removed in an upcoming major version.")
-    val extraParams: Map<String, Any>? = null,
+    private val _extraParams: ExtraParams = ExtraParams(),
 
     /**
      * The client secret of this PaymentIntent. Used for client-side retrieval using a
@@ -120,6 +120,9 @@ data class ConfirmPaymentIntentParams internal constructor(
      */
     var receiptEmail: String? = null
 ) : ConfirmStripeIntentParams {
+    @Deprecated("Will be removed in an upcoming major version.")
+    val extraParams: Map<String, Any>
+        get() = _extraParams.value.orEmpty()
 
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
@@ -171,7 +174,7 @@ data class ConfirmPaymentIntentParams internal constructor(
                 mapOf(PARAM_RECEIPT_EMAIL to it)
             }.orEmpty()
         ).plus(
-            extraParams.orEmpty()
+            extraParams
         )
     }
 
@@ -377,7 +380,7 @@ data class ConfirmPaymentIntentParams internal constructor(
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 returnUrl = returnUrl,
-                extraParams = extraParams,
+                _extraParams = ExtraParams(extraParams),
                 shipping = shipping
             )
         }
@@ -520,7 +523,7 @@ data class ConfirmPaymentIntentParams internal constructor(
                 paymentMethodId = paymentMethodId,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
-                extraParams = extraParams,
+                _extraParams = ExtraParams(extraParams),
                 paymentMethodOptions = paymentMethodOptions,
                 mandateId = mandateId,
                 mandateData = mandateData,
@@ -659,7 +662,7 @@ data class ConfirmPaymentIntentParams internal constructor(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
-                extraParams = extraParams,
+                _extraParams = ExtraParams(extraParams),
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setupFutureUsage = setupFutureUsage,
@@ -737,7 +740,7 @@ data class ConfirmPaymentIntentParams internal constructor(
                 sourceId = sourceId,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
-                extraParams = extraParams,
+                _extraParams = ExtraParams(extraParams),
                 shipping = shipping
             )
         }
@@ -808,7 +811,7 @@ data class ConfirmPaymentIntentParams internal constructor(
                 sourceParams = sourceParams,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
-                extraParams = extraParams,
+                _extraParams = ExtraParams(extraParams.orEmpty()),
                 shipping = shipping
             )
         }
