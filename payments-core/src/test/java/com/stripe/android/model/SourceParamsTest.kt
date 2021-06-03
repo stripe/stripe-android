@@ -149,11 +149,11 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "statement_descriptor" to "descriptor",
-                "preferred_language" to "en"
+            SourceParams.TypeData.Bancontact(
+                "descriptor",
+                "en"
             )
         )
     }
@@ -196,10 +196,10 @@ class SourceParamsTest {
         )
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "preferred_language" to "en"
+            SourceParams.TypeData.Bancontact(
+                preferredLanguage = "en"
             )
         )
     }
@@ -215,10 +215,10 @@ class SourceParamsTest {
         )
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "statement_descriptor" to "descriptor"
+            SourceParams.TypeData.Bancontact(
+                "descriptor"
             )
         )
     }
@@ -363,11 +363,9 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "statement_descriptor" to "stripe descriptor"
-            )
+            SourceParams.TypeData.Eps("stripe descriptor")
         )
     }
 
@@ -444,9 +442,9 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf("statement_descriptor" to "stripe descriptor")
+            SourceParams.TypeData.Giropay("stripe descriptor")
         )
     }
 
@@ -531,11 +529,11 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "bank" to "SVB",
-                "statement_descriptor" to "something you bought"
+            SourceParams.TypeData.Ideal(
+                "something you bought",
+                "SVB"
             )
         )
     }
@@ -705,9 +703,9 @@ class SourceParamsTest {
         )
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf("iban" to "ibaniban")
+            SourceParams.TypeData.SepaDebit("ibaniban")
         )
     }
 
@@ -766,11 +764,11 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "country" to "UK",
-                "statement_descriptor" to "a thing you bought"
+            SourceParams.TypeData.Sofort(
+                "UK",
+                "a thing you bought"
             )
         )
     }
@@ -820,11 +818,9 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "card" to "card_id_123"
-            )
+            SourceParams.TypeData.ThreeDSecure("card_id_123")
         )
     }
 
@@ -846,6 +842,24 @@ class SourceParamsTest {
                 "amount" to AMOUNT,
                 "redirect" to mapOf("return_url" to RETURN_URL),
                 Source.SourceType.THREE_D_SECURE to mapOf("card" to "card_id_123")
+            )
+        )
+    }
+
+    @Test
+    fun createVisaCheckoutParams_toParamMap_createsExpectedMap() {
+        val params = SourceParams.createVisaCheckoutParams("callid123")
+
+        assertThat(
+            params.toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "type" to Source.SourceType.CARD,
+                "card" to mapOf(
+                    "visa_checkout" to mapOf(
+                        "callid" to "callid123"
+                    )
+                )
             )
         )
     }

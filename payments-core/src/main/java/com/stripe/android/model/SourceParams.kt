@@ -18,6 +18,8 @@ data class SourceParams internal constructor(
      */
     @SourceType val typeRaw: String,
 
+    internal var typeData: TypeData? = null,
+
     private var _amount: Long? = null,
     private var _currency: String? = null,
     private var _owner: OwnerParams? = null,
@@ -220,6 +222,9 @@ data class SourceParams internal constructor(
                 }.orEmpty()
             )
             .plus(
+                typeData?.createParams().orEmpty()
+            )
+            .plus(
                 amount?.let {
                     mapOf(PARAM_AMOUNT to it)
                 }.orEmpty()
@@ -353,34 +358,18 @@ data class SourceParams internal constructor(
 
     companion object {
         private const val PARAM_AMOUNT = "amount"
+        private const val PARAM_CLIENT_SECRET = "client_secret"
         private const val PARAM_CURRENCY = "currency"
+        private const val PARAM_FLOW = "flow"
         private const val PARAM_METADATA = "metadata"
         private const val PARAM_OWNER = "owner"
         private const val PARAM_REDIRECT = "redirect"
-        private const val PARAM_TYPE = "type"
+        private const val PARAM_RETURN_URL = "return_url"
+        private const val PARAM_SOURCE_ORDER = "source_order"
         private const val PARAM_TOKEN = "token"
+        private const val PARAM_TYPE = "type"
         private const val PARAM_USAGE = "usage"
         private const val PARAM_WECHAT = "wechat"
-        private const val PARAM_CLIENT_SECRET = "client_secret"
-        private const val PARAM_FLOW = "flow"
-        private const val PARAM_SOURCE_ORDER = "source_order"
-        private const val PARAM_BANK = "bank"
-        private const val PARAM_CARD = "card"
-        private const val PARAM_COUNTRY = "country"
-        private const val PARAM_CVC = "cvc"
-        private const val PARAM_EXP_MONTH = "exp_month"
-        private const val PARAM_EXP_YEAR = "exp_year"
-        private const val PARAM_IBAN = "iban"
-        private const val PARAM_NUMBER = "number"
-        private const val PARAM_RETURN_URL = "return_url"
-        private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
-        private const val PARAM_PREFERRED_LANGUAGE = "preferred_language"
-
-        private const val PARAM_VISA_CHECKOUT = "visa_checkout"
-        private const val PARAM_CALL_ID = "callid"
-        private const val PARAM_MASTERPASS = "masterpass"
-        private const val PARAM_TRANSACTION_ID = "transaction_id"
-        private const val PARAM_CART_ID = "cart_id"
 
         /**
          * Create P24 Source params.
@@ -597,25 +586,16 @@ data class SourceParams internal constructor(
             statementDescriptor: String? = null,
             preferredLanguage: String? = null
         ): SourceParams {
-            val apiParams = emptyMap<String, Any>()
-                .plus(
-                    statementDescriptor?.let {
-                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
-                    }.orEmpty()
-                )
-                .plus(
-                    preferredLanguage?.let {
-                        mapOf(PARAM_PREFERRED_LANGUAGE to it)
-                    }.orEmpty()
-                ).takeIf { it.isNotEmpty() }
-
             return SourceParams(
                 SourceType.BANCONTACT,
+                typeData = TypeData.Bancontact(
+                    statementDescriptor,
+                    preferredLanguage
+                ),
                 _currency = Source.EURO,
                 _amount = amount,
                 _owner = OwnerParams(name = name),
-                _returnUrl = returnUrl,
-                _apiParameterMap = apiParams
+                _returnUrl = returnUrl
             )
         }
 
@@ -658,6 +638,12 @@ data class SourceParams internal constructor(
         fun createCardParams(card: Card): SourceParams {
             return SourceParams(
                 SourceType.CARD,
+                typeData = TypeData.Card(
+                    card.number,
+                    card.expMonth,
+                    card.expYear,
+                    card.cvc
+                ),
                 attribution = card.loggingTokens,
                 _owner = OwnerParams(
                     address = Address.Builder()
@@ -670,13 +656,7 @@ data class SourceParams internal constructor(
                         .build(),
                     name = card.name
                 ),
-                _metadata = card.metadata,
-                _apiParameterMap = mapOf(
-                    PARAM_NUMBER to card.number,
-                    PARAM_EXP_MONTH to card.expMonth,
-                    PARAM_EXP_YEAR to card.expYear,
-                    PARAM_CVC to card.cvc
-                )
+                _metadata = card.metadata
             )
         }
 
@@ -692,18 +672,18 @@ data class SourceParams internal constructor(
         fun createCardParams(cardParams: CardParams): SourceParams {
             return SourceParams(
                 SourceType.CARD,
+                typeData = TypeData.Card(
+                    cardParams.number,
+                    cardParams.expMonth,
+                    cardParams.expYear,
+                    cardParams.cvc
+                ),
                 attribution = cardParams.attribution,
                 _owner = OwnerParams(
                     address = cardParams.address,
                     name = cardParams.name
                 ),
-                _metadata = cardParams.metadata,
-                _apiParameterMap = mapOf(
-                    PARAM_NUMBER to cardParams.number,
-                    PARAM_EXP_MONTH to cardParams.expMonth,
-                    PARAM_EXP_YEAR to cardParams.expYear,
-                    PARAM_CVC to cardParams.cvc
-                )
+                _metadata = cardParams.metadata
             )
         }
 
@@ -756,13 +736,11 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.EPS,
+                typeData = TypeData.Eps(statementDescriptor),
                 _currency = Source.EURO,
                 _amount = amount,
                 _owner = OwnerParams(name = name),
-                _returnUrl = returnUrl,
-                _apiParameterMap = statementDescriptor?.let {
-                    mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
-                }
+                _returnUrl = returnUrl
             )
         }
 
@@ -788,13 +766,11 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.GIROPAY,
+                typeData = TypeData.Giropay(statementDescriptor),
                 _currency = Source.EURO,
                 _amount = amount,
                 _owner = OwnerParams(name = name),
-                _returnUrl = returnUrl,
-                _apiParameterMap = statementDescriptor?.let {
-                    mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
-                }
+                _returnUrl = returnUrl
             )
         }
 
@@ -820,27 +796,16 @@ data class SourceParams internal constructor(
             statementDescriptor: String? = null,
             bank: String? = null
         ): SourceParams {
-            val apiParams = emptyMap<String, Any>()
-                .plus(
-                    statementDescriptor?.let {
-                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
-                    }.orEmpty()
-                )
-                .plus(
-                    bank?.let {
-                        mapOf(PARAM_BANK to it)
-                    }.orEmpty()
-                ).takeIf {
-                    it.isNotEmpty()
-                }
-
             return SourceParams(
                 SourceType.IDEAL,
+                typeData = TypeData.Ideal(
+                    statementDescriptor,
+                    bank
+                ),
                 _currency = Source.EURO,
                 _amount = amount,
                 _returnUrl = returnUrl,
-                _owner = OwnerParams(name = name),
-                _apiParameterMap = apiParams
+                _owner = OwnerParams(name = name)
             )
         }
 
@@ -931,6 +896,7 @@ data class SourceParams internal constructor(
             return SourceParams(
                 SourceType.SEPA_DEBIT,
                 _currency = Source.EURO,
+                typeData = TypeData.SepaDebit(iban),
                 _owner = OwnerParams(
                     address = Address.Builder()
                         .setLine1(addressLine1)
@@ -940,9 +906,6 @@ data class SourceParams internal constructor(
                         .build(),
                     email = email,
                     name = name
-                ),
-                _apiParameterMap = mapOf(
-                    PARAM_IBAN to iban
                 )
             )
         }
@@ -967,18 +930,12 @@ data class SourceParams internal constructor(
             @Size(2) country: String,
             statementDescriptor: String? = null
         ): SourceParams {
-            val sofortData = mapOf(PARAM_COUNTRY to country)
-                .plus(
-                    statementDescriptor?.let {
-                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
-                    }.orEmpty()
-                )
             return SourceParams(
                 SourceType.SOFORT,
+                typeData = TypeData.Sofort(country, statementDescriptor),
                 _currency = Source.EURO,
                 _amount = amount,
-                _returnUrl = returnUrl,
-                _apiParameterMap = sofortData
+                _returnUrl = returnUrl
             )
         }
 
@@ -1003,10 +960,10 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.THREE_D_SECURE,
+                typeData = TypeData.ThreeDSecure(cardId),
                 _currency = currency,
                 _amount = amount,
-                _returnUrl = returnUrl,
-                _apiParameterMap = mapOf(PARAM_CARD to cardId)
+                _returnUrl = returnUrl
             )
         }
 
@@ -1024,11 +981,7 @@ data class SourceParams internal constructor(
         fun createVisaCheckoutParams(callId: String): SourceParams {
             return SourceParams(
                 SourceType.CARD,
-                _apiParameterMap = mapOf(
-                    PARAM_VISA_CHECKOUT to mapOf(
-                        PARAM_CALL_ID to callId
-                    )
-                )
+                typeData = TypeData.VisaCheckout(callId)
             )
         }
 
@@ -1054,11 +1007,8 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.CARD,
-                _apiParameterMap = mapOf(
-                    PARAM_MASTERPASS to mapOf(
-                        PARAM_TRANSACTION_ID to transactionId,
-                        PARAM_CART_ID to cartId
-                    )
+                typeData = TypeData.Masterpass(
+                    transactionId, cartId
                 )
             )
         }
@@ -1076,6 +1026,225 @@ data class SourceParams internal constructor(
             @Size(min = 1) clientSecret: String
         ): Map<String, String> {
             return mapOf(PARAM_CLIENT_SECRET to clientSecret)
+        }
+    }
+
+
+    internal sealed class TypeData : Parcelable {
+        abstract val type: String
+
+        abstract val params: List<Pair<String, Any?>>
+
+        fun createParams(): Map<String, Map<String, Any>> {
+            return params.fold(
+                emptyMap<String, Any>()
+            ) { acc, (key, value) ->
+                acc.plus(
+                    value?.let { mapOf(key to it) }.orEmpty()
+                )
+            }.takeIf { it.isNotEmpty() }?.let {
+                mapOf(
+                    type to it
+                )
+            }.orEmpty()
+        }
+
+        @Parcelize
+        data class Card(
+            /**
+             * The [number] of this card
+             */
+            val number: String? = null,
+
+            /**
+             * Two-digit number representing the card’s expiration month.
+             *
+             * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-exp_month).
+             */
+            @get:IntRange(from = 1, to = 12)
+            val expMonth: Int?,
+
+            /**
+             * Four-digit number representing the card’s expiration year.
+             *
+             * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-exp_year).
+             */
+            val expYear: Int?,
+
+            /**
+             * The [cvc] for this card
+             */
+            val cvc: String? = null,
+        ) : TypeData() {
+            override val type: String get() = SourceType.CARD
+
+            override val params: List<Pair<String, Any?>>
+                get() = listOf(
+                    PARAM_NUMBER to number,
+                    PARAM_EXP_MONTH to expMonth,
+                    PARAM_EXP_YEAR to expYear,
+                    PARAM_CVC to cvc
+                )
+
+            private companion object {
+                private const val PARAM_NUMBER = "number"
+                private const val PARAM_EXP_MONTH = "exp_month"
+                private const val PARAM_EXP_YEAR = "exp_year"
+                private const val PARAM_CVC = "cvc"
+            }
+        }
+
+        @Parcelize
+        data class Eps(
+            var statementDescriptor: String? = null
+        ) : TypeData() {
+            override val type: String get() = SourceType.EPS
+
+            override val params: List<Pair<String, String?>>
+                get() = listOf(PARAM_STATEMENT_DESCRIPTOR to statementDescriptor)
+
+            private companion object {
+                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
+            }
+        }
+
+        @Parcelize
+        data class Giropay(
+            var statementDescriptor: String? = null
+        ) : TypeData() {
+            override val type: String get() = SourceType.GIROPAY
+
+            override val params: List<Pair<String, String?>>
+                get() = listOf(
+                    PARAM_STATEMENT_DESCRIPTOR to statementDescriptor
+                )
+
+            private companion object {
+                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
+            }
+        }
+
+        @Parcelize
+        data class Ideal(
+            var statementDescriptor: String? = null,
+            var bank: String? = null
+        ) : TypeData() {
+            override val type: String get() = SourceType.IDEAL
+
+            override val params: List<Pair<String, String?>>
+                get() = listOf(
+                    PARAM_STATEMENT_DESCRIPTOR to statementDescriptor,
+                    PARAM_BANK to bank
+                )
+
+            private companion object {
+                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
+                private const val PARAM_BANK = "bank"
+            }
+        }
+
+        @Parcelize
+        data class Masterpass(
+            var transactionId: String,
+            var cartId: String
+        ) : TypeData() {
+            override val type: String get() = SourceType.CARD
+
+            override val params: List<Pair<String, String?>>
+                get() = listOf(
+                    PARAM_TRANSACTION_ID to transactionId,
+                    PARAM_CART_ID to cartId
+                )
+
+            private companion object {
+                private const val PARAM_TRANSACTION_ID = "transaction_id"
+                private const val PARAM_CART_ID = "cart_id"
+            }
+        }
+
+        @Parcelize
+        data class Sofort(
+            @Size(2) var country: String,
+            var statementDescriptor: String? = null
+        ) : TypeData() {
+            override val type: String get() = SourceType.SOFORT
+
+            override val params: List<Pair<String, String?>>
+                get() = listOf(
+                    PARAM_COUNTRY to country,
+                    PARAM_STATEMENT_DESCRIPTOR to statementDescriptor
+                )
+
+            private companion object {
+                private const val PARAM_COUNTRY = "country"
+                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
+            }
+        }
+
+        @Parcelize
+        data class SepaDebit(
+            var iban: String
+        ) : TypeData() {
+            override val type: String get() = SourceType.SEPA_DEBIT
+
+            override val params: List<Pair<String, String?>>
+                get() = listOf(PARAM_IBAN to iban)
+
+            private companion object {
+                private const val PARAM_IBAN = "iban"
+            }
+        }
+
+        @Parcelize
+        data class ThreeDSecure(
+            var cardId: String
+        ) : TypeData() {
+            override val type: String get() = SourceType.THREE_D_SECURE
+
+            override val params: List<Pair<String, String?>>
+                get() = listOf(PARAM_CARD to cardId)
+
+            private companion object {
+                private const val PARAM_CARD = "card"
+            }
+        }
+
+        @Parcelize
+        data class VisaCheckout(
+            var callId: String
+        ) : TypeData() {
+            override val type: String get() = SourceType.CARD
+
+            override val params: List<Pair<String, Any?>>
+                get() = listOf(
+                    PARAM_VISA_CHECKOUT to mapOf(
+                        PARAM_CALL_ID to callId
+                    )
+                )
+
+            private companion object {
+                private const val PARAM_VISA_CHECKOUT = "visa_checkout"
+                private const val PARAM_CALL_ID = "callid"
+            }
+        }
+
+        @Parcelize
+        data class Bancontact(
+            var statementDescriptor: String? = null,
+            var preferredLanguage: String? = null
+        ) : TypeData() {
+            override val type: String get() = SourceType.BANCONTACT
+
+            override val params: List<Pair<String, String?>>
+                get() = listOf(
+                    PARAM_STATEMENT_DESCRIPTOR to statementDescriptor,
+                    PARAM_PREFERRED_LANGUAGE to preferredLanguage
+                )
+
+            private companion object {
+                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
+                private const val PARAM_PREFERRED_LANGUAGE = "preferred_language"
+            }
         }
     }
 }
