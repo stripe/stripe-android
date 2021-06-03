@@ -12,9 +12,9 @@ import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.googlepaysheet.GooglePaySheetConfig
+import com.stripe.android.googlepaysheet.GooglePaySheetEnvironment
 import com.stripe.android.googlepaysheet.GooglePaySheetResult
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
-import com.stripe.android.googlepaysheet.StripeGooglePayEnvironment
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
@@ -252,9 +252,9 @@ internal class DefaultFlowController internal constructor(
                     config = GooglePaySheetConfig(
                         environment = when (config?.googlePay?.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                                StripeGooglePayEnvironment.Production
+                                GooglePaySheetEnvironment.Production
                             else ->
-                                StripeGooglePayEnvironment.Test
+                                GooglePaySheetEnvironment.Test
                         },
                         amount = initData.stripeIntent.amount?.toInt(),
                         countryCode = config?.googlePay?.countryCode.orEmpty(),

@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class GooglePaySheetConfig(
-    var environment: StripeGooglePayEnvironment,
+    var environment: GooglePaySheetEnvironment,
 
     /**
      * Total monetary value of the transaction.
