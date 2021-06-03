@@ -115,7 +115,7 @@ internal class StripePaymentController internal constructor(
     }
 
     private val authenticatorRegistry: IntentAuthenticatorRegistry =
-        DefaultIntentAuthenticatorRegistry.getInstance(
+        DefaultIntentAuthenticatorRegistry.createInstance(
             stripeRepository,
             paymentRelayStarterFactory,
             paymentBrowserAuthStarterFactory,
@@ -537,7 +537,7 @@ internal class StripePaymentController internal constructor(
         returnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
-        authenticatorRegistry.lookUp(stripeIntent).authenticate(
+        authenticatorRegistry.getAuthenticator(stripeIntent).authenticate(
             host,
             stripeIntent,
             returnUrl,

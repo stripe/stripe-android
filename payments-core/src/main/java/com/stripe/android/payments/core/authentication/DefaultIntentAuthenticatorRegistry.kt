@@ -21,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Default registry to provide look ups for [IntentAuthenticator].
- * Should be only accessed through [DefaultIntentAuthenticatorRegistry.getInstance].
+ * Should be only accessed through [DefaultIntentAuthenticatorRegistry.createInstance].
  */
 internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor() :
     IntentAuthenticatorRegistry {
@@ -39,7 +39,7 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
     @Inject
     lateinit var stripe3DS2Authenticator: Stripe3DS2Authenticator
 
-    override fun lookUp(stripeIntent: StripeIntent): IntentAuthenticator {
+    override fun getAuthenticator(stripeIntent: StripeIntent): IntentAuthenticator {
         if (!stripeIntent.requiresAction()) {
             return noOpIntentAuthenticator
         }
@@ -68,49 +68,10 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
     }
 
     companion object {
-        // Holding this single instance would in turn holds DaggerAuthenticationComponent instance,
-        // which keeps dagger injection graph live.
-        @Volatile
-        private var INSTANCE: IntentAuthenticatorRegistry? = null
-
         /**
-         * Return the singleton instance of [IntentAuthenticatorRegistry].
+         * Create an instance of [IntentAuthenticatorRegistry] with dagger.
          */
-        fun getInstance(
-            stripeRepository: StripeRepository,
-            paymentRelayStarterFactory: (AuthActivityStarter.Host) -> PaymentRelayStarter,
-            paymentBrowserAuthStarterFactory: (AuthActivityStarter.Host) -> PaymentBrowserAuthStarter,
-            analyticsRequestExecutor: AnalyticsRequestExecutor,
-            analyticsRequestFactory: AnalyticsRequestFactory,
-            logger: Logger,
-            enableLogging: Boolean,
-            workContext: CoroutineContext,
-            uiContext: CoroutineContext,
-            threeDs2Service: StripeThreeDs2Service,
-            messageVersionRegistry: MessageVersionRegistry,
-            challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
-            stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
-            stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>?
-        ) = INSTANCE ?: synchronized(this) {
-            INSTANCE ?: createInstance(
-                stripeRepository,
-                paymentRelayStarterFactory,
-                paymentBrowserAuthStarterFactory,
-                analyticsRequestExecutor,
-                analyticsRequestFactory,
-                logger,
-                enableLogging,
-                workContext,
-                uiContext,
-                threeDs2Service,
-                messageVersionRegistry,
-                challengeProgressActivityStarter,
-                stripe3ds2Config,
-                stripe3ds2ChallengeLauncher
-            ).also { INSTANCE = it }
-        }
-
-        private fun createInstance(
+        fun createInstance(
             stripeRepository: StripeRepository,
             paymentRelayStarterFactory: (AuthActivityStarter.Host) -> PaymentRelayStarter,
             paymentBrowserAuthStarterFactory: (AuthActivityStarter.Host) -> PaymentBrowserAuthStarter,

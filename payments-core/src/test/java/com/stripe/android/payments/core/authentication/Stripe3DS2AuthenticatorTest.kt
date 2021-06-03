@@ -49,7 +49,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -57,10 +56,7 @@ class Stripe3DS2AuthenticatorTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val activity: Activity = mock()
     private val host = AuthActivityStarter.Host.create(activity)
-
-    private val sdkTransactionId = mock<SdkTransactionId>().also {
-        whenever(it.value).thenReturn(UUID.randomUUID().toString())
-    }
+    private val sdkTransactionId = SdkTransactionId.create()
     private val stripeRepository = mock<StripeRepository>()
     private val webIntentAuthenticator = mock<WebIntentAuthenticator>()
     private val paymentRelayStarterFactory =

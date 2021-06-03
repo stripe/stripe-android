@@ -10,7 +10,7 @@ internal interface IntentAuthenticatorRegistry {
     /**
      * Returns the correct [IntentAuthenticator] to handle the [StripeIntent].
      */
-    fun lookUp(stripeIntent: StripeIntent): IntentAuthenticator
+    fun getAuthenticator(stripeIntent: StripeIntent): IntentAuthenticator
 
     // TODO(ccen): Add registration API
 }
