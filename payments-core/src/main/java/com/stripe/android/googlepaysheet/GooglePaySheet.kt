@@ -36,13 +36,12 @@ internal class GooglePaySheet(
     )
 
     fun configure(
-        configuration: GooglePaySheetConfiguration? = null,
+        configuration: GooglePaySheetConfig? = null,
         callback: ConfigCallback
     ) {
     }
 
     fun present() {
-        googlePaySheetLauncher.present()
     }
 
     fun interface ConfigCallback {
