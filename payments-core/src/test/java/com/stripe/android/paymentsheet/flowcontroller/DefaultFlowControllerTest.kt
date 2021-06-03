@@ -21,9 +21,9 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaysheet.GooglePaySheetConfig
+import com.stripe.android.googlepaysheet.GooglePaySheetEnvironment
 import com.stripe.android.googlepaysheet.GooglePaySheetResult
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
-import com.stripe.android.googlepaysheet.StripeGooglePayEnvironment
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -406,7 +406,7 @@ internal class DefaultFlowControllerTest {
             .isEqualTo(
                 StripeGooglePayContract.Args(
                     config = GooglePaySheetConfig(
-                        environment = StripeGooglePayEnvironment.Test,
+                        environment = GooglePaySheetEnvironment.Test,
                         amount = 1099,
                         countryCode = "US",
                         currencyCode = "usd",

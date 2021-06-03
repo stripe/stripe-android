@@ -209,7 +209,7 @@ class StripeGooglePayViewModelTest {
 
     private companion object {
         private val CONFIG = GooglePaySheetConfig(
-            environment = StripeGooglePayEnvironment.Test,
+            environment = GooglePaySheetEnvironment.Test,
             amount = 2000,
             countryCode = "US",
             currencyCode = "usd",
