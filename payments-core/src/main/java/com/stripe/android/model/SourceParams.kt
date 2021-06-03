@@ -639,22 +639,9 @@ data class SourceParams internal constructor(
          */
         @JvmStatic
         fun createSourceFromTokenParams(tokenId: String): SourceParams {
-            return createSourceFromTokenParams(
-                tokenId = tokenId
-            )
-        }
-
-        @JvmSynthetic
-        internal fun createSourceFromTokenParams(
-            tokenId: String,
-            attribution: Set<String> = emptySet(),
-            owner: OwnerParams? = null
-        ): SourceParams {
             return SourceParams(
                 SourceType.CARD,
-                attribution = attribution,
-                token = tokenId,
-                _owner = owner
+                token = tokenId
             )
         }
 
@@ -732,12 +719,13 @@ data class SourceParams internal constructor(
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val token = googlePayResult.token
 
-            return createSourceFromTokenParams(
-                tokenId = token?.id.orEmpty(),
+            return SourceParams(
+                SourceType.CARD,
+                token = token?.id.orEmpty(),
                 attribution = setOfNotNull(
                     token?.card?.tokenizationMethod?.toString()
                 ),
-                owner = OwnerParams(
+                _owner = OwnerParams(
                     address = googlePayResult.address,
                     email = googlePayResult.email,
                     name = googlePayResult.name,
