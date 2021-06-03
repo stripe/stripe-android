@@ -1029,7 +1029,6 @@ data class SourceParams internal constructor(
         }
     }
 
-
     internal sealed class TypeData : Parcelable {
         abstract val type: String
 
