@@ -303,12 +303,12 @@ class SourceParamsTest {
                 GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
             )
         ).isEqualTo(
-            SourceParams
-                .createSourceFromTokenParams(
-                    "tok_1F4ACMCRMbs6FrXf6fPqLnN7",
-                    setOf("GooglePay")
-                )
-                .setOwner(SourceParams.OwnerParams())
+            SourceParams(
+                Source.SourceType.CARD,
+                token = "tok_1F4ACMCRMbs6FrXf6fPqLnN7",
+                attribution = setOf("GooglePay"),
+                _owner = SourceParams.OwnerParams()
+            )
         )
     }
 
@@ -319,11 +319,11 @@ class SourceParamsTest {
                 GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS
             )
         ).isEqualTo(
-            SourceParams.createSourceFromTokenParams(
-                "tok_1F4VSjBbvEcIpqUbSsbEtBap",
-                attribution = setOf("GooglePay")
-            ).setOwner(
-                SourceParams.OwnerParams(
+            SourceParams(
+                Source.SourceType.CARD,
+                token = "tok_1F4VSjBbvEcIpqUbSsbEtBap",
+                attribution = setOf("GooglePay"),
+                _owner = SourceParams.OwnerParams(
                     email = "stripe@example.com",
                     name = "Stripe Johnson",
                     phone = "1-888-555-1234",

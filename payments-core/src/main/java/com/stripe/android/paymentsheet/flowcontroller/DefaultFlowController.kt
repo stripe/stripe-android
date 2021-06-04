@@ -11,8 +11,10 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.googlepay.StripeGooglePayContract
-import com.stripe.android.googlepay.StripeGooglePayEnvironment
+import com.stripe.android.googlepaysheet.GooglePaySheetConfig
+import com.stripe.android.googlepaysheet.GooglePaySheetEnvironment
+import com.stripe.android.googlepaysheet.GooglePaySheetResult
+import com.stripe.android.googlepaysheet.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
@@ -247,12 +249,12 @@ internal class DefaultFlowController internal constructor(
             }
             googlePayLauncher(
                 StripeGooglePayContract.Args(
-                    config = StripeGooglePayContract.GooglePayConfig(
+                    config = GooglePaySheetConfig(
                         environment = when (config?.googlePay?.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                                StripeGooglePayEnvironment.Production
+                                GooglePaySheetEnvironment.Production
                             else ->
-                                StripeGooglePayEnvironment.Test
+                                GooglePaySheetEnvironment.Test
                         },
                         amount = initData.stripeIntent.amount?.toInt(),
                         countryCode = config?.googlePay?.countryCode.orEmpty(),
@@ -299,10 +301,10 @@ internal class DefaultFlowController internal constructor(
 
     @VisibleForTesting
     internal fun onGooglePayResult(
-        googlePayResult: StripeGooglePayContract.Result
+        googlePayResult: GooglePaySheetResult
     ) {
         when (googlePayResult) {
-            is StripeGooglePayContract.Result.PaymentData -> {
+            is GooglePaySheetResult.PaymentData -> {
                 runCatching {
                     viewModel.initData
                 }.fold(
@@ -324,7 +326,7 @@ internal class DefaultFlowController internal constructor(
                     }
                 )
             }
-            is StripeGooglePayContract.Result.Error -> {
+            is GooglePaySheetResult.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
@@ -335,7 +337,7 @@ internal class DefaultFlowController internal constructor(
                     )
                 )
             }
-            is StripeGooglePayContract.Result.Canceled -> {
+            is GooglePaySheetResult.Canceled -> {
                 // don't log cancellations as failures
                 paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
             }

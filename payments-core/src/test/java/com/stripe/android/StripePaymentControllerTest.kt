@@ -9,12 +9,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.argWhere
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
@@ -27,11 +24,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
-import com.stripe.android.model.Stripe3ds2AuthResultFixtures
-import com.stripe.android.model.Stripe3ds2Fingerprint
-import com.stripe.android.model.Stripe3ds2FingerprintTest
 import com.stripe.android.model.Stripe3ds2Fixtures
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.AnalyticsEvent
@@ -39,13 +32,10 @@ import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
-import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
-import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.utils.ParcelUtils
 import com.stripe.android.view.AuthActivityStarter
@@ -67,7 +57,6 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class StripePaymentControllerTest {
-
     private val activity: Activity = mock()
     private val threeDs2Service: StripeThreeDs2Service = mock()
     private val sdkTransactionId = mock<SdkTransactionId>().also {
@@ -77,7 +66,6 @@ internal class StripePaymentControllerTest {
         whenever(it.sdkTransactionId)
             .thenReturn(sdkTransactionId)
     }
-    private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter =
         mock()
@@ -91,18 +79,11 @@ internal class StripePaymentControllerTest {
     )
     private val host = AuthActivityStarter.Host.create(activity)
 
-    private val relayStarterArgsArgumentCaptor: KArgumentCaptor<PaymentRelayStarter.Args> =
-        argumentCaptor()
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
 
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val defaultReturnUrl = DefaultReturnUrl.create(context)
-    private val paymentBrowserAuthContract = PaymentBrowserAuthContract(
-        defaultReturnUrl,
-        hasCompatibleBrowser = { true }
-    )
     private val controller = createController()
 
     @BeforeTest
@@ -120,210 +101,6 @@ internal class StripePaymentControllerTest {
     fun cleanup() {
         Dispatchers.resetMain()
         testDispatcher.cleanupTestCoroutines()
-    }
-
-    @Test
-    internal fun handleNextAction_withMastercardAnd3ds2_shouldStart3ds2ChallengeFlow() =
-        testDispatcher.runBlockingTest {
-            val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
-            val dsPublicKey =
-                Stripe3ds2Fingerprint(paymentIntent.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2)
-                    .directoryServerEncryption
-                    .directoryServerPublicKey
-            whenever(
-                threeDs2Service.createTransaction(
-                    eq(MASTERCARD_DS_ID),
-                    eq(MESSAGE_VERSION),
-                    eq(paymentIntent.isLiveMode),
-                    eq("mastercard"),
-                    any(),
-                    eq(dsPublicKey),
-                    eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee")
-                )
-            )
-                .thenReturn(transaction)
-            controller.handleNextAction(
-                host,
-                paymentIntent,
-                null,
-                REQUEST_OPTIONS
-            )
-            testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)
-
-            verify(threeDs2Service).createTransaction(
-                eq(MASTERCARD_DS_ID),
-                eq(MESSAGE_VERSION),
-                eq(paymentIntent.isLiveMode),
-                eq("mastercard"),
-                any(),
-                eq(dsPublicKey),
-                eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee")
-            )
-            verify(transaction)
-                .doChallenge(any<Stripe3ds2ActivityStarterHost>(), any(), any(), any())
-
-            verify(challengeProgressActivityStarter).start(
-                eq(activity),
-                eq("mastercard"),
-                eq(false),
-                any(),
-                eq(sdkTransactionId)
-            )
-
-            verify(analyticsRequestExecutor)
-                .executeAsync(analyticsRequestArgumentCaptor.capture())
-            val analyticsParams = requireNotNull(analyticsRequestArgumentCaptor.firstValue.params)
-            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
-                .isEqualTo(AnalyticsEvent.Auth3ds2Fingerprint.toString())
-        }
-
-    @Test
-    fun handleNextAction_withAmexAnd3ds2_shouldStart3ds2ChallengeFlow() =
-        testDispatcher.runBlockingTest {
-            whenever(
-                threeDs2Service.createTransaction(
-                    eq(AMEX_DS_ID),
-                    eq(MESSAGE_VERSION),
-                    eq(PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.isLiveMode),
-                    eq("american_express"),
-                    any(),
-                    eq(Stripe3ds2FingerprintTest.DS_RSA_PUBLIC_KEY),
-                    eq(PaymentIntentFixtures.KEY_ID)
-                )
-            )
-                .thenReturn(transaction)
-            controller.handleNextAction(
-                host,
-                PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
-                null,
-                REQUEST_OPTIONS
-            )
-            testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)
-
-            verify(threeDs2Service).createTransaction(
-                eq(AMEX_DS_ID),
-                eq(MESSAGE_VERSION),
-                eq(PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.isLiveMode),
-                eq("american_express"),
-                any(),
-                eq(Stripe3ds2FingerprintTest.DS_RSA_PUBLIC_KEY),
-                eq(PaymentIntentFixtures.KEY_ID)
-            )
-            verify(transaction)
-                .doChallenge(any<Stripe3ds2ActivityStarterHost>(), any(), any(), any())
-
-            verify(challengeProgressActivityStarter).start(
-                eq(activity),
-                eq("american_express"),
-                eq(false),
-                any(),
-                eq(sdkTransactionId)
-            )
-        }
-
-    @Test
-    fun handleNextAction_whenSdk3ds1() = testDispatcher.runBlockingTest {
-        controller.handleNextAction(
-            host,
-            PaymentIntentFixtures.PI_REQUIRES_3DS1,
-            null,
-            REQUEST_OPTIONS
-        )
-        verify(activity).startActivityForResult(
-            intentArgumentCaptor.capture(),
-            eq(StripePaymentController.PAYMENT_REQUEST_CODE)
-        )
-        val args = requireNotNull(
-            PaymentBrowserAuthContract.parseArgs(intentArgumentCaptor.firstValue)
-        )
-        assertThat(args.url)
-            .isEqualTo("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW")
-        assertThat(args.returnUrl).isNull()
-
-        verifyAnalytics(AnalyticsEvent.Auth3ds1Sdk)
-    }
-
-    @Test
-    fun handleNextAction_whenSdk3ds1_withReturnUrl() = testDispatcher.runBlockingTest {
-        controller.handleNextAction(
-            host,
-            PaymentIntentFixtures.PI_REQUIRES_3DS1,
-            defaultReturnUrl.value,
-            REQUEST_OPTIONS
-        )
-        verify(activity).startActivityForResult(
-            intentArgumentCaptor.capture(),
-            eq(StripePaymentController.PAYMENT_REQUEST_CODE)
-        )
-        val args = requireNotNull(
-            PaymentBrowserAuthContract.parseArgs(intentArgumentCaptor.firstValue)
-        )
-        assertThat(args.url)
-            .isEqualTo("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW")
-        assertThat(args.returnUrl)
-            .isEqualTo(defaultReturnUrl.value)
-
-        verifyAnalytics(AnalyticsEvent.Auth3ds1Sdk)
-    }
-
-    @Test
-    fun handleNextAction_whenBrowser3ds1() = testDispatcher.runBlockingTest {
-        controller.handleNextAction(
-            host,
-            PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
-            null,
-            REQUEST_OPTIONS
-        )
-        verify(activity).startActivityForResult(
-            intentArgumentCaptor.capture(),
-            eq(StripePaymentController.PAYMENT_REQUEST_CODE)
-        )
-        val args = requireNotNull(
-            PaymentBrowserAuthContract.parseArgs(intentArgumentCaptor.firstValue)
-        )
-        assertThat(args.url)
-            .isEqualTo("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv")
-        assertThat(args.returnUrl).isEqualTo("stripe://deeplink")
-
-        verify(analyticsRequestExecutor)
-            .executeAsync(analyticsRequestArgumentCaptor.capture())
-        val analyticsParams = requireNotNull(analyticsRequestArgumentCaptor.firstValue.params)
-        assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
-            .isEqualTo(AnalyticsEvent.AuthRedirect.toString())
-    }
-
-    @Test
-    fun handleNextAction_when3dsRedirectWithSetupIntent() = testDispatcher.runBlockingTest {
-        controller.handleNextAction(
-            host,
-            SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
-            null,
-            REQUEST_OPTIONS
-        )
-        verify(activity).startActivityForResult(
-            any(),
-            eq(StripePaymentController.SETUP_REQUEST_CODE)
-        )
-    }
-
-    @Test
-    fun `handleNextAction oxxo details`() = testDispatcher.runBlockingTest {
-        controller.handleNextAction(
-            host,
-            PaymentIntentFixtures.OXXO_REQUIES_ACTION,
-            null,
-            REQUEST_OPTIONS
-        )
-        verify(activity).startActivityForResult(
-            intentArgumentCaptor.capture(),
-            eq(StripePaymentController.PAYMENT_REQUEST_CODE)
-        )
-        val args = requireNotNull(
-            PaymentBrowserAuthContract.parseArgs(intentArgumentCaptor.firstValue)
-        )
-        assertThat(args.url)
-            .isEqualTo("https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb")
-        assertThat(args.shouldCancelIntentOnUserNavigation).isFalse()
     }
 
     @Test
@@ -351,168 +128,6 @@ internal class StripePaymentControllerTest {
             )
         ).isEqualTo(StripePaymentController.PAYMENT_REQUEST_CODE)
     }
-
-    @Test
-    fun `on3ds2AuthSuccess() with challenge flow should not start relay activity`() =
-        testDispatcher.runBlockingTest {
-            controller.on3ds2AuthSuccess(
-                Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW,
-                transaction,
-                SOURCE_ID,
-                MAX_TIMEOUT,
-                paymentRelayStarter,
-                StripePaymentController.PAYMENT_REQUEST_CODE,
-                host,
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                REQUEST_OPTIONS
-            )
-            verify(paymentRelayStarter, never())
-                .start(anyOrNull())
-        }
-
-    @Test
-    fun `on3ds2AuthSuccess() with frictionless flow should start relay activity with PaymentIntent`() =
-        testDispatcher.runBlockingTest {
-            controller.on3ds2AuthSuccess(
-                Stripe3ds2AuthResultFixtures.ARES_FRICTIONLESS_FLOW,
-                transaction,
-                SOURCE_ID,
-                MAX_TIMEOUT,
-                paymentRelayStarter,
-                StripePaymentController.PAYMENT_REQUEST_CODE,
-                host,
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                REQUEST_OPTIONS
-            )
-            verify(paymentRelayStarter)
-                .start(relayStarterArgsArgumentCaptor.capture())
-            val args =
-                relayStarterArgsArgumentCaptor.firstValue as? PaymentRelayStarter.Args.PaymentIntentArgs
-            assertThat(args?.paymentIntent)
-                .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
-
-            verify(analyticsRequestExecutor)
-                .executeAsync(analyticsRequestArgumentCaptor.capture())
-            val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-            val analyticsParams = requireNotNull(analyticsRequest.params)
-            assertThat(analyticsParams[AnalyticsRequestFactory.FIELD_EVENT])
-                .isEqualTo(AnalyticsEvent.Auth3ds2Frictionless.toString())
-        }
-
-    @Test
-    fun `on3ds2AuthSuccess() with fallback redirect URL should start auth webview activity`() =
-        testDispatcher.runBlockingTest {
-            controller.on3ds2AuthSuccess(
-                Stripe3ds2AuthResultFixtures.FALLBACK_REDIRECT_URL,
-                transaction,
-                SOURCE_ID,
-                MAX_TIMEOUT,
-                paymentRelayStarter,
-                StripePaymentController.PAYMENT_REQUEST_CODE,
-                host,
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                REQUEST_OPTIONS
-            )
-            verify(activity).startActivityForResult(
-                intentArgumentCaptor.capture(),
-                eq(StripePaymentController.PAYMENT_REQUEST_CODE)
-            )
-            val args = requireNotNull(
-                PaymentBrowserAuthContract.parseArgs(intentArgumentCaptor.firstValue)
-            )
-            assertThat(args.url)
-                .isEqualTo("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW")
-            assertThat(args.returnUrl).isNull()
-
-            verify(analyticsRequestExecutor)
-                .executeAsync(analyticsRequestArgumentCaptor.capture())
-            val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-            assertThat(
-                requireNotNull(analyticsRequest.params)[AnalyticsRequestFactory.FIELD_EVENT]
-            ).isEqualTo(AnalyticsEvent.Auth3ds2Fallback.toString())
-        }
-
-    @Test
-    fun `on3ds2AuthSuccess() with AReq error should start relay activity with exception`() =
-        testDispatcher.runBlockingTest {
-            controller.on3ds2AuthSuccess(
-                Stripe3ds2AuthResultFixtures.ERROR,
-                transaction,
-                SOURCE_ID,
-                MAX_TIMEOUT,
-                paymentRelayStarter,
-                StripePaymentController.PAYMENT_REQUEST_CODE,
-                host,
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                REQUEST_OPTIONS
-            )
-
-            verify(paymentRelayStarter)
-                .start(relayStarterArgsArgumentCaptor.capture())
-
-            val args =
-                relayStarterArgsArgumentCaptor.firstValue as? PaymentRelayStarter.Args.ErrorArgs
-            assertThat(args?.exception?.message).isEqualTo(
-                "Error encountered during 3DS2 authentication request. " +
-                    "Code: 302, Detail: null, " +
-                    "Description: Data could not be decrypted by the receiving system due to " +
-                    "technical or other reason., Component: D"
-            )
-        }
-
-    @Test
-    fun `startChallengeFlow() when successful should call doChallenge()`() =
-        testDispatcher.runBlockingTest {
-            val ares = requireNotNull(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW.ares)
-            controller.startChallengeFlow(
-                ares,
-                transaction,
-                SOURCE_ID,
-                MAX_TIMEOUT,
-                paymentRelayStarter,
-                host,
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                REQUEST_OPTIONS
-            )
-
-            testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)
-
-            verify(transaction).doChallenge(
-                any<Stripe3ds2ActivityStarterHost>(),
-                eq(
-                    ChallengeParameters(
-                        acsSignedContent = null,
-                        threeDsServerTransactionId = ares.threeDSServerTransId,
-                        acsTransactionId = ares.acsTransId
-                    )
-                ),
-                any(),
-                eq(MAX_TIMEOUT)
-            )
-        }
-
-    @Test
-    fun `startChallengeFlow() when failure should start relay activity with exception()`() =
-        testDispatcher.runBlockingTest {
-            val failingHost = mock<AuthActivityStarter.Host>()
-            val ares = requireNotNull(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW.ares)
-            controller.startChallengeFlow(
-                ares,
-                transaction,
-                SOURCE_ID,
-                MAX_TIMEOUT,
-                paymentRelayStarter,
-                failingHost,
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                REQUEST_OPTIONS
-            )
-
-            verify(paymentRelayStarter).start(
-                argWhere<PaymentRelayStarter.Args.ErrorArgs> {
-                    it.exception.message == "Error while attempting to start 3DS2 challenge flow."
-                }
-            )
-        }
 
     @Test
     fun handlePaymentResult_whenSourceShouldBeCanceled_onlyCallsCancelIntentOnce() =
@@ -641,54 +256,6 @@ internal class StripePaymentControllerTest {
             assertThat(actualResponse.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
         }
 
-    @Test
-    fun `bypassAuth() with ActivityResultLauncher should use ActivityResultLauncher`() =
-        testDispatcher.runBlockingTest {
-            verify(activity).window
-
-            val launcher = FakeActivityResultLauncher(PaymentRelayContract())
-            createController(
-                paymentRelayLauncher = launcher
-            ).bypassAuth(
-                host,
-                PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-                null
-            )
-            assertThat(launcher.launchArgs)
-                .containsExactly(
-                    PaymentRelayStarter.Args.PaymentIntentArgs(
-                        PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
-                    )
-                )
-        }
-
-    @Test
-    fun `on3ds2AuthFallback() with ActivityResultLauncher should use ActivityResultLauncher`() =
-        testDispatcher.runBlockingTest {
-            verify(activity).window
-
-            val launcher = FakeActivityResultLauncher(paymentBrowserAuthContract)
-            createController(
-                paymentBrowserAuthLauncher = launcher
-            ).on3ds2AuthFallback(
-                "https://example.com",
-                host,
-                PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-                REQUEST_OPTIONS
-            )
-            assertThat(launcher.launchArgs)
-                .containsExactly(
-                    PaymentBrowserAuthContract.Args(
-                        objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
-                        requestCode = 50000,
-                        clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
-                        stripeAccountId = ACCOUNT_ID,
-                        url = "https://example.com",
-                        shouldCancelSource = true
-                    )
-                )
-        }
-
     private fun createController(
         paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
         paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? = null
@@ -786,13 +353,10 @@ internal class StripePaymentControllerTest {
 
     private companion object {
         private const val ACCOUNT_ID = "acct_123"
-        private const val MESSAGE_VERSION = Stripe3ds2Fixtures.MESSAGE_VERSION
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID
         )
-        private const val MAX_TIMEOUT = 5
-        private const val SOURCE_ID = "src_123"
 
         private val CONFIG = PaymentAuthConfig.Builder()
             .set3ds2Config(
@@ -801,8 +365,5 @@ internal class StripePaymentControllerTest {
                     .build()
             )
             .build()
-
-        private const val MASTERCARD_DS_ID = "A000000004"
-        private const val AMEX_DS_ID = "A000000025"
     }
 }

@@ -5,9 +5,9 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
-import com.google.android.gms.wallet.WalletConstants
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Logger
+import com.stripe.android.googlepaysheet.GooglePaySheetEnvironment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -17,25 +17,33 @@ import kotlinx.coroutines.flow.filterNotNull
  */
 internal class DefaultGooglePayRepository(
     private val context: Context,
-    private val environment: PaymentSheet.GooglePayConfiguration.Environment,
+    private val environment: GooglePaySheetEnvironment,
     private val logger: Logger = Logger.noop()
 ) : GooglePayRepository {
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
 
     private val paymentsClient: PaymentsClient by lazy {
         val options = Wallet.WalletOptions.Builder()
-            .setEnvironment(
-                when (environment) {
-                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                        WalletConstants.ENVIRONMENT_PRODUCTION
-                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
-                        WalletConstants.ENVIRONMENT_TEST
-                }
-            )
+            .setEnvironment(environment.value)
             .build()
 
         Wallet.getPaymentsClient(context, options)
     }
+
+    internal constructor(
+        context: Context,
+        environment: PaymentSheet.GooglePayConfiguration.Environment,
+        logger: Logger = Logger.noop()
+    ) : this(
+        context,
+        when (environment) {
+            PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                GooglePaySheetEnvironment.Production
+            PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                GooglePaySheetEnvironment.Test
+        },
+        logger
+    )
 
     /**
      * @return a [Flow] that represents the result of a [PaymentsClient.isReadyToPay] operation.

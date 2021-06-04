@@ -1,4 +1,4 @@
-package com.stripe.android.googlepay
+package com.stripe.android.googlepaysheet
 
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
@@ -208,8 +208,8 @@ class StripeGooglePayViewModelTest {
     private class FakeStripeRepository : AbsFakeStripeRepository()
 
     private companion object {
-        private val CONFIG = StripeGooglePayContract.GooglePayConfig(
-            environment = StripeGooglePayEnvironment.Test,
+        private val CONFIG = GooglePaySheetConfig(
+            environment = GooglePaySheetEnvironment.Test,
             amount = 2000,
             countryCode = "US",
             currencyCode = "usd",
