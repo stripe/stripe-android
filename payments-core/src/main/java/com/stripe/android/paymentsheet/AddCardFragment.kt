@@ -17,6 +17,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
@@ -24,7 +25,6 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
@@ -36,12 +36,18 @@ import com.stripe.android.view.Country
 import com.stripe.android.view.StripeEditText
 
 /**
- * A `Fragment` for adding new card payment method.
+ * A [Fragment] for adding new card payment method.
  */
-internal abstract class BaseAddCardFragment(
-    private val eventReporter: EventReporter
+internal class AddCardFragment<ViewModelType : BaseSheetViewModel<*>>(
+    private val viewModelClass: Class<ViewModelType>,
+    private val viewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
-    abstract val sheetViewModel: BaseSheetViewModel<*>
+    // Because the ViewModel is a subclass of BaseSheetViewModel (depending on whether we're going
+    // through the complete or custom flow), we need to parameterize the ViewModel class so it is
+    // properly reused if it was already created.
+    val sheetViewModel: ViewModelType by lazy {
+        ViewModelProvider(requireActivity(), viewModelFactory).get(viewModelClass)
+    }
 
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
@@ -49,10 +55,9 @@ internal abstract class BaseAddCardFragment(
     private lateinit var billingErrors: TextView
     private lateinit var saveCardCheckbox: CheckBox
     private lateinit var bottomSpace: Space
-    private lateinit var addCardHeader: TextView
 
     /**
-     * A [PaymentMethodCreateParams] instance of card and billing address details are valid;
+     * A [PaymentMethodCreateParams] instance if card and billing address details are valid;
      * otherwise, `null`.
      */
     private val paymentMethodParams: PaymentMethodCreateParams?
@@ -76,7 +81,7 @@ internal abstract class BaseAddCardFragment(
         savedInstanceState: Bundle?
     ): View? {
         val themedInflater = inflater.cloneInContext(
-            ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddCardTheme)
+            ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
         )
         return themedInflater.inflate(
             R.layout.fragment_paymentsheet_add_card,
@@ -105,7 +110,6 @@ internal abstract class BaseAddCardFragment(
         billingErrors = viewBinding.billingErrors
         saveCardCheckbox = viewBinding.saveCardCheckbox
         bottomSpace = viewBinding.bottomSpace
-        addCardHeader = viewBinding.addCardHeader
 
         // This must be done prior to setting up the card widget or the save card checkbox won't
         // populate correctly.
@@ -143,11 +147,9 @@ internal abstract class BaseAddCardFragment(
         }
 
         setupSaveCardCheckbox()
-
-        eventReporter.onShowNewPaymentOptionForm()
     }
 
-    protected fun updateSelection() {
+    fun updateSelection() {
         val validCard = if (addCardViewModel.isCardValid) {
             paymentMethodParams?.let { params ->
                 PaymentSelection.New.Card(
