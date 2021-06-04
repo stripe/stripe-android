@@ -69,8 +69,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         )
 
         viewBinding.reloadButton.setOnClickListener {
-            viewBinding.completeCheckoutButton.isEnabled = false
-            viewBinding.customCheckoutButton.isEnabled = false
+            disableViews()
 
             viewModel.prepareCheckout(customer, mode).observe(this) {
                 viewBinding.completeCheckoutButton.isEnabled = it
@@ -93,6 +92,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
         }
+    }
+
+    private fun disableViews() {
+        viewBinding.completeCheckoutButton.isEnabled = false
+        viewBinding.customCheckoutButton.isEnabled = false
+        viewBinding.paymentMethod.setOnClickListener(null)
+        viewBinding.paymentMethod.setText(R.string.loading)
     }
 
     private fun startCompleteCheckout() {
@@ -186,9 +192,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
         if (paymentResult !is PaymentSheetResult.Canceled) {
-            viewBinding.completeCheckoutButton.isEnabled = false
-            viewBinding.customCheckoutButton.isEnabled = false
-            viewBinding.paymentMethod.setOnClickListener(null)
+            disableViews()
         }
 
         viewModel.status.value = paymentResult.toString()
