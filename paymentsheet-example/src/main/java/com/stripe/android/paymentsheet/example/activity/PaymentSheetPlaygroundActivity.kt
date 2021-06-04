@@ -99,6 +99,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewBinding.customCheckoutButton.isEnabled = false
         viewBinding.paymentMethod.setOnClickListener(null)
         viewBinding.paymentMethod.setText(R.string.loading)
+        viewBinding.paymentMethod.setCompoundDrawables(null, null, null, null)
     }
 
     private fun startCompleteCheckout() {
@@ -180,12 +181,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             viewBinding.customCheckoutButton.isEnabled = true
         } else {
             viewBinding.paymentMethod.setText(R.string.select)
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                null,
-                null,
-                null,
-                null
-            )
+            viewBinding.paymentMethod.setCompoundDrawables(null, null, null, null)
             viewBinding.customCheckoutButton.isEnabled = false
         }
     }
