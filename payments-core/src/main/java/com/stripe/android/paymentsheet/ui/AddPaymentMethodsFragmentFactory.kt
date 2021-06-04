@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 /**
  * [FragmentFactory] for fragments used to add new payment methods.
  */
-internal class PaymentMethodsFragmentFactory<ViewModelType : BaseSheetViewModel<*>>(
+internal class AddPaymentMethodsFragmentFactory<ViewModelType : BaseSheetViewModel<*>>(
     private val viewModelClass: Class<ViewModelType>,
     private val viewModelFactory: ViewModelProvider.Factory
 ) : FragmentFactory() {

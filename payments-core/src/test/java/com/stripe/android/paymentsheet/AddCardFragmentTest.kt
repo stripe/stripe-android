@@ -24,7 +24,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.PaymentMethodsFragmentFactory
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
@@ -459,7 +459,7 @@ class AddCardFragmentTest {
         stripeIntent: StripeIntent? = mock<PaymentIntent>(),
         onReady: (AddCardFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
-        val factory = PaymentMethodsFragmentFactory(
+        val factory = AddPaymentMethodsFragmentFactory(
             PaymentSheetViewModel::class.java,
             PaymentSheetViewModel.Factory(
                 { ApplicationProvider.getApplicationContext() },

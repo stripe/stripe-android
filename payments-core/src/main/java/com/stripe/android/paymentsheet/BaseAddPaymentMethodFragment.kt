@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.ui.PaymentMethodsFragmentFactory
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal abstract class BaseAddPaymentMethodFragment(
@@ -25,7 +25,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        childFragmentManager.fragmentFactory = PaymentMethodsFragmentFactory(
+        childFragmentManager.fragmentFactory = AddPaymentMethodsFragmentFactory(
             sheetViewModel::class.java, viewModelFactory
         )
     }
