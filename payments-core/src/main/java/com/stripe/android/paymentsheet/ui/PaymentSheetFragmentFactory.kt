@@ -8,9 +8,6 @@ import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.PaymentSheetListFragment
 import com.stripe.android.paymentsheet.analytics.EventReporter
 
-/**
- * [FragmentFactory] that instantiates fragments to add each supported payment method.
- */
 internal class PaymentSheetFragmentFactory(
     private val eventReporter: EventReporter
 ) : FragmentFactory() {
