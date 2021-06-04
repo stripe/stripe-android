@@ -58,7 +58,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
                 RemoteCardAccountRangeSource(
                     StripeApiRepository(
                         appContext,
-                        publishableKey
+                        { publishableKey }
                     ),
                     ApiRequest.Options(
                         publishableKey

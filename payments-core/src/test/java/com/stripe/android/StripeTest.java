@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -1365,7 +1367,7 @@ public class StripeTest {
     ) {
         return new StripeApiRepository(
                 context,
-                publishableKey,
+                () -> publishableKey,
                 null,
                 new FakeLogger(),
                 workDispatcher,

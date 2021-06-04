@@ -213,7 +213,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     ): CardAccountRangeSource {
         val stripeRepository = StripeApiRepository(
             application,
-            publishableKey
+            { publishableKey }
         )
         return RemoteCardAccountRangeSource(
             stripeRepository,

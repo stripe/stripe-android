@@ -426,7 +426,7 @@ internal class PaymentSheetViewModel internal constructor(
             val stripeAccountId = config.stripeAccountId
             val stripeRepository = StripeApiRepository(
                 application,
-                publishableKey
+                { publishableKey }
             )
 
             val starterArgs = starterArgsSupplier()
@@ -465,14 +465,14 @@ internal class PaymentSheetViewModel internal constructor(
                 when (starterArgs.clientSecret) {
                     is PaymentIntentClientSecret -> PaymentIntentFlowResultProcessor(
                         application,
-                        publishableKey,
+                        { publishableKey },
                         stripeRepository,
                         enableLogging = true,
                         Dispatchers.IO
                     )
                     is SetupIntentClientSecret -> SetupIntentFlowResultProcessor(
                         application,
-                        publishableKey,
+                        { publishableKey },
                         stripeRepository,
                         enableLogging = true,
                         Dispatchers.IO

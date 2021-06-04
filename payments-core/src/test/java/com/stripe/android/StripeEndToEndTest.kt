@@ -230,7 +230,7 @@ internal class StripeEndToEndTest {
     ): Stripe {
         val stripeRepository = StripeApiRepository(
             context,
-            publishableKey,
+            { publishableKey },
             workContext = testDispatcher
         )
         return Stripe(

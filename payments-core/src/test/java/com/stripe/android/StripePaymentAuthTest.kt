@@ -272,7 +272,7 @@ internal class StripePaymentAuthTest {
         return Stripe(
             StripeApiRepository(
                 context,
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 stripeApiRequestExecutor = DefaultApiRequestExecutor(
                     workContext = testDispatcher
                 ),

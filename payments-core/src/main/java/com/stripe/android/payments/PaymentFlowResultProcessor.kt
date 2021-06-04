@@ -13,6 +13,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -20,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
-    private val publishableKey: String,
+    private val publishableKeyProvider: Provider<String>,
     protected val stripeRepository: StripeRepository,
     enableLogging: Boolean,
     private val workContext: CoroutineContext = Dispatchers.IO
@@ -34,7 +35,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         val result = unvalidatedResult.validate()
 
         val requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
+            apiKey = publishableKeyProvider.get(),
             stripeAccount = result.stripeAccountId
         )
 
@@ -109,12 +110,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
  */
 internal class PaymentIntentFlowResultProcessor(
     context: Context,
-    publishableKey: String,
+    publishableKeyProvider: Provider<String>,
     stripeRepository: StripeRepository,
     enableLogging: Boolean,
     workContext: CoroutineContext = Dispatchers.IO
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
-    context, publishableKey, stripeRepository, enableLogging, workContext
+    context, publishableKeyProvider, stripeRepository, enableLogging, workContext
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -155,12 +156,12 @@ internal class PaymentIntentFlowResultProcessor(
  */
 internal class SetupIntentFlowResultProcessor(
     context: Context,
-    publishableKey: String,
+    publishableKeyProvider: Provider<String>,
     stripeRepository: StripeRepository,
     enableLogging: Boolean,
     workContext: CoroutineContext = Dispatchers.IO
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
-    context, publishableKey, stripeRepository, enableLogging, workContext
+    context, publishableKeyProvider, stripeRepository, enableLogging, workContext
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
