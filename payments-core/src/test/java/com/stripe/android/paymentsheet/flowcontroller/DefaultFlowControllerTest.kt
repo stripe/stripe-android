@@ -9,7 +9,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argWhere
-import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -212,8 +211,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions() after successful init should launch with expected args`() {
-        val mockPaymentOptionActivityLauncher = mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
-        val paymentOptionContractArgsCaptor = argumentCaptor<PaymentOptionContract.Args>()
+        val mockPaymentOptionActivityLauncher =
+            mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
 
         flowController.paymentOptionActivityLauncher = mockPaymentOptionActivityLauncher
 
@@ -227,11 +226,9 @@ internal class DefaultFlowControllerTest {
             .isTrue()
         flowController.presentPaymentOptions()
 
-        verify(mockPaymentOptionActivityLauncher).launch(paymentOptionContractArgsCaptor.capture())
-
-        assertThat(paymentOptionContractArgsCaptor.firstValue)
-            .isEqualTo(
-                PaymentOptionContract.Args(
+        verify(mockPaymentOptionActivityLauncher).launch(
+            argWhere {
+                it == PaymentOptionContract.Args(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     paymentMethods = emptyList(),
                     sessionId = SESSION_ID,
@@ -243,7 +240,8 @@ internal class DefaultFlowControllerTest {
                         R.color.stripe_toolbar_color_default_dark
                     )
                 )
-            )
+            }
+        )
     }
 
     @Test
@@ -333,17 +331,18 @@ internal class DefaultFlowControllerTest {
         // capture the actual launch arguments when paymentOptionLauncher is called
         val mockPaymentOptionActivityLauncher =
             mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
-        val paymentOptionsContractArgsCaptor = argumentCaptor<PaymentOptionContract.Args>()
 
         flowController.paymentOptionActivityLauncher = mockPaymentOptionActivityLauncher
 
         flowController.presentPaymentOptions()
 
-        verify(mockPaymentOptionActivityLauncher).launch(paymentOptionsContractArgsCaptor.capture())
-
         // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
-        assertThat(paymentOptionsContractArgsCaptor.firstValue.paymentMethods)
-            .isEqualTo(initialPaymentMethods)
+
+        verify(mockPaymentOptionActivityLauncher).launch(
+            argWhere {
+                it.paymentMethods == initialPaymentMethods
+            }
+        )
     }
 
     @Test
@@ -397,7 +396,6 @@ internal class DefaultFlowControllerTest {
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
         val mockGooglePayActivityLauncher =
             mock<ActivityResultLauncher<StripeGooglePayContract.Args>>()
-        val googlePayArgsCaptor = argumentCaptor<StripeGooglePayContract.Args>()
 
         flowController.googlePayActivityLauncher = mockGooglePayActivityLauncher
 
@@ -411,11 +409,9 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(mockGooglePayActivityLauncher).launch(googlePayArgsCaptor.capture())
-
-        assertThat(googlePayArgsCaptor.firstValue)
-            .isEqualTo(
-                StripeGooglePayContract.Args(
+        verify(mockGooglePayActivityLauncher).launch(
+            argWhere {
+                it == StripeGooglePayContract.Args(
                     config = GooglePayConfig(
                         environment = GooglePayEnvironment.Test,
                         amount = 1099,
@@ -429,7 +425,8 @@ internal class DefaultFlowControllerTest {
                         R.color.stripe_toolbar_color_default_dark
                     )
                 )
-            )
+            }
+        )
     }
 
     @Test
