@@ -160,8 +160,8 @@ class DefaultGooglePaySheetLauncherTest {
     }
 
     private companion object {
-        val CONFIG = GooglePaySheetConfig(
-            GooglePaySheetEnvironment.Test,
+        val CONFIG = GooglePayConfig(
+            GooglePayEnvironment.Test,
             amount = 1000,
             countryCode = "US",
             currencyCode = "usd"

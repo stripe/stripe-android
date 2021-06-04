@@ -8,7 +8,7 @@ internal class PaymentsClientFactory(
     private val context: Context
 ) {
     fun create(
-        environment: GooglePaySheetEnvironment
+        environment: GooglePayEnvironment
     ): PaymentsClient {
         val options = Wallet.WalletOptions.Builder()
             .setEnvironment(environment.value)

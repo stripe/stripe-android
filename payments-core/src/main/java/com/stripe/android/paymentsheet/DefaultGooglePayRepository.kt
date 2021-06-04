@@ -7,7 +7,7 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Logger
-import com.stripe.android.googlepaysheet.GooglePaySheetEnvironment
+import com.stripe.android.googlepaysheet.GooglePayEnvironment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.filterNotNull
  */
 internal class DefaultGooglePayRepository(
     private val context: Context,
-    private val environment: GooglePaySheetEnvironment,
+    private val environment: GooglePayEnvironment,
     private val logger: Logger = Logger.noop()
 ) : GooglePayRepository {
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
@@ -38,9 +38,9 @@ internal class DefaultGooglePayRepository(
         context,
         when (environment) {
             PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                GooglePaySheetEnvironment.Production
+                GooglePayEnvironment.Production
             PaymentSheet.GooglePayConfiguration.Environment.Test ->
-                GooglePaySheetEnvironment.Test
+                GooglePayEnvironment.Test
         },
         logger
     )

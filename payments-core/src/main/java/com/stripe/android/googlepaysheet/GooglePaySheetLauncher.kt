@@ -15,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal interface GooglePaySheetLauncher {
     suspend fun configure(
-        configuration: GooglePaySheetConfig
+        configuration: GooglePayConfig
     ): Boolean
 
     fun present()
@@ -24,7 +24,7 @@ internal interface GooglePaySheetLauncher {
 internal class DefaultGooglePaySheetLauncher(
     viewModelStoreOwner: ViewModelStoreOwner,
     private val ioContext: CoroutineContext,
-    private val googlePayRepositoryFactory: (GooglePaySheetEnvironment) -> GooglePayRepository,
+    private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     private val activityResultLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
 ) : GooglePaySheetLauncher {
 
@@ -34,7 +34,7 @@ internal class DefaultGooglePaySheetLauncher(
     constructor(
         activity: ComponentActivity,
         ioContext: CoroutineContext = Dispatchers.IO,
-        googlePayRepositoryFactory: (GooglePaySheetEnvironment) -> GooglePayRepository,
+        googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
         callback: GooglePaySheetResultCallback
     ) : this(
         activity,
@@ -50,7 +50,7 @@ internal class DefaultGooglePaySheetLauncher(
     constructor(
         fragment: Fragment,
         ioContext: CoroutineContext = Dispatchers.IO,
-        googlePayRepositoryFactory: (GooglePaySheetEnvironment) -> GooglePayRepository,
+        googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
         callback: GooglePaySheetResultCallback
     ) : this(
         fragment,
@@ -68,7 +68,7 @@ internal class DefaultGooglePaySheetLauncher(
         fragment: Fragment,
         registry: ActivityResultRegistry,
         ioContext: CoroutineContext = Dispatchers.IO,
-        googlePayRepositoryFactory: (GooglePaySheetEnvironment) -> GooglePayRepository,
+        googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
         callback: GooglePaySheetResultCallback
     ) : this(
         fragment,
@@ -83,7 +83,7 @@ internal class DefaultGooglePaySheetLauncher(
     )
 
     override suspend fun configure(
-        configuration: GooglePaySheetConfig
+        configuration: GooglePayConfig
     ): Boolean = withContext(ioContext) {
         val repository = googlePayRepositoryFactory(configuration.environment)
 

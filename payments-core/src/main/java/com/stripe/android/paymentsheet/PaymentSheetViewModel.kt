@@ -15,8 +15,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.googlepaysheet.GooglePaySheetConfig
-import com.stripe.android.googlepaysheet.GooglePaySheetEnvironment
+import com.stripe.android.googlepaysheet.GooglePayConfig
+import com.stripe.android.googlepaysheet.GooglePayEnvironment
 import com.stripe.android.googlepaysheet.GooglePaySheetResult
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
 import com.stripe.android.googlepaysheet.getErrorResourceID
@@ -259,12 +259,12 @@ internal class PaymentSheetViewModel internal constructor(
             (stripeIntent.value as? PaymentIntent)?.let { paymentIntent ->
                 _launchGooglePay.value = Event(
                     StripeGooglePayContract.Args(
-                        config = GooglePaySheetConfig(
+                        config = GooglePayConfig(
                             environment = when (args.config?.googlePay?.environment) {
                                 PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                                    GooglePaySheetEnvironment.Production
+                                    GooglePayEnvironment.Production
                                 else ->
-                                    GooglePaySheetEnvironment.Test
+                                    GooglePayEnvironment.Test
                             },
                             amount = paymentIntent.amount?.toInt(),
                             countryCode = args.googlePayConfig?.countryCode.orEmpty(),
