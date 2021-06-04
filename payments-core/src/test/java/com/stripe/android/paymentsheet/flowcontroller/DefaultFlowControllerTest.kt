@@ -2,12 +2,14 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argWhere
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -210,10 +212,10 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions() after successful init should launch with expected args`() {
-        var launchArgs: PaymentOptionContract.Args? = null
-        flowController.paymentOptionLauncher = {
-            launchArgs = it
-        }
+        val mockPaymentOptionActivityLauncher = mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
+        val paymentOptionContractArgsCaptor = argumentCaptor<PaymentOptionContract.Args>()
+
+        flowController.paymentOptionActivityLauncher = mockPaymentOptionActivityLauncher
 
         var isReadyState = false
         flowController.configureWithPaymentIntent(
@@ -225,7 +227,9 @@ internal class DefaultFlowControllerTest {
             .isTrue()
         flowController.presentPaymentOptions()
 
-        assertThat(launchArgs)
+        verify(mockPaymentOptionActivityLauncher).launch(paymentOptionContractArgsCaptor.capture())
+
+        assertThat(paymentOptionContractArgsCaptor.firstValue)
             .isEqualTo(
                 PaymentOptionContract.Args(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -326,16 +330,19 @@ internal class DefaultFlowControllerTest {
         // up the payment option launcher
         flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(SAVE_NEW_CARD_SELECTION))
 
-        // Save off the actual launch arguments when paymentOptionLauncher is called
-        var launchArgs: PaymentOptionContract.Args? = null
-        flowController.paymentOptionLauncher = {
-            launchArgs = it
-        }
+        // capture the actual launch arguments when paymentOptionLauncher is called
+        val mockPaymentOptionActivityLauncher =
+            mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
+        val paymentOptionsContractArgsCaptor = argumentCaptor<PaymentOptionContract.Args>()
+
+        flowController.paymentOptionActivityLauncher = mockPaymentOptionActivityLauncher
 
         flowController.presentPaymentOptions()
 
+        verify(mockPaymentOptionActivityLauncher).launch(paymentOptionsContractArgsCaptor.capture())
+
         // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
-        assertThat(launchArgs!!.paymentMethods)
+        assertThat(paymentOptionsContractArgsCaptor.firstValue.paymentMethods)
             .isEqualTo(initialPaymentMethods)
     }
 
@@ -388,10 +395,11 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
-        var launchArgs: StripeGooglePayContract.Args? = null
-        flowController.googlePayLauncher = {
-            launchArgs = it
-        }
+        val mockGooglePayActivityLauncher =
+            mock<ActivityResultLauncher<StripeGooglePayContract.Args>>()
+        val googlePayArgsCaptor = argumentCaptor<StripeGooglePayContract.Args>()
+
+        flowController.googlePayActivityLauncher = mockGooglePayActivityLauncher
 
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
@@ -402,7 +410,10 @@ internal class DefaultFlowControllerTest {
             PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
         )
         flowController.confirm()
-        assertThat(launchArgs)
+
+        verify(mockGooglePayActivityLauncher).launch(googlePayArgsCaptor.capture())
+
+        assertThat(googlePayArgsCaptor.firstValue)
             .isEqualTo(
                 StripeGooglePayContract.Args(
                     config = GooglePayConfig(
