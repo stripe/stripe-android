@@ -230,7 +230,7 @@ internal class PaymentSheetActivityTest {
                 )
                 idleLooper()
                 assertThat(currentFragment(activity))
-                    .isInstanceOf(PaymentSheetAddCardFragment::class.java)
+                    .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
@@ -547,7 +547,7 @@ internal class PaymentSheetActivityTest {
                 idleLooper()
 
                 assertThat(currentFragment(activity))
-                    .isInstanceOf(PaymentSheetAddCardFragment::class.java)
+                    .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
@@ -631,7 +631,7 @@ internal class PaymentSheetActivityTest {
                 idleLooper()
 
                 assertThat(currentFragment(activity))
-                    .isInstanceOf(PaymentSheetAddCardFragment::class.java)
+                    .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
             }

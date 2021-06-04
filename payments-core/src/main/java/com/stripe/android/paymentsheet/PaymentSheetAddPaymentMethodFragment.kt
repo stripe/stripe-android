@@ -74,7 +74,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
     }
 
     private fun updateSelection() {
-        // TODO(brnunes-stripe): Fix this
+        // TODO(brnunes-stripe): Refactor to support other payment methods
         (
             childFragmentManager
                 .findFragmentById(R.id.payment_method_fragment_container) as? AddCardFragment<*>

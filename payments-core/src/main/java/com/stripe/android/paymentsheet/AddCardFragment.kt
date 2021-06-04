@@ -38,14 +38,14 @@ import com.stripe.android.view.StripeEditText
 /**
  * A [Fragment] for adding new card payment method.
  */
-internal class AddCardFragment<ViewModelClass : BaseSheetViewModel<*>>(
-    private val viewModelClass: Class<ViewModelClass>,
+internal class AddCardFragment<ViewModelType : BaseSheetViewModel<*>>(
+    private val viewModelClass: Class<ViewModelType>,
     private val viewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
     // Because the ViewModel is a subclass of BaseSheetViewModel (depending on whether we're going
     // through the complete or custom flow), we need to parameterize the ViewModel class so it is
     // properly reused if it was already created.
-    val sheetViewModel: ViewModelClass by lazy {
+    val sheetViewModel: ViewModelType by lazy {
         ViewModelProvider(requireActivity(), viewModelFactory).get(viewModelClass)
     }
 
