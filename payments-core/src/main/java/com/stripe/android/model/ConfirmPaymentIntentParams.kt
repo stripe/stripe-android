@@ -29,6 +29,7 @@ data class ConfirmPaymentIntentParams internal constructor(
     val sourceParams: SourceParams? = null,
     val sourceId: String? = null,
 
+    @Deprecated("Will be removed in an upcoming major version.")
     private val _extraParams: ExtraParams = ExtraParams(),
 
     /**
@@ -120,7 +121,7 @@ data class ConfirmPaymentIntentParams internal constructor(
      */
     var receiptEmail: String? = null
 ) : ConfirmStripeIntentParams {
-    @Deprecated("Will be removed in an upcoming major version.")
+    @Deprecated("Will be removed in an upcoming major version. Use the setupFutureUsage argument to specify this parameter.")
     val extraParams: Map<String, Any>
         get() = _extraParams.value.orEmpty()
 
