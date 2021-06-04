@@ -208,8 +208,8 @@ class StripeGooglePayViewModelTest {
     private class FakeStripeRepository : AbsFakeStripeRepository()
 
     private companion object {
-        private val CONFIG = GooglePaySheetConfig(
-            environment = GooglePaySheetEnvironment.Test,
+        private val CONFIG = GooglePayConfig(
+            environment = GooglePayEnvironment.Test,
             amount = 2000,
             countryCode = "US",
             currencyCode = "usd",
