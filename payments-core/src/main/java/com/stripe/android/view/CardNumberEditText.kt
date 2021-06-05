@@ -74,7 +74,7 @@ class CardNumberEditText internal constructor(
         AnalyticsRequestExecutor.Default(),
         AnalyticsRequestFactory(
             context,
-            publishableKeySupplier = publishableKeySupplier
+            publishableKeyProvider = publishableKeySupplier
         )
     )
 

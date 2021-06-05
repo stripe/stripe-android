@@ -110,7 +110,6 @@ internal class DefaultFlowController internal constructor(
     // configureWithSetupIntent.
     // TODO(ccen) inject paymentConfigurationProvider
     private val paymentConfigurationProvider = Provider {
-        PaymentConfiguration.clearInstance()
         PaymentConfiguration.getInstance(appContext)
     }
 

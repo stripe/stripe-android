@@ -83,7 +83,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
-        AnalyticsRequestFactory(context) { publishableKeyProvider.get() },
+        AnalyticsRequestFactory(context, publishableKeyProvider),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas).code,

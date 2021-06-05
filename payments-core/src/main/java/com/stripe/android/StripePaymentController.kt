@@ -66,7 +66,7 @@ internal class StripePaymentController internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
-        AnalyticsRequestFactory(context.applicationContext) { publishableKeyProvider.get() },
+        AnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
     challengeProgressActivityStarter: ChallengeProgressActivityStarter =
         ChallengeProgressActivityStarter.Default(),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
