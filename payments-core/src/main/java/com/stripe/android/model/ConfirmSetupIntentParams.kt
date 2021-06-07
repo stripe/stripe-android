@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import com.stripe.android.Stripe
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
@@ -47,7 +46,7 @@ data class ConfirmSetupIntentParams internal constructor(
      * See [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data).
      */
     var mandateData: MandateDataParams? = null
-) : ConfirmStripeIntentParams, Parcelable {
+) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk

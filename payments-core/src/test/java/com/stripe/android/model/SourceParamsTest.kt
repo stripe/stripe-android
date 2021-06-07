@@ -2,11 +2,15 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
+import com.stripe.android.utils.ParcelUtils
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 /**
  * Test class for [SourceParams].
  */
+@RunWith(RobolectricTestRunner::class)
 class SourceParamsTest {
 
     @Test
@@ -149,11 +153,11 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "statement_descriptor" to "descriptor",
-                "preferred_language" to "en"
+            SourceParams.TypeData.Bancontact(
+                "descriptor",
+                "en"
             )
         )
     }
@@ -196,10 +200,10 @@ class SourceParamsTest {
         )
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "preferred_language" to "en"
+            SourceParams.TypeData.Bancontact(
+                preferredLanguage = "en"
             )
         )
     }
@@ -215,10 +219,10 @@ class SourceParamsTest {
         )
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "statement_descriptor" to "descriptor"
+            SourceParams.TypeData.Bancontact(
+                "descriptor"
             )
         )
     }
@@ -234,7 +238,7 @@ class SourceParamsTest {
         )
 
         assertThat(params.apiParameterMap)
-            .isNull()
+            .isEmpty()
     }
 
     @Test
@@ -363,11 +367,9 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "statement_descriptor" to "stripe descriptor"
-            )
+            SourceParams.TypeData.Eps("stripe descriptor")
         )
     }
 
@@ -444,9 +446,9 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf("statement_descriptor" to "stripe descriptor")
+            SourceParams.TypeData.Giropay("stripe descriptor")
         )
     }
 
@@ -531,11 +533,11 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "bank" to "SVB",
-                "statement_descriptor" to "something you bought"
+            SourceParams.TypeData.Ideal(
+                "something you bought",
+                "SVB"
             )
         )
     }
@@ -705,9 +707,9 @@ class SourceParamsTest {
         )
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf("iban" to "ibaniban")
+            SourceParams.TypeData.SepaDebit("ibaniban")
         )
     }
 
@@ -766,11 +768,11 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "country" to "UK",
-                "statement_descriptor" to "a thing you bought"
+            SourceParams.TypeData.Sofort(
+                "UK",
+                "a thing you bought"
             )
         )
     }
@@ -820,11 +822,9 @@ class SourceParamsTest {
             .isEqualTo(RETURN_URL)
 
         assertThat(
-            requireNotNull(params.apiParameterMap)
+            requireNotNull(params.typeData)
         ).isEqualTo(
-            mapOf(
-                "card" to "card_id_123"
-            )
+            SourceParams.TypeData.ThreeDSecure("card_id_123")
         )
     }
 
@@ -846,6 +846,46 @@ class SourceParamsTest {
                 "amount" to AMOUNT,
                 "redirect" to mapOf("return_url" to RETURN_URL),
                 Source.SourceType.THREE_D_SECURE to mapOf("card" to "card_id_123")
+            )
+        )
+    }
+
+    @Test
+    fun createVisaCheckoutParams_toParamMap_createsExpectedMap() {
+        val params = SourceParams.createVisaCheckoutParams("callid123")
+
+        assertThat(
+            params.toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "type" to Source.SourceType.CARD,
+                "card" to mapOf(
+                    "visa_checkout" to mapOf(
+                        "callid" to "callid123"
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun createMasterpassParams_toParamMap_createsExpectedMap() {
+        val params = SourceParams.createMasterpassParams(
+            "abc_123",
+            "cart_456"
+        )
+
+        assertThat(
+            params.toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "type" to Source.SourceType.CARD,
+                "card" to mapOf(
+                    "masterpass" to mapOf(
+                        "transaction_id" to "abc_123",
+                        "cart_id" to "cart_456"
+                    )
+                )
             )
         )
     }
@@ -938,52 +978,8 @@ class SourceParamsTest {
 
     @Test
     fun `createKlarna() should create expected params`() {
-        val lineItems = listOf(
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Sku,
-                itemDescription = "towel",
-                totalAmount = 10000,
-                quantity = 1
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Sku,
-                itemDescription = "digital watch",
-                totalAmount = 20000,
-                quantity = 2
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Tax,
-                itemDescription = "taxes",
-                totalAmount = 1500
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Shipping,
-                itemDescription = "ground shipping",
-                totalAmount = 499
-            )
-        )
-        val params = SourceParams.createKlarna(
-            returnUrl = RETURN_URL,
-            currency = "GBP",
-            klarnaParams = KlarnaSourceParams(
-                purchaseCountry = "UK",
-                lineItems = lineItems,
-                billingPhone = "02012267709",
-                billingEmail = "test@example.com",
-                billingAddress = Address(
-                    line1 = "29 Arlington Avenue",
-                    city = "London",
-                    country = "UK",
-                    postalCode = "N1 7BE"
-                ),
-                billingFirstName = "Arthur",
-                billingLastName = "Dent",
-                billingDob = DateOfBirth(11, 3, 1952)
-            )
-        )
-
         assertThat(
-            params.toParamMap()
+            KLARNA_PARAMS.toParamMap()
         ).isEqualTo(
             mapOf(
                 "type" to "klarna",
@@ -1046,8 +1042,71 @@ class SourceParamsTest {
         )
     }
 
+    @Test
+    fun `verify ApiParams parceling`() {
+        val apiParams = SourceParams.ApiParams(
+            mapOf(
+                "type" to "bar_tab",
+                "amount" to 1000,
+                "currency" to "brl",
+                "redirect" to mapOf("return_url" to "https://example.com"),
+                "bar_tab" to mapOf("card" to "card_id_123")
+            )
+        )
+        ParcelUtils.verifyParcelRoundtrip(apiParams)
+    }
+
+    @Test
+    fun `verify SourceParams parceling`() {
+        ParcelUtils.verifyParcelRoundtrip(KLARNA_PARAMS)
+    }
+
     private companion object {
         private const val AMOUNT = 1099L
         private const val RETURN_URL = "stripe://return"
+
+        private val KLARNA_LINE_ITEMS = listOf(
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Sku,
+                itemDescription = "towel",
+                totalAmount = 10000,
+                quantity = 1
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Sku,
+                itemDescription = "digital watch",
+                totalAmount = 20000,
+                quantity = 2
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Tax,
+                itemDescription = "taxes",
+                totalAmount = 1500
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Shipping,
+                itemDescription = "ground shipping",
+                totalAmount = 499
+            )
+        )
+        private val KLARNA_PARAMS = SourceParams.createKlarna(
+            returnUrl = RETURN_URL,
+            currency = "GBP",
+            klarnaParams = KlarnaSourceParams(
+                purchaseCountry = "UK",
+                lineItems = KLARNA_LINE_ITEMS,
+                billingPhone = "02012267709",
+                billingEmail = "test@example.com",
+                billingAddress = Address(
+                    line1 = "29 Arlington Avenue",
+                    city = "London",
+                    country = "UK",
+                    postalCode = "N1 7BE"
+                ),
+                billingFirstName = "Arthur",
+                billingLastName = "Dent",
+                billingDob = DateOfBirth(11, 3, 1952)
+            )
+        )
     }
 }
