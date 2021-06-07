@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
@@ -12,6 +13,7 @@ import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetP
 import com.stripe.android.paymentsheet.example.repository.Repository
 import com.stripe.android.paymentsheet.example.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.coroutines.launch
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val viewBinding by lazy {
@@ -69,11 +71,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         )
 
         viewBinding.reloadButton.setOnClickListener {
-            disableViews()
-
-            viewModel.prepareCheckout(customer, mode).observe(this) {
-                viewBinding.completeCheckoutButton.isEnabled = it
-                configureCustomCheckout()
+            lifecycleScope.launch {
+                viewModel.prepareCheckout(customer, mode)
             }
         }
 
@@ -91,6 +90,15 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
+        }
+
+        viewModel.readyToCheckout.observe(this) { isReady ->
+            if (isReady) {
+                viewBinding.completeCheckoutButton.isEnabled = true
+                configureCustomCheckout()
+            } else {
+                disableViews()
+            }
         }
     }
 

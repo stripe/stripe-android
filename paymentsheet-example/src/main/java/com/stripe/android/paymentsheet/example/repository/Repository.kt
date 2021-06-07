@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.repository
 
 import com.stripe.android.paymentsheet.example.service.CheckoutResponse
-import kotlinx.coroutines.flow.Flow
 
 internal interface Repository {
     sealed class CheckoutCustomer(val value: String) {
@@ -24,5 +23,5 @@ internal interface Repository {
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
         mode: CheckoutMode
-    ): Flow<Result<CheckoutResponse>>
+    ): CheckoutResponse
 }

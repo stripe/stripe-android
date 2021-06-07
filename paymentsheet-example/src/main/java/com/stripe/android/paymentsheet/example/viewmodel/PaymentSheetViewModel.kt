@@ -9,9 +9,6 @@ import androidx.lifecycle.liveData
 import com.stripe.android.paymentsheet.example.repository.DefaultRepository
 import com.stripe.android.paymentsheet.example.repository.Repository
 import com.stripe.android.paymentsheet.example.service.BackendApiFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.single
-import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel(
     application: Application,
@@ -28,9 +25,11 @@ internal class PaymentSheetViewModel(
         liveData {
             inProgress.postValue(true)
 
-            val checkoutResponse = repository.checkout(
-                customer, Repository.CheckoutCurrency.USD, mode
-            ).single()
+            val checkoutResponse = runCatching {
+                repository.checkout(
+                    customer, Repository.CheckoutCurrency.USD, mode
+                )
+            }
 
             checkoutResponse.fold(
                 onSuccess = { },
@@ -46,15 +45,13 @@ internal class PaymentSheetViewModel(
         }
 
     internal class Factory(
-        private val application: Application,
-        private val workContext: CoroutineContext = Dispatchers.IO
+        private val application: Application
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val checkoutBackendApi = BackendApiFactory(application).createCheckout()
 
             val repository = DefaultRepository(
-                checkoutBackendApi,
-                workContext
+                checkoutBackendApi
             )
 
             return PaymentSheetViewModel(
