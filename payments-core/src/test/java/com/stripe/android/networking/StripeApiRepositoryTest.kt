@@ -67,7 +67,7 @@ internal class StripeApiRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val stripeApiRepository = StripeApiRepository(
         context,
-        DEFAULT_OPTIONS.apiKey,
+        { DEFAULT_OPTIONS.apiKey },
         workContext = testDispatcher
     )
     private val fileFactory = FileFactory(context)
@@ -470,7 +470,7 @@ internal class StripeApiRepositoryTest {
     fun createSource_createsObjectAndLogs() = testDispatcher.runBlockingTest {
         val stripeApiRepository = StripeApiRepository(
             context,
-            DEFAULT_OPTIONS.apiKey,
+            { DEFAULT_OPTIONS.apiKey },
             workContext = testDispatcher,
             stripeApiRequestExecutor = DefaultApiRequestExecutor(
                 workContext = testDispatcher
@@ -828,7 +828,7 @@ internal class StripeApiRepositoryTest {
 
             val stripeRepository = StripeApiRepository(
                 context,
-                DEFAULT_OPTIONS.apiKey,
+                { DEFAULT_OPTIONS.apiKey },
                 workContext = testDispatcher,
                 sdkVersion = "AndroidBindings/13.0.0"
             )
@@ -852,7 +852,7 @@ internal class StripeApiRepositoryTest {
 
             val stripeRepository = StripeApiRepository(
                 context,
-                DEFAULT_OPTIONS.apiKey,
+                { DEFAULT_OPTIONS.apiKey },
                 workContext = testDispatcher,
                 sdkVersion = "AndroidBindings/14.0.0"
             )
@@ -959,7 +959,7 @@ internal class StripeApiRepositoryTest {
     fun `createRadarSession() with FraudDetectionData should return expected value`() = testDispatcher.runBlockingTest {
         val stripeRepository = StripeApiRepository(
             context,
-            DEFAULT_OPTIONS.apiKey,
+            { DEFAULT_OPTIONS.apiKey },
             analyticsRequestExecutor = analyticsRequestExecutor,
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
                 FraudDetectionData(
@@ -983,7 +983,7 @@ internal class StripeApiRepositoryTest {
     fun `createRadarSession() with null FraudDetectionData should throw an exception`() = testDispatcher.runBlockingTest {
         val stripeRepository = StripeApiRepository(
             context,
-            DEFAULT_OPTIONS.apiKey,
+            { DEFAULT_OPTIONS.apiKey },
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
                 null
             ),
@@ -1043,7 +1043,7 @@ internal class StripeApiRepositoryTest {
     private fun create(): StripeApiRepository {
         return StripeApiRepository(
             context,
-            DEFAULT_OPTIONS.apiKey,
+            { DEFAULT_OPTIONS.apiKey },
             workContext = testDispatcher,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             analyticsRequestExecutor = analyticsRequestExecutor,

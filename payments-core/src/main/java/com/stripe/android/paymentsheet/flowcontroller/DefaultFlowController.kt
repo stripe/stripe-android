@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.gms.common.api.Status
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -48,6 +47,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import javax.inject.Provider
 
 internal class DefaultFlowController internal constructor(
     private val appContext: Context,
@@ -60,7 +60,7 @@ internal class DefaultFlowController internal constructor(
     private val flowControllerInitializer: FlowControllerInitializer,
     paymentControllerFactory: PaymentControllerFactory,
     paymentFlowResultProcessorFactory:
-        (ClientSecret, String, StripeApiRepository) ->
+        (ClientSecret, Provider<String>, StripeApiRepository) ->
         PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
@@ -104,38 +104,39 @@ internal class DefaultFlowController internal constructor(
     private val viewModel =
         ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
 
-    // The properties below are lazily initialized to allow the developer to set the publishableKey
-    // and stripeAccountId in PaymentConfiguration any time before configuring the FlowController
-    // through configureWithPaymentIntent or configureWithSetupIntent.
-
-    private val paymentConfiguration: PaymentConfiguration by lazy {
+    // The provider below always refreshes the PaymentConfiguration instance to allow the developer
+    // to set the publishableKey and stripeAccountId in PaymentConfiguration any time before
+    // configuring the FlowController through configureWithPaymentIntent or
+    // configureWithSetupIntent.
+    // TODO(ccen) inject paymentConfigurationProvider
+    private val paymentConfigurationProvider = Provider {
         PaymentConfiguration.getInstance(appContext)
     }
 
-    private val stripeApiRepository: StripeApiRepository by lazy {
+    private val stripeApiRepository =
         StripeApiRepository(
             appContext,
-            paymentConfiguration.publishableKey
+            { paymentConfigurationProvider.get().publishableKey }
         )
-    }
 
+    // paymentFlowResultProcessor needs to still be lazy as it needs viewModel.initData.clientSecret
+    // to be set, which is done by configureWithPaymentIntent or configureWithSetupIntent
     private val paymentFlowResultProcessor by lazy {
         paymentFlowResultProcessorFactory(
             viewModel.initData.clientSecret,
-            paymentConfiguration.publishableKey,
+            { paymentConfigurationProvider.get().publishableKey },
             stripeApiRepository
         )
     }
 
-    private val paymentController: PaymentController by lazy {
+    private val paymentController =
         paymentControllerFactory.create(
-            paymentConfiguration.publishableKey,
+            { paymentConfigurationProvider.get().publishableKey },
             stripeApiRepository,
             paymentRelayLauncher = paymentRelayLauncher,
             paymentBrowserAuthLauncher = paymentBrowserAuthLauncher,
             stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
         )
-    }
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
@@ -172,15 +173,15 @@ internal class DefaultFlowController internal constructor(
                 StripeIntentRepository.Api(
                     stripeRepository = stripeApiRepository,
                     requestOptions = ApiRequest.Options(
-                        paymentConfiguration.publishableKey,
-                        paymentConfiguration.stripeAccountId
+                        paymentConfigurationProvider.get().publishableKey,
+                        paymentConfigurationProvider.get().stripeAccountId
                     ),
                     workContext = Dispatchers.IO
                 ),
                 PaymentMethodsApiRepository(
                     stripeRepository = stripeApiRepository,
-                    publishableKey = paymentConfiguration.publishableKey,
-                    stripeAccountId = paymentConfiguration.stripeAccountId,
+                    publishableKey = paymentConfigurationProvider.get().publishableKey,
+                    stripeAccountId = paymentConfigurationProvider.get().stripeAccountId,
                     workContext = Dispatchers.IO
                 ),
                 configuration
@@ -285,8 +286,8 @@ internal class DefaultFlowController internal constructor(
                     authHostSupplier(),
                     confirmParams,
                     ApiRequest.Options(
-                        apiKey = paymentConfiguration.publishableKey,
-                        stripeAccount = paymentConfiguration.stripeAccountId
+                        apiKey = paymentConfigurationProvider.get().publishableKey,
+                        stripeAccount = paymentConfigurationProvider.get().stripeAccountId
                     )
                 )
             }

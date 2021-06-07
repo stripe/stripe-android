@@ -95,7 +95,7 @@ class Stripe internal constructor(
         context.applicationContext,
         StripeApiRepository(
             context.applicationContext,
-            publishableKey,
+            { publishableKey },
             appInfo,
             Logger.getInstance(enableLogging),
             betas = betas
@@ -115,7 +115,7 @@ class Stripe internal constructor(
         stripeRepository,
         StripePaymentController(
             context.applicationContext,
-            publishableKey,
+            { publishableKey },
             stripeRepository,
             enableLogging
         ),

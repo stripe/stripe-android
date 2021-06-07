@@ -62,6 +62,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -69,7 +70,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
-    private val publishableKey: String,
+    publishableKeyProvider: Provider<String>,
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -82,7 +83,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
-        AnalyticsRequestFactory(context, publishableKey),
+        AnalyticsRequestFactory(context, publishableKeyProvider),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas).code,

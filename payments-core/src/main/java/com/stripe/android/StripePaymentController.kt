@@ -44,6 +44,7 @@ import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -53,7 +54,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class StripePaymentController internal constructor(
     context: Context,
-    private val publishableKey: String,
+    private val publishableKeyProvider: Provider<String>,
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
     messageVersionRegistry: MessageVersionRegistry =
@@ -65,7 +66,7 @@ internal class StripePaymentController internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
-        AnalyticsRequestFactory(context.applicationContext, publishableKey),
+        AnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
     challengeProgressActivityStarter: ChallengeProgressActivityStarter =
         ChallengeProgressActivityStarter.Default(),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
@@ -78,14 +79,14 @@ internal class StripePaymentController internal constructor(
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
-        publishableKey,
+        publishableKeyProvider,
         stripeRepository,
         enableLogging,
         workContext
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
-        publishableKey,
+        publishableKeyProvider,
         stripeRepository,
         enableLogging,
         workContext
@@ -468,7 +469,7 @@ internal class StripePaymentController internal constructor(
         val clientSecret = result.clientSecret.orEmpty()
 
         val requestOptions = ApiRequest.Options(
-            apiKey = publishableKey,
+            apiKey = publishableKeyProvider.get(),
             stripeAccount = result.stripeAccountId
         )
 
@@ -647,7 +648,7 @@ internal class StripePaymentController internal constructor(
         ): PaymentController {
             return StripePaymentController(
                 context.applicationContext,
-                publishableKey,
+                { publishableKey },
                 stripeRepository,
                 enableLogging
             )

@@ -473,7 +473,7 @@ class CustomerSession @VisibleForTesting internal constructor(
 
             instance = CustomerSession(
                 context,
-                StripeApiRepository(context, config.publishableKey, appInfo),
+                StripeApiRepository(context, { config.publishableKey }, appInfo),
                 config.publishableKey,
                 config.stripeAccountId,
                 createCoroutineDispatcher(),

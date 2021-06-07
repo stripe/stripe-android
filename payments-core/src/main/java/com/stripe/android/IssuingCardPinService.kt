@@ -370,7 +370,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         ): IssuingCardPinService {
             return IssuingCardPinService(
                 keyProvider,
-                StripeApiRepository(context, publishableKey, appInfo),
+                StripeApiRepository(context, { publishableKey }, appInfo),
                 StripeOperationIdFactory(),
                 stripeAccountId = stripeAccountId
             )

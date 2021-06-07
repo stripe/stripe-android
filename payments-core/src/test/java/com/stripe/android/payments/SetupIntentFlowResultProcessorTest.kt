@@ -23,7 +23,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
     private val processor = SetupIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
         FakeStripeRepository(),
         false,
         testDispatcher

@@ -34,7 +34,7 @@ internal class FpxViewModel internal constructor(
             val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
             val stripeRepository = StripeApiRepository(
                 application,
-                publishableKey
+                { publishableKey }
             )
 
             return FpxViewModel(application, publishableKey, stripeRepository) as T

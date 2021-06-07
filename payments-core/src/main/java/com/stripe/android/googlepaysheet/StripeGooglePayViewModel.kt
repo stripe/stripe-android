@@ -102,7 +102,7 @@ internal class StripeGooglePayViewModel(
                 publishableKey,
                 stripeAccountId,
                 args,
-                StripeApiRepository(application, publishableKey),
+                StripeApiRepository(application, { publishableKey }),
                 appName,
                 Dispatchers.IO
             ) as T

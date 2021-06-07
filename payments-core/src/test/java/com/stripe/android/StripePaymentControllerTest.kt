@@ -262,7 +262,7 @@ internal class StripePaymentControllerTest {
     ): StripePaymentController {
         return StripePaymentController(
             context,
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
             stripeRepository,
             false,
             MessageVersionRegistry(),

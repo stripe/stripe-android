@@ -23,7 +23,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     private val processor = PaymentIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
         FakeStripeRepository(),
         false,
         testDispatcher

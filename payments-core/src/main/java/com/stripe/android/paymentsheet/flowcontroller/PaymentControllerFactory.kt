@@ -6,10 +6,11 @@ import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
+import javax.inject.Provider
 
 internal fun interface PaymentControllerFactory {
     fun create(
-        publishableKey: String,
+        publishableKeyProvider: Provider<String>,
         stripeRepository: StripeRepository,
         paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>,
         paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>,

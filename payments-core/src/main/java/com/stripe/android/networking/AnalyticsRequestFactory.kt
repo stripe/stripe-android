@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.analytics.DeviceId
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.utils.ContextUtils.packageInfo
+import javax.inject.Provider
 
 /**
  * Factory for [AnalyticsRequest] objects.
@@ -21,7 +22,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
     private val packageInfo: PackageInfo?,
     private val packageName: String,
-    private val publishableKeySupplier: () -> String
+    private val publishableKeyProvider: Provider<String>
 ) {
     internal constructor(
         context: Context,
@@ -33,12 +34,12 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     internal constructor(
         context: Context,
-        publishableKeySupplier: () -> String
+        publishableKeyProvider: Provider<String>
     ) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,
         context.applicationContext.packageName.orEmpty(),
-        publishableKeySupplier
+        publishableKeyProvider
     )
 
     @JvmSynthetic
@@ -237,7 +238,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
             FIELD_ANALYTICS_UA to ANALYTICS_UA,
             FIELD_EVENT to event,
             FIELD_PUBLISHABLE_KEY to runCatching {
-                publishableKeySupplier()
+                publishableKeyProvider.get()
             }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
             FIELD_OS_NAME to Build.VERSION.CODENAME,
             FIELD_OS_RELEASE to Build.VERSION.RELEASE,

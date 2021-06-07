@@ -139,10 +139,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
         paymentController = StripePaymentController(
             application,
-            paymentConfig.publishableKey,
+            { paymentConfig.publishableKey },
             StripeApiRepository(
                 application,
-                paymentConfig.publishableKey
+                { paymentConfig.publishableKey }
             ),
             true,
             paymentRelayLauncher = paymentRelayLauncher,

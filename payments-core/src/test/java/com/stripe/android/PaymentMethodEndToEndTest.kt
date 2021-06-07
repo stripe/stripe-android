@@ -228,7 +228,7 @@ internal class PaymentMethodEndToEndTest {
     fun createPaymentMethod_withGrabPay_shouldCreateObject() = testDispatcher.runBlockingTest {
         val repository = StripeApiRepository(
             context,
-            ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY,
+            { ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY },
             workContext = testDispatcher
         )
 
@@ -245,7 +245,7 @@ internal class PaymentMethodEndToEndTest {
     fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = testDispatcher.runBlockingTest {
         val paymentMethod = StripeApiRepository(
             context,
-            ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY,
+            { ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY },
             workContext = testDispatcher
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPal(),

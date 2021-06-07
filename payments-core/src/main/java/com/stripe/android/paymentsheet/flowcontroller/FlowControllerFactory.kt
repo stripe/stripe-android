@@ -73,12 +73,12 @@ internal class FlowControllerFactory(
         val sessionId = SessionId()
 
         val paymentControllerFactory =
-            PaymentControllerFactory { publishableKey, stripeRepository, paymentRelayLauncher,
+            PaymentControllerFactory { publishableKeyProvider, stripeRepository, paymentRelayLauncher,
                 paymentBrowserAuthLauncher, stripe3ds2ChallengeLauncher ->
 
                 StripePaymentController(
                     appContext,
-                    publishableKey,
+                    publishableKeyProvider,
                     stripeRepository,
                     enableLogging = true,
                     paymentRelayLauncher = paymentRelayLauncher,
@@ -121,18 +121,18 @@ internal class FlowControllerFactory(
                 workContext = Dispatchers.IO
             ),
             paymentControllerFactory = paymentControllerFactory,
-            paymentFlowResultProcessorFactory = { clientSecret, publishableKey, stripeApiRepository ->
+            paymentFlowResultProcessorFactory = { clientSecret, publishableKeyProvider, stripeApiRepository ->
                 when (clientSecret) {
                     is PaymentIntentClientSecret -> PaymentIntentFlowResultProcessor(
                         appContext,
-                        publishableKey,
+                        publishableKeyProvider,
                         stripeApiRepository,
                         enableLogging = false,
                         Dispatchers.IO
                     )
                     is SetupIntentClientSecret -> SetupIntentFlowResultProcessor(
                         appContext,
-                        publishableKey,
+                        publishableKeyProvider,
                         stripeApiRepository,
                         enableLogging = false,
                         Dispatchers.IO
