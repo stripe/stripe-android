@@ -41,6 +41,8 @@ Table of contents
 
 **Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build a custom UI on top of this layer.
 
+**Localized**: We support the following localizations: Bulgarian, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Finnish, French, French (Canada), German, Greek, Hungarian, Italian, Japanese, Korean, Latvian, Lithuanian, Maltese, Norwegian Bokmål, Polish, Portuguese (Brazil), Portuguese, Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, and Turkish.
+
 ## Releases
 * The [changelog](CHANGELOG.md) provides a summary of changes in each release.
 * The [migration guide](MIGRATING.md) provides instructions on upgrading from older versions.
