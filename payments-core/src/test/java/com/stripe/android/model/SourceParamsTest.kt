@@ -2,11 +2,15 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
+import com.stripe.android.utils.ParcelUtils
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 /**
  * Test class for [SourceParams].
  */
+@RunWith(RobolectricTestRunner::class)
 class SourceParamsTest {
 
     @Test
@@ -234,7 +238,7 @@ class SourceParamsTest {
         )
 
         assertThat(params.apiParameterMap)
-            .isNull()
+            .isEmpty()
     }
 
     @Test
@@ -974,52 +978,8 @@ class SourceParamsTest {
 
     @Test
     fun `createKlarna() should create expected params`() {
-        val lineItems = listOf(
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Sku,
-                itemDescription = "towel",
-                totalAmount = 10000,
-                quantity = 1
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Sku,
-                itemDescription = "digital watch",
-                totalAmount = 20000,
-                quantity = 2
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Tax,
-                itemDescription = "taxes",
-                totalAmount = 1500
-            ),
-            KlarnaSourceParams.LineItem(
-                itemType = KlarnaSourceParams.LineItem.Type.Shipping,
-                itemDescription = "ground shipping",
-                totalAmount = 499
-            )
-        )
-        val params = SourceParams.createKlarna(
-            returnUrl = RETURN_URL,
-            currency = "GBP",
-            klarnaParams = KlarnaSourceParams(
-                purchaseCountry = "UK",
-                lineItems = lineItems,
-                billingPhone = "02012267709",
-                billingEmail = "test@example.com",
-                billingAddress = Address(
-                    line1 = "29 Arlington Avenue",
-                    city = "London",
-                    country = "UK",
-                    postalCode = "N1 7BE"
-                ),
-                billingFirstName = "Arthur",
-                billingLastName = "Dent",
-                billingDob = DateOfBirth(11, 3, 1952)
-            )
-        )
-
         assertThat(
-            params.toParamMap()
+            KLARNA_PARAMS.toParamMap()
         ).isEqualTo(
             mapOf(
                 "type" to "klarna",
@@ -1082,8 +1042,71 @@ class SourceParamsTest {
         )
     }
 
+    @Test
+    fun `verify ApiParams parceling`() {
+        val apiParams = SourceParams.ApiParams(
+            mapOf(
+                "type" to "bar_tab",
+                "amount" to 1000,
+                "currency" to "brl",
+                "redirect" to mapOf("return_url" to "https://example.com"),
+                "bar_tab" to mapOf("card" to "card_id_123")
+            )
+        )
+        ParcelUtils.verifyParcelRoundtrip(apiParams)
+    }
+
+    @Test
+    fun `verify SourceParams parceling`() {
+        ParcelUtils.verifyParcelRoundtrip(KLARNA_PARAMS)
+    }
+
     private companion object {
         private const val AMOUNT = 1099L
         private const val RETURN_URL = "stripe://return"
+
+        private val KLARNA_LINE_ITEMS = listOf(
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Sku,
+                itemDescription = "towel",
+                totalAmount = 10000,
+                quantity = 1
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Sku,
+                itemDescription = "digital watch",
+                totalAmount = 20000,
+                quantity = 2
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Tax,
+                itemDescription = "taxes",
+                totalAmount = 1500
+            ),
+            KlarnaSourceParams.LineItem(
+                itemType = KlarnaSourceParams.LineItem.Type.Shipping,
+                itemDescription = "ground shipping",
+                totalAmount = 499
+            )
+        )
+        private val KLARNA_PARAMS = SourceParams.createKlarna(
+            returnUrl = RETURN_URL,
+            currency = "GBP",
+            klarnaParams = KlarnaSourceParams(
+                purchaseCountry = "UK",
+                lineItems = KLARNA_LINE_ITEMS,
+                billingPhone = "02012267709",
+                billingEmail = "test@example.com",
+                billingAddress = Address(
+                    line1 = "29 Arlington Avenue",
+                    city = "London",
+                    country = "UK",
+                    postalCode = "N1 7BE"
+                ),
+                billingFirstName = "Arthur",
+                billingLastName = "Dent",
+                billingDob = DateOfBirth(11, 3, 1952)
+            )
+        )
     }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
@@ -20,8 +21,8 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepaysheet.GooglePaySheetConfig
-import com.stripe.android.googlepaysheet.GooglePaySheetEnvironment
+import com.stripe.android.googlepaysheet.GooglePayConfig
+import com.stripe.android.googlepaysheet.GooglePayEnvironment
 import com.stripe.android.googlepaysheet.GooglePaySheetResult
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
@@ -210,10 +211,10 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions() after successful init should launch with expected args`() {
-        var launchArgs: PaymentOptionContract.Args? = null
-        flowController.paymentOptionLauncher = {
-            launchArgs = it
-        }
+        val mockPaymentOptionActivityLauncher =
+            mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
+
+        flowController.paymentOptionActivityLauncher = mockPaymentOptionActivityLauncher
 
         var isReadyState = false
         flowController.configureWithPaymentIntent(
@@ -225,9 +226,9 @@ internal class DefaultFlowControllerTest {
             .isTrue()
         flowController.presentPaymentOptions()
 
-        assertThat(launchArgs)
-            .isEqualTo(
-                PaymentOptionContract.Args(
+        verify(mockPaymentOptionActivityLauncher).launch(
+            argWhere {
+                it == PaymentOptionContract.Args(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     paymentMethods = emptyList(),
                     sessionId = SESSION_ID,
@@ -239,7 +240,8 @@ internal class DefaultFlowControllerTest {
                         R.color.stripe_toolbar_color_default_dark
                     )
                 )
-            )
+            }
+        )
     }
 
     @Test
@@ -326,17 +328,21 @@ internal class DefaultFlowControllerTest {
         // up the payment option launcher
         flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(SAVE_NEW_CARD_SELECTION))
 
-        // Save off the actual launch arguments when paymentOptionLauncher is called
-        var launchArgs: PaymentOptionContract.Args? = null
-        flowController.paymentOptionLauncher = {
-            launchArgs = it
-        }
+        // capture the actual launch arguments when paymentOptionLauncher is called
+        val mockPaymentOptionActivityLauncher =
+            mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
+
+        flowController.paymentOptionActivityLauncher = mockPaymentOptionActivityLauncher
 
         flowController.presentPaymentOptions()
 
         // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
-        assertThat(launchArgs!!.paymentMethods)
-            .isEqualTo(initialPaymentMethods)
+
+        verify(mockPaymentOptionActivityLauncher).launch(
+            argWhere {
+                it.paymentMethods == initialPaymentMethods
+            }
+        )
     }
 
     @Test
@@ -388,10 +394,10 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
-        var launchArgs: StripeGooglePayContract.Args? = null
-        flowController.googlePayLauncher = {
-            launchArgs = it
-        }
+        val mockGooglePayActivityLauncher =
+            mock<ActivityResultLauncher<StripeGooglePayContract.Args>>()
+
+        flowController.googlePayActivityLauncher = mockGooglePayActivityLauncher
 
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
@@ -402,11 +408,12 @@ internal class DefaultFlowControllerTest {
             PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
         )
         flowController.confirm()
-        assertThat(launchArgs)
-            .isEqualTo(
-                StripeGooglePayContract.Args(
-                    config = GooglePaySheetConfig(
-                        environment = GooglePaySheetEnvironment.Test,
+
+        verify(mockGooglePayActivityLauncher).launch(
+            argWhere {
+                it == StripeGooglePayContract.Args(
+                    config = GooglePayConfig(
+                        environment = GooglePayEnvironment.Test,
                         amount = 1099,
                         countryCode = "US",
                         currencyCode = "usd",
@@ -418,7 +425,8 @@ internal class DefaultFlowControllerTest {
                         R.color.stripe_toolbar_color_default_dark
                     )
                 )
-            )
+            }
+        )
     }
 
     @Test

@@ -34,7 +34,7 @@ internal class StripeGooglePayContract :
      */
     @Parcelize
     data class Args(
-        var config: GooglePaySheetConfig,
+        var config: GooglePayConfig,
         @ColorInt val statusBarColor: Int?
     ) : ActivityStarter.Args {
 

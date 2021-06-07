@@ -9,7 +9,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
+import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionsAddCardFragmentTest {
+class PaymentOptionsAddPaymentMethodFragmentTest {
     private val eventReporter = mock<EventReporter>()
 
     @Before
@@ -52,9 +52,9 @@ class PaymentOptionsAddCardFragmentTest {
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
         ),
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
-        onReady: (PaymentOptionsAddCardFragment, FragmentPaymentsheetAddCardBinding) -> Unit
+        onReady: (PaymentOptionsAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit
     ) {
-        launchFragmentInContainer<PaymentOptionsAddCardFragment>(
+        launchFragmentInContainer<PaymentOptionsAddPaymentMethodFragment>(
             bundleOf(
                 PaymentOptionsActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentOptionsActivity.EXTRA_STARTER_ARGS to args
@@ -64,7 +64,7 @@ class PaymentOptionsAddCardFragmentTest {
         ).onFragment { fragment ->
             onReady(
                 fragment,
-                FragmentPaymentsheetAddCardBinding.bind(
+                FragmentPaymentsheetAddPaymentMethodBinding.bind(
                     requireNotNull(fragment.view)
                 )
             )

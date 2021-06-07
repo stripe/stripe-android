@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
-import com.stripe.android.paymentsheet.PaymentOptionsAddCardFragment
+import com.stripe.android.paymentsheet.PaymentOptionsAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.PaymentOptionsListFragment
-import com.stripe.android.paymentsheet.PaymentSheetAddCardFragment
+import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.PaymentSheetListFragment
 import com.stripe.android.paymentsheet.analytics.EventReporter
 
@@ -19,11 +19,11 @@ internal class PaymentSheetFragmentFactory(
             PaymentSheetListFragment::class.java.name -> {
                 PaymentSheetListFragment(eventReporter)
             }
-            PaymentSheetAddCardFragment::class.java.name -> {
-                PaymentSheetAddCardFragment(eventReporter)
+            PaymentSheetAddPaymentMethodFragment::class.java.name -> {
+                PaymentSheetAddPaymentMethodFragment(eventReporter)
             }
-            PaymentOptionsAddCardFragment::class.java.name -> {
-                PaymentOptionsAddCardFragment(eventReporter)
+            PaymentOptionsAddPaymentMethodFragment::class.java.name -> {
+                PaymentOptionsAddPaymentMethodFragment(eventReporter)
             }
             else -> {
                 super.instantiate(classLoader, className)

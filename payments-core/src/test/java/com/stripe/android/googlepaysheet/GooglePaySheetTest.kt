@@ -63,7 +63,7 @@ class GooglePaySheetTest {
         private val isConfigured: Boolean
     ) : GooglePaySheetLauncher {
         override suspend fun configure(
-            configuration: GooglePaySheetConfig
+            configuration: GooglePayConfig
         ): Boolean = isConfigured
 
         override fun present() {
@@ -79,8 +79,8 @@ class GooglePaySheetTest {
     }
 
     private companion object {
-        val CONFIG = GooglePaySheetConfig(
-            GooglePaySheetEnvironment.Test,
+        val CONFIG = GooglePayConfig(
+            GooglePayEnvironment.Test,
             amount = 1000,
             countryCode = "US",
             currencyCode = "usd"

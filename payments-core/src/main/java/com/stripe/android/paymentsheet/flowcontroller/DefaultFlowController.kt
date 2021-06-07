@@ -11,8 +11,8 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.googlepaysheet.GooglePaySheetConfig
-import com.stripe.android.googlepaysheet.GooglePaySheetEnvironment
+import com.stripe.android.googlepaysheet.GooglePayConfig
+import com.stripe.android.googlepaysheet.GooglePayEnvironment
 import com.stripe.android.googlepaysheet.GooglePaySheetResult
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
@@ -69,24 +69,18 @@ internal class DefaultFlowController internal constructor(
     private val paymentResultCallback: PaymentSheetResultCallback
 ) : PaymentSheet.FlowController {
 
-    private val paymentOptionActivityLauncher = activityLauncherFactory.create(
+    @VisibleForTesting
+    internal var paymentOptionActivityLauncher = activityLauncherFactory.create(
         PaymentOptionContract()
     ) { paymentOptionResult ->
         onPaymentOptionResult(paymentOptionResult)
     }
 
-    private val googlePayActivityLauncher = activityLauncherFactory.create(
+    @VisibleForTesting
+    internal var googlePayActivityLauncher = activityLauncherFactory.create(
         StripeGooglePayContract()
     ) { result ->
         onGooglePayResult(result)
-    }
-
-    internal var paymentOptionLauncher: (PaymentOptionContract.Args) -> Unit = { args ->
-        paymentOptionActivityLauncher.launch(args)
-    }
-
-    internal var googlePayLauncher: (StripeGooglePayContract.Args) -> Unit = { args ->
-        googlePayActivityLauncher.launch(args)
     }
 
     private val paymentRelayLauncher = activityLauncherFactory.create(
@@ -217,7 +211,7 @@ internal class DefaultFlowController internal constructor(
             )
         }
 
-        paymentOptionLauncher(
+        paymentOptionActivityLauncher.launch(
             PaymentOptionContract.Args(
                 stripeIntent = initData.stripeIntent,
                 paymentMethods = initData.paymentMethods,
@@ -247,14 +241,14 @@ internal class DefaultFlowController internal constructor(
             if (initData.stripeIntent !is PaymentIntent) {
                 error("Google Pay is currently supported only for PaymentIntents")
             }
-            googlePayLauncher(
+            googlePayActivityLauncher.launch(
                 StripeGooglePayContract.Args(
-                    config = GooglePaySheetConfig(
+                    config = GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                                GooglePaySheetEnvironment.Production
+                                GooglePayEnvironment.Production
                             else ->
-                                GooglePaySheetEnvironment.Test
+                                GooglePayEnvironment.Test
                         },
                         amount = initData.stripeIntent.amount?.toInt(),
                         countryCode = config?.googlePay?.countryCode.orEmpty(),

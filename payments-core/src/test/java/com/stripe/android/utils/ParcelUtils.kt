@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import kotlin.test.assertEquals
+import com.google.common.truth.Truth.assertThat
 
 internal object ParcelUtils {
     /**
@@ -37,12 +37,20 @@ internal object ParcelUtils {
     }
 
     internal fun verifyParcelRoundtrip(expected: Parcelable) {
-        val bundle = bundleOf(KEY to expected)
+        val actual: Parcelable = createParcelRoundtrip(expected)
 
-        val actual = copy(bundle, Bundle.CREATOR)
-            .getParcelable<Parcelable>(KEY)
+        assertThat(actual)
+            .isEqualTo(expected)
+    }
 
-        assertEquals(expected, actual)
+    private inline fun <reified T : Parcelable> createParcelRoundtrip(
+        source: Parcelable
+    ): T {
+        val bundle = bundleOf(KEY to source)
+
+        return requireNotNull(
+            copy(bundle, Bundle.CREATOR).getParcelable(KEY)
+        )
     }
 
     private const val KEY = "parcelable"

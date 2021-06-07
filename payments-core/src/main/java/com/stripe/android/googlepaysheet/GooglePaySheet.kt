@@ -61,7 +61,7 @@ internal class GooglePaySheet internal constructor(
     )
 
     fun configure(
-        configuration: GooglePaySheetConfig,
+        configuration: GooglePayConfig,
         callback: ConfigCallback
     ) {
         lifecycleScope().launch {
