@@ -5664,11 +5664,11 @@ public final class com/stripe/android/paymentsheet/injection/DaggerFlowControlle
 }
 
 public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideEventReporterFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideEventReporterFactory;
+	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideEventReporterFactory;
 	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEventReporter (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Lcom/stripe/android/paymentsheet/analytics/SessionId;Landroid/content/Context;)Lcom/stripe/android/paymentsheet/analytics/EventReporter;
+	public static fun provideEventReporter (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Lcom/stripe/android/paymentsheet/analytics/SessionId;Landroid/content/Context;Ldagger/Lazy;)Lcom/stripe/android/paymentsheet/analytics/EventReporter;
 }
 
 public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideFlowControllerInitializerFactory : dagger/internal/Factory {
