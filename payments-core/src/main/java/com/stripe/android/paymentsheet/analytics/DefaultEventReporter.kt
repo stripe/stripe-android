@@ -31,9 +31,8 @@ internal class DefaultEventReporter internal constructor(
         DefaultDeviceIdRepository(context, workContext),
         AnalyticsRequestExecutor.Default(),
         AnalyticsRequestFactory(
-            context,
-            { PaymentConfiguration.getInstance(context).publishableKey }
-        ),
+            context
+        ) { PaymentConfiguration.getInstance(context).publishableKey },
         workContext
     )
 
