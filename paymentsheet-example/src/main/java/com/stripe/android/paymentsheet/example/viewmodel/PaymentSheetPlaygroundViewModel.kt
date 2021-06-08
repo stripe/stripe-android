@@ -38,6 +38,7 @@ internal class PaymentSheetPlaygroundViewModel(
      */
     suspend fun prepareCheckout(
         customer: Repository.CheckoutCustomer,
+        currency: Repository.CheckoutCurrency,
         mode: Repository.CheckoutMode
     ) {
         customerConfig.value = null
@@ -46,9 +47,7 @@ internal class PaymentSheetPlaygroundViewModel(
         inProgress.postValue(true)
 
         runCatching {
-            repository.checkout(
-                customer, Repository.CheckoutCurrency.USD, mode
-            )
+            repository.checkout(customer, currency, mode)
         }.fold(
             onSuccess = {
                 checkoutMode = mode

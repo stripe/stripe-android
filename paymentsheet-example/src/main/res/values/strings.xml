@@ -28,4 +28,5 @@
     <string name="select">Select</string>
     <string name="checkout_custom">Checkout (Custom)</string>
     <string name="checkout_complete">Checkout (Complete)</string>
+    <string name="currency">Currency</string>
 </resources>

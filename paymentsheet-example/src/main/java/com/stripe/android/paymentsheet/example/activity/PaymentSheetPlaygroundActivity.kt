@@ -48,6 +48,12 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> null
         }
 
+    private val currency: Repository.CheckoutCurrency
+        get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
+            R.id.currency_usd_button -> Repository.CheckoutCurrency.USD
+            else -> Repository.CheckoutCurrency.EUR
+        }
+
     private val mode: Repository.CheckoutMode
         get() = when (viewBinding.modeRadioGroup.checkedRadioButtonId) {
             R.id.mode_payment_button -> Repository.CheckoutMode.Payment
@@ -70,7 +76,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewBinding.reloadButton.setOnClickListener {
             lifecycleScope.launch {
-                viewModel.prepareCheckout(customer, mode)
+                viewModel.prepareCheckout(customer, currency, mode)
             }
         }
 
