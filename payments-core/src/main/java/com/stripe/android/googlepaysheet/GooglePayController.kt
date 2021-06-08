@@ -21,6 +21,10 @@ internal interface GooglePayController {
     fun present()
 }
 
+/**
+ * Default [GooglePayController] for managing checks for Google Pay readiness and starting
+ * [StripeGooglePayActivity] using [StripeGooglePayContract.Args].
+ */
 internal class DefaultGooglePayController(
     viewModelStoreOwner: ViewModelStoreOwner,
     private val ioContext: CoroutineContext,
