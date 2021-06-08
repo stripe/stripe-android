@@ -32,7 +32,7 @@ internal class DefaultEventReporter internal constructor(
         AnalyticsRequestExecutor.Default(),
         AnalyticsRequestFactory(
             context,
-            PaymentConfiguration.getInstance(context).publishableKey
+            { PaymentConfiguration.getInstance(context).publishableKey }
         ),
         workContext
     )
