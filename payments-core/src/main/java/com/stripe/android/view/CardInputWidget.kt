@@ -34,7 +34,6 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
@@ -208,16 +207,6 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
     /**
-     * A [Card] representing the card details and postal code if all fields are valid;
-     * otherwise `null`
-     */
-    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
-    override val card: Card?
-        get() {
-            return cardBuilder?.build()
-        }
-
-    /**
      * A [CardParams] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
@@ -269,64 +258,6 @@ class CardInputWidget @JvmOverloads constructor(
                             .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
                             .build()
                     )
-                }
-            }
-
-            shouldShowErrorIcon = true
-
-            return null
-        }
-
-    /**
-     * A [Card.Builder] representing the card details and postal code if all fields are valid;
-     * otherwise `null`
-     */
-    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
-    override val cardBuilder: Card.Builder?
-        get() {
-            val cardNumber = cardNumberEditText.validatedCardNumber
-            val expirationDate = expiryDateEditText.validatedDate
-            val cvc = this.cvc
-
-            cardNumberEditText.shouldShowError = cardNumber == null
-            expiryDateEditText.shouldShowError = expirationDate == null
-            cvcEditText.shouldShowError = cvc == null
-            postalCodeEditText.shouldShowError =
-                (postalCodeRequired || usZipCodeRequired) &&
-                postalCodeEditText.postalCode.isNullOrBlank()
-
-            // Announce error messages for accessibility
-            currentFields
-                .filter { it.shouldShowError }
-                .forEach { editText ->
-                    editText.errorMessage?.let { errorMessage ->
-                        editText.announceForAccessibility(errorMessage)
-                    }
-                }
-
-            when {
-                cardNumber == null -> {
-                    cardNumberEditText.requestFocus()
-                }
-                expirationDate == null -> {
-                    expiryDateEditText.requestFocus()
-                }
-                cvc == null -> {
-                    cvcEditText.requestFocus()
-                }
-                postalCodeEditText.shouldShowError -> {
-                    postalCodeEditText.requestFocus()
-                }
-                else -> {
-                    shouldShowErrorIcon = false
-                    return Card.Builder(
-                        number = cardNumber.value,
-                        expMonth = expirationDate.month,
-                        expYear = expirationDate.year,
-                        cvc = cvc.value
-                    )
-                        .addressZip(postalCodeValue)
-                        .loggingTokens(setOf(LOGGING_TOKEN))
                 }
             }
 

@@ -1,15 +1,12 @@
 package com.stripe.android.model
 
-import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.parsers.CardJsonParser
 import org.json.JSONObject
 
 object CardFixtures {
     internal val CARD = Card(
-        number = CardNumberFixtures.VISA_NO_SPACES,
         expMonth = 8,
         expYear = 2050,
-        cvc = "123",
         addressLine1 = AddressFixtures.ADDRESS.line1,
         addressLine2 = AddressFixtures.ADDRESS.line2,
         addressCity = AddressFixtures.ADDRESS.city,

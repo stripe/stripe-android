@@ -10,18 +10,6 @@ import kotlin.test.assertNull
 class PaymentMethodCreateParamsTest {
 
     @Test
-    fun card_toPaymentMethodParamsCard() {
-        assertThat(CardFixtures.CARD.toPaymentMethodParamsCard()).isEqualTo(
-            PaymentMethodCreateParams.Card(
-                number = "4242424242424242",
-                cvc = "123",
-                expiryMonth = 8,
-                expiryYear = 2050
-            )
-        )
-    }
-
-    @Test
     fun createFromGooglePay_withNoBillingAddress() {
         assertThat(
             PaymentMethodCreateParams.createFromGooglePay(

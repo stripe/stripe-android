@@ -31,9 +31,9 @@ import com.stripe.android.model.StripeFileParams;
 import com.stripe.android.model.StripeFilePurpose;
 import com.stripe.android.model.Token;
 import com.stripe.android.model.WeChat;
-import com.stripe.android.networking.AnalyticsRequestFactory;
 import com.stripe.android.networking.AnalyticsRequest;
 import com.stripe.android.networking.AnalyticsRequestExecutor;
+import com.stripe.android.networking.AnalyticsRequestFactory;
 import com.stripe.android.networking.DefaultApiRequestExecutor;
 import com.stripe.android.networking.FakeAnalyticsRequestExecutor;
 import com.stripe.android.networking.StripeApiRepository;
@@ -45,8 +45,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import javax.inject.Provider;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -1130,7 +1128,6 @@ public class StripeTest {
                 createdPaymentMethod.billingDetails);
         assertNotNull(createdPaymentMethod.card);
         assertEquals("4242", createdPaymentMethod.card.last4);
-        assertThat(createdPaymentMethod.metadata).isNull();
 
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());

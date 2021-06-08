@@ -272,35 +272,6 @@ class SourceParamsTest {
     }
 
     @Test
-    fun `create with Card object should return expected map`() {
-        assertThat(
-            SourceParams.createCardParams(CardFixtures.CARD)
-                .toParamMap()
-        ).isEqualTo(
-            mapOf(
-                "type" to "card",
-                "card" to mapOf(
-                    "number" to VISA_NO_SPACES,
-                    "exp_month" to 8,
-                    "exp_year" to 2050,
-                    "cvc" to "123"
-                ),
-                "owner" to mapOf(
-                    "address" to mapOf(
-                        "line1" to "123 Market St",
-                        "line2" to "#345",
-                        "city" to "San Francisco",
-                        "state" to "CA",
-                        "postal_code" to "94107",
-                        "country" to "US"
-                    ),
-                    "name" to "Jenny Rosen"
-                )
-            )
-        )
-    }
-
-    @Test
     fun createCardParamsFromGooglePay_withNoBillingAddress() {
         assertThat(
             SourceParams.createCardParamsFromGooglePay(

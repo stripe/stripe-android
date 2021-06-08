@@ -345,36 +345,6 @@ class Stripe internal constructor(
     }
 
     /**
-     * Authenticate a [PaymentIntent].
-     * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/android-manual) flow.
-     *
-     * @param activity the `Activity` that is launching the payment authentication flow
-     * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
-     * property of a confirmed [PaymentIntent] object
-     */
-    @Deprecated(
-        "Rename to better reflect behavior and match iOS naming.",
-        ReplaceWith("handleNextActionForPayment(activity, clientSecret)")
-    )
-    @UiThread
-    fun authenticatePayment(
-        activity: Activity,
-        clientSecret: String
-    ) {
-        getLifecycleScope(activity).launch {
-            paymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
-                PaymentIntent.ClientSecret(clientSecret).value,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                ),
-                PaymentController.StripeIntentType.PaymentIntent
-            )
-        }
-    }
-
-    /**
      * Handle the [next_action](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action)
      * for a previously confirmed [PaymentIntent].
      *
@@ -704,51 +674,6 @@ class Stripe internal constructor(
      * | No return_url     | Custom Tabs            | Chrome            | WebView  |
      * | Custom return_url | WebView                | WebView           | WebView  |
      *
-     * @param activity the `Activity` that is launching the payment authentication flow
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
-     */
-    @JvmOverloads
-    @Deprecated(
-        "ComponentActivity will be required in an upcoming major version.",
-        ReplaceWith("confirmSetupIntent(ComponentActivity)")
-    )
-    fun confirmSetupIntent(
-        activity: Activity,
-        confirmSetupIntentParams: ConfirmSetupIntentParams,
-        stripeAccountId: String? = this.stripeAccountId
-    ) {
-        getLifecycleScope(activity).launch {
-            paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
-                confirmSetupIntentParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                )
-            )
-        }
-    }
-
-    /**
-     * Confirm and, if necessary, authenticate a [SetupIntent].
-     *
-     * For confirmation attempts that require 3DS1 authentication, if the
-     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
-     * be used:
-     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
-     *   are supported on the device.
-     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
-     * - Otherwise, use a WebView.
-     *
-     * If a custom `return_url` value is set, a WebView will always be used.
-     *
-     * |                   | Custom Tabs available? | Chrome available? | Fallback |
-     * |-------------------|------------------------|-------------------|----------|
-     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
-     * | Custom return_url | WebView                | WebView           | WebView  |
-     *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
@@ -773,35 +698,6 @@ class Stripe internal constructor(
     }
 
     /**
-     * Authenticate a [SetupIntent]. Used for manual confirmation flow.
-     *
-     * @param activity the `Activity` that is launching the payment authentication flow
-     * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
-     * property of a confirmed [SetupIntent] object
-     */
-    @Deprecated(
-        "Rename to better reflect behavior and match iOS naming.",
-        ReplaceWith("handleNextActionForSetupIntent(activity, clientSecret)")
-    )
-    @UiThread
-    fun authenticateSetup(
-        activity: Activity,
-        clientSecret: String
-    ) {
-        getLifecycleScope(activity).launch {
-            paymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
-                SetupIntent.ClientSecret(clientSecret).value,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                ),
-                PaymentController.StripeIntentType.SetupIntent
-            )
-        }
-    }
-
-    /**
      * Handle [next_action](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-next_action)
      * for a previously confirmed [SetupIntent]. Used for manual confirmation flow.
      *
@@ -819,40 +715,6 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId
     ) {
         activity.lifecycleScope.launch {
-            paymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
-                SetupIntent.ClientSecret(clientSecret).value,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                ),
-                PaymentController.StripeIntentType.SetupIntent
-            )
-        }
-    }
-
-    /**
-     * Handle [next_action](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-next_action)
-     * for a previously confirmed [SetupIntent]. Used for manual confirmation flow.
-     *
-     * @param activity the `Activity` that is launching the payment authentication flow
-     * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
-     * property of a confirmed [SetupIntent] object
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
-     */
-    @UiThread
-    @JvmOverloads
-    @Deprecated(
-        "ComponentActivity will be required in an upcoming major version.",
-        ReplaceWith("handleNextActionForSetupIntent(ComponentActivity)")
-    )
-    fun handleNextActionForSetupIntent(
-        activity: Activity,
-        clientSecret: String,
-        stripeAccountId: String? = this.stripeAccountId
-    ) {
-        getLifecycleScope(activity).launch {
             paymentController.startAuth(
                 AuthActivityStarter.Host.create(activity),
                 SetupIntent.ClientSecret(clientSecret).value,
@@ -1162,36 +1024,6 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId
     ) {
         activity.lifecycleScope.launch {
-            paymentController.startAuthenticateSource(
-                AuthActivityStarter.Host.create(activity),
-                source,
-                ApiRequest.Options(publishableKey, stripeAccountId)
-            )
-        }
-    }
-
-    /**
-     * Authenticate a [Source] that requires user action via a redirect (i.e. [Source.flow] is
-     * [Source.Flow.Redirect].
-     *
-     * The result of this operation will be returned via `Activity#onActivityResult(int, int, Intent)}}`
-     *
-     * @param activity the `Activity` that is launching the [Source] authentication flow
-     * @param source the [Source] to confirm
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
-     */
-    @JvmOverloads
-    @Deprecated(
-        "ComponentActivity will be required in an upcoming major version.",
-        ReplaceWith("authenticateSource(ComponentActivity)")
-    )
-    fun authenticateSource(
-        activity: Activity,
-        source: Source,
-        stripeAccountId: String? = this.stripeAccountId
-    ) {
-        getLifecycleScope(activity).launch {
             paymentController.startAuthenticateSource(
                 AuthActivityStarter.Host.create(activity),
                 source,
@@ -1648,35 +1480,6 @@ class Stripe internal constructor(
      * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
      * `POST /v1/tokens`
      *
-     * @param card the [Card] used to create this payment token
-     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
-     * @param callback a [ApiResultCallback] to receive the result or error
-     */
-    @Deprecated("Use createCardToken(CardParams)")
-    @UiThread
-    @JvmOverloads
-    fun createCardToken(
-        card: Card,
-        idempotencyKey: String? = null,
-        stripeAccountId: String? = this.stripeAccountId,
-        callback: ApiResultCallback<Token>
-    ) {
-        createToken(
-            tokenParams = card,
-            stripeAccountId = stripeAccountId,
-            idempotencyKey = idempotencyKey,
-            callback = callback
-        )
-    }
-
-    /**
-     * Create a Card token asynchronously.
-     *
-     * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
-     * `POST /v1/tokens`
-     *
      * @param cardParams the [CardParams] used to create this payment token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param stripeAccountId Optional, the Connect account to associate with this request.
@@ -1697,53 +1500,6 @@ class Stripe internal constructor(
             idempotencyKey = idempotencyKey,
             callback = callback
         )
-    }
-
-    /**
-     * Blocking method to create a [Token]. Do not call this on the UI thread or your app
-     * will crash.
-     *
-     * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
-     * `POST /v1/tokens`
-     *
-     * @param card the [Card] to use for this token
-     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
-     *
-     * @return a [Token] that can be used for this card
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException the card cannot be charged for some reason
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
-     */
-    @Deprecated("Use createCardTokenSynchronous(CardParams)")
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        CardException::class,
-        APIException::class
-    )
-    @WorkerThread
-    @JvmOverloads
-    fun createCardTokenSynchronous(
-        card: Card,
-        idempotencyKey: String? = null,
-        stripeAccountId: String? = this.stripeAccountId
-    ): Token? {
-        return runBlocking {
-            stripeRepository.createToken(
-                card,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
-                )
-            )
-        }
     }
 
     /**
@@ -2058,17 +1814,6 @@ class Stripe internal constructor(
                 callback.onError(StripeException.create(it))
             }
         )
-    }
-
-    /**
-     * Get a [LifecycleCoroutineScope] if available. Otherwise, default to a [CoroutineScope]
-     * using [Dispatchers.IO].
-     */
-    private fun getLifecycleScope(
-        activity: Activity
-    ): CoroutineScope = when (activity) {
-        is ComponentActivity -> activity.lifecycleScope
-        else -> CoroutineScope(workContext)
     }
 
     companion object {

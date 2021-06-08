@@ -635,41 +635,6 @@ data class SourceParams internal constructor(
         /**
          * Create Card Source params.
          *
-         * @param card A [Card] object containing the details necessary for the source.
-         * @return a [SourceParams] object that can be used to create a card source.
-         *
-         * @see [Card Payments with Sources](https://stripe.com/docs/sources/cards)
-         */
-        @Deprecated("Use createCardParams with CardParams argument.")
-        @JvmStatic
-        fun createCardParams(card: Card): SourceParams {
-            return SourceParams(
-                SourceType.CARD,
-                typeData = TypeData.Card(
-                    card.number,
-                    card.expMonth,
-                    card.expYear,
-                    card.cvc
-                ),
-                attribution = card.loggingTokens,
-                _owner = OwnerParams(
-                    address = Address.Builder()
-                        .setLine1(card.addressLine1)
-                        .setLine2(card.addressLine2)
-                        .setCity(card.addressCity)
-                        .setState(card.addressState)
-                        .setPostalCode(card.addressZip)
-                        .setCountry(card.addressCountry)
-                        .build(),
-                    name = card.name
-                ),
-                _metadata = card.metadata
-            )
-        }
-
-        /**
-         * Create Card Source params.
-         *
          * @param cardParams A [CardParams] object containing the details necessary for the source.
          * @return a [SourceParams] object that can be used to create a card source.
          *

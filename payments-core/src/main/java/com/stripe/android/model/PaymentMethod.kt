@@ -66,17 +66,6 @@ data class PaymentMethod internal constructor(
     @JvmField val customerId: String? = null,
 
     /**
-     * Set of key-value pairs that you can attach to an object. This can be useful for storing
-     * additional information about the object in a structured format.
-     *
-     * [metadata](https://stripe.com/docs/api/payment_methods/object#payment_method_object-metadata)
-     *
-     * @deprecated Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.
-     */
-    @Deprecated("Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.")
-    @JvmField val metadata: Map<String, String>? = null,
-
-    /**
      * If this is a `card` PaymentMethod, this hash contains details about the card.
      *
      * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)

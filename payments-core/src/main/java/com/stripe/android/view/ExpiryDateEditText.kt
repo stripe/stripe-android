@@ -36,15 +36,9 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
     /**
      * Gets the expiry date displayed on this control if it is valid, or `null` if it is not.
-     * The return value is given as a [Pair], where the first entry is the two-digit month
-     * (from 01-12) and the second entry is the four-digit year (2017, not 17).
+     * The return value is a [ExpirationDate.Validated], where the first entry is the two-digit
+     * month (from 01-12) and the second entry is the four-digit year (2017, not 17).
      */
-    @Deprecated("Use validatedDate")
-    val validDateFields: Pair<Int, Int>?
-        get() = validatedDate?.let {
-            Pair(it.month, it.year)
-        }
-
     val validatedDate: ExpirationDate.Validated?
         get() {
             return when (isDateValid) {
