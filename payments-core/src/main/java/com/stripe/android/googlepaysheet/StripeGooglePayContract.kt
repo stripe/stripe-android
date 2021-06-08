@@ -11,7 +11,7 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class StripeGooglePayContract :
-    ActivityResultContract<StripeGooglePayContract.Args, GooglePaySheetResult>() {
+    ActivityResultContract<StripeGooglePayContract.Args, GooglePayLauncherResult>() {
 
     override fun createIntent(
         context: Context,
@@ -24,13 +24,13 @@ internal class StripeGooglePayContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): GooglePaySheetResult {
-        return GooglePaySheetResult.fromIntent(intent)
+    ): GooglePayLauncherResult {
+        return GooglePayLauncherResult.fromIntent(intent)
     }
 
     /**
      * Args to start [StripeGooglePayActivity] and collect payment data. If successful, the
-     * result will be returned through [GooglePaySheetResult.PaymentData].
+     * result will be returned through [GooglePayLauncherResult.PaymentData].
      */
     @Parcelize
     data class Args(
@@ -47,7 +47,7 @@ internal class StripeGooglePayContract :
     }
 }
 
-internal fun GooglePaySheetResult.Error.getErrorResourceID(): Int? {
+internal fun GooglePayLauncherResult.Error.getErrorResourceID(): Int? {
     return when (googlePayStatus) {
         Status.RESULT_SUCCESS -> null
         Status.RESULT_INTERNAL_ERROR, Status.RESULT_CANCELED, Status.RESULT_DEAD_CLIENT, null ->

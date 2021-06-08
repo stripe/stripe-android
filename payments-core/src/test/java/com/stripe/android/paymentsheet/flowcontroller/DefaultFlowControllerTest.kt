@@ -24,7 +24,7 @@ import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaysheet.GooglePayConfig
 import com.stripe.android.googlepaysheet.GooglePayEnvironment
-import com.stripe.android.googlepaysheet.GooglePaySheetResult
+import com.stripe.android.googlepaysheet.GooglePayLauncherResult
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -432,7 +432,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onGooglePayResult(
-            GooglePaySheetResult.Canceled
+            GooglePayLauncherResult.Canceled
         )
 
         verify(paymentResultCallback).onPaymentSheetResult(
@@ -450,7 +450,7 @@ internal class DefaultFlowControllerTest {
             }
 
             flowController.onGooglePayResult(
-                GooglePaySheetResult.PaymentData(
+                GooglePayLauncherResult.PaymentData(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     shippingInformation = null
                 )

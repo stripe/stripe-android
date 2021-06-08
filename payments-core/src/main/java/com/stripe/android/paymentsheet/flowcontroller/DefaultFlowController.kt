@@ -10,7 +10,7 @@ import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaysheet.GooglePayConfig
 import com.stripe.android.googlepaysheet.GooglePayEnvironment
-import com.stripe.android.googlepaysheet.GooglePaySheetResult
+import com.stripe.android.googlepaysheet.GooglePayLauncherResult
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
@@ -238,10 +238,10 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     internal fun onGooglePayResult(
-        googlePayResult: GooglePaySheetResult
+        googlePayResult: GooglePayLauncherResult
     ) {
         when (googlePayResult) {
-            is GooglePaySheetResult.PaymentData -> {
+            is GooglePayLauncherResult.PaymentData -> {
                 runCatching {
                     viewModel.initData
                 }.fold(
@@ -263,7 +263,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     }
                 )
             }
-            is GooglePaySheetResult.Error -> {
+            is GooglePayLauncherResult.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
@@ -274,7 +274,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
                 )
             }
-            is GooglePaySheetResult.Canceled -> {
+            is GooglePayLauncherResult.Canceled -> {
                 // don't log cancellations as failures
                 paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
             }
