@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.argWhere
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -106,6 +107,17 @@ class DefaultEventReporterTest {
                 val deviceIdValue = requireNotNull(req.compactParams?.get("device_id")).toString()
                 UUID.fromString(deviceIdValue) != null
             }
+        )
+    }
+
+    @Test
+    fun `constructor does not read from PaymentConfiguration`() {
+        PaymentConfiguration.clearInstance()
+        // Would crash if it tries to read from the uninitialized PaymentConfiguration
+        DefaultEventReporter(
+            EventReporter.Mode.Complete,
+            sessionId,
+            ApplicationProvider.getApplicationContext()
         )
     }
 }
