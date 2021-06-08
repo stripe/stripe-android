@@ -54,8 +54,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> Repository.CheckoutMode.Setup
         }
 
-    private val merchantName = "Example, Inc."
-
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
@@ -84,6 +82,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             flowController.confirm()
         }
 
+        viewBinding.paymentMethod.setOnClickListener {
+            flowController.presentPaymentOptions()
+        }
+
         viewModel.status.observe(this) {
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         }
@@ -100,14 +102,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 disableViews()
             }
         }
+
+        disableViews()
     }
 
     private fun disableViews() {
         viewBinding.completeCheckoutButton.isEnabled = false
         viewBinding.customCheckoutButton.isEnabled = false
-        viewBinding.paymentMethod.setOnClickListener(null)
-        viewBinding.paymentMethod.setText(R.string.loading)
-        viewBinding.paymentMethod.setCompoundDrawables(null, null, null, null)
+        viewBinding.paymentMethod.isClickable = false
     }
 
     private fun startCompleteCheckout() {
@@ -166,10 +168,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun onConfigured(success: Boolean, error: Throwable?) {
         if (success) {
-            viewBinding.paymentMethod.setOnClickListener {
-                flowController.presentPaymentOptions()
-            }
-
+            viewBinding.paymentMethod.isClickable = true
             onPaymentOption(flowController.getPaymentOption())
         } else {
             viewModel.status.value =
@@ -200,5 +199,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewModel.status.value = paymentResult.toString()
+    }
+
+    companion object {
+        private const val merchantName = "Example, Inc."
     }
 }

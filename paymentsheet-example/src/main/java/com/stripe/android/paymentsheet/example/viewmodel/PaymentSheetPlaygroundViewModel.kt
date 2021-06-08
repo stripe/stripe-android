@@ -32,6 +32,10 @@ internal class PaymentSheetPlaygroundViewModel(
     var checkoutMode: Repository.CheckoutMode? = null
     var temporaryCustomerId: String? = null
 
+    /**
+     * Calls the backend to prepare for checkout. The server creates a new Payment or Setup Intent
+     * that will be confirmed on the client using Payment Sheet.
+     */
     suspend fun prepareCheckout(
         customer: Repository.CheckoutCustomer,
         mode: Repository.CheckoutMode
@@ -41,13 +45,11 @@ internal class PaymentSheetPlaygroundViewModel(
 
         inProgress.postValue(true)
 
-        val checkoutResponse = runCatching {
+        runCatching {
             repository.checkout(
                 customer, Repository.CheckoutCurrency.USD, mode
             )
-        }
-
-        checkoutResponse.fold(
+        }.fold(
             onSuccess = {
                 checkoutMode = mode
                 temporaryCustomerId = if (customer == Repository.CheckoutCustomer.New) {
