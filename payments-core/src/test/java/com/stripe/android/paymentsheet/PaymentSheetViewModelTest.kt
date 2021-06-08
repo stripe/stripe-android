@@ -12,7 +12,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepaysheet.GooglePaySheetResult
+import com.stripe.android.googlepaysheet.GooglePayLauncherResult
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -192,7 +192,7 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(PaymentSheetViewState.StartProcessing)
         assertThat(processing[0]).isTrue()
 
-        viewModel.onGooglePayResult(GooglePaySheetResult.Canceled)
+        viewModel.onGooglePayResult(GooglePayLauncherResult.Canceled)
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
@@ -252,7 +252,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(processing[0]).isTrue()
 
         viewModel.onGooglePayResult(
-            GooglePaySheetResult.Error(
+            GooglePayLauncherResult.Error(
                 Exception("Test exception"),
                 Status.RESULT_INTERNAL_ERROR
             )

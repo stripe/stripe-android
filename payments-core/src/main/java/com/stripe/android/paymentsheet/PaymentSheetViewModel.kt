@@ -17,7 +17,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepaysheet.GooglePayConfig
 import com.stripe.android.googlepaysheet.GooglePayEnvironment
-import com.stripe.android.googlepaysheet.GooglePaySheetResult
+import com.stripe.android.googlepaysheet.GooglePayLauncherResult
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
 import com.stripe.android.googlepaysheet.getErrorResourceID
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -337,16 +337,16 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     internal fun onGooglePayResult(
-        googlePayResult: GooglePaySheetResult
+        googlePayResult: GooglePayLauncherResult
     ) {
         when (googlePayResult) {
-            is GooglePaySheetResult.PaymentData -> {
+            is GooglePayLauncherResult.PaymentData -> {
                 val paymentSelection = PaymentSelection.Saved(
                     googlePayResult.paymentMethod
                 )
                 confirmPaymentSelection(paymentSelection)
             }
-            is GooglePaySheetResult.Error -> {
+            is GooglePayLauncherResult.Error -> {
                 logger.error("Error processing Google Pay payment", googlePayResult.exception)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 stripeIntent.value?.let { it ->

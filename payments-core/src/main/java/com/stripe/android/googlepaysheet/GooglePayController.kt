@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
-internal interface GooglePaySheetLauncher {
+internal interface GooglePayController {
     suspend fun configure(
         configuration: GooglePayConfig
     ): Boolean
@@ -21,21 +21,21 @@ internal interface GooglePaySheetLauncher {
     fun present()
 }
 
-internal class DefaultGooglePaySheetLauncher(
+internal class DefaultGooglePayController(
     viewModelStoreOwner: ViewModelStoreOwner,
     private val ioContext: CoroutineContext,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     private val activityResultLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
-) : GooglePaySheetLauncher {
+) : GooglePayController {
 
     private val viewModel =
-        ViewModelProvider(viewModelStoreOwner)[GooglePaySheetConfigureViewModel::class.java]
+        ViewModelProvider(viewModelStoreOwner)[GooglePayLauncherConfigureViewModel::class.java]
 
     constructor(
         activity: ComponentActivity,
         ioContext: CoroutineContext = Dispatchers.IO,
         googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-        callback: GooglePaySheetResultCallback
+        callback: GooglePayLauncher.ResultCallback
     ) : this(
         activity,
         ioContext,
@@ -51,7 +51,7 @@ internal class DefaultGooglePaySheetLauncher(
         fragment: Fragment,
         ioContext: CoroutineContext = Dispatchers.IO,
         googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-        callback: GooglePaySheetResultCallback
+        callback: GooglePayLauncher.ResultCallback
     ) : this(
         fragment,
         ioContext,
@@ -69,7 +69,7 @@ internal class DefaultGooglePaySheetLauncher(
         registry: ActivityResultRegistry,
         ioContext: CoroutineContext = Dispatchers.IO,
         googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-        callback: GooglePaySheetResultCallback
+        callback: GooglePayLauncher.ResultCallback
     ) : this(
         fragment,
         ioContext,
@@ -114,6 +114,6 @@ internal class DefaultGooglePaySheetLauncher(
 
     private companion object {
         private const val CONFIGURE_ERROR =
-            "GooglePaySheet must be successfully initialized using configure() before calling present()."
+            "GooglePayLauncher must be successfully initialized using configure() before calling present()."
     }
 }

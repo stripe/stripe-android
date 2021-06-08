@@ -15,17 +15,17 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-class GooglePaySheetTest {
+class GooglePayLauncherTest {
 
     @Test
     fun `no-op should not return any results`() {
-        val results = mutableListOf<GooglePaySheetResult>()
+        val results = mutableListOf<GooglePayLauncherResult>()
         val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
             TestFragment()
         }
 
         scenario.onFragment { fragment ->
-            GooglePaySheet(fragment) { result ->
+            GooglePayLauncher(fragment) { result ->
                 results.add(result)
             }
         }
@@ -36,7 +36,7 @@ class GooglePaySheetTest {
 
     @Test
     fun `configure() should invoke callback with expected value`() {
-        val launcher = FakeGooglePaySheetLauncher(true)
+        val launcher = FakeGooglePayController(true)
 
         val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
             TestFragment()
@@ -44,7 +44,7 @@ class GooglePaySheetTest {
 
         val configResults = mutableListOf<Boolean>()
         scenario.onFragment { fragment ->
-            val sheet = GooglePaySheet(
+            val sheet = GooglePayLauncher(
                 { fragment.viewLifecycleOwner.lifecycleScope },
                 launcher,
             )
@@ -59,9 +59,9 @@ class GooglePaySheetTest {
             .containsExactly(true)
     }
 
-    internal class FakeGooglePaySheetLauncher(
+    internal class FakeGooglePayController(
         private val isConfigured: Boolean
-    ) : GooglePaySheetLauncher {
+    ) : GooglePayController {
         override suspend fun configure(
             configuration: GooglePayConfig
         ): Boolean = isConfigured

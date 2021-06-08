@@ -33,7 +33,7 @@ internal class StripeGooglePayViewModel(
 
     private val googlePayJsonFactory = GooglePayJsonFactory(application)
 
-    private val _googleResult = MutableLiveData<GooglePaySheetResult>()
+    private val _googleResult = MutableLiveData<GooglePayLauncherResult>()
     internal val googlePayResult = _googleResult.distinctUntilChanged()
 
     fun createIsReadyToPayRequest(): IsReadyToPayRequest {
@@ -42,7 +42,7 @@ internal class StripeGooglePayViewModel(
         )
     }
 
-    fun updateGooglePayResult(result: GooglePaySheetResult) {
+    fun updateGooglePayResult(result: GooglePayLauncherResult) {
         _googleResult.value = result
     }
 
