@@ -13,6 +13,8 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.googlepaysheet.StripeGooglePayContract
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
@@ -24,6 +26,7 @@ import com.stripe.android.paymentsheet.DefaultGooglePayRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.GooglePayRepository
 import com.stripe.android.paymentsheet.PaymentOptionContract
+import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
@@ -47,7 +50,7 @@ internal class FlowControllerModule {
     /**
      * Provides a non-singleton PaymentConfiguration.
      *
-     * Needs to be recalculated whenever needed to allow client to set the publishableKey and
+     * Needs to be re-fetched whenever needed to allow client to set the publishableKey and
      * stripeAccountId in PaymentConfiguration any time before configuring the FlowController
      * through configureWithPaymentIntent or configureWithSetupIntent.
      *
@@ -91,12 +94,18 @@ internal class FlowControllerModule {
     @Singleton
     fun provideEventReporter(
         sessionId: SessionId,
-        appContext: Context
+        appContext: Context,
+        lazyPaymentConfiguration: Lazy<PaymentConfiguration>
     ): EventReporter {
         return DefaultEventReporter(
             mode = EventReporter.Mode.Custom,
             sessionId,
-            appContext
+            DefaultDeviceIdRepository(appContext, Dispatchers.IO),
+            AnalyticsRequestExecutor.Default(),
+            AnalyticsRequestFactory(
+                appContext
+            ) { lazyPaymentConfiguration.get().publishableKey },
+            Dispatchers.IO
         )
     }
 
