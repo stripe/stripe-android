@@ -15,11 +15,11 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.googlepaysheet.GooglePayConfig
-import com.stripe.android.googlepaysheet.GooglePayEnvironment
-import com.stripe.android.googlepaysheet.GooglePayLauncherResult
-import com.stripe.android.googlepaysheet.StripeGooglePayContract
-import com.stripe.android.googlepaysheet.getErrorResourceID
+import com.stripe.android.googlepaylauncher.GooglePayConfig
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.getErrorResourceID
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod

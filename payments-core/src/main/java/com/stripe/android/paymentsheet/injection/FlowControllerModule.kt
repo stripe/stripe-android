@@ -11,7 +11,7 @@ import com.stripe.android.PaymentRelayContract
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.googlepaysheet.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
