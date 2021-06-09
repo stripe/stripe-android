@@ -45,8 +45,7 @@ internal class EndToEndTest {
             stripe.confirmPaymentIntentSynchronous(
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     clientSecret = newPaymentIntent.clientSecret,
-                    paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
-                    returnUrl = "https://example.com"
+                    paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS
                 )
             )
         )
