@@ -160,8 +160,6 @@ data class Card internal constructor(
      */
     override val id: String?,
 
-    internal val loggingTokens: Set<String> = emptySet(),
-
     /**
      * If the card number is tokenized, this is the method that was used. See [TokenizationMethod].
      *
@@ -170,7 +168,7 @@ data class Card internal constructor(
     val tokenizationMethod: TokenizationMethod? = null
 ) : StripeModel, StripePaymentSource {
 
-    companion object {
+    internal companion object {
         /**
          * See https://stripe.com/docs/api/cards/object#card_object-brand for valid values.
          */
