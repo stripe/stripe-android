@@ -7,17 +7,13 @@ package com.stripe.android.paymentsheet.elements.common
  */
 internal abstract class TextFieldElementState {
 
-    /**
-     * This indicate the Element state has reached the max number of characters
-     * and focus should shift forward.
-     */
-    abstract fun isFull(): Boolean
+    abstract fun shouldShowError(hasFocus: Boolean): Boolean
 
     /**
      * Indicates element is valid and field extraction can happen
      * and be used to create PaymentMethod Parameters
      */
-    abstract fun isValid(): Boolean
+    fun isValid(): Boolean = this is TextFieldElementStateValid
 
     /**
      * If in a state where isValid() returns false it indicates the element cannot be
@@ -26,15 +22,10 @@ internal abstract class TextFieldElementState {
     abstract fun getErrorMessageResId(): Int?
 
     abstract class TextFieldElementStateValid : TextFieldElementState() {
-        override fun isValid(): Boolean = true
-        override fun isFull(): Boolean = false
         override fun getErrorMessageResId(): Int? = null
+        override fun shouldShowError(hasFocus: Boolean) = false
+        abstract fun isFull(): Boolean?
     }
 
-    abstract class TextFieldElementStateError(private val stringResId: Int) :
-        TextFieldElementState() {
-        override fun isValid(): Boolean = false
-        override fun isFull(): Boolean = false
-        override fun getErrorMessageResId(): Int? = stringResId
-    }
+    abstract class TextFieldElementStateInvalid : TextFieldElementState()
 }

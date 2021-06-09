@@ -21,10 +21,10 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
 
     override fun determineState(input: String): TextFieldElementState {
         return when {
-            input.isEmpty() -> Error.BlankAndRequired
+            input.isEmpty() -> Invalid.BlankAndRequired
             pattern.matcher(input).matches() -> Valid.Limitless
-            containsNameAndDomain(input) -> Error.Malformed
-            else -> Error.Incomplete
+            containsNameAndDomain(input) -> Invalid.Malformed
+            else -> Invalid.Incomplete
         }
     }
 
@@ -32,29 +32,30 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
         Regex(".*@.*\\..+")
     )
 
-    override fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean) =
-        when (elementState) {
-            is Error -> {
-                when (elementState) {
-                    Error.Incomplete -> !hasFocus
-                    Error.Malformed -> true
-                    Error.BlankAndRequired -> false
-                }
-            }
-            is Valid -> false
-            else -> false
-        }
-
     companion object {
         sealed class Valid : TextFieldElementState.TextFieldElementStateValid() {
             object Limitless : Valid() // no auto-advance
+            {
+                override fun isFull(): Boolean = false
+            }
         }
 
-        sealed class Error(stringResId: Int) :
-            TextFieldElementState.TextFieldElementStateError(stringResId) {
-            object Incomplete : Error(R.string.incomplete)
-            object Malformed : Error(R.string.malformed)
-            object BlankAndRequired : Error(R.string.blank_and_required)
+        sealed class Invalid :
+            TextFieldElementState.TextFieldElementStateInvalid() {
+            object Incomplete : Invalid() {
+                override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+                override fun getErrorMessageResId(): Int = R.string.incomplete
+            }
+
+            object Malformed : Invalid() {
+                override fun shouldShowError(hasFocus: Boolean): Boolean = true
+                override fun getErrorMessageResId(): Int = R.string.malformed
+            }
+
+            object BlankAndRequired : Invalid() {
+                override fun shouldShowError(hasFocus: Boolean): Boolean = false
+                override fun getErrorMessageResId(): Int = R.string.blank_and_required
+            }
         }
     }
 }

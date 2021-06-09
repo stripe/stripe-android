@@ -29,17 +29,17 @@ internal class TextFieldElementTest {
         { state, hasFocus ->
             when (state) {
                 is TextFieldElement.Companion.Valid.Full -> false
-                is TextFieldElement.Companion.Error.ShowInFocus -> !hasFocus
-                is TextFieldElement.Companion.Error.ShowAlways -> true
-                else -> config.shouldShowError(state, hasFocus)
+                is TextFieldElement.Companion.Invalid.ShowOutOfFocus -> !hasFocus
+                is TextFieldElement.Companion.Invalid.ShowAlways -> true
+                else -> state.shouldShowError(hasFocus)
             }
         }
 
     private val determineStateDebug: (String) -> TextFieldElementState = { str ->
         when {
             str.contains("full") -> TextFieldElement.Companion.Valid.Full
-            str.contains("focus") -> TextFieldElement.Companion.Error.ShowInFocus
-            str.contains("always") -> TextFieldElement.Companion.Error.ShowAlways
+            str.contains("focus") -> TextFieldElement.Companion.Invalid.ShowOutOfFocus
+            str.contains("always") -> TextFieldElement.Companion.Invalid.ShowAlways
             else -> config.determineState(str)
         }
     }
@@ -50,7 +50,7 @@ internal class TextFieldElementTest {
 
     @Test
     fun `verify onValueChange sets the paramValue`() {
-        config.fakeElementState = Error.Incomplete
+        config.fakeElementState = Invalid.Incomplete
 
         var paramValue: String? = null
         textFieldElement.input.asLiveData()
@@ -63,8 +63,7 @@ internal class TextFieldElementTest {
 
     @Test
     fun `verify the error message is set when should be visible`() {
-        config.fakeElementState = Error.Incomplete
-        config.fakeShouldShowError = true
+        config.fakeElementState = Invalid.Incomplete
 
         var errorMessageResId: Int? = 5
         textFieldElement.errorMessage.asLiveData()
@@ -112,7 +111,7 @@ internal class TextFieldElementTest {
     @Test
     fun `Verify is not complete set when the element state changes`() {
         config.fakeElementState = object : TextFieldElementState.TextFieldElementStateValid() {
-            override fun isValid() = false
+            override fun isFull(): Boolean = true
         }
 
         var isComplete = true
@@ -135,13 +134,14 @@ internal class TextFieldElementTest {
             }
 
         config.fakeElementState = object : TextFieldElementState.TextFieldElementStateValid() {
-            override fun isValid() = false
+            override fun isFull(): Boolean = false
         }
         textFieldElement.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(false)
 
-        config.fakeElementState = object : TextFieldElementState.TextFieldElementStateValid() {
-            override fun isValid() = true
+        config.fakeElementState = object : TextFieldElementState.TextFieldElementStateInvalid() {
+            override fun shouldShowError(hasFocus: Boolean): Boolean = false
+            override fun getErrorMessageResId(): Int = R.string.incomplete
         }
         textFieldElement.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(true)
@@ -154,11 +154,9 @@ internal class TextFieldElementTest {
             visibleError = it
         }
 
-        config.fakeShouldShowError = false
         textFieldElement.onValueChange("full")
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeShouldShowError = true
         textFieldElement.onValueChange("focus")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
@@ -166,8 +164,6 @@ internal class TextFieldElementTest {
 
     @Test
     fun `Verify is visible error set when the element state changes`() {
-        config.fakeShouldShowError = false
-
         var visibleError = false
         textFieldElement.visibleError.asLiveData()
             .observeForever {
@@ -176,8 +172,7 @@ internal class TextFieldElementTest {
 
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeElementState = Error.Incomplete
-        config.fakeShouldShowError = true
+        config.fakeElementState = Invalid.Incomplete
         textFieldElement.onValueChange("newValue")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
@@ -242,16 +237,10 @@ internal class TextFieldElementTest {
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        var fakeShouldShowError = false
         var fakeElementState: TextFieldElementState = Valid.Limitless
 
         override fun determineState(input: String): TextFieldElementState =
             fakeElementState
-
-        override fun shouldShowError(
-            elementState: TextFieldElementState,
-            hasFocus: Boolean
-        ) = fakeShouldShowError
 
         override fun filter(userTyped: String): String = userTyped
     }
@@ -266,11 +255,6 @@ internal class TextFieldElementTest {
         override fun determineState(input: String): TextFieldElementState =
             fakeElementState
 
-        override fun shouldShowError(
-            elementState: TextFieldElementState,
-            hasFocus: Boolean
-        ) = hasFocus
-
         override fun filter(userTyped: String): String = userTyped
     }
 
@@ -279,12 +263,9 @@ internal class TextFieldElementTest {
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        override fun determineState(input: String): TextFieldElementState = Valid.Limitless
+        val fakeElementState: TextFieldElementState = Valid.Limitless
 
-        override fun shouldShowError(
-            elementState: TextFieldElementState,
-            hasFocus: Boolean
-        ) = false
+        override fun determineState(input: String): TextFieldElementState = fakeElementState
 
         override fun filter(userTyped: String): String = userTyped.filter { Character.isDigit(it) }
     }
@@ -293,11 +274,18 @@ internal class TextFieldElementTest {
 
         sealed class Valid : TextFieldElementState.TextFieldElementStateValid() {
             object Limitless : Valid() // no auto-advance
+            {
+                override fun isFull(): Boolean = false
+            }
         }
 
-        sealed class Error(stringResId: Int) :
-            TextFieldElementState.TextFieldElementStateError(stringResId) {
-            object Incomplete : Error(R.string.incomplete)
+        sealed class Invalid :
+            TextFieldElementState.TextFieldElementStateInvalid() {
+            object Incomplete : Invalid() {
+                override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+
+                override fun getErrorMessageResId(): Int = R.string.incomplete
+            }
         }
     }
 

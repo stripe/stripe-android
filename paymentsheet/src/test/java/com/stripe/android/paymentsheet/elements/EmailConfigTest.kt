@@ -9,18 +9,18 @@ class EmailConfigTest {
 
     @Test
     fun `verify determine state returns blank and required when empty`() {
-        assertThat(emailConfig.determineState("")).isEqualTo(EmailConfig.Companion.Error.BlankAndRequired)
+        assertThat(emailConfig.determineState("")).isEqualTo(EmailConfig.Companion.Invalid.BlankAndRequired)
     }
 
     @Test
     fun `verify the if email doesn't match the pattern it returns incomplete`() {
-        assertThat(emailConfig.determineState("sdf")).isEqualTo(EmailConfig.Companion.Error.Incomplete)
+        assertThat(emailConfig.determineState("sdf")).isEqualTo(EmailConfig.Companion.Invalid.Incomplete)
     }
 
     @Test
     fun `verify if it doesn't pattern match but has an @ and period it is malformed`() {
-        assertThat(emailConfig.determineState("@.")).isEqualTo(EmailConfig.Companion.Error.Incomplete)
-        assertThat(emailConfig.determineState("@.x")).isEqualTo(EmailConfig.Companion.Error.Malformed)
+        assertThat(emailConfig.determineState("@.")).isEqualTo(EmailConfig.Companion.Invalid.Incomplete)
+        assertThat(emailConfig.determineState("@.x")).isEqualTo(EmailConfig.Companion.Invalid.Malformed)
     }
 
     @Test
@@ -31,14 +31,12 @@ class EmailConfigTest {
     @Test
     fun `verify incomplete errors are shown when don't have focus`() {
         assertThat(
-            emailConfig.shouldShowError(
-                EmailConfig.Companion.Error.Incomplete,
+            EmailConfig.Companion.Invalid.Incomplete.shouldShowError(
                 true
             )
         ).isEqualTo(false)
         assertThat(
-            emailConfig.shouldShowError(
-                EmailConfig.Companion.Error.Incomplete,
+            EmailConfig.Companion.Invalid.Incomplete.shouldShowError(
                 false
             )
         ).isEqualTo(true)
@@ -47,14 +45,12 @@ class EmailConfigTest {
     @Test
     fun `verify malformed are shown when you do and don't have focus`() {
         assertThat(
-            emailConfig.shouldShowError(
-                EmailConfig.Companion.Error.Malformed,
+            EmailConfig.Companion.Invalid.Malformed.shouldShowError(
                 true
             )
         ).isEqualTo(true)
         assertThat(
-            emailConfig.shouldShowError(
-                EmailConfig.Companion.Error.Malformed,
+            EmailConfig.Companion.Invalid.Malformed.shouldShowError(
                 false
             )
         ).isEqualTo(true)
@@ -63,14 +59,12 @@ class EmailConfigTest {
     @Test
     fun `verify blank and required errors are never shown`() {
         assertThat(
-            emailConfig.shouldShowError(
-                EmailConfig.Companion.Error.BlankAndRequired,
+            EmailConfig.Companion.Invalid.BlankAndRequired.shouldShowError(
                 true
             )
         ).isEqualTo(false)
         assertThat(
-            emailConfig.shouldShowError(
-                EmailConfig.Companion.Error.BlankAndRequired,
+            EmailConfig.Companion.Invalid.BlankAndRequired.shouldShowError(
                 false
             )
         ).isEqualTo(false)
@@ -79,14 +73,12 @@ class EmailConfigTest {
     @Test
     fun `verify Limitless states are never shown as error`() {
         assertThat(
-            emailConfig.shouldShowError(
-                EmailConfig.Companion.Valid.Limitless,
+            EmailConfig.Companion.Valid.Limitless.shouldShowError(
                 true
             )
         ).isEqualTo(false)
         assertThat(
-            emailConfig.shouldShowError(
-                EmailConfig.Companion.Valid.Limitless,
+            EmailConfig.Companion.Valid.Limitless.shouldShowError(
                 false
             )
         ).isEqualTo(false)

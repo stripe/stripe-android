@@ -10,7 +10,7 @@ class NameConfigTest {
     @Test
     fun `verify determine state returns blank and required when empty or null`() {
         Truth.assertThat(nameConfig.determineState(""))
-            .isEqualTo(NameConfig.Companion.Error.BlankAndRequired)
+            .isEqualTo(NameConfig.Companion.Invalid.BlankAndRequired)
     }
 
     @Test
@@ -22,14 +22,12 @@ class NameConfigTest {
     @Test
     fun `verify blank and required errors are never shown`() {
         Truth.assertThat(
-            nameConfig.shouldShowError(
-                NameConfig.Companion.Error.BlankAndRequired,
+            NameConfig.Companion.Invalid.BlankAndRequired.shouldShowError(
                 true
             )
         ).isEqualTo(false)
         Truth.assertThat(
-            nameConfig.shouldShowError(
-                NameConfig.Companion.Error.BlankAndRequired,
+            NameConfig.Companion.Invalid.BlankAndRequired.shouldShowError(
                 false
             )
         ).isEqualTo(false)
@@ -38,14 +36,12 @@ class NameConfigTest {
     @Test
     fun `verify Limitless states are never shown as error`() {
         Truth.assertThat(
-            nameConfig.shouldShowError(
-                NameConfig.Companion.Valid.Limitless,
+            NameConfig.Companion.Valid.Limitless.shouldShowError(
                 true
             )
         ).isEqualTo(false)
         Truth.assertThat(
-            nameConfig.shouldShowError(
-                NameConfig.Companion.Valid.Limitless,
+            NameConfig.Companion.Valid.Limitless.shouldShowError(
                 false
             )
         ).isEqualTo(false)
