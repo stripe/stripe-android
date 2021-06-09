@@ -12,7 +12,7 @@ internal interface TextFieldConfig {
     val keyboard: KeyboardType
 
     /** This will determine the state of the element based on the text */
-    fun determineState(input: String): TextFieldElementState
+    fun determineState(input: String): TextFieldState
 
     /**
      * This works a little like the input filter, removing pasted characters that are invalid in

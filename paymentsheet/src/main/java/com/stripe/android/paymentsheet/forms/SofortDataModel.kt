@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.R
+import com.stripe.android.paymentsheet.R
+
 val sofortParams: MutableMap<String, Any?> = mutableMapOf(
     "country" to null,
 )
