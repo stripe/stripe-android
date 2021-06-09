@@ -26,32 +26,21 @@ enum class CardBrand(
      * Note that [CardBrand.DinersClub]'s max length depends on the BIN (e.g. card number prefix).
      * In the case of a [CardBrand.DinersClub] card, use [getMaxLengthForCardNumber].
      */
-    @Deprecated("Will be removed in upcoming major release.")
-    val defaultMaxLength: Int = 16,
+    private val defaultMaxLength: Int = 16,
 
     /**
      * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
      */
-    @Deprecated("Will be removed in upcoming major release.")
-    val pattern: Pattern? = null,
+    private val pattern: Pattern? = null,
 
     /**
      * Patterns for discrete lengths
      */
-    @Deprecated("Will be removed in upcoming major release.")
     private val partialPatterns: Map<Int, Pattern>,
-
-    /**
-     * The position of spaces in a formatted card number. For example, "4242424242424242" is
-     * formatted to "4242 4242 4242 4242".
-     */
-    @Deprecated("Will be removed in upcoming major release.")
-    val defaultSpacePositions: Set<Int> = setOf(4, 9, 14),
 
     /**
      * By default, a [CardBrand] does not have variants.
      */
-    @Deprecated("Will be removed in upcoming major release.")
     private val variantMaxLength: Map<Pattern, Int> = emptyMap(),
 ) {
     AmericanExpress(
@@ -65,8 +54,7 @@ enum class CardBrand(
         pattern = Pattern.compile("^(34|37)[0-9]*$"),
         partialPatterns = mapOf(
             1 to Pattern.compile("^3$")
-        ),
-        defaultSpacePositions = setOf(4, 11)
+        )
     ),
 
     Discover(
@@ -187,8 +175,7 @@ enum class CardBrand(
      *
      * Note: currently only [CardBrand.DinersClub] has variants
      */
-    @Deprecated("Will be replaced with AccountRange#panLength, which is internal.")
-    fun getMaxLengthForCardNumber(cardNumber: String): Int {
+    internal fun getMaxLengthForCardNumber(cardNumber: String): Int {
         val normalizedCardNumber = CardNumber.Unvalidated(cardNumber).normalized
         return variantMaxLength.entries.firstOrNull { (pattern, _) ->
             pattern.matcher(normalizedCardNumber).matches()
@@ -205,8 +192,7 @@ enum class CardBrand(
          * @return the [CardBrand] that matches the [cardNumber]'s prefix, if one is found;
          * otherwise, [CardBrand.Unknown]
          */
-        @Deprecated("Card brand matching logic will no longer be public in upcoming major release.")
-        fun fromCardNumber(cardNumber: String?): CardBrand {
+        internal fun fromCardNumber(cardNumber: String?): CardBrand {
             if (cardNumber.isNullOrBlank()) {
                 return Unknown
             }

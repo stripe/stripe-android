@@ -327,36 +327,6 @@ class Stripe internal constructor(
     }
 
     /**
-     * Authenticate a [PaymentIntent].
-     * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow) flow.
-     *
-     * @param fragment the `Fragment` that is launching the payment authentication flow
-     * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
-     * property of a confirmed [PaymentIntent] object
-     */
-    @Deprecated(
-        "Rename to better reflect behavior and match iOS naming.",
-        ReplaceWith("handleNextActionForPayment(fragment, clientSecret)")
-    )
-    @UiThread
-    fun authenticatePayment(
-        fragment: Fragment,
-        clientSecret: String
-    ) {
-        fragment.lifecycleScope.launch {
-            paymentController.startAuth(
-                AuthActivityStarter.Host.create(fragment),
-                PaymentIntent.ClientSecret(clientSecret).value,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                ),
-                PaymentController.StripeIntentType.PaymentIntent
-            )
-        }
-    }
-
-    /**
      * Handle the [next_action](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action)
      * for a previously confirmed [PaymentIntent].
      *
@@ -631,35 +601,6 @@ class Stripe internal constructor(
         activity.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarter.Host.create(activity),
-                SetupIntent.ClientSecret(clientSecret).value,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                ),
-                PaymentController.StripeIntentType.SetupIntent
-            )
-        }
-    }
-
-    /**
-     * Authenticate a [SetupIntent]. Used for manual confirmation flow.
-     *
-     * @param fragment the `Fragment` launching the payment authentication flow
-     * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
-     * property of a confirmed [SetupIntent] object
-     */
-    @Deprecated(
-        "Rename to better reflect behavior and match iOS naming.",
-        ReplaceWith("handleNextActionForSetupIntent(fragment, clientSecret)")
-    )
-    @UiThread
-    fun authenticateSetup(
-        fragment: Fragment,
-        clientSecret: String
-    ) {
-        fragment.lifecycleScope.launch {
-            paymentController.startAuth(
-                AuthActivityStarter.Host.create(fragment),
                 SetupIntent.ClientSecret(clientSecret).value,
                 ApiRequest.Options(
                     apiKey = publishableKey,

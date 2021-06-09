@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import org.robolectric.shadows.ShadowLooper.idleMainLooper
 
 internal object TestUtils {
-    @JvmStatic
     fun idleLooper() = idleMainLooper()
 
     fun viewModelFactoryFor(viewModel: ViewModel) = object : ViewModelProvider.Factory {
