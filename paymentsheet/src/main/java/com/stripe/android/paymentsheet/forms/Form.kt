@@ -21,9 +21,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
+// TODO: Convert this to flows
+// TODO: Country element type
+// TODO: Manadate type
+// TODO: Next focus
+// TODO: Save for future usage.
+
 @ExperimentalAnimationApi
 @Composable
-internal fun FormDataObjectReader(
+internal fun Form(
     form: FormDataObject,
     formViewModel: FormViewModel,
 ) {
@@ -98,12 +104,6 @@ internal fun SectionOneField(
     }
 }
 
-
-// TODO: Convert this to flows
-// TODO: Country element type
-// TODO: Manadate type
-// TODO: Next focus
-// TODO: Save for future usage.
 internal class FormViewModel(
     private val paramKey: MutableMap<String, Any?>,
     types: List<Field>

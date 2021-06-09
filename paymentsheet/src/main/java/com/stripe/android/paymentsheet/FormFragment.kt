@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.asLiveData
-import com.stripe.android.paymentsheet.forms.FormDataObjectReader
+import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
 
 class FormFragment : Fragment() {
@@ -42,7 +42,7 @@ class FormFragment : Fragment() {
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
-                    FormDataObjectReader(
+                    Form(
                         formDataObject,
                         formViewModel
                     )
