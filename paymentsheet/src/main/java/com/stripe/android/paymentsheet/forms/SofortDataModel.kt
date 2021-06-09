@@ -14,7 +14,16 @@ val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 
 internal val sofort = FormDataObject(
     R.string.stripe_paymentsheet_add_payment_method_title,
-    listOf(Field.NameInput, Field.EmailInput),
+    listOf(
+        Section(
+            R.string.address_label_name,
+            listOf(Field.NameInput)
+        ),
+        Section(
+            R.string.email,
+            listOf(Field.EmailInput)
+        )
+    ),
     sofortParamKey,
 )
 

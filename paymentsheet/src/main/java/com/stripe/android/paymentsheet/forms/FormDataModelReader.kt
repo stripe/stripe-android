@@ -1,14 +1,18 @@
 package com.stripe.android.paymentsheet.forms
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.TextField
@@ -17,44 +21,80 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
+@ExperimentalAnimationApi
 @Composable
 internal fun FormDataObjectReader(
     form: FormDataObject,
     formViewModel: FormViewModel,
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
             .padding(16.dp)
     ) {
+        form.elements.forEach {
+            when (it) {
+                is Section -> {
+                    val numberItemsInSection = it.fields.size
+                    if (numberItemsInSection == 1) {
+                        val contentType = it.fields[0]
+                        SectionOneField(formViewModel.getElement(contentType))
+                    } else {
+                        SectionMultipleFields(
+                            formViewModel,
+                            it.labelResId,
+                            it.fields
+                        )
+                    }
+                }
+                is Field -> {
+                    SectionOneField(formViewModel.getElement(it))
+                }
+            }
+        }
+    }
+}
 
-        form.elements.forEachIndexed { index, element ->
-            SingleField(
-                formViewModel.getElement(element),
-            )
+@ExperimentalAnimationApi
+@Composable
+internal fun SectionMultipleFields(
+    formViewModel: FormViewModel,
+    labelResId: Int,
+    fields: List<Field>
+) {
+    com.stripe.android.paymentsheet.elements.Section(stringResource(labelResId), null) {
+        Column {
+            fields.forEach { contentType ->
+                val element = formViewModel.getElement(contentType)
+                val label = element.label
+
+                TextField(
+                    label = label,
+                    textFieldElement = formViewModel.getElement(contentType),
+                    myFocus = FocusRequester(),
+                    nextFocus = null,
+                )
+            }
         }
     }
 }
 
 @Composable
-internal fun SingleField(
+internal fun SectionOneField(
     element: TextFieldElement,
 ) {
     val label = element.label
-    Card(
-        Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        elevation = 8.dp
-    ) {
-        TextField(
-            label = label,
-            textFieldElement = element,
-            myFocus = FocusRequester(),
-            nextFocus = null,
-            modifier = Modifier.padding(vertical = 12.dp)
-        )
+    val error by element.errorMessage.asLiveData().observeAsState(null)
+
+    com.stripe.android.paymentsheet.elements.Section(stringResource(element.label), error) {
+        Column {
+            TextField(
+                label = label,
+                textFieldElement = element,
+                myFocus = FocusRequester(),
+                nextFocus = null,
+            )
+        }
     }
 }
 
