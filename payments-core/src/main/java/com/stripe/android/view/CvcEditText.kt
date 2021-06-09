@@ -21,15 +21,6 @@ class CvcEditText @JvmOverloads constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
-    /**
-     * The inputted CVC value if valid; otherwise, `null`.
-     */
-    @Deprecated("Will be removed in next major release.")
-    val cvcValue: String?
-        get() {
-            return cvc?.value
-        }
-
     private val unvalidatedCvc: Cvc.Unvalidated
         get() {
             return Cvc.Unvalidated(fieldText)
@@ -75,7 +66,7 @@ class CvcEditText @JvmOverloads constructor(
         layoutDirection = LAYOUT_DIRECTION_LTR
     }
 
-    override val accessibilityText: String?
+    override val accessibilityText: String
         get() {
             return resources.getString(R.string.acc_label_cvc_node, text)
         }
