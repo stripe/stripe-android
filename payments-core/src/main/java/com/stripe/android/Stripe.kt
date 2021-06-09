@@ -8,7 +8,6 @@ import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -186,55 +185,6 @@ class Stripe internal constructor(
     }
 
     /**
-     * Confirm and, if necessary, authenticate a [PaymentIntent].
-     * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
-     *
-     * For confirmation attempts that require 3DS1 authentication, if the
-     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
-     * be used:
-     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
-     *   are supported on the device.
-     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
-     * - Otherwise, use a WebView.
-     *
-     * If a custom `return_url` value is set, a WebView will always be used.
-     *
-     * |                   | Custom Tabs available? | Chrome available? | Fallback |
-     * |-------------------|------------------------|-------------------|----------|
-     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
-     * | Custom return_url | WebView                | WebView           | WebView  |
-     *
-     * @param activity the `Activity` that is launching the payment authentication flow
-     * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
-     * [PaymentIntent]
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
-     */
-    @JvmOverloads
-    @UiThread
-    @Deprecated(
-        "ComponentActivity will be required in an upcoming major version.",
-        ReplaceWith("confirmPayment(ComponentActivity)")
-    )
-    fun confirmPayment(
-        activity: Activity,
-        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        stripeAccountId: String? = this.stripeAccountId
-    ) {
-        getLifecycleScope(activity).launch {
-            paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
-                confirmPaymentIntentParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                )
-            )
-        }
-    }
-
-    /**
      * Confirm and authenticate a [PaymentIntent] using the Alipay SDK
      * @see <a href="https://intl.alipay.com/docs/ac/app/sdk_integration">Alipay Documentation</a>
      *
@@ -364,42 +314,6 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId
     ) {
         activity.lifecycleScope.launch {
-            paymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
-                PaymentIntent.ClientSecret(clientSecret).value,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                ),
-                PaymentController.StripeIntentType.PaymentIntent
-            )
-        }
-    }
-
-    /**
-     * Handle the [next_action](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action)
-     * for a previously confirmed [PaymentIntent].
-     *
-     * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow) flow.
-     *
-     * @param activity the `Activity` that is launching the payment authentication flow
-     * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
-     * property of a confirmed [PaymentIntent] object
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
-     */
-    @JvmOverloads
-    @UiThread
-    @Deprecated(
-        "ComponentActivity will be required in an upcoming major version.",
-        ReplaceWith("handleNextActionForPayment(ComponentActivity)")
-    )
-    fun handleNextActionForPayment(
-        activity: Activity,
-        clientSecret: String,
-        stripeAccountId: String? = this.stripeAccountId
-    ) {
-        getLifecycleScope(activity).launch {
             paymentController.startAuth(
                 AuthActivityStarter.Host.create(activity),
                 PaymentIntent.ClientSecret(clientSecret).value,

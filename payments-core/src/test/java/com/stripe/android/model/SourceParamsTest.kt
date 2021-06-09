@@ -282,7 +282,7 @@ class SourceParamsTest {
                 Source.SourceType.CARD,
                 token = "tok_1F4ACMCRMbs6FrXf6fPqLnN7",
                 attribution = setOf("GooglePay"),
-                _owner = SourceParams.OwnerParams()
+                owner = SourceParams.OwnerParams()
             )
         )
     }
@@ -298,7 +298,7 @@ class SourceParamsTest {
                 Source.SourceType.CARD,
                 token = "tok_1F4VSjBbvEcIpqUbSsbEtBap",
                 attribution = setOf("GooglePay"),
-                _owner = SourceParams.OwnerParams(
+                owner = SourceParams.OwnerParams(
                     email = "stripe@example.com",
                     name = "Stripe Johnson",
                     phone = "1-888-555-1234",
@@ -870,11 +870,13 @@ class SourceParamsTest {
         val dogecoinParams = mapOf("statement_descriptor" to "stripe descriptor")
 
         val params = SourceParams.createCustomParams(dogecoin)
-            .setCurrency(Source.EURO)
-            .setAmount(AMOUNT)
-            .setReturnUrl(RETURN_URL)
-            .setOwner(SourceParams.OwnerParams(name = "Stripe"))
             .setApiParameterMap(dogecoinParams)
+            .also {
+                it.currency = Source.EURO
+                it.amount = AMOUNT
+                it.returnUrl = RETURN_URL
+                it.owner = SourceParams.OwnerParams(name = "Stripe")
+            }
 
         assertThat(
             params.toParamMap()
@@ -927,12 +929,14 @@ class SourceParamsTest {
     @Test
     fun createCustomParams_withCustomType() {
         val params = SourceParams.createCustomParams("bar_tab")
-            .setAmount(AMOUNT)
-            .setCurrency("brl")
-            .setReturnUrl(RETURN_URL)
             .setApiParameterMap(
                 mapOf("card" to "card_id_123")
             )
+            .also {
+                it.amount = AMOUNT
+                it.currency = "brl"
+                it.returnUrl = RETURN_URL
+            }
 
         assertThat(
             params.toParamMap()

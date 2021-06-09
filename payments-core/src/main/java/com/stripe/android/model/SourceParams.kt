@@ -23,11 +23,43 @@ data class SourceParams internal constructor(
 
     internal var typeData: TypeData? = null,
 
-    private var _amount: Long? = null,
-    private var _currency: String? = null,
-    private var _owner: OwnerParams? = null,
-    private var _usage: Source.Usage? = null,
-    private var _returnUrl: String? = null,
+    /**
+     * Amount associated with the source. This is the amount for which the source will
+     * be chargeable once ready. Required for `single_use` sources. Not supported for `receiver`
+     * type sources, where charge amount may not be specified until funds land.
+     *
+     * See [amount](https://stripe.com/docs/api/sources/create#create_source-amount)
+     */
+    var amount: Long? = null,
+
+    /**
+     * Three-letter ISO code for the currency associated with the source.
+     * This is the currency for which the source will be chargeable once ready.
+     *
+     * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
+     */
+    var currency: String? = null,
+
+    /**
+     * Information about the owner of the payment instrument that may be used or required by
+     * particular source types.
+     */
+    var owner: OwnerParams? = null,
+
+    /**
+     * Either `reusable` or `single_use`. Whether this source should be reusable or not.
+     * Some source types may or may not be reusable by construction, while others may leave the
+     * option at creation. If an incompatible value is passed, an error will be returned.
+     *
+     * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
+     */
+    var usage: Source.Usage? = null,
+
+    /**
+     * The URL you provide to redirect the customer back to you after they authenticated their
+     * payment. It can use your application URI scheme in the context of a mobile application.
+     */
+    var returnUrl: String? = null,
 
     /**
      * The authentication `flow` of the source to create. `flow` is one of `redirect`, `receiver`,
@@ -51,12 +83,16 @@ data class SourceParams internal constructor(
      *
      * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
      */
-    private var token: String? = null,
+    var token: String? = null,
+
+    /**
+     * Set of key-value pairs that you can attach to an object. This can be useful for storing
+     * additional information about the object in a structured format.
+     */
+    var metadata: Map<String, String>? = null,
 
     private var weChatParams: WeChatParams? = null,
-    private var _metadata: Map<String, String>? = null,
     private var apiParams: ApiParams = ApiParams(),
-    private var extraParams: ExtraParams = ExtraParams(),
 
     /**
      * A set of identifiers representing the component that created this instance.
@@ -73,65 +109,11 @@ data class SourceParams internal constructor(
         get() = asSourceType(typeRaw)
 
     /**
-     * Amount associated with the source. This is the amount for which the source will
-     * be chargeable once ready. Required for `single_use` sources. Not supported for `receiver`
-     * type sources, where charge amount may not be specified until funds land.
-     *
-     * See [amount](https://stripe.com/docs/api/sources/create#create_source-amount)
-     */
-    val amount: Long? get() = _amount
-
-    /**
      * A [Map] of the parameters specific to the Source type.
      */
     val apiParameterMap: Map<String, Any?> get() = apiParams.value
 
-    /**
-     * Three-letter ISO code for the currency associated with the source.
-     * This is the currency for which the source will be chargeable once ready.
-     *
-     * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
-     */
-    val currency: String? get() = _currency
-
-    /**
-     * The URL you provide to redirect the customer back to you after they authenticated their
-     * payment. It can use your application URI scheme in the context of a mobile application.
-     */
-    val returnUrl: String? get() = _returnUrl
-
-    /**
-     * Information about the owner of the payment instrument that may be used or required by
-     * particular source types.
-     */
-    val owner: OwnerParams? get() = _owner
-
-    /**
-     * Set of key-value pairs that you can attach to an object. This can be useful for storing
-     * additional information about the object in a structured format.
-     */
-    val metaData: Map<String, String>? get() = _metadata
-
-    /**
-     * Either `reusable` or `single_use`. Whether this source should be reusable or not.
-     * Some source types may or may not be reusable by construction, while others may leave the
-     * option at creation. If an incompatible value is passed, an error will be returned.
-     *
-     * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
-     */
-    val usage: Source.Usage? get() = _usage
-
     /*---- Setters ----*/
-    /**
-     * @param amount Amount associated with the source. This is the amount for which the source will
-     * be chargeable once ready. Required for `single_use` sources. Not supported for `receiver`
-     * type sources, where charge amount may not be specified until funds land.
-     *
-     * See [amount](https://stripe.com/docs/api/sources/create#create_source-amount)
-     */
-    fun setAmount(@IntRange(from = 0) amount: Long?): SourceParams = apply {
-        this._amount = amount
-    }
 
     /**
      * @param apiParameterMap a map of parameters specific for this type of source
@@ -140,80 +122,6 @@ data class SourceParams internal constructor(
         apiParameterMap: Map<String, Any?>?
     ): SourceParams = apply {
         this.apiParams = ApiParams(apiParameterMap.orEmpty())
-    }
-
-    /**
-     * @param currency Three-letter ISO code for the currency associated with the source.
-     * This is the currency for which the source will be chargeable once ready.
-     *
-     * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
-     */
-    fun setCurrency(currency: String): SourceParams = apply {
-        this._currency = currency
-    }
-
-    /**
-     * @param owner Information about the owner of the payment instrument that may be used or
-     * required by particular source types.
-     *
-     * See [owner](https://stripe.com/docs/api/sources/create#create_source-owner)
-     */
-    fun setOwner(owner: OwnerParams?): SourceParams = apply {
-        this._owner = owner
-    }
-
-    /**
-     * Sets extra params for this source object.
-     *
-     * @param extraParams a set of params
-     */
-    @Deprecated("Will be removed in an upcoming major version.")
-    fun setExtraParams(
-        extraParams: Map<String, Any>
-    ): SourceParams = apply {
-        this.extraParams = ExtraParams(extraParams)
-    }
-
-    /**
-     * @param returnUrl The URL you provide to redirect the customer back to you after they
-     * authenticated their payment. It can use your application URI scheme in the context of a
-     * mobile application.
-     *
-     * See [redirect.return_url](https://stripe.com/docs/api/sources/create#create_source-redirect-return_url)
-     */
-    fun setReturnUrl(@Size(min = 1) returnUrl: String): SourceParams = apply {
-        this._returnUrl = returnUrl
-    }
-
-    /**
-     * @param metaData A set of key-value pairs that you can attach to a source object. It can be
-     * useful for storing additional information about the source in a structured format.
-     *
-     * See [metadata](https://stripe.com/docs/api/sources/create#create_source-metadata)
-     */
-    fun setMetaData(metaData: Map<String, String>?): SourceParams = apply {
-        this._metadata = metaData
-    }
-
-    /**
-     * @param token An optional token used to create the source. When passed, token properties will
-     * override source parameters.
-     *
-     * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
-     */
-    fun setToken(token: String): SourceParams = apply {
-        this.token = token
-    }
-
-    /**
-     * @param usage Either `reusable` or `single_use`. Whether this source should be reusable or not.
-     * Some source types may or may not be reusable by construction, while others may leave the
-     * option at creation. If an incompatible value is passed, an error will be returned.
-     *
-     * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
-     */
-    fun setUsage(usage: Source.Usage): SourceParams = apply {
-        this._usage = usage
     }
 
     /**
@@ -262,7 +170,7 @@ data class SourceParams internal constructor(
                 }.orEmpty()
             )
             .plus(
-                metaData?.let {
+                metadata?.let {
                     mapOf(PARAM_METADATA to it)
                 }.orEmpty()
             )
@@ -276,7 +184,6 @@ data class SourceParams internal constructor(
                     mapOf(PARAM_USAGE to it.code)
                 }.orEmpty()
             )
-            .plus(extraParams.value.orEmpty())
             .plus(
                 weChatParams?.let {
                     mapOf(PARAM_WECHAT to it.toParamMap())
@@ -403,10 +310,10 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.P24,
-                _amount = amount,
-                _currency = currency,
-                _returnUrl = returnUrl,
-                _owner = OwnerParams(
+                amount = amount,
+                currency = currency,
+                returnUrl = returnUrl,
+                owner = OwnerParams(
                     email = email,
                     name = name
                 )
@@ -436,10 +343,10 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.ALIPAY,
-                _currency = currency,
-                _returnUrl = returnUrl,
-                _usage = Source.Usage.Reusable,
-                _owner = OwnerParams(
+                currency = currency,
+                returnUrl = returnUrl,
+                usage = Source.Usage.Reusable,
+                owner = OwnerParams(
                     email = email,
                     name = name
                 )
@@ -472,10 +379,10 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.ALIPAY,
-                _currency = currency,
-                _amount = amount,
-                _returnUrl = returnUrl,
-                _owner = OwnerParams(
+                currency = currency,
+                amount = amount,
+                returnUrl = returnUrl,
+                owner = OwnerParams(
                     email = email,
                     name = name
                 )
@@ -505,8 +412,8 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.WECHAT,
-                _currency = currency,
-                _amount = amount,
+                currency = currency,
+                amount = amount,
                 weChatParams = WeChatParams(
                     weChatAppId,
                     statementDescriptor
@@ -556,10 +463,10 @@ data class SourceParams internal constructor(
                 SourceType.KLARNA,
                 flow = Flow.Redirect,
                 sourceOrder = sourceOrderParams,
-                _amount = totalAmount.toLong(),
-                _currency = currency,
-                _returnUrl = returnUrl,
-                _owner = OwnerParams(
+                amount = totalAmount.toLong(),
+                currency = currency,
+                returnUrl = returnUrl,
+                owner = OwnerParams(
                     address = klarnaParams.billingAddress,
                     email = klarnaParams.billingEmail,
                     phone = klarnaParams.billingPhone
@@ -599,10 +506,10 @@ data class SourceParams internal constructor(
                     statementDescriptor,
                     preferredLanguage
                 ),
-                _currency = Source.EURO,
-                _amount = amount,
-                _owner = OwnerParams(name = name),
-                _returnUrl = returnUrl
+                currency = Source.EURO,
+                amount = amount,
+                owner = OwnerParams(name = name),
+                returnUrl = returnUrl
             )
         }
 
@@ -641,7 +548,9 @@ data class SourceParams internal constructor(
          * @see [Card Payments with Sources](https://stripe.com/docs/sources/cards)
          */
         @JvmStatic
-        fun createCardParams(cardParams: CardParams): SourceParams {
+        fun createCardParams(
+            cardParams: CardParams
+        ): SourceParams {
             return SourceParams(
                 SourceType.CARD,
                 typeData = TypeData.Card(
@@ -651,11 +560,11 @@ data class SourceParams internal constructor(
                     cardParams.cvc
                 ),
                 attribution = cardParams.attribution,
-                _owner = OwnerParams(
+                owner = OwnerParams(
                     address = cardParams.address,
                     name = cardParams.name
                 ),
-                _metadata = cardParams.metadata
+                metadata = cardParams.metadata
             )
         }
 
@@ -677,7 +586,7 @@ data class SourceParams internal constructor(
                 attribution = setOfNotNull(
                     token?.card?.tokenizationMethod?.toString()
                 ),
-                _owner = OwnerParams(
+                owner = OwnerParams(
                     address = googlePayResult.address,
                     email = googlePayResult.email,
                     name = googlePayResult.name,
@@ -709,10 +618,10 @@ data class SourceParams internal constructor(
             return SourceParams(
                 SourceType.EPS,
                 typeData = TypeData.Eps(statementDescriptor),
-                _currency = Source.EURO,
-                _amount = amount,
-                _owner = OwnerParams(name = name),
-                _returnUrl = returnUrl
+                currency = Source.EURO,
+                amount = amount,
+                owner = OwnerParams(name = name),
+                returnUrl = returnUrl
             )
         }
 
@@ -739,10 +648,10 @@ data class SourceParams internal constructor(
             return SourceParams(
                 SourceType.GIROPAY,
                 typeData = TypeData.Giropay(statementDescriptor),
-                _currency = Source.EURO,
-                _amount = amount,
-                _owner = OwnerParams(name = name),
-                _returnUrl = returnUrl
+                currency = Source.EURO,
+                amount = amount,
+                owner = OwnerParams(name = name),
+                returnUrl = returnUrl
             )
         }
 
@@ -774,10 +683,10 @@ data class SourceParams internal constructor(
                     statementDescriptor,
                     bank
                 ),
-                _currency = Source.EURO,
-                _amount = amount,
-                _returnUrl = returnUrl,
-                _owner = OwnerParams(name = name)
+                currency = Source.EURO,
+                amount = amount,
+                returnUrl = returnUrl,
+                owner = OwnerParams(name = name)
             )
         }
 
@@ -801,10 +710,10 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.MULTIBANCO,
-                _currency = Source.EURO,
-                _amount = amount,
-                _returnUrl = returnUrl,
-                _owner = OwnerParams(email = email)
+                currency = Source.EURO,
+                amount = amount,
+                returnUrl = returnUrl,
+                owner = OwnerParams(email = email)
             )
         }
 
@@ -867,9 +776,9 @@ data class SourceParams internal constructor(
         ): SourceParams {
             return SourceParams(
                 SourceType.SEPA_DEBIT,
-                _currency = Source.EURO,
+                currency = Source.EURO,
                 typeData = TypeData.SepaDebit(iban),
-                _owner = OwnerParams(
+                owner = OwnerParams(
                     address = Address.Builder()
                         .setLine1(addressLine1)
                         .setCity(city)
@@ -905,9 +814,9 @@ data class SourceParams internal constructor(
             return SourceParams(
                 SourceType.SOFORT,
                 typeData = TypeData.Sofort(country, statementDescriptor),
-                _currency = Source.EURO,
-                _amount = amount,
-                _returnUrl = returnUrl
+                currency = Source.EURO,
+                amount = amount,
+                returnUrl = returnUrl
             )
         }
 
@@ -933,9 +842,9 @@ data class SourceParams internal constructor(
             return SourceParams(
                 SourceType.THREE_D_SECURE,
                 typeData = TypeData.ThreeDSecure(cardId),
-                _currency = currency,
-                _amount = amount,
-                _returnUrl = returnUrl
+                currency = currency,
+                amount = amount,
+                returnUrl = returnUrl
             )
         }
 
