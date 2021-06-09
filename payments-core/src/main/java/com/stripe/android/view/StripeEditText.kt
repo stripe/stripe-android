@@ -39,9 +39,6 @@ open class StripeEditText @JvmOverloads constructor(
         @VisibleForTesting
         internal set
 
-    @Deprecated("Will be removed in upcoming major release.")
-    val cachedColorStateList: ColorStateList
-        get() = defaultColorStateList
     private var externalColorStateList: ColorStateList? = null
 
     @ColorInt

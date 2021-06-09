@@ -46,12 +46,6 @@ public final class com/stripe/android/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/CardUtils {
-	public static final field INSTANCE Lcom/stripe/android/CardUtils;
-	public static final fun getPossibleCardBrand (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
-	public static final fun isValidCardNumber (Ljava/lang/String;)Z
-}
-
 public final class com/stripe/android/CustomerSession {
 	public static final field Companion Lcom/stripe/android/CustomerSession$Companion;
 	public final fun addCustomerSource (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/CustomerSession$SourceRetrievalListener;)V
@@ -136,8 +130,6 @@ public abstract interface class com/stripe/android/EphemeralKeyUpdateListener {
 
 public final class com/stripe/android/GooglePayConfig {
 	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -696,41 +688,28 @@ public final class com/stripe/android/Stripe {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Z)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;)V
 	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun authenticatePayment (Landroid/app/Activity;Ljava/lang/String;)V
-	public final fun authenticatePayment (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
-	public final fun authenticateSetup (Landroid/app/Activity;Ljava/lang/String;)V
-	public final fun authenticateSetup (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
-	public final fun authenticateSource (Landroid/app/Activity;Lcom/stripe/android/model/Source;)V
-	public final fun authenticateSource (Landroid/app/Activity;Lcom/stripe/android/model/Source;Ljava/lang/String;)V
 	public final fun authenticateSource (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/Source;)V
 	public final fun authenticateSource (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/Source;Ljava/lang/String;)V
 	public final fun authenticateSource (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/Source;)V
 	public final fun authenticateSource (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/Source;Ljava/lang/String;)V
-	public static synthetic fun authenticateSource$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Lcom/stripe/android/model/Source;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun authenticateSource$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/Source;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun authenticateSource$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/Source;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun confirmAlipayPayment (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun confirmAlipayPayment (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public static synthetic fun confirmAlipayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
-	public final fun confirmPayment (Landroid/app/Activity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
-	public final fun confirmPayment (Landroid/app/Activity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;)V
 	public final fun confirmPayment (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
 	public final fun confirmPayment (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;)V
 	public final fun confirmPayment (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
 	public final fun confirmPayment (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;)V
-	public static synthetic fun confirmPayment$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun confirmPayment$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun confirmPayment$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun confirmPaymentIntentSynchronous (Lcom/stripe/android/model/ConfirmPaymentIntentParams;)Lcom/stripe/android/model/PaymentIntent;
 	public final fun confirmPaymentIntentSynchronous (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;)Lcom/stripe/android/model/PaymentIntent;
 	public static synthetic fun confirmPaymentIntentSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
-	public final fun confirmSetupIntent (Landroid/app/Activity;Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
-	public final fun confirmSetupIntent (Landroid/app/Activity;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;)V
 	public final fun confirmSetupIntent (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
 	public final fun confirmSetupIntent (Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;)V
 	public final fun confirmSetupIntent (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
 	public final fun confirmSetupIntent (Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;)V
-	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun confirmSetupIntentSynchronous (Lcom/stripe/android/model/ConfirmSetupIntentParams;)Lcom/stripe/android/model/SetupIntent;
@@ -755,21 +734,13 @@ public final class com/stripe/android/Stripe {
 	public final fun createBankAccountTokenSynchronous (Lcom/stripe/android/model/BankAccountTokenParams;Ljava/lang/String;)Lcom/stripe/android/model/Token;
 	public final fun createBankAccountTokenSynchronous (Lcom/stripe/android/model/BankAccountTokenParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/Token;
 	public static synthetic fun createBankAccountTokenSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/BankAccountTokenParams;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Token;
-	public final fun createCardToken (Lcom/stripe/android/model/Card;Lcom/stripe/android/ApiResultCallback;)V
-	public final fun createCardToken (Lcom/stripe/android/model/Card;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
-	public final fun createCardToken (Lcom/stripe/android/model/Card;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createCardToken (Lcom/stripe/android/model/CardParams;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createCardToken (Lcom/stripe/android/model/CardParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createCardToken (Lcom/stripe/android/model/CardParams;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
-	public static synthetic fun createCardToken$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/Card;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
 	public static synthetic fun createCardToken$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/CardParams;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
-	public final fun createCardTokenSynchronous (Lcom/stripe/android/model/Card;)Lcom/stripe/android/model/Token;
-	public final fun createCardTokenSynchronous (Lcom/stripe/android/model/Card;Ljava/lang/String;)Lcom/stripe/android/model/Token;
-	public final fun createCardTokenSynchronous (Lcom/stripe/android/model/Card;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/Token;
 	public final fun createCardTokenSynchronous (Lcom/stripe/android/model/CardParams;)Lcom/stripe/android/model/Token;
 	public final fun createCardTokenSynchronous (Lcom/stripe/android/model/CardParams;Ljava/lang/String;)Lcom/stripe/android/model/Token;
 	public final fun createCardTokenSynchronous (Lcom/stripe/android/model/CardParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/Token;
-	public static synthetic fun createCardTokenSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/Card;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Token;
 	public static synthetic fun createCardTokenSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/CardParams;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Token;
 	public final fun createCvcUpdateToken (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createCvcUpdateToken (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
@@ -824,22 +795,16 @@ public final class com/stripe/android/Stripe {
 	public static synthetic fun createSourceSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Source;
 	public static final fun getAdvancedFraudSignalsEnabled ()Z
 	public static final fun getAppInfo ()Lcom/stripe/android/AppInfo;
-	public final fun handleNextActionForPayment (Landroid/app/Activity;Ljava/lang/String;)V
-	public final fun handleNextActionForPayment (Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroidx/activity/ComponentActivity;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun handleNextActionForPayment$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForPayment$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForPayment$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
-	public final fun handleNextActionForSetupIntent (Landroid/app/Activity;Ljava/lang/String;)V
-	public final fun handleNextActionForSetupIntent (Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun handleNextActionForSetupIntent (Landroidx/activity/ComponentActivity;Ljava/lang/String;)V
 	public final fun handleNextActionForSetupIntent (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun handleNextActionForSetupIntent (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
 	public final fun handleNextActionForSetupIntent (Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun handleNextActionForSetupIntent$default (Lcom/stripe/android/Stripe;Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun isAuthenticateSourceResult (ILandroid/content/Intent;)Z
@@ -978,11 +943,6 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun retrieveSource (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrieveSource$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-}
-
-public final class com/stripe/android/StripeTextUtils {
-	public static final field INSTANCE Lcom/stripe/android/StripeTextUtils;
-	public static final fun removeSpacesAndHyphens (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class com/stripe/android/exception/APIConnectionException : com/stripe/android/exception/StripeException {
@@ -1576,40 +1536,34 @@ public final class com/stripe/android/model/BankAccountTokenParamsFixtures {
 	public static final field INSTANCE Lcom/stripe/android/model/BankAccountTokenParamsFixtures;
 }
 
-public final class com/stripe/android/model/Card : com/stripe/android/model/TokenParams, com/stripe/android/model/StripeModel, com/stripe/android/model/StripePaymentSource {
+public final class com/stripe/android/model/Card : com/stripe/android/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/Card$Companion;
-	public final fun component1 ()Ljava/lang/String;
+	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component10 ()Ljava/lang/String;
 	public final fun component11 ()Ljava/lang/String;
 	public final fun component12 ()Ljava/lang/String;
-	public final fun component13 ()Ljava/lang/String;
-	public final fun component14 ()Ljava/lang/String;
-	public final fun component15 ()Lcom/stripe/android/model/CardBrand;
-	public final fun component16 ()Lcom/stripe/android/model/CardFunding;
+	public final fun component13 ()Lcom/stripe/android/model/CardBrand;
+	public final fun component14 ()Lcom/stripe/android/model/CardFunding;
+	public final fun component15 ()Ljava/lang/String;
+	public final fun component16 ()Ljava/lang/String;
 	public final fun component17 ()Ljava/lang/String;
 	public final fun component18 ()Ljava/lang/String;
 	public final fun component19 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Integer;
 	public final fun component20 ()Ljava/lang/String;
-	public final fun component21 ()Ljava/lang/String;
-	public final fun component22 ()Ljava/lang/String;
-	public final fun component24 ()Lcom/stripe/android/model/TokenizationMethod;
-	public final fun component25 ()Ljava/util/Map;
-	public final fun component3 ()Ljava/lang/Integer;
-	public final fun component4 ()Ljava/lang/Integer;
+	public final fun component22 ()Lcom/stripe/android/model/TokenizationMethod;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/CardFunding;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/model/TokenizationMethod;Ljava/util/Map;)Lcom/stripe/android/model/Card;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/Card;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/CardFunding;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/model/TokenizationMethod;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/Card;
-	public static final fun create (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)Lcom/stripe/android/model/Card;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/CardFunding;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/model/TokenizationMethod;)Lcom/stripe/android/model/Card;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/Card;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/CardFunding;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/model/TokenizationMethod;ILjava/lang/Object;)Lcom/stripe/android/model/Card;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/Card;
-	public static final fun fromString (Ljava/lang/String;)Lcom/stripe/android/model/Card;
 	public final fun getAddressCity ()Ljava/lang/String;
 	public final fun getAddressCountry ()Ljava/lang/String;
 	public final fun getAddressLine1 ()Ljava/lang/String;
@@ -1622,7 +1576,6 @@ public final class com/stripe/android/model/Card : com/stripe/android/model/Toke
 	public final fun getCountry ()Ljava/lang/String;
 	public final fun getCurrency ()Ljava/lang/String;
 	public final fun getCustomerId ()Ljava/lang/String;
-	public final fun getCvc ()Ljava/lang/String;
 	public final fun getCvcCheck ()Ljava/lang/String;
 	public final fun getExpMonth ()Ljava/lang/Integer;
 	public final fun getExpYear ()Ljava/lang/Integer;
@@ -1630,58 +1583,14 @@ public final class com/stripe/android/model/Card : com/stripe/android/model/Toke
 	public final fun getFunding ()Lcom/stripe/android/model/CardFunding;
 	public fun getId ()Ljava/lang/String;
 	public final fun getLast4 ()Ljava/lang/String;
-	public final fun getMetadata ()Ljava/util/Map;
 	public final fun getName ()Ljava/lang/String;
-	public final fun getNumber ()Ljava/lang/String;
 	public final fun getTokenizationMethod ()Lcom/stripe/android/model/TokenizationMethod;
-	public fun getTypeDataParams ()Ljava/util/Map;
 	public fun hashCode ()I
-	public final fun toBuilder ()Lcom/stripe/android/model/Card$Builder;
-	public final fun toPaymentMethodParamsCard ()Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
-	public final fun toPaymentMethodsParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public fun toString ()Ljava/lang/String;
-	public final fun validateCVC ()Z
-	public final fun validateCard ()Z
-	public final fun validateExpMonth ()Z
-	public final fun validateExpiryDate ()Z
-	public final fun validateNumber ()Z
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/Card$Builder : com/stripe/android/ObjectBuilder {
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun addressCity (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun addressCountry (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun addressLine1 (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun addressLine1Check (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun addressLine2 (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun addressState (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun addressZip (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun addressZipCheck (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun brand (Lcom/stripe/android/model/CardBrand;)Lcom/stripe/android/model/Card$Builder;
-	public fun build ()Lcom/stripe/android/model/Card;
-	public synthetic fun build ()Ljava/lang/Object;
-	public final fun country (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun currency (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun customer (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun cvcCheck (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun fingerprint (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun funding (Lcom/stripe/android/model/CardFunding;)Lcom/stripe/android/model/Card$Builder;
-	public final fun id (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun last4 (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun loggingTokens (Ljava/util/Set;)Lcom/stripe/android/model/Card$Builder;
-	public final fun metadata (Ljava/util/Map;)Lcom/stripe/android/model/Card$Builder;
-	public final fun name (Ljava/lang/String;)Lcom/stripe/android/model/Card$Builder;
-	public final fun tokenizationMethod (Lcom/stripe/android/model/TokenizationMethod;)Lcom/stripe/android/model/Card$Builder;
-}
-
 public final class com/stripe/android/model/Card$Companion {
-	public final fun create (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)Lcom/stripe/android/model/Card;
-	public static synthetic fun create$default (Lcom/stripe/android/model/Card$Companion;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Card;
-	public final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/Card;
-	public final fun fromString (Ljava/lang/String;)Lcom/stripe/android/model/Card;
 }
 
 public class com/stripe/android/model/Card$Creator : android/os/Parcelable$Creator {
@@ -1702,22 +1611,13 @@ public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 	public static final field UnionPay Lcom/stripe/android/model/CardBrand;
 	public static final field Unknown Lcom/stripe/android/model/CardBrand;
 	public static final field Visa Lcom/stripe/android/model/CardBrand;
-	public final fun formatNumber (Ljava/lang/String;)Ljava/lang/String;
 	public final fun getCode ()Ljava/lang/String;
 	public final fun getCvcIcon ()I
 	public final fun getCvcLength ()Ljava/util/Set;
-	public final fun getDefaultMaxLength ()I
-	public final fun getDefaultMaxLengthWithSpaces ()I
-	public final fun getDefaultSpacePositions ()Ljava/util/Set;
 	public final fun getDisplayName ()Ljava/lang/String;
 	public final fun getErrorIcon ()I
 	public final fun getIcon ()I
 	public final fun getMaxCvcLength ()I
-	public final fun getMaxLengthForCardNumber (Ljava/lang/String;)I
-	public final fun getMaxLengthWithSpacesForCardNumber (Ljava/lang/String;)I
-	public final fun getPattern ()Ljava/util/regex/Pattern;
-	public final fun getSpacePositionsForCardNumber (Ljava/lang/String;)Ljava/util/Set;
-	public final fun groupNumber (Ljava/lang/String;)[Ljava/lang/String;
 	public final fun isMaxCvc (Ljava/lang/String;)Z
 	public final fun isValidCardNumberLength (Ljava/lang/String;)Z
 	public final fun isValidCvc (Ljava/lang/String;)Z
@@ -1726,7 +1626,6 @@ public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 }
 
 public final class com/stripe/android/model/CardBrand$Companion {
-	public final fun fromCardNumber (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
 	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
 }
 
@@ -1786,29 +1685,23 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams : com/str
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;
 	public final fun component1 ()Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public final fun component10 ()Lcom/stripe/android/model/PaymentMethodOptionsParams;
-	public final fun component11 ()Ljava/lang/String;
-	public final fun component12 ()Lcom/stripe/android/model/MandateDataParams;
-	public final fun component13 ()Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
-	public final fun component14 ()Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;
-	public final fun component15 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component11 ()Lcom/stripe/android/model/MandateDataParams;
+	public final fun component12 ()Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
+	public final fun component13 ()Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;
+	public final fun component14 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lcom/stripe/android/model/SourceParams;
 	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/lang/String;
-	public final fun component7 ()Ljava/lang/String;
-	public final fun component8 ()Ljava/lang/Boolean;
-	public final fun copy (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Lcom/stripe/android/model/ExtraParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;ZLcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Lcom/stripe/android/model/ExtraParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;ZLcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
+	public final fun component7 ()Ljava/lang/Boolean;
+	public final fun component9 ()Lcom/stripe/android/model/PaymentMethodOptionsParams;
+	public final fun copy (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;ZLcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;ZLcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun create (Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun create (Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun create (Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createAlipay (Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
@@ -1816,19 +1709,6 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams : com/str
 	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
@@ -1836,37 +1716,15 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams : com/str
 	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getClientSecret ()Ljava/lang/String;
-	public final fun getExtraParams ()Ljava/util/Map;
 	public final fun getMandateData ()Lcom/stripe/android/model/MandateDataParams;
 	public final fun getMandateId ()Ljava/lang/String;
 	public final fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -1901,15 +1759,7 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams$Companion
 	public final fun create (Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun create (Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun create (Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static synthetic fun create$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun create$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun create$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createAlipay (Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
@@ -1917,22 +1767,7 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams$Companion
 	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodCreateParams (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static synthetic fun createWithPaymentMethodCreateParams$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun createWithPaymentMethodCreateParams$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun createWithPaymentMethodCreateParams$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
@@ -1940,40 +1775,15 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams$Companion
 	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithPaymentMethodId (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static synthetic fun createWithPaymentMethodId$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun createWithPaymentMethodId$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun createWithPaymentMethodId$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodOptionsParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithSourceId (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static synthetic fun createWithSourceId$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun createWithSourceId$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public final fun createWithSourceParams (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 	public static synthetic fun createWithSourceParams$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
-	public static synthetic fun createWithSourceParams$default (Lcom/stripe/android/model/ConfirmPaymentIntentParams$Companion;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/ConfirmPaymentIntentParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmPaymentIntentParams;
 }
 
 public class com/stripe/android/model/ConfirmPaymentIntentParams$Creator : android/os/Parcelable$Creator {
@@ -2028,17 +1838,10 @@ public final class com/stripe/android/model/ConfirmSetupIntentParams : com/strip
 	public static final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public static final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public static final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public static final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public static final fun create (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public static final fun create (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public static final fun createWithoutPaymentMethod (Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static final fun createWithoutPaymentMethod (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public synthetic fun getClientSecret ()Ljava/lang/String;
@@ -2061,21 +1864,12 @@ public final class com/stripe/android/model/ConfirmSetupIntentParams$Companion {
 	public final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public final fun create (Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public final fun create (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public final fun create (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public static synthetic fun create$default (Lcom/stripe/android/model/ConfirmSetupIntentParams$Companion;Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static synthetic fun create$default (Lcom/stripe/android/model/ConfirmSetupIntentParams$Companion;Lcom/stripe/android/model/PaymentMethodCreateParams;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public static synthetic fun create$default (Lcom/stripe/android/model/ConfirmSetupIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public static synthetic fun create$default (Lcom/stripe/android/model/ConfirmSetupIntentParams$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/MandateDataParams;ILjava/lang/Object;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 	public final fun createWithoutPaymentMethod (Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
-	public final fun createWithoutPaymentMethod (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/ConfirmSetupIntentParams;
 }
 
 public class com/stripe/android/model/ConfirmSetupIntentParams$Creator : android/os/Parcelable$Creator {
@@ -2675,31 +2469,29 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/m
 	public final field id Ljava/lang/String;
 	public final field ideal Lcom/stripe/android/model/PaymentMethod$Ideal;
 	public final field liveMode Z
-	public final field metadata Ljava/util/Map;
 	public final field netbanking Lcom/stripe/android/model/PaymentMethod$Netbanking;
 	public final field sepaDebit Lcom/stripe/android/model/PaymentMethod$SepaDebit;
 	public final field sofort Lcom/stripe/android/model/PaymentMethod$Sofort;
 	public final field type Lcom/stripe/android/model/PaymentMethod$Type;
 	public final field upi Lcom/stripe/android/model/PaymentMethod$Upi;
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component10 ()Lcom/stripe/android/model/PaymentMethod$Fpx;
-	public final fun component11 ()Lcom/stripe/android/model/PaymentMethod$Ideal;
-	public final fun component12 ()Lcom/stripe/android/model/PaymentMethod$SepaDebit;
-	public final fun component13 ()Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;
-	public final fun component14 ()Lcom/stripe/android/model/PaymentMethod$BacsDebit;
-	public final fun component15 ()Lcom/stripe/android/model/PaymentMethod$Sofort;
-	public final fun component16 ()Lcom/stripe/android/model/PaymentMethod$Upi;
-	public final fun component17 ()Lcom/stripe/android/model/PaymentMethod$Netbanking;
+	public final fun component10 ()Lcom/stripe/android/model/PaymentMethod$Ideal;
+	public final fun component11 ()Lcom/stripe/android/model/PaymentMethod$SepaDebit;
+	public final fun component12 ()Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;
+	public final fun component13 ()Lcom/stripe/android/model/PaymentMethod$BacsDebit;
+	public final fun component14 ()Lcom/stripe/android/model/PaymentMethod$Sofort;
+	public final fun component15 ()Lcom/stripe/android/model/PaymentMethod$Upi;
+	public final fun component16 ()Lcom/stripe/android/model/PaymentMethod$Netbanking;
 	public final fun component2 ()Ljava/lang/Long;
 	public final fun component3 ()Z
 	public final fun component4 ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public final fun component5 ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final fun component6 ()Ljava/lang/String;
-	public final fun component7 ()Ljava/util/Map;
-	public final fun component8 ()Lcom/stripe/android/model/PaymentMethod$Card;
-	public final fun component9 ()Lcom/stripe/android/model/PaymentMethod$CardPresent;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;)Lcom/stripe/android/model/PaymentMethod;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod;
+	public final fun component7 ()Lcom/stripe/android/model/PaymentMethod$Card;
+	public final fun component8 ()Lcom/stripe/android/model/PaymentMethod$CardPresent;
+	public final fun component9 ()Lcom/stripe/android/model/PaymentMethod$Fpx;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;)Lcom/stripe/android/model/PaymentMethod;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/Long;ZLcom/stripe/android/model/PaymentMethod$Type;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/PaymentMethod$CardPresent;Lcom/stripe/android/model/PaymentMethod$Fpx;Lcom/stripe/android/model/PaymentMethod$Ideal;Lcom/stripe/android/model/PaymentMethod$SepaDebit;Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Lcom/stripe/android/model/PaymentMethod$BacsDebit;Lcom/stripe/android/model/PaymentMethod$Sofort;Lcom/stripe/android/model/PaymentMethod$Upi;Lcom/stripe/android/model/PaymentMethod$Netbanking;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentMethod;
@@ -2857,22 +2649,6 @@ public final class com/stripe/android/model/PaymentMethod$Card : com/stripe/andr
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/PaymentMethod$Card$Builder : com/stripe/android/ObjectBuilder {
-	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PaymentMethod$Card;
-	public synthetic fun build ()Ljava/lang/Object;
-	public final fun setBrand (Lcom/stripe/android/model/CardBrand;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setChecks (Lcom/stripe/android/model/PaymentMethod$Card$Checks;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setCountry (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setExpiryMonth (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setExpiryYear (Ljava/lang/Integer;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setFingerprint (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setFunding (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setLast4 (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setThreeDSecureUsage (Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
-	public final fun setWallet (Lcom/stripe/android/model/wallets/Wallet;)Lcom/stripe/android/model/PaymentMethod$Card$Builder;
 }
 
 public final class com/stripe/android/model/PaymentMethod$Card$Checks : com/stripe/android/model/StripeModel {
@@ -3437,13 +3213,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Fpx : andr
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PaymentMethodCreateParams$Fpx$Builder : com/stripe/android/ObjectBuilder {
-	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PaymentMethodCreateParams$Fpx;
-	public synthetic fun build ()Ljava/lang/Object;
-	public final fun setBank (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Fpx$Builder;
-}
-
 public class com/stripe/android/model/PaymentMethodCreateParams$Fpx$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/PaymentMethodCreateParams$Fpx;
@@ -3466,13 +3235,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Ideal : an
 	public fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/PaymentMethodCreateParams$Ideal$Builder : com/stripe/android/ObjectBuilder {
-	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PaymentMethodCreateParams$Ideal;
-	public synthetic fun build ()Ljava/lang/Object;
-	public final fun setBank (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$Ideal$Builder;
 }
 
 public class com/stripe/android/model/PaymentMethodCreateParams$Ideal$Creator : android/os/Parcelable$Creator {
@@ -3518,13 +3280,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$SepaDebit 
 	public fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/PaymentMethodCreateParams$SepaDebit$Builder : com/stripe/android/ObjectBuilder {
-	public fun <init> ()V
-	public fun build ()Lcom/stripe/android/model/PaymentMethodCreateParams$SepaDebit;
-	public synthetic fun build ()Ljava/lang/Object;
-	public final fun setIban (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethodCreateParams$SepaDebit$Builder;
 }
 
 public class com/stripe/android/model/PaymentMethodCreateParams$SepaDebit$Creator : android/os/Parcelable$Creator {
@@ -4059,27 +3814,26 @@ public final class com/stripe/android/model/Source : com/stripe/android/model/St
 	public static final field Companion Lcom/stripe/android/model/Source$Companion;
 	public static final fun asSourceType (Ljava/lang/String;)Ljava/lang/String;
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component10 ()Lcom/stripe/android/model/Source$Owner;
-	public final fun component11 ()Lcom/stripe/android/model/Source$Receiver;
-	public final fun component12 ()Lcom/stripe/android/model/Source$Redirect;
-	public final fun component13 ()Lcom/stripe/android/model/Source$Status;
-	public final fun component14 ()Ljava/util/Map;
-	public final fun component15 ()Lcom/stripe/android/model/SourceTypeModel;
+	public final fun component10 ()Lcom/stripe/android/model/Source$Receiver;
+	public final fun component11 ()Lcom/stripe/android/model/Source$Redirect;
+	public final fun component12 ()Lcom/stripe/android/model/Source$Status;
+	public final fun component13 ()Ljava/util/Map;
+	public final fun component14 ()Lcom/stripe/android/model/SourceTypeModel;
+	public final fun component15 ()Ljava/lang/String;
 	public final fun component16 ()Ljava/lang/String;
-	public final fun component17 ()Ljava/lang/String;
-	public final fun component18 ()Lcom/stripe/android/model/Source$Usage;
+	public final fun component17 ()Lcom/stripe/android/model/Source$Usage;
 	public final fun component2 ()Ljava/lang/Long;
-	public final fun component21 ()Lcom/stripe/android/model/SourceOrder;
-	public final fun component22 ()Ljava/lang/String;
+	public final fun component20 ()Lcom/stripe/android/model/SourceOrder;
+	public final fun component21 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Lcom/stripe/android/model/Source$CodeVerification;
 	public final fun component5 ()Ljava/lang/Long;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Lcom/stripe/android/model/Source$Flow;
 	public final fun component8 ()Ljava/lang/Boolean;
-	public final fun component9 ()Ljava/util/Map;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/Source$CodeVerification;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/Source$Flow;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/Source$Owner;Lcom/stripe/android/model/Source$Receiver;Lcom/stripe/android/model/Source$Redirect;Lcom/stripe/android/model/Source$Status;Ljava/util/Map;Lcom/stripe/android/model/SourceTypeModel;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Source$Usage;Lcom/stripe/android/model/WeChat;Lcom/stripe/android/model/Source$Klarna;Lcom/stripe/android/model/SourceOrder;Ljava/lang/String;)Lcom/stripe/android/model/Source;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/Source;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/Source$CodeVerification;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/Source$Flow;Ljava/lang/Boolean;Ljava/util/Map;Lcom/stripe/android/model/Source$Owner;Lcom/stripe/android/model/Source$Receiver;Lcom/stripe/android/model/Source$Redirect;Lcom/stripe/android/model/Source$Status;Ljava/util/Map;Lcom/stripe/android/model/SourceTypeModel;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Source$Usage;Lcom/stripe/android/model/WeChat;Lcom/stripe/android/model/Source$Klarna;Lcom/stripe/android/model/SourceOrder;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Source;
+	public final fun component9 ()Lcom/stripe/android/model/Source$Owner;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/Source$CodeVerification;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/Source$Flow;Ljava/lang/Boolean;Lcom/stripe/android/model/Source$Owner;Lcom/stripe/android/model/Source$Receiver;Lcom/stripe/android/model/Source$Redirect;Lcom/stripe/android/model/Source$Status;Ljava/util/Map;Lcom/stripe/android/model/SourceTypeModel;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Source$Usage;Lcom/stripe/android/model/WeChat;Lcom/stripe/android/model/Source$Klarna;Lcom/stripe/android/model/SourceOrder;Ljava/lang/String;)Lcom/stripe/android/model/Source;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/Source;Ljava/lang/String;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/Source$CodeVerification;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/Source$Flow;Ljava/lang/Boolean;Lcom/stripe/android/model/Source$Owner;Lcom/stripe/android/model/Source$Receiver;Lcom/stripe/android/model/Source$Redirect;Lcom/stripe/android/model/Source$Status;Ljava/util/Map;Lcom/stripe/android/model/SourceTypeModel;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Source$Usage;Lcom/stripe/android/model/WeChat;Lcom/stripe/android/model/Source$Klarna;Lcom/stripe/android/model/SourceOrder;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Source;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/Source;
@@ -4091,7 +3845,6 @@ public final class com/stripe/android/model/Source : com/stripe/android/model/St
 	public final fun getFlow ()Lcom/stripe/android/model/Source$Flow;
 	public fun getId ()Ljava/lang/String;
 	public final fun getKlarna ()Lcom/stripe/android/model/Source$Klarna;
-	public final fun getMetaData ()Ljava/util/Map;
 	public final fun getOwner ()Lcom/stripe/android/model/Source$Owner;
 	public final fun getReceiver ()Lcom/stripe/android/model/Source$Receiver;
 	public final fun getRedirect ()Lcom/stripe/android/model/Source$Redirect;
@@ -4583,14 +4336,20 @@ public final class com/stripe/android/model/SourceParams : android/os/Parcelable
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/SourceParams$Companion;
 	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component11 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lcom/stripe/android/model/SourceParams$OwnerParams;
+	public final fun component6 ()Lcom/stripe/android/model/Source$Usage;
+	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Lcom/stripe/android/model/SourceParams$Flow;
 	public final fun component9 ()Lcom/stripe/android/model/SourceOrderParams;
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/model/SourceParams$TypeData;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$OwnerParams;Lcom/stripe/android/model/Source$Usage;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$Flow;Lcom/stripe/android/model/SourceOrderParams;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$WeChatParams;Ljava/util/Map;Lcom/stripe/android/model/SourceParams$ApiParams;Lcom/stripe/android/model/ExtraParams;Ljava/util/Set;)Lcom/stripe/android/model/SourceParams;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$TypeData;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$OwnerParams;Lcom/stripe/android/model/Source$Usage;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$Flow;Lcom/stripe/android/model/SourceOrderParams;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$WeChatParams;Ljava/util/Map;Lcom/stripe/android/model/SourceParams$ApiParams;Lcom/stripe/android/model/ExtraParams;Ljava/util/Set;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
+	public final fun copy (Ljava/lang/String;Lcom/stripe/android/model/SourceParams$TypeData;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$OwnerParams;Lcom/stripe/android/model/Source$Usage;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$Flow;Lcom/stripe/android/model/SourceOrderParams;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/SourceParams$WeChatParams;Lcom/stripe/android/model/SourceParams$ApiParams;Ljava/util/Set;)Lcom/stripe/android/model/SourceParams;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$TypeData;Ljava/lang/Long;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$OwnerParams;Lcom/stripe/android/model/Source$Usage;Ljava/lang/String;Lcom/stripe/android/model/SourceParams$Flow;Lcom/stripe/android/model/SourceOrderParams;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/SourceParams$WeChatParams;Lcom/stripe/android/model/SourceParams$ApiParams;Ljava/util/Set;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createAlipayReusableParams (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createAlipaySingleUseParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createBancontactParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
-	public static final fun createCardParams (Lcom/stripe/android/model/Card;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createCardParams (Lcom/stripe/android/model/CardParams;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createCardParamsFromGooglePay (Lorg/json/JSONObject;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createCustomParams (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
@@ -4615,25 +4374,25 @@ public final class com/stripe/android/model/SourceParams : android/os/Parcelable
 	public final fun getApiParameterMap ()Ljava/util/Map;
 	public final fun getCurrency ()Ljava/lang/String;
 	public final fun getFlow ()Lcom/stripe/android/model/SourceParams$Flow;
-	public final fun getMetaData ()Ljava/util/Map;
+	public final fun getMetadata ()Ljava/util/Map;
 	public final fun getOwner ()Lcom/stripe/android/model/SourceParams$OwnerParams;
 	public final fun getReturnUrl ()Ljava/lang/String;
 	public final fun getSourceOrder ()Lcom/stripe/android/model/SourceOrderParams;
+	public final fun getToken ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
 	public final fun getTypeRaw ()Ljava/lang/String;
 	public final fun getUsage ()Lcom/stripe/android/model/Source$Usage;
 	public fun hashCode ()I
-	public final fun setAmount (Ljava/lang/Long;)Lcom/stripe/android/model/SourceParams;
+	public final fun setAmount (Ljava/lang/Long;)V
 	public final fun setApiParameterMap (Ljava/util/Map;)Lcom/stripe/android/model/SourceParams;
-	public final fun setCurrency (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
-	public final fun setExtraParams (Ljava/util/Map;)Lcom/stripe/android/model/SourceParams;
+	public final fun setCurrency (Ljava/lang/String;)V
 	public final fun setFlow (Lcom/stripe/android/model/SourceParams$Flow;)V
-	public final fun setMetaData (Ljava/util/Map;)Lcom/stripe/android/model/SourceParams;
-	public final fun setOwner (Lcom/stripe/android/model/SourceParams$OwnerParams;)Lcom/stripe/android/model/SourceParams;
-	public final fun setReturnUrl (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
+	public final fun setMetadata (Ljava/util/Map;)V
+	public final fun setOwner (Lcom/stripe/android/model/SourceParams$OwnerParams;)V
+	public final fun setReturnUrl (Ljava/lang/String;)V
 	public final fun setSourceOrder (Lcom/stripe/android/model/SourceOrderParams;)V
-	public final fun setToken (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
-	public final fun setUsage (Lcom/stripe/android/model/Source$Usage;)Lcom/stripe/android/model/SourceParams;
+	public final fun setToken (Ljava/lang/String;)V
+	public final fun setUsage (Lcom/stripe/android/model/Source$Usage;)V
 	public fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -4646,7 +4405,6 @@ public final class com/stripe/android/model/SourceParams$Companion {
 	public static synthetic fun createAlipaySingleUseParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
 	public final fun createBancontactParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static synthetic fun createBancontactParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
-	public final fun createCardParams (Lcom/stripe/android/model/Card;)Lcom/stripe/android/model/SourceParams;
 	public final fun createCardParams (Lcom/stripe/android/model/CardParams;)Lcom/stripe/android/model/SourceParams;
 	public final fun createCardParamsFromGooglePay (Lorg/json/JSONObject;)Lcom/stripe/android/model/SourceParams;
 	public final fun createCustomParams (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
@@ -5961,8 +5719,6 @@ public final class com/stripe/android/view/CardInputWidget : android/widget/Line
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
-	public fun getCard ()Lcom/stripe/android/model/Card;
-	public fun getCardBuilder ()Lcom/stripe/android/model/Card$Builder;
 	public fun getCardParams ()Lcom/stripe/android/model/CardParams;
 	public fun getPaymentMethodCard ()Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
 	public fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -5995,8 +5751,6 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IZ)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
-	public fun getCard ()Lcom/stripe/android/model/Card;
-	public fun getCardBuilder ()Lcom/stripe/android/model/Card$Builder;
 	public fun getCardParams ()Lcom/stripe/android/model/CardParams;
 	public final fun getPaymentMethodBillingDetails ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final fun getPaymentMethodBillingDetailsBuilder ()Lcom/stripe/android/model/PaymentMethod$BillingDetails$Builder;
@@ -6031,8 +5785,6 @@ public final class com/stripe/android/view/CardNumberEditText : com/stripe/andro
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getCardBrand ()Lcom/stripe/android/model/CardBrand;
-	public final fun getCardNumber ()Ljava/lang/String;
-	public final fun getLengthMax ()I
 	public final fun isCardNumberValid ()Z
 }
 
@@ -6054,7 +5806,6 @@ public final class com/stripe/android/view/CvcEditText : com/stripe/android/view
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getCvcValue ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/view/ExpiryDateEditText : com/stripe/android/view/StripeEditText {
@@ -6062,7 +5813,6 @@ public final class com/stripe/android/view/ExpiryDateEditText : com/stripe/andro
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getValidDateFields ()Lkotlin/Pair;
 	public final fun getValidatedDate ()Lcom/stripe/android/model/ExpirationDate$Validated;
 	public final fun isDateValid ()Z
 }
@@ -6285,7 +6035,6 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun addTextChangedListener (Landroid/text/TextWatcher;)V
 	protected fun getAccessibilityText ()Ljava/lang/String;
-	public final fun getCachedColorStateList ()Landroid/content/res/ColorStateList;
 	public final fun getDefaultErrorColorInt ()I
 	public fun getOnFocusChangeListener ()Landroid/view/View$OnFocusChangeListener;
 	public final fun getShouldShowError ()Z

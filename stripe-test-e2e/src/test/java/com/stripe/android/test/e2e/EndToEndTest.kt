@@ -43,11 +43,12 @@ internal class EndToEndTest {
         // Confirm the PaymentIntent using a test card
         val confirmedPaymentIntent = requireNotNull(
             stripe.confirmPaymentIntentSynchronous(
-                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    clientSecret = newPaymentIntent.clientSecret,
-                    paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
-                    returnUrl = "https://example.com"
-                )
+                ConfirmPaymentIntentParams
+                    .createWithPaymentMethodCreateParams(
+                        clientSecret = newPaymentIntent.clientSecret,
+                        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS
+                    )
+                    .withShouldUseStripeSdk(true)
             )
         )
 

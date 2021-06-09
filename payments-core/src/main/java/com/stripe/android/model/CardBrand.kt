@@ -26,36 +26,22 @@ enum class CardBrand(
      * Note that [CardBrand.DinersClub]'s max length depends on the BIN (e.g. card number prefix).
      * In the case of a [CardBrand.DinersClub] card, use [getMaxLengthForCardNumber].
      */
-    @Deprecated("Will be removed in upcoming major release.")
-    val defaultMaxLength: Int = 16,
+    private val defaultMaxLength: Int = 16,
 
     /**
      * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
      */
-    @Deprecated("Will be removed in upcoming major release.")
-    val pattern: Pattern? = null,
+    private val pattern: Pattern? = null,
 
     /**
      * Patterns for discrete lengths
      */
-    @Deprecated("Will be removed in upcoming major release.")
     private val partialPatterns: Map<Int, Pattern>,
-
-    /**
-     * The position of spaces in a formatted card number. For example, "4242424242424242" is
-     * formatted to "4242 4242 4242 4242".
-     */
-    @Deprecated("Will be removed in upcoming major release.")
-    val defaultSpacePositions: Set<Int> = setOf(4, 9, 14),
 
     /**
      * By default, a [CardBrand] does not have variants.
      */
-    @Deprecated("Will be removed in upcoming major release.")
     private val variantMaxLength: Map<Pattern, Int> = emptyMap(),
-
-    @Deprecated("Will be removed in upcoming major release.")
-    private val variantSpacePositions: Map<Pattern, Set<Int>> = emptyMap()
 ) {
     AmericanExpress(
         "amex",
@@ -68,8 +54,7 @@ enum class CardBrand(
         pattern = Pattern.compile("^(34|37)[0-9]*$"),
         partialPatterns = mapOf(
             1 to Pattern.compile("^3$")
-        ),
-        defaultSpacePositions = setOf(4, 11)
+        )
     ),
 
     Discover(
@@ -116,9 +101,6 @@ enum class CardBrand(
         ),
         variantMaxLength = mapOf(
             Pattern.compile("^(36)[0-9]*$") to 14
-        ),
-        variantSpacePositions = mapOf(
-            Pattern.compile("^(36)[0-9]*$") to setOf(4, 11)
         )
     ),
 
@@ -161,9 +143,6 @@ enum class CardBrand(
         partialPatterns = emptyMap()
     );
 
-    @Deprecated("Will be removed in upcoming major release.")
-    val defaultMaxLengthWithSpaces: Int = defaultMaxLength + defaultSpacePositions.size
-
     val maxCvcLength: Int
         get() {
             return cvcLength.maxOrNull() ?: CVC_COMMON_LENGTH
@@ -196,89 +175,11 @@ enum class CardBrand(
      *
      * Note: currently only [CardBrand.DinersClub] has variants
      */
-    @Deprecated("Will be replaced with AccountRange#panLength, which is internal.")
-    fun getMaxLengthForCardNumber(cardNumber: String): Int {
+    internal fun getMaxLengthForCardNumber(cardNumber: String): Int {
         val normalizedCardNumber = CardNumber.Unvalidated(cardNumber).normalized
         return variantMaxLength.entries.firstOrNull { (pattern, _) ->
             pattern.matcher(normalizedCardNumber).matches()
         }?.value ?: defaultMaxLength
-    }
-
-    @Deprecated("Will be replaced with AccountRange#panLength, which is internal.")
-    fun getMaxLengthWithSpacesForCardNumber(cardNumber: String): Int {
-        return getMaxLengthForCardNumber(cardNumber) +
-            getSpacePositionsForCardNumber(cardNumber).size
-    }
-
-    /**
-     * If the [CardBrand] has variants, and the [cardNumber] starts with one of the variant
-     * prefixes, return the length for that variant. Otherwise, return [defaultMaxLength].
-     *
-     * Note: currently only [CardBrand.DinersClub] has variants
-     */
-    @Deprecated("Will be replaced with CardNumber#getSpacePositions(), which is internal.")
-    fun getSpacePositionsForCardNumber(cardNumber: String): Set<Int> {
-        val normalizedCardNumber = CardNumber.Unvalidated(cardNumber).normalized
-        return variantSpacePositions.entries.firstOrNull { (pattern, _) ->
-            pattern.matcher(normalizedCardNumber).matches()
-        }?.value ?: defaultSpacePositions
-    }
-
-    /**
-     * Format a number according to brand requirements.
-     *
-     * e.g. `"4242424242424242"` will return `"4242 4242 4242 4242"`
-     */
-    @Deprecated("Will be replaced with CardNumber.Unverified#getFormatted(), which is internal.")
-    fun formatNumber(cardNumber: String): String {
-        return groupNumber(cardNumber)
-            .takeWhile { it != null }
-            .joinToString(" ")
-    }
-
-    /**
-     * Separates a card number according to the brand requirements, including prefixes of card
-     * numbers, so that the groups can be easily displayed if the user is typing them in.
-     * Note that this does not verify that the card number is valid, or even that it is a number.
-     *
-     * e.g. `"4242424242424242"` will return `["4242", "4242", "4242", "4242"]`
-     *
-     * @param cardNumber the raw card number
-     *
-     * @return an array of strings with the number groups, in order. If the number is not complete,
-     * some of the array entries may be `null`.
-     */
-    @Deprecated("Will be replaced with CardNumber.Unverified#getFormatted(), which is internal.")
-    fun groupNumber(cardNumber: String): Array<String?> {
-        val spacelessCardNumber = cardNumber.take(getMaxLengthForCardNumber(cardNumber))
-        val spacePositions = getSpacePositionsForCardNumber(cardNumber)
-        val groups = arrayOfNulls<String?>(spacePositions.size + 1)
-
-        val length = spacelessCardNumber.length
-        var lastUsedIndex = 0
-
-        spacePositions
-            .toList().sorted().forEachIndexed { idx, spacePosition ->
-                val adjustedSpacePosition = spacePosition - idx
-                if (length > adjustedSpacePosition) {
-                    groups[idx] = spacelessCardNumber.substring(
-                        lastUsedIndex,
-                        adjustedSpacePosition
-                    )
-                    lastUsedIndex = adjustedSpacePosition
-                }
-            }
-
-        // populate any remaining digits in the first index with a null value
-        groups
-            .indexOfFirst { it == null }
-            .takeIf {
-                it != -1
-            }?.let {
-                groups[it] = spacelessCardNumber.substring(lastUsedIndex)
-            }
-
-        return groups
     }
 
     private fun getPatternForLength(cardNumber: String): Pattern? {
@@ -291,8 +192,7 @@ enum class CardBrand(
          * @return the [CardBrand] that matches the [cardNumber]'s prefix, if one is found;
          * otherwise, [CardBrand.Unknown]
          */
-        @Deprecated("Card brand matching logic will no longer be public in upcoming major release.")
-        fun fromCardNumber(cardNumber: String?): CardBrand {
+        internal fun fromCardNumber(cardNumber: String?): CardBrand {
             if (cardNumber.isNullOrBlank()) {
                 return Unknown
             }
