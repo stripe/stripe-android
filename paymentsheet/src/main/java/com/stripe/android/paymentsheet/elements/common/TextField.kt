@@ -22,6 +22,7 @@ import androidx.compose.ui.focus.isFocused
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.lifecycle.asLiveData
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
 internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
@@ -44,9 +45,9 @@ internal fun TextField(
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
 
-    val value by textFieldElement.input.observeAsState("")
-    val shouldShowError by textFieldElement.visibleError.observeAsState(false)
-    val elementIsFull by textFieldElement.isFull.observeAsState(false)
+    val value by textFieldElement.input.asLiveData().observeAsState("")
+    val shouldShowError by textFieldElement.visibleError.asLiveData().observeAsState(false)
+    val elementIsFull by textFieldElement.isFull.asLiveData().observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
@@ -85,6 +86,8 @@ internal fun TextField(
                 hasFocus = it.isFocused
             },
         keyboardOptions = KeyboardOptions(imeAction = imeAction(nextFocus)),
-        colors = colors
+        colors = colors,
+        maxLines = 1,
+        singleLine = true
     )
 }
