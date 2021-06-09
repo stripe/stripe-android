@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements.common
 
-import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -14,8 +13,8 @@ import kotlinx.coroutines.flow.map
 internal class TextFieldElement(
     private val textFieldConfig: TextFieldConfig,
     // This is here because it is useful to provide text to force the full/invalid/incomplete states
-    private val shouldShowError: (TextFieldElementState, Boolean) -> Boolean = { state, hasFocus ->
-        textFieldConfig.shouldShowError(state, hasFocus)
+    private val shouldShowError: (TextFieldElementState.Invalid, Boolean) -> Boolean = { invalidState, hasFocus ->
+        invalidState.shouldShowError(invalidState, hasFocus)
     },
     // This is here because it is useful to provide text to force the full/invalid/incomplete states
     private val determineState: (String) -> TextFieldElementState = {
@@ -29,20 +28,27 @@ internal class TextFieldElement(
     private val _input = MutableStateFlow("")
     val input: Flow<String> = _input
 
-    private val _elementState = MutableStateFlow<TextFieldElementState>(Error.ShowAlways)
-
     private val _hasFocus = MutableStateFlow(false)
 
-    val visibleError: Flow<Boolean> = combine(_elementState, _hasFocus) { elementState, hasFocus ->
-        shouldShowError(elementState, hasFocus)
-    }
-    val errorMessage: Flow<Int?> = visibleError.map { visibleError ->
-        _elementState.value.getErrorMessageResId()?.takeIf { visibleError }
+    private val _elementState = MutableStateFlow<TextFieldElementState>(Error.ShowAlways)
+    private val _invalidState = _elementState.map {
+        it as? TextFieldElementState.Invalid
     }
 
-    val isFull: Flow<Boolean> = _elementState.map { it.isFull() }
+    val visibleError: Flow<Boolean> = combine(_invalidState, _hasFocus) { invalidState, hasFocus ->
+        invalidState?.let { shouldShowError(invalidState, hasFocus) } ?: false
+    }
 
-    val isComplete: Flow<Boolean> = _elementState.map { it.isValid() }
+    val errorMessage: Flow<Int?> =
+        combine(visibleError, _invalidState) { visibleError, invalidState ->
+            invalidState?.getErrorMessageResId()?.takeIf { visibleError }
+        }
+
+    val isFull: Flow<Boolean> = _elementState.map {
+        (it as? TextFieldElementState.Valid)?.isFull() ?: false
+    }
+
+    val isComplete: Flow<Boolean> = _elementState.map { it is TextFieldElementState.Valid }
 
     init {
         onValueChange("")
@@ -57,19 +63,5 @@ internal class TextFieldElement(
 
     fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
-    }
-
-    companion object {
-        sealed class Valid : TextFieldElementState.TextFieldElementStateValid() {
-            object Full : Valid() {
-                override fun isFull() = true
-            }
-        }
-
-        sealed class Error(stringResId: Int) :
-            TextFieldElementState.TextFieldElementStateError(stringResId) {
-            object ShowInFocus : Error(R.string.invalid)
-            object ShowAlways : Error(R.string.invalid)
-        }
     }
 }
