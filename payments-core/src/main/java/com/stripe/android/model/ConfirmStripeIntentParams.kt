@@ -7,7 +7,7 @@ import android.os.Parcelable
  *
  * See [ConfirmPaymentIntentParams] and [ConfirmSetupIntentParams]
  */
-interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
+sealed interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
 
     val clientSecret: String
 
