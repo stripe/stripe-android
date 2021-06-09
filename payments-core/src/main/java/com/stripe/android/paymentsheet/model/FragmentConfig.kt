@@ -3,12 +3,12 @@ package com.stripe.android.paymentsheet.model
 import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.AddCardFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import kotlinx.parcelize.Parcelize
 
 /**
- * Configuration data for [AddCardFragment] and [BasePaymentMethodsListFragment].
+ * Configuration data for [CardDataCollectionFragment] and [BasePaymentMethodsListFragment].
  */
 @Parcelize
 internal data class FragmentConfig(

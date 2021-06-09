@@ -176,8 +176,16 @@
     <string name="stripe_paymentsheet_new_card_button_label">+ New card</string>
     <string name="stripe_paymentsheet_save_this_card">Save this card for future payments</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
-    <string name="stripe_paymentsheet_or_pay_with">Or pay with a card</string>
+    <!-- Title of a section containing a card form that will collect the payment information from the user -->
+    <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
+    <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user -->
+    <string name="stripe_paymentsheet_or_pay_using" tools:ignore="MissingTranslation">Or pay using</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
+
+    <!-- Title for card payment method -->
+    <string name="stripe_paymentsheet_payment_method_card" tools:ignore="MissingTranslation">Card</string>
+    <!-- Title for card payment method -->
+    <string name="stripe_paymentsheet_payment_method_ideal" tools:ignore="MissingTranslation">iDEAL</string>
 
     <!-- Label for a button that starts payment processing -->
     <string name="stripe_paymentsheet_pay_button_label">Pay</string>

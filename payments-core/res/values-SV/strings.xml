@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">Stäng</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ Nytt kort</string>
-    <string name="stripe_paymentsheet_or_pay_with">Eller betala med ett kort</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Eller betala med ett kort</string>
     <string name="stripe_paymentsheet_pay_button_amount">Betala %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Betala</string>
     <string name="stripe_paymentsheet_primary_button_processing">Bearbetar ...</string>

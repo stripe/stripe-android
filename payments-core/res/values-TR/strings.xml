@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">Kapat</string>
     <string name="stripe_paymentsheet_expiration_date_hint">AA / YY</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ Yeni kart</string>
-    <string name="stripe_paymentsheet_or_pay_with">Ya da kartla ödeyin</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Ya da kartla ödeyin</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s öde</string>
     <string name="stripe_paymentsheet_pay_button_label">Öde</string>
     <string name="stripe_paymentsheet_primary_button_processing">İşleniyor...</string>

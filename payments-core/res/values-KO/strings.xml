@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">닫기</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/YY</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ 새 카드</string>
-    <string name="stripe_paymentsheet_or_pay_with">또는 카드 결제</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">또는 카드 결제</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s 결제</string>
     <string name="stripe_paymentsheet_pay_button_label">결제</string>
     <string name="stripe_paymentsheet_primary_button_processing">처리 중...</string>

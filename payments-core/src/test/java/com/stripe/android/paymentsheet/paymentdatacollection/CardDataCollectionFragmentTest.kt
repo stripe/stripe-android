@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.content.Context
 import androidx.core.os.bundleOf
@@ -21,6 +21,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheetActivity
+import com.stripe.android.paymentsheet.PaymentSheetContract
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -32,7 +37,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class AddCardFragmentTest {
+class CardDataCollectionFragmentTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
@@ -457,7 +462,7 @@ class AddCardFragmentTest {
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = mock<PaymentIntent>(),
-        onReady: (AddCardFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
+        onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
         val factory = AddPaymentMethodsFragmentFactory(
             PaymentSheetViewModel::class.java,
@@ -466,7 +471,7 @@ class AddCardFragmentTest {
                 { args }
             )
         )
-        launchFragmentInContainer<AddCardFragment<PaymentSheetViewModel>>(
+        launchFragmentInContainer<CardDataCollectionFragment<PaymentSheetViewModel>>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args

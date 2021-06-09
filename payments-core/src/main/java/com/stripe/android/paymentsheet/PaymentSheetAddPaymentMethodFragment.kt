@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 
 internal class PaymentSheetAddPaymentMethodFragment(
@@ -77,7 +78,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
         // TODO(brnunes-stripe): Refactor to support other payment methods
         (
             childFragmentManager
-                .findFragmentById(R.id.payment_method_fragment_container) as? AddCardFragment<*>
+                .findFragmentById(R.id.payment_method_fragment_container) as? CardDataCollectionFragment<*>
             )?.updateSelection()
     }
 }
