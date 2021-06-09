@@ -8,10 +8,10 @@ import com.google.android.gms.common.api.Status
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepaysheet.GooglePayConfig
-import com.stripe.android.googlepaysheet.GooglePayEnvironment
-import com.stripe.android.googlepaysheet.GooglePayLauncherResult
-import com.stripe.android.googlepaysheet.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.GooglePayConfig
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest

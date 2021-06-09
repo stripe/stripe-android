@@ -1,4 +1,4 @@
-package com.stripe.android.googlepaysheet
+package com.stripe.android.googlepaylauncher
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher

@@ -22,10 +22,10 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepaysheet.GooglePayConfig
-import com.stripe.android.googlepaysheet.GooglePayEnvironment
-import com.stripe.android.googlepaysheet.GooglePayLauncherResult
-import com.stripe.android.googlepaysheet.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.GooglePayConfig
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures

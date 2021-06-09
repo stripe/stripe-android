@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 17.0.0 - unreleased
+This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
+
+* [3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10` and Coroutines to `1.5.0`
+
 ## 16.10.0 - 2021-05-28
 * [3752](https://github.com/stripe/stripe-android/pull/3752) Support connected accounts when using Google Pay in PaymentSheet
 * [3761](https://github.com/stripe/stripe-android/pull/3761) Publish `CardFormView`

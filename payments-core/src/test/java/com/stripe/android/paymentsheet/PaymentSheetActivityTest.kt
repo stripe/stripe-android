@@ -18,7 +18,7 @@ import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
-import com.stripe.android.googlepaysheet.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent

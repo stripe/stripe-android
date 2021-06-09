@@ -1,4 +1,4 @@
-package com.stripe.android.googlepaysheet
+package com.stripe.android.googlepaylauncher
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

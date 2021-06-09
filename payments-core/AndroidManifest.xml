@@ -55,7 +55,7 @@
             android:theme="@style/StripePaymentSheetDefaultTheme" />
 
         <activity
-            android:name=".googlepaysheet.StripeGooglePayActivity"
+            android:name=".googlepaylauncher.StripeGooglePayActivity"
             android:theme="@style/StripeGooglePayDefaultTheme" />
     </application>
 
