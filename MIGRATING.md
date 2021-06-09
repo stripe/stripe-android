@@ -1,5 +1,58 @@
 # Migration Guide
 
+## Migrating from versions < 17.0.0
+- Changes to `Stripe`
+    - `ComponentActivity` is now required for payment confirmation methods to make operations
+       lifecycle-aware.
+    - `authenticatePayment` and `authenticateSetup` have been removed
+    - `createCardToken()` now requires `CardParams` instead of `Card`
+- Changes to `ConfirmPaymentIntentParams`
+    - `returnUrl` has been removed as a parameter on `ConfirmPaymentIntentParams` static creation
+       methods. The SDK manages setting this value internally.
+    - `extraParams` property has been removed. Static creation methods that accept this parameter
+      have been removed.
+- Changes to `ConfirmSetupIntentParams`
+    - `returnUrl` has been removed as a parameter on `ConfirmSetupIntentParams` static creation
+       methods. The SDK manages setting this value internally.
+- Changes to `Card`
+     - `number` and `cvc` properties have been removed to reflect the Stripe API
+     - `metadata` has been removed to reflect that it is no longer returned to clients using a
+       publishable key
+     - `Card.Builder` has been removed
+     - `fromString()` and `fromJson()` static methods have been removed
+     - `toPaymentMethodsParams()`, `toPaymentMethodParamsCard()`, `toBuilder()`, and validation
+       instance methods have been removed
+- Changes to `PaymentMethod`
+     - `metadata` has been removed to reflect that it is no longer returned to clients using a
+       publishable key
+     - `PaymentMethod.Card.Builder` has been removed
+- Changes to `PaymentMethodCreateParams`
+     - `Ideal.Builder`, `Fpx.Builder`, and `SepaDebit.Builder` have been removed
+- Changes to `Source`
+     - `metadata` has been removed to reflect that it is no longer returned to clients using a
+       publishable key
+- Changes to `SourceParams`
+     - Most setter methods have been removed
+     - `extraParams` property has been removed
+- Changes to `CardBrand`
+    - Deprecated methods have been removed
+- Changes to `CardInputWidget`
+    - `card` and `cardBuilder` properties have been removed; use `cardParams` instead
+- Changes to `CardMultilineWidget`
+    - `card` and `cardBuilder` properties have been removed; use `cardParams` instead
+- Changes to `CardNumberEditText`
+    - `lengthMax` and `cardNumber` properties have been removed
+- Changes to `CvcEditText`
+    - `cvcValue` property has been removed
+- Changes to `ExpiryDateEditText`
+    - `validDateFields` property has been removed
+- Changes to `StripeEditText`
+    - `cachedColorStateList` property has been removed
+- Other changes
+    - `GooglePayConfig` now requires instantiated `PaymentConfiguration`
+    - `CardUtils` is now `internal`
+    - `StripeTextUtils` has been removed
+
 ## Migrating from versions < 16.0.0
 - Changes to `CardInputWidget` and `CardMultilineWidget`
     -  To enable 19-digit card support, [PaymentConfiguration.init]
