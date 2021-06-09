@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import com.stripe.android.paymentsheet.forms.SofortForm
-import com.stripe.android.paymentsheet.forms.SofortFormViewModel
+import androidx.lifecycle.asLiveData
+import com.stripe.android.paymentsheet.forms.FormDataObjectReader
+import com.stripe.android.paymentsheet.forms.FormViewModel
 
 class FormFragment : Fragment() {
-    private val sofortFormViewModel by activityViewModels<SofortFormViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,10 +26,24 @@ class FormFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
+        val formDataObject = com.stripe.android.paymentsheet.forms.sofort
+
+        val formViewModel = FormViewModel(
+            formDataObject.paramKey,
+            formDataObject.allTypes
+        )
+
+        formViewModel.paramMapFlow.asLiveData().observe(viewLifecycleOwner) {
+            Log.e("APP", "Params: $it")
+        }
+
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
-                    SofortForm(sofortFormViewModel, "My merchant, Inc.")
+                    FormDataObjectReader(
+                        formDataObject,
+                        formViewModel
+                    )
                 }
             }
         }

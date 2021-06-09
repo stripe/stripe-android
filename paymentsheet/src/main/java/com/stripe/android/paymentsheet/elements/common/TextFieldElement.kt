@@ -22,6 +22,7 @@ internal class TextFieldElement(
         textFieldConfig.determineState(it)
     }
 ) {
+    val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */
