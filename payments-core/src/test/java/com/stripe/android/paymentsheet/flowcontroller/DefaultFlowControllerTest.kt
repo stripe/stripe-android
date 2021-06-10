@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -33,7 +34,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -97,6 +97,9 @@ internal class DefaultFlowControllerTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
+
+    private val activityResultCaller = mock<ActivityResultCaller>()
+
     private lateinit var activity: ComponentActivity
 
     @BeforeTest
@@ -109,6 +112,20 @@ internal class DefaultFlowControllerTest {
         activityScenario.onActivity {
             activity = it
         }
+
+        whenever(
+            activityResultCaller.registerForActivityResult(
+                any<PaymentOptionContract>(),
+                any()
+            )
+        ).thenReturn(paymentOptionActivityLauncher)
+
+        whenever(
+            activityResultCaller.registerForActivityResult(
+                any<StripeGooglePayContract>(),
+                any()
+            )
+        ).thenReturn(googlePayActivityLauncher)
     }
 
     @AfterTest
@@ -598,13 +615,12 @@ internal class DefaultFlowControllerTest {
         PaymentOptionFactory(activity.resources),
         paymentOptionCallback,
         paymentResultCallback,
+        activityResultCaller,
         flowControllerInitializer,
         eventReporter,
         SESSION_ID,
-        paymentOptionActivityLauncher,
-        googlePayActivityLauncher,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
-        mock<StripeApiRepository>(),
+        mock(),
         paymentController,
         { PaymentConfiguration.getInstance(activity) },
         { flowResultProcessor }

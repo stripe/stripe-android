@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import com.stripe.android.paymentsheet.flowcontroller.ActivityLauncherFactory
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.view.AuthActivityStarterHost
@@ -30,7 +30,7 @@ internal interface FlowControllerComponent {
         fun lifecycleScope(lifecycleScope: CoroutineScope): Builder
 
         @BindsInstance
-        fun activityLauncherFactory(activityLauncherFactory: ActivityLauncherFactory): Builder
+        fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
 
         @BindsInstance
         fun statusBarColor(statusBarColor: () -> Int?): Builder

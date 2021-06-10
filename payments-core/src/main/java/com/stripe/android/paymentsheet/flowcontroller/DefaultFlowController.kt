@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.gms.common.api.Status
@@ -57,12 +58,11 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
+    activityResultCaller: ActivityResultCaller,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
-    private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>,
-    private val googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>,
     private val viewModel: FlowControllerViewModel,
     private val stripeApiRepository: StripeApiRepository,
     private val paymentController: PaymentController,
@@ -80,6 +80,25 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     private val lazyPaymentFlowResultProcessor: Lazy<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController {
+    private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
+    private val googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
+
+    init {
+        paymentController.updateLaunchersWithCallback(
+            activityResultCaller,
+            ::onPaymentFlowResult
+        )
+        paymentOptionActivityLauncher =
+            activityResultCaller.registerForActivityResult(
+                PaymentOptionContract(),
+                ::onPaymentOptionResult
+            )
+        googlePayActivityLauncher =
+            activityResultCaller.registerForActivityResult(
+                StripeGooglePayContract(),
+                ::onGooglePayResult
+            )
+    }
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
@@ -425,7 +444,7 @@ internal class DefaultFlowController @Inject internal constructor(
             appContext: Context,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleScope: CoroutineScope,
-            activityLauncherFactory: ActivityLauncherFactory,
+            activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
             authHostSupplier: () -> AuthActivityStarterHost,
             paymentOptionFactory: PaymentOptionFactory,
@@ -436,7 +455,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
                 .lifecycleScope(lifecycleScope)
-                .activityLauncherFactory(activityLauncherFactory)
+                .activityResultCaller(activityResultCaller)
                 .statusBarColor(statusBarColor)
                 .authHostSupplier(authHostSupplier)
                 .paymentOptionFactory(paymentOptionFactory)

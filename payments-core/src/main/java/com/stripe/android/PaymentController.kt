@@ -1,6 +1,11 @@
 package com.stripe.android
 
+import android.app.Activity
 import android.content.Intent
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
+import androidx.fragment.app.Fragment
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -13,6 +18,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.WeChat
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarterHost
 
 internal interface PaymentController {
@@ -182,6 +188,19 @@ internal interface PaymentController {
         stripeIntent: StripeIntent,
         returnUrl: String?,
         requestOptions: ApiRequest.Options
+    )
+
+    /**
+     * Update the [ActivityResultLauncher]s with the new [ActivityResultCaller] and callback.
+     *
+     * [ActivityResultCaller] is usually an [Activity] or [Fragment] instance, this method needs
+     * to be called from [Activity.onCreate] to make sure that during configuration change,
+     * the new [Activity] instance correctly registers for launchers and the old instance is
+     * correctly GC-ed.
+     */
+    fun updateLaunchersWithCallback(
+        activityResultCaller: ActivityResultCaller,
+        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     )
 
     enum class StripeIntentType {

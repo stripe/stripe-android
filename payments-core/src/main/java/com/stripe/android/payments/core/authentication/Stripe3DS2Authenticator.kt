@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.authentication
 
-import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentRelayStarter
@@ -16,7 +15,6 @@ import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultStripeChallengeStatusReceiver
-import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
@@ -44,16 +42,10 @@ internal class Stripe3DS2Authenticator(
     private val messageVersionRegistry: MessageVersionRegistry,
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
     private val stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
-    private val stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>?,
+    private val stripe3ds2CompletionStarterFactory: (AuthActivityStarterHost, Int) -> Stripe3ds2CompletionStarter,
     private val workContext: CoroutineContext,
     private val uiContext: CoroutineContext
 ) : IntentAuthenticator {
-    private val stripe3ds2CompletionStarterFactory =
-        { host: AuthActivityStarterHost, requestCode: Int ->
-            stripe3ds2ChallengeLauncher?.let {
-                Stripe3ds2CompletionStarter.Modern(it)
-            } ?: Stripe3ds2CompletionStarter.Legacy(host, requestCode)
-        }
 
     override suspend fun authenticate(
         host: AuthActivityStarterHost,

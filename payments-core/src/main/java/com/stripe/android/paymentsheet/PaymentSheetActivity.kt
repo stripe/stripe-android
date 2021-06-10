@@ -20,16 +20,12 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
-import com.stripe.android.PaymentRelayContract
 import com.stripe.android.R
 import com.stripe.android.StripePaymentController
-import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.Amount
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -120,23 +116,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             return
         }
 
-        val paymentRelayLauncher = registerForActivityResult(
-            PaymentRelayContract()
-        ) {
-            viewModel.onPaymentFlowResult(it)
-        }
-        val paymentBrowserAuthLauncher = registerForActivityResult(
-            PaymentBrowserAuthContract(
-                DefaultReturnUrl.create(application)
-            )
-        ) {
-            viewModel.onPaymentFlowResult(it)
-        }
-        val stripe3ds2ChallengeLauncher = registerForActivityResult(
-            Stripe3ds2CompletionContract()
-        ) {
-            viewModel.onPaymentFlowResult(it)
-        }
         paymentController = StripePaymentController(
             application,
             { paymentConfig.publishableKey },
@@ -144,11 +123,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 application,
                 { paymentConfig.publishableKey }
             ),
-            true,
-            paymentRelayLauncher = paymentRelayLauncher,
-            paymentBrowserAuthLauncher = paymentBrowserAuthLauncher,
-            stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
+            true
         )
+
+        paymentController.updateLaunchersWithCallback(this) {
+            viewModel.onPaymentFlowResult(it)
+        }
 
         val googlePayLauncher = registerForActivityResult(
             StripeGooglePayContract()

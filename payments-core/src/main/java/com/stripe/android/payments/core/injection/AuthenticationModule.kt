@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.injection
 
-import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentBrowserAuthStarter
@@ -9,7 +8,7 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.payments.core.authentication.NoOpIntentAuthenticator
 import com.stripe.android.payments.core.authentication.Stripe3DS2Authenticator
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
@@ -42,7 +41,7 @@ internal class AuthenticationModule(
     private val messageVersionRegistry: MessageVersionRegistry,
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
     private val stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
-    private val stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>?,
+    private val stripe3ds2CompletionStarterFactory: (AuthActivityStarterHost, Int) -> Stripe3ds2CompletionStarter,
 ) {
     @Singleton
     @Provides
@@ -78,7 +77,7 @@ internal class AuthenticationModule(
             messageVersionRegistry,
             challengeProgressActivityStarter,
             stripe3ds2Config,
-            stripe3ds2ChallengeLauncher,
+            stripe3ds2CompletionStarterFactory,
             workContext,
             uiContext
         )
