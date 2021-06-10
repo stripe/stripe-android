@@ -8,9 +8,8 @@
     <string name="blank_and_required" tools:ignore="MissingTranslation">%s cannot be blank.</string>
     <!-- Use when is not valid, but the exact problem is unknown. -->
     <string name="invalid" tools:ignore="MissingTranslation">%s is invalid.</string>
-    <string name="email">Email</string>
-    <string name="title_bank_account">Bank Account</string>
-    <string name="address_label_name">Name</string>
-    <string name="address_label_country">Country</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">"    Add your payment information"</string>
+    <string name="email" tools:ignore="MissingTranslation">Email</string>
+    <string name="title_bank_account" tools:ignore="MissingTranslation">Bank Account</string>
+    <string name="address_label_name" tools:ignore="MissingTranslation">Name</string>
+    <string name="address_label_country" tools:ignore="MissingTranslation">Country</string>
 </resources>
