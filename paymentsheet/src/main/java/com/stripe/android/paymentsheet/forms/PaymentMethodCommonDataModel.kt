@@ -21,6 +21,8 @@ sealed class Field(
     object NameInput : Field("name")
 
     object EmailInput : Field("email")
+
+    object CountryInput : Field("country")
 }
 
 data class Section(

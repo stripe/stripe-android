@@ -40,7 +40,6 @@ internal fun TextField(
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,
     modifier: Modifier = Modifier,
-    label: Int? = null, // Let the caller choose if they want a label, if it is in a section by itself it might not make sense.
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
 
@@ -74,7 +73,7 @@ internal fun TextField(
         value = value,
         onValueChange = { textFieldElement.onValueChange(it) },
         isError = shouldShowError,
-        label = { label?.let { Text(text = stringResource(it)) } },
+        label = { textFieldElement.label?.let { Text(text = stringResource(it)) } },
         modifier = modifier
             .fillMaxWidth()
             .focusOrder(myFocus) { nextFocus?.requestFocus() }

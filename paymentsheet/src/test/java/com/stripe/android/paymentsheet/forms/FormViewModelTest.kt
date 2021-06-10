@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.elements.common.DropdownElement
+import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -14,8 +16,8 @@ class FormViewModelTest {
     fun `Verify params are set when element flows are complete`() = runBlocking {
         val formViewModel = FormViewModel(sofort)
 
-        val nameElement = formViewModel.getElement(Field.NameInput)
-        val emailElement = formViewModel.getElement(Field.EmailInput)
+        val nameElement = formViewModel.getElement(Field.NameInput) as TextFieldElement
+        val emailElement = formViewModel.getElement(Field.EmailInput) as TextFieldElement
 
         nameElement.onValueChange("joe")
         assertThat(formViewModel.paramMapFlow.first()).isNull()
@@ -29,7 +31,7 @@ class FormViewModelTest {
                   billing_details={
                     address={
                       city=null,
-                      country=null,
+                      country=US,
                       line1=null,
                       line2=null,
                       postal_code=null,
@@ -39,11 +41,12 @@ class FormViewModelTest {
                     email=joe@gmail.com,
                     phone=null
                   },
-                  sofort={country=null}
+                  sofort={country=US}
                 }
             """.replace("\\s".toRegex(), "")
         )
         emailElement.onValueChange("invalid.email@IncompleteDomain")
+
         assertThat(formViewModel.paramMapFlow.first()).isNull()
     }
 }

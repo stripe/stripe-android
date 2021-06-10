@@ -17,6 +17,9 @@ val sofort = FormDataObject(
         ),
         Section(
             Field.EmailInput
+        ),
+        Section(
+            Field.CountryInput
         )
     ),
     sofortParamKey,

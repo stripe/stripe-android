@@ -16,14 +16,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
+import com.stripe.android.paymentsheet.elements.common.DropDown
+import com.stripe.android.paymentsheet.elements.common.DropdownElement
+import com.stripe.android.paymentsheet.elements.common.Element
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
+import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-// TODO: Country element type
 // TODO: Manadate type
 // TODO: Save for future usage.
 
@@ -33,30 +36,38 @@ internal fun Form(
     formViewModel: FormViewModel,
 ) {
     val form = formViewModel.formDataObject
-    val focusRequesters = List(form.sections.size) { FocusRequester() }
+
+    // There is only a single field in a section, some of those might not require focus like
+    // country so we will create an extra one
+    var focusRequesterIndex = 0
+    val focusRequesters = List(formViewModel.getNumberTextFieldElements()) { FocusRequester() }
 
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
             .padding(16.dp)
     ) {
-        form.sections.forEachIndexed { index, section ->
+        form.sections.forEach { section ->
             val element = formViewModel.getElement(section.field)
             val error by element.errorMessage.asLiveData().observeAsState(null)
             val sectionErrorString =
                 error?.let { stringResource(it, stringResource(element.label)) }
 
             Section(sectionErrorString) {
-                TextField(
-                    label = element.label,
-                    textFieldElement = element,
-                    myFocus = focusRequesters[index],
-                    nextFocus = if (index == form.sections.size - 1) {
-                        null
-                    } else {
-                        focusRequesters[index + 1]
-                    },
-                )
+                if (element is TextFieldElement) {
+                    TextField(
+                        textFieldElement = element,
+                        myFocus = focusRequesters[focusRequesterIndex],
+                        nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
+                            null
+                        } else {
+                            focusRequesters[focusRequesterIndex + 1]
+                        },
+                    )
+                    focusRequesterIndex++
+                } else if (element is DropdownElement) {
+                    DropDown(element)
+                }
             }
         }
     }
@@ -76,7 +87,8 @@ class FormViewModel(
 
     private val paramKey: MutableMap<String, Any?> = formDataObject.paramKey
     private val types: List<Field> = formDataObject.allTypes
-    private val elementMap = mutableMapOf<Field, TextFieldElement>()
+    private val elementMap = mutableMapOf<Field, Element>()
+    fun getNumberTextFieldElements() = elementMap.filter { it.value is TextFieldElement }.size
 
     internal fun getElement(type: Field) = requireNotNull(elementMap[type])
 
@@ -91,9 +103,15 @@ class FormViewModel(
             val element = when (type) {
                 Field.NameInput -> TextFieldElement(NameConfig()) // All configs should have the label passed in for consistency
                 Field.EmailInput -> TextFieldElement(EmailConfig())
+                Field.CountryInput -> DropdownElement(CountryConfig())
             }
             listCompleteFlows.add(element.isComplete)
-            listOfPairs.add(element.input.map { Pair(type.paymentMethodCreateParamsKey, it) })
+            listOfPairs.add(element.paymentMethodParams.map {
+                Pair(
+                    type.paymentMethodCreateParamsKey,
+                    it
+                )
+            })
             elementMap[type] = element
         }
 

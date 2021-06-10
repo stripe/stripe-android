@@ -12,5 +12,4 @@ internal class CountryConfig : DropdownConfig {
         CountryUtils.getOrderedCountries(Locale.getDefault()).map { it.name }
     override fun getPaymentMethodParams(): List<String> =
         CountryUtils.getOrderedCountries(Locale.getDefault()).map { it.code.value }
-
 }
