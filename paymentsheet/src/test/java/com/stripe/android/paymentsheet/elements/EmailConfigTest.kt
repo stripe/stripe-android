@@ -7,7 +7,7 @@ import org.junit.Test
 import java.util.regex.Pattern
 
 class EmailConfigTest {
-    private val emailConfig = EmailConfig(PATTERN)
+    private val emailConfig = EmailConfig()
 
     @Test
     fun `verify determine state returns blank and required when empty`() {
@@ -36,16 +36,4 @@ class EmailConfigTest {
             .isEqualTo("123^@gmail[\uD83E\uDD57.com")
     }
 
-    companion object {
-        // This is here because it is not defined during unit tests.
-        val PATTERN: Pattern = Pattern.compile(
-            "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
-                "\\@" +
-                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-                "(" +
-                "\\." +
-                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-                ")+"
-        )
-    }
 }
