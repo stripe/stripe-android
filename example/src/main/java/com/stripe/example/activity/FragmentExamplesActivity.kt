@@ -14,15 +14,5 @@ class FragmentExamplesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
         setTitle(R.string.launch_payment_session_from_fragment)
-
-        if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(
-                    viewBinding.fragmentContainer.id,
-                    FragmentExamplesFragment()
-                )
-                .commit()
-        }
     }
 }
