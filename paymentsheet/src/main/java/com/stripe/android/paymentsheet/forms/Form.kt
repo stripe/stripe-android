@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.map
 
 // TODO: Country element type
 // TODO: Manadate type
-// TODO: Next focus
 // TODO: Save for future usage.
 
 @ExperimentalAnimationApi
@@ -33,22 +32,29 @@ internal fun Form(
     form: FormDataObject,
     formViewModel: FormViewModel,
 ) {
+    val focusRequesters = List(form.sections.size) { FocusRequester() }
+
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
             .padding(16.dp)
     ) {
-        form.elements.forEach {
-            val element = formViewModel.getElement(it.field)
-            val label = element.label
+        form.sections.forEachIndexed { index, section ->
+            val element = formViewModel.getElement(section.field)
             val error by element.errorMessage.asLiveData().observeAsState(null)
+            val sectionErrorString =
+                error?.let { stringResource(it, stringResource(element.label)) }
 
-            Section(stringResource(element.label), error) {
+            Section(sectionErrorString) {
                 TextField(
-                    label = label,
+                    label = element.label,
                     textFieldElement = element,
-                    myFocus = FocusRequester(),
-                    nextFocus = null,
+                    myFocus = focusRequesters[index],
+                    nextFocus = if (index == form.sections.size - 1) {
+                        null
+                    } else {
+                        focusRequesters[index + 1]
+                    },
                 )
             }
         }
