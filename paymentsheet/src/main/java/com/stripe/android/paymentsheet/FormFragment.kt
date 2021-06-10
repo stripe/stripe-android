@@ -31,9 +31,7 @@ class FormFragment : Fragment() {
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
-                    Form(
-                        viewModel
-                    )
+                    Form(viewModel)
                 }
             }
         }
