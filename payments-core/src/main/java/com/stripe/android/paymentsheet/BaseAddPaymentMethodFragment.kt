@@ -15,13 +15,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.IdealDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
-import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal abstract class BaseAddPaymentMethodFragment(
@@ -33,6 +31,8 @@ internal abstract class BaseAddPaymentMethodFragment(
     protected lateinit var addPaymentMethodHeader: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // When the fragment is destroyed and recreated, the child fragment is re-instantiated
+        // during onCreate, so the factory must be set before calling super.
         childFragmentManager.fragmentFactory = AddPaymentMethodsFragmentFactory(
             sheetViewModel::class.java, viewModelFactory
         )
@@ -60,27 +60,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         addPaymentMethodHeader = viewBinding.addPaymentMethodHeader
 
-        val config = requireNotNull(
-            arguments?.getParcelable<FragmentConfig>(
-                BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
-            )
-        )
-
-        val paymentMethods = config.stripeIntent.paymentMethodTypes.mapNotNull {
-            SupportedPaymentMethod.fromCode(it)
-        }.filter { it == SupportedPaymentMethod.Card }
-
-        if (paymentMethods.isEmpty()) {
-            sheetViewModel.onFatal(
-                IllegalArgumentException(
-                    "None of the requested payment methods" +
-                        " (${config.stripeIntent.paymentMethodTypes})" +
-                        " matches the supported payment types" +
-                        " (${SupportedPaymentMethod.values().toList()})"
-                )
-            )
-            return
-        }
+        val paymentMethods = sheetViewModel.getSupportedPaymentMethods()
 
         viewBinding.googlePayDivider.setText(
             if (paymentMethods.contains(SupportedPaymentMethod.Card) && paymentMethods.size == 1) {

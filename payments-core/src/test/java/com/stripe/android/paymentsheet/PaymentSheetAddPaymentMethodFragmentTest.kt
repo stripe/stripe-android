@@ -17,6 +17,7 @@ import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBindin
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -120,16 +121,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
-    fun `fragment started without FragmentConfig should emit fatal`() {
-        createFragment(
-            fragmentConfig = null
-        ) { fragment, _ ->
-            assertThat((fragment.sheetViewModel.paymentSheetResult.value as PaymentSheetResult.Failed).error.message)
-                .isEqualTo("Failed to start add payment option fragment.")
-        }
-    }
-
-    @Test
     fun `google pay button state updated on start processing`() {
         createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
             fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
@@ -190,11 +181,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card"))
         }
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT.copy(stripeIntent = paymentIntent)
-
-        createFragment(fragmentConfig = fragmentConfig) { fragment, viewBinding ->
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isFalse()
-            assertThat(viewBinding.googlePayDivider.viewBinding.dividerText)
+            assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
                 .isEqualTo("Or pay with a card")
         }
     }
@@ -205,24 +194,16 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "ideal"))
         }
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT.copy(stripeIntent = paymentIntent)
-
-        createFragment(fragmentConfig = fragmentConfig) { fragment, viewBinding ->
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
-            assertThat(viewBinding.googlePayDivider.viewBinding.dividerText)
+            assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
                 .isEqualTo("Or pay using")
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when payment method is selected then transitions to correct fragment`() {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "ideal"))
-        }
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT.copy(stripeIntent = paymentIntent)
-
-        createFragment(fragmentConfig = fragmentConfig) { fragment, viewBinding ->
+        createFragment { fragment, viewBinding ->
             assertThat(
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
@@ -244,7 +225,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     private fun createFragment(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
-        stripeIntent: StripeIntent? = mock<PaymentIntent>(),
+        stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         onReady: (PaymentSheetAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit
     ) {
         launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
@@ -257,7 +238,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             initialState = Lifecycle.State.INITIALIZED
         ).onFragment { fragment ->
             // Mock sheetViewModel loading the StripeIntent before the Fragment is created
-            fragment.sheetViewModel._stripeIntent.value = stripeIntent
+            fragment.sheetViewModel.setStripeIntent(stripeIntent)
         }.moveToState(Lifecycle.State.STARTED)
             .onFragment { fragment ->
                 onReady(
