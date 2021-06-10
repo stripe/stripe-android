@@ -50,7 +50,7 @@ ext {
     buildToolsVersion = "30.0.3"
     compileSdkVersion = 30
 
-    kotlinCoroutinesVersion = '1.5.0'
+    kotlinCoroutinesVersion = '1.5.0-native-mt'
     composeVersion = '1.0.0-beta08'
     espressoVersion = '3.3.0'
     ktlintVersion = '0.41.0'
