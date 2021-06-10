@@ -68,7 +68,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         val paymentMethods = config.stripeIntent.paymentMethodTypes.mapNotNull {
             SupportedPaymentMethod.fromCode(it)
-        }.toMutableList()
+        }.filter { it == SupportedPaymentMethod.Card }
 
         if (paymentMethods.isEmpty()) {
             sheetViewModel.onFatal(

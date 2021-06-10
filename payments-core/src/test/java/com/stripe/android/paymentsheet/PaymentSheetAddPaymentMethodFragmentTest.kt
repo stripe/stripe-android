@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -198,6 +199,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
+    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
         val paymentIntent = mock<PaymentIntent>().also {
@@ -212,6 +214,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
+    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when payment method is selected then transitions to correct fragment`() {
         val paymentIntent = mock<PaymentIntent>().also {
