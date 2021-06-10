@@ -40,6 +40,10 @@ android {
         kotlinCompilerVersion = "$kotlinVersion"
         kotlinCompilerExtensionVersion "$composeVersion"
     }
+
+    lintOptions {
+        disable "UnrememberedMutableState"
+    }
 }
 
 dependencies {
