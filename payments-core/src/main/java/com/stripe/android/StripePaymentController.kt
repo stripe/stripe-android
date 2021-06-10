@@ -170,7 +170,6 @@ internal class StripePaymentController internal constructor(
                         requestOptions
                     )
                 }
-                else -> error("Confirmation params must be ConfirmPaymentIntentParams or ConfirmSetupIntentParams")
             }
         }.fold(
             onSuccess = { intent ->
