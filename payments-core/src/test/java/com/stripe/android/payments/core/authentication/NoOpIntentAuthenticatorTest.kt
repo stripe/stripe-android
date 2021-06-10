@@ -16,7 +16,7 @@ import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -30,10 +30,10 @@ import org.robolectric.RobolectricTestRunner
 class NoOpIntentAuthenticatorTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val host = mock<AuthActivityStarter.Host>()
+    private val host = mock<AuthActivityStarterHost>()
 
     private val paymentRelayStarterFactory =
-        mock<(AuthActivityStarter.Host) -> PaymentRelayStarter>()
+        mock<(AuthActivityStarterHost) -> PaymentRelayStarter>()
 
     private val authenticator = NoOpIntentAuthenticator(
         paymentRelayStarterFactory

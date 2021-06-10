@@ -15,7 +15,7 @@ import com.stripe.android.payments.core.authentication.Stripe3DS2Authenticator
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -30,8 +30,8 @@ import kotlin.coroutines.CoroutineContext
 @Module
 internal class AuthenticationModule(
     private val stripeRepository: StripeRepository,
-    private val paymentRelayStarterFactory: (AuthActivityStarter.Host) -> PaymentRelayStarter,
-    private val paymentBrowserAuthStarterFactory: (AuthActivityStarter.Host) -> PaymentBrowserAuthStarter,
+    private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
+    private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val logger: Logger,

@@ -15,7 +15,7 @@ import com.stripe.android.payments.core.injection.AuthenticationModule
 import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -73,8 +73,8 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
          */
         fun createInstance(
             stripeRepository: StripeRepository,
-            paymentRelayStarterFactory: (AuthActivityStarter.Host) -> PaymentRelayStarter,
-            paymentBrowserAuthStarterFactory: (AuthActivityStarter.Host) -> PaymentBrowserAuthStarter,
+            paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
+            paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
             analyticsRequestExecutor: AnalyticsRequestExecutor,
             analyticsRequestFactory: AnalyticsRequestFactory,
             logger: Logger,
