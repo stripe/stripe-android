@@ -14,7 +14,7 @@ internal class CurrencyFormatter {
         targetLocale: Locale = Locale.getDefault()
     ) = format(
         amount,
-        Currency.getInstance(amountCurrencyCode.toUpperCase(Locale.ROOT)),
+        Currency.getInstance(amountCurrencyCode.uppercase()),
         targetLocale
     )
 
@@ -70,7 +70,7 @@ internal class CurrencyFormatter {
          */
         return SERVER_DECIMAL_DIGITS
             .filter { entry ->
-                entry.key.contains(currency.currencyCode.toUpperCase(Locale.ROOT))
+                entry.key.contains(currency.currencyCode.uppercase())
             }.map {
                 it.value
             }.firstOrNull() ?: currency.defaultFractionDigits

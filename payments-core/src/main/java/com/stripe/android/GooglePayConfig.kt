@@ -41,17 +41,9 @@ class GooglePayConfig @JvmOverloads constructor(
         PaymentConfiguration.getInstance(context)
     )
 
-    /**
-     * Instantiate with [PaymentConfiguration] and optional Connect Account Id.
-     * [PaymentConfiguration] must be initialized.
-     */
-    @Deprecated("Configure connectedAccountId in PaymentConfiguration")
-    constructor(context: Context, connectedAccountId: String? = null) : this(
-        publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
-        connectedAccountId = connectedAccountId
-    )
-
-    private constructor(paymentConfiguration: PaymentConfiguration) : this(
+    private constructor(
+        paymentConfiguration: PaymentConfiguration
+    ) : this(
         publishableKey = paymentConfiguration.publishableKey,
         connectedAccountId = paymentConfiguration.stripeAccountId
     )

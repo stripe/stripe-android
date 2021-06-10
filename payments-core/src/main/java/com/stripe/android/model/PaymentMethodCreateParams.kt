@@ -7,7 +7,6 @@ import com.stripe.android.Stripe
 import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.Locale
 
 /**
  * Model for PaymentMethod creation parameters.
@@ -295,19 +294,6 @@ data class PaymentMethodCreateParams internal constructor(
             return bank?.let { mapOf(PARAM_BANK to it) }.orEmpty()
         }
 
-        @Deprecated("Ideal#bank is now visible and mutable.")
-        class Builder : ObjectBuilder<Ideal> {
-            internal var bank: String? = null
-
-            fun setBank(bank: String?): Builder = apply {
-                this.bank = bank
-            }
-
-            override fun build(): Ideal {
-                return Ideal(bank)
-            }
-        }
-
         private companion object {
             private const val PARAM_BANK: String = "bank"
         }
@@ -321,19 +307,6 @@ data class PaymentMethodCreateParams internal constructor(
             return bank?.let {
                 mapOf(PARAM_BANK to it)
             }.orEmpty()
-        }
-
-        @Deprecated("Fpx#bank is now visible and mutable.")
-        class Builder : ObjectBuilder<Fpx> {
-            internal var bank: String? = null
-
-            fun setBank(bank: String?): Builder = apply {
-                this.bank = bank
-            }
-
-            override fun build(): Fpx {
-                return Fpx(bank)
-            }
         }
 
         private companion object {
@@ -364,19 +337,6 @@ data class PaymentMethodCreateParams internal constructor(
             return iban?.let {
                 mapOf(PARAM_IBAN to it)
             }.orEmpty()
-        }
-
-        @Deprecated("SepaDebit#iban is now visible and mutable.")
-        class Builder : ObjectBuilder<SepaDebit> {
-            private var iban: String? = null
-
-            fun setIban(iban: String?): Builder = apply {
-                this.iban = iban
-            }
-
-            override fun build(): SepaDebit {
-                return SepaDebit(iban)
-            }
         }
 
         private companion object {
@@ -439,7 +399,7 @@ data class PaymentMethodCreateParams internal constructor(
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
-                PARAM_COUNTRY to country.toUpperCase(Locale.ROOT)
+                PARAM_COUNTRY to country.uppercase()
             )
         }
 
@@ -454,7 +414,7 @@ data class PaymentMethodCreateParams internal constructor(
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
-                PARAM_BANK to bank.toLowerCase(Locale.ROOT)
+                PARAM_BANK to bank.lowercase()
             )
         }
 

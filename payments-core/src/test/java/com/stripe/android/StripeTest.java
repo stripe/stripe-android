@@ -31,9 +31,9 @@ import com.stripe.android.model.StripeFileParams;
 import com.stripe.android.model.StripeFilePurpose;
 import com.stripe.android.model.Token;
 import com.stripe.android.model.WeChat;
-import com.stripe.android.networking.AnalyticsRequestFactory;
 import com.stripe.android.networking.AnalyticsRequest;
 import com.stripe.android.networking.AnalyticsRequestExecutor;
+import com.stripe.android.networking.AnalyticsRequestFactory;
 import com.stripe.android.networking.DefaultApiRequestExecutor;
 import com.stripe.android.networking.FakeAnalyticsRequestExecutor;
 import com.stripe.android.networking.StripeApiRepository;
@@ -45,8 +45,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import javax.inject.Provider;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -433,7 +431,7 @@ public class StripeTest {
             put("flavor", "strawberry");
             put("type", "sherbet");
         }};
-        bancontactParams.setMetaData(metamap);
+        bancontactParams.setMetadata(metamap);
 
         final Source bancontactSource = defaultStripe.createSourceSynchronous(bancontactParams);
         assertNotNull(bancontactSource);
@@ -468,7 +466,7 @@ public class StripeTest {
             put("dimensions", "three");
             put("type", "beach ball");
         }};
-        threeDParams.setMetaData(metadata);
+        threeDParams.setMetadata(metadata);
 
         final Source threeDSource = stripe.createSourceSynchronous(threeDParams);
         assertNotNull(threeDSource);
@@ -494,7 +492,7 @@ public class StripeTest {
             put("giro", "with chicken");
             put("type", "wrap");
         }};
-        params.setMetaData(metamap);
+        params.setMetadata(metamap);
 
         final Source giropaySource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(giropaySource);
@@ -554,7 +552,7 @@ public class StripeTest {
             put("type", "brackish");
             put("value", "100000");
         }};
-        params.setMetaData(metamap);
+        params.setMetadata(metamap);
 
         final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
@@ -592,7 +590,7 @@ public class StripeTest {
             put("type", "brackish");
             put("value", "100000");
         }};
-        params.setMetaData(metamap);
+        params.setMetadata(metamap);
         final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
         assertNotNull(sepaDebitSource.getClientSecret());
@@ -617,7 +615,7 @@ public class StripeTest {
             put("type", "brackish");
             put("value", "100000");
         }};
-        params.setMetaData(metamap);
+        params.setMetadata(metamap);
 
         final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
@@ -680,7 +678,7 @@ public class StripeTest {
             put("picture", "17L");
             put("arrows", "what?");
         }};
-        params.setMetaData(metamap);
+        params.setMetadata(metamap);
 
         final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
@@ -713,7 +711,7 @@ public class StripeTest {
             put("picture", "17L");
             put("arrows", "what?");
         }};
-        params.setMetaData(metamap);
+        params.setMetadata(metamap);
 
         final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
@@ -747,7 +745,7 @@ public class StripeTest {
             put("picture", "17L");
             put("arrows", "what?");
         }};
-        params.setMetaData(metamap);
+        params.setMetadata(metamap);
 
         final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
@@ -778,7 +776,7 @@ public class StripeTest {
             put("state", "soforting");
             put("repetitions", "400");
         }};
-        params.setMetaData(metamap);
+        params.setMetadata(metamap);
 
         final Source sofortSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sofortSource);
@@ -840,10 +838,8 @@ public class StripeTest {
         final Token token = stripe.createCardTokenSynchronous(CARD_PARAMS);
         assertNotNull(token);
 
-        final Map<String, String> map = new HashMap<>();
-        map.put("usage", "single_use");
-        final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId())
-                .setExtraParams(map);
+        final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId());
+        sourceParams.setUsage(Source.Usage.SingleUse);
 
         final Source source = stripe.createSourceSynchronous(sourceParams);
         assertNotNull(source);
@@ -1130,7 +1126,6 @@ public class StripeTest {
                 createdPaymentMethod.billingDetails);
         assertNotNull(createdPaymentMethod.card);
         assertEquals("4242", createdPaymentMethod.card.last4);
-        assertThat(createdPaymentMethod.metadata).isNull();
 
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
@@ -1284,7 +1279,7 @@ public class StripeTest {
             put("dimensions", "three");
             put("type", "beach ball");
         }};
-        threeDParams.setMetaData(metamap);
+        threeDParams.setMetadata(metamap);
 
         final Source source = stripe.createSourceSynchronous(threeDParams);
         assertNotNull(source);

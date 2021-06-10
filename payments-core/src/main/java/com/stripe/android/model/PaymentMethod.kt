@@ -66,17 +66,6 @@ data class PaymentMethod internal constructor(
     @JvmField val customerId: String? = null,
 
     /**
-     * Set of key-value pairs that you can attach to an object. This can be useful for storing
-     * additional information about the object in a structured format.
-     *
-     * [metadata](https://stripe.com/docs/api/payment_methods/object#payment_method_object-metadata)
-     *
-     * @deprecated Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.
-     */
-    @Deprecated("Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.")
-    @JvmField val metadata: Map<String, String>? = null,
-
-    /**
      * If this is a `card` PaymentMethod, this hash contains details about the card.
      *
      * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)
@@ -459,74 +448,6 @@ data class PaymentMethod internal constructor(
         @JvmField
         internal val networks: Networks? = null
     ) : StripeModel {
-
-        class Builder : ObjectBuilder<Card> {
-            private var brand: CardBrand = CardBrand.Unknown
-            private var checks: Checks? = null
-            private var country: String? = null
-            private var expiryMonth: Int? = null
-            private var expiryYear: Int? = null
-            private var fingerprint: String? = null
-            private var funding: String? = null
-            private var last4: String? = null
-            private var threeDSecureUsage: ThreeDSecureUsage? = null
-            private var wallet: Wallet? = null
-
-            fun setBrand(brand: CardBrand): Builder = apply {
-                this.brand = brand
-            }
-
-            fun setChecks(checks: Checks?): Builder = apply {
-                this.checks = checks
-            }
-
-            fun setCountry(country: String?): Builder = apply {
-                this.country = country
-            }
-
-            fun setExpiryMonth(expiryMonth: Int?): Builder = apply {
-                this.expiryMonth = expiryMonth
-            }
-
-            fun setExpiryYear(expiryYear: Int?): Builder = apply {
-                this.expiryYear = expiryYear
-            }
-
-            fun setFingerprint(fingerprint: String?): Builder = apply {
-                this.fingerprint = fingerprint
-            }
-
-            fun setFunding(funding: String?): Builder = apply {
-                this.funding = funding
-            }
-
-            fun setLast4(last4: String?): Builder = apply {
-                this.last4 = last4
-            }
-
-            fun setThreeDSecureUsage(threeDSecureUsage: ThreeDSecureUsage?): Builder = apply {
-                this.threeDSecureUsage = threeDSecureUsage
-            }
-
-            fun setWallet(wallet: Wallet?): Builder = apply {
-                this.wallet = wallet
-            }
-
-            override fun build(): Card {
-                return Card(
-                    brand,
-                    checks,
-                    country,
-                    expiryMonth,
-                    expiryYear,
-                    fingerprint,
-                    funding,
-                    last4,
-                    threeDSecureUsage,
-                    wallet
-                )
-            }
-        }
 
         /**
          * Checks on Card address and CVC if provided
