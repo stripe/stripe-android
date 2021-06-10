@@ -8,6 +8,6 @@ internal data class CountryCode private constructor(
     val value: String,
 ) {
     companion object {
-        fun create(value: String) = CountryCode(value.toUpperCase(Locale.ROOT))
+        fun create(value: String) = CountryCode(value.uppercase())
     }
 }

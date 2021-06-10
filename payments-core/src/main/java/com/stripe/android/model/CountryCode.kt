@@ -18,6 +18,6 @@ internal data class CountryCode(
         fun isCA(countryCode: CountryCode?) = countryCode == CA
         fun isGB(countryCode: CountryCode?) = countryCode == GB
 
-        fun create(value: String) = CountryCode(value.toUpperCase(Locale.ROOT))
+        fun create(value: String) = CountryCode(value.uppercase())
     }
 }
