@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.app.Activity
+import android.os.Parcelable
 import androidx.annotation.IntRange
 import com.stripe.android.stripe3ds2.init.ui.ButtonCustomization
 import com.stripe.android.stripe3ds2.init.ui.LabelCustomization
@@ -12,6 +13,7 @@ import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.init.ui.TextBoxCustomization
 import com.stripe.android.stripe3ds2.init.ui.ToolbarCustomization
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization
+import kotlinx.parcelize.Parcelize
 
 /**
  * Configuration for authentication mechanisms via [StripePaymentController]
@@ -31,10 +33,11 @@ class PaymentAuthConfig private constructor(
         }
     }
 
+    @Parcelize
     data class Stripe3ds2Config internal constructor(
         @IntRange(from = 5, to = 99) internal val timeout: Int,
         internal val uiCustomization: Stripe3ds2UiCustomization
-    ) {
+    ) : Parcelable {
         init {
             checkValidTimeout(timeout)
         }
@@ -429,9 +432,10 @@ class PaymentAuthConfig private constructor(
     /**
      * Customizations for the 3DS2 UI
      */
+    @Parcelize
     data class Stripe3ds2UiCustomization internal constructor(
         val uiCustomization: StripeUiCustomization
-    ) {
+    ) : Parcelable {
         /**
          * The type of button for which customization can be set
          */
@@ -564,7 +568,7 @@ class PaymentAuthConfig private constructor(
         private var instance: PaymentAuthConfig? = null
 
         private val DEFAULT = Builder()
-            .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder().build())
+            .set3ds2Config(Stripe3ds2Config.Builder().build())
             .build()
 
         @JvmStatic
