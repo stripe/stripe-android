@@ -103,12 +103,6 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal var completionCallback: () -> Unit = {}
 
-    @Deprecated("Will be removed in upcoming major release.")
-    val lengthMax: Int
-        get() {
-            return cardBrand.getMaxLengthWithSpacesForCardNumber(fieldText)
-        }
-
     private var accountRange: AccountRange? = null
         set(value) {
             field = value
@@ -128,18 +122,6 @@ class CardNumberEditText internal constructor(
      */
     var isCardNumberValid: Boolean = false
         private set
-
-    /**
-     * A normalized form of the card number. If the entered card number is "4242 4242 4242 4242",
-     * this will be "4242424242424242". If the entered card number is invalid, this is `null`.
-     */
-    @Deprecated("Will be removed in next major release.")
-    val cardNumber: String?
-        get() = if (isCardNumberValid) {
-            unvalidatedCardNumber.normalized
-        } else {
-            null
-        }
 
     internal val validatedCardNumber: CardNumber.Validated?
         get() = unvalidatedCardNumber.validate(panLength)
@@ -189,7 +171,7 @@ class CardNumberEditText internal constructor(
         }
     }
 
-    override val accessibilityText: String?
+    override val accessibilityText: String
         get() {
             return resources.getString(R.string.acc_label_card_number_node, text)
         }

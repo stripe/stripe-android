@@ -29,7 +29,7 @@ class FormFragment : Fragment() {
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
-                    SofortForm(sofortFormViewModel)
+                    SofortForm(sofortFormViewModel, "My merchant, Inc.")
                 }
             }
         }

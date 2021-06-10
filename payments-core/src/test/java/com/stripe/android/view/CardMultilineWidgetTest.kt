@@ -24,7 +24,6 @@ import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
 import com.stripe.android.model.BinFixtures
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
@@ -172,13 +171,6 @@ internal class CardMultilineWidgetTest {
         fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
         fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
-        assertThat(cardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -202,12 +194,6 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("50")
         fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -230,12 +216,6 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("50")
         noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(noZipCardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -258,12 +238,6 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("50")
         noZipGroup.cvcEditText.append("1234")
 
-        assertThat(noZipCardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_AMEX)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -286,12 +260,6 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("50")
         noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(noZipCardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -753,13 +721,6 @@ internal class CardMultilineWidgetTest {
         fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
         fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
-        assertThat(cardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -784,13 +745,6 @@ internal class CardMultilineWidgetTest {
         fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
         fullGroup.postalCodeEditText.append(POSTAL_CODE_VALUE)
 
-        assertThat(cardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -859,12 +813,6 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("50")
         fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -893,8 +841,6 @@ internal class CardMultilineWidgetTest {
 
         // invalid zipcode
         fullGroup.postalCodeEditText.setText("1234")
-        assertThat(cardMultilineWidget.card)
-            .isNull()
         assertThat(cardMultilineWidget.cardParams)
             .isNull()
     }
@@ -912,13 +858,6 @@ internal class CardMultilineWidgetTest {
 
         // valid zipcode
         fullGroup.postalCodeEditText.setText(POSTAL_CODE_VALUE)
-        assertThat(cardMultilineWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(

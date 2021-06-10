@@ -2,26 +2,22 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import android.os.Parcelable
-import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.gms.common.api.Status
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentRelayContract
+import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.googlepaysheet.GooglePayConfig
-import com.stripe.android.googlepaysheet.GooglePayEnvironment
-import com.stripe.android.googlepaysheet.GooglePaySheetResult
-import com.stripe.android.googlepaysheet.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.GooglePayConfig
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
-import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -30,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.SessionId
+import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -41,102 +38,48 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.AuthActivityStarter
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
-import javax.inject.Provider
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal class DefaultFlowController internal constructor(
-    private val appContext: Context,
-    viewModelStoreOwner: ViewModelStoreOwner,
+@Singleton
+internal class DefaultFlowController @Inject internal constructor(
+    // Properties provided through FlowControllerComponent.Builder
     private val lifecycleScope: CoroutineScope,
-    activityLauncherFactory: ActivityLauncherFactory,
     private val statusBarColor: () -> Int?,
     private val authHostSupplier: () -> AuthActivityStarter.Host,
     private val paymentOptionFactory: PaymentOptionFactory,
+    private val paymentOptionCallback: PaymentOptionCallback,
+    private val paymentResultCallback: PaymentSheetResultCallback,
+    // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
-    paymentControllerFactory: PaymentControllerFactory,
-    paymentFlowResultProcessorFactory:
-        (ClientSecret, Provider<String>, StripeApiRepository) ->
-        PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
-    defaultReturnUrl: DefaultReturnUrl,
-    private val paymentOptionCallback: PaymentOptionCallback,
-    private val paymentResultCallback: PaymentSheetResultCallback
+    private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>,
+    private val googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>,
+    private val viewModel: FlowControllerViewModel,
+    private val stripeApiRepository: StripeApiRepository,
+    private val paymentController: PaymentController,
+    /**
+     * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
+     * stripeAccountId after creating a [DefaultFlowController].
+     */
+    private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
+    /**
+     * [PaymentFlowResultProcessor] is [Lazy] because it needs [FlowControllerViewModel.initData]
+     * to be set, which happens post [DefaultFlowController] creation and after
+     * [configureWithPaymentIntent] or [configureWithPaymentIntent] is called.
+     * TODO: Observe on [FlowControllerViewModel.initData] change and initialize
+     *   paymentFlowResultProcessor afterwards.
+     */
+    private val lazyPaymentFlowResultProcessor: Lazy<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController {
-
-    @VisibleForTesting
-    internal var paymentOptionActivityLauncher = activityLauncherFactory.create(
-        PaymentOptionContract()
-    ) { paymentOptionResult ->
-        onPaymentOptionResult(paymentOptionResult)
-    }
-
-    @VisibleForTesting
-    internal var googlePayActivityLauncher = activityLauncherFactory.create(
-        StripeGooglePayContract()
-    ) { result ->
-        onGooglePayResult(result)
-    }
-
-    private val paymentRelayLauncher = activityLauncherFactory.create(
-        PaymentRelayContract()
-    ) { result ->
-        onPaymentFlowResult(result)
-    }
-
-    private val paymentBrowserAuthLauncher = activityLauncherFactory.create(
-        PaymentBrowserAuthContract(defaultReturnUrl)
-    ) { result ->
-        onPaymentFlowResult(result)
-    }
-
-    private val stripe3ds2ChallengeLauncher = activityLauncherFactory.create(
-        Stripe3ds2CompletionContract()
-    ) { result ->
-        onPaymentFlowResult(result)
-    }
-
-    private val viewModel =
-        ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
-
-    // The provider below always refreshes the PaymentConfiguration instance to allow the developer
-    // to set the publishableKey and stripeAccountId in PaymentConfiguration any time before
-    // configuring the FlowController through configureWithPaymentIntent or
-    // configureWithSetupIntent.
-    // TODO(ccen) inject paymentConfigurationProvider
-    private val paymentConfigurationProvider = Provider {
-        PaymentConfiguration.getInstance(appContext)
-    }
-
-    private val stripeApiRepository =
-        StripeApiRepository(
-            appContext,
-            { paymentConfigurationProvider.get().publishableKey }
-        )
-
-    // paymentFlowResultProcessor needs to still be lazy as it needs viewModel.initData.clientSecret
-    // to be set, which is done by configureWithPaymentIntent or configureWithSetupIntent
-    private val paymentFlowResultProcessor by lazy {
-        paymentFlowResultProcessorFactory(
-            viewModel.initData.clientSecret,
-            { paymentConfigurationProvider.get().publishableKey },
-            stripeApiRepository
-        )
-    }
-
-    private val paymentController =
-        paymentControllerFactory.create(
-            { paymentConfigurationProvider.get().publishableKey },
-            stripeApiRepository,
-            paymentRelayLauncher = paymentRelayLauncher,
-            paymentBrowserAuthLauncher = paymentBrowserAuthLauncher,
-            stripe3ds2ChallengeLauncher = stripe3ds2ChallengeLauncher
-        )
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
@@ -173,15 +116,15 @@ internal class DefaultFlowController internal constructor(
                 StripeIntentRepository.Api(
                     stripeRepository = stripeApiRepository,
                     requestOptions = ApiRequest.Options(
-                        paymentConfigurationProvider.get().publishableKey,
-                        paymentConfigurationProvider.get().stripeAccountId
+                        lazyPaymentConfiguration.get().publishableKey,
+                        lazyPaymentConfiguration.get().stripeAccountId
                     ),
                     workContext = Dispatchers.IO
                 ),
                 PaymentMethodsApiRepository(
                     stripeRepository = stripeApiRepository,
-                    publishableKey = paymentConfigurationProvider.get().publishableKey,
-                    stripeAccountId = paymentConfigurationProvider.get().stripeAccountId,
+                    lazyPaymentConfiguration.get().publishableKey,
+                    lazyPaymentConfiguration.get().stripeAccountId,
                     workContext = Dispatchers.IO
                 ),
                 configuration
@@ -286,20 +229,19 @@ internal class DefaultFlowController internal constructor(
                     authHostSupplier(),
                     confirmParams,
                     ApiRequest.Options(
-                        apiKey = paymentConfigurationProvider.get().publishableKey,
-                        stripeAccount = paymentConfigurationProvider.get().stripeAccountId
+                        apiKey = lazyPaymentConfiguration.get().publishableKey,
+                        stripeAccount = lazyPaymentConfiguration.get().stripeAccountId
                     )
                 )
             }
         }
     }
 
-    @VisibleForTesting
     internal fun onGooglePayResult(
-        googlePayResult: GooglePaySheetResult
+        googlePayResult: GooglePayLauncherResult
     ) {
         when (googlePayResult) {
-            is GooglePaySheetResult.PaymentData -> {
+            is GooglePayLauncherResult.PaymentData -> {
                 runCatching {
                     viewModel.initData
                 }.fold(
@@ -321,7 +263,7 @@ internal class DefaultFlowController internal constructor(
                     }
                 )
             }
-            is GooglePaySheetResult.Error -> {
+            is GooglePayLauncherResult.Error -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
@@ -332,7 +274,7 @@ internal class DefaultFlowController internal constructor(
                     )
                 )
             }
-            is GooglePaySheetResult.Canceled -> {
+            is GooglePayLauncherResult.Canceled -> {
                 // don't log cancellations as failures
                 paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
             }
@@ -412,13 +354,12 @@ internal class DefaultFlowController internal constructor(
         }
     }
 
-    @VisibleForTesting
     internal fun onPaymentFlowResult(
         paymentFlowResult: PaymentFlowResult.Unvalidated
     ) {
         lifecycleScope.launch {
             runCatching {
-                paymentFlowResultProcessor.processResult(
+                lazyPaymentFlowResultProcessor.get().processResult(
                     paymentFlowResult
                 )
             }.fold(
@@ -478,4 +419,30 @@ internal class DefaultFlowController internal constructor(
         val clientSecret: String,
         val config: PaymentSheet.Configuration?
     ) : Parcelable
+
+    companion object {
+        fun getInstance(
+            appContext: Context,
+            viewModelStoreOwner: ViewModelStoreOwner,
+            lifecycleScope: CoroutineScope,
+            activityLauncherFactory: ActivityLauncherFactory,
+            statusBarColor: () -> Int?,
+            authHostSupplier: () -> AuthActivityStarter.Host,
+            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionCallback: PaymentOptionCallback,
+            paymentResultCallback: PaymentSheetResultCallback
+        ): PaymentSheet.FlowController {
+            return DaggerFlowControllerComponent.builder()
+                .appContext(appContext)
+                .viewModelStoreOwner(viewModelStoreOwner)
+                .lifecycleScope(lifecycleScope)
+                .activityLauncherFactory(activityLauncherFactory)
+                .statusBarColor(statusBarColor)
+                .authHostSupplier(authHostSupplier)
+                .paymentOptionFactory(paymentOptionFactory)
+                .paymentOptionCallback(paymentOptionCallback)
+                .paymentResultCallback(paymentResultCallback)
+                .build().flowController
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package com.stripe.android.googlepaysheet
+package com.stripe.android.googlepaylauncher
 
 import android.content.Context
 import android.content.Intent
@@ -35,7 +35,7 @@ class StripeGooglePayActivityTest {
         ) { activityScenario ->
             // Google Pay is only available on a real device
             assertThat(parseResult(activityScenario))
-                .isInstanceOf(GooglePaySheetResult.Unavailable::class.java)
+                .isInstanceOf(GooglePayLauncherResult.Unavailable::class.java)
         }
     }
 
@@ -46,7 +46,7 @@ class StripeGooglePayActivityTest {
         ).use { activityScenario ->
             assertThat(activityScenario.state)
                 .isEqualTo(Lifecycle.State.DESTROYED)
-            val result = parseResult(activityScenario) as GooglePaySheetResult.Error
+            val result = parseResult(activityScenario) as GooglePayLauncherResult.Error
             assertThat(result.exception.message)
                 .isEqualTo(
                     "StripeGooglePayActivity was started without arguments."
@@ -93,7 +93,7 @@ class StripeGooglePayActivityTest {
 
     private fun parseResult(
         activityScenario: ActivityScenario<*>
-    ): GooglePaySheetResult {
+    ): GooglePayLauncherResult {
         return contract.parseResult(0, activityScenario.result.resultData)
     }
 

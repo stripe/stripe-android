@@ -64,15 +64,6 @@ data class Source internal constructor(
     val isLiveMode: Boolean? = null,
 
     /**
-     * Set of key-value pairs that you can attach to an object. This can be useful for storing
-     * additional information about the object in a structured format.
-     *
-     * @deprecated Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.
-     */
-    @Deprecated("Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.")
-    val metaData: Map<String, String>? = null,
-
-    /**
      * Information about the owner of the payment instrument that may be used or required by
      * particular source types.
      */

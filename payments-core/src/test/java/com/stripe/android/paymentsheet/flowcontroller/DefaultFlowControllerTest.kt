@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
@@ -21,10 +22,10 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepaysheet.GooglePayConfig
-import com.stripe.android.googlepaysheet.GooglePayEnvironment
-import com.stripe.android.googlepaysheet.GooglePaySheetResult
-import com.stripe.android.googlepaysheet.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.GooglePayConfig
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -32,7 +33,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -80,6 +81,13 @@ internal class DefaultFlowControllerTest {
 
     private val flowResultProcessor =
         mock<PaymentFlowResultProcessor<StripeIntent, StripeIntentResult<StripeIntent>>>()
+
+    private val paymentOptionActivityLauncher =
+        mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
+
+    private val googlePayActivityLauncher =
+        mock<ActivityResultLauncher<StripeGooglePayContract.Args>>()
+
     private val flowController: DefaultFlowController by lazy {
         createFlowController()
     }
@@ -211,11 +219,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions() after successful init should launch with expected args`() {
-        val mockPaymentOptionActivityLauncher =
-            mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
-
-        flowController.paymentOptionActivityLauncher = mockPaymentOptionActivityLauncher
-
         var isReadyState = false
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET
@@ -226,7 +229,7 @@ internal class DefaultFlowControllerTest {
             .isTrue()
         flowController.presentPaymentOptions()
 
-        verify(mockPaymentOptionActivityLauncher).launch(
+        verify(paymentOptionActivityLauncher).launch(
             argWhere {
                 it == PaymentOptionContract.Args(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -241,6 +244,7 @@ internal class DefaultFlowControllerTest {
                     )
                 )
             }
+
         )
     }
 
@@ -327,21 +331,14 @@ internal class DefaultFlowControllerTest {
         // Add a saved card payment method so that we can make sure it is added when we open
         // up the payment option launcher
         flowController.onPaymentOptionResult(PaymentOptionResult.Succeeded(SAVE_NEW_CARD_SELECTION))
-
-        // capture the actual launch arguments when paymentOptionLauncher is called
-        val mockPaymentOptionActivityLauncher =
-            mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
-
-        flowController.paymentOptionActivityLauncher = mockPaymentOptionActivityLauncher
-
         flowController.presentPaymentOptions()
 
-        // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
-
-        verify(mockPaymentOptionActivityLauncher).launch(
+        verify(paymentOptionActivityLauncher).launch(
             argWhere {
+                // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
                 it.paymentMethods == initialPaymentMethods
             }
+
         )
     }
 
@@ -394,11 +391,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
-        val mockGooglePayActivityLauncher =
-            mock<ActivityResultLauncher<StripeGooglePayContract.Args>>()
-
-        flowController.googlePayActivityLauncher = mockGooglePayActivityLauncher
-
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -409,7 +401,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(mockGooglePayActivityLauncher).launch(
+        verify(googlePayActivityLauncher).launch(
             argWhere {
                 it == StripeGooglePayContract.Args(
                     config = GooglePayConfig(
@@ -440,7 +432,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onGooglePayResult(
-            GooglePaySheetResult.Canceled
+            GooglePayLauncherResult.Canceled
         )
 
         verify(paymentResultCallback).onPaymentSheetResult(
@@ -458,7 +450,7 @@ internal class DefaultFlowControllerTest {
             }
 
             flowController.onGooglePayResult(
-                GooglePaySheetResult.PaymentData(
+                GooglePayLauncherResult.PaymentData(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     shippingInformation = null
                 )
@@ -599,25 +591,24 @@ internal class DefaultFlowControllerTest {
 
     private fun createFlowController(
         flowControllerInitializer: FlowControllerInitializer
-    ): DefaultFlowController {
-        return DefaultFlowController(
-            activity,
-            activity,
-            testScope,
-            ActivityLauncherFactory.ActivityHost(activity),
-            statusBarColor = { activity.window.statusBarColor },
-            authHostSupplier = { AuthActivityStarter.Host.create(activity) },
-            paymentOptionFactory = PaymentOptionFactory(activity.resources),
-            flowControllerInitializer,
-            { _, _, _, _, _ -> paymentController },
-            { _, _, _ -> flowResultProcessor },
-            eventReporter,
-            sessionId = SESSION_ID,
-            defaultReturnUrl = DefaultReturnUrl.create(activity),
-            paymentOptionCallback,
-            paymentResultCallback
-        )
-    }
+    ) = DefaultFlowController(
+        testScope,
+        { activity.window.statusBarColor },
+        { AuthActivityStarter.Host.create(activity) },
+        PaymentOptionFactory(activity.resources),
+        paymentOptionCallback,
+        paymentResultCallback,
+        flowControllerInitializer,
+        eventReporter,
+        SESSION_ID,
+        paymentOptionActivityLauncher,
+        googlePayActivityLauncher,
+        ViewModelProvider(activity)[FlowControllerViewModel::class.java],
+        mock<StripeApiRepository>(),
+        paymentController,
+        { PaymentConfiguration.getInstance(activity) },
+        { flowResultProcessor }
+    )
 
     private class FakeFlowControllerInitializer(
         var paymentMethods: List<PaymentMethod>,

@@ -1,8 +1,8 @@
-package com.stripe.android.googlepaysheet
+package com.stripe.android.googlepaylauncher
 
 import androidx.lifecycle.ViewModel
 
-internal class GooglePaySheetConfigureViewModel : ViewModel() {
+internal class GooglePayLauncherConfigureViewModel : ViewModel() {
     private var _args: StripeGooglePayContract.Args? = null
 
     fun setArgs(args: StripeGooglePayContract.Args) {

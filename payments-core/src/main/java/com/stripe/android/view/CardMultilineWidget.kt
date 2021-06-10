@@ -26,7 +26,6 @@ import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.databinding.CardMultilineWidgetBinding
 import com.stripe.android.model.Address
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
@@ -189,16 +188,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
     /**
-     * A [Card] representing the card details and postal code if all fields are valid;
-     * otherwise `null`
-     */
-    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
-    override val card: Card?
-        get() {
-            return cardBuilder?.build()
-        }
-
-    /**
      * A [CardParams] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
@@ -227,35 +216,6 @@ class CardMultilineWidget @JvmOverloads constructor(
                     .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
                     .build()
             )
-        }
-
-    /**
-     * A [Card.Builder] representing the card details and postal code if all fields are valid;
-     * otherwise `null`
-     */
-    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
-    override val cardBuilder: Card.Builder?
-        get() {
-            if (!validateAllFields()) {
-                shouldShowErrorIcon = true
-                return null
-            }
-
-            shouldShowErrorIcon = false
-
-            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
-            val cvcValue = cvcEditText.text?.toString()
-            val postalCode = postalCodeEditText.text?.toString()
-                .takeIf { shouldShowPostalCode }
-
-            return Card.Builder(
-                number = validatedCardNumber?.value,
-                expMonth = expirationDate.month,
-                expYear = expirationDate.year,
-                cvc = cvcValue
-            )
-                .addressZip(postalCode)
-                .loggingTokens(setOf(CARD_MULTILINE_TOKEN))
         }
 
     internal val validatedCardNumber: CardNumber.Validated?

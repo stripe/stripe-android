@@ -19,7 +19,6 @@ import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
 import com.stripe.android.model.BinFixtures
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
@@ -130,13 +129,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
-
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -174,14 +166,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
-
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
 
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
@@ -226,13 +210,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
 
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_AMEX)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
-
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -270,14 +247,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
-
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_AMEX)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
 
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
@@ -324,13 +293,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(DINERS_CLUB_14_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
-
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -366,14 +328,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
-
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(DINERS_CLUB_14_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
 
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
@@ -413,8 +367,6 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.append("")
 
-        assertThat(cardInputWidget.card)
-            .isNull()
         assertThat(cardInputWidget.cardParams)
             .isNull()
         assertThat(cardInputWidget.paymentMethodCard)
@@ -429,8 +381,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.card)
-            .isNull()
         assertThat(cardInputWidget.cardParams)
             .isNull()
         assertThat(cardInputWidget.paymentMethodCard)
@@ -445,8 +395,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("12")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.card)
-            .isNull()
         assertThat(cardInputWidget.cardParams)
             .isNull()
         assertThat(cardInputWidget.paymentMethodCard)
@@ -460,8 +408,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append("12")
 
-        assertThat(cardInputWidget.card)
-            .isNull()
         assertThat(cardInputWidget.cardParams)
             .isNull()
         assertThat(cardInputWidget.paymentMethodCard)
@@ -478,12 +424,6 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText("")
 
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -509,12 +449,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
-            )
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -541,13 +475,6 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -573,8 +500,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append("12")
 
-        assertThat(cardInputWidget.card)
-            .isNull()
         assertThat(cardInputWidget.cardParams)
             .isNull()
         assertThat(cardInputWidget.paymentMethodCard)
@@ -616,8 +541,6 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append("12")
 
-        assertThat(cardInputWidget.card)
-            .isNull()
         assertThat(cardInputWidget.cardParams)
             .isNull()
         assertThat(cardInputWidget.paymentMethodCard)
@@ -1182,20 +1105,6 @@ internal class CardInputWidgetTest {
         cardInputWidget.setExpiryDate(12, 2079)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
 
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card(
-                    id = null,
-                    brand = CardBrand.AmericanExpress,
-                    number = AMEX_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2079,
-                    cvc = CVC_VALUE_AMEX,
-                    loggingTokens = ATTRIBUTION,
-                    last4 = "0005"
-                )
-            )
-
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
@@ -1230,14 +1139,6 @@ internal class CardInputWidgetTest {
         cardInputWidget.setExpiryDate(12, 2079)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
         cardInputWidget.setPostalCode(POSTAL_CODE_VALUE)
-
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(AMEX_NO_SPACES, 12, 2079, CVC_VALUE_AMEX)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
 
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
@@ -1536,7 +1437,7 @@ internal class CardInputWidgetTest {
 
         // invalid zipcode
         cardInputWidget.postalCodeEditText.setText(CVC_VALUE_AMEX)
-        assertThat(cardInputWidget.card)
+        assertThat(cardInputWidget.cardParams)
             .isNull()
     }
 
@@ -1553,14 +1454,6 @@ internal class CardInputWidgetTest {
 
         // valid zipcode
         cardInputWidget.postalCodeEditText.setText(POSTAL_CODE_VALUE)
-
-        assertThat(cardInputWidget.card)
-            .isEqualTo(
-                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
-                    .loggingTokens(ATTRIBUTION)
-                    .addressZip(POSTAL_CODE_VALUE)
-                    .build()
-            )
 
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
@@ -1623,7 +1516,7 @@ internal class CardInputWidgetTest {
     }
 
     private class FakeCardInputListener : CardInputListener {
-        internal val focusedFields = mutableListOf<CardInputListener.FocusField>()
+        val focusedFields = mutableListOf<CardInputListener.FocusField>()
         var cardCompleteCalls = 0
         var expirationCompleteCalls = 0
         var cvcCompleteCalls = 0

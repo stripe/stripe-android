@@ -1,4 +1,4 @@
-package com.stripe.android.googlepaysheet
+package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,7 +11,7 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 
-internal sealed class GooglePaySheetResult : ActivityStarter.Result {
+internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
     override fun toBundle(): Bundle {
         return bundleOf(ActivityStarter.Result.EXTRA to this)
     }
@@ -22,7 +22,7 @@ internal sealed class GooglePaySheetResult : ActivityStarter.Result {
         val googlePayStatus: Status? = null,
         val paymentMethod: PaymentMethod? = null,
         val shippingInformation: ShippingInformation? = null
-    ) : GooglePaySheetResult() {
+    ) : GooglePayLauncherResult() {
         companion object : Parceler<Error> {
             override fun create(parcel: Parcel): Error {
                 return Error(
@@ -45,21 +45,21 @@ internal sealed class GooglePaySheetResult : ActivityStarter.Result {
     data class PaymentData(
         val paymentMethod: PaymentMethod,
         val shippingInformation: ShippingInformation?
-    ) : GooglePaySheetResult()
+    ) : GooglePayLauncherResult()
 
     @Parcelize
-    object Canceled : GooglePaySheetResult()
+    object Canceled : GooglePayLauncherResult()
 
     @Parcelize
-    object Unavailable : GooglePaySheetResult()
+    object Unavailable : GooglePayLauncherResult()
 
     companion object {
         /**
          * @return the [Result] object from the given `Intent`
          */
         @JvmStatic
-        fun fromIntent(intent: Intent?): GooglePaySheetResult {
-            val result = intent?.getParcelableExtra<GooglePaySheetResult>(ActivityStarter.Result.EXTRA)
+        fun fromIntent(intent: Intent?): GooglePayLauncherResult {
+            val result = intent?.getParcelableExtra<GooglePayLauncherResult>(ActivityStarter.Result.EXTRA)
             return result ?: Error(
                 exception = IllegalStateException(
                     "Error while processing result from Google Pay."

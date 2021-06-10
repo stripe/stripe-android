@@ -6,31 +6,19 @@ import com.stripe.android.model.CardBrand
 /**
  * Utility class for functions to do with cards.
  */
-object CardUtils {
+internal object CardUtils {
 
     /**
      * @param cardNumber a full or partial card number
      * @return the [CardBrand] that matches the card number based on prefixes,
      * or [CardBrand.Unknown] if it can't be determined
      */
-    @Deprecated("CardInputWidget and CardMultilineWidget handle card brand lookup. This method should not be relied on for determining CardBrand.")
-    @JvmStatic
-    fun getPossibleCardBrand(cardNumber: String?): CardBrand {
-        return getPossibleCardBrand(cardNumber, true)
-    }
-
-    /**
-     * Checks the input string to see whether or not it is a valid card number, possibly
-     * with groupings separated by spaces or hyphens.
-     *
-     * @param cardNumber a String that may or may not represent a valid card number
-     * @return `true` if and only if the input value is a valid card number
-     */
-    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
-    @JvmStatic
-    fun isValidCardNumber(cardNumber: String?): Boolean {
-        val normalizedNumber = CardNumber.Unvalidated(cardNumber.orEmpty()).normalized
-        return isValidLuhnNumber(normalizedNumber) && isValidCardLength(normalizedNumber)
+    internal fun getPossibleCardBrand(cardNumber: String?): CardBrand {
+        return if (cardNumber.isNullOrBlank()) {
+            CardBrand.Unknown
+        } else {
+            CardBrand.fromCardNumber(CardNumber.Unvalidated(cardNumber).normalized)
+        }
     }
 
     /**
@@ -68,32 +56,5 @@ object CardUtils {
         }
 
         return sum % 10 == 0
-    }
-
-    /**
-     * Checks to see whether the input number is of the correct length, after determining its brand.
-     * This function does not perform a Luhn check.
-     *
-     * @param cardNumber the card number with no spaces or dashes
-     * @return `true` if the card number is of known type and the correct length
-     */
-    internal fun isValidCardLength(cardNumber: String?): Boolean {
-        return cardNumber != null &&
-            getPossibleCardBrand(cardNumber, false).isValidCardNumberLength(cardNumber)
-    }
-
-    private fun getPossibleCardBrand(cardNumber: String?, shouldNormalize: Boolean): CardBrand {
-        if (cardNumber.isNullOrBlank()) {
-            return CardBrand.Unknown
-        }
-
-        val spacelessCardNumber =
-            if (shouldNormalize) {
-                CardNumber.Unvalidated(cardNumber).normalized
-            } else {
-                cardNumber
-            }
-
-        return CardBrand.fromCardNumber(spacelessCardNumber)
     }
 }

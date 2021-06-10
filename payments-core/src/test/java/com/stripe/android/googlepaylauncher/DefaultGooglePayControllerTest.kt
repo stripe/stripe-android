@@ -1,4 +1,4 @@
-package com.stripe.android.googlepaysheet
+package com.stripe.android.googlepaylauncher
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -32,7 +32,7 @@ import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class DefaultGooglePaySheetLauncherTest {
+class DefaultGooglePayControllerTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val testScope = TestCoroutineScope(testDispatcher)
 
@@ -52,14 +52,14 @@ class DefaultGooglePaySheetLauncherTest {
 
     @Test
     fun `configure() and present() when Google Pay is ready should return expected result`() {
-        val testRegistry = FakeActivityResultRegistry(GooglePaySheetResult.Canceled)
+        val testRegistry = FakeActivityResultRegistry(GooglePayLauncherResult.Canceled)
 
         val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
             TestFragment()
         }
         scenario.onFragment { fragment ->
-            val results = mutableListOf<GooglePaySheetResult>()
-            val launcher = DefaultGooglePaySheetLauncher(
+            val results = mutableListOf<GooglePayLauncherResult>()
+            val launcher = DefaultGooglePayController(
                 fragment,
                 testRegistry,
                 testDispatcher,
@@ -79,21 +79,21 @@ class DefaultGooglePaySheetLauncherTest {
 
             assertThat(results)
                 .containsExactly(
-                    GooglePaySheetResult.Canceled
+                    GooglePayLauncherResult.Canceled
                 )
         }
     }
 
     @Test
     fun `configure() when Google Pay is not ready should throw exception`() {
-        val testRegistry = FakeActivityResultRegistry(GooglePaySheetResult.Canceled)
+        val testRegistry = FakeActivityResultRegistry(GooglePayLauncherResult.Canceled)
 
         val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
             TestFragment()
         }
         scenario.onFragment { fragment ->
-            val results = mutableListOf<GooglePaySheetResult>()
-            val launcher = DefaultGooglePaySheetLauncher(
+            val results = mutableListOf<GooglePayLauncherResult>()
+            val launcher = DefaultGooglePayController(
                 fragment,
                 testRegistry,
                 testDispatcher,
@@ -119,7 +119,7 @@ class DefaultGooglePaySheetLauncherTest {
             }
         ) {
             onFragment { fragment ->
-                val launcher = DefaultGooglePaySheetLauncher(
+                val launcher = DefaultGooglePayController(
                     fragment,
                     googlePayRepositoryFactory = { FakeGooglePayRepository(true) }
                 ) {
@@ -130,13 +130,13 @@ class DefaultGooglePaySheetLauncherTest {
                     launcher.present()
                 }
                 assertThat(exception.message)
-                    .isEqualTo("GooglePaySheet must be successfully initialized using configure() before calling present().")
+                    .isEqualTo("GooglePayLauncher must be successfully initialized using configure() before calling present().")
             }
         }
     }
 
     private class FakeActivityResultRegistry(
-        private val result: GooglePaySheetResult
+        private val result: GooglePayLauncherResult
     ) : ActivityResultRegistry() {
         override fun <I, O> onLaunch(
             requestCode: Int,

@@ -1,4 +1,4 @@
-package com.stripe.android.googlepaysheet
+package com.stripe.android.googlepaylauncher
 
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
@@ -10,22 +10,22 @@ import kotlinx.coroutines.launch
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment.
  */
-internal class GooglePaySheet internal constructor(
+internal class GooglePayLauncher internal constructor(
     private val lifecycleScope: () -> CoroutineScope,
-    private val googlePaySheetLauncher: GooglePaySheetLauncher
+    private val googlePayController: GooglePayController
 ) {
     /**
-     * Constructor to be used when launching GooglePaySheet from an Activity.
+     * Constructor to be used when launching [GooglePayLauncher] from an Activity.
      *
-     * @param activity the Activity that is launching the GooglePaySheet
-     * @param callback called with the result of the GooglePaySheet operation
+     * @param activity the Activity that is launching the [GooglePayLauncher]
+     * @param callback called with the result of the [GooglePayLauncher] operation
      */
     internal constructor(
         activity: ComponentActivity,
-        callback: GooglePaySheetResultCallback
+        callback: ResultCallback
     ) : this(
         { activity.lifecycleScope },
-        DefaultGooglePaySheetLauncher(
+        DefaultGooglePayController(
             activity,
             googlePayRepositoryFactory = {
                 DefaultGooglePayRepository(
@@ -38,17 +38,17 @@ internal class GooglePaySheet internal constructor(
     )
 
     /**
-     * Constructor to be used when launching GooglePaySheet from an Activity.
+     * Constructor to be used when launching [GooglePayLauncher] from an Activity.
      *
-     * @param fragment the Fragment that is launching the GooglePaySheet
-     * @param callback called with the result of the GooglePaySheet operation
+     * @param fragment the Fragment that is launching the [GooglePayLauncher]
+     * @param callback called with the result of the [GooglePayLauncher] operation
      */
     internal constructor(
         fragment: Fragment,
-        callback: GooglePaySheetResultCallback
+        callback: ResultCallback
     ) : this(
         { fragment.viewLifecycleOwner.lifecycleScope },
-        DefaultGooglePaySheetLauncher(
+        DefaultGooglePayController(
             fragment,
             googlePayRepositoryFactory = {
                 DefaultGooglePayRepository(
@@ -66,7 +66,7 @@ internal class GooglePaySheet internal constructor(
     ) {
         lifecycleScope().launch {
             runCatching {
-                googlePaySheetLauncher.configure(configuration)
+                googlePayController.configure(configuration)
             }.fold(
                 onSuccess = {
                     callback.onConfigured(it, null)
@@ -79,7 +79,7 @@ internal class GooglePaySheet internal constructor(
     }
 
     fun present() {
-        googlePaySheetLauncher.present()
+        googlePayController.present()
     }
 
     fun interface ConfigCallback {
@@ -87,5 +87,9 @@ internal class GooglePaySheet internal constructor(
             success: Boolean,
             error: Throwable?
         )
+    }
+
+    internal fun interface ResultCallback {
+        fun onResult(result: GooglePayLauncherResult)
     }
 }
