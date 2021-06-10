@@ -4,22 +4,12 @@ package com.stripe.android.paymentsheet.forms
  * This class is used to define different forms full of fields.
  */
 internal data class FormDataObject(
-    val labelResId: Int,
-    val elements: List<Any>,
+    val elements: List<Section>,
     val paramKey: MutableMap<String, Any?>,
 ) {
     val allTypes = mutableListOf<Field>().apply {
         elements.forEach {
-            when (it) {
-                is Section -> {
-                    it.fields.forEach { contentType ->
-                        add(contentType)
-                    }
-                }
-                is Field -> {
-                    add(it)
-                }
-            }
+            add(it.field)
         }
     }
 }
@@ -34,7 +24,6 @@ internal sealed class Field(
 }
 
 internal data class Section(
-    val labelResId: Int,
-    val fields: List<Field>
+    val field: Field
 )
 

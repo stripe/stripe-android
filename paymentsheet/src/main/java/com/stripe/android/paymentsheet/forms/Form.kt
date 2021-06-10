@@ -15,13 +15,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
+import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-// TODO: Convert this to flows
 // TODO: Country element type
 // TODO: Manadate type
 // TODO: Next focus
@@ -39,67 +39,18 @@ internal fun Form(
             .padding(16.dp)
     ) {
         form.elements.forEach {
-            when (it) {
-                is Section -> {
-                    val numberItemsInSection = it.fields.size
-                    if (numberItemsInSection == 1) {
-                        val contentType = it.fields[0]
-                        SectionOneField(formViewModel.getElement(contentType))
-                    } else {
-                        SectionMultipleFields(
-                            formViewModel,
-                            it.labelResId,
-                            it.fields
-                        )
-                    }
-                }
-                is Field -> {
-                    SectionOneField(formViewModel.getElement(it))
-                }
-            }
-        }
-    }
-}
+            val element = formViewModel.getElement(it.field)
+            val label = element.label
+            val error by element.errorMessage.asLiveData().observeAsState(null)
 
-@ExperimentalAnimationApi
-@Composable
-internal fun SectionMultipleFields(
-    formViewModel: FormViewModel,
-    labelResId: Int,
-    fields: List<Field>
-) {
-    com.stripe.android.paymentsheet.elements.Section(stringResource(labelResId), null) {
-        Column {
-            fields.forEach { contentType ->
-                val element = formViewModel.getElement(contentType)
-                val label = element.label
-
+            Section(stringResource(element.label), error) {
                 TextField(
                     label = label,
-                    textFieldElement = formViewModel.getElement(contentType),
+                    textFieldElement = element,
                     myFocus = FocusRequester(),
                     nextFocus = null,
                 )
             }
-        }
-    }
-}
-
-@Composable
-internal fun SectionOneField(
-    element: TextFieldElement,
-) {
-    val label = element.label
-    val error by element.errorMessage.asLiveData().observeAsState(null)
-
-    com.stripe.android.paymentsheet.elements.Section(stringResource(element.label), error) {
-        Column {
-            TextField(
-                label = label,
-                textFieldElement = element,
-                myFocus = FocusRequester(),
-                nextFocus = null,
-            )
         }
     }
 }

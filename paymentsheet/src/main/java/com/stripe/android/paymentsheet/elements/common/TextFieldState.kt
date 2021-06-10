@@ -34,5 +34,5 @@ internal interface TextFieldState {
      * This is used to indicate the field contains the maximum number of characters.
      * This is needed to know when to advance to the next field.
      */
-    fun isFull(): Boolean?
+    fun isFull(): Boolean
 }

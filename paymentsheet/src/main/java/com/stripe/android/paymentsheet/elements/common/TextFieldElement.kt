@@ -33,9 +33,7 @@ internal class TextFieldElement(
         _elementState.value.getErrorMessageResId()?.takeIf { visibleError }
     }
 
-    val isFull: Flow<Boolean> = _elementState.map {
-        it.isFull() ?: false
-    }
+    val isFull: Flow<Boolean> = _elementState.map { it.isFull() }
 
     val isComplete: Flow<Boolean> = _elementState.map { it.isValid() }
 

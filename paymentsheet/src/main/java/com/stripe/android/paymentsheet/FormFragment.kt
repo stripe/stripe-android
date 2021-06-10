@@ -36,7 +36,7 @@ class FormFragment : Fragment() {
         )
 
         formViewModel.paramMapFlow.asLiveData().observe(viewLifecycleOwner) {
-            Log.e("APP", "Params: $it")
+            Log.d("APP", "Params: $it")
         }
 
         setContent {

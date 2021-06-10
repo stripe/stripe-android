@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Invalid.*
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.*
 import org.junit.Test
 import java.util.regex.Pattern
 
@@ -9,79 +11,23 @@ class EmailConfigTest {
 
     @Test
     fun `verify determine state returns blank and required when empty`() {
-        assertThat(emailConfig.determineState("")).isEqualTo(EmailConfig.Companion.Invalid.BlankAndRequired)
+        assertThat(emailConfig.determineState("")).isEqualTo(BlankAndRequired)
     }
 
     @Test
     fun `verify the if email doesn't match the pattern it returns incomplete`() {
-        assertThat(emailConfig.determineState("sdf")).isEqualTo(EmailConfig.Companion.Invalid.Incomplete)
+        assertThat(emailConfig.determineState("sdf")).isEqualTo(Incomplete)
     }
 
     @Test
     fun `verify if it doesn't pattern match but has an @ and period it is malformed`() {
-        assertThat(emailConfig.determineState("@.")).isEqualTo(EmailConfig.Companion.Invalid.Incomplete)
-        assertThat(emailConfig.determineState("@.x")).isEqualTo(EmailConfig.Companion.Invalid.Malformed)
+        assertThat(emailConfig.determineState("@.")).isEqualTo(Incomplete)
+        assertThat(emailConfig.determineState("@.x")).isEqualTo(Malformed)
     }
 
     @Test
     fun `verify the if email matches the pattern it returns Limitless`() {
-        assertThat(emailConfig.determineState("sdf@gmail.com")).isEqualTo(EmailConfig.Companion.Valid.Limitless)
-    }
-
-    @Test
-    fun `verify incomplete errors are shown when don't have focus`() {
-        assertThat(
-            EmailConfig.Companion.Invalid.Incomplete.shouldShowError(
-                true
-            )
-        ).isEqualTo(false)
-        assertThat(
-            EmailConfig.Companion.Invalid.Incomplete.shouldShowError(
-                false
-            )
-        ).isEqualTo(true)
-    }
-
-    @Test
-    fun `verify malformed are shown when you do and don't have focus`() {
-        assertThat(
-            EmailConfig.Companion.Invalid.Malformed.shouldShowError(
-                true
-            )
-        ).isEqualTo(true)
-        assertThat(
-            EmailConfig.Companion.Invalid.Malformed.shouldShowError(
-                false
-            )
-        ).isEqualTo(true)
-    }
-
-    @Test
-    fun `verify blank and required errors are never shown`() {
-        assertThat(
-            EmailConfig.Companion.Invalid.BlankAndRequired.shouldShowError(
-                true
-            )
-        ).isEqualTo(false)
-        assertThat(
-            EmailConfig.Companion.Invalid.BlankAndRequired.shouldShowError(
-                false
-            )
-        ).isEqualTo(false)
-    }
-
-    @Test
-    fun `verify Limitless states are never shown as error`() {
-        assertThat(
-            EmailConfig.Companion.Valid.Limitless.shouldShowError(
-                true
-            )
-        ).isEqualTo(false)
-        assertThat(
-            EmailConfig.Companion.Valid.Limitless.shouldShowError(
-                false
-            )
-        ).isEqualTo(false)
+        assertThat(emailConfig.determineState("sdf@gmail.com")).isEqualTo(Limitless)
     }
 
     @Test
