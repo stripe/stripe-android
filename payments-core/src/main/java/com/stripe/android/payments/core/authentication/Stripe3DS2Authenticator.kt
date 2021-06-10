@@ -24,9 +24,7 @@ import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.cert.CertificateException
 import kotlin.coroutines.CoroutineContext
@@ -146,7 +144,7 @@ internal class Stripe3DS2Authenticator(
             }
         }
 
-        CoroutineScope(workContext).launch {
+        withContext(workContext) {
             val areqParams = transaction.createAuthenticationRequestParameters()
 
             val timeout = stripe3ds2Config.timeout
