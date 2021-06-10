@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -23,6 +24,9 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.IdealDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -177,6 +181,60 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             assertThat(googlePayButton.primaryButton.isVisible).isTrue()
             assertThat(googlePayIconComponent.isVisible).isFalse()
             assertThat(finishProcessingCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun `when PaymentIntent only supports card it should not show payment method selector`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card"))
+        }
+        val fragmentConfig = FragmentConfigFixtures.DEFAULT.copy(stripeIntent = paymentIntent)
+
+        createFragment(fragmentConfig = fragmentConfig) { fragment, viewBinding ->
+            assertThat(viewBinding.paymentMethodsRecycler.isVisible).isFalse()
+            assertThat(viewBinding.googlePayDivider.viewBinding.dividerText)
+                .isEqualTo("Or pay with a card")
+        }
+    }
+
+    @Test
+    fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "ideal"))
+        }
+        val fragmentConfig = FragmentConfigFixtures.DEFAULT.copy(stripeIntent = paymentIntent)
+
+        createFragment(fragmentConfig = fragmentConfig) { fragment, viewBinding ->
+            assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
+            assertThat(viewBinding.googlePayDivider.viewBinding.dividerText)
+                .isEqualTo("Or pay using")
+        }
+    }
+
+    @Test
+    fun `when payment method is selected then transitions to correct fragment`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "ideal"))
+        }
+        val fragmentConfig = FragmentConfigFixtures.DEFAULT.copy(stripeIntent = paymentIntent)
+
+        createFragment(fragmentConfig = fragmentConfig) { fragment, viewBinding ->
+            assertThat(
+                fragment.childFragmentManager.findFragmentById(
+                    viewBinding.paymentMethodFragmentContainer.id
+                )
+            ).isInstanceOf(CardDataCollectionFragment::class.java)
+
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Ideal)
+
+            idleLooper()
+
+            assertThat(
+                fragment.childFragmentManager.findFragmentById(
+                    viewBinding.paymentMethodFragmentContainer.id
+                )
+            ).isInstanceOf(IdealDataCollectionFragment::class.java)
         }
     }
 

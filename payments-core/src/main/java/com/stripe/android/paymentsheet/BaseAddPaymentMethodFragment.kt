@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -127,7 +128,8 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
     }
 
-    private fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
+    @VisibleForTesting
+    internal fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
         replacePaymentMethodFragment(paymentMethod)
     }
 
