@@ -12,10 +12,7 @@ class FormViewModelTest {
 
     @Test
     fun `Verify params are set when element flows are complete`() = runBlocking {
-        val formViewModel = FormViewModel(
-            sofort.paramKey,
-            sofort.allTypes
-        )
+        val formViewModel = FormViewModel(sofort)
 
         val nameElement = formViewModel.getElement(Field.NameInput)
         val emailElement = formViewModel.getElement(Field.EmailInput)
@@ -24,7 +21,9 @@ class FormViewModelTest {
         assertThat(formViewModel.paramMapFlow.first()).isNull()
 
         emailElement.onValueChange("joe@gmail.com")
-        assertThat(formViewModel.paramMapFlow.first().toString().replace("\\s".toRegex(), "")).isEqualTo(
+        assertThat(
+            formViewModel.paramMapFlow.first().toString().replace("\\s".toRegex(), "")
+        ).isEqualTo(
             """
                 {
                   billing_details={

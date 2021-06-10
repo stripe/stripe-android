@@ -2,8 +2,7 @@ package com.stripe.android.paymentsheet.elements.common
 
 import com.stripe.android.paymentsheet.R
 
-class TextFieldStateConstants {
-
+internal class TextFieldStateConstants {
     sealed class Valid : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean): Boolean = false
         override fun isValid(): Boolean = true
@@ -19,28 +18,26 @@ class TextFieldStateConstants {
         }
     }
 
-    sealed class Invalid : TextFieldState {
+    sealed class Error : TextFieldState {
         override fun isValid(): Boolean = false
         override fun isFull(): Boolean = false
 
-        object AlwaysError : TextFieldState {
+        object AlwaysError : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = true
-            override fun isValid(): Boolean = false
             override fun getErrorMessageResId(): Int = R.string.invalid
-            override fun isFull(): Boolean = false
         }
 
-        object Incomplete : Invalid() {
+        object Incomplete : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
             override fun getErrorMessageResId(): Int = R.string.incomplete
         }
 
-        object Malformed : Invalid() {
+        object Invalid : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = true
-            override fun getErrorMessageResId(): Int = R.string.malformed
+            override fun getErrorMessageResId(): Int = R.string.invalid
         }
 
-        object BlankAndRequired : Invalid() {
+        object BlankAndRequired : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
             override fun getErrorMessageResId(): Int = R.string.blank_and_required
         }

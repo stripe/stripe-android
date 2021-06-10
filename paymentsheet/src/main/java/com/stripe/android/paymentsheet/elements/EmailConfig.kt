@@ -4,7 +4,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
 import com.stripe.android.paymentsheet.elements.common.TextFieldState
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Invalid
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid
 import java.util.regex.Pattern
 
@@ -22,10 +22,10 @@ internal class EmailConfig() :
 
     override fun determineState(input: String): TextFieldState {
         return when {
-            input.isEmpty() -> Invalid.BlankAndRequired
+            input.isEmpty() -> Error.BlankAndRequired
             PATTERN.matcher(input).matches() -> Valid.Limitless
-            containsNameAndDomain(input) -> Invalid.Malformed
-            else -> Invalid.Incomplete
+            containsNameAndDomain(input) -> Error.Invalid
+            else -> Error.Incomplete
         }
     }
 
@@ -34,7 +34,8 @@ internal class EmailConfig() :
     )
 
     companion object {
-        // This is here because it is not defined during unit tests.
+        // This is copied from Paterns.EMAIL_ADDRESS because it is not defined for unit tests unless
+        // using Robolectric which is quite slow.
         val PATTERN: Pattern = Pattern.compile(
             "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
                 "\\@" +

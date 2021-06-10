@@ -4,7 +4,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
 import com.stripe.android.paymentsheet.elements.common.TextFieldState
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Invalid
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid
 
 internal class NameConfig : TextFieldConfig {
@@ -14,7 +14,7 @@ internal class NameConfig : TextFieldConfig {
 
     override fun determineState(input: String): TextFieldState {
         return when {
-            input.isEmpty() -> Invalid.BlankAndRequired
+            input.isEmpty() -> Error.BlankAndRequired
             else -> Valid.Limitless
         }
     }

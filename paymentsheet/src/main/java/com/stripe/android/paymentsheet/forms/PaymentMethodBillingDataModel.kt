@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-val addressParams: MutableMap<String, Any?> = mutableMapOf(
+internal val addressParams: MutableMap<String, Any?> = mutableMapOf(
     "city" to null,
     "country" to null,
     "line1" to null,
@@ -9,7 +9,7 @@ val addressParams: MutableMap<String, Any?> = mutableMapOf(
     "state" to null,
 )
 
-val billingParams: MutableMap<String, Any?> = mutableMapOf(
+internal val billingParams: MutableMap<String, Any?> = mutableMapOf(
     "address" to addressParams,
     "name" to null,
     "email" to null,

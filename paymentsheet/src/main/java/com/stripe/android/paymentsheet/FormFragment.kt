@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,11 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.asLiveData
+import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
 
 class FormFragment : Fragment() {
+    private val viewModel by activityViewModels<FormViewModel>()
 
     @ExperimentalAnimationApi
     override fun onCreateView(
@@ -28,23 +28,11 @@ class FormFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
-        val formDataObject = com.stripe.android.paymentsheet.forms.sofort
-
-        val formViewModel = FormViewModel(
-            formDataObject.paramKey,
-            formDataObject.allTypes
-        )
-
-        formViewModel.paramMapFlow.asLiveData().observe(viewLifecycleOwner) {
-            Log.d("APP", "Params: $it")
-        }
-
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
                     Form(
-                        formDataObject,
-                        formViewModel
+                        viewModel
                     )
                 }
             }

@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Invalid.*
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error.*
 import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.*
 import org.junit.Test
-import java.util.regex.Pattern
 
 class EmailConfigTest {
     private val emailConfig = EmailConfig()
@@ -22,7 +21,7 @@ class EmailConfigTest {
     @Test
     fun `verify if it doesn't pattern match but has an @ and period it is malformed`() {
         assertThat(emailConfig.determineState("@.")).isEqualTo(Incomplete)
-        assertThat(emailConfig.determineState("@.x")).isEqualTo(Malformed)
+        assertThat(emailConfig.determineState("@.x")).isEqualTo(Invalid)
     }
 
     @Test

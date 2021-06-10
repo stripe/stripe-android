@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.elements.common
 
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.*
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -21,8 +21,7 @@ internal class TextFieldElement(
     private val _input = MutableStateFlow("")
     val input: Flow<String> = _input
 
-    private val _elementState =
-        MutableStateFlow<TextFieldState>(Invalid.AlwaysError)
+    private val _elementState = MutableStateFlow<TextFieldState>(Error.AlwaysError)
 
     private val _hasFocus = MutableStateFlow(false)
 

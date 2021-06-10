@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.paymentsheet.elements.common
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /**
- * This is a simple section that holds several fields in a card view.  It has a label, fields specified
+ * This is a simple section that holds content in a card view.  It has a label, content specified
  * by the caller, and an error string.
  */
 @ExperimentalAnimationApi

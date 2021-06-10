@@ -12,10 +12,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.Section
+import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import kotlinx.coroutines.flow.Flow
@@ -29,9 +30,9 @@ import kotlinx.coroutines.flow.map
 @ExperimentalAnimationApi
 @Composable
 internal fun Form(
-    form: FormDataObject,
     formViewModel: FormViewModel,
 ) {
+    val form = formViewModel.formDataObject
     val focusRequesters = List(form.sections.size) { FocusRequester() }
 
     Column(
@@ -61,13 +62,23 @@ internal fun Form(
     }
 }
 
-internal class FormViewModel(
-    private val paramKey: MutableMap<String, Any?>,
-    types: List<Field>
+class FormViewModel(
+    val formDataObject: FormDataObject
 ) : ViewModel() {
+    class Factory(
+        val formDataObject: FormDataObject
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return FormViewModel(formDataObject) as T
+        }
+    }
+
+    private val paramKey: MutableMap<String, Any?> = formDataObject.paramKey
+    private val types: List<Field> = formDataObject.allTypes
     private val elementMap = mutableMapOf<Field, TextFieldElement>()
 
-    fun getElement(type: Field) = requireNotNull(elementMap[type])
+    internal fun getElement(type: Field) = requireNotNull(elementMap[type])
 
     private val isComplete: Flow<Boolean>
     private val params: Flow<MutableMap<String, Any?>>

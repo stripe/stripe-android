@@ -87,7 +87,7 @@ internal class TextFieldElementTest {
 
     @Test
     fun `Verify is not complete set when the element state changes`() {
-        config.fakeState = Invalid.AlwaysError
+        config.fakeState = Error.AlwaysError
 
         var isComplete = true
         textFieldElement.isComplete.asLiveData()
@@ -110,7 +110,7 @@ internal class TextFieldElementTest {
                 isComplete = it
             }
 
-        config.fakeState = Invalid.AlwaysError
+        config.fakeState = Error.AlwaysError
         textFieldElement.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(false)
 
@@ -130,7 +130,7 @@ internal class TextFieldElementTest {
         textFieldElement.onValueChange("full")
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeState = Invalid.AlwaysError
+        config.fakeState = Error.AlwaysError
         textFieldElement.onValueChange("always")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
@@ -148,7 +148,7 @@ internal class TextFieldElementTest {
 
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeState = Invalid.AlwaysError
+        config.fakeState = Error.AlwaysError
         textFieldElement.onValueChange("newValue")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)

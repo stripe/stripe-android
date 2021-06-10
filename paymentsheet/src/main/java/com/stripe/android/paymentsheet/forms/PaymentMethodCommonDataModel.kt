@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.forms
 /**
  * This class is used to define different forms full of fields.
  */
-internal data class FormDataObject(
+data class FormDataObject(
     val sections: List<Section>,
     val paramKey: MutableMap<String, Any?>,
 ) {
@@ -14,7 +14,7 @@ internal data class FormDataObject(
     }
 }
 
-internal sealed class Field(
+sealed class Field(
     // This is the key used in the PaymentMethodCreateParams
     val paymentMethodCreateParamsKey: String,
 ) {
@@ -23,7 +23,7 @@ internal sealed class Field(
     object EmailInput : Field("email")
 }
 
-internal data class Section(
+data class Section(
     val field: Field
 )
 
