@@ -3,13 +3,12 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
+    android:layout_height="match_parent"
+    android:padding="8dp">
+    <androidx.fragment.app.FragmentContainerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
         android:gravity="center_horizontal"
-        android:orientation="vertical"
+        android:name="com.stripe.example.activity.FragmentExamplesFragment"
         android:id="@+id/fragment_container" />
 </ScrollView>

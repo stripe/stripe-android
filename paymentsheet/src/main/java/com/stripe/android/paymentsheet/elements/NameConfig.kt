@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
@@ -8,13 +9,14 @@ import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.E
 import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid
 
 internal class NameConfig : TextFieldConfig {
-    override val debugLabel = "name"
+    @StringRes
     override val label = R.string.address_label_name
+    override val debugLabel = "name"
     override val keyboard = KeyboardType.Text
 
     override fun determineState(input: String): TextFieldState {
         return when {
-            input.isEmpty() -> Error.BlankAndRequired
+            input.isEmpty() -> Error.Blank
             else -> Valid.Limitless
         }
     }

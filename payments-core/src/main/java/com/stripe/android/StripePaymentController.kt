@@ -40,7 +40,7 @@ import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.views.ChallengeProgressActivity
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -95,7 +95,7 @@ internal class StripePaymentController internal constructor(
     private val logger = Logger.getInstance(enableLogging)
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
-    private val paymentRelayStarterFactory = { host: AuthActivityStarter.Host ->
+    private val paymentRelayStarterFactory = { host: AuthActivityStarterHost ->
         paymentRelayLauncher?.let {
             PaymentRelayStarter.Modern(it)
         } ?: PaymentRelayStarter.Legacy(host)
@@ -105,7 +105,7 @@ internal class StripePaymentController internal constructor(
         BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
     }
 
-    private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarter.Host ->
+    private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarterHost ->
         paymentBrowserAuthLauncher?.let {
             PaymentBrowserAuthStarter.Modern(it)
         } ?: PaymentBrowserAuthStarter.Legacy(
@@ -143,7 +143,7 @@ internal class StripePaymentController internal constructor(
      * Confirm the Stripe Intent and resolve any next actions
      */
     override suspend fun startConfirmAndAuth(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
     ) {
@@ -258,7 +258,7 @@ internal class StripePaymentController internal constructor(
     }
 
     override suspend fun startAuth(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         type: PaymentController.StripeIntentType
@@ -306,7 +306,7 @@ internal class StripePaymentController internal constructor(
     }
 
     override suspend fun startAuthenticateSource(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
@@ -337,7 +337,7 @@ internal class StripePaymentController internal constructor(
     }
 
     private suspend fun onSourceRetrieved(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
@@ -508,7 +508,7 @@ internal class StripePaymentController internal constructor(
     }
 
     private suspend fun handleError(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         requestCode: Int,
         throwable: Throwable
     ) = withContext(uiContext) {
@@ -532,7 +532,7 @@ internal class StripePaymentController internal constructor(
      */
     @VisibleForTesting
     override suspend fun handleNextAction(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         returnUrl: String?,
         requestOptions: ApiRequest.Options
@@ -546,7 +546,7 @@ internal class StripePaymentController internal constructor(
     }
 
     private suspend fun bypassAuth(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         source: Source,
         stripeAccountId: String?
     ) = withContext(uiContext) {

@@ -433,13 +433,16 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomiz
 	public final fun setTextFontSize (I)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ButtonCustomization$Builder;
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2Config {
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2Config : android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Companion;
 	public final fun copy (ILcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config;
 	public static synthetic fun copy$default (Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config;ILcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;ILjava/lang/Object;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config;
+	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Builder : com/stripe/android/ObjectBuilder {
@@ -448,6 +451,14 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Builder
 	public synthetic fun build ()Ljava/lang/Object;
 	public final fun setTimeout (I)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Builder;
 	public final fun setUiCustomization (Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Builder;
+}
+
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2Config$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2Config;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2LabelCustomization {
@@ -511,14 +522,17 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomi
 	public final fun setTextFontSize (I)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2ToolbarCustomization$Builder;
 }
 
-public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization {
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization : android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun component1 ()Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;
 	public final fun copy (Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;
 	public static synthetic fun copy$default (Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;ILjava/lang/Object;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;
+	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getUiCustomization ()Lcom/stripe/android/stripe3ds2/init/ui/StripeUiCustomization;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$Builder : com/stripe/android/ObjectBuilder {
@@ -548,6 +562,14 @@ public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomizatio
 	public static final field SUBMIT Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$ButtonType;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$ButtonType;
 	public static fun values ()[Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$ButtonType;
+}
+
+public final class com/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/PaymentAuthConfig$Stripe3ds2UiCustomization;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/PaymentConfiguration : android/os/Parcelable {
@@ -4942,6 +4964,22 @@ public final class com/stripe/android/model/Stripe3ds2AuthResult$ThreeDS2Error$C
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/Stripe3ds2AuthResult$ThreeDS2Error;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/Stripe3ds2AuthResult$ThreeDS2Error;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/Stripe3ds2Fingerprint$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/Stripe3ds2Fingerprint;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/Stripe3ds2Fingerprint;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/Stripe3ds2Fingerprint$DirectoryServerEncryption$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/Stripe3ds2Fingerprint$DirectoryServerEncryption;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/Stripe3ds2Fingerprint$DirectoryServerEncryption;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

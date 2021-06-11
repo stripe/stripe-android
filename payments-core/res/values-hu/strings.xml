@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">Bezárás</string>
     <string name="stripe_paymentsheet_expiration_date_hint">HH / ÉÉ</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ új kártya</string>
-    <string name="stripe_paymentsheet_or_pay_with">Vagy fizetés kártyával</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Vagy fizetés kártyával</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s kifizetése</string>
     <string name="stripe_paymentsheet_pay_button_label">Fizetés:</string>
     <string name="stripe_paymentsheet_primary_button_processing">Feldolgozás...</string>

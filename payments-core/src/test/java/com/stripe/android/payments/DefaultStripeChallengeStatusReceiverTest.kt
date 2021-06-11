@@ -1,8 +1,8 @@
 package com.stripe.android.payments
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.argWhere
@@ -38,7 +38,7 @@ import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -70,10 +70,10 @@ class DefaultStripeChallengeStatusReceiverTest {
     private val analyticsRequestArgumentCaptor = argumentCaptor<AnalyticsRequest>()
     private val intentArgumentCaptor = argumentCaptor<Intent>()
 
-    private val activity: Activity = mock()
+    private val activity: ComponentActivity = mock()
     private val stripeRepository = FakeStripeRepository()
 
-    private val host = AuthActivityStarter.Host.create(activity)
+    private val host = AuthActivityStarterHost.create(activity)
     private val completionStarter = Stripe3ds2CompletionStarter.Legacy(
         host,
         50000

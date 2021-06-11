@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.DropdownConfig
 
 internal class IdealBankConfig : DropdownConfig {
     override val debugLabel = "idealBank"
+    @StringRes
     override val label = R.string.title_bank_account
 
     override fun getDisplayItems() = DISPLAY_TO_PARAM.map { it.displayName }

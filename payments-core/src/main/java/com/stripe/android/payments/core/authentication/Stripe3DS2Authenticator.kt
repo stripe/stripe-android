@@ -23,10 +23,8 @@ import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.Transaction
-import com.stripe.android.view.AuthActivityStarter
-import kotlinx.coroutines.CoroutineScope
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.cert.CertificateException
 import kotlin.coroutines.CoroutineContext
@@ -39,7 +37,7 @@ import kotlin.coroutines.CoroutineContext
 internal class Stripe3DS2Authenticator(
     private val stripeRepository: StripeRepository,
     private val webIntentAuthenticator: WebIntentAuthenticator,
-    private val paymentRelayStarterFactory: (AuthActivityStarter.Host) -> PaymentRelayStarter,
+    private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val threeDs2Service: StripeThreeDs2Service,
@@ -51,14 +49,14 @@ internal class Stripe3DS2Authenticator(
     private val uiContext: CoroutineContext
 ) : IntentAuthenticator {
     private val stripe3ds2CompletionStarterFactory =
-        { host: AuthActivityStarter.Host, requestCode: Int ->
+        { host: AuthActivityStarterHost, requestCode: Int ->
             stripe3ds2ChallengeLauncher?.let {
                 Stripe3ds2CompletionStarter.Modern(it)
             } ?: Stripe3ds2CompletionStarter.Legacy(host, requestCode)
         }
 
     override suspend fun authenticate(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options
@@ -72,7 +70,7 @@ internal class Stripe3DS2Authenticator(
     }
 
     private suspend fun handle3ds2Auth(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options,
         nextActionData: StripeIntent.NextActionData.SdkData.Use3DS2
@@ -97,7 +95,7 @@ internal class Stripe3DS2Authenticator(
     }
 
     private suspend fun handleError(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         requestCode: Int,
         throwable: Throwable
     ) = withContext(uiContext) {
@@ -111,13 +109,11 @@ internal class Stripe3DS2Authenticator(
     }
 
     private suspend fun begin3ds2Auth(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         stripe3ds2Fingerprint: Stripe3ds2Fingerprint,
         requestOptions: ApiRequest.Options
     ) {
-        val activity = host.activity ?: return
-
         val transaction = threeDs2Service.createTransaction(
             stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId,
             messageVersionRegistry.current, stripeIntent.isLiveMode,
@@ -127,15 +123,28 @@ internal class Stripe3DS2Authenticator(
             stripe3ds2Fingerprint.directoryServerEncryption.keyId
         )
 
-        challengeProgressActivityStarter.start(
-            activity,
-            stripe3ds2Fingerprint.directoryServerName,
-            false,
-            stripe3ds2Config.uiCustomization.uiCustomization,
-            transaction.sdkTransactionId
-        )
+        when (host) {
+            is AuthActivityStarterHost.ActivityHost -> {
+                challengeProgressActivityStarter.start(
+                    host.activity,
+                    stripe3ds2Fingerprint.directoryServerName,
+                    false,
+                    stripe3ds2Config.uiCustomization.uiCustomization,
+                    transaction.sdkTransactionId
+                )
+            }
+            is AuthActivityStarterHost.FragmentHost -> {
+                challengeProgressActivityStarter.start(
+                    host.fragment.requireActivity(),
+                    stripe3ds2Fingerprint.directoryServerName,
+                    false,
+                    stripe3ds2Config.uiCustomization.uiCustomization,
+                    transaction.sdkTransactionId
+                )
+            }
+        }
 
-        CoroutineScope(workContext).launch {
+        withContext(workContext) {
             val areqParams = transaction.createAuthenticationRequestParameters()
 
             val timeout = stripe3ds2Config.timeout
@@ -196,7 +205,7 @@ internal class Stripe3DS2Authenticator(
         timeout: Int,
         paymentRelayStarter: PaymentRelayStarter,
         requestCode: Int,
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
@@ -208,7 +217,6 @@ internal class Stripe3DS2Authenticator(
                     transaction,
                     sourceId,
                     timeout,
-                    paymentRelayStarter,
                     host,
                     stripeIntent,
                     requestOptions
@@ -251,7 +259,7 @@ internal class Stripe3DS2Authenticator(
      */
     private suspend fun on3ds2AuthFallback(
         fallbackRedirectUrl: String,
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
@@ -302,59 +310,46 @@ internal class Stripe3DS2Authenticator(
         transaction: Transaction,
         sourceId: String,
         maxTimeout: Int,
-        paymentRelayStarter: PaymentRelayStarter,
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
     ) = withContext(workContext) {
-        runCatching {
-            requireNotNull(
-                host.fragment?.let { fragment ->
-                    Stripe3ds2ActivityStarterHost(fragment)
-                } ?: host.activity?.let { activity ->
-                    Stripe3ds2ActivityStarterHost(activity)
-                }
-            ) {
-                "Error while attempting to start 3DS2 challenge flow."
+        when (host) {
+            is AuthActivityStarterHost.ActivityHost -> {
+                Stripe3ds2ActivityStarterHost(host.activity)
             }
-        }.fold(
-            onSuccess = { stripe3ds2Host ->
-                delay(StripePaymentController.CHALLENGE_DELAY)
+            is AuthActivityStarterHost.FragmentHost -> {
+                Stripe3ds2ActivityStarterHost(host.fragment)
+            }
+        }.let { stripe3ds2Host ->
+            delay(StripePaymentController.CHALLENGE_DELAY)
 
-                transaction.doChallenge(
-                    stripe3ds2Host,
-                    ChallengeParameters(
-                        acsSignedContent = ares.acsSignedContent,
-                        threeDsServerTransactionId = ares.threeDSServerTransId,
-                        acsTransactionId = ares.acsTransId
+            transaction.doChallenge(
+                stripe3ds2Host,
+                ChallengeParameters(
+                    acsSignedContent = ares.acsSignedContent,
+                    threeDsServerTransactionId = ares.threeDSServerTransId,
+                    acsTransactionId = ares.acsTransId
+                ),
+                DefaultStripeChallengeStatusReceiver(
+                    stripe3ds2CompletionStarterFactory(
+                        host,
+                        StripePaymentController.getRequestCode(stripeIntent)
                     ),
-                    DefaultStripeChallengeStatusReceiver(
-                        stripe3ds2CompletionStarterFactory(
-                            host,
-                            StripePaymentController.getRequestCode(stripeIntent)
-                        ),
-                        stripeRepository,
-                        stripeIntent,
-                        sourceId,
-                        requestOptions,
-                        analyticsRequestExecutor,
-                        analyticsRequestFactory,
-                        transaction,
-                        {
-                            transaction.close()
-                        },
-                        workContext = workContext
-                    ),
-                    maxTimeout
-                )
-            },
-            onFailure = {
-                on3ds2AuthFailure(
-                    it,
-                    StripePaymentController.getRequestCode(stripeIntent),
-                    paymentRelayStarter
-                )
-            }
-        )
+                    stripeRepository,
+                    stripeIntent,
+                    sourceId,
+                    requestOptions,
+                    analyticsRequestExecutor,
+                    analyticsRequestFactory,
+                    transaction,
+                    {
+                        transaction.close()
+                    },
+                    workContext = workContext
+                ),
+                maxTimeout
+            )
+        }
     }
 }

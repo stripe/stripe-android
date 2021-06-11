@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.elements.common
 
+import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
 
 internal class TextFieldStateConstants {
     sealed class Valid : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean): Boolean = false
         override fun isValid(): Boolean = true
+        @StringRes
         override fun getErrorMessageResId(): Int? = null
 
         object Full : Valid() {
@@ -24,21 +26,25 @@ internal class TextFieldStateConstants {
 
         object AlwaysError : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = true
-            override fun getErrorMessageResId(): Int = R.string.invalid
+            @StringRes
+            override fun getErrorMessageResId():  Int = R.string.invalid
         }
 
         object Incomplete : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+            @StringRes
             override fun getErrorMessageResId(): Int = R.string.incomplete
         }
 
         object Invalid : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = true
+            @StringRes
             override fun getErrorMessageResId(): Int = R.string.invalid
         }
 
-        object BlankAndRequired : Error() {
+        object Blank : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
+            @StringRes
             override fun getErrorMessageResId(): Int = R.string.blank_and_required
         }
     }

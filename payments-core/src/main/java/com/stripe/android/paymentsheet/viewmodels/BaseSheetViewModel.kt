@@ -13,7 +13,6 @@ import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.AddCardFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -22,6 +21,8 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,8 +49,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
     internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
 
-    @VisibleForTesting
-    internal val _stripeIntent = MutableLiveData<StripeIntent?>()
+    private val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
@@ -68,7 +68,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     /**
-     * On [AddCardFragment] this is set every time the details in the add
+     * On [CardDataCollectionFragment] this is set every time the details in the add
      * card fragment is determined to be valid (not necessarily selected)
      * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
@@ -142,6 +142,32 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     open fun transitionTo(target: TransitionTargetType) {
         _transition.postValue(Event(target))
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    fun setStripeIntent(stripeIntent: StripeIntent?) {
+        _stripeIntent.value = stripeIntent
+
+        if (stripeIntent != null && getSupportedPaymentMethods().isEmpty()) {
+            onFatal(
+                IllegalArgumentException(
+                    "None of the requested payment methods" +
+                        " (${stripeIntent.paymentMethodTypes})" +
+                        " match the supported payment types" +
+                        " (${SupportedPaymentMethod.values().toList()})"
+                )
+            )
+        }
+    }
+
+    fun getSupportedPaymentMethods(): List<SupportedPaymentMethod> {
+        stripeIntent.value?.let { stripeIntent ->
+            return stripeIntent.paymentMethodTypes.mapNotNull {
+                SupportedPaymentMethod.fromCode(it)
+            }.filter { it == SupportedPaymentMethod.Card }
+        }
+
+        return emptyList()
     }
 
     fun updateSelection(selection: PaymentSelection?) {

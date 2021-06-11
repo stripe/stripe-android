@@ -5,6 +5,7 @@ import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
@@ -14,7 +15,7 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
 internal interface PaymentBrowserAuthStarter :
     AuthActivityStarter<PaymentBrowserAuthContract.Args> {
     class Legacy(
-        private val host: AuthActivityStarter.Host,
+        private val host: AuthActivityStarterHost,
         private val hasCompatibleBrowser: Boolean,
         private val defaultReturnUrl: DefaultReturnUrl
     ) : PaymentBrowserAuthStarter {

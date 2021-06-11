@@ -23,7 +23,7 @@ import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -37,7 +37,7 @@ import org.robolectric.RobolectricTestRunner
 class WebIntentAuthenticatorTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val paymentBrowserAuthStarterFactory =
-        mock<(AuthActivityStarter.Host) -> PaymentBrowserAuthStarter>()
+        mock<(AuthActivityStarterHost) -> PaymentBrowserAuthStarter>()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = AnalyticsRequestFactory(
         context,
@@ -46,7 +46,7 @@ class WebIntentAuthenticatorTest {
     private val logger = mock<Logger>()
 
     private val testDispatcher = TestCoroutineDispatcher()
-    private val host = mock<AuthActivityStarter.Host>()
+    private val host = mock<AuthActivityStarterHost>()
 
     private val paymentBrowserWebStarter = mock<PaymentBrowserAuthStarter>()
 

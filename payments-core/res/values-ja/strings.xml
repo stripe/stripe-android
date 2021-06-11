@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">閉じる</string>
     <string name="stripe_paymentsheet_expiration_date_hint">月 / 年</string>
     <string name="stripe_paymentsheet_new_card_button_label">新しいカードを追加</string>
-    <string name="stripe_paymentsheet_or_pay_with">または、カードで支払う</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">または、カードで支払う</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s を支払う</string>
     <string name="stripe_paymentsheet_pay_button_label">支払う: </string>
     <string name="stripe_paymentsheet_primary_button_processing">処理中...</string>

@@ -49,8 +49,14 @@ internal class BottomSheetController(
     }
 
     fun hide() {
-        // When the bottom sheet finishes animating to its new state,
-        // the callback will finish the activity
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
+            // If the state is already hidden, setting the state to hidden is a no-op,
+            // so we need to finish it now.
+            _shouldFinish.value = true
+        } else {
+            // When the bottom sheet finishes animating to its new state,
+            // the callback will finish the activity.
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.payments
 
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.Stripe3ds2CompletionActivity
 
 internal sealed class Stripe3ds2CompletionStarter : AuthActivityStarter<PaymentFlowResult.Unvalidated> {
@@ -14,7 +15,7 @@ internal sealed class Stripe3ds2CompletionStarter : AuthActivityStarter<PaymentF
     }
 
     class Legacy(
-        private val host: AuthActivityStarter.Host,
+        private val host: AuthActivityStarterHost,
         private val requestCode: Int
     ) : Stripe3ds2CompletionStarter() {
         override fun start(args: PaymentFlowResult.Unvalidated) {

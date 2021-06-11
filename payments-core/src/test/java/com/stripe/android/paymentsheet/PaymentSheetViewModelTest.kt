@@ -495,6 +495,25 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
+        val viewModel = createViewModel(
+            stripeIntentRepository = StripeIntentRepository.Static(
+                PAYMENT_INTENT.copy(paymentMethodTypes = listOf("unsupported_payment_type"))
+            )
+        )
+        var result: PaymentSheetResult? = null
+        viewModel.paymentSheetResult.observeForever {
+            result = it
+        }
+        viewModel.fetchStripeIntent()
+        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
+            .startsWith(
+                "None of the requested payment methods ([unsupported_payment_type]) " +
+                    "match the supported payment types "
+            )
+    }
+
+    @Test
     fun `isGooglePayReady when googlePayConfig is not null should emit expected value`() {
         Dispatchers.setMain(testDispatcher)
         var isReady: Boolean? = null

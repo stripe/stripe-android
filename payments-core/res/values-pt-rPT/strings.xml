@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">Fechar</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/AA</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ Novo cartão</string>
-    <string name="stripe_paymentsheet_or_pay_with">Ou pagar com um cartão</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Ou pagar com um cartão</string>
     <string name="stripe_paymentsheet_pay_button_amount">Pagar %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
     <string name="stripe_paymentsheet_primary_button_processing">A processar…</string>

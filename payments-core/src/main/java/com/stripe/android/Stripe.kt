@@ -41,7 +41,7 @@ import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -174,7 +174,7 @@ class Stripe internal constructor(
     ) {
         activity.lifecycleScope.launch {
             paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
+                AuthActivityStarterHost.create(activity),
                 confirmPaymentIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -284,7 +284,7 @@ class Stripe internal constructor(
     ) {
         fragment.lifecycleScope.launch {
             paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(fragment),
+                AuthActivityStarterHost.create(fragment),
                 confirmPaymentIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -315,7 +315,7 @@ class Stripe internal constructor(
     ) {
         activity.lifecycleScope.launch {
             paymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
+                AuthActivityStarterHost.create(activity),
                 PaymentIntent.ClientSecret(clientSecret).value,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -347,7 +347,7 @@ class Stripe internal constructor(
     ) {
         fragment.lifecycleScope.launch {
             paymentController.startAuth(
-                AuthActivityStarter.Host.create(fragment),
+                AuthActivityStarterHost.create(fragment),
                 PaymentIntent.ClientSecret(clientSecret).value,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -529,7 +529,7 @@ class Stripe internal constructor(
     ) {
         activity.lifecycleScope.launch {
             paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
+                AuthActivityStarterHost.create(activity),
                 confirmSetupIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -571,7 +571,7 @@ class Stripe internal constructor(
     ) {
         fragment.lifecycleScope.launch {
             paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(fragment),
+                AuthActivityStarterHost.create(fragment),
                 confirmSetupIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -600,7 +600,7 @@ class Stripe internal constructor(
     ) {
         activity.lifecycleScope.launch {
             paymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
+                AuthActivityStarterHost.create(activity),
                 SetupIntent.ClientSecret(clientSecret).value,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -630,7 +630,7 @@ class Stripe internal constructor(
     ) {
         fragment.lifecycleScope.launch {
             paymentController.startAuth(
-                AuthActivityStarter.Host.create(fragment),
+                AuthActivityStarterHost.create(fragment),
                 SetupIntent.ClientSecret(clientSecret).value,
                 ApiRequest.Options(
                     apiKey = publishableKey,
@@ -880,7 +880,7 @@ class Stripe internal constructor(
     ) {
         activity.lifecycleScope.launch {
             paymentController.startAuthenticateSource(
-                AuthActivityStarter.Host.create(activity),
+                AuthActivityStarterHost.create(activity),
                 source,
                 ApiRequest.Options(publishableKey, stripeAccountId)
             )
@@ -906,7 +906,7 @@ class Stripe internal constructor(
     ) {
         fragment.lifecycleScope.launchWhenCreated {
             paymentController.startAuthenticateSource(
-                AuthActivityStarter.Host.create(fragment),
+                AuthActivityStarterHost.create(fragment),
                 source,
                 ApiRequest.Options(publishableKey, stripeAccountId)
             )

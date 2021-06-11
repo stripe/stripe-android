@@ -13,14 +13,14 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.WeChat
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 
 internal interface PaymentController {
     /**
      * Confirm the Stripe Intent and resolve any next actions
      */
     suspend fun startConfirmAndAuth(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
     )
@@ -80,14 +80,14 @@ internal interface PaymentController {
     ): WeChatPayNextAction
 
     suspend fun startAuth(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         type: StripeIntentType
     )
 
     suspend fun startAuthenticateSource(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         source: Source,
         requestOptions: ApiRequest.Options
     )
@@ -178,7 +178,7 @@ internal interface PaymentController {
      * if it is not needed.
      */
     suspend fun handleNextAction(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         returnUrl: String?,
         requestOptions: ApiRequest.Options

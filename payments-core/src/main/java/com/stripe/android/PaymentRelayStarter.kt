@@ -10,6 +10,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
@@ -20,7 +21,7 @@ import kotlinx.parcelize.Parcelize
  */
 internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter.Args> {
     class Legacy(
-        private val host: AuthActivityStarter.Host
+        private val host: AuthActivityStarterHost
     ) : PaymentRelayStarter {
         override fun start(args: Args) {
             host.startActivityForResult(

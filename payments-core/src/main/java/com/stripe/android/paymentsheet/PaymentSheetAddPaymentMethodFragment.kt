@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 
 internal class PaymentSheetAddPaymentMethodFragment(
@@ -74,10 +75,13 @@ internal class PaymentSheetAddPaymentMethodFragment(
     }
 
     private fun updateSelection() {
-        // TODO(brnunes-stripe): Refactor to support other payment methods
+        // TODO(brnunes-stripe): Remove when CardDataCollectionFragment is replaced
+        // This is just to support the CardDataCollectionFragment that needs this callback to update
+        // the payment selection in the ViewModel.
+        // If this happens while another fragment is visible, it should just do nothing.
         (
             childFragmentManager
-                .findFragmentById(R.id.payment_method_fragment_container) as? AddCardFragment<*>
+                .findFragmentById(R.id.payment_method_fragment_container) as? CardDataCollectionFragment<*>
             )?.updateSelection()
     }
 }

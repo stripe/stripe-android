@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
@@ -202,7 +202,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             if (confirmParams != null) {
                 lifecycleScope.launch {
                     paymentController.startConfirmAndAuth(
-                        AuthActivityStarter.Host.create(this@PaymentSheetActivity),
+                        AuthActivityStarterHost.create(this@PaymentSheetActivity),
                         confirmParams,
                         ApiRequest.Options(
                             apiKey = paymentConfig.publishableKey,

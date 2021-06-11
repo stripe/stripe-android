@@ -170,7 +170,7 @@ internal class PaymentSheetViewModel internal constructor(
             }.fold(
                 onSuccess = ::onStripeIntentFetchResponse,
                 onFailure = {
-                    _stripeIntent.value = null
+                    setStripeIntent(null)
                     onFatal(it)
                 }
             )
@@ -185,7 +185,7 @@ internal class PaymentSheetViewModel internal constructor(
                 stripeIntentValidator.requireValid(stripeIntent)
             }.fold(
                 onSuccess = {
-                    _stripeIntent.value = stripeIntent
+                    setStripeIntent(stripeIntent)
                     resetViewState(stripeIntent, userErrorMessage = null)
                 },
                 onFailure = ::onFatal
