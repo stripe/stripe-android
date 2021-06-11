@@ -22,7 +22,7 @@ internal class EmailConfig() :
 
     override fun determineState(input: String): TextFieldState {
         return when {
-            input.isEmpty() -> Error.BlankAndRequired
+            input.isEmpty() -> Error.Blank
             PATTERN.matcher(input).matches() -> Valid.Limitless
             containsNameAndDomain(input) -> Error.Invalid
             else -> Error.Incomplete

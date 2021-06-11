@@ -10,7 +10,7 @@ class EmailConfigTest {
 
     @Test
     fun `verify determine state returns blank and required when empty`() {
-        assertThat(emailConfig.determineState("")).isEqualTo(BlankAndRequired)
+        assertThat(emailConfig.determineState("")).isEqualTo(Blank)
     }
 
     @Test

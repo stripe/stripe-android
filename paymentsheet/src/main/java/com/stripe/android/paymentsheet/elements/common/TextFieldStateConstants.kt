@@ -37,7 +37,7 @@ internal class TextFieldStateConstants {
             override fun getErrorMessageResId(): Int = R.string.invalid
         }
 
-        object BlankAndRequired : Error() {
+        object Blank : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
             override fun getErrorMessageResId(): Int = R.string.blank_and_required
         }

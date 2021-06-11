@@ -12,7 +12,7 @@ class NameConfigTest {
     @Test
     fun `verify determine state returns blank and required when empty or null`() {
         Truth.assertThat(nameConfig.determineState(""))
-            .isEqualTo(BlankAndRequired)
+            .isEqualTo(Blank)
     }
 
     @Test

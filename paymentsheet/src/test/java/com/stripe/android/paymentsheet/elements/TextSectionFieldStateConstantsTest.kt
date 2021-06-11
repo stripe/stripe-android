@@ -38,12 +38,12 @@ class TextSectionFieldStateConstantsTest {
     @Test
     fun `verify blank and required errors are never shown`() {
         assertThat(
-            Error.BlankAndRequired.shouldShowError(
+            Error.Blank.shouldShowError(
                 true
             )
         ).isEqualTo(false)
         assertThat(
-            Error.BlankAndRequired.shouldShowError(
+            Error.Blank.shouldShowError(
                 false
             )
         ).isEqualTo(false)

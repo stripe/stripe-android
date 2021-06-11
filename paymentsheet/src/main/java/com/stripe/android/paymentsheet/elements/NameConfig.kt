@@ -14,7 +14,7 @@ internal class NameConfig : TextFieldConfig {
 
     override fun determineState(input: String): TextFieldState {
         return when {
-            input.isEmpty() -> Error.BlankAndRequired
+            input.isEmpty() -> Error.Blank
             else -> Valid.Limitless
         }
     }
