@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -92,6 +93,8 @@ internal class DefaultFlowControllerTest {
         createFlowController()
     }
 
+    private val lifeCycleOwner = mock<LifecycleOwner>()
+
     private val testDispatcher = TestCoroutineDispatcher()
     private val testScope = TestCoroutineScope(testDispatcher + Job())
 
@@ -126,6 +129,8 @@ internal class DefaultFlowControllerTest {
                 any()
             )
         ).thenReturn(googlePayActivityLauncher)
+
+        whenever(lifeCycleOwner.lifecycle).thenReturn(mock())
     }
 
     @AfterTest
@@ -610,6 +615,7 @@ internal class DefaultFlowControllerTest {
         flowControllerInitializer: FlowControllerInitializer
     ) = DefaultFlowController(
         testScope,
+        lifeCycleOwner,
         { activity.window.statusBarColor },
         { AuthActivityStarterHost.create(activity) },
         PaymentOptionFactory(activity.resources),

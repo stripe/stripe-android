@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -16,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 internal class FlowControllerFactory(
     private val viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleScope: CoroutineScope,
+    private val lifecycleOwner: LifecycleOwner,
     private val appContext: Context,
     private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
@@ -31,6 +33,7 @@ internal class FlowControllerFactory(
     ) : this(
         activity,
         activity.lifecycleScope,
+        activity,
         activity.applicationContext,
         activity,
         { activity.window.statusBarColor },
@@ -47,6 +50,7 @@ internal class FlowControllerFactory(
     ) : this(
         fragment,
         fragment.lifecycleScope,
+        fragment,
         fragment.requireContext(),
         fragment,
         { fragment.activity?.window?.statusBarColor },
@@ -61,6 +65,7 @@ internal class FlowControllerFactory(
             appContext = appContext,
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleScope = lifecycleScope,
+            lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,
             statusBarColor = statusBarColor,
             authHostSupplier = authHostSupplier,

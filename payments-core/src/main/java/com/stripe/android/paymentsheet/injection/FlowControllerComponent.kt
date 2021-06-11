@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -28,6 +29,9 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun lifecycleScope(lifecycleScope: CoroutineScope): Builder
+
+        @BindsInstance
+        fun lifeCycleOwner(lifecycleOwner: LifecycleOwner): Builder
 
         @BindsInstance
         fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
