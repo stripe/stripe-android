@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.paymentsheet.AddCardFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 /**
@@ -15,8 +15,8 @@ internal class AddPaymentMethodsFragmentFactory<ViewModelType : BaseSheetViewMod
 ) : FragmentFactory() {
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
         return when (className) {
-            AddCardFragment::class.java.name -> {
-                AddCardFragment(viewModelClass, viewModelFactory)
+            CardDataCollectionFragment::class.java.name -> {
+                CardDataCollectionFragment(viewModelClass, viewModelFactory)
             }
             else -> super.instantiate(classLoader, className)
         }

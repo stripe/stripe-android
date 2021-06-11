@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">Luk</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/ÅÅ</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ Nyt kort</string>
-    <string name="stripe_paymentsheet_or_pay_with">Eller betal med et kort</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Eller betal med et kort</string>
     <string name="stripe_paymentsheet_pay_button_amount">Betal %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Betal</string>
     <string name="stripe_paymentsheet_primary_button_processing">Behandler...</string>

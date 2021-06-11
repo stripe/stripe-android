@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">Închidere</string>
     <string name="stripe_paymentsheet_expiration_date_hint">LL/AA</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ Card nou</string>
-    <string name="stripe_paymentsheet_or_pay_with">Sau folosiți ca metodă de plată un card</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Sau folosiți ca metodă de plată un card</string>
     <string name="stripe_paymentsheet_pay_button_amount">Plătiți %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Plătiți</string>
     <string name="stripe_paymentsheet_primary_button_processing">Se procesează...</string>

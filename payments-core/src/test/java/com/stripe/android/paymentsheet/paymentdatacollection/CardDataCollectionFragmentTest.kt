@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.content.Context
 import androidx.core.os.bundleOf
@@ -16,11 +16,15 @@ import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
-import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheetActivity
+import com.stripe.android.paymentsheet.PaymentSheetContract
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -32,7 +36,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class AddCardFragmentTest {
+class CardDataCollectionFragmentTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
@@ -244,16 +248,6 @@ class AddCardFragmentTest {
     }
 
     @Test
-    fun `fragment started without FragmentConfig should emit fatal`() {
-        createFragment(
-            fragmentConfig = null
-        ) { fragment, _ ->
-            assertThat((fragment.sheetViewModel.paymentSheetResult.value as PaymentSheetResult.Failed).error.message)
-                .isEqualTo("Failed to start add payment option fragment.")
-        }
-    }
-
-    @Test
     fun `cardErrors should react to input validity`() {
         createFragment { _, viewBinding ->
             assertThat(viewBinding.cardErrors.isVisible)
@@ -456,8 +450,8 @@ class AddCardFragmentTest {
     private fun createFragment(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
-        stripeIntent: StripeIntent? = mock<PaymentIntent>(),
-        onReady: (AddCardFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
+        stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
+        onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
         val factory = AddPaymentMethodsFragmentFactory(
             PaymentSheetViewModel::class.java,
@@ -466,7 +460,7 @@ class AddCardFragmentTest {
                 { args }
             )
         )
-        launchFragmentInContainer<AddCardFragment<PaymentSheetViewModel>>(
+        launchFragmentInContainer<CardDataCollectionFragment<PaymentSheetViewModel>>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args
@@ -476,7 +470,7 @@ class AddCardFragmentTest {
             initialState = Lifecycle.State.INITIALIZED
         ).onFragment { fragment ->
             // Mock sheetViewModel loading the StripeIntent before the Fragment is created
-            fragment.sheetViewModel._stripeIntent.value = stripeIntent
+            fragment.sheetViewModel.setStripeIntent(stripeIntent)
         }.moveToState(Lifecycle.State.STARTED)
             .onFragment { fragment ->
                 onReady(

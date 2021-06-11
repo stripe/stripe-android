@@ -81,6 +81,13 @@
     <dimen name="stripe_paymentsheet_card_stroke_width">1dp</dimen>
     <dimen name="stripe_paymentsheet_card_stroke_width_selected">2dp</dimen>
 
+    <dimen name="stripe_paymentsheet_add_pm_card_height">60dp</dimen>
+    <dimen name="stripe_paymentsheet_add_pm_card_width">112dp</dimen>
+    <dimen name="stripe_paymentsheet_add_pm_card_elevation">0dp</dimen>
+    <dimen name="stripe_paymentsheet_add_pm_card_elevation_selected">1.5dp</dimen>
+    <dimen name="stripe_paymentsheet_add_pm_card_stroke_width">1.5dp</dimen>
+    <dimen name="stripe_paymentsheet_add_pm_card_stroke_width_selected">2dp</dimen>
+
     <dimen name="stripe_card_number_text_input_layout_progress_end_margin">14dp</dimen>
     <dimen name="stripe_card_number_text_input_layout_progress_top_margin">10dp</dimen>
 

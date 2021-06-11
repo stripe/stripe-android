@@ -103,7 +103,7 @@
     <string name="stripe_paymentsheet_close">Sluiten</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / JJ</string>
     <string name="stripe_paymentsheet_new_card_button_label">+ Nieuwe kaart</string>
-    <string name="stripe_paymentsheet_or_pay_with">Of met een kaart betalen</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Of met een kaart betalen</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s betalen</string>
     <string name="stripe_paymentsheet_pay_button_label">Betaal</string>
     <string name="stripe_paymentsheet_primary_button_processing">Verwerken...</string>

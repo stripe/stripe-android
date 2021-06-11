@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Bundle
 import android.util.TypedValue
@@ -25,9 +25,7 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
@@ -36,12 +34,12 @@ import com.stripe.android.view.Country
 import com.stripe.android.view.StripeEditText
 
 /**
- * A [Fragment] for adding new card payment method.
+ * A [Fragment] for collecting data for a new card payment method.
  */
-internal class AddCardFragment<ViewModelType : BaseSheetViewModel<*>>(
+internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>(
     private val viewModelClass: Class<ViewModelType>,
     private val viewModelFactory: ViewModelProvider.Factory
-) : Fragment() {
+) : BasePaymentDataCollectionFragment() {
     // Because the ViewModel is a subclass of BaseSheetViewModel (depending on whether we're going
     // through the complete or custom flow), we need to parameterize the ViewModel class so it is
     // properly reused if it was already created.
@@ -92,16 +90,6 @@ internal class AddCardFragment<ViewModelType : BaseSheetViewModel<*>>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val config = arguments?.getParcelable<FragmentConfig>(
-            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
-        )
-        if (activity == null || config == null) {
-            sheetViewModel.onFatal(
-                IllegalArgumentException("Failed to start add payment option fragment.")
-            )
-            return
-        }
 
         val viewBinding = FragmentPaymentsheetAddCardBinding.bind(view)
         cardMultilineWidget = viewBinding.cardMultilineWidget

@@ -37,7 +37,12 @@ internal abstract class BasePaymentMethodsListFragment(
 
         this.config = nullableConfig
 
-        val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
+        setupRecyclerView(FragmentPaymentsheetPaymentMethodsListBinding.bind(view))
+
+        eventReporter.onShowExistingPaymentOptions()
+    }
+
+    private fun setupRecyclerView(viewBinding: FragmentPaymentsheetPaymentMethodsListBinding) {
         val layoutManager = object : LinearLayoutManager(
             activity,
             HORIZONTAL,
@@ -63,8 +68,6 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter.update(config, sheetViewModel.selection.value)
-
-        eventReporter.onShowExistingPaymentOptions()
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             adapter.isEnabled = !isProcessing

@@ -45,7 +45,7 @@ internal class PaymentOptionsViewModel(
 
     init {
         _isGooglePayReady.value = args.isGooglePayReady
-        _stripeIntent.value = args.stripeIntent
+        setStripeIntent(args.stripeIntent)
         _paymentMethods.value = args.paymentMethods
         _processing.postValue(false)
     }
