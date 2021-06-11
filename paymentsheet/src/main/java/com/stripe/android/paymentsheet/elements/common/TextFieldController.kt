@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.map
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal class TextFieldElement(
+internal class TextFieldController(
     private val textFieldConfig: TextFieldConfig
-) : Element {
+) : FieldController {
     @StringRes
     override val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel

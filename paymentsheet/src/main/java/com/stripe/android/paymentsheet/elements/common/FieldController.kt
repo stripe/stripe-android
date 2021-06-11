@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.elements.common
 
 import kotlinx.coroutines.flow.Flow
 
-interface Element {
+interface FieldController {
     val label: Int
     val paymentMethodParams: Flow<String>
     val isComplete: Flow<Boolean>

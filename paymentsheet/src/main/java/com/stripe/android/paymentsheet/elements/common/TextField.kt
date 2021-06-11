@@ -36,16 +36,16 @@ internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFoc
  */
 @Composable
 internal fun TextField(
-    textFieldElement: TextFieldElement,
+    textFieldController: TextFieldController,
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,
     modifier: Modifier = Modifier,
 ) {
-    Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
+    Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
 
-    val value by textFieldElement.input.asLiveData().observeAsState("")
-    val shouldShowError by textFieldElement.visibleError.asLiveData().observeAsState(false)
-    val elementIsFull by textFieldElement.isFull.asLiveData().observeAsState(false)
+    val value by textFieldController.input.asLiveData().observeAsState("")
+    val shouldShowError by textFieldController.visibleError.asLiveData().observeAsState(false)
+    val elementIsFull by textFieldController.isFull.asLiveData().observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
@@ -71,15 +71,15 @@ internal fun TextField(
 
     TextField(
         value = value,
-        onValueChange = { textFieldElement.onValueChange(it) },
+        onValueChange = { textFieldController.onValueChange(it) },
         isError = shouldShowError,
-        label = { Text(text = stringResource(textFieldElement.label)) },
+        label = { Text(text = stringResource(textFieldController.label)) },
         modifier = modifier
             .fillMaxWidth()
             .focusOrder(myFocus) { nextFocus?.requestFocus() }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {
-                    textFieldElement.onFocusChange(it.isFocused)
+                    textFieldController.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
             },

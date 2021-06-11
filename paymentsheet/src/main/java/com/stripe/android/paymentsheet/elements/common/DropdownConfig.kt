@@ -8,5 +8,4 @@ internal interface DropdownConfig {
 
     fun getDisplayItems(): List<String>
     fun getPaymentMethodParams(): List<String>
-
 }

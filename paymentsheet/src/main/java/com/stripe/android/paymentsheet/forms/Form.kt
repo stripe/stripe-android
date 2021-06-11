@@ -16,13 +16,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.common.DropdownElement
-import com.stripe.android.paymentsheet.elements.common.Element
+import com.stripe.android.paymentsheet.elements.common.DropDown
+import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.common.FieldController
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
-import com.stripe.android.paymentsheet.elements.common.TextFieldElement
+import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.elements.common.DropDown
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.map
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val form = formViewModel.formDataObject
+    val form = formViewModel.formSpec
 
     // There is only a single field in a section, some of those might not require focus like
     // country so we will create an extra one
@@ -47,16 +47,16 @@ internal fun Form(
             .fillMaxWidth(1f)
             .padding(16.dp)
     ) {
-        form.sections.forEach { section ->
-            val element = formViewModel.getElement(section.field)
+        form.sectionSpecs.forEach { section ->
+            val element = formViewModel.getController(section.sectionField)
             val error by element.errorMessage.asLiveData().observeAsState(null)
             val sectionErrorString =
                 error?.let { stringResource(it, stringResource(element.label)) }
 
             Section(sectionErrorString) {
-                if (element is TextFieldElement) {
+                if (element is TextFieldController) {
                     TextField(
-                        textFieldElement = element,
+                        textFieldController = element,
                         myFocus = focusRequesters[focusRequesterIndex],
                         nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
                             null
@@ -65,7 +65,7 @@ internal fun Form(
                         },
                     )
                     focusRequesterIndex++
-                } else if (element is DropdownElement) {
+                } else if (element is DropdownFieldController) {
                     DropDown(element)
                 }
             }
@@ -74,23 +74,24 @@ internal fun Form(
 }
 
 class FormViewModel(
-    val formDataObject: FormDataObject
+    val formSpec: FormSpec
 ) : ViewModel() {
     class Factory(
-        val formDataObject: FormDataObject
+        val formSpec: FormSpec
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(formDataObject) as T
+            return FormViewModel(formSpec) as T
         }
     }
 
-    private val paramKey: MutableMap<String, Any?> = formDataObject.paramKey
-    private val types: List<Field> = formDataObject.allTypes
-    private val elementMap = mutableMapOf<Field, Element>()
-    fun getNumberTextFieldElements() = elementMap.count { it.value is TextFieldElement }
+    private val paramKey: MutableMap<String, Any?> = formSpec.paramKey
+    private val types: List<SectionSpec.SectionFieldSpec> = formSpec.allTypes
+    private val typeControllerMap = mutableMapOf<SectionSpec.SectionFieldSpec, FieldController>()
+    fun getNumberTextFieldElements() = typeControllerMap.count { it.value is TextFieldController }
 
-    internal fun getElement(type: Field) = requireNotNull(elementMap[type])
+    internal fun getController(type: SectionSpec.SectionFieldSpec) =
+        requireNotNull(typeControllerMap[type])
 
     private val isComplete: Flow<Boolean>
     val populatedFormData: Flow<FormData?>
@@ -100,9 +101,9 @@ class FormViewModel(
         val listOfPairs = mutableListOf<Flow<Pair<String, String?>>>()
         types.forEach { type ->
             val element = when (type) {
-                Field.NameInput -> TextFieldElement(NameConfig()) // All configs should have the label passed in for consistency
-                Field.EmailInput -> TextFieldElement(EmailConfig())
-                Field.CountryInput -> DropdownElement(CountryConfig())
+                SectionSpec.SectionFieldSpec.Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
+                SectionSpec.SectionFieldSpec.Email -> TextFieldController(EmailConfig())
+                SectionSpec.SectionFieldSpec.Country -> DropdownFieldController(CountryConfig())
             }
             listCompleteFlows.add(element.isComplete)
             listOfPairs.add(element.paymentMethodParams.map {
@@ -111,7 +112,7 @@ class FormViewModel(
                     it
                 )
             })
-            elementMap[type] = element
+            typeControllerMap[type] = element
         }
 
         isComplete = combine(listCompleteFlows) { elementCompleteState ->

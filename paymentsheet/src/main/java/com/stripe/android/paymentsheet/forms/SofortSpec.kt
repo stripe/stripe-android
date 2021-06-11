@@ -1,5 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Name
+
 internal val sofortParams: MutableMap<String, Any?> = mutableMapOf(
     "country" to null,
 )
@@ -10,17 +14,11 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
     "sofort" to sofortParams
 )
 
-val sofort = FormDataObject(
+val sofort = FormSpec(
     listOf(
-        Section(
-            Field.NameInput
-        ),
-        Section(
-            Field.EmailInput
-        ),
-        Section(
-            Field.CountryInput
-        )
+        SectionSpec(Name),
+        SectionSpec(Email),
+        SectionSpec(Country)
     ),
     sofortParamKey,
 )

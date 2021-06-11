@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
-internal class DropdownElement(
+internal class DropdownFieldController(
     private val config: DropdownConfig,
-) : Element {
+) : FieldController {
     val displayItems: List<String> = config.getDisplayItems()
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: Flow<Int> = _selectedIndex
