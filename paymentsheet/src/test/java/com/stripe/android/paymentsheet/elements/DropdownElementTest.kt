@@ -6,9 +6,10 @@ import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import java.util.Locale
 
 class DropdownElementTest {
-    private val dropdownElement = DropdownElement(CountryConfig())
+    private val dropdownElement = DropdownElement(CountryConfig(Locale.US))
 
     @Test
     fun `Verify that when the selected index changes the paymentMethod param value updates`() =
