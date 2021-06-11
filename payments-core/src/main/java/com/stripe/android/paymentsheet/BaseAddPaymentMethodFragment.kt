@@ -86,7 +86,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             dataCollectionViewModel.processing.value = isProcessing
         }
 
-        dataCollectionViewModel.formData.observe(viewLifecycleOwner) { paramMap ->
+        dataCollectionViewModel.paramMap.observe(viewLifecycleOwner) { paramMap ->
             // Create PaymentSelection and set in sheetViewModel
         }
 

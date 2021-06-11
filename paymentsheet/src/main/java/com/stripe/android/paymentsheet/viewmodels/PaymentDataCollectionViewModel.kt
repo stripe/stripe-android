@@ -12,7 +12,7 @@ class PaymentDataCollectionViewModel(
 
     val processing = MutableLiveData(true)
 
-    val formData = MutableLiveData<Map<String, Any?>?>()
+    val paramMap = MutableLiveData<Map<String, Any?>?>()
 
     class Factory(
         private val applicationSupplier: () -> Application,

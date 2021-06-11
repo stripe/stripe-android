@@ -39,7 +39,7 @@ class SofortDataCollectionFragment : BasePaymentDataCollectionFragment() {
         }
 
         sofortFormViewModel.paramMapFlow.asLiveData().observe(viewLifecycleOwner) {
-            dataCollectionViewModel.formData.value = it
+            dataCollectionViewModel.paramMap.value = it
         }
 
         dataCollectionViewModel.processing.observe(viewLifecycleOwner) {
