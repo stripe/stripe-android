@@ -112,7 +112,8 @@ internal class StripePaymentController internal constructor(
 
     // paymentBrowserAuthLauncher is mutable and might be updated during
     // through #updateLaunchersWithCallback
-    private var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? = null
+    private var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
+        null
     private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarterHost ->
         paymentBrowserAuthLauncher?.let {
             PaymentBrowserAuthStarter.Modern(it)
@@ -125,7 +126,8 @@ internal class StripePaymentController internal constructor(
 
     // stripe3ds2ChallengeLauncher is mutable and might be updated during
     // through #updateLaunchersWithCallback
-    private var stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? = null
+    private var stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? =
+        null
     private val stripe3ds2CompletionStarterFactory =
         { host: AuthActivityStarterHost, requestCode: Int ->
             stripe3ds2ChallengeLauncher?.let {
@@ -157,7 +159,7 @@ internal class StripePaymentController internal constructor(
         )
     }
 
-    override fun updateLaunchersWithCallback(
+    override fun registerLaunchersWithActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
@@ -173,6 +175,15 @@ internal class StripePaymentController internal constructor(
             Stripe3ds2CompletionContract(),
             activityResultCallback
         )
+    }
+
+    override fun unregisterLaunchers() {
+        paymentRelayLauncher?.unregister()
+        paymentBrowserAuthLauncher?.unregister()
+        stripe3ds2ChallengeLauncher?.unregister()
+        paymentRelayLauncher = null
+        paymentBrowserAuthLauncher = null
+        stripe3ds2ChallengeLauncher = null
     }
 
     /**

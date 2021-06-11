@@ -126,7 +126,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             true
         )
 
-        paymentController.updateLaunchersWithCallback(this) {
+        paymentController.registerLaunchersWithActivityResultCaller(this) {
             viewModel.onPaymentFlowResult(it)
         }
 
@@ -196,6 +196,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.paymentSheetResult.observe(this) {
             closeSheet(it)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        paymentController.unregisterLaunchers()
     }
 
     override fun onBackPressed() {

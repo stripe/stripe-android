@@ -191,17 +191,23 @@ internal interface PaymentController {
     )
 
     /**
-     * Update the [ActivityResultLauncher]s with the new [ActivityResultCaller] and callback.
+     * Register the [ActivityResultLauncher]s with the new [ActivityResultCaller] and callback.
      *
      * [ActivityResultCaller] is usually an [Activity] or [Fragment] instance, this method needs
      * to be called from [Activity.onCreate] to make sure that during configuration change,
      * the new [Activity] instance correctly registers for launchers and the old instance is
      * correctly GC-ed.
      */
-    fun updateLaunchersWithCallback(
+    fun registerLaunchersWithActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     )
+
+    /**
+     * Unregister the [ActivityResultLauncher]s, releasing the reference to [Activity] or
+     * [Fragment].
+     */
+    fun unregisterLaunchers()
 
     enum class StripeIntentType {
         PaymentIntent,

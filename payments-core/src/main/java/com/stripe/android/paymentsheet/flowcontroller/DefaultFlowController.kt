@@ -84,7 +84,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
 
     init {
-        paymentController.updateLaunchersWithCallback(
+        paymentController.registerLaunchersWithActivityResultCaller(
             activityResultCaller,
             ::onPaymentFlowResult
         )
@@ -426,6 +426,10 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             }
         }
+    }
+
+    protected fun finalize() {
+        paymentController.unregisterLaunchers()
     }
 
     class GooglePayException(
