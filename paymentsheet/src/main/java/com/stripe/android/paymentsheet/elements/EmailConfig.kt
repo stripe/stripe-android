@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
@@ -11,6 +12,7 @@ import java.util.regex.Pattern
 internal class EmailConfig() :
     TextFieldConfig {
     override val debugLabel = "email"
+    @StringRes
     override val label = R.string.email
     override val keyboard = KeyboardType.Email
 

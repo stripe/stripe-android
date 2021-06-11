@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.elements.common
 
+import androidx.annotation.StringRes
+
 /**
  * This represents the different states a field can be in,
  * in each of these cases there might be a reason to show the
@@ -28,7 +30,8 @@ internal interface TextFieldState {
      * used for extraction.  This function should return the error message.
      * It is up to calling shouldSHowError to determine if it should be displayed on screen.
      */
-    fun getErrorMessageResId(): Int?
+    @StringRes
+    fun getErrorMessageResId():  Int?
 
     /**
      * This is used to indicate the field contains the maximum number of characters.

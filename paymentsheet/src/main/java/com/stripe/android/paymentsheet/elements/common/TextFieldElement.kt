@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements.common
 
+import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.map
 internal class TextFieldElement(
     private val textFieldConfig: TextFieldConfig
 ) {
+    @StringRes
     val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
 

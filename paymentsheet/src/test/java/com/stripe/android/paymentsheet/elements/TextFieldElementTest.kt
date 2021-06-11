@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.elements
 
 import android.os.Build
 import android.os.Looper.getMainLooper
+import androidx.annotation.StringRes
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.asLiveData
@@ -192,6 +193,7 @@ internal class TextFieldElementTest {
 
     private class TestConfig : TextFieldConfig {
         override val debugLabel = "debugLabel"
+        @StringRes
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
@@ -205,6 +207,7 @@ internal class TextFieldElementTest {
 
     private class TestConfigFilter : TextFieldConfig {
         override val debugLabel = "debugLabel"
+        @StringRes
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
@@ -220,6 +223,7 @@ internal class TextFieldElementTest {
             override fun isValid(): Boolean = false
             override fun isFull(): Boolean = false
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+            @StringRes
             override fun getErrorMessageResId(): Int = R.string.incomplete
         }
     }
