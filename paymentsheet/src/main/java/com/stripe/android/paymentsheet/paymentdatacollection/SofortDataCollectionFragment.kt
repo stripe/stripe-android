@@ -9,13 +9,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.StripeTheme
 import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.sofort
 
-internal class IdealFragment : BasePaymentDataCollectionFragment() {
-    private val viewModel2 by activityViewModels<FormViewModel>()
+class SofortDataCollectionFragment : BasePaymentDataCollectionFragment() {
+    val sofortFormViewModel: FormViewModel by viewModels { FormViewModel.Factory(sofort) }
 
     @ExperimentalAnimationApi
     override fun onCreateView(
@@ -31,9 +33,17 @@ internal class IdealFragment : BasePaymentDataCollectionFragment() {
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
-                    Form(viewModel2)
+                    Form(sofortFormViewModel)
                 }
             }
+        }
+
+        sofortFormViewModel.paramMapFlow.asLiveData().observe(viewLifecycleOwner) {
+            dataCollectionViewModel.formData.value = it
+        }
+
+        dataCollectionViewModel.processing.observe(viewLifecycleOwner) {
+            // Disable views
         }
     }
 }

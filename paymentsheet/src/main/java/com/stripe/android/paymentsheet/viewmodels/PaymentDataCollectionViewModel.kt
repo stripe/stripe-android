@@ -2,14 +2,19 @@ package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
-internal class PaymentDataCollectionViewModel(
+class PaymentDataCollectionViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    internal class Factory(
+    val processing = MutableLiveData(true)
+
+    val formData = MutableLiveData<Map<String, Any?>?>()
+
+    class Factory(
         private val applicationSupplier: () -> Application,
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {

@@ -10,6 +10,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
@@ -17,16 +18,21 @@ import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBindin
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.IdealFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.SofortDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.PaymentDataCollectionViewModel
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
 ) : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
+
+    val dataCollectionViewModel: PaymentDataCollectionViewModel by viewModels {
+        PaymentDataCollectionViewModel.Factory { requireActivity().application }
+    }
 
     protected lateinit var addPaymentMethodHeader: TextView
 
@@ -75,6 +81,14 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         replacePaymentMethodFragment(paymentMethods[0])
+
+        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            dataCollectionViewModel.processing.value = isProcessing
+        }
+
+        dataCollectionViewModel.formData.observe(viewLifecycleOwner) { paramMap ->
+            // Create PaymentSelection and set in sheetViewModel
+        }
 
         eventReporter.onShowNewPaymentOptionForm()
     }
@@ -133,7 +147,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
                 SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
-                SupportedPaymentMethod.Ideal -> IdealFragment::class.java
+                SupportedPaymentMethod.Ideal -> SofortDataCollectionFragment::class.java
             }
     }
 }
