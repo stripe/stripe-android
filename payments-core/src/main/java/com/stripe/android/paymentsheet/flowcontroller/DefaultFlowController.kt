@@ -50,7 +50,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -86,10 +85,8 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     private val lazyPaymentFlowResultProcessor: Lazy<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController {
-    private var paymentOptionActivityLauncher:
-        ActivityResultLauncher<PaymentOptionContract.Args>? = null
-    private var googlePayActivityLauncher:
-        ActivityResultLauncher<StripeGooglePayContract.Args>? = null
+    private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
+    private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
 
     init {
         lifecycleOwner.lifecycle.addObserver(
@@ -100,30 +97,25 @@ internal class DefaultFlowController @Inject internal constructor(
                         activityResultCaller,
                         ::onPaymentFlowResult
                     )
-                    paymentOptionActivityLauncher =
-                        activityResultCaller.registerForActivityResult(
-                            PaymentOptionContract(),
-                            ::onPaymentOptionResult
-                        )
-                    googlePayActivityLauncher =
-                        activityResultCaller.registerForActivityResult(
-                            StripeGooglePayContract(),
-                            ::onGooglePayResult
-                        )
                 }
 
                 @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                 fun onDestroy() {
                     paymentController.unregisterLaunchers()
-                    paymentOptionActivityLauncher?.unregister()
-                    paymentOptionActivityLauncher = null
-                    googlePayActivityLauncher?.unregister()
-                    googlePayActivityLauncher = null
                 }
             }
         )
 
-
+        paymentOptionActivityLauncher =
+            activityResultCaller.registerForActivityResult(
+                PaymentOptionContract(),
+                ::onPaymentOptionResult
+            )
+        googlePayActivityLauncher =
+            activityResultCaller.registerForActivityResult(
+                StripeGooglePayContract(),
+                ::onGooglePayResult
+            )
     }
 
     override fun configureWithPaymentIntent(
@@ -200,7 +192,7 @@ internal class DefaultFlowController @Inject internal constructor(
             )
         }
 
-        paymentOptionActivityLauncher?.launch(
+        paymentOptionActivityLauncher.launch(
             PaymentOptionContract.Args(
                 stripeIntent = initData.stripeIntent,
                 paymentMethods = initData.paymentMethods,
@@ -210,9 +202,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
                 statusBarColor = statusBarColor()
             )
-        ) ?: run {
-            throw IllegalStateException("paymentOptionActivityLauncher should not be null")
-        }
+        )
     }
 
     override fun confirm() {
@@ -232,7 +222,7 @@ internal class DefaultFlowController @Inject internal constructor(
             if (initData.stripeIntent !is PaymentIntent) {
                 error("Google Pay is currently supported only for PaymentIntents")
             }
-            googlePayActivityLauncher?.launch(
+            googlePayActivityLauncher.launch(
                 StripeGooglePayContract.Args(
                     config = GooglePayConfig(
                         environment = when (config?.googlePay?.environment) {
@@ -249,9 +239,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     ),
                     statusBarColor = statusBarColor()
                 )
-            ) ?: run {
-                throw IllegalStateException("googlePayActivityLauncher should not be null")
-            }
+            )
         } else {
             confirmPaymentSelection(paymentSelection, initData)
         }
