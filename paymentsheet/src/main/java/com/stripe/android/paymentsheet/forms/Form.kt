@@ -93,7 +93,7 @@ class FormViewModel(
     internal fun getElement(type: Field) = requireNotNull(elementMap[type])
 
     private val isComplete: Flow<Boolean>
-    val populatedFormData: Flow<FormData>
+    val populatedFormData: Flow<FormData?>
 
     init {
         val listCompleteFlows = mutableListOf<Flow<Boolean>>()
@@ -118,8 +118,12 @@ class FormViewModel(
             elementCompleteState.none { complete -> !complete }
         }
 
-        populatedFormData = combine(listOfPairs) { allPairs ->
+        val formData = combine(listOfPairs) { allPairs ->
             FormData(paramKey, allPairs.toMap())
+        }
+
+        populatedFormData = combine(formData, isComplete) { populatedData, isComplete ->
+            populatedData.takeIf { isComplete }
         }
     }
 }

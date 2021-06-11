@@ -20,11 +20,11 @@ class FormViewModelTest {
         val emailElement = formViewModel.getElement(Field.EmailInput) as TextFieldElement
 
         nameElement.onValueChange("joe")
-        assertThat(formViewModel.paramMapFlow.first()).isNull()
+        assertThat(formViewModel.populatedFormData.first()).isNull()
 
         emailElement.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.paramMapFlow.first().toString().replace("\\s".toRegex(), "")
+            formViewModel.populatedFormData.first()?.toMap().toString().replace("\\s".toRegex(), "")
         ).isEqualTo(
             """
                 {
@@ -47,6 +47,6 @@ class FormViewModelTest {
         )
         emailElement.onValueChange("invalid.email@IncompleteDomain")
 
-        assertThat(formViewModel.paramMapFlow.first()).isNull()
+        assertThat(formViewModel.populatedFormData.first()).isNull()
     }
 }

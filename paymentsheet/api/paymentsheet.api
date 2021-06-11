@@ -11,10 +11,22 @@ public final class com/stripe/android/paymentsheet/FormFragment : androidx/fragm
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
 }
 
+public abstract interface class com/stripe/android/paymentsheet/elements/common/Element {
+	public abstract fun getErrorMessage ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getLabel ()I
+	public abstract fun getPaymentMethodParams ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+}
+
 public abstract class com/stripe/android/paymentsheet/forms/Field {
 	public static final field $stable I
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getPaymentMethodCreateParamsKey ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/forms/Field$CountryInput : com/stripe/android/paymentsheet/forms/Field {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/forms/Field$CountryInput;
 }
 
 public final class com/stripe/android/paymentsheet/forms/Field$EmailInput : com/stripe/android/paymentsheet/forms/Field {
@@ -25,6 +37,18 @@ public final class com/stripe/android/paymentsheet/forms/Field$EmailInput : com/
 public final class com/stripe/android/paymentsheet/forms/Field$NameInput : com/stripe/android/paymentsheet/forms/Field {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/forms/Field$NameInput;
+}
+
+public final class com/stripe/android/paymentsheet/forms/FormData {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/forms/FormData$Companion;
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
+	public final fun getElementKeys ()Ljava/util/Map;
+	public final fun getSource ()Ljava/util/Map;
+	public final fun toMap ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/paymentsheet/forms/FormData$Companion {
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormDataObject {
@@ -46,7 +70,8 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/forms/FormDataObject;)V
 	public final fun getFormDataObject ()Lcom/stripe/android/paymentsheet/forms/FormDataObject;
-	public final fun getParamMapFlow ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getNumberTextFieldElements ()I
+	public final fun getPopulatedFormData ()Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
