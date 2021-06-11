@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements.common
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardType
 
 internal interface TextFieldConfig {
@@ -12,10 +13,7 @@ internal interface TextFieldConfig {
     val keyboard: KeyboardType
 
     /** This will determine the state of the element based on the text */
-    fun determineState(input: String): TextFieldElementState
-
-    /** This will determine if the element is in an error state based on the current focus state */
-    fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean): Boolean
+    fun determineState(input: String): TextFieldState
 
     /**
      * This works a little like the input filter, removing pasted characters that are invalid in

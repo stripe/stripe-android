@@ -1,41 +1,30 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.paymentsheet.elements.common
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
-
-private val SECTION_CARD_VERTICAL_PADDING = 2.dp
-private val SECTION_CARD_ELEVATION = 8.dp
-
 /**
- * This is a simple section that holds several fields in a card view.  It has a label, fields specified
+ * This is a simple section that holds content in a card view.  It has a label, content specified
  * by the caller, and an error string.
  */
+@ExperimentalAnimationApi
 @Composable
-internal fun Section(label: Int, error: Int?, content: @Composable () -> Unit) {
-    Column(modifier = Modifier.padding(top = 2.dp)) {
-        Text(
-            text = stringResource(id = label)
-        )
-        Card(
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = SECTION_CARD_VERTICAL_PADDING),
-            elevation = SECTION_CARD_ELEVATION
-        ) {
-            Column {
-                content()
-            }
+internal fun Section(error: String?, content: @Composable () -> Unit) {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
+        Card {
+            content()
         }
-        SectionError(error?.let{stringResource(error, stringResource(label))} ?:"")
+        AnimatedVisibility(error != null){
+            SectionError(error!!)
+        }
     }
 }
 

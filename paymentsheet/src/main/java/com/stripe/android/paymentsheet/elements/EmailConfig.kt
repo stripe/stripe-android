@@ -1,16 +1,19 @@
 package com.stripe.android.paymentsheet.elements
 
-import android.util.Patterns
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
-import com.stripe.android.paymentsheet.elements.common.TextFieldElementState
+import com.stripe.android.paymentsheet.elements.common.TextFieldState
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid
 import java.util.regex.Pattern
 
-internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS) :
+internal class EmailConfig() :
     TextFieldConfig {
     override val debugLabel = "email"
-    override val label = R.string.becs_widget_email
+    @StringRes
+    override val label = R.string.email
     override val keyboard = KeyboardType.Email
 
     /**
@@ -19,11 +22,11 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
      */
     override fun filter(userTyped: String) = userTyped
 
-    override fun determineState(input: String): TextFieldElementState {
+    override fun determineState(input: String): TextFieldState {
         return when {
-            input.isEmpty() -> Error.BlankAndRequired
-            pattern.matcher(input).matches() -> Valid.Limitless
-            containsNameAndDomain(input) -> Error.Malformed
+            input.isEmpty() -> Error.Blank
+            PATTERN.matcher(input).matches() -> Valid.Limitless
+            containsNameAndDomain(input) -> Error.Invalid
             else -> Error.Incomplete
         }
     }
@@ -32,29 +35,17 @@ internal class EmailConfig(private val pattern: Pattern = Patterns.EMAIL_ADDRESS
         Regex(".*@.*\\..+")
     )
 
-    override fun shouldShowError(elementState: TextFieldElementState, hasFocus: Boolean) =
-        when (elementState) {
-            is Error -> {
-                when (elementState) {
-                    Error.Incomplete -> !hasFocus
-                    Error.Malformed -> true
-                    Error.BlankAndRequired -> false
-                }
-            }
-            is Valid -> false
-            else -> false
-        }
-
     companion object {
-        sealed class Valid : TextFieldElementState.TextFieldElementStateValid() {
-            object Limitless : Valid() // no auto-advance
-        }
-
-        sealed class Error(stringResId: Int) :
-            TextFieldElementState.TextFieldElementStateError(stringResId) {
-            object Incomplete : Error(R.string.incomplete)
-            object Malformed : Error(R.string.malformed)
-            object BlankAndRequired : Error(R.string.blank_and_required)
-        }
+        // This is copied from Paterns.EMAIL_ADDRESS because it is not defined for unit tests unless
+        // using Robolectric which is quite slow.
+        val PATTERN: Pattern = Pattern.compile(
+            "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
+                "\\@" +
+                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+                "(" +
+                "\\." +
+                "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+                ")+"
+        )
     }
 }

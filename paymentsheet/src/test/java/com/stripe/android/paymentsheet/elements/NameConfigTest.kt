@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error.*
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.*
 import org.junit.Test
 
 class NameConfigTest {
@@ -10,45 +12,13 @@ class NameConfigTest {
     @Test
     fun `verify determine state returns blank and required when empty or null`() {
         Truth.assertThat(nameConfig.determineState(""))
-            .isEqualTo(NameConfig.Companion.Error.BlankAndRequired)
+            .isEqualTo(Blank)
     }
 
     @Test
     fun `verify the if name has any characters it returns Limitless`() {
         Truth.assertThat(nameConfig.determineState("Susan Smith"))
-            .isEqualTo(NameConfig.Companion.Valid.Limitless)
-    }
-
-    @Test
-    fun `verify blank and required errors are never shown`() {
-        Truth.assertThat(
-            nameConfig.shouldShowError(
-                NameConfig.Companion.Error.BlankAndRequired,
-                true
-            )
-        ).isEqualTo(false)
-        Truth.assertThat(
-            nameConfig.shouldShowError(
-                NameConfig.Companion.Error.BlankAndRequired,
-                false
-            )
-        ).isEqualTo(false)
-    }
-
-    @Test
-    fun `verify Limitless states are never shown as error`() {
-        Truth.assertThat(
-            nameConfig.shouldShowError(
-                NameConfig.Companion.Valid.Limitless,
-                true
-            )
-        ).isEqualTo(false)
-        Truth.assertThat(
-            nameConfig.shouldShowError(
-                NameConfig.Companion.Valid.Limitless,
-                false
-            )
-        ).isEqualTo(false)
+            .isEqualTo(Limitless)
     }
 
     @Test

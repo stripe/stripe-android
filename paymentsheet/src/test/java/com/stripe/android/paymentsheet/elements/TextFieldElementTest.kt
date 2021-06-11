@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.elements
 
 import android.os.Build
 import android.os.Looper.getMainLooper
+import androidx.annotation.StringRes
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.asLiveData
@@ -9,7 +10,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
-import com.stripe.android.paymentsheet.elements.common.TextFieldElementState
+import com.stripe.android.paymentsheet.elements.common.TextFieldState
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,32 +27,12 @@ internal class TextFieldElementTest {
     val rule = InstantTaskExecutorRule()
 
     private val config = TestConfig()
-    private val shouldShowErrorDebug: (TextFieldElementState, Boolean) -> Boolean =
-        { state, hasFocus ->
-            when (state) {
-                is TextFieldElement.Companion.Valid.Full -> false
-                is TextFieldElement.Companion.Error.ShowInFocus -> !hasFocus
-                is TextFieldElement.Companion.Error.ShowAlways -> true
-                else -> config.shouldShowError(state, hasFocus)
-            }
-        }
 
-    private val determineStateDebug: (String) -> TextFieldElementState = { str ->
-        when {
-            str.contains("full") -> TextFieldElement.Companion.Valid.Full
-            str.contains("focus") -> TextFieldElement.Companion.Error.ShowInFocus
-            str.contains("always") -> TextFieldElement.Companion.Error.ShowAlways
-            else -> config.determineState(str)
-        }
-    }
-
-    private val textFieldElement =
-        TextFieldElement(config, shouldShowErrorDebug, determineStateDebug)
-
+    private val textFieldElement = TextFieldElement(config)
 
     @Test
     fun `verify onValueChange sets the paramValue`() {
-        config.fakeElementState = Error.Incomplete
+        config.fakeState = Valid.Limitless
 
         var paramValue: String? = null
         textFieldElement.input.asLiveData()
@@ -63,8 +45,7 @@ internal class TextFieldElementTest {
 
     @Test
     fun `verify the error message is set when should be visible`() {
-        config.fakeElementState = Error.Incomplete
-        config.fakeShouldShowError = true
+        config.fakeState = ShowWhenNoFocus
 
         var errorMessageResId: Int? = 5
         textFieldElement.errorMessage.asLiveData()
@@ -79,9 +60,7 @@ internal class TextFieldElementTest {
 
     @Test
     fun `Verify is full set when the element state changes`() {
-        config.fakeElementState = object : TextFieldElementState.TextFieldElementStateValid() {
-            override fun isFull() = true
-        }
+        config.fakeState = Valid.Full
 
         var isFull = false
         textFieldElement.isFull.asLiveData()
@@ -95,9 +74,7 @@ internal class TextFieldElementTest {
 
     @Test
     fun `Verify is not full set when the element state changes`() {
-        config.fakeElementState = object : TextFieldElementState.TextFieldElementStateValid() {
-            override fun isFull() = false
-        }
+        config.fakeState = Valid.Limitless
 
         var isFull = false
         textFieldElement.isFull.asLiveData()
@@ -111,9 +88,7 @@ internal class TextFieldElementTest {
 
     @Test
     fun `Verify is not complete set when the element state changes`() {
-        config.fakeElementState = object : TextFieldElementState.TextFieldElementStateValid() {
-            override fun isValid() = false
-        }
+        config.fakeState = Error.AlwaysError
 
         var isComplete = true
         textFieldElement.isComplete.asLiveData()
@@ -121,9 +96,11 @@ internal class TextFieldElementTest {
                 isComplete = it
             }
 
+        assertThat(isComplete).isEqualTo(true)
         textFieldElement.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(false)
     }
+
 
     @Test
     fun `Verify is complete set when the element state changes`() {
@@ -134,15 +111,11 @@ internal class TextFieldElementTest {
                 isComplete = it
             }
 
-        config.fakeElementState = object : TextFieldElementState.TextFieldElementStateValid() {
-            override fun isValid() = false
-        }
+        config.fakeState = Error.AlwaysError
         textFieldElement.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(false)
 
-        config.fakeElementState = object : TextFieldElementState.TextFieldElementStateValid() {
-            override fun isValid() = true
-        }
+        config.fakeState = Valid.Limitless
         textFieldElement.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(true)
     }
@@ -154,19 +127,19 @@ internal class TextFieldElementTest {
             visibleError = it
         }
 
-        config.fakeShouldShowError = false
+        config.fakeState = Valid.Full
         textFieldElement.onValueChange("full")
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeShouldShowError = true
-        textFieldElement.onValueChange("focus")
+        config.fakeState = Error.AlwaysError
+        textFieldElement.onValueChange("always")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
     }
 
     @Test
     fun `Verify is visible error set when the element state changes`() {
-        config.fakeShouldShowError = false
+        config.fakeState = Valid.Limitless
 
         var visibleError = false
         textFieldElement.visibleError.asLiveData()
@@ -176,8 +149,7 @@ internal class TextFieldElementTest {
 
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeElementState = Error.Incomplete
-        config.fakeShouldShowError = true
+        config.fakeState = Error.AlwaysError
         textFieldElement.onValueChange("newValue")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
@@ -185,40 +157,22 @@ internal class TextFieldElementTest {
 
     @Test
     fun `Verify correct value passed to config should show error`() {
-        val configErrorBasedOnFocus = TestConfigErrorBasedOnFocus()
-        val textFieldElementErrorBasedOnFocus = TextFieldElement(configErrorBasedOnFocus)
+        config.fakeState = ShowWhenNoFocus
+        //Initialize the elementState
+        textFieldElement.onValueChange("1a2b3c4d")
 
         var visibleError = false
-        textFieldElementErrorBasedOnFocus.visibleError.asLiveData()
+        textFieldElement.visibleError.asLiveData()
             .observeForever {
                 visibleError = it
             }
 
-        textFieldElementErrorBasedOnFocus.onFocusChange(false)
-        assertThat(visibleError).isEqualTo(false)
-
-        textFieldElementErrorBasedOnFocus.onFocusChange(true)
-        shadowOf(getMainLooper()).idle()
+        textFieldElement.onFocusChange(false)
         assertThat(visibleError).isEqualTo(true)
-    }
 
-    @Test
-    fun `Verify filter called on value change`() {
-        val configErrorBasedOnFocus = TestConfigErrorBasedOnFocus()
-        val textFieldElementErrorBasedOnFocus = TextFieldElement(configErrorBasedOnFocus)
-
-        var visibleError = false
-        textFieldElementErrorBasedOnFocus.visibleError.asLiveData()
-            .observeForever {
-                visibleError = it
-            }
-
-        textFieldElementErrorBasedOnFocus.onFocusChange(false)
-        assertThat(visibleError).isEqualTo(false)
-
-        textFieldElementErrorBasedOnFocus.onFocusChange(true)
+        textFieldElement.onFocusChange(true)
         shadowOf(getMainLooper()).idle()
-        assertThat(visibleError).isEqualTo(true)
+        assertThat(visibleError).isEqualTo(false)
     }
 
     @Test
@@ -239,65 +193,38 @@ internal class TextFieldElementTest {
 
     private class TestConfig : TextFieldConfig {
         override val debugLabel = "debugLabel"
+        @StringRes
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        var fakeShouldShowError = false
-        var fakeElementState: TextFieldElementState = Valid.Limitless
+        var fakeState: TextFieldState = Valid.Limitless
 
-        override fun determineState(input: String): TextFieldElementState =
-            fakeElementState
-
-        override fun shouldShowError(
-            elementState: TextFieldElementState,
-            hasFocus: Boolean
-        ) = fakeShouldShowError
-
-        override fun filter(userTyped: String): String = userTyped
-    }
-
-    private class TestConfigErrorBasedOnFocus : TextFieldConfig {
-        override val debugLabel = "debugLabel"
-        override val label: Int = R.string.address_label_name
-        override val keyboard: KeyboardType = KeyboardType.Ascii
-
-        var fakeElementState: TextFieldElementState = Valid.Limitless
-
-        override fun determineState(input: String): TextFieldElementState =
-            fakeElementState
-
-        override fun shouldShowError(
-            elementState: TextFieldElementState,
-            hasFocus: Boolean
-        ) = hasFocus
+        override fun determineState(input: String): TextFieldState =
+            fakeState
 
         override fun filter(userTyped: String): String = userTyped
     }
 
     private class TestConfigFilter : TextFieldConfig {
         override val debugLabel = "debugLabel"
+        @StringRes
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        override fun determineState(input: String): TextFieldElementState = Valid.Limitless
+        val fakeState: TextFieldState = Valid.Limitless
 
-        override fun shouldShowError(
-            elementState: TextFieldElementState,
-            hasFocus: Boolean
-        ) = false
+        override fun determineState(input: String): TextFieldState = fakeState
 
         override fun filter(userTyped: String): String = userTyped.filter { Character.isDigit(it) }
     }
 
     companion object {
-
-        sealed class Valid : TextFieldElementState.TextFieldElementStateValid() {
-            object Limitless : Valid() // no auto-advance
-        }
-
-        sealed class Error(stringResId: Int) :
-            TextFieldElementState.TextFieldElementStateError(stringResId) {
-            object Incomplete : Error(R.string.incomplete)
+        object ShowWhenNoFocus : TextFieldState {
+            override fun isValid(): Boolean = false
+            override fun isFull(): Boolean = false
+            override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+            @StringRes
+            override fun getErrorMessageResId(): Int = R.string.incomplete
         }
     }
 
