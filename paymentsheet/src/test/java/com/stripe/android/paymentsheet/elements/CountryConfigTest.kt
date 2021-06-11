@@ -16,7 +16,6 @@ class CountryConfigTest {
     fun `Verify the label`() {
         CountryConfig().label
         assertThat(CountryConfig().label).isEqualTo(R.string.address_label_country)
-
     }
 
     @Test

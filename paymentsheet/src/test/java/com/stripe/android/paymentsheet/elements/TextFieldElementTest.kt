@@ -22,7 +22,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
 internal class TextFieldElementTest {
-
     @get:Rule
     val rule = InstantTaskExecutorRule()
 

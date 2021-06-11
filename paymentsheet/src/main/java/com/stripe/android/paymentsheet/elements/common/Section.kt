@@ -22,7 +22,7 @@ internal fun Section(error: String?, content: @Composable () -> Unit) {
         Card {
             content()
         }
-        AnimatedVisibility(error != null){
+        AnimatedVisibility(error != null) {
             SectionError(error!!)
         }
     }

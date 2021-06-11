@@ -8,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class DropdownElementTest {
-
     private val dropdownElement = DropdownElement(CountryConfig())
 
     @Test

@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.V
 import org.junit.Test
 
 class NameConfigTest {
-
     private val nameConfig = NameConfig()
 
     @Test

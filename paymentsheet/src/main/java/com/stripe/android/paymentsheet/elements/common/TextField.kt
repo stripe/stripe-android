@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.elements.common
 
 import android.util.Log
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalContentAlpha
@@ -41,7 +40,6 @@ internal fun TextField(
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,
     modifier: Modifier = Modifier,
-    @StringRes label: Int? = null, // Let the caller choose if they want a label, if it is in a section by itself it might not make sense.
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
 
@@ -75,7 +73,7 @@ internal fun TextField(
         value = value,
         onValueChange = { textFieldElement.onValueChange(it) },
         isError = shouldShowError,
-        label = { textFieldElement.label?.let { Text(text = stringResource(it)) } },
+        label = { Text(text = stringResource(textFieldElement.label)) },
         modifier = modifier
             .fillMaxWidth()
             .focusOrder(myFocus) { nextFocus?.requestFocus() }
