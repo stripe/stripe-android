@@ -9,7 +9,8 @@ import org.junit.Test
 import java.util.Locale
 
 class DropdownElementTest {
-    private val dropdownElement = DropdownElement(CountryConfig(Locale.US))
+    private val countryConfig = CountryConfig(Locale.US)
+    private val dropdownElement = DropdownElement(countryConfig)
 
     @Test
     fun `Verify that when the selected index changes the paymentMethod param value updates`() =
@@ -21,12 +22,12 @@ class DropdownElementTest {
 
     @Test
     fun `Verify display items gets the display items form the config`() {
-        assertThat(dropdownElement.displayItems).isEqualTo(CountryConfig().getDisplayItems())
+        assertThat(dropdownElement.displayItems).isEqualTo(countryConfig.getDisplayItems())
     }
 
     @Test
     fun `Verify label gets the label from the config`() {
-        assertThat(dropdownElement.label).isEqualTo(CountryConfig().label)
+        assertThat(dropdownElement.label).isEqualTo(countryConfig.label)
     }
 
     @Test
