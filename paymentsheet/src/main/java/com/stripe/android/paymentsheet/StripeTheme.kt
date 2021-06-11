@@ -52,7 +52,7 @@ private val StripeLightPalette = lightColors(
 )
 
 @Composable
-internal fun StripeTheme(
+fun StripeTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {

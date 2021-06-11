@@ -17,7 +17,7 @@ import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBindin
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.IdealDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.IdealFragment
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -133,7 +133,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
                 SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
-                SupportedPaymentMethod.Ideal -> IdealDataCollectionFragment::class.java
+                SupportedPaymentMethod.Ideal -> IdealFragment::class.java
             }
     }
 }

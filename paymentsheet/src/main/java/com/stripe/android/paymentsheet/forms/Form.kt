@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.map
 
 @ExperimentalAnimationApi
 @Composable
-internal fun Form(
+fun Form(
     formViewModel: FormViewModel,
 ) {
     val form = formViewModel.formDataObject
