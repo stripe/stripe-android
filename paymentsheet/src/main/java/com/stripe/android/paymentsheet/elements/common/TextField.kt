@@ -43,7 +43,7 @@ internal fun TextField(
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
 
-    val value by textFieldElement.input.asLiveData().observeAsState("")
+    val value by textFieldElement.fieldValue.asLiveData().observeAsState("")
     val shouldShowError by textFieldElement.visibleError.asLiveData().observeAsState(false)
     val elementIsFull by textFieldElement.isFull.asLiveData().observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }

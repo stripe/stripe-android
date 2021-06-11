@@ -7,6 +7,4 @@ internal interface DropdownConfig {
     val label: Int
 
     fun getDisplayItems(): List<String>
-    fun getPaymentMethodParams(): List<String>
-
 }

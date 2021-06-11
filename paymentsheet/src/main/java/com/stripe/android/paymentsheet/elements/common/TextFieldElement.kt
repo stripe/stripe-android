@@ -20,9 +20,8 @@ internal class TextFieldElement(
     val debugLabel = textFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */
-    private val _input = MutableStateFlow("")
-    val input: Flow<String> = _input
-    override val paymentMethodParams = _input
+    private val _fieldValue = MutableStateFlow("")
+    override val fieldValue: Flow<String> = _fieldValue
 
     private val _elementState = MutableStateFlow<TextFieldState>(Error.AlwaysError)
 
@@ -44,10 +43,10 @@ internal class TextFieldElement(
     }
 
     fun onValueChange(displayFormatted: String) {
-        _input.value = textFieldConfig.filter(displayFormatted)
+        _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
-        _elementState.value = textFieldConfig.determineState(_input.value)
+        _elementState.value = textFieldConfig.determineState(_fieldValue.value)
     }
 
     fun onFocusChange(newHasFocus: Boolean) {

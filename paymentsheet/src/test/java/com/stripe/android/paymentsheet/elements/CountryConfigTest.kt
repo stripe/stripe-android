@@ -21,7 +21,7 @@ class CountryConfigTest {
 
     @Test
     fun `Verify the paymentMethodParams or country code for the country`() {
-        assertThat(CountryConfig(Locale.US).getPaymentMethodParams()[0]).isEqualTo("US")
+        assertThat(CountryConfig(Locale.US).getDisplayValue()[0]).isEqualTo("US")
     }
 
 }

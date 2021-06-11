@@ -11,7 +11,7 @@ internal class DropdownElement(
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: Flow<Int> = _selectedIndex
     override val label: Int = config.label
-    override val paymentMethodParams = selectedIndex.map { config.getPaymentMethodParams()[it] }
+    override val fieldValue = selectedIndex.map { displayItems[it] }
     override val errorMessage: Flow<Int?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
 

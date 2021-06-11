@@ -12,7 +12,7 @@ data class FormDataObject(
 
 sealed class Field(
     // This is the key used in the PaymentMethodCreateParams
-    val paymentMethodCreateParamsKey: String,
+    val identifier: String,
 ) {
     object NameInput : Field("name")
 

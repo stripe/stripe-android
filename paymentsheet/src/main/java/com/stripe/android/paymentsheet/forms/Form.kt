@@ -16,13 +16,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
+import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.DropdownElement
 import com.stripe.android.paymentsheet.elements.common.Element
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldElement
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.elements.common.DropDown
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -85,7 +85,6 @@ class FormViewModel(
         }
     }
 
-    private val paramKey: MutableMap<String, Any?> = formDataObject.paramKey
     private val types: List<Field> = formDataObject.allTypes
     private val elementMap = mutableMapOf<Field, Element>()
     fun getNumberTextFieldElements() = elementMap.count { it.value is TextFieldElement }
@@ -105,11 +104,8 @@ class FormViewModel(
                 Field.CountryInput -> DropdownElement(CountryConfig())
             }
             listCompleteFlows.add(element.isComplete)
-            listOfPairs.add(element.paymentMethodParams.map {
-                Pair(
-                    type.paymentMethodCreateParamsKey,
-                    it
-                )
+            listOfPairs.add(element.fieldValue.map {
+                Pair(type.identifier, it)
             })
             elementMap[type] = element
         }
@@ -119,7 +115,7 @@ class FormViewModel(
         }
 
         val formData = combine(listOfPairs) { allPairs ->
-            FormData(paramKey, allPairs.toMap())
+            FormData(formDataObject.paramKey, allPairs.toMap())
         }
 
         populatedFormData = combine(formData, isComplete) { populatedData, isComplete ->

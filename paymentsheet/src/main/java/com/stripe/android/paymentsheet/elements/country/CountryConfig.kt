@@ -14,6 +14,6 @@ internal class CountryConfig(val locale: Locale = Locale.getDefault()) : Dropdow
     override fun getDisplayItems(): List<String> =
         CountryUtils.getOrderedCountries(locale).map { it.name }
 
-    override fun getPaymentMethodParams(): List<String> =
+    override fun getDisplayValue(): List<String> =
         CountryUtils.getOrderedCountries(locale).map { it.code.value }
 }

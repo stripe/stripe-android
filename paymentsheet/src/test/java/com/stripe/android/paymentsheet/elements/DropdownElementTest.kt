@@ -15,9 +15,9 @@ class DropdownElementTest {
     @Test
     fun `Verify that when the selected index changes the paymentMethod param value updates`() =
         runBlocking {
-            assertThat(dropdownElement.paymentMethodParams.first()).isEqualTo("US")
+            assertThat(dropdownElement.fieldValue.first()).isEqualTo("US")
             dropdownElement.onValueChange(1)
-            assertThat(dropdownElement.paymentMethodParams.first()).isEqualTo("AF")
+            assertThat(dropdownElement.fieldValue.first()).isEqualTo("AF")
         }
 
     @Test
