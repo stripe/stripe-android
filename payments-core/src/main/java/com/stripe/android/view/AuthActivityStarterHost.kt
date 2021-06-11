@@ -6,9 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 
 /**
- * A representation of an object (i.e. Activity or Fragment) that can start an activity.
+ * A representation of an Android component (i.e. [ComponentActivity] or [Fragment]) that can start
+ * an activity. [ActivityHost] and [FragmentHost] hold references to Android components, so they
+ * should only be used in a lifecycle-aware scope.
  */
-@Suppress("DEPRECATION")
 internal sealed class AuthActivityStarterHost {
     abstract fun startActivityForResult(
         target: Class<*>,
@@ -22,6 +23,8 @@ internal sealed class AuthActivityStarterHost {
         val activity: ComponentActivity,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
+
+        @Suppress("DEPRECATION")
         override fun startActivityForResult(
             target: Class<*>,
             extras: Bundle,
@@ -37,6 +40,8 @@ internal sealed class AuthActivityStarterHost {
         val fragment: Fragment,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
+
+        @Suppress("DEPRECATION")
         override fun startActivityForResult(
             target: Class<*>,
             extras: Bundle,
