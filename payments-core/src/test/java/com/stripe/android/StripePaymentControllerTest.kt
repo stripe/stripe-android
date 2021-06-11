@@ -1,9 +1,9 @@
 package com.stripe.android
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -38,7 +38,7 @@ import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.utils.ParcelUtils
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,7 +57,7 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class StripePaymentControllerTest {
-    private val activity: Activity = mock()
+    private val activity: ComponentActivity = mock()
     private val threeDs2Service: StripeThreeDs2Service = mock()
     private val sdkTransactionId = mock<SdkTransactionId>().also {
         whenever(it.value).thenReturn(UUID.randomUUID().toString())
@@ -77,7 +77,7 @@ internal class StripePaymentControllerTest {
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
-    private val host = AuthActivityStarter.Host.create(activity)
+    private val host = AuthActivityStarterHost.create(activity)
 
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()

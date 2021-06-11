@@ -1,7 +1,7 @@
 package com.stripe.android
 
-import android.app.Activity
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
@@ -15,17 +15,17 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.utils.ParcelUtils.verifyParcelRoundtrip
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentRelayStarterTest {
-    private val activity = mock<Activity>()
+    private val activity = mock<ComponentActivity>()
     private val intentArgumentCaptor = argumentCaptor<Intent>()
     private val starter = PaymentRelayStarter.Legacy(
-        AuthActivityStarter.Host.create(activity)
+        AuthActivityStarterHost.create(activity)
     )
 
     @Test

@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 
 /**
  * A unit to authenticate a [StripeIntent] base on its next_action.
@@ -20,7 +20,7 @@ internal interface IntentAuthenticator {
      * @param requestOptions configurations for the API request which triggers the authentication
      */
     suspend fun authenticate(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options

@@ -9,7 +9,7 @@ import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -17,7 +17,7 @@ import kotlin.coroutines.CoroutineContext
  * [IntentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
  */
 internal class WebIntentAuthenticator(
-    private val paymentBrowserAuthStarterFactory: (AuthActivityStarter.Host) -> PaymentBrowserAuthStarter,
+    private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val logger: Logger,
@@ -26,7 +26,7 @@ internal class WebIntentAuthenticator(
 ) : IntentAuthenticator {
 
     override suspend fun authenticate(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options
@@ -89,7 +89,7 @@ internal class WebIntentAuthenticator(
     }
 
     internal suspend fun beginWebAuth(
-        host: AuthActivityStarter.Host,
+        host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         requestCode: Int,
         clientSecret: String,

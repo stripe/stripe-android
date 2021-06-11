@@ -1,15 +1,13 @@
 package com.stripe.android.payments.core.authentication
 
-import android.app.Activity
 import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.argWhere
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
@@ -40,7 +38,7 @@ import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.Transaction
-import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -54,13 +52,13 @@ import org.robolectric.RobolectricTestRunner
 @ExperimentalCoroutinesApi
 class Stripe3DS2AuthenticatorTest {
     private val testDispatcher = TestCoroutineDispatcher()
-    private val activity: Activity = mock()
-    private val host = AuthActivityStarter.Host.create(activity)
+    private val activity: ComponentActivity = mock()
+    private val host = AuthActivityStarterHost.create(activity)
     private val sdkTransactionId = SdkTransactionId.create()
     private val stripeRepository = mock<StripeRepository>()
     private val webIntentAuthenticator = mock<WebIntentAuthenticator>()
     private val paymentRelayStarterFactory =
-        mock<(AuthActivityStarter.Host) -> PaymentRelayStarter>()
+        mock<(AuthActivityStarterHost) -> PaymentRelayStarter>()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val analyticsRequestFactory = AnalyticsRequestFactory(
@@ -121,7 +119,7 @@ class Stripe3DS2AuthenticatorTest {
     fun `on3ds2AuthSuccess() with challenge flow should not start relay activity`() {
         testDispatcher.runBlockingTest {
             authenticator.on3ds2AuthSuccess(
-                Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW,
+                ARES_CHALLENGE_FLOW,
                 transaction,
                 SOURCE_ID,
                 MAX_TIMEOUT,
@@ -183,7 +181,7 @@ class Stripe3DS2AuthenticatorTest {
             verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture())
             val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-            Truth.assertThat(
+            assertThat(
                 requireNotNull(analyticsRequest.params)[AnalyticsRequestFactory.FIELD_EVENT]
             ).isEqualTo(AnalyticsEvent.Auth3ds2Fallback.toString())
 
@@ -218,7 +216,7 @@ class Stripe3DS2AuthenticatorTest {
 
             val args =
                 relayStarterArgsArgumentCaptor.firstValue as? PaymentRelayStarter.Args.ErrorArgs
-            Truth.assertThat(args?.exception?.message).isEqualTo(
+            assertThat(args?.exception?.message).isEqualTo(
                 "Error encountered during 3DS2 authentication request. " +
                     "Code: 302, Detail: null, " +
                     "Description: Data could not be decrypted by the receiving system due to " +
@@ -229,13 +227,12 @@ class Stripe3DS2AuthenticatorTest {
     @Test
     fun `startChallengeFlow() when successful should call doChallenge()`() =
         testDispatcher.runBlockingTest {
-            val ares = requireNotNull(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW.ares)
+            val ares = requireNotNull(ARES_CHALLENGE_FLOW.ares)
             authenticator.startChallengeFlow(
                 ares,
                 transaction,
                 SOURCE_ID,
                 MAX_TIMEOUT,
-                paymentRelayStarter,
                 host,
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                 REQUEST_OPTIONS
@@ -254,29 +251,6 @@ class Stripe3DS2AuthenticatorTest {
                 ),
                 any(),
                 eq(MAX_TIMEOUT)
-            )
-        }
-
-    @Test
-    fun `startChallengeFlow() when failure should start relay activity with exception()`() =
-        testDispatcher.runBlockingTest {
-            val failingHost = mock<AuthActivityStarter.Host>()
-            val ares = requireNotNull(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW.ares)
-            authenticator.startChallengeFlow(
-                ares,
-                transaction,
-                SOURCE_ID,
-                MAX_TIMEOUT,
-                paymentRelayStarter,
-                failingHost,
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                REQUEST_OPTIONS
-            )
-
-            verify(paymentRelayStarter).start(
-                argWhere<PaymentRelayStarter.Args.ErrorArgs> {
-                    it.exception.message == "Error while attempting to start 3DS2 challenge flow."
-                }
             )
         }
 
