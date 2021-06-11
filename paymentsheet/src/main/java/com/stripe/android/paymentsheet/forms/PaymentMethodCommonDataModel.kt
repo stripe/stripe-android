@@ -7,11 +7,7 @@ data class FormDataObject(
     val sections: List<Section>,
     val paramKey: MutableMap<String, Any?>,
 ) {
-    val allTypes = mutableListOf<Field>().apply {
-        sections.forEach {
-            add(it.field)
-        }
-    }
+    val allTypes get() = sections.map { it.field }
 }
 
 sealed class Field(

@@ -88,13 +88,12 @@ class FormViewModel(
     private val paramKey: MutableMap<String, Any?> = formDataObject.paramKey
     private val types: List<Field> = formDataObject.allTypes
     private val elementMap = mutableMapOf<Field, Element>()
-    fun getNumberTextFieldElements() = elementMap.filter { it.value is TextFieldElement }.size
+    fun getNumberTextFieldElements() = elementMap.count { it.value is TextFieldElement }
 
     internal fun getElement(type: Field) = requireNotNull(elementMap[type])
 
     private val isComplete: Flow<Boolean>
-    private val params: Flow<MutableMap<String, Any?>>
-    val paramMapFlow: Flow<MutableMap<String, Any?>?>
+    val populatedFormData: Flow<FormData>
 
     init {
         val listCompleteFlows = mutableListOf<Flow<Boolean>>()
@@ -119,31 +118,8 @@ class FormViewModel(
             elementCompleteState.none { complete -> !complete }
         }
 
-        params = combine(listOfPairs) { allPairs ->
-            val destMap = mutableMapOf<String, Any?>()
-            createMap(paramKey, destMap, allPairs.toMap())
-            destMap
-        }
-
-        paramMapFlow = combine(isComplete, params) { isComplete, params ->
-            params.takeIf { isComplete }
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun createMap(
-        source: Map<String, Any?>,
-        dest: MutableMap<String, Any?>,
-        elementKeys: Map<String, String?>
-    ) {
-        source.keys.forEach { key ->
-            if (source[key] == null) {
-                dest[key] = elementKeys[key]
-            } else if (source[key] is MutableMap<*, *>) {
-                val newDestMap = mutableMapOf<String, Any?>()
-                dest[key] = newDestMap
-                createMap(source[key] as MutableMap<String, Any?>, newDestMap, elementKeys)
-            }
+        populatedFormData = combine(listOfPairs) { allPairs ->
+            FormData(paramKey, allPairs.toMap())
         }
     }
 }
