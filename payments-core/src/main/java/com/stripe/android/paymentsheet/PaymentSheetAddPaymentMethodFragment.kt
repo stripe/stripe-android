@@ -75,7 +75,10 @@ internal class PaymentSheetAddPaymentMethodFragment(
     }
 
     private fun updateSelection() {
-        // TODO(brnunes-stripe): Refactor to support other payment methods
+        // TODO(brnunes-stripe): Remove when CardDataCollectionFragment is replaced
+        // This is just to support the CardDataCollectionFragment that needs this callback to update
+        // the payment selection in the ViewModel.
+        // If this happens while another fragment is visible, it should just do nothing.
         (
             childFragmentManager
                 .findFragmentById(R.id.payment_method_fragment_container) as? CardDataCollectionFragment<*>
