@@ -1,11 +1,9 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.stripe.android.paymentsheet.viewmodels.PaymentDataCollectionViewModel
+import androidx.lifecycle.LiveData
 
 abstract class BasePaymentDataCollectionFragment : Fragment() {
-    protected val dataCollectionViewModel: PaymentDataCollectionViewModel by viewModels {
-        PaymentDataCollectionViewModel.Factory { requireActivity().application }
-    }
+    abstract fun setProcessing(processing: Boolean)
+    abstract fun paramMapLiveData(): LiveData<Map<String, Any?>?>
 }

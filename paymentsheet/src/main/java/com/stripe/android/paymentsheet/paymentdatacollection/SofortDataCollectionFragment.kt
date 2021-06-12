@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.StripeTheme
 import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -37,13 +38,14 @@ class SofortDataCollectionFragment : BasePaymentDataCollectionFragment() {
                 }
             }
         }
+    }
 
-        sofortFormViewModel.paramMapFlow.asLiveData().observe(viewLifecycleOwner) {
-            dataCollectionViewModel.paramMap.value = it
-        }
+    override fun setProcessing(processing: Boolean) {
+        // Disable views
+    }
 
-        dataCollectionViewModel.processing.observe(viewLifecycleOwner) {
-            // Disable views
-        }
+    // This can't be a var or we'll be reading from the ViewModel while the fragment is detached
+    override fun paramMapLiveData() = sofortFormViewModel.paramMapFlow.asLiveData().map { mutableMap ->
+        mutableMap?.toMap()
     }
 }

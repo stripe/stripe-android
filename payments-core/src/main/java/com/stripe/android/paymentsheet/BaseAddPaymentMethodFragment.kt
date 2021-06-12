@@ -10,29 +10,24 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.BasePaymentDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.SofortDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.PaymentDataCollectionViewModel
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
 ) : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
-
-    val dataCollectionViewModel: PaymentDataCollectionViewModel by viewModels {
-        PaymentDataCollectionViewModel.Factory { requireActivity().application }
-    }
 
     protected lateinit var addPaymentMethodHeader: TextView
 
@@ -83,11 +78,14 @@ internal abstract class BaseAddPaymentMethodFragment(
         replacePaymentMethodFragment(paymentMethods[0])
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            dataCollectionViewModel.processing.value = isProcessing
+            getFragment()?.setProcessing(isProcessing)
         }
 
-        dataCollectionViewModel.paramMap.observe(viewLifecycleOwner) { paramMap ->
-            // Create PaymentSelection and set in sheetViewModel
+        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
+            (fragment as? BasePaymentDataCollectionFragment)?.paramMapLiveData()
+                ?.observe(viewLifecycleOwner) { paramMap ->
+                    // Create PaymentSelection and set in sheetViewModel
+                }
         }
 
         eventReporter.onShowNewPaymentOptionForm()
@@ -142,6 +140,10 @@ internal abstract class BaseAddPaymentMethodFragment(
             )
         }
     }
+
+    private fun getFragment() =
+        childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
+            as? BasePaymentDataCollectionFragment
 
     companion object {
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
