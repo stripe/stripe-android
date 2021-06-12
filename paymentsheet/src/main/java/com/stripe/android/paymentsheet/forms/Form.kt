@@ -73,6 +73,10 @@ internal fun Form(
     }
 }
 
+/**
+ * This sets up the controllers for all the views.  It doesn't care where they are hierarchically
+ * on the screen.  The viewModel takes in a formDataObject
+ */
 class FormViewModel(
     val formDataObject: FormDataObject
 ) : ViewModel() {
@@ -85,41 +89,40 @@ class FormViewModel(
         }
     }
 
-    private val types: List<Field> = formDataObject.allTypes
-    private val elementMap = mutableMapOf<Field, Element>()
-    fun getNumberTextFieldElements() = elementMap.count { it.value is TextFieldElement }
+    private val fields: List<Field> = formDataObject.allFields
+    private val fieldElementMap = mutableMapOf<Field, Element>()
+    fun getNumberTextFieldElements() = fieldElementMap.count { it.value is TextFieldElement }
 
-    internal fun getElement(type: Field) = requireNotNull(elementMap[type])
+    internal fun getElement(type: Field) = requireNotNull(fieldElementMap[type])
+
+    private val currentFieldValues: Flow<Map<Field, String?>>
 
     private val isComplete: Flow<Boolean>
-    val populatedFormData: Flow<FormData?>
+    val completeFieldValues: Flow<Map<Field, String?>?>
 
     init {
-        val listCompleteFlows = mutableListOf<Flow<Boolean>>()
-        val listOfPairs = mutableListOf<Flow<Pair<String, String?>>>()
-        types.forEach { type ->
-            val element = when (type) {
+        val fieldValuePairs = mutableListOf<Flow<Pair<Field, String?>>>()
+        fields.forEach { field ->
+            val element = when (field) {
                 Field.NameInput -> TextFieldElement(NameConfig()) // All configs should have the label passed in for consistency
                 Field.EmailInput -> TextFieldElement(EmailConfig())
                 Field.CountryInput -> DropdownElement(CountryConfig())
             }
-            listCompleteFlows.add(element.isComplete)
-            listOfPairs.add(element.fieldValue.map {
-                Pair(type.identifier, it)
-            })
-            elementMap[type] = element
+            fieldValuePairs.add(element.fieldValue.map { Pair(field, it) })
+            fieldElementMap[field] = element
         }
 
-        isComplete = combine(listCompleteFlows) { elementCompleteState ->
+        isComplete = combine(fieldElementMap.values.map { it.isComplete }) { elementCompleteState ->
             elementCompleteState.none { complete -> !complete }
         }
 
-        val formData = combine(listOfPairs) { allPairs ->
-            FormData(formDataObject.paramKey, allPairs.toMap())
+        currentFieldValues = combine(fieldValuePairs) { pairs ->
+            pairs.toMap()
         }
 
-        populatedFormData = combine(formData, isComplete) { populatedData, isComplete ->
-            populatedData.takeIf { isComplete }
-        }
+        completeFieldValues =
+            combine(currentFieldValues, isComplete) { identifierValues, isComplete ->
+                identifierValues.takeIf { isComplete }
+            }
     }
 }
