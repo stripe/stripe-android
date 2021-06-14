@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCaller
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -15,8 +17,9 @@ import kotlinx.coroutines.CoroutineScope
 internal class FlowControllerFactory(
     private val viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleScope: CoroutineScope,
+    private val lifecycleOwner: LifecycleOwner,
     private val appContext: Context,
-    private val activityLauncherFactory: ActivityLauncherFactory,
+    private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
     private val authHostSupplier: () -> AuthActivityStarterHost,
     private val paymentOptionFactory: PaymentOptionFactory,
@@ -30,8 +33,9 @@ internal class FlowControllerFactory(
     ) : this(
         activity,
         activity.lifecycleScope,
+        activity,
         activity.applicationContext,
-        ActivityLauncherFactory.ActivityHost(activity),
+        activity,
         { activity.window.statusBarColor },
         { AuthActivityStarterHost.create(activity) },
         PaymentOptionFactory(activity.resources),
@@ -46,8 +50,9 @@ internal class FlowControllerFactory(
     ) : this(
         fragment,
         fragment.lifecycleScope,
+        fragment,
         fragment.requireContext(),
-        ActivityLauncherFactory.FragmentHost(fragment),
+        fragment,
         { fragment.activity?.window?.statusBarColor },
         { AuthActivityStarterHost.create(fragment) },
         PaymentOptionFactory(fragment.resources),
@@ -60,7 +65,8 @@ internal class FlowControllerFactory(
             appContext = appContext,
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleScope = lifecycleScope,
-            activityLauncherFactory = activityLauncherFactory,
+            lifecycleOwner = lifecycleOwner,
+            activityResultCaller = activityResultCaller,
             statusBarColor = statusBarColor,
             authHostSupplier = authHostSupplier,
             paymentOptionFactory = paymentOptionFactory,
