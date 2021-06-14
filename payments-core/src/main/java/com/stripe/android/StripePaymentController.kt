@@ -101,8 +101,10 @@ internal class StripePaymentController internal constructor(
         BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
     }
 
-    // paymentRelayLauncher is mutable and might be updated during
-    // through #updateLaunchersWithCallback
+    /**
+     * [paymentRelayLauncher] is mutable and might be updated during
+     * through [registerLaunchersWithActivityResultCaller]
+     */
     private var paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null
     private val paymentRelayStarterFactory = { host: AuthActivityStarterHost ->
         paymentRelayLauncher?.let {
@@ -110,8 +112,10 @@ internal class StripePaymentController internal constructor(
         } ?: PaymentRelayStarter.Legacy(host)
     }
 
-    // paymentBrowserAuthLauncher is mutable and might be updated during
-    // through #updateLaunchersWithCallback
+    /**
+     * [paymentBrowserAuthLauncher] is mutable and might be updated during
+     * through [registerLaunchersWithActivityResultCaller]
+     */
     private var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
         null
     private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarterHost ->
@@ -124,8 +128,10 @@ internal class StripePaymentController internal constructor(
         )
     }
 
-    // stripe3ds2ChallengeLauncher is mutable and might be updated during
-    // through #updateLaunchersWithCallback
+    /**
+     * [stripe3ds2ChallengeLauncher] is mutable and might be updated during
+     * through [registerLaunchersWithActivityResultCaller]
+     */
     private var stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? =
         null
     private val stripe3ds2CompletionStarterFactory =
