@@ -2751,7 +2751,7 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/m
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PaymentMethod$AuBecsDebit : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$AuBecsDebit : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field bsbNumber Ljava/lang/String;
 	public final field fingerprint Ljava/lang/String;
@@ -2763,6 +2763,7 @@ public final class com/stripe/android/model/PaymentMethod$AuBecsDebit : com/stri
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$AuBecsDebit;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -2776,7 +2777,7 @@ public final class com/stripe/android/model/PaymentMethod$AuBecsDebit$Creator : 
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$BacsDebit : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$BacsDebit : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field fingerprint Ljava/lang/String;
 	public final field last4 Ljava/lang/String;
@@ -2788,6 +2789,7 @@ public final class com/stripe/android/model/PaymentMethod$BacsDebit : com/stripe
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$BacsDebit;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$BacsDebit;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -2870,7 +2872,7 @@ public final class com/stripe/android/model/PaymentMethod$Builder : com/stripe/a
 	public final fun setUpi (Lcom/stripe/android/model/PaymentMethod$Upi;)Lcom/stripe/android/model/PaymentMethod$Builder;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Card : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$Card : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field brand Lcom/stripe/android/model/CardBrand;
 	public final field checks Lcom/stripe/android/model/PaymentMethod$Card$Checks;
@@ -2897,6 +2899,7 @@ public final class com/stripe/android/model/PaymentMethod$Card : com/stripe/andr
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$Card;Lcom/stripe/android/model/CardBrand;Lcom/stripe/android/model/PaymentMethod$Card$Checks;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage;Lcom/stripe/android/model/wallets/Wallet;Lcom/stripe/android/model/PaymentMethod$Card$Networks;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$Card;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -2984,7 +2987,7 @@ public final class com/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$CardPresent : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$CardPresent : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/PaymentMethod$CardPresent$Companion;
 	public fun <init> ()V
@@ -2992,6 +2995,7 @@ public final class com/stripe/android/model/PaymentMethod$CardPresent : com/stri
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$CardPresent;ZILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$CardPresent;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -3017,7 +3021,7 @@ public final class com/stripe/android/model/PaymentMethod$Creator : android/os/P
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Fpx : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$Fpx : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field accountHolderType Ljava/lang/String;
 	public final field bank Ljava/lang/String;
@@ -3027,6 +3031,7 @@ public final class com/stripe/android/model/PaymentMethod$Fpx : com/stripe/andro
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$Fpx;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$Fpx;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -3040,7 +3045,7 @@ public final class com/stripe/android/model/PaymentMethod$Fpx$Creator : android/
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Ideal : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$Ideal : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field bank Ljava/lang/String;
 	public final field bankIdentifierCode Ljava/lang/String;
@@ -3050,6 +3055,7 @@ public final class com/stripe/android/model/PaymentMethod$Ideal : com/stripe/and
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$Ideal;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$Ideal;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -3063,7 +3069,7 @@ public final class com/stripe/android/model/PaymentMethod$Ideal$Creator : androi
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Netbanking : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$Netbanking : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field bank Ljava/lang/String;
 	public final fun component1 ()Ljava/lang/String;
@@ -3071,6 +3077,7 @@ public final class com/stripe/android/model/PaymentMethod$Netbanking : com/strip
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$Netbanking;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$Netbanking;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -3084,7 +3091,7 @@ public final class com/stripe/android/model/PaymentMethod$Netbanking$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$SepaDebit : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$SepaDebit : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field bankCode Ljava/lang/String;
 	public final field branchCode Ljava/lang/String;
@@ -3100,6 +3107,7 @@ public final class com/stripe/android/model/PaymentMethod$SepaDebit : com/stripe
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$SepaDebit;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$SepaDebit;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -3113,7 +3121,7 @@ public final class com/stripe/android/model/PaymentMethod$SepaDebit$Creator : an
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Sofort : com/stripe/android/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod$Sofort : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field country Ljava/lang/String;
 	public final fun component1 ()Ljava/lang/String;
@@ -3121,6 +3129,7 @@ public final class com/stripe/android/model/PaymentMethod$Sofort : com/stripe/an
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$Sofort;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$Sofort;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -3178,7 +3187,11 @@ public final class com/stripe/android/model/PaymentMethod$Type$Creator : android
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Upi : com/stripe/android/model/StripeModel {
+public abstract class com/stripe/android/model/PaymentMethod$TypeData : com/stripe/android/model/StripeModel {
+	public abstract fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
+}
+
+public final class com/stripe/android/model/PaymentMethod$Upi : com/stripe/android/model/PaymentMethod$TypeData {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field vpa Ljava/lang/String;
 	public final fun component1 ()Ljava/lang/String;
@@ -3186,6 +3199,7 @@ public final class com/stripe/android/model/PaymentMethod$Upi : com/stripe/andro
 	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$Upi;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$Upi;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
