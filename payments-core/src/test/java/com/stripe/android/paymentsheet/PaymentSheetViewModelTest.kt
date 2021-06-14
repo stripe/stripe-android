@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.Logger
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
@@ -653,15 +654,20 @@ internal class PaymentSheetViewModelTest {
         )
     ): PaymentSheetViewModel {
         return PaymentSheetViewModel(
-            stripeIntentRepository = stripeIntentRepository,
-            paymentMethodsRepository = paymentMethodsRepository,
-            paymentFlowResultProcessor,
+            application,
+            args,
+            eventReporter,
+            ApiRequest.Options(
+                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            ),
+            stripeIntentRepository,
+            paymentMethodsRepository,
+            { paymentFlowResultProcessor },
             googlePayRepository,
             prefsRepository,
-            eventReporter,
-            args,
-            workContext = testDispatcher,
-            application = application
+            Logger.noop(),
+            testDispatcher,
+            mock()
         )
     }
 
@@ -676,7 +682,8 @@ internal class PaymentSheetViewModelTest {
 
     private companion object {
         private const val CLIENT_SECRET = PaymentSheetFixtures.CLIENT_SECRET
-        private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
+        private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
+            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
         private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
 
