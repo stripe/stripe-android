@@ -75,7 +75,7 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-rxjava2:$composeVersion"
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation "org.mockito:mockito-core:3.11.0"
+    testImplementation "org.mockito:mockito-core:3.11.1"
     testImplementation 'org.robolectric:robolectric:4.5.1'
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation 'org.json:json:20210307'
