@@ -39,16 +39,29 @@ public final class com/stripe/android/paymentsheet/forms/Field$NameInput : com/s
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/forms/Field$NameInput;
 }
 
+public final class com/stripe/android/paymentsheet/forms/FieldLayout {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/paymentsheet/forms/FieldLayout;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FieldLayout;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FieldLayout;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAllFields ()Ljava/util/List;
+	public final fun getVisualFieldLayout ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/paymentsheet/forms/FormDataObject {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;Ljava/util/Map;)V
-	public final fun component1 ()Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;
+	public fun <init> (Lcom/stripe/android/paymentsheet/forms/FieldLayout;Ljava/util/Map;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/forms/FieldLayout;
 	public final fun component2 ()Ljava/util/Map;
-	public final fun copy (Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;Ljava/util/Map;)Lcom/stripe/android/paymentsheet/forms/FormDataObject;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FormDataObject;Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormDataObject;
+	public final fun copy (Lcom/stripe/android/paymentsheet/forms/FieldLayout;Ljava/util/Map;)Lcom/stripe/android/paymentsheet/forms/FormDataObject;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FormDataObject;Lcom/stripe/android/paymentsheet/forms/FieldLayout;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormDataObject;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFieldLayout ()Lcom/stripe/android/paymentsheet/forms/FieldLayout;
 	public final fun getParamKey ()Ljava/util/Map;
-	public final fun getVisualFieldLayout ()Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -75,10 +88,10 @@ public final class com/stripe/android/paymentsheet/forms/FormToPaymentMethodTran
 public final class com/stripe/android/paymentsheet/forms/FormViewModel : androidx/lifecycle/ViewModel {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentsheet/forms/FormViewModel$Companion;
-	public fun <init> (Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/forms/FieldLayout;)V
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getFieldLayout ()Lcom/stripe/android/paymentsheet/forms/FieldLayout;
 	public final fun getNumberTextFieldElements ()I
-	public final fun getVisualFieldLayout ()Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel$Companion {
@@ -91,7 +104,7 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel$Companion
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/forms/FieldLayout;)V
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 
@@ -109,18 +122,5 @@ public final class com/stripe/android/paymentsheet/forms/Section {
 
 public final class com/stripe/android/paymentsheet/forms/SofortDataModelKt {
 	public static final fun getSofort ()Lcom/stripe/android/paymentsheet/forms/FormDataObject;
-}
-
-public final class com/stripe/android/paymentsheet/forms/VisualFieldLayout {
-	public static final field $stable I
-	public fun <init> (Ljava/util/List;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;)Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/VisualFieldLayout;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAllFields ()Ljava/util/List;
-	public final fun getVisualFieldLayout ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
