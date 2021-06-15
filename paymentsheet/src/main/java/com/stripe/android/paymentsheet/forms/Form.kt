@@ -93,7 +93,14 @@ class FormViewModel(
     }
 
     // This maps the field type to the element
-    private val fieldElementMap = mutableMapOf<Field, Element>()
+    private val fieldElementMap: Map<Field, Element> =
+        visualFieldLayout.allFields.associateWith { field ->
+            when (field) {
+                Field.NameInput -> TextFieldElement(NameConfig()) // All configs should have the label passed in for consistency
+                Field.EmailInput -> TextFieldElement(EmailConfig())
+                Field.CountryInput -> DropdownElement(CountryConfig())
+            }
+        }
 
     // This find the element based on the field type
     internal fun getElement(type: Field) = requireNotNull(fieldElementMap[type])
@@ -102,24 +109,11 @@ class FormViewModel(
 
     // This is null if any form field values are incomplete, otherwise it is an object
     // representing all the complete fields
-    val completeFormValues: Flow<FormFieldValues?>
-
-    init {
-        val fieldElementMap = visualFieldLayout.allFields.associateWith { field ->
-            when (field) {
-                Field.NameInput -> TextFieldElement(NameConfig()) // All configs should have the label passed in for consistency
-                Field.EmailInput -> TextFieldElement(EmailConfig())
-                Field.CountryInput -> DropdownElement(CountryConfig())
-            }
-        }
-
-        completeFormValues =
-            combine(
-                currentFormFieldValuesFlow(fieldElementMap),
-                allFormFieldsComplete(fieldElementMap)
-            ) { formFieldValue, isComplete ->
-                formFieldValue.takeIf { isComplete }
-            }
+    val completeFormValues: Flow<FormFieldValues?> = combine(
+        currentFormFieldValuesFlow(fieldElementMap),
+        allFormFieldsComplete(fieldElementMap)
+    ) { formFieldValue, isComplete ->
+        formFieldValue.takeIf { isComplete }
     }
 
     companion object {
@@ -140,8 +134,8 @@ class FormViewModel(
         }
 
         fun getCurrentFieldValuePair(field: Field, value: Element): Flow<Pair<Field, String>> {
-            return value.fieldValue.map { value ->
-                Pair(field, value)
+            return value.fieldValue.map {
+                Pair(field, it)
             }
         }
 
