@@ -5,13 +5,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
 /**
- * This class controls the dropdown view and implements the [Element] interface.
+ * This class controls the dropdown view and implements the [FieldController] interface.
  * Because it can never be in error the `errorMessage` is always null.  It is also
  * designed to always have a value selected, so isComplete is always true.
  */
-internal class DropdownElement(
+internal class DropdownFieldController(
     config: DropdownConfig,
-) : Element {
+) : FieldController {
     val displayItems: List<String> = config.getDisplayItems()
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: Flow<Int> = _selectedIndex

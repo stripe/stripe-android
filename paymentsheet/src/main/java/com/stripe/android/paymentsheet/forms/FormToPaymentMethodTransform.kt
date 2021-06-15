@@ -25,7 +25,7 @@ class FormToPaymentMethodTransform {
         // Need to convert Country Fields to a country code to put it in the parameter map
         val formKeyValueMap = formFieldValues.getMap()
             .mapValues { entry ->
-                if (entry.key == Field.CountryInput) {
+                if (entry.key == SectionSpec.SectionFieldSpec.Country) {
                     entry.value?.let {
                         CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
                     }

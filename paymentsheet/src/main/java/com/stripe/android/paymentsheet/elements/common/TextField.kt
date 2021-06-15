@@ -36,16 +36,16 @@ internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFoc
  */
 @Composable
 internal fun TextField(
-    textFieldElement: TextFieldElement,
+    textFieldController: TextFieldController,
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,
     modifier: Modifier = Modifier,
 ) {
-    Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
+    Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
 
-    val value by textFieldElement.fieldValue.asLiveData().observeAsState("")
-    val shouldShowError by textFieldElement.visibleError.asLiveData().observeAsState(false)
-    val elementIsFull by textFieldElement.isFull.asLiveData().observeAsState(false)
+    val value by textFieldController.fieldValue.asLiveData().observeAsState("")
+    val shouldShowError by textFieldController.visibleError.asLiveData().observeAsState(false)
+    val fieldIsFull by textFieldController.isFull.asLiveData().observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
@@ -60,7 +60,7 @@ internal fun TextField(
     // This is setup so that when a field is full it still allows more characters
     // to be entered, it just triggers next focus when the event happens.
     @Suppress("UNUSED_VALUE")
-    processedIsFull = if (elementIsFull) {
+    processedIsFull = if (fieldIsFull) {
         if (!processedIsFull) {
             nextFocus?.requestFocus()
         }
@@ -71,15 +71,15 @@ internal fun TextField(
 
     TextField(
         value = value,
-        onValueChange = { textFieldElement.onValueChange(it) },
+        onValueChange = { textFieldController.onValueChange(it) },
         isError = shouldShowError,
-        label = { Text(text = stringResource(textFieldElement.label)) },
+        label = { Text(text = stringResource(textFieldController.label)) },
         modifier = modifier
             .fillMaxWidth()
             .focusOrder(myFocus) { nextFocus?.requestFocus() }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {
-                    textFieldElement.onFocusChange(it.isFocused)
+                    textFieldController.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
             },

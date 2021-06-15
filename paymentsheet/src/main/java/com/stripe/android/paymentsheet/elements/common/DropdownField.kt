@@ -25,10 +25,10 @@ internal val textFieldBackgroundColor = Color(0xFFe0e0e0)
 
 @Composable
 internal fun DropDown(
-    element: DropdownElement,
+    controller: DropdownFieldController,
 ) {
-    val selectedIndex by element.selectedIndex.asLiveData().observeAsState(0)
-    val items = element.displayItems
+    val selectedIndex by controller.selectedIndex.asLiveData().observeAsState(0)
+    val items = controller.displayItems
     var expanded by remember { mutableStateOf(false) }
 
     Box(
@@ -51,7 +51,7 @@ internal fun DropDown(
             items.forEachIndexed { index, displayValue ->
                 DropdownMenuItem(
                     onClick = {
-                        element.onValueChange(index)
+                        controller.onValueChange(index)
                         expanded = false
                     }
                 ) {

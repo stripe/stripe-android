@@ -9,7 +9,7 @@ import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
-import com.stripe.android.paymentsheet.elements.common.TextFieldElement
+import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.common.TextFieldState
 import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.*
 import org.junit.Rule
@@ -21,13 +21,13 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-internal class TextFieldElementTest {
+internal class TextFieldControllerTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     private val config = TestConfig()
 
-    private val textFieldElement = TextFieldElement(config)
+    private val textFieldElement = TextFieldController(config)
 
     @Test
     fun `verify onValueChange sets the paramValue`() {
@@ -157,7 +157,7 @@ internal class TextFieldElementTest {
     @Test
     fun `Verify correct value passed to config should show error`() {
         config.fakeState = ShowWhenNoFocus
-        //Initialize the elementState
+        //Initialize the fieldState
         textFieldElement.onValueChange("1a2b3c4d")
 
         var visibleError = false
@@ -177,7 +177,7 @@ internal class TextFieldElementTest {
     @Test
     fun `Verify filter is called to set the input value`() {
         val numberConfigFilter = TestConfigFilter()
-        val textFieldElement = TextFieldElement(numberConfigFilter)
+        val textFieldElement = TextFieldController(numberConfigFilter)
 
         var inputValue = ""
         textFieldElement.fieldValue.asLiveData()

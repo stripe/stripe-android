@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Name
 import org.junit.Test
 
 class FormToPaymentMethodTransformTest {
@@ -11,9 +14,9 @@ class FormToPaymentMethodTransformTest {
             sofortParamKey,
             FormFieldValues(
                 mapOf(
-                    Field.NameInput to "joe",
-                    Field.EmailInput to "joe@gmail.com",
-                    Field.CountryInput to "United States",
+                    Name to "joe",
+                    Email to "joe@gmail.com",
+                    Country to "United States",
                 )
             )
         )
