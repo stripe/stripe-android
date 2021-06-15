@@ -2,7 +2,6 @@ package com.stripe.android.payments.core.authentication
 
 import android.content.Context
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -31,7 +30,6 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
@@ -72,8 +70,6 @@ class Stripe3DS2AuthenticatorTest {
     private val stripe3ds2Config = PaymentAuthConfig.Stripe3ds2Config.Builder()
         .setTimeout(5)
         .build()
-    private val stripe3ds2ChallengeLauncher =
-        mock<ActivityResultLauncher<PaymentFlowResult.Unvalidated>>()
 
     private val paymentRelayStarter = mock<PaymentRelayStarter>()
     private val relayStarterArgsArgumentCaptor: KArgumentCaptor<PaymentRelayStarter.Args> =
@@ -92,7 +88,7 @@ class Stripe3DS2AuthenticatorTest {
         messageVersionRegistry,
         challengeProgressActivityStarter,
         stripe3ds2Config,
-        stripe3ds2ChallengeLauncher,
+        { _, _ -> mock() },
         testDispatcher,
         testDispatcher
     )

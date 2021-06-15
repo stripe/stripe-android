@@ -2,7 +2,12 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.gms.common.api.Status
 import com.stripe.android.PaymentConfiguration
@@ -52,17 +57,17 @@ import javax.inject.Singleton
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
     private val lifecycleScope: CoroutineScope,
+    private val lifecycleOwner: LifecycleOwner,
     private val statusBarColor: () -> Int?,
     private val authHostSupplier: () -> AuthActivityStarterHost,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
+    activityResultCaller: ActivityResultCaller,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
     private val eventReporter: EventReporter,
     private val sessionId: SessionId,
-    private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>,
-    private val googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>,
     private val viewModel: FlowControllerViewModel,
     private val stripeApiRepository: StripeApiRepository,
     private val paymentController: PaymentController,
@@ -80,6 +85,38 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     private val lazyPaymentFlowResultProcessor: Lazy<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController {
+    private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
+    private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(
+            object : LifecycleObserver {
+                @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+                fun onCreate() {
+                    paymentController.registerLaunchersWithActivityResultCaller(
+                        activityResultCaller,
+                        ::onPaymentFlowResult
+                    )
+                }
+
+                @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                fun onDestroy() {
+                    paymentController.unregisterLaunchers()
+                }
+            }
+        )
+
+        paymentOptionActivityLauncher =
+            activityResultCaller.registerForActivityResult(
+                PaymentOptionContract(),
+                ::onPaymentOptionResult
+            )
+        googlePayActivityLauncher =
+            activityResultCaller.registerForActivityResult(
+                StripeGooglePayContract(),
+                ::onGooglePayResult
+            )
+    }
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
@@ -425,7 +462,8 @@ internal class DefaultFlowController @Inject internal constructor(
             appContext: Context,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleScope: CoroutineScope,
-            activityLauncherFactory: ActivityLauncherFactory,
+            lifecycleOwner: LifecycleOwner,
+            activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
             authHostSupplier: () -> AuthActivityStarterHost,
             paymentOptionFactory: PaymentOptionFactory,
@@ -436,7 +474,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
                 .lifecycleScope(lifecycleScope)
-                .activityLauncherFactory(activityLauncherFactory)
+                .lifeCycleOwner(lifecycleOwner)
+                .activityResultCaller(activityResultCaller)
                 .statusBarColor(statusBarColor)
                 .authHostSupplier(authHostSupplier)
                 .paymentOptionFactory(paymentOptionFactory)
