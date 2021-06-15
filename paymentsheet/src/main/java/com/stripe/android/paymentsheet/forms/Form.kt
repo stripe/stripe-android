@@ -26,6 +26,9 @@ import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec
 import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Name
 import com.stripe.android.paymentsheet.forms.FormElementSpec.StaticSpec.TextSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -110,11 +113,12 @@ class FormViewModel(
     // This maps the field type to the controller
     private val fieldControllerMap: Map<SectionFieldSpec, FieldController> =
         layout.allFields.associateWith { field ->
-            when (field) {
-                SectionFieldSpec.Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
-                SectionFieldSpec.Email -> TextFieldController(EmailConfig())
-                SectionFieldSpec.Country -> DropdownFieldController(CountryConfig())
+            val fieldController = when (field) {
+                Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
+                Email -> TextFieldController(EmailConfig())
+                Country -> DropdownFieldController(CountryConfig())
             }
+            fieldController
         }
 
     // This find the controller based on the field type
