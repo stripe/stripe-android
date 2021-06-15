@@ -31,7 +31,7 @@ internal interface TextFieldState {
      * It is up to calling shouldSHowError to determine if it should be displayed on screen.
      */
     @StringRes
-    fun getErrorMessageResId():  Int?
+    fun getErrorMessageResId(): Int?
 
     /**
      * This is used to indicate the field contains the maximum number of characters.

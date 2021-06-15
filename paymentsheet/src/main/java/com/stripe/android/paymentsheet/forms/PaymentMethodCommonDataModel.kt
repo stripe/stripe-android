@@ -1,26 +1,27 @@
 package com.stripe.android.paymentsheet.forms
 
+
+data class FieldLayout(val visualFieldLayout: List<Section>) {
+    val allFields get() = visualFieldLayout.map { it.field }
+}
+
 /**
  * This class is used to define different forms full of fields.
  */
 data class FormDataObject(
-    val sections: List<Section>,
+    val fieldLayout: FieldLayout,
     val paramKey: MutableMap<String, Any?>,
-) {
-    val allTypes = mutableListOf<Field>().apply {
-        sections.forEach {
-            add(it.field)
-        }
-    }
-}
+)
 
 sealed class Field(
     // This is the key used in the PaymentMethodCreateParams
-    val paymentMethodCreateParamsKey: String,
+    val identifier: String,
 ) {
     object NameInput : Field("name")
 
     object EmailInput : Field("email")
+
+    object CountryInput : Field("country")
 }
 
 data class Section(

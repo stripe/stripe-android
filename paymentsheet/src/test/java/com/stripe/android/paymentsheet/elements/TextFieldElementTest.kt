@@ -22,7 +22,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
 internal class TextFieldElementTest {
-
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
@@ -35,7 +34,7 @@ internal class TextFieldElementTest {
         config.fakeState = Valid.Limitless
 
         var paramValue: String? = null
-        textFieldElement.input.asLiveData()
+        textFieldElement.fieldValue.asLiveData()
             .observeForever {
                 paramValue = it
             }
@@ -181,7 +180,7 @@ internal class TextFieldElementTest {
         val textFieldElement = TextFieldElement(numberConfigFilter)
 
         var inputValue = ""
-        textFieldElement.input.asLiveData()
+        textFieldElement.fieldValue.asLiveData()
             .observeForever {
                 inputValue = it
             }

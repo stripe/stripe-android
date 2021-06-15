@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements.common
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardType
 
 internal interface TextFieldConfig {

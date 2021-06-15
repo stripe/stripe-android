@@ -14,14 +14,14 @@ import kotlinx.coroutines.flow.map
  */
 internal class TextFieldElement(
     private val textFieldConfig: TextFieldConfig
-) {
+) : Element {
     @StringRes
-    val label: Int = textFieldConfig.label
+    override val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */
-    private val _input = MutableStateFlow("")
-    val input: Flow<String> = _input
+    private val _fieldValue = MutableStateFlow("")
+    override val fieldValue: Flow<String> = _fieldValue
 
     private val _elementState = MutableStateFlow<TextFieldState>(Error.AlwaysError)
 
@@ -30,23 +30,23 @@ internal class TextFieldElement(
     val visibleError: Flow<Boolean> = combine(_elementState, _hasFocus) { elementState, hasFocus ->
         elementState.shouldShowError(hasFocus)
     }
-    val errorMessage: Flow<Int?> = visibleError.map { visibleError ->
+    override val errorMessage: Flow<Int?> = visibleError.map { visibleError ->
         _elementState.value.getErrorMessageResId()?.takeIf { visibleError }
     }
 
     val isFull: Flow<Boolean> = _elementState.map { it.isFull() }
 
-    val isComplete: Flow<Boolean> = _elementState.map { it.isValid() }
+    override val isComplete: Flow<Boolean> = _elementState.map { it.isValid() }
 
     init {
         onValueChange("")
     }
 
     fun onValueChange(displayFormatted: String) {
-        _input.value = textFieldConfig.filter(displayFormatted)
+        _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
-        _elementState.value = textFieldConfig.determineState(_input.value)
+        _elementState.value = textFieldConfig.determineState(_fieldValue.value)
     }
 
     fun onFocusChange(newHasFocus: Boolean) {

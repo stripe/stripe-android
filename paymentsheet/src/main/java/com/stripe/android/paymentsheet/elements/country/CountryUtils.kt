@@ -19,6 +19,11 @@ internal object CountryUtils {
     }
 
     @JvmSynthetic
+    internal fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
+        return localizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
+    }
+
+    @JvmSynthetic
     internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))

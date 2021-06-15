@@ -11,12 +11,17 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 val sofort = FormDataObject(
-    listOf(
-        Section(
-            Field.NameInput
-        ),
-        Section(
-            Field.EmailInput
+    FieldLayout(
+        listOf(
+            Section(
+                Field.NameInput
+            ),
+            Section(
+                Field.EmailInput
+            ),
+            Section(
+                Field.CountryInput
+            )
         )
     ),
     sofortParamKey,
