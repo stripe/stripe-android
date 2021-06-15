@@ -4,7 +4,6 @@ import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
-import com.stripe.android.StripePaymentController
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -82,7 +81,6 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
             uiContext: CoroutineContext,
             threeDs2Service: StripeThreeDs2Service,
             messageVersionRegistry: MessageVersionRegistry,
-            challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
             stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
             stripe3ds2ChallengeLauncherFactory: (AuthActivityStarterHost, Int) -> Stripe3ds2CompletionStarter
         ) = DaggerAuthenticationComponent.builder().authenticationModule(
@@ -98,7 +96,6 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
                 uiContext,
                 threeDs2Service,
                 messageVersionRegistry,
-                challengeProgressActivityStarter,
                 stripe3ds2Config,
                 stripe3ds2ChallengeLauncherFactory
             )

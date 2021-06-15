@@ -38,12 +38,9 @@ import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.payments.core.authentication.DefaultIntentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.IntentAuthenticatorRegistry
-import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
-import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
-import com.stripe.android.stripe3ds2.views.ChallengeProgressActivity
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -71,8 +68,6 @@ internal class StripePaymentController internal constructor(
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
         AnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
-    challengeProgressActivityStarter: ChallengeProgressActivityStarter =
-        ChallengeProgressActivityStarter.Default(),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     workContext: CoroutineContext = Dispatchers.IO,
     private val uiContext: CoroutineContext = Dispatchers.Main
@@ -154,7 +149,6 @@ internal class StripePaymentController internal constructor(
             uiContext,
             threeDs2Service,
             messageVersionRegistry,
-            challengeProgressActivityStarter,
             config.stripe3ds2Config,
             stripe3ds2CompletionStarterFactory
         )
@@ -627,34 +621,6 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    internal interface ChallengeProgressActivityStarter {
-        fun start(
-            context: Context,
-            directoryServerName: String,
-            cancelable: Boolean,
-            uiCustomization: StripeUiCustomization,
-            sdkTransactionId: SdkTransactionId
-        )
-
-        class Default : ChallengeProgressActivityStarter {
-            override fun start(
-                context: Context,
-                directoryServerName: String,
-                cancelable: Boolean,
-                uiCustomization: StripeUiCustomization,
-                sdkTransactionId: SdkTransactionId
-            ) {
-                ChallengeProgressActivity.show(
-                    context,
-                    directoryServerName,
-                    cancelable,
-                    uiCustomization,
-                    sdkTransactionId
-                )
-            }
-        }
-    }
-
     internal companion object {
         internal const val PAYMENT_REQUEST_CODE = 50000
         internal const val SETUP_REQUEST_CODE = 50001
@@ -683,10 +649,9 @@ internal class StripePaymentController internal constructor(
          */
         @JvmSynthetic
         internal fun getRequestCode(params: ConfirmStripeIntentParams): Int {
-            return if (params is ConfirmPaymentIntentParams) {
-                PAYMENT_REQUEST_CODE
-            } else {
-                SETUP_REQUEST_CODE
+            return when (params) {
+                is ConfirmPaymentIntentParams -> PAYMENT_REQUEST_CODE
+                is ConfirmSetupIntentParams -> SETUP_REQUEST_CODE
             }
         }
 

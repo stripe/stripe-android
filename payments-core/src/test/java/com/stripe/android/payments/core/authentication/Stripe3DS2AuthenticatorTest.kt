@@ -66,7 +66,7 @@ class Stripe3DS2AuthenticatorTest {
     private val threeDs2Service = mock<StripeThreeDs2Service>()
     private val messageVersionRegistry = MessageVersionRegistry()
     private val challengeProgressActivityStarter =
-        mock<StripePaymentController.ChallengeProgressActivityStarter>()
+        mock<Stripe3DS2Authenticator.ChallengeProgressActivityStarter>()
     private val stripe3ds2Config = PaymentAuthConfig.Stripe3ds2Config.Builder()
         .setTimeout(5)
         .build()
@@ -86,11 +86,11 @@ class Stripe3DS2AuthenticatorTest {
         analyticsRequestFactory,
         threeDs2Service,
         messageVersionRegistry,
-        challengeProgressActivityStarter,
         stripe3ds2Config,
         { _, _ -> mock() },
         testDispatcher,
-        testDispatcher
+        testDispatcher,
+        challengeProgressActivityStarter
     )
 
     @Before

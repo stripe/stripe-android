@@ -4,7 +4,6 @@ import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
-import com.stripe.android.StripePaymentController
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -39,7 +38,6 @@ internal class AuthenticationModule(
     private val uiContext: CoroutineContext,
     private val threeDs2Service: StripeThreeDs2Service,
     private val messageVersionRegistry: MessageVersionRegistry,
-    private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
     private val stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
     private val stripe3ds2CompletionStarterFactory: (AuthActivityStarterHost, Int) -> Stripe3ds2CompletionStarter,
 ) {
@@ -75,7 +73,6 @@ internal class AuthenticationModule(
             analyticsRequestFactory,
             threeDs2Service,
             messageVersionRegistry,
-            challengeProgressActivityStarter,
             stripe3ds2Config,
             stripe3ds2CompletionStarterFactory,
             workContext,

@@ -65,8 +65,6 @@ internal class StripePaymentControllerTest {
             .thenReturn(sdkTransactionId)
     }
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
-    private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter =
-        mock()
     private val alipayRepository = mock<AlipayRepository>()
     private val stripeRepository = FakeStripeRepository()
 
@@ -265,7 +263,6 @@ internal class StripePaymentControllerTest {
             threeDs2Service,
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            challengeProgressActivityStarter,
             alipayRepository,
             workContext = testDispatcher,
             uiContext = testDispatcher
