@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.map
 
 // TODO: Save for future usage.
 
-val formElementPadding = 16.dp
+internal val formElementPadding = 16.dp
 
 @ExperimentalAnimationApi
 @Composable

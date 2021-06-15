@@ -29,7 +29,7 @@ internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFoc
     ImeAction.Next
 } ?: ImeAction.Done
 
-data class TextFieldColors(
+internal data class TextFieldColors(
     val placeholderColor: Color = Color(0x14000000),
     val backgroundColor: Color = Color.Transparent,
     val focusedIndicatorColor: Color = Color.Transparent, // primary color by default

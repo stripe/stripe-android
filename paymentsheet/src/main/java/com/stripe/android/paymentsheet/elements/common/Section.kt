@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-data class CardStyle(
+internal data class CardStyle(
     val cardBorderColor: Color = Color(0x14000000),
     val cardBorderWidth: Dp = 1.dp,
     val cardElevation: Dp = 1.dp,

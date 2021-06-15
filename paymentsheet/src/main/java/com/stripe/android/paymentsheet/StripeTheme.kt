@@ -8,8 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val Green400 = Color(0xFF3CB043)
@@ -58,7 +56,7 @@ private val StripeLightPalette = lightColors(
     onError = Color.White
 )
 
-val LocalFieldTextStyle = TextStyle.Default.copy(
+internal val LocalFieldTextStyle = TextStyle.Default.copy(
     fontFamily = FontFamily.SansSerif,
     fontSize = 14.sp
 )
