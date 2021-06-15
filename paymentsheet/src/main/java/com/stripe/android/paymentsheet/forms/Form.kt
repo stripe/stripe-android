@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.map
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val form = formViewModel.formDataObject
+    val form = formViewModel.visualFieldLayout
 
     // There is only a single field in a section, some of those might not require focus like
     // country so we will create an extra one
@@ -47,7 +47,7 @@ internal fun Form(
             .fillMaxWidth(1f)
             .padding(16.dp)
     ) {
-        form.sections.forEach { section ->
+        form.visualFieldLayout.forEach { section ->
             val element = formViewModel.getElement(section.field)
             val error by element.errorMessage.asLiveData().observeAsState(null)
             val sectionErrorString =
@@ -74,55 +74,80 @@ internal fun Form(
 }
 
 /**
- * This sets up the controllers for all the views.  It doesn't care where they are hierarchically
- * on the screen.  The viewModel takes in a formDataObject
+ * This class stores the visual field layout for the [Form] and then sets up the controller
+ * for all the fields on screen.  When all fields are reported as complete, the completedFieldValues
+ * holds the resulting values for each field.
+ *
+ * @param: visualFieldLayout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 class FormViewModel(
-    val formDataObject: FormDataObject
+    val visualFieldLayout: VisualFieldLayout,
 ) : ViewModel() {
     class Factory(
-        val formDataObject: FormDataObject
+        private val visualFieldLayout: VisualFieldLayout,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(formDataObject) as T
+            return FormViewModel(visualFieldLayout) as T
         }
     }
 
-    private val fields: List<Field> = formDataObject.allFields
+    // This maps the field type to the element
     private val fieldElementMap = mutableMapOf<Field, Element>()
-    fun getNumberTextFieldElements() = fieldElementMap.count { it.value is TextFieldElement }
 
+    // This find the element based on the field type
     internal fun getElement(type: Field) = requireNotNull(fieldElementMap[type])
 
-    private val currentFieldValues: Flow<Map<Field, String?>>
+    fun getNumberTextFieldElements() = fieldElementMap.count { it.value is TextFieldElement }
 
-    private val isComplete: Flow<Boolean>
-    val completeFieldValues: Flow<Map<Field, String?>?>
+    // This is null if any form field values are incomplete, otherwise it is an object
+    // representing all the complete fields
+    val completeFormValues: Flow<FormFieldValues?>
 
     init {
-        val fieldValuePairs = mutableListOf<Flow<Pair<Field, String?>>>()
-        fields.forEach { field ->
-            val element = when (field) {
+        val fieldElementMap = visualFieldLayout.allFields.associateWith { field ->
+            when (field) {
                 Field.NameInput -> TextFieldElement(NameConfig()) // All configs should have the label passed in for consistency
                 Field.EmailInput -> TextFieldElement(EmailConfig())
                 Field.CountryInput -> DropdownElement(CountryConfig())
             }
-            fieldValuePairs.add(element.fieldValue.map { Pair(field, it) })
-            fieldElementMap[field] = element
         }
 
-        isComplete = combine(fieldElementMap.values.map { it.isComplete }) { elementCompleteState ->
-            elementCompleteState.none { complete -> !complete }
+        completeFormValues =
+            combine(
+                currentFormFieldValuesFlow(fieldElementMap),
+                allFormFieldsComplete(fieldElementMap)
+            ) { formFieldValue, isComplete ->
+                formFieldValue.takeIf { isComplete }
+            }
+    }
+
+    companion object {
+        // Flows of FormFieldValues for each of the elements as the field is updated
+        fun currentFormFieldValuesFlow(fieldElementMap: Map<Field, Element>) =
+            combine(getCurrentFieldValuePairs(fieldElementMap))
+            {
+                transformToFormFieldValues(it)
+            }
+
+        fun transformToFormFieldValues(allFormFieldValues: Array<Pair<Field, String>>) =
+            FormFieldValues(allFormFieldValues.toMap())
+
+        fun getCurrentFieldValuePairs(fieldElementMap: Map<Field, Element>): List<Flow<Pair<Field, String>>> {
+            return fieldElementMap.map { fieldElementEntry ->
+                getCurrentFieldValuePair(fieldElementEntry.key, fieldElementEntry.value)
+            }
         }
 
-        currentFieldValues = combine(fieldValuePairs) { pairs ->
-            pairs.toMap()
+        fun getCurrentFieldValuePair(field: Field, value: Element): Flow<Pair<Field, String>> {
+            return value.fieldValue.map { value ->
+                Pair(field, value)
+            }
         }
 
-        completeFieldValues =
-            combine(currentFieldValues, isComplete) { identifierValues, isComplete ->
-                identifierValues.takeIf { isComplete }
+        fun allFormFieldsComplete(fieldElementMap: Map<Field, Element>) =
+            combine(fieldElementMap.values.map { it.isComplete }) { elementCompleteStates ->
+                elementCompleteStates.none { complete -> !complete }
             }
     }
 }
