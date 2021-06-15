@@ -18,10 +18,4 @@ class CountryConfigTest {
         CountryConfig().label
         assertThat(CountryConfig(Locale.US).label).isEqualTo(R.string.address_label_country)
     }
-
-    @Test
-    fun `Verify the paymentMethodParams or country code for the country`() {
-        assertThat(CountryConfig(Locale.US).getDisplayValue()[0]).isEqualTo("US")
-    }
-
 }
