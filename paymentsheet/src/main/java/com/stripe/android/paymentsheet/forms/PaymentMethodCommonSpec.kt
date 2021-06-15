@@ -20,9 +20,7 @@ data class FormSpec(
 data class Layout(val elements: List<FormElementSpec>) {
     val allFields
         get() = mutableListOf<SectionFieldSpec>().apply {
-            elements.filterIsInstance<SectionSpec>().forEach { section ->
-                add(section.field)
-            }
+            elements.filterIsInstance<SectionSpec>().map { it.field }
         }
 }
 
