@@ -1,5 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.paymentsheet.elements.country.CountryUtils
+import java.util.Locale
+
 /**
  * This class will transform the fields in a form into a structure as defined by a map.
  */
@@ -18,24 +21,69 @@ class FormToPaymentMethodTransform {
         formFieldValues: FormFieldValues
     ): MutableMap<String, Any?> {
         val destMap = mutableMapOf<String, Any?>()
-        createMap(mapStructure, destMap, formFieldValues.getMap().mapKeys { it.key.identifier })
+
+        // Need to convert Country Fields to a country code to put it in the parameter map
+        val formKeyValueMap = formFieldValues.getMap()
+            .mapValues { entry ->
+                if (entry.key == Field.CountryInput) {
+                    entry.value?.let {
+                        CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
+                    }
+                } else {
+                    entry.value
+                }
+            }
+            .mapKeys { it.key.identifier }
+
+        createMap(mapStructure, destMap, formKeyValueMap)
         return destMap
     }
 
     companion object {
+        /**
+         * This function will looks for each of the keys in the mapStructure and
+         * if the formField contains a key that matches it will populate the value.
+         *
+         * For example:
+         * mapStructure = {
+         *   "name": null
+         *   billing = {
+         *      address = {
+         *         "name": null
+         *      }
+         *   }
+         * }
+         * formFieldValues = {
+         *   "name": "John Smith"
+         * }
+         *
+         * will return a map of:
+         * dest = {
+         *   "name": "John Smith"
+         *   billing = {
+         *      address = {
+         *         "name": "John Smith"
+         *      }
+         *   }
+         * }
+         */
         @Suppress("UNCHECKED_CAST")
         private fun createMap(
-            source: Map<String, Any?>,
+            mapStructure: Map<String, Any?>,
             dest: MutableMap<String, Any?>,
-            elementKeys: Map<String, String?>
+            formFieldKeyValues: Map<String, String?>
         ) {
-            source.keys.forEach { key ->
-                if (source[key] == null) {
-                    dest[key] = elementKeys[key]
-                } else if (source[key] is MutableMap<*, *>) {
+            mapStructure.keys.forEach { key ->
+                if (mapStructure[key] == null) {
+                    dest[key] = formFieldKeyValues[key]
+                } else if (mapStructure[key] is MutableMap<*, *>) {
                     val newDestMap = mutableMapOf<String, Any?>()
                     dest[key] = newDestMap
-                    createMap(source[key] as MutableMap<String, Any?>, newDestMap, elementKeys)
+                    createMap(
+                        mapStructure[key] as MutableMap<String, Any?>,
+                        newDestMap,
+                        formFieldKeyValues
+                    )
                 }
             }
         }
