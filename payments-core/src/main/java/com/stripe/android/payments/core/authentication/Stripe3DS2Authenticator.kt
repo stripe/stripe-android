@@ -136,57 +136,70 @@ internal class Stripe3DS2Authenticator(
             }
         }
 
-        withContext(workContext) {
-            val areqParams = transaction.createAuthenticationRequestParameters()
-
-            val timeout = stripe3ds2Config.timeout
-            val authParams = Stripe3ds2AuthParams(
-                stripe3ds2Fingerprint.source,
-                areqParams.sdkAppId,
-                areqParams.sdkReferenceNumber,
-                areqParams.sdkTransactionId.value,
-                areqParams.deviceData,
-                areqParams.sdkEphemeralPublicKey,
-                areqParams.messageVersion,
-                timeout,
-                // We do not currently have a fallback url
-                // TODO(smaskell-stripe): Investigate more robust error handling
-                returnUrl = null
+        val paymentRelayStarter = paymentRelayStarterFactory(host)
+        val timeout = stripe3ds2Config.timeout
+        runCatching {
+            perform3ds2AuthenticationRequest(
+                transaction,
+                stripe3ds2Fingerprint,
+                requestOptions,
+                timeout
             )
-
-            val start3ds2AuthResult = runCatching {
-                requireNotNull(
-                    stripeRepository.start3ds2Auth(
-                        authParams,
-                        requestOptions
-                    )
+        }.fold(
+            onSuccess = { authResult ->
+                on3ds2AuthSuccess(
+                    authResult,
+                    transaction,
+                    stripe3ds2Fingerprint.source,
+                    timeout,
+                    paymentRelayStarter,
+                    StripePaymentController.getRequestCode(stripeIntent),
+                    host,
+                    stripeIntent,
+                    requestOptions
+                )
+            },
+            onFailure = { throwable ->
+                on3ds2AuthFailure(
+                    throwable,
+                    StripePaymentController.getRequestCode(stripeIntent),
+                    paymentRelayStarter
                 )
             }
+        )
+    }
 
-            val paymentRelayStarter = paymentRelayStarterFactory(host)
-            start3ds2AuthResult.fold(
-                onSuccess = { authResult ->
-                    on3ds2AuthSuccess(
-                        authResult,
-                        transaction,
-                        stripe3ds2Fingerprint.source,
-                        timeout,
-                        paymentRelayStarter,
-                        StripePaymentController.getRequestCode(stripeIntent),
-                        host,
-                        stripeIntent,
-                        requestOptions
-                    )
-                },
-                onFailure = { throwable ->
-                    on3ds2AuthFailure(
-                        throwable,
-                        StripePaymentController.getRequestCode(stripeIntent),
-                        paymentRelayStarter
-                    )
-                }
+    /**
+     * Fire the 3DS2 AReq.
+     */
+    private suspend fun perform3ds2AuthenticationRequest(
+        transaction: Transaction,
+        stripe3ds2Fingerprint: Stripe3ds2Fingerprint,
+        requestOptions: ApiRequest.Options,
+        timeout: Int
+    ) = withContext(workContext) {
+        val areqParams = transaction.createAuthenticationRequestParameters()
+
+        val authParams = Stripe3ds2AuthParams(
+            stripe3ds2Fingerprint.source,
+            areqParams.sdkAppId,
+            areqParams.sdkReferenceNumber,
+            areqParams.sdkTransactionId.value,
+            areqParams.deviceData,
+            areqParams.sdkEphemeralPublicKey,
+            areqParams.messageVersion,
+            timeout,
+            // We do not currently have a fallback url
+            // TODO(smaskell-stripe): Investigate more robust error handling
+            returnUrl = null
+        )
+
+        requireNotNull(
+            stripeRepository.start3ds2Auth(
+                authParams,
+                requestOptions
             )
-        }
+        )
     }
 
     @VisibleForTesting
