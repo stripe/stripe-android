@@ -113,12 +113,11 @@ class FormViewModel(
     // This maps the field type to the controller
     private val fieldControllerMap: Map<SectionFieldSpec, FieldController> =
         layout.allFields.associateWith { field ->
-            val fieldController = when (field) {
+            when (field) {
                 Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
                 Email -> TextFieldController(EmailConfig())
                 Country -> DropdownFieldController(CountryConfig())
             }
-            fieldController
         }
 
     // This find the controller based on the field type
