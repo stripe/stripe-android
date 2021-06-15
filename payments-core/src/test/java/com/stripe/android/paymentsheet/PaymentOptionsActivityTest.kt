@@ -7,7 +7,6 @@ import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -29,6 +28,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

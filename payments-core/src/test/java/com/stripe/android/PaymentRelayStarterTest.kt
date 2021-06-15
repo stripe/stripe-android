@@ -3,10 +3,6 @@ package com.stripe.android
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
@@ -17,6 +13,10 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.utils.ParcelUtils.verifyParcelRoundtrip
 import com.stripe.android.view.AuthActivityStarterHost
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 

@@ -7,10 +7,6 @@ import android.widget.LinearLayout
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.reset
-import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
@@ -33,6 +29,10 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext

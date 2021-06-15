@@ -6,11 +6,11 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
