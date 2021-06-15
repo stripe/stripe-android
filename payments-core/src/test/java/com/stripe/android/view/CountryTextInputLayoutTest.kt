@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.widget.AutoCompleteTextView
 import androidx.test.core.app.ApplicationProvider
-import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.EphemeralKeyProvider
@@ -15,6 +14,7 @@ import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.AfterTest

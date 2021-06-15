@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import androidx.test.core.app.ApplicationProvider
-import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.stripe3ds2.init.ui.StripeButtonCustomization
 import com.stripe.android.stripe3ds2.init.ui.StripeLabelCustomization
 import com.stripe.android.stripe3ds2.init.ui.StripeTextBoxCustomization
@@ -11,6 +10,7 @@ import com.stripe.android.stripe3ds2.init.ui.UiCustomization
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.PaymentFlowActivity
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test

@@ -2,9 +2,6 @@ package com.stripe.android
 
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.PaymentIntent
@@ -22,6 +19,9 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import kotlin.test.AfterTest
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
