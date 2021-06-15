@@ -31,8 +31,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-// TODO: Manadate type
 // TODO: Save for future usage.
+
+val formElementPadding = 16.dp
 
 @ExperimentalAnimationApi
 @Composable
@@ -47,7 +48,7 @@ internal fun Form(
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
-            .padding(16.dp)
+            .padding(formElementPadding)
     ) {
         fieldLayout.sections.forEach { section ->
             val controller = formViewModel.getController(section.field)
