@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.forms
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec
 
 
 /**
@@ -19,9 +18,7 @@ data class FormSpec(
  */
 data class Layout(val elements: List<FormElementSpec>) {
     val allFields
-        get() = mutableListOf<SectionFieldSpec>().apply {
-            elements.filterIsInstance<SectionSpec>().map { add(it.field) }
-        }
+        get() = elements.filterIsInstance<SectionSpec>().map { it.field }
 }
 
 /**
