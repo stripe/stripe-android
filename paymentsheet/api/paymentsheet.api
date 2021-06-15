@@ -95,7 +95,7 @@ public final class com/stripe/android/paymentsheet/forms/SectionSpec {
 	public final fun copy (Lcom/stripe/android/paymentsheet/forms/SectionSpec$SectionFieldSpec;)Lcom/stripe/android/paymentsheet/forms/SectionSpec;
 	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/SectionSpec;Lcom/stripe/android/paymentsheet/forms/SectionSpec$SectionFieldSpec;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/SectionSpec;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getSectionField ()Lcom/stripe/android/paymentsheet/forms/SectionSpec$SectionFieldSpec;
+	public final fun getField ()Lcom/stripe/android/paymentsheet/forms/SectionSpec$SectionFieldSpec;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
