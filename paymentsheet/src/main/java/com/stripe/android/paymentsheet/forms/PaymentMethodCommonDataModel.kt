@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 
-data class VisualFieldLayout(val visualFieldLayout: List<Section>) {
+data class FieldLayout(val visualFieldLayout: List<Section>) {
     val allFields get() = visualFieldLayout.map { it.field }
 }
 
@@ -9,7 +9,7 @@ data class VisualFieldLayout(val visualFieldLayout: List<Section>) {
  * This class is used to define different forms full of fields.
  */
 data class FormDataObject(
-    val visualFieldLayout: VisualFieldLayout,
+    val fieldLayout: FieldLayout,
     val paramKey: MutableMap<String, Any?>,
 )
 

@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.map
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val form = formViewModel.visualFieldLayout
+    val form = formViewModel.fieldLayout
 
     // There is only a single field in a section, some of those might not require focus like
     // country so we will create an extra one
@@ -81,20 +81,20 @@ internal fun Form(
  * @param: visualFieldLayout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 class FormViewModel(
-    val visualFieldLayout: VisualFieldLayout,
+    val fieldLayout: FieldLayout,
 ) : ViewModel() {
     class Factory(
-        private val visualFieldLayout: VisualFieldLayout,
+        private val fieldLayout: FieldLayout,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(visualFieldLayout) as T
+            return FormViewModel(fieldLayout) as T
         }
     }
 
     // This maps the field type to the element
     private val fieldElementMap: Map<Field, Element> =
-        visualFieldLayout.allFields.associateWith { field ->
+        fieldLayout.allFields.associateWith { field ->
             when (field) {
                 Field.NameInput -> TextFieldElement(NameConfig()) // All configs should have the label passed in for consistency
                 Field.EmailInput -> TextFieldElement(EmailConfig())

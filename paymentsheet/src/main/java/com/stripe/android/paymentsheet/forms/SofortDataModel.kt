@@ -11,7 +11,7 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 val sofort = FormDataObject(
-    VisualFieldLayout(
+    FieldLayout(
         listOf(
             Section(
                 Field.NameInput
