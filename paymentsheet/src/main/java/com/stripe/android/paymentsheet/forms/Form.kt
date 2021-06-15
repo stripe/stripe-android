@@ -4,6 +4,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -23,15 +24,13 @@ import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec
+import com.stripe.android.paymentsheet.forms.FormElementSpec.StaticSpec.TextSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-// TODO: Manadate type
 // TODO: Save for future usage.
 
 @ExperimentalAnimationApi
@@ -39,7 +38,7 @@ import kotlinx.coroutines.flow.map
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val fieldLayout = formViewModel.fieldLayout
+    val fieldLayout = formViewModel.layout
 
     var focusRequesterIndex = 0
     val focusRequesters = List(formViewModel.getNumberTextFields()) { FocusRequester() }
@@ -49,29 +48,40 @@ internal fun Form(
             .fillMaxWidth(1f)
             .padding(16.dp)
     ) {
-        fieldLayout.sections.forEach { section ->
-            val controller = formViewModel.getController(section.field)
-            val error by controller.errorMessage.asLiveData().observeAsState(null)
-            val sectionErrorString =
-                error?.let { stringResource(it, stringResource(controller.label)) }
+        fieldLayout.elements.forEach { element ->
+            when (element) {
+                is SectionSpec -> {
+                    val controller = formViewModel.getController(element.field)
+                    val error by controller.errorMessage.asLiveData().observeAsState(null)
+                    val sectionErrorString =
+                        error?.let { stringResource(it, stringResource(controller.label)) }
 
-            Section(sectionErrorString) {
-                when (controller) {
-                    is TextFieldController -> {
-                        TextField(
-                            textFieldController = controller,
-                            myFocus = focusRequesters[focusRequesterIndex],
-                            nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
-                                null
-                            } else {
-                                focusRequesters[focusRequesterIndex + 1]
-                            },
-                        )
-                        focusRequesterIndex++
+                    Section(sectionErrorString) {
+                        when (controller) {
+                            is TextFieldController -> {
+                                TextField(
+                                    textFieldController = controller,
+                                    myFocus = focusRequesters[focusRequesterIndex],
+                                    nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
+                                        null
+                                    } else {
+                                        focusRequesters[focusRequesterIndex + 1]
+                                    },
+                                )
+                                focusRequesterIndex++
+                            }
+                            is DropdownFieldController -> {
+                                DropDown(controller)
+                            }
+                        }
                     }
-                    is DropdownFieldController -> {
-                        DropDown(controller)
-                    }
+                }
+                is TextSpec -> {
+                    Text(
+                        stringResource(element.stringResId),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = element.color
+                    )
                 }
             }
         }
@@ -86,24 +96,24 @@ internal fun Form(
  * @param: fieldLayout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 class FormViewModel(
-    val fieldLayout: FieldLayoutSpec,
+    val layout: Layout,
 ) : ViewModel() {
     class Factory(
-        private val fieldLayout: FieldLayoutSpec,
+        private val layout: Layout,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(fieldLayout) as T
+            return FormViewModel(layout) as T
         }
     }
 
     // This maps the field type to the controller
     private val fieldControllerMap: Map<SectionFieldSpec, FieldController> =
-        fieldLayout.allFields.associateWith { field ->
+        layout.allFields.associateWith { field ->
             when (field) {
-                Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
-                Email -> TextFieldController(EmailConfig())
-                Country -> DropdownFieldController(CountryConfig())
+                SectionFieldSpec.Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
+                SectionFieldSpec.Email -> TextFieldController(EmailConfig())
+                SectionFieldSpec.Country -> DropdownFieldController(CountryConfig())
             }
         }
 

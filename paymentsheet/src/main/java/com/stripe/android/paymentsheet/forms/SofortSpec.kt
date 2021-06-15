@@ -1,8 +1,12 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Name
+import androidx.compose.ui.graphics.Color
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.forms.FormElementSpec.StaticSpec.TextSpec
 
 internal val sofortParams: MutableMap<String, Any?> = mutableMapOf(
     "country" to null,
@@ -15,11 +19,12 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 val sofort = FormSpec(
-    FieldLayoutSpec(
+    Layout(
         listOf(
             SectionSpec(Name),
             SectionSpec(Email),
-            SectionSpec(Country)
+            SectionSpec(Country),
+            TextSpec(R.string.sofort_mandate, Color.Gray)
         )
     ),
     sofortParamKey,
