@@ -5,13 +5,13 @@ import androidx.compose.ui.text.input.KeyboardType
 internal interface TextFieldConfig {
     val debugLabel: String
 
-    /** This is the label to describe the element */
+    /** This is the label to describe the field */
     val label: Int
 
-    /** This is the type of keyboard to use for this element */
+    /** This is the type of keyboard to use for this field */
     val keyboard: KeyboardType
 
-    /** This will determine the state of the element based on the text */
+    /** This will determine the state of the field based on the text */
     fun determineState(input: String): TextFieldState
 
     /**

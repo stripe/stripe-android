@@ -1,21 +1,32 @@
 package com.stripe.android.paymentsheet.forms
 
+
 /**
  * This class is used to define different forms full of fields.
  */
 data class FormSpec(
-    val sectionSpecs: List<SectionSpec>,
+    val visualFieldLayout: VisualFieldLayoutSpec,
     val paramKey: MutableMap<String, Any?>,
 ) {
-    val allTypes get() = sectionSpecs.map { it.sectionField }
+    val allTypes get() = visualFieldLayout.sections.map { it.sectionField }
 }
 
+/**
+ * This is a data representation of the layout of UI fields on the screen.
+ */
+data class VisualFieldLayoutSpec(val sections: List<SectionSpec>) {
+    val allFields get() = sections.map { it.sectionField }
+}
+
+/**
+ * This is used to define each section in the visual form layout
+ */
 data class SectionSpec(
     val sectionField: SectionFieldSpec
 ) {
     sealed class SectionFieldSpec(
         // This is the key used in the PaymentMethodCreateParams
-        val paymentMethodCreateParamsKey: String,
+        val identifier: String,
     ) {
         object Name : SectionFieldSpec("name")
 

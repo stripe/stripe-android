@@ -34,7 +34,7 @@ internal class TextFieldControllerTest {
         config.fakeState = Valid.Limitless
 
         var paramValue: String? = null
-        textFieldElement.input.asLiveData()
+        textFieldElement.fieldValue.asLiveData()
             .observeForever {
                 paramValue = it
             }
@@ -157,7 +157,7 @@ internal class TextFieldControllerTest {
     @Test
     fun `Verify correct value passed to config should show error`() {
         config.fakeState = ShowWhenNoFocus
-        //Initialize the elementState
+        //Initialize the fieldState
         textFieldElement.onValueChange("1a2b3c4d")
 
         var visibleError = false
@@ -180,7 +180,7 @@ internal class TextFieldControllerTest {
         val textFieldElement = TextFieldController(numberConfigFilter)
 
         var inputValue = ""
-        textFieldElement.input.asLiveData()
+        textFieldElement.fieldValue.asLiveData()
             .observeForever {
                 inputValue = it
             }

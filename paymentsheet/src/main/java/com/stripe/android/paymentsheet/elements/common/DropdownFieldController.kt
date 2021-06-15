@@ -4,14 +4,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
+/**
+ * This class controls the dropdown view and implements the [FieldController] interface.
+ * Because it can never be in error the `errorMessage` is always null.  It is also
+ * designed to always have a value selected, so isComplete is always true.
+ */
 internal class DropdownFieldController(
-    private val config: DropdownConfig,
+    config: DropdownConfig,
 ) : FieldController {
     val displayItems: List<String> = config.getDisplayItems()
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: Flow<Int> = _selectedIndex
     override val label: Int = config.label
-    override val paymentMethodParams = selectedIndex.map { config.getPaymentMethodParams()[it] }
+    override val fieldValue = selectedIndex.map { displayItems[it] }
     override val errorMessage: Flow<Int?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
 

@@ -20,13 +20,13 @@ internal interface TextFieldState {
     fun shouldShowError(hasFocus: Boolean): Boolean
 
     /**
-     * Indicates an element is valid and field extraction can happen
+     * Indicates an field is valid and field extraction can happen
      * and be used to create PaymentMethod Parameters
      */
     fun isValid(): Boolean
 
     /**
-     * If in a state where isValid() returns false it indicates the element cannot be
+     * If in a state where isValid() returns false it indicates the field cannot be
      * used for extraction.  This function should return the error message.
      * It is up to calling shouldSHowError to determine if it should be displayed on screen.
      */

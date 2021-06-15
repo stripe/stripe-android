@@ -15,39 +15,28 @@ class FormViewModelTest {
 
     @Test
     fun `Verify params are set when element flows are complete`() = runBlocking {
-        val formViewModel = FormViewModel(sofort)
+        val formViewModel = FormViewModel(sofort.visualFieldLayout)
 
         val nameElement = formViewModel.getController(Name) as TextFieldController
         val emailElement = formViewModel.getController(Email) as TextFieldController
 
         nameElement.onValueChange("joe")
-        assertThat(formViewModel.populatedFormData.first()).isNull()
+        assertThat(
+            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+        ).isNull()
 
         emailElement.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.populatedFormData.first()?.toMap().toString().replace("\\s".toRegex(), "")
-        ).isEqualTo(
-            """
-                {
-                  billing_details={
-                    address={
-                      city=null,
-                      country=US,
-                      line1=null,
-                      line2=null,
-                      postal_code=null,
-                      state=null
-                    },
-                    name=joe,
-                    email=joe@gmail.com,
-                    phone=null
-                  },
-                  sofort={country=US}
-                }
-            """.replace("\\s".toRegex(), "")
-        )
+            formViewModel.completeFormValues.first()?.getMap()?.get(Email)
+        ).isEqualTo("joe@gmail.com")
+        assertThat(
+            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+        ).isEqualTo("joe")
+
         emailElement.onValueChange("invalid.email@IncompleteDomain")
 
-        assertThat(formViewModel.populatedFormData.first()).isNull()
+        assertThat(
+            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+        ).isNull()
     }
 }

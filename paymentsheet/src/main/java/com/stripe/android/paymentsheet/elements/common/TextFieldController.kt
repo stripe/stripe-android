@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 /**
- * This class will provide the onValueChanged and onFocusChanged functionality to the element's
+ * This class will provide the onValueChanged and onFocusChanged functionality to the field's
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
@@ -19,35 +19,33 @@ internal class TextFieldController(
     override val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
 
-    /** This is all the information that can be observed on the element */
-    private val _input = MutableStateFlow("")
-    val input: Flow<String> = _input
-    override val paymentMethodParams = _input
+    private val _fieldValue = MutableStateFlow("")
+    override val fieldValue: Flow<String> = _fieldValue
 
-    private val _elementState = MutableStateFlow<TextFieldState>(Error.AlwaysError)
+    private val _fieldState = MutableStateFlow<TextFieldState>(Error.AlwaysError)
 
     private val _hasFocus = MutableStateFlow(false)
 
-    val visibleError: Flow<Boolean> = combine(_elementState, _hasFocus) { elementState, hasFocus ->
+    val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { elementState, hasFocus ->
         elementState.shouldShowError(hasFocus)
     }
     override val errorMessage: Flow<Int?> = visibleError.map { visibleError ->
-        _elementState.value.getErrorMessageResId()?.takeIf { visibleError }
+        _fieldState.value.getErrorMessageResId()?.takeIf { visibleError }
     }
 
-    val isFull: Flow<Boolean> = _elementState.map { it.isFull() }
+    val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
-    override val isComplete: Flow<Boolean> = _elementState.map { it.isValid() }
+    override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
 
     init {
         onValueChange("")
     }
 
     fun onValueChange(displayFormatted: String) {
-        _input.value = textFieldConfig.filter(displayFormatted)
+        _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
-        _elementState.value = textFieldConfig.determineState(_input.value)
+        _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
     }
 
     fun onFocusChange(newHasFocus: Boolean) {

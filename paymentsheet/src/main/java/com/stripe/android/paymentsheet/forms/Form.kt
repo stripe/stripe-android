@@ -23,6 +23,10 @@ import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Name
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -35,28 +39,26 @@ import kotlinx.coroutines.flow.map
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val form = formViewModel.formSpec
+    val visualFieldLayout = formViewModel.visualFieldLayout
 
-    // There is only a single field in a section, some of those might not require focus like
-    // country so we will create an extra one
     var focusRequesterIndex = 0
-    val focusRequesters = List(formViewModel.getNumberTextFieldElements()) { FocusRequester() }
+    val focusRequesters = List(formViewModel.getNumberTextFields()) { FocusRequester() }
 
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
             .padding(16.dp)
     ) {
-        form.sectionSpecs.forEach { section ->
-            val element = formViewModel.getController(section.sectionField)
-            val error by element.errorMessage.asLiveData().observeAsState(null)
+        visualFieldLayout.sections.forEach { section ->
+            val controller = formViewModel.getController(section.sectionField)
+            val error by controller.errorMessage.asLiveData().observeAsState(null)
             val sectionErrorString =
-                error?.let { stringResource(it, stringResource(element.label)) }
+                error?.let { stringResource(it, stringResource(controller.label)) }
 
             Section(sectionErrorString) {
-                if (element is TextFieldController) {
+                if (controller is TextFieldController) {
                     TextField(
-                        textFieldController = element,
+                        textFieldController = controller,
                         myFocus = focusRequesters[focusRequesterIndex],
                         nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
                             null
@@ -65,66 +67,88 @@ internal fun Form(
                         },
                     )
                     focusRequesterIndex++
-                } else if (element is DropdownFieldController) {
-                    DropDown(element)
+                } else if (controller is DropdownFieldController) {
+                    DropDown(controller)
                 }
             }
         }
     }
 }
 
+/**
+ * This class stores the visual field layout for the [Form] and then sets up the controller
+ * for all the fields on screen.  When all fields are reported as complete, the completedFieldValues
+ * holds the resulting values for each field.
+ *
+ * @param: visualFieldLayout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
+ */
 class FormViewModel(
-    val formSpec: FormSpec
+    val visualFieldLayout: VisualFieldLayoutSpec,
 ) : ViewModel() {
     class Factory(
-        val formSpec: FormSpec
+        private val visualFieldLayout: VisualFieldLayoutSpec,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(formSpec) as T
+            return FormViewModel(visualFieldLayout) as T
         }
     }
 
-    private val paramKey: MutableMap<String, Any?> = formSpec.paramKey
-    private val types: List<SectionSpec.SectionFieldSpec> = formSpec.allTypes
-    private val typeControllerMap = mutableMapOf<SectionSpec.SectionFieldSpec, FieldController>()
-    fun getNumberTextFieldElements() = typeControllerMap.count { it.value is TextFieldController }
-
-    internal fun getController(type: SectionSpec.SectionFieldSpec) =
-        requireNotNull(typeControllerMap[type])
-
-    private val isComplete: Flow<Boolean>
-    val populatedFormData: Flow<FormData?>
-
-    init {
-        val listCompleteFlows = mutableListOf<Flow<Boolean>>()
-        val listOfPairs = mutableListOf<Flow<Pair<String, String?>>>()
-        types.forEach { type ->
-            val element = when (type) {
-                SectionSpec.SectionFieldSpec.Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
-                SectionSpec.SectionFieldSpec.Email -> TextFieldController(EmailConfig())
-                SectionSpec.SectionFieldSpec.Country -> DropdownFieldController(CountryConfig())
+    // This maps the field type to the controller
+    private val fieldControllerMap: Map<SectionFieldSpec, FieldController> =
+        visualFieldLayout.allFields.associateWith { field ->
+            val fieldController = when (field) {
+                Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
+                Email -> TextFieldController(EmailConfig())
+                Country -> DropdownFieldController(CountryConfig())
             }
-            listCompleteFlows.add(element.isComplete)
-            listOfPairs.add(element.paymentMethodParams.map {
-                Pair(
-                    type.paymentMethodCreateParamsKey,
-                    it
-                )
-            })
-            typeControllerMap[type] = element
+            fieldController
         }
 
-        isComplete = combine(listCompleteFlows) { elementCompleteState ->
-            elementCompleteState.none { complete -> !complete }
+    // This find the element based on the field type
+    internal fun getController(type: SectionFieldSpec) =
+        requireNotNull(fieldControllerMap[type])
+
+    fun getNumberTextFields() = fieldControllerMap.count { it.value is TextFieldController }
+
+    // This is null if any form field values are incomplete, otherwise it is an object
+    // representing all the complete fields
+    val completeFormValues: Flow<FormFieldValues?> = combine(
+        currentFormFieldValuesFlow(fieldControllerMap),
+        allFormFieldsComplete(fieldControllerMap)
+    ) { formFieldValue, isComplete ->
+        formFieldValue.takeIf { isComplete }
+    }
+
+    companion object {
+        // Flows of FormFieldValues for each of the fields as they are updated
+        fun currentFormFieldValuesFlow(fieldElementMap: Map<SectionFieldSpec, FieldController>) =
+            combine(getCurrentFieldValuePairs(fieldElementMap))
+            {
+                transformToFormFieldValues(it)
+            }
+
+        fun transformToFormFieldValues(allFormFieldValues: Array<Pair<SectionFieldSpec, String>>) =
+            FormFieldValues(allFormFieldValues.toMap())
+
+        fun getCurrentFieldValuePairs(fieldElementMap: Map<SectionFieldSpec, FieldController>): List<Flow<Pair<SectionFieldSpec, String>>> {
+            return fieldElementMap.map { fieldElementEntry ->
+                getCurrentFieldValuePair(fieldElementEntry.key, fieldElementEntry.value)
+            }
         }
 
-        val formData = combine(listOfPairs) { allPairs ->
-            FormData(paramKey, allPairs.toMap())
+        fun getCurrentFieldValuePair(
+            field: SectionFieldSpec,
+            value: FieldController
+        ): Flow<Pair<SectionFieldSpec, String>> {
+            return value.fieldValue.map {
+                Pair(field, it)
+            }
         }
 
-        populatedFormData = combine(formData, isComplete) { populatedData, isComplete ->
-            populatedData.takeIf { isComplete }
-        }
+        fun allFormFieldsComplete(fieldElementMap: Map<SectionFieldSpec, FieldController>) =
+            combine(fieldElementMap.values.map { it.isComplete }) { fieldCompleteStates ->
+                fieldCompleteStates.none { complete -> !complete }
+            }
     }
 }
