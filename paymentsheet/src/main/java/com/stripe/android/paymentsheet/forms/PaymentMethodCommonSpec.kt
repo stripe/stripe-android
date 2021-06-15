@@ -8,21 +8,21 @@ data class FormSpec(
     val fieldLayout: FieldLayoutSpec,
     val paramKey: MutableMap<String, Any?>,
 ) {
-    val allTypes get() = fieldLayout.sections.map { it.sectionField }
+    val allTypes get() = fieldLayout.sections.map { it.field }
 }
 
 /**
  * This is a data representation of the layout of UI fields on the screen.
  */
 data class FieldLayoutSpec(val sections: List<SectionSpec>) {
-    val allFields get() = sections.map { it.sectionField }
+    val allFields get() = sections.map { it.field }
 }
 
 /**
  * This is used to define each section in the visual form layout
  */
 data class SectionSpec(
-    val sectionField: SectionFieldSpec
+    val field: SectionFieldSpec
 ) {
     sealed class SectionFieldSpec(
         // This is the key used in the PaymentMethodCreateParams

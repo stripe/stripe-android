@@ -45,7 +45,7 @@ internal fun TextField(
 
     val value by textFieldController.fieldValue.asLiveData().observeAsState("")
     val shouldShowError by textFieldController.visibleError.asLiveData().observeAsState(false)
-    val elementIsFull by textFieldController.isFull.asLiveData().observeAsState(false)
+    val fieldIsFull by textFieldController.isFull.asLiveData().observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
@@ -60,7 +60,7 @@ internal fun TextField(
     // This is setup so that when a field is full it still allows more characters
     // to be entered, it just triggers next focus when the event happens.
     @Suppress("UNUSED_VALUE")
-    processedIsFull = if (elementIsFull) {
+    processedIsFull = if (fieldIsFull) {
         if (!processedIsFull) {
             nextFocus?.requestFocus()
         }

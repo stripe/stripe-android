@@ -50,7 +50,7 @@ internal fun Form(
             .padding(16.dp)
     ) {
         fieldLayout.sections.forEach { section ->
-            val controller = formViewModel.getController(section.sectionField)
+            val controller = formViewModel.getController(section.field)
             val error by controller.errorMessage.asLiveData().observeAsState(null)
             val sectionErrorString =
                 error?.let { stringResource(it, stringResource(controller.label)) }
@@ -107,7 +107,7 @@ class FormViewModel(
             }
         }
 
-    // This find the element based on the field type
+    // This find the controller based on the field type
     internal fun getController(type: SectionFieldSpec) =
         requireNotNull(fieldControllerMap[type])
 
@@ -124,8 +124,8 @@ class FormViewModel(
 
     companion object {
         // Flows of FormFieldValues for each of the fields as they are updated
-        fun currentFormFieldValuesFlow(fieldElementMap: Map<SectionFieldSpec, FieldController>) =
-            combine(getCurrentFieldValuePairs(fieldElementMap))
+        fun currentFormFieldValuesFlow(fieldControllerMap: Map<SectionFieldSpec, FieldController>) =
+            combine(getCurrentFieldValuePairs(fieldControllerMap))
             {
                 transformToFormFieldValues(it)
             }
@@ -133,9 +133,9 @@ class FormViewModel(
         fun transformToFormFieldValues(allFormFieldValues: Array<Pair<SectionFieldSpec, String>>) =
             FormFieldValues(allFormFieldValues.toMap())
 
-        fun getCurrentFieldValuePairs(fieldElementMap: Map<SectionFieldSpec, FieldController>): List<Flow<Pair<SectionFieldSpec, String>>> {
-            return fieldElementMap.map { fieldElementEntry ->
-                getCurrentFieldValuePair(fieldElementEntry.key, fieldElementEntry.value)
+        fun getCurrentFieldValuePairs(fieldControllerMap: Map<SectionFieldSpec, FieldController>): List<Flow<Pair<SectionFieldSpec, String>>> {
+            return fieldControllerMap.map { fieldControllerEntry ->
+                getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
             }
         }
 
@@ -148,8 +148,8 @@ class FormViewModel(
             }
         }
 
-        fun allFormFieldsComplete(fieldElementMap: Map<SectionFieldSpec, FieldController>) =
-            combine(fieldElementMap.values.map { it.isComplete }) { fieldCompleteStates ->
+        fun allFormFieldsComplete(fieldControllerMap: Map<SectionFieldSpec, FieldController>) =
+            combine(fieldControllerMap.values.map { it.isComplete }) { fieldCompleteStates ->
                 fieldCompleteStates.none { complete -> !complete }
             }
     }
