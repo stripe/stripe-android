@@ -19,6 +19,7 @@ internal class TextFieldController(
     override val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
 
+    /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: Flow<String> = _fieldValue
 

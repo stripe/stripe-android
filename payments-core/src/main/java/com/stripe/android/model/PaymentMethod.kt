@@ -367,6 +367,10 @@ data class PaymentMethod internal constructor(
         }
     }
 
+    sealed class TypeData : StripeModel {
+        abstract val type: Type
+    }
+
     /**
      * If this is a `card` PaymentMethod, this hash contains details about the card.
      *
@@ -447,7 +451,8 @@ data class PaymentMethod internal constructor(
 
         @JvmField
         internal val networks: Networks? = null
-    ) : StripeModel {
+    ) : TypeData() {
+        override val type: Type get() = Type.Card
 
         /**
          * Checks on Card address and CVC if provided
@@ -509,7 +514,9 @@ data class PaymentMethod internal constructor(
     @Parcelize
     data class CardPresent internal constructor(
         private val ignore: Boolean = true
-    ) : StripeModel {
+    ) : TypeData() {
+        override val type: Type get() = Type.CardPresent
+
         internal companion object {
             @JvmSynthetic
             internal val EMPTY: CardPresent = CardPresent()
@@ -538,7 +545,9 @@ data class PaymentMethod internal constructor(
          * [ideal.bic](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal-bic)
          */
         @JvmField val bankIdentifierCode: String?
-    ) : StripeModel
+    ) : TypeData() {
+        override val type: Type get() = Type.Ideal
+    }
 
     /**
      * Requires the FPX payment method enabled on your account via
@@ -550,7 +559,9 @@ data class PaymentMethod internal constructor(
     data class Fpx internal constructor(
         @JvmField val bank: String?,
         @JvmField val accountHolderType: String?
-    ) : StripeModel
+    ) : TypeData() {
+        override val type: Type get() = Type.Fpx
+    }
 
     /**
      * If this is a `sepa_debit` PaymentMethod, this hash contains details about the SEPA debit bank account.
@@ -593,31 +604,41 @@ data class PaymentMethod internal constructor(
          * [sepa_debit.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-last4)
          */
         @JvmField val last4: String?
-    ) : StripeModel
+    ) : TypeData() {
+        override val type: Type get() = Type.SepaDebit
+    }
 
     @Parcelize
     data class AuBecsDebit internal constructor(
         @JvmField val bsbNumber: String?,
         @JvmField val fingerprint: String?,
         @JvmField val last4: String?
-    ) : StripeModel
+    ) : TypeData() {
+        override val type: Type get() = Type.AuBecsDebit
+    }
 
     @Parcelize
     data class BacsDebit internal constructor(
         @JvmField val fingerprint: String?,
         @JvmField val last4: String?,
         @JvmField val sortCode: String?
-    ) : StripeModel
+    ) : TypeData() {
+        override val type: Type get() = Type.BacsDebit
+    }
 
     @Parcelize
     data class Sofort internal constructor(
         @JvmField val country: String?
-    ) : StripeModel
+    ) : TypeData() {
+        override val type: Type get() = Type.Sofort
+    }
 
     @Parcelize
     data class Upi internal constructor(
         @JvmField val vpa: String?
-    ) : StripeModel
+    ) : TypeData() {
+        override val type: Type get() = Type.Upi
+    }
 
     @Parcelize
     data class Netbanking internal constructor(
@@ -627,7 +648,9 @@ data class PaymentMethod internal constructor(
          * [netbanking.bank](https://stripe.com/docs/payments/netbanking/banks)
          */
         @JvmField val bank: String?
-    ) : StripeModel
+    ) : TypeData() {
+        override val type: Type get() = Type.Netbanking
+    }
 
     companion object {
         @JvmStatic

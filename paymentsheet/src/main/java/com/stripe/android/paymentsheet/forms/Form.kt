@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.map
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val visualFieldLayout = formViewModel.visualFieldLayout
+    val fieldLayout = formViewModel.fieldLayout
 
     var focusRequesterIndex = 0
     val focusRequesters = List(formViewModel.getNumberTextFields()) { FocusRequester() }
@@ -49,7 +49,7 @@ internal fun Form(
             .fillMaxWidth(1f)
             .padding(16.dp)
     ) {
-        visualFieldLayout.sections.forEach { section ->
+        fieldLayout.sections.forEach { section ->
             val controller = formViewModel.getController(section.sectionField)
             val error by controller.errorMessage.asLiveData().observeAsState(null)
             val sectionErrorString =
@@ -83,29 +83,28 @@ internal fun Form(
  * for all the fields on screen.  When all fields are reported as complete, the completedFieldValues
  * holds the resulting values for each field.
  *
- * @param: visualFieldLayout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
+ * @param: fieldLayout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 class FormViewModel(
-    val visualFieldLayout: VisualFieldLayoutSpec,
+    val fieldLayout: FieldLayoutSpec,
 ) : ViewModel() {
     class Factory(
-        private val visualFieldLayout: VisualFieldLayoutSpec,
+        private val fieldLayout: FieldLayoutSpec,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(visualFieldLayout) as T
+            return FormViewModel(fieldLayout) as T
         }
     }
 
     // This maps the field type to the controller
     private val fieldControllerMap: Map<SectionFieldSpec, FieldController> =
-        visualFieldLayout.allFields.associateWith { field ->
-            val fieldController = when (field) {
+        fieldLayout.allFields.associateWith { field ->
+            when (field) {
                 Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
                 Email -> TextFieldController(EmailConfig())
                 Country -> DropdownFieldController(CountryConfig())
             }
-            fieldController
         }
 
     // This find the element based on the field type

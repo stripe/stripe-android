@@ -15,7 +15,7 @@ class FormViewModelTest {
 
     @Test
     fun `Verify params are set when element flows are complete`() = runBlocking {
-        val formViewModel = FormViewModel(sofort.visualFieldLayout)
+        val formViewModel = FormViewModel(sofort.fieldLayout)
 
         val nameElement = formViewModel.getController(Name) as TextFieldController
         val emailElement = formViewModel.getController(Email) as TextFieldController
