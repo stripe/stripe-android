@@ -56,19 +56,22 @@ internal fun Form(
                 error?.let { stringResource(it, stringResource(controller.label)) }
 
             Section(sectionErrorString) {
-                if (controller is TextFieldController) {
-                    TextField(
-                        textFieldController = controller,
-                        myFocus = focusRequesters[focusRequesterIndex],
-                        nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
-                            null
-                        } else {
-                            focusRequesters[focusRequesterIndex + 1]
-                        },
-                    )
-                    focusRequesterIndex++
-                } else if (controller is DropdownFieldController) {
-                    DropDown(controller)
+                when (controller) {
+                    is TextFieldController -> {
+                        TextField(
+                            textFieldController = controller,
+                            myFocus = focusRequesters[focusRequesterIndex],
+                            nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
+                                null
+                            } else {
+                                focusRequesters[focusRequesterIndex + 1]
+                            },
+                        )
+                        focusRequesterIndex++
+                    }
+                    is DropdownFieldController -> {
+                        DropDown(controller)
+                    }
                 }
             }
         }

@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 /**
  * This class provides the logic behind the fields.
  */
-interface FieldController {
+sealed interface FieldController {
     val label: Int
     val fieldValue: Flow<String>
     val isComplete: Flow<Boolean>
