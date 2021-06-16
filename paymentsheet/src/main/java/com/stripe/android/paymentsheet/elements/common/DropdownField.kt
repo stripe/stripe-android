@@ -21,8 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
 
-internal val textFieldBackgroundColor = Color(0xFFe0e0e0)
-
 @Composable
 internal fun DropDown(
     controller: DropdownFieldController,
@@ -34,7 +32,7 @@ internal fun DropDown(
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
-            .background(textFieldBackgroundColor)
+            .background(Color.Transparent)
     ) {
         Text(
             items[selectedIndex],

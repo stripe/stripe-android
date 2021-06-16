@@ -5,10 +5,10 @@ package com.stripe.android.paymentsheet.forms
  * This class is used to define different forms full of fields.
  */
 data class FormSpec(
-    val fieldLayout: FieldLayoutSpec,
+    val layout: FieldLayoutSpec,
     val paramKey: MutableMap<String, Any?>,
 ) {
-    val allTypes get() = fieldLayout.sections.map { it.field }
+    val allTypes get() = layout.sections.map { it.field }
 }
 
 /**

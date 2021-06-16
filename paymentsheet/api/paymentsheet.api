@@ -49,7 +49,7 @@ public final class com/stripe/android/paymentsheet/forms/FormSpec {
 	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FormSpec;Lcom/stripe/android/paymentsheet/forms/FieldLayoutSpec;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormSpec;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllTypes ()Ljava/util/List;
-	public final fun getFieldLayout ()Lcom/stripe/android/paymentsheet/forms/FieldLayoutSpec;
+	public final fun getLayout ()Lcom/stripe/android/paymentsheet/forms/FieldLayoutSpec;
 	public final fun getParamKey ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
