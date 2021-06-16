@@ -5,39 +5,45 @@ import kotlinx.parcelize.Parcelize
 /**
  * Model of the "data" object inside a [Customer] "source" object.
  */
+sealed class CustomerPaymentSource : StripeModel {
+    abstract val id: String?
+    abstract val tokenizationMethod: TokenizationMethod?
+}
+
 @Parcelize
-data class CustomerSource internal constructor(
-    private val stripePaymentSource: StripePaymentSource
-) : StripeModel, StripePaymentSource {
+data class CustomerCard(
+    val card: Card
+) : CustomerPaymentSource() {
+    override val id: String? get() = card.id
 
-    override val id: String?
-        get() = stripePaymentSource.id
-
-    val tokenizationMethod: TokenizationMethod?
+    override val tokenizationMethod: TokenizationMethod?
         get() {
-            return asSource()?.let { source ->
-                when (source.sourceTypeModel) {
-                    is SourceTypeModel.Card -> {
-                        source.sourceTypeModel.tokenizationMethod
-                    }
-                    else -> null
+            return card.tokenizationMethod
+        }
+}
+
+@Parcelize
+data class CustomerBankAccount(
+    val bankAccount: BankAccount
+) : CustomerPaymentSource() {
+    override val id: String? get() = bankAccount.id
+
+    override val tokenizationMethod: TokenizationMethod? get() = null
+}
+
+@Parcelize
+data class CustomerSource(
+    val source: Source
+) : CustomerPaymentSource() {
+    override val id: String? get() = source.id
+
+    override val tokenizationMethod: TokenizationMethod?
+        get() {
+            return when (source.sourceTypeModel) {
+                is SourceTypeModel.Card -> {
+                    source.sourceTypeModel.tokenizationMethod
                 }
-            } ?: asCard()?.tokenizationMethod
+                else -> null
+            }
         }
-
-    val sourceType: String
-        @Source.SourceType
-        get() = when (stripePaymentSource) {
-            is Card -> Source.SourceType.CARD
-            is Source -> stripePaymentSource.type
-            else -> Source.SourceType.UNKNOWN
-        }
-
-    fun asSource(): Source? {
-        return stripePaymentSource as? Source?
-    }
-
-    fun asCard(): Card? {
-        return stripePaymentSource as? Card?
-    }
 }
