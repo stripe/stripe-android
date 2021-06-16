@@ -4557,6 +4557,9 @@ public final class com/stripe/android/paymentsheet/injection/FlowControllerModul
 	public static fun provideViewModel (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Landroidx/lifecycle/ViewModelStoreOwner;)Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
 }
 
+public abstract interface annotation class com/stripe/android/paymentsheet/injection/IOContext : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_ProvideApiRequestOptionsFactory : dagger/internal/Factory {
 	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule;Ljavax/inject/Provider;)V
 	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_ProvideApiRequestOptionsFactory;

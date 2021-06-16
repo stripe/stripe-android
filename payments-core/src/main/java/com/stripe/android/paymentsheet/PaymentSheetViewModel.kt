@@ -32,7 +32,7 @@ import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
-import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
+import com.stripe.android.paymentsheet.injection.IOContext
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -48,7 +48,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -81,7 +80,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val logger: Logger,
-    @Named(PaymentSheetViewModelModule.WORK_CONTEXT) workContext: CoroutineContext,
+    @IOContext workContext: CoroutineContext,
     private val paymentController: PaymentController
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,

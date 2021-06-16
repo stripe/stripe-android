@@ -27,7 +27,6 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -162,8 +161,7 @@ internal class PaymentSheetViewModelModule {
     fun provideLogger() = Logger.noop()
 
     @Provides
-    @Singleton
-    @Named(WORK_CONTEXT)
+    @IOContext
     fun provideWorkContext(): CoroutineContext = Dispatchers.IO
 
     @Provides
@@ -179,9 +177,5 @@ internal class PaymentSheetViewModelModule {
             stripeApiRepository,
             enableLogging = true
         )
-    }
-
-    companion object {
-        const val WORK_CONTEXT = "WORK_CONTEXT"
     }
 }
