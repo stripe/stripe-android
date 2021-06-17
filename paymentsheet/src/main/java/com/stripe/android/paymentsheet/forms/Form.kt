@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.Section
 import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Name
-import com.stripe.android.paymentsheet.forms.FormElementSpec.StaticSpec.TextSpec
+import com.stripe.android.paymentsheet.forms.FormElementSpec.StaticTextSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -81,7 +81,7 @@ internal fun Form(
                         }
                     }
                 }
-                is TextSpec -> {
+                is StaticTextSpec -> {
                     Text(
                         stringResource(element.stringResId),
                         modifier = Modifier.padding(vertical = 8.dp),
