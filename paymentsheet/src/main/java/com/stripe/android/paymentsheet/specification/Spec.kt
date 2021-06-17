@@ -36,11 +36,9 @@ sealed class FormElementSpec {
         }
     }
 
-    sealed class StaticSpec : FormElementSpec() {
-        data class TextSpec(
-            @StringRes val stringResId: Int,
-            val color: Color
-        ) : StaticSpec()
-    }
+    data class StaticTextSpec(
+        @StringRes val stringResId: Int,
+        val color: Color
+    ) : FormElementSpec()
 }
 
