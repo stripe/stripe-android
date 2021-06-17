@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
@@ -11,7 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentController
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
@@ -26,29 +27,28 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
-import com.stripe.android.payments.PaymentIntentFlowResultProcessor
-import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
+import com.stripe.android.paymentsheet.injection.IOContext
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -66,17 +66,22 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     }
 }
 
-internal class PaymentSheetViewModel internal constructor(
+@Singleton
+internal class PaymentSheetViewModel @Inject internal constructor(
+    // Properties provided through PaymentSheetViewModelComponent.Builder
+    application: Application,
+    internal val args: PaymentSheetContract.Args,
+    private val eventReporter: EventReporter,
+    // Properties provided through injection
+    private val apiRequestOptions: ApiRequest.Options,
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
-    private val paymentFlowResultProcessor: PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>,
+    private val paymentFlowResultProcessor: dagger.Lazy<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
-    private val eventReporter: EventReporter,
-    internal val args: PaymentSheetContract.Args,
-    private val logger: Logger = Logger.noop(),
-    workContext: CoroutineContext,
-    application: Application
+    private val logger: Logger,
+    @IOContext workContext: CoroutineContext,
+    private val paymentController: PaymentController
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -281,6 +286,28 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
+    suspend fun confirmStripeIntent(
+        authActivityStarterHost: AuthActivityStarterHost,
+        confirmStripeIntentParams: ConfirmStripeIntentParams
+    ) {
+        paymentController.startConfirmAndAuth(
+            authActivityStarterHost,
+            confirmStripeIntentParams,
+            apiRequestOptions
+        )
+    }
+
+    fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
+        paymentController.registerLaunchersWithActivityResultCaller(
+            activityResultCaller,
+            ::onPaymentFlowResult
+        )
+    }
+
+    fun unregisterFromActivity() {
+        paymentController.unregisterLaunchers()
+    }
+
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -366,7 +393,7 @@ internal class PaymentSheetViewModel internal constructor(
         viewModelScope.launch {
             val result = runCatching {
                 withContext(workContext) {
-                    paymentFlowResultProcessor.processResult(
+                    paymentFlowResultProcessor.get().processResult(
                         paymentFlowResult
                     )
                 }
@@ -418,83 +445,25 @@ internal class PaymentSheetViewModel internal constructor(
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args,
+        private val eventReporterSupplier: (() -> EventReporter)? = null
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val application = applicationSupplier()
-            val config = PaymentConfiguration.getInstance(application)
-            val publishableKey = config.publishableKey
-            val stripeAccountId = config.stripeAccountId
-            val stripeRepository = StripeApiRepository(
-                application,
-                { publishableKey }
-            )
-
-            val starterArgs = starterArgsSupplier()
-
-            val googlePayRepository =
-                starterArgs.config?.googlePay?.environment?.let { environment ->
-                    DefaultGooglePayRepository(
-                        application,
-                        environment
-                    )
-                } ?: GooglePayRepository.Disabled
-
-            val prefsRepository = starterArgs.config?.customer?.let { (id) ->
-                DefaultPrefsRepository(
-                    application,
-                    customerId = id,
-                    isGooglePayReady = { googlePayRepository.isReady().first() },
-                    workContext = Dispatchers.IO
+            return DaggerPaymentSheetViewModelComponent.builder()
+                .application(applicationSupplier())
+                .starterArgs(starterArgsSupplier())
+                .eventReporter(
+                    eventReporterSupplier?.let {
+                        it()
+                    } ?: run {
+                        DefaultEventReporter(
+                            mode = EventReporter.Mode.Complete,
+                            starterArgsSupplier().sessionId,
+                            applicationSupplier()
+                        )
+                    }
                 )
-            } ?: PrefsRepository.Noop()
-
-            val stripeIntentRepository = StripeIntentRepository.Api(
-                stripeRepository = stripeRepository,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
-                workContext = Dispatchers.IO
-            )
-
-            val paymentMethodsRepository = PaymentMethodsApiRepository(
-                stripeRepository = stripeRepository,
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-                workContext = Dispatchers.IO
-            )
-
-            val paymentFlowResultProcessor =
-                when (starterArgs.clientSecret) {
-                    is PaymentIntentClientSecret -> PaymentIntentFlowResultProcessor(
-                        application,
-                        { publishableKey },
-                        stripeRepository,
-                        enableLogging = true,
-                        Dispatchers.IO
-                    )
-                    is SetupIntentClientSecret -> SetupIntentFlowResultProcessor(
-                        application,
-                        { publishableKey },
-                        stripeRepository,
-                        enableLogging = true,
-                        Dispatchers.IO
-                    )
-                }
-
-            return PaymentSheetViewModel(
-                stripeIntentRepository,
-                paymentMethodsRepository,
-                paymentFlowResultProcessor,
-                googlePayRepository,
-                prefsRepository,
-                DefaultEventReporter(
-                    mode = EventReporter.Mode.Complete,
-                    starterArgs.sessionId,
-                    application
-                ),
-                starterArgs,
-                logger = Logger.noop(),
-                workContext = Dispatchers.IO,
-                application = application
-            ) as T
+                .build()
+                .viewModel as T
         }
     }
 

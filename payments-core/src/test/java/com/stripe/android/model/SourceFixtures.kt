@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.SourceOrderFixtures.SOURCE_ORDER_JSON
-import com.stripe.android.model.parsers.CustomerSourceJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
 import org.json.JSONObject
 
@@ -399,10 +398,6 @@ internal object SourceFixtures {
                 }
             }
         """.trimIndent()
-    )
-
-    internal val CUSTOMER_SOURCE_CARD = requireNotNull(
-        CustomerSourceJsonParser().parse(CUSTOMER_SOURCE_CARD_JSON)
     )
 
     internal const val DOGE_COIN = "dogecoin"

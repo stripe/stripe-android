@@ -18,14 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentController
 import com.stripe.android.R
-import com.stripe.android.StripePaymentController
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.googlepaylauncher.StripeGooglePayContract
-import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.Amount
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -43,7 +38,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
             { application },
-            { requireNotNull(starterArgs) }
+            { requireNotNull(starterArgs) },
+            { eventReporter }
         )
 
     @VisibleForTesting
@@ -84,12 +80,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         )
     }
 
-    private lateinit var paymentController: PaymentController
-
-    private val paymentConfig: PaymentConfiguration by lazy {
-        PaymentConfiguration.getInstance(application)
-    }
-
     private val currencyFormatter = CurrencyFormatter()
 
     private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
@@ -116,19 +106,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             return
         }
 
-        paymentController = StripePaymentController(
-            application,
-            { paymentConfig.publishableKey },
-            StripeApiRepository(
-                application,
-                { paymentConfig.publishableKey }
-            ),
-            true
-        )
-
-        paymentController.registerLaunchersWithActivityResultCaller(this) {
-            viewModel.onPaymentFlowResult(it)
-        }
+        viewModel.registerFromActivity(this)
 
         val googlePayLauncher = registerForActivityResult(
             StripeGooglePayContract()
@@ -181,13 +159,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
                 lifecycleScope.launch {
-                    paymentController.startConfirmAndAuth(
+                    viewModel.confirmStripeIntent(
                         AuthActivityStarterHost.create(this@PaymentSheetActivity),
-                        confirmParams,
-                        ApiRequest.Options(
-                            apiKey = paymentConfig.publishableKey,
-                            stripeAccount = paymentConfig.stripeAccountId
-                        )
+                        confirmParams
                     )
                 }
             }
@@ -200,7 +174,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     override fun onDestroy() {
         super.onDestroy()
-        paymentController.unregisterLaunchers()
+        viewModel.unregisterFromActivity()
     }
 
     override fun onBackPressed() {

@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.map
 
 // TODO: Save for future usage.
 
+internal val formElementPadding = 16.dp
+
 @ExperimentalAnimationApi
 @Composable
 internal fun Form(
@@ -50,7 +52,7 @@ internal fun Form(
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
-            .padding(16.dp)
+            .padding(formElementPadding)
     ) {
         fieldLayout.elements.forEach { element ->
             when (element) {
