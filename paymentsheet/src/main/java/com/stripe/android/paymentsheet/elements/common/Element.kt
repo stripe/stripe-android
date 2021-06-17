@@ -11,6 +11,9 @@ internal class FocusRequesterCount {
     fun get() = value
 }
 
+interface OptionalElement {
+    val identifier: IdentifierSpec
+}
 
 internal sealed interface SectionFieldElementType {
     val identifier: IdentifierSpec
@@ -43,13 +46,22 @@ internal sealed class FormElement {
         val stringResId: Int,
         val color: Color,
         override val controller: Controller? = null,
+    ) : FormElement(), OptionalElement
+
+    /**
+     * This is an element that will make elements (as specified by identifier) hidden
+     * when save for future use is unchecked)
+     */
+    data class SaveForFutureUseElement(
+        override val identifier: IdentifierSpec,
+        override val controller: SaveForFutureUseController,
     ) : FormElement()
 
     data class SectionElement(
         override val identifier: IdentifierSpec,
         val field: SectionFieldElementType,
         override val controller: Controller
-    ) : FormElement() {
+    ) : FormElement(), OptionalElement {
 
         sealed class SectionFieldElement {
             abstract val identifier: IdentifierSpec

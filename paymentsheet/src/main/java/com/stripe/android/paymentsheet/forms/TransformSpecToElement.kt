@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.common.FocusRequesterCount
 import com.stripe.android.paymentsheet.elements.common.FormElement
+import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specification.FormElementSpec
@@ -14,6 +15,7 @@ internal class TransformSpecToElement {
     fun createElement(layout: LayoutSpec, focusRequesterCount: FocusRequesterCount) =
         layout.elements.map {
             when (it) {
+                is FormElementSpec.SaveForFutureUseSpec -> createElement(it)
                 is FormElementSpec.SectionSpec -> createElement(it, focusRequesterCount)
                 is FormElementSpec.StaticSpec.TextSpec -> createElement(it)
             }
@@ -78,4 +80,14 @@ internal class TransformSpecToElement {
             DropdownFieldController(CountryConfig())
         )
 
+
+    private fun createElement(spec: FormElementSpec.SaveForFutureUseSpec) =
+        FormElement.SaveForFutureUseElement(
+            spec.identifier,
+            SaveForFutureUseController(
+                spec.elementsOptionalOnFutureUse.map { element ->
+                    element.identifier
+                }
+            )
+        )
 }

@@ -1,9 +1,12 @@
 package com.stripe.android.paymentsheet.forms
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,10 +28,8 @@ import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.specification.IdentifierSpec
 import com.stripe.android.paymentsheet.specification.LayoutSpec
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-
-// TODO: Save for future usage.
 
 internal val formElementPadding = 16.dp
 
@@ -39,6 +40,9 @@ internal fun Form(
 ) {
     val focusRequesters =
         List(formViewModel.getCountFocusableFields()) { FocusRequester() }
+    val isOptionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
+        emptyList()
+    )
 
     Column(
         modifier = Modifier
@@ -46,39 +50,57 @@ internal fun Form(
             .padding(formElementPadding)
     ) {
         formViewModel.elements.forEach { element ->
-            when (element) {
-                is FormElement.SectionElement -> {
-                    val controller = element.controller
-                    val error by controller.errorMessage.asLiveData().observeAsState(null)
-                    val sectionErrorString =
-                        error?.let { stringResource(it, stringResource(controller.label)) }
 
-                    Section(sectionErrorString) {
-                        when (element.field) {
-                            is SectionFieldElementType.TextFieldElement -> {
-                                val focusRequesterIndex = element.field.focusIndexOrder
-                                TextField(
-                                    textFieldController = element.field.controller,
-                                    myFocus = focusRequesters[focusRequesterIndex],
-                                    nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
-                                        null
-                                    } else {
-                                        focusRequesters[focusRequesterIndex + 1]
-                                    },
-                                )
-                            }
-                            is SectionFieldElementType.DropdownFieldElement -> {
-                                DropDown(element.field.controller)
+            AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
+                when (element) {
+                    is FormElement.SectionElement -> {
+
+                        AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
+                            val controller = element.controller
+
+                            val error by controller.errorMessage.asLiveData().observeAsState(null)
+                            val sectionErrorString =
+                                error?.let { stringResource(it, stringResource(controller.label)) }
+
+                            Section(sectionErrorString) {
+                                when (element.field) {
+                                    is SectionFieldElementType.TextFieldElement -> {
+                                        val focusRequesterIndex = element.field.focusIndexOrder
+                                        TextField(
+                                            textFieldController = element.field.controller,
+                                            myFocus = focusRequesters[focusRequesterIndex],
+                                            nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
+                                                null
+                                            } else {
+                                                focusRequesters[focusRequesterIndex + 1]
+                                            },
+                                        )
+                                    }
+                                    is SectionFieldElementType.DropdownFieldElement -> {
+                                        DropDown(element.field.controller)
+                                    }
+                                }
                             }
                         }
                     }
-                }
-                is FormElement.StaticElement -> {
-                    Text(
-                        stringResource(element.stringResId),
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = element.color
-                    )
+                    is FormElement.StaticElement -> {
+                        Text(
+                            stringResource(element.stringResId),
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = element.color
+                        )
+                    }
+                    is FormElement.SaveForFutureUseElement -> {
+                        val controller = element.controller
+                        val checked by controller.saveForFutureUse.asLiveData().observeAsState(true)
+                        Row(modifier = Modifier.padding(vertical = 8.dp)) {
+                            Checkbox(
+                                checked = checked,
+                                onCheckedChange = { controller.onValueChange(it) }
+                            )
+                            Text(stringResource(controller.label))
+                        }
+                    }
                 }
             }
         }
@@ -111,6 +133,11 @@ class FormViewModel(
     private val specToFormTransform = TransformSpecToElement()
     internal val elements = specToFormTransform.createElement(layout, focusIndex)
 
+    val optionalIdentifiers = elements
+        .filterIsInstance<FormElement.SaveForFutureUseElement>()
+        .firstOrNull()?.controller?.optionalIdentifiers
+        ?: MutableStateFlow(emptyList())
+
     // This maps the field type to the controller
     private val idControllerMap = elements
         .filter { it.controller != null }
@@ -132,10 +159,10 @@ class FormViewModel(
             transformToFormFieldValues(it)
         }
 
-    fun transformToFormFieldValues(allFormFieldValues: Array<Pair<IdentifierSpec, String>>) =
+    fun transformToFormFieldValues(allFormFieldValues: Array<Pair<IdentifierSpec, String?>>) =
         FormFieldValues(allFormFieldValues.toMap())
 
-    fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>): List<Flow<Pair<IdentifierSpec, String>>> {
+    fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>): List<Flow<Pair<IdentifierSpec, String?>>> {
         return idControllerMap.map { fieldControllerEntry ->
             getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
         }
@@ -144,14 +171,21 @@ class FormViewModel(
     fun getCurrentFieldValuePair(
         field: IdentifierSpec,
         value: Controller
-    ): Flow<Pair<IdentifierSpec, String>> {
-        return value.fieldValue.map {
-            Pair(field, it)
+    ): Flow<Pair<IdentifierSpec, String?>> {
+        return combine(optionalIdentifiers, value.fieldValue) { optionalIdentifiers, fieldValue ->
+            Pair(field, fieldValue.takeUnless { optionalIdentifiers.contains(field) })
         }
     }
 
     fun allFormFieldsComplete(fieldControllerMap: Map<IdentifierSpec, Controller>) =
-        combine(fieldControllerMap.values.map { it.isComplete }) { fieldCompleteStates ->
+        combine(
+            fieldControllerMap.entries.map { fieldIsComplete(it.key, it.value) },
+        ) { fieldCompleteStates ->
             fieldCompleteStates.none { complete -> !complete }
+        }
+
+    private fun fieldIsComplete(field: IdentifierSpec, controller: Controller) =
+        combine(controller.isComplete, optionalIdentifiers) { fieldIsComplete, optionalIdentifier ->
+            fieldIsComplete.takeUnless { optionalIdentifier.contains(field) } ?: true
         }
 }

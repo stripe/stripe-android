@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.specification
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec
+import com.stripe.android.paymentsheet.elements.common.OptionalElement
 
 
 /**
@@ -16,22 +16,18 @@ data class FormSpec(
 /**
  * This is a data representation of the layout of UI fields on the screen.
  */
-data class LayoutSpec(val elements: List<FormElementSpec>) {
-    val allFields
-        get() = elements.filterIsInstance<SectionSpec>().map { it.field }
-}
+data class LayoutSpec(val elements: List<FormElementSpec>)
 
 data class IdentifierSpec(val value: String)
 
 /**
  * This is used to define each section in the visual form layout
  */
-
 sealed class FormElementSpec {
     data class SectionSpec(
-        val identifier: IdentifierSpec,
+        override val identifier: IdentifierSpec,
         val field: SectionFieldSpec
-    ) : FormElementSpec() {
+    ) : FormElementSpec(), OptionalElement {
 
         sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
             object Name : SectionFieldSpec(IdentifierSpec("name"))
@@ -45,12 +41,22 @@ sealed class FormElementSpec {
     /**
      * This is for elements that do not receive user input
      */
-    sealed class StaticSpec : FormElementSpec() {
+    sealed class StaticSpec : FormElementSpec(), OptionalElement {
         data class TextSpec(
-            val identifier: IdentifierSpec,
+            override val identifier: IdentifierSpec,
             @StringRes val stringResId: Int,
             val color: Color
-        ) : StaticSpec()
+        ) : StaticSpec(), OptionalElement
+    }
+
+    /**
+     * This is an element that will make elements (as specified by identifer hidden
+     * when save for future use is unchecked)
+     */
+    data class SaveForFutureUseSpec(
+        val elementsOptionalOnFutureUse: List<OptionalElement>
+    ) : FormElementSpec(), OptionalElement {
+        override val identifier = IdentifierSpec("save_for_future_use")
     }
 }
 
