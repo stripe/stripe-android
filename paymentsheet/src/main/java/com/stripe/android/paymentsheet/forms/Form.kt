@@ -15,20 +15,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
-import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.DropDown
-import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.common.FocusRequesterCount
+import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.Section
+import com.stripe.android.paymentsheet.elements.common.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.common.TextField
-import com.stripe.android.paymentsheet.elements.common.TextFieldController
-import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Name
-import com.stripe.android.paymentsheet.specification.FormElementSpec.StaticSpec.TextSpec
 import com.stripe.android.paymentsheet.specification.IdentifierSpec
 import com.stripe.android.paymentsheet.specification.LayoutSpec
 import kotlinx.coroutines.flow.Flow
@@ -44,29 +37,28 @@ internal val formElementPadding = 16.dp
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val fieldLayout = formViewModel.layout
-
-    var focusRequesterIndex = 0
-    val focusRequesters = List(formViewModel.getNumberTextFields()) { FocusRequester() }
+    val focusRequesters =
+        List(formViewModel.getCountFocusableFields()) { FocusRequester() }
 
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
             .padding(formElementPadding)
     ) {
-        fieldLayout.elements.forEach { element ->
+        formViewModel.elements.forEach { element ->
             when (element) {
-                is SectionSpec -> {
-                    val controller = formViewModel.getController(element.field.identifier)
+                is FormElement.SectionElement -> {
+                    val controller = element.controller
                     val error by controller.errorMessage.asLiveData().observeAsState(null)
                     val sectionErrorString =
                         error?.let { stringResource(it, stringResource(controller.label)) }
 
                     Section(sectionErrorString) {
-                        when (controller) {
-                            is TextFieldController -> {
+                        when (element.field) {
+                            is SectionFieldElementType.TextFieldElement -> {
+                                val focusRequesterIndex = element.field.focusIndexOrder
                                 TextField(
-                                    textFieldController = controller,
+                                    textFieldController = element.field.controller,
                                     myFocus = focusRequesters[focusRequesterIndex],
                                     nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
                                         null
@@ -74,15 +66,14 @@ internal fun Form(
                                         focusRequesters[focusRequesterIndex + 1]
                                     },
                                 )
-                                focusRequesterIndex++
                             }
-                            is DropdownFieldController -> {
-                                DropDown(controller)
+                            is SectionFieldElementType.DropdownFieldElement -> {
+                                DropDown(element.field.controller)
                             }
                         }
                     }
                 }
-                is TextSpec -> {
+                is FormElement.StaticElement -> {
                     Text(
                         stringResource(element.stringResId),
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -99,10 +90,11 @@ internal fun Form(
  * for all the fields on screen.  When all fields are reported as complete, the completedFieldValues
  * holds the resulting values for each field.
  *
- * @param: layout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
+ * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
+ * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 class FormViewModel(
-    val layout: LayoutSpec,
+    layout: LayoutSpec,
 ) : ViewModel() {
     class Factory(
         private val layout: LayoutSpec,
@@ -113,21 +105,16 @@ class FormViewModel(
         }
     }
 
+    private var focusIndex = FocusRequesterCount()
+    fun getCountFocusableFields() = focusIndex.get()
+
+    private val specToFormTransform = TransformSpecToElement()
+    internal val elements = specToFormTransform.createElement(layout, focusIndex)
+
     // This maps the field type to the controller
-    private val idControllerMap: Map<IdentifierSpec, Controller> =
-        layout.allFields.associate { field ->
-            field.identifier to when (field) {
-                Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
-                Email -> TextFieldController(EmailConfig())
-                Country -> DropdownFieldController(CountryConfig())
-            }
-        }
-
-    // This find the controller based on the field type
-    internal fun getController(type: IdentifierSpec) =
-        requireNotNull(idControllerMap[type])
-
-    fun getNumberTextFields() = idControllerMap.count { it.value is TextFieldController }
+    private val idControllerMap = elements
+        .filter { it.controller != null }
+        .associate { Pair(it.identifier, it.controller!!) }
 
     // This is null if any form field values are incomplete, otherwise it is an object
     // representing all the complete fields

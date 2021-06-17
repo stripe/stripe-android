@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Name
@@ -18,26 +19,28 @@ class FormViewModelTest {
     fun `Verify params are set when element flows are complete`() = runBlocking {
         val formViewModel = FormViewModel(sofort.layout)
 
-        val nameElement = formViewModel.getController(Name) as TextFieldController
-        val emailElement = formViewModel.getController(Email) as TextFieldController
+        val nameElement =
+            (formViewModel.elements[0] as FormElement.SectionElement).field.controller as TextFieldController
+        val emailElement =
+            (formViewModel.elements[1] as FormElement.SectionElement).field.controller as TextFieldController
 
         nameElement.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.getMap()?.get(Name.identifier)
         ).isNull()
 
         emailElement.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Email)
+            formViewModel.completeFormValues.first()?.getMap()?.get(Email.identifier)
         ).isEqualTo("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.getMap()?.get(Name.identifier)
         ).isEqualTo("joe")
 
         emailElement.onValueChange("invalid.email@IncompleteDomain")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.getMap()?.get(Name.identifier)
         ).isNull()
     }
 }
