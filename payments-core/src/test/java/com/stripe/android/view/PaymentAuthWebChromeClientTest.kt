@@ -2,9 +2,9 @@ package com.stripe.android.view
 
 import android.webkit.ConsoleMessage
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.FakeLogger
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 

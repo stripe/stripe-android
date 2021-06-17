@@ -34,6 +34,10 @@
 - Changes to `SourceParams`
      - Most setter methods have been removed
      - `extraParams` property has been removed
+- Changes to `Customer`
+    - Remove `fromString()` and `fromJson()`
+    - Rename `CustomerSource` to `CustomerPaymentSource` and make a sealed class with types
+      `CustomerBankAccount`, `CustomerCard`, and `CustomerSource`
 - Changes to `CardBrand`
     - Deprecated methods have been removed
 - Changes to `CardInputWidget`

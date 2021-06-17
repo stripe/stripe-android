@@ -49,7 +49,7 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.5.1'
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation 'org.json:json:20210307'
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:3.2.0"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"

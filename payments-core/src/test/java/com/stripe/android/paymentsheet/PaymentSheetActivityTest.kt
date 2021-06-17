@@ -8,14 +8,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.StripePaymentController
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
@@ -26,6 +25,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
@@ -51,6 +51,9 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -685,15 +688,24 @@ internal class PaymentSheetActivityTest {
         whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(paymentIntentResult)
 
         PaymentSheetViewModel(
-            stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
-            paymentMethodsRepository = FakePaymentMethodsRepository(paymentMethods),
-            paymentFlowResultProcessor = paymentFlowResultProcessor,
-            googlePayRepository = googlePayRepository,
-            prefsRepository = FakePrefsRepository(),
-            eventReporter = eventReporter,
-            args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext()
+            ApplicationProvider.getApplicationContext(),
+            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            eventReporter,
+            ApiRequest.Options(
+                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            ),
+            StripeIntentRepository.Static(paymentIntent),
+            FakePaymentMethodsRepository(paymentMethods),
+            { paymentFlowResultProcessor },
+            googlePayRepository,
+            FakePrefsRepository(),
+            Logger.noop(),
+            testDispatcher,
+            StripePaymentController(
+                ApplicationProvider.getApplicationContext(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                mock()
+            )
         )
     }
 

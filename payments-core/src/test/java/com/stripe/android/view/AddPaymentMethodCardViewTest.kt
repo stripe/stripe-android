@@ -1,12 +1,12 @@
 package com.stripe.android.view
 
 import android.view.inputmethod.EditorInfo
-import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 

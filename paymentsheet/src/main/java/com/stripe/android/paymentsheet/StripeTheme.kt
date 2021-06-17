@@ -6,6 +6,9 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
 
 private val Green400 = Color(0xFF3CB043)
 private val Green800 = Color(0xFF234F1E)
@@ -31,6 +34,7 @@ private val StripeDarkPalette = darkColors(
     primaryVariant = Green400,
     onPrimary = Color.Black,
     secondary = Yellow400,
+    surface = Color.Black, // card background color
     onSecondary = Color.Black,
     onSurface = Color.White,
     onBackground = Color.White,
@@ -39,11 +43,12 @@ private val StripeDarkPalette = darkColors(
 )
 
 private val StripeLightPalette = lightColors(
-    primary = Teal,
+    primary = Color(0xFF1A1A1A),
     primaryVariant = TealLight,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,
     secondary = Purple,
     secondaryVariant = PurpleLight,
+    surface = Color.White, // card background color
     onSecondary = Color.Black,
     onSurface = Color.Black,
     onBackground = Color.Black,
@@ -51,8 +56,12 @@ private val StripeLightPalette = lightColors(
     onError = Color.White
 )
 
+internal val LocalFieldTextStyle = TextStyle.Default.copy(
+    fontFamily = FontFamily.SansSerif,
+    fontSize = 14.sp
+)
+
 @Composable
-@Suppress("FunctionName")
 internal fun StripeTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
@@ -61,6 +70,10 @@ internal fun StripeTheme(
 
     MaterialTheme(
         colors = myColors,
-        content = content,
+        typography = MaterialTheme.typography.copy(
+            body1 = LocalFieldTextStyle,
+            subtitle1 = LocalFieldTextStyle
+        ),
+        content = content
     )
 }
