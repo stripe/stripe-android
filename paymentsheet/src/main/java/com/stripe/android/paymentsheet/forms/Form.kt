@@ -146,46 +146,34 @@ class FormViewModel(
     // This is null if any form field values are incomplete, otherwise it is an object
     // representing all the complete fields
     val completeFormValues: Flow<FormFieldValues?> = combine(
-        currentFormFieldValuesFlow(idControllerMap),
-        allFormFieldsComplete(idControllerMap)
-    ) { formFieldValue, isComplete ->
-        formFieldValue.takeIf { isComplete }
+        getCurrentFieldValuePairs(idControllerMap)
+    ) { formFieldValues ->
+        FormFieldValues(
+            formFieldValues.toMap().mapValues {
+                it.value.fieldValue
+            }
+        ).takeIf {
+            formFieldValues
+                .map { it.second.isComplete }
+                .none { complete -> !complete }
+        }
     }
 
-    // Flows of FormFieldValues for each of the fields as they are updated
-    fun currentFormFieldValuesFlow(idControllerMap: Map<IdentifierSpec, Controller>) =
-        combine(getCurrentFieldValuePairs(idControllerMap))
-        {
-            transformToFormFieldValues(it)
-        }
-
-    fun transformToFormFieldValues(allFormFieldValues: Array<Pair<IdentifierSpec, String?>>) =
-        FormFieldValues(allFormFieldValues.toMap())
-
-    fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>): List<Flow<Pair<IdentifierSpec, String?>>> {
-        return idControllerMap.map { fieldControllerEntry ->
+    fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>) =
+        idControllerMap.map { fieldControllerEntry ->
             getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
         }
-    }
 
     fun getCurrentFieldValuePair(
         field: IdentifierSpec,
         value: Controller
-    ): Flow<Pair<IdentifierSpec, String?>> {
-        return combine(optionalIdentifiers, value.fieldValue) { optionalIdentifiers, fieldValue ->
-            Pair(field, fieldValue.takeUnless { optionalIdentifiers.contains(field) })
-        }
+    ) = combine(value.fieldValue, value.isComplete) { fieldValue, isComplete ->
+        Pair(field, FieldSnapshot(fieldValue, field, isComplete))
     }
-
-    fun allFormFieldsComplete(fieldControllerMap: Map<IdentifierSpec, Controller>) =
-        combine(
-            fieldControllerMap.entries.map { fieldIsComplete(it.key, it.value) },
-        ) { fieldCompleteStates ->
-            fieldCompleteStates.none { complete -> !complete }
-        }
-
-    private fun fieldIsComplete(field: IdentifierSpec, controller: Controller) =
-        combine(controller.isComplete, optionalIdentifiers) { fieldIsComplete, optionalIdentifier ->
-            fieldIsComplete.takeUnless { optionalIdentifier.contains(field) } ?: true
-        }
 }
+
+data class FieldSnapshot(
+    val fieldValue: String,
+    val identifier: IdentifierSpec,
+    val isComplete: Boolean
+)
