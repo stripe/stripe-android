@@ -24,13 +24,13 @@ import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Name
-import com.stripe.android.paymentsheet.specification.FormElementSpec.StaticSpec.TextSpec
-import com.stripe.android.paymentsheet.specification.IdentifierSpec
-import com.stripe.android.paymentsheet.specification.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.StaticTextSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -82,7 +82,7 @@ internal fun Form(
                         }
                     }
                 }
-                is TextSpec -> {
+                is StaticTextSpec -> {
                     Text(
                         stringResource(element.stringResId),
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -99,7 +99,8 @@ internal fun Form(
  * for all the fields on screen.  When all fields are reported as complete, the completedFieldValues
  * holds the resulting values for each field.
  *
- * @param: layout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
+ * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
+ * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 class FormViewModel(
     val layout: LayoutSpec,
