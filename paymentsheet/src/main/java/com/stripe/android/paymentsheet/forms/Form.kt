@@ -143,18 +143,31 @@ class FormViewModel(
         .filter { it.controller != null }
         .associate { Pair(it.identifier, it.controller!!) }
 
+    val currentFieldValueMap = combine(
+        getCurrentFieldValuePairs(idControllerMap)
+    ) {
+        it.toMap()
+    }
+
     // This is null if any form field values are incomplete, otherwise it is an object
     // representing all the complete fields
     val completeFormValues: Flow<FormFieldValues?> = combine(
-        getCurrentFieldValuePairs(idControllerMap)
-    ) { formFieldValues ->
+        currentFieldValueMap,
+        optionalIdentifiers
+    ) { idFieldSnapshotMap, optionalIdentifiers ->
+
+        // This will hit twice in a row when the save for future use state changes: once for the
+        // saveController changing and once for the the optionalFields changing
+        val optionalFilteredFieldSnapshotMap = idFieldSnapshotMap.filter {
+            !optionalIdentifiers.contains(it.key)
+        }
+
         FormFieldValues(
-            formFieldValues.toMap().mapValues {
+            optionalFilteredFieldSnapshotMap.mapValues {
                 it.value.fieldValue
             }
         ).takeIf {
-            formFieldValues
-                .map { it.second.isComplete }
+            optionalFilteredFieldSnapshotMap.values.map { it.isComplete }
                 .none { complete -> !complete }
         }
     }
