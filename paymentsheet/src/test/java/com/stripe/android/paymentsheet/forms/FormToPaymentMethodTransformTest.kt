@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Name
 import org.junit.Test
 
 class FormToPaymentMethodTransformTest {

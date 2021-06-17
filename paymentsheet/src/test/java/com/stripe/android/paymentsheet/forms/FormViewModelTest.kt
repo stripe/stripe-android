@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.forms.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Name
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -22,21 +22,21 @@ class FormViewModelTest {
 
         nameElement.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
         ).isNull()
 
         emailElement.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Email)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email)
         ).isEqualTo("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
         ).isEqualTo("joe")
 
         emailElement.onValueChange("invalid.email@IncompleteDomain")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
         ).isNull()
     }
 }
