@@ -1,8 +1,8 @@
-package com.stripe.android.paymentsheet.specification
+package com.stripe.android.paymentsheet.specifications
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec
 
 
 /**
