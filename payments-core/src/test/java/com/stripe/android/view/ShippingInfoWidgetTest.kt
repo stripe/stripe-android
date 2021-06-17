@@ -5,7 +5,6 @@ import android.view.View
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.EphemeralKeyProvider
@@ -17,6 +16,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.getCountryCode
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.BeforeTest

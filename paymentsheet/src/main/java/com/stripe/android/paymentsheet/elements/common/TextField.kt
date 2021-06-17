@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusOrder
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.asLiveData
@@ -27,6 +28,13 @@ import androidx.lifecycle.asLiveData
 internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
     ImeAction.Next
 } ?: ImeAction.Done
+
+internal data class TextFieldColors(
+    val placeholderColor: Color = Color(0x14000000),
+    val backgroundColor: Color = Color.Transparent,
+    val focusedIndicatorColor: Color = Color.Transparent, // primary color by default
+    val unfocusedIndicatorColor: Color = Color.Transparent
+)
 
 /**
  * This is focused on converting an `Element` into what is displayed in a textField.
@@ -49,12 +57,17 @@ internal fun TextField(
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
+    val textFieldColors = TextFieldColors()
     val colors = TextFieldDefaults.textFieldColors(
         textColor = if (shouldShowError) {
             MaterialTheme.colors.error
         } else {
             LocalContentColor.current.copy(LocalContentAlpha.current)
-        }
+        },
+        placeholderColor = textFieldColors.placeholderColor,
+        backgroundColor = textFieldColors.backgroundColor,
+        focusedIndicatorColor = textFieldColors.focusedIndicatorColor,
+        unfocusedIndicatorColor = textFieldColors.unfocusedIndicatorColor
     )
 
     // This is setup so that when a field is full it still allows more characters

@@ -1,7 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.Customer
-import com.stripe.android.model.CustomerSource
+import com.stripe.android.model.CustomerPaymentSource
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.StripeJsonUtils.optString
 import com.stripe.android.model.TokenizationMethod
@@ -9,7 +9,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class CustomerJsonParser : ModelJsonParser<Customer> {
-    private val customerSourceJsonParser = CustomerSourceJsonParser()
+    private val customerSourceJsonParser = CustomerPaymentSourceJsonParser()
 
     override fun parse(json: JSONObject): Customer? {
         val objectType = optString(json, FIELD_OBJECT)
@@ -26,7 +26,7 @@ internal class CustomerJsonParser : ModelJsonParser<Customer> {
         val hasMore: Boolean
         val totalCount: Int?
         val url: String?
-        val sources: List<CustomerSource>
+        val sources: List<CustomerPaymentSource>
         if (sourcesJson != null && VALUE_LIST == optString(sourcesJson, FIELD_OBJECT)) {
             hasMore = StripeJsonUtils.optBoolean(sourcesJson, FIELD_HAS_MORE)
             totalCount = StripeJsonUtils.optInteger(sourcesJson, FIELD_TOTAL_COUNT)

@@ -3,7 +3,7 @@ package com.stripe.android.model.parsers
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.BankAccount
 import com.stripe.android.model.Customer
-import com.stripe.android.model.CustomerSource
+import com.stripe.android.model.CustomerBankAccount
 import org.json.JSONObject
 import kotlin.test.Test
 
@@ -20,7 +20,7 @@ class CustomerJsonParserTest {
                 defaultSource = "ba_1H3NOMCRMbs6FrXfahj",
                 shippingInformation = null,
                 sources = listOf(
-                    CustomerSource(
+                    CustomerBankAccount(
                         BankAccount(
                             id = "ba_1H3NOMCRMbs6FrXfahj",
                             accountHolderName = "Test Bank Account",
