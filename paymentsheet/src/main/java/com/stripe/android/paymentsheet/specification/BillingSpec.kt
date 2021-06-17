@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.paymentsheet.specification
 
 internal val addressParams: MutableMap<String, Any?> = mutableMapOf(
     "city" to null,

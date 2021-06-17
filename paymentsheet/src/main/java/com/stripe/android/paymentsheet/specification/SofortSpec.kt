@@ -1,12 +1,12 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.paymentsheet.specification
 
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Name
-import com.stripe.android.paymentsheet.forms.FormElementSpec.StaticSpec.TextSpec
+import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec
+import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.specification.FormElementSpec.StaticSpec.TextSpec
 
 internal val sofortParams: MutableMap<String, Any?> = mutableMapOf(
     "country" to null,
@@ -19,7 +19,7 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 val sofort = FormSpec(
-    Layout(
+    LayoutSpec(
         listOf(
             SectionSpec(Name),
             SectionSpec(Email),

@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec
+import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec
 
 class FormFieldValues(private val fieldValuePairs: Map<SectionFieldSpec, String?> = mapOf()) {
     fun update(field: SectionFieldSpec, fieldValue: String): FormFieldValues {
