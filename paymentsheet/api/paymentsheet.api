@@ -55,17 +55,13 @@ public final class com/stripe/android/paymentsheet/forms/FormElementSpec$Section
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/forms/FormElementSpec$SectionSpec$SectionFieldSpec$Name;
 }
 
-public abstract class com/stripe/android/paymentsheet/forms/FormElementSpec$StaticSpec : com/stripe/android/paymentsheet/forms/FormElementSpec {
-	public static final field $stable I
-}
-
-public final class com/stripe/android/paymentsheet/forms/FormElementSpec$StaticSpec$TextSpec : com/stripe/android/paymentsheet/forms/FormElementSpec$StaticSpec {
+public final class com/stripe/android/paymentsheet/forms/FormElementSpec$StaticTextSpec : com/stripe/android/paymentsheet/forms/FormElementSpec {
 	public static final field $stable I
 	public synthetic fun <init> (IJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2-0d7_KjU ()J
-	public final fun copy-4WTKRHQ (IJ)Lcom/stripe/android/paymentsheet/forms/FormElementSpec$StaticSpec$TextSpec;
-	public static synthetic fun copy-4WTKRHQ$default (Lcom/stripe/android/paymentsheet/forms/FormElementSpec$StaticSpec$TextSpec;IJILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormElementSpec$StaticSpec$TextSpec;
+	public final fun copy-4WTKRHQ (IJ)Lcom/stripe/android/paymentsheet/forms/FormElementSpec$StaticTextSpec;
+	public static synthetic fun copy-4WTKRHQ$default (Lcom/stripe/android/paymentsheet/forms/FormElementSpec$StaticTextSpec;IJILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormElementSpec$StaticTextSpec;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getColor-0d7_KjU ()J
 	public final fun getStringResId ()I
@@ -78,7 +74,7 @@ public final class com/stripe/android/paymentsheet/forms/FormFieldValues {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getMap ()Ljava/util/Map;
+	public final fun getFieldValuePairs ()Ljava/util/Map;
 	public final fun update (Lcom/stripe/android/paymentsheet/forms/FormElementSpec$SectionSpec$SectionFieldSpec;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/forms/FormFieldValues;
 }
 
