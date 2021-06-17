@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.elements.country.CountryUtils
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.*
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Country
 import java.util.Locale
 
 /**

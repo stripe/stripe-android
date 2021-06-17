@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
  */
 internal class TextFieldController(
     private val textFieldConfig: TextFieldConfig
-) : FieldController {
+) : Controller {
     @StringRes
     override val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
@@ -27,8 +27,8 @@ internal class TextFieldController(
 
     private val _hasFocus = MutableStateFlow(false)
 
-    val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { elementState, hasFocus ->
-        elementState.shouldShowError(hasFocus)
+    val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
+        fieldState.shouldShowError(hasFocus)
     }
     override val errorMessage: Flow<Int?> = visibleError.map { visibleError ->
         _fieldState.value.getErrorMessageResId()?.takeIf { visibleError }

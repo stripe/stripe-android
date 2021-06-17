@@ -19,17 +19,18 @@ import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.common.FieldController
+import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Name
-import com.stripe.android.paymentsheet.forms.FormElementSpec.StaticTextSpec
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.StaticTextSpec
+import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -102,10 +103,10 @@ internal fun Form(
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 class FormViewModel(
-    val layout: Layout,
+    val layout: LayoutSpec,
 ) : ViewModel() {
     class Factory(
-        private val layout: Layout,
+        private val layout: LayoutSpec,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -114,7 +115,7 @@ class FormViewModel(
     }
 
     // This maps the field type to the controller
-    private val fieldControllerMap: Map<SectionFieldSpec, FieldController> =
+    private val fieldControllerMap: Map<SectionFieldSpec, Controller> =
         layout.allFields.associateWith { field ->
             when (field) {
                 Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
@@ -140,7 +141,7 @@ class FormViewModel(
 
     companion object {
         // Flows of FormFieldValues for each of the fields as they are updated
-        fun currentFormFieldValuesFlow(fieldControllerMap: Map<SectionFieldSpec, FieldController>) =
+        fun currentFormFieldValuesFlow(fieldControllerMap: Map<SectionFieldSpec, Controller>) =
             combine(getCurrentFieldValuePairs(fieldControllerMap))
             {
                 transformToFormFieldValues(it)
@@ -149,7 +150,7 @@ class FormViewModel(
         fun transformToFormFieldValues(allFormFieldValues: Array<Pair<SectionFieldSpec, String>>) =
             FormFieldValues(allFormFieldValues.toMap())
 
-        fun getCurrentFieldValuePairs(fieldControllerMap: Map<SectionFieldSpec, FieldController>): List<Flow<Pair<SectionFieldSpec, String>>> {
+        fun getCurrentFieldValuePairs(fieldControllerMap: Map<SectionFieldSpec, Controller>): List<Flow<Pair<SectionFieldSpec, String>>> {
             return fieldControllerMap.map { fieldControllerEntry ->
                 getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
             }
@@ -157,14 +158,14 @@ class FormViewModel(
 
         fun getCurrentFieldValuePair(
             field: SectionFieldSpec,
-            value: FieldController
+            value: Controller
         ): Flow<Pair<SectionFieldSpec, String>> {
             return value.fieldValue.map {
                 Pair(field, it)
             }
         }
 
-        fun allFormFieldsComplete(fieldControllerMap: Map<SectionFieldSpec, FieldController>) =
+        fun allFormFieldsComplete(fieldControllerMap: Map<SectionFieldSpec, Controller>) =
             combine(fieldControllerMap.values.map { it.isComplete }) { fieldCompleteStates ->
                 fieldCompleteStates.none { complete -> !complete }
             }
