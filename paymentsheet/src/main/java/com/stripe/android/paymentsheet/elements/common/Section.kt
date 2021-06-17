@@ -36,7 +36,7 @@ internal fun Section(error: String?, content: @Composable () -> Unit) {
             content()
         }
         AnimatedVisibility(error != null) {
-            SectionError(error!!)
+            SectionError(error ?: "")
         }
     }
 }
