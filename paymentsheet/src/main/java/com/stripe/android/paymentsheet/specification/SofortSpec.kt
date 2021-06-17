@@ -21,10 +21,10 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 val sofort = FormSpec(
     LayoutSpec(
         listOf(
-            SectionSpec(Name),
-            SectionSpec(Email),
-            SectionSpec(Country),
-            TextSpec(R.string.sofort_mandate, Color.Gray)
+            SectionSpec(IdentifierSpec("name"), Name),
+            SectionSpec(IdentifierSpec("email"), Email),
+            SectionSpec(IdentifierSpec("country"), Country),
+            TextSpec(IdentifierSpec("mandate"), R.string.sofort_mandate, Color.Gray)
         )
     ),
     sofortParamKey,

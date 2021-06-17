@@ -7,17 +7,17 @@ import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec
 import com.stripe.android.paymentsheet.specification.sofortParamKey
 import org.junit.Test
 
-class FormToPaymentMethodTransformTest {
+class TransformFormToPaymentMethodTest {
 
     @Test
     fun `transform to payment method params`() {
-        val paymentMethodParams = FormToPaymentMethodTransform().transform(
+        val paymentMethodParams = TransformFormToPaymentMethod().transform(
             sofortParamKey,
             FormFieldValues(
                 mapOf(
-                    Name to "joe",
-                    Email to "joe@gmail.com",
-                    Country to "United States",
+                    Name.identifier to "joe",
+                    Email.identifier to "joe@gmail.com",
+                    Country.identifier to "United States",
                 )
             )
         )

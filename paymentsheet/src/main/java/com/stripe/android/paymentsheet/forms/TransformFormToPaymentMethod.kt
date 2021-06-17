@@ -7,7 +7,7 @@ import java.util.Locale
 /**
  * This class will transform the fields in a form into a structure as defined by a map.
  */
-class FormToPaymentMethodTransform {
+class TransformFormToPaymentMethod {
     /**
      * This function will put the field values as defined in the formFieldValues into a map
      * according to the mapLayout structure.
@@ -26,7 +26,7 @@ class FormToPaymentMethodTransform {
         // Need to convert Country Fields to a country code to put it in the parameter map
         val formKeyValueMap = formFieldValues.getMap()
             .mapValues { entry ->
-                if (entry.key == Country) {
+                if (entry.key == Country.identifier) {
                     entry.value?.let {
                         CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
                     }
@@ -34,7 +34,7 @@ class FormToPaymentMethodTransform {
                     entry.value
                 }
             }
-            .mapKeys { it.key.identifier }
+            .mapKeys { it.key.value }
 
         createMap(mapStructure, destMap, formKeyValueMap)
         return destMap
