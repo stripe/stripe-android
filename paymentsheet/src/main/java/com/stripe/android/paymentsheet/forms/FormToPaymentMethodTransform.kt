@@ -24,7 +24,7 @@ class FormToPaymentMethodTransform {
         val destMap = mutableMapOf<String, Any?>()
 
         // Need to convert Country Fields to a country code to put it in the parameter map
-        val formKeyValueMap = formFieldValues.getMap()
+        val formKeyValueMap = formFieldValues.fieldValuePairs
             .mapValues { entry ->
                 if (entry.key == Country) {
                     entry.value?.let {

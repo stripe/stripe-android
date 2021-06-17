@@ -98,7 +98,8 @@ internal fun Form(
  * for all the fields on screen.  When all fields are reported as complete, the completedFieldValues
  * holds the resulting values for each field.
  *
- * @param: fieldLayout - this contains the visual layout of the fields on the screen used by [Form] to display the UI fields on screen.  It also informs us of the backing fields to be created.
+ * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
+ * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 class FormViewModel(
     val layout: Layout,

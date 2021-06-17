@@ -22,21 +22,21 @@ class FormViewModelTest {
 
         nameElement.onValueChange("joe")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
         ).isNull()
 
         emailElement.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Email)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email)
         ).isEqualTo("joe@gmail.com")
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
         ).isEqualTo("joe")
 
         emailElement.onValueChange("invalid.email@IncompleteDomain")
 
         assertThat(
-            formViewModel.completeFormValues.first()?.getMap()?.get(Name)
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
         ).isNull()
     }
 }
