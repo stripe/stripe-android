@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.elements.common.FormElement.SectionElemen
 import com.stripe.android.paymentsheet.elements.common.FormElement.SectionElement.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.elements.common.FormElement.SectionElement.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.specifications.FormElementSpec
+import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import org.junit.Test
@@ -25,19 +25,19 @@ class TransformSpecToElementTest {
     fun `Create a layout element`() {
         val layout = LayoutSpec(
             listOf(
-                FormElementSpec.SectionSpec(
+                FormItemSpec.SectionSpec(
                     IdentifierSpec("nameSection"),
-                    FormElementSpec.SectionSpec.SectionFieldSpec.Name
+                    FormItemSpec.SectionSpec.SectionFieldSpec.Name
                 ),
-                FormElementSpec.SectionSpec(
+                FormItemSpec.SectionSpec(
                     IdentifierSpec("emailSection"),
-                    FormElementSpec.SectionSpec.SectionFieldSpec.Email
+                    FormItemSpec.SectionSpec.SectionFieldSpec.Email
                 ),
-                FormElementSpec.SectionSpec(
+                FormItemSpec.SectionSpec(
                     IdentifierSpec("countrySection"),
-                    FormElementSpec.SectionSpec.SectionFieldSpec.Country
+                    FormItemSpec.SectionSpec.SectionFieldSpec.Country
                 ),
-                FormElementSpec.StaticTextSpec(
+                FormItemSpec.StaticTextSpec(
                     IdentifierSpec("mandateSection"),
                     R.string.sofort_mandate,
                     Color.Gray

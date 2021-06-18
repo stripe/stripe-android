@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.elements.common.FocusRequesterCount
 import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.specifications.FormElementSpec
+import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 
 /**
@@ -17,29 +17,29 @@ import com.stripe.android.paymentsheet.specifications.LayoutSpec
  */
 internal class TransformSpecToElement {
     fun transform(layout: LayoutSpec, focusRequesterCount: FocusRequesterCount) =
-        layout.elements.map {
+        layout.items.map {
             when (it) {
-                is FormElementSpec.SectionSpec -> transform(it, focusRequesterCount)
-                is FormElementSpec.StaticTextSpec -> transform(it)
+                is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
+                is FormItemSpec.StaticTextSpec -> transform(it)
             }
         }
 
     private fun transform(
-        spec: FormElementSpec.SectionSpec,
+        spec: FormItemSpec.SectionSpec,
         focusRequesterCount: FocusRequesterCount
     ): FormElement.SectionElement {
 
         val fieldElement = when (spec.field) {
-            FormElementSpec.SectionSpec.SectionFieldSpec.Email -> transform(
-                spec.field as FormElementSpec.SectionSpec.SectionFieldSpec.Email,
+            FormItemSpec.SectionSpec.SectionFieldSpec.Email -> transform(
+                spec.field as FormItemSpec.SectionSpec.SectionFieldSpec.Email,
                 focusRequesterCount
             )
-            FormElementSpec.SectionSpec.SectionFieldSpec.Name -> transform(
-                spec.field as FormElementSpec.SectionSpec.SectionFieldSpec.Name,
+            FormItemSpec.SectionSpec.SectionFieldSpec.Name -> transform(
+                spec.field as FormItemSpec.SectionSpec.SectionFieldSpec.Name,
                 focusRequesterCount
             )
-            FormElementSpec.SectionSpec.SectionFieldSpec.Country -> transform(
-                spec.field as FormElementSpec.SectionSpec.SectionFieldSpec.Country
+            FormItemSpec.SectionSpec.SectionFieldSpec.Country -> transform(
+                spec.field as FormItemSpec.SectionSpec.SectionFieldSpec.Country
             )
         }
 
@@ -52,7 +52,7 @@ internal class TransformSpecToElement {
         )
     }
 
-    private fun transform(spec: FormElementSpec.StaticTextSpec) =
+    private fun transform(spec: FormItemSpec.StaticTextSpec) =
         // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         FormElement.StaticTextElement(
@@ -62,7 +62,7 @@ internal class TransformSpecToElement {
         )
 
     private fun transform(
-        spec: FormElementSpec.SectionSpec.SectionFieldSpec.Name,
+        spec: FormItemSpec.SectionSpec.SectionFieldSpec.Name,
         focusRequesterCount: FocusRequesterCount
     ) =
         FormElement.SectionElement.SectionFieldElement.Name(
@@ -73,7 +73,7 @@ internal class TransformSpecToElement {
 
 
     private fun transform(
-        spec: FormElementSpec.SectionSpec.SectionFieldSpec.Email,
+        spec: FormItemSpec.SectionSpec.SectionFieldSpec.Email,
         focusRequesterCount: FocusRequesterCount
     ) =
         FormElement.SectionElement.SectionFieldElement.Email(
@@ -83,7 +83,7 @@ internal class TransformSpecToElement {
         )
 
 
-    private fun transform(spec: FormElementSpec.SectionSpec.SectionFieldSpec.Country) =
+    private fun transform(spec: FormItemSpec.SectionSpec.SectionFieldSpec.Country) =
         FormElement.SectionElement.SectionFieldElement.Country(
             spec.identifier,
             DropdownFieldController(CountryConfig())
