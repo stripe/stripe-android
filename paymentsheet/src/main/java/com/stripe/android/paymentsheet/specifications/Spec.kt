@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.specification
+package com.stripe.android.paymentsheet.specifications
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
@@ -41,13 +41,11 @@ sealed class FormElementSpec {
     /**
      * This is for elements that do not receive user input
      */
-    sealed class StaticSpec : FormElementSpec(), OptionalElement {
-        data class TextSpec(
-            override val identifier: IdentifierSpec,
-            @StringRes val stringResId: Int,
-            val color: Color
-        ) : StaticSpec(), OptionalElement
-    }
+    data class StaticTextSpec(
+        override val identifier: IdentifierSpec,
+        @StringRes val stringResId: Int,
+        val color: Color
+    ) : FormElementSpec(), OptionalElement
 
     /**
      * This is an element that will make elements (as specified by identifer hidden
@@ -59,4 +57,3 @@ sealed class FormElementSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
 }
-

@@ -25,8 +25,8 @@ import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.common.TextField
-import com.stripe.android.paymentsheet.specification.IdentifierSpec
-import com.stripe.android.paymentsheet.specification.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -41,7 +41,7 @@ internal fun Form(
     val focusRequesters =
         List(formViewModel.getCountFocusableFields()) { FocusRequester() }
     val isOptionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
-        emptyList()
+        emptyList<IdentifierSpec>()
     )
 
     Column(
@@ -54,7 +54,6 @@ internal fun Form(
             AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
                 when (element) {
                     is FormElement.SectionElement -> {
-
                         AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
                             val controller = element.controller
 
@@ -83,16 +82,18 @@ internal fun Form(
                             }
                         }
                     }
-                    is FormElement.StaticElement -> {
+                    is FormElement.StaticTextElement -> {
                         Text(
                             stringResource(element.stringResId),
                             modifier = Modifier.padding(vertical = 8.dp),
                             color = element.color
                         )
                     }
+
                     is FormElement.SaveForFutureUseElement -> {
                         val controller = element.controller
-                        val checked by controller.saveForFutureUse.asLiveData().observeAsState(true)
+                        val checked by controller.saveForFutureUse.asLiveData()
+                            .observeAsState(true)
                         Row(modifier = Modifier.padding(vertical = 8.dp)) {
                             Checkbox(
                                 checked = checked,
