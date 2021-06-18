@@ -32,7 +32,7 @@ import java.security.cert.CertificateException
 import kotlin.coroutines.CoroutineContext
 
 /**
- * [IntentAuthenticator] authenticate through Stripe's 3ds2 SDK.
+ * [IntentAuthenticator] authenticating through Stripe's 3ds2 SDK.
  */
 internal class Stripe3DS2Authenticator(
     private val config: PaymentAuthConfig,
