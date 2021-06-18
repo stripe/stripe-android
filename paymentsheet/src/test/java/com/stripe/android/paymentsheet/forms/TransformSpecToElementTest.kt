@@ -79,28 +79,6 @@ class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a mandate section spec setup of the mandate element correctly`() {
-        val mandate = FormItemSpec.StaticTextSpec(
-            IdentifierSpec("mandate"),
-            R.string.sofort_mandate,
-            Color.Gray
-        )
-        val formElement = transformSpecToElement.transform(
-            LayoutSpec(
-                listOf(mandate)
-            ),
-            FocusRequesterCount()
-        )
-
-        val mandateElement = formElement.first() as StaticTextElement
-
-        assertThat(mandateElement.controller).isNull()
-        assertThat(mandateElement.color).isEqualTo(mandate.color)
-        assertThat(mandateElement.stringResId).isEqualTo(mandate.stringResId)
-        assertThat(mandateElement.identifier).isEqualTo(mandate.identifier)
-    }
-
-    @Test
     fun `Add a email section spec sets up the email element correctly`() {
         val formElement = transformSpecToElement.transform(
             LayoutSpec(
@@ -137,5 +115,27 @@ class TransformSpecToElementTest {
 
         // It should equal as many text field as are present
         assertThat(focusRequesterCount.get()).isEqualTo(2)
+    }
+
+    @Test
+    fun `Add a mandate section spec setup of the mandate element correctly`() {
+        val mandate = FormItemSpec.StaticTextSpec(
+            IdentifierSpec("mandate"),
+            R.string.sofort_mandate,
+            Color.Gray
+        )
+        val formElement = transformSpecToElement.transform(
+            LayoutSpec(
+                listOf(mandate)
+            ),
+            FocusRequesterCount()
+        )
+
+        val mandateElement = formElement.first() as StaticTextElement
+
+        assertThat(mandateElement.controller).isNull()
+        assertThat(mandateElement.color).isEqualTo(mandate.color)
+        assertThat(mandateElement.stringResId).isEqualTo(mandate.stringResId)
+        assertThat(mandateElement.identifier).isEqualTo(mandate.identifier)
     }
 }
