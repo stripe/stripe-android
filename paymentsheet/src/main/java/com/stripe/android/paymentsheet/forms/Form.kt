@@ -109,7 +109,7 @@ class FormViewModel(
     fun getCountFocusableFields() = focusIndex.get()
 
     private val specToFormTransform = TransformSpecToElement()
-    internal val elements = specToFormTransform.createElement(layout, focusIndex)
+    internal val elements = specToFormTransform.transform(layout, focusIndex)
 
     // This maps the field type to the controller
     private val idControllerMap = elements
