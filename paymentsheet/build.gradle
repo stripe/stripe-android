@@ -46,6 +46,14 @@ android {
     }
 }
 
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
+
+configurations {
+    javadocDeps
+    ktlint
+}
+
 dependencies {
 //    implementation project(":payments-core")
     implementation libraries.androidx.fragment.ktx
@@ -92,4 +100,23 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = "Check Kotlin code style."
+    main = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "src/**/*.kt"
+    // to generate report in checkstyle format prepend following args:
+    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
+    // see https://github.com/pinterest/ktlint#usage for more
+}
+check.dependsOn ktlint
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    main = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "-F", "src/**/*.kt"
 }
