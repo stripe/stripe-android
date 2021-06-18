@@ -1,6 +1,10 @@
-package com.stripe.android.paymentsheet.elements.common
+package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.paymentsheet.elements.common.Controller
+import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
 internal class FocusRequesterCount {
@@ -41,7 +45,7 @@ internal sealed class FormElement {
      * This is an element that will make elements (as specified by identifier hidden
      * when save for future use is unchecked)
      */
-    data class StaticTextElement(
+    internal data class StaticTextElement(
         override val identifier: IdentifierSpec,
         val stringResId: Int,
         val color: Color,

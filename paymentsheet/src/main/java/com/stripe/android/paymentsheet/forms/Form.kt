@@ -18,15 +18,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
+import com.stripe.android.paymentsheet.FocusRequesterCount
+import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.common.DropDown
-import com.stripe.android.paymentsheet.elements.common.FocusRequesterCount
-import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.Section
-import com.stripe.android.paymentsheet.elements.common.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal val formElementPadding = 16.dp
@@ -66,11 +65,9 @@ internal fun Form(
                                         TextField(
                                             textFieldController = element.field.controller,
                                             myFocus = focusRequesters[focusRequesterIndex],
-                                            nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
-                                                null
-                                            } else {
-                                                focusRequesters[focusRequesterIndex + 1]
-                                            },
+                                            nextFocus = focusRequesters.getOrNull(
+                                                focusRequesterIndex + 1
+                                            ),
                                         )
                                     }
                                     is SectionFieldElementType.DropdownFieldElement -> {
@@ -130,7 +127,7 @@ class FormViewModel(
     fun getCountFocusableFields() = focusIndex.get()
 
     private val specToFormTransform = TransformSpecToElement()
-    internal val elements = specToFormTransform.createElement(layout, focusIndex)
+    internal val elements = specToFormTransform.transform(layout, focusIndex)
 
     val optionalIdentifiers = elements
         .filterIsInstance<FormElement.SaveForFutureUseElement>()
