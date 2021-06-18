@@ -6,6 +6,9 @@ import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
+/**
+ * This is used to track the number of focus requesters in a form
+ */
 internal class FocusRequesterCount {
     private var value = 0
 
@@ -14,7 +17,9 @@ internal class FocusRequesterCount {
     fun get() = value
 }
 
-
+/**
+ * This abstract is used to define the types of elements allowed in a section
+ */
 internal sealed interface SectionFieldElementType {
     val identifier: IdentifierSpec
     val controller: Controller
@@ -30,16 +35,15 @@ internal sealed interface SectionFieldElementType {
 }
 
 /**
- * This is used to define each section in the visual form layout.
- * Each item in the layout has an identifier and a controller associated with it.
+ * This is used to define each section in the visual form layout as an element.
  */
 internal sealed class FormElement {
     abstract val controller: Controller?
     abstract val identifier: IdentifierSpec
 
     /**
-     * This is an element that will make elements (as specified by identifier hidden
-     * when save for future use is unchecked)
+     * This is an element that has static text because it takes no user input, it is not
+     * outputted from the list of form field values.
      */
     internal data class StaticTextElement(
         override val identifier: IdentifierSpec,
@@ -48,12 +52,18 @@ internal sealed class FormElement {
         override val controller: Controller? = null,
     ) : FormElement()
 
+    /**
+     * This is an element that contains another element.
+     */
     data class SectionElement(
         override val identifier: IdentifierSpec,
         val field: SectionFieldElementType,
         override val controller: Controller
     ) : FormElement() {
 
+        /**
+         * This is an element that is in a section and accepts user input.
+         */
         sealed class SectionFieldElement {
             abstract val identifier: IdentifierSpec
             abstract val controller: Controller

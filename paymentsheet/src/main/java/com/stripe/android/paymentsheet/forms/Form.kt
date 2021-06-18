@@ -16,8 +16,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.FocusRequesterCount
-import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.SectionFieldElementType
+import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.FormElement.StaticTextElement
+import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
+import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.Section
@@ -47,7 +49,7 @@ internal fun Form(
     ) {
         formViewModel.elements.forEach { element ->
             when (element) {
-                is FormElement.SectionElement -> {
+                is SectionElement -> {
                     val controller = element.controller
                     val error by controller.errorMessage.asLiveData().observeAsState(null)
                     val sectionErrorString =
@@ -55,7 +57,7 @@ internal fun Form(
 
                     Section(sectionErrorString) {
                         when (element.field) {
-                            is SectionFieldElementType.TextFieldElement -> {
+                            is TextFieldElement -> {
                                 val focusRequesterIndex = element.field.focusIndexOrder
                                 TextField(
                                     textFieldController = element.field.controller,
@@ -65,13 +67,13 @@ internal fun Form(
                                     ),
                                 )
                             }
-                            is SectionFieldElementType.DropdownFieldElement -> {
+                            is DropdownFieldElement -> {
                                 DropDown(element.field.controller)
                             }
                         }
                     }
                 }
-                is FormElement.StaticTextElement -> {
+                is StaticTextElement -> {
                     Text(
                         stringResource(element.stringResId),
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -91,9 +93,7 @@ internal fun Form(
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
-class FormViewModel(
-    layout: LayoutSpec,
-) : ViewModel() {
+class FormViewModel(layout: LayoutSpec) : ViewModel() {
     class Factory(
         private val layout: LayoutSpec,
     ) : ViewModelProvider.Factory {
@@ -124,16 +124,16 @@ class FormViewModel(
     }
 
     // Flows of FormFieldValues for each of the fields as they are updated
-    fun currentFormFieldValuesFlow(idControllerMap: Map<IdentifierSpec, Controller>) =
+    private fun currentFormFieldValuesFlow(idControllerMap: Map<IdentifierSpec, Controller>) =
         combine(getCurrentFieldValuePairs(idControllerMap))
         {
             transformToFormFieldValues(it)
         }
 
-    fun transformToFormFieldValues(allFormFieldValues: Array<Pair<IdentifierSpec, String>>) =
+    private fun transformToFormFieldValues(allFormFieldValues: Array<Pair<IdentifierSpec, String>>) =
         FormFieldValues(allFormFieldValues.toMap())
 
-    fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>): List<Flow<Pair<IdentifierSpec, String>>> {
+    private fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>): List<Flow<Pair<IdentifierSpec, String>>> {
         return idControllerMap.map { fieldControllerEntry ->
             getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
         }

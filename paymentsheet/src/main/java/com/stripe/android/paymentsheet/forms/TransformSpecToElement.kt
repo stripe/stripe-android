@@ -53,8 +53,6 @@ internal class TransformSpecToElement {
     }
 
     private fun transform(spec: FormItemSpec.StaticTextSpec) =
-    // It could be argued that the static text should have a controller, but
-        // since it doesn't provide a form field we leave it out for now
         FormElement.StaticTextElement(
             spec.identifier,
             spec.stringResId,
