@@ -104,7 +104,7 @@ class FormViewModel(layout: LayoutSpec) : ViewModel() {
     }
 
     private var focusIndex = FocusRequesterCount()
-    fun getCountFocusableFields() = focusIndex.get()
+    internal fun getCountFocusableFields() = focusIndex.get()
 
     private val specToFormTransform = TransformSpecToElement()
     internal val elements = specToFormTransform.transform(layout, focusIndex)
@@ -139,7 +139,7 @@ class FormViewModel(layout: LayoutSpec) : ViewModel() {
         }
     }
 
-    fun getCurrentFieldValuePair(
+    private fun getCurrentFieldValuePair(
         field: IdentifierSpec,
         value: Controller
     ): Flow<Pair<IdentifierSpec, String>> {
@@ -148,7 +148,7 @@ class FormViewModel(layout: LayoutSpec) : ViewModel() {
         }
     }
 
-    fun allFormFieldsComplete(fieldControllerMap: Map<IdentifierSpec, Controller>) =
+    private fun allFormFieldsComplete(fieldControllerMap: Map<IdentifierSpec, Controller>) =
         combine(fieldControllerMap.values.map { it.isComplete }) { fieldCompleteStates ->
             fieldCompleteStates.none { complete -> !complete }
         }
