@@ -22,7 +22,7 @@ class TransformSpecToElementTest {
     private val focusRequesterCount = FocusRequesterCount()
 
     @Test
-    fun `create a layout element`() {
+    fun `Create a layout element`() {
         val layout = LayoutSpec(
             listOf(
                 FormElementSpec.SectionSpec(
@@ -30,7 +30,7 @@ class TransformSpecToElementTest {
                     FormElementSpec.SectionSpec.SectionFieldSpec.Name
                 ),
                 FormElementSpec.SectionSpec(
-                    IdentifierSpec("emailEmail"),
+                    IdentifierSpec("emailSection"),
                     FormElementSpec.SectionSpec.SectionFieldSpec.Email
                 ),
                 FormElementSpec.SectionSpec(
@@ -64,13 +64,13 @@ class TransformSpecToElementTest {
         assertThat(emailElement.controller.label).isEqualTo(EmailConfig().label)
         assertThat(countryElement.controller.label).isEqualTo(CountryConfig().label)
 
-        assertThat(nameSectionElement.identifier).isEqualTo("nameSection")
-        assertThat(emailSectionElement.identifier).isEqualTo("emailSection")
-        assertThat(countrySectionElement.identifier).isEqualTo("countrySection")
+        assertThat(nameSectionElement.identifier.value).isEqualTo("nameSection")
+        assertThat(emailSectionElement.identifier.value).isEqualTo("emailSection")
+        assertThat(countrySectionElement.identifier.value).isEqualTo("countrySection")
 
-        assertThat(nameElement.identifier).isEqualTo("name")
-        assertThat(emailElement.identifier).isEqualTo("email")
-        assertThat(countryElement.identifier).isEqualTo("country")
+        assertThat(nameElement.identifier.value).isEqualTo("name")
+        assertThat(emailElement.identifier.value).isEqualTo("email")
+        assertThat(countryElement.identifier.value).isEqualTo("country")
 
         assertThat(nameElement.focusIndexOrder).isEqualTo(0)
         assertThat(emailElement.focusIndexOrder).isEqualTo(1)

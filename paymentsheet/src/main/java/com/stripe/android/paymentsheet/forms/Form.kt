@@ -60,11 +60,9 @@ internal fun Form(
                                 TextField(
                                     textFieldController = element.field.controller,
                                     myFocus = focusRequesters[focusRequesterIndex],
-                                    nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
-                                        null
-                                    } else {
-                                        focusRequesters[focusRequesterIndex + 1]
-                                    },
+                                    nextFocus = focusRequesters.getOrNull(
+                                        focusRequesterIndex + 1
+                                    ),
                                 )
                             }
                             is SectionFieldElementType.DropdownFieldElement -> {
