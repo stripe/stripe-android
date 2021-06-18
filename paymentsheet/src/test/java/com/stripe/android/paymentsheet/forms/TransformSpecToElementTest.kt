@@ -2,14 +2,14 @@ package com.stripe.android.paymentsheet.forms
 
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.FocusRequesterCount
+import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.FormElement.SectionElement.SectionFieldElement.Country
+import com.stripe.android.paymentsheet.FormElement.SectionElement.SectionFieldElement.Email
+import com.stripe.android.paymentsheet.FormElement.SectionElement.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.common.FocusRequesterCount
-import com.stripe.android.paymentsheet.elements.common.FormElement.SectionElement
-import com.stripe.android.paymentsheet.elements.common.FormElement.SectionElement.SectionFieldElement.Country
-import com.stripe.android.paymentsheet.elements.common.FormElement.SectionElement.SectionFieldElement.Email
-import com.stripe.android.paymentsheet.elements.common.FormElement.SectionElement.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec

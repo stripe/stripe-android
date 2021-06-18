@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.elements.common.FormElement
+import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec.SectionFieldSpec.Name
@@ -20,9 +21,9 @@ class FormViewModelTest {
         val formViewModel = FormViewModel(sofort.layout)
 
         val nameElement =
-            (formViewModel.elements[0] as FormElement.SectionElement).field.controller as TextFieldController
+            (formViewModel.elements[0] as SectionElement).field.controller as TextFieldController
         val emailElement =
-            (formViewModel.elements[1] as FormElement.SectionElement).field.controller as TextFieldController
+            (formViewModel.elements[1] as SectionElement).field.controller as TextFieldController
 
         nameElement.onValueChange("joe")
         assertThat(
