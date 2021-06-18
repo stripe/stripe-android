@@ -22,8 +22,8 @@ import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.common.TextField
-import com.stripe.android.paymentsheet.specification.IdentifierSpec
-import com.stripe.android.paymentsheet.specification.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -73,7 +73,7 @@ internal fun Form(
                         }
                     }
                 }
-                is FormElement.StaticElement -> {
+                is FormElement.StaticTextElement -> {
                     Text(
                         stringResource(element.stringResId),
                         modifier = Modifier.padding(vertical = 8.dp),

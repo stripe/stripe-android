@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.elements.common
 
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.specification.IdentifierSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
 internal class FocusRequesterCount {
     private var value = 0
@@ -38,7 +38,7 @@ internal sealed class FormElement {
      * This is an element that will make elements (as specified by identifier hidden
      * when save for future use is unchecked)
      */
-    data class StaticElement(
+    data class StaticTextElement(
         override val identifier: IdentifierSpec,
         val stringResId: Int,
         val color: Color,

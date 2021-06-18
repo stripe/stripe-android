@@ -7,15 +7,15 @@ import com.stripe.android.paymentsheet.elements.common.FocusRequesterCount
 import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
-import com.stripe.android.paymentsheet.specification.FormElementSpec
-import com.stripe.android.paymentsheet.specification.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.FormElementSpec
+import com.stripe.android.paymentsheet.specifications.LayoutSpec
 
 internal class TransformSpecToElement {
     fun createElement(layout: LayoutSpec, focusRequesterCount: FocusRequesterCount) =
         layout.elements.map {
             when (it) {
                 is FormElementSpec.SectionSpec -> createElement(it, focusRequesterCount)
-                is FormElementSpec.StaticSpec.TextSpec -> createElement(it)
+                is FormElementSpec.StaticTextSpec -> createElement(it)
             }
         }
 
@@ -43,8 +43,8 @@ internal class TransformSpecToElement {
         )
     }
 
-    private fun createElement(spec: FormElementSpec.StaticSpec.TextSpec) =
-        FormElement.StaticElement(
+    private fun createElement(spec: FormElementSpec.StaticTextSpec) =
+        FormElement.StaticTextElement(
             spec.identifier,
             spec.stringResId,
             spec.color

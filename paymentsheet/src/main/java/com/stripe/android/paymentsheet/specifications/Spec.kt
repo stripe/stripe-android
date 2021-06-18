@@ -1,9 +1,8 @@
-package com.stripe.android.paymentsheet.specification
+package com.stripe.android.paymentsheet.specifications
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec
-
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec
 
 /**
  * This class is used to define different forms full of fields.
@@ -45,12 +44,9 @@ sealed class FormElementSpec {
     /**
      * This is for elements that do not receive user input
      */
-    sealed class StaticSpec : FormElementSpec() {
-        data class TextSpec(
-            val identifier: IdentifierSpec,
-            @StringRes val stringResId: Int,
-            val color: Color
-        ) : StaticSpec()
-    }
+    data class StaticTextSpec(
+        val identifier: IdentifierSpec,
+        @StringRes val stringResId: Int,
+        val color: Color
+    ) : FormElementSpec()
 }
-
