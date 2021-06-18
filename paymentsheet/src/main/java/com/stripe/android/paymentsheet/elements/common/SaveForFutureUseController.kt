@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.elements.common
 
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.specification.IdentifierSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map

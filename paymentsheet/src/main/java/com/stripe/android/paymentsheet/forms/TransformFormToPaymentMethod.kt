@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.elements.country.CountryUtils
-import com.stripe.android.paymentsheet.specification.FormElementSpec.SectionSpec.SectionFieldSpec.*
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Country
 import java.util.Locale
 
 /**
@@ -24,7 +24,7 @@ class TransformFormToPaymentMethod {
         val destMap = mutableMapOf<String, Any?>()
 
         // Need to convert Country Fields to a country code to put it in the parameter map
-        val formKeyValueMap = formFieldValues.getMap()
+        val formKeyValueMap = formFieldValues.fieldValuePairs
             .mapValues { entry ->
                 if (entry.key == Country.identifier) {
                     entry.value?.let {
