@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.sofort
 
 class SofortDataCollectionFragment : BasePaymentDataCollectionFragment() {
-    val sofortFormViewModel: FormViewModel by viewModels { FormViewModel.Factory(sofort) }
+    val sofortFormViewModel: FormViewModel by viewModels { FormViewModel.Factory(sofort.layout) }
 
     @ExperimentalAnimationApi
     override fun onCreateView(
@@ -45,7 +45,7 @@ class SofortDataCollectionFragment : BasePaymentDataCollectionFragment() {
     }
 
     // This can't be a var or we'll be reading from the ViewModel while the fragment is detached
-    override fun paramMapLiveData() = sofortFormViewModel.paramMapFlow.asLiveData().map { mutableMap ->
-        mutableMap?.toMap()
+    override fun paramMapLiveData() = sofortFormViewModel.completeFormValues.asLiveData().map { mutableMap ->
+        mutableMap?.fieldValuePairs?.toMap()
     }
 }

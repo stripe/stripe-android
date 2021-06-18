@@ -27,6 +27,7 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -344,7 +345,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
 
     private fun shouldSaveCard() = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
 
-    override fun paramMapLiveData(): LiveData<Map<String, Any?>?> = MutableLiveData()
+    override fun paramMapLiveData(): LiveData<Map<SectionFieldSpec, String?>?> = MutableLiveData()
 
     override fun setProcessing(processing: Boolean) {
         saveCardCheckbox.isEnabled = !processing
