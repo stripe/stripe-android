@@ -68,11 +68,9 @@ internal fun Form(
                                         TextField(
                                             textFieldController = element.field.controller,
                                             myFocus = focusRequesters[focusRequesterIndex],
-                                            nextFocus = if (focusRequesterIndex == focusRequesters.size - 1) {
-                                                null
-                                            } else {
-                                                focusRequesters[focusRequesterIndex + 1]
-                                            },
+                                            nextFocus = focusRequesters.getOrNull(
+                                                focusRequesterIndex + 1
+                                            ),
                                         )
                                     }
                                     is SectionFieldElementType.DropdownFieldElement -> {
@@ -132,7 +130,7 @@ class FormViewModel(
     fun getCountFocusableFields() = focusIndex.get()
 
     private val specToFormTransform = TransformSpecToElement()
-    internal val elements = specToFormTransform.createElement(layout, focusIndex)
+    internal val elements = specToFormTransform.transform(layout, focusIndex)
 
     val optionalIdentifiers = elements
         .filterIsInstance<FormElement.SaveForFutureUseElement>()
