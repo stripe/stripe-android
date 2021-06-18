@@ -15,12 +15,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
+import com.stripe.android.paymentsheet.FocusRequesterCount
+import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.DropDown
-import com.stripe.android.paymentsheet.elements.common.FocusRequesterCount
-import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.Section
-import com.stripe.android.paymentsheet.elements.common.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec

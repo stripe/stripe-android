@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.paymentsheet.FocusRequesterCount
+import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.common.FocusRequesterCount
-import com.stripe.android.paymentsheet.elements.common.FormElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -53,7 +53,7 @@ internal class TransformSpecToElement {
     }
 
     private fun transform(spec: FormItemSpec.StaticTextSpec) =
-        // It could be argued that the static text should have a controller, but
+    // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         FormElement.StaticTextElement(
             spec.identifier,
