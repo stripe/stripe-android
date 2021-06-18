@@ -25,22 +25,18 @@ class TransformSpecToElementTest {
         IdentifierSpec("nameSection"),
         FormItemSpec.SectionSpec.SectionFieldSpec.Name
     )
+
     private val emailSection = FormItemSpec.SectionSpec(
         IdentifierSpec("emailSection"),
         FormItemSpec.SectionSpec.SectionFieldSpec.Email
     )
-    private val countrySection = FormItemSpec.SectionSpec(
-        IdentifierSpec("countrySection"),
-        FormItemSpec.SectionSpec.SectionFieldSpec.Country
-    )
-    private val mandate = FormItemSpec.StaticTextSpec(
-        IdentifierSpec("mandate"),
-        R.string.sofort_mandate,
-        Color.Gray
-    )
 
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
+        val countrySection = FormItemSpec.SectionSpec(
+            IdentifierSpec("countrySection"),
+            FormItemSpec.SectionSpec.SectionFieldSpec.Country
+        )
         val formElement = transformSpecToElement.transform(
             LayoutSpec(
                 listOf(countrySection)
@@ -84,6 +80,11 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a mandate section spec setup of the mandate element correctly`() {
+        val mandate = FormItemSpec.StaticTextSpec(
+            IdentifierSpec("mandate"),
+            R.string.sofort_mandate,
+            Color.Gray
+        )
         val formElement = transformSpecToElement.transform(
             LayoutSpec(
                 listOf(mandate)
