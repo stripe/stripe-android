@@ -57,8 +57,8 @@ class TransformElementToFormViewValueFlowTest {
             val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
 
             assertThat(formFieldValue).isNotNull()
-            assertThat(formFieldValue?.fieldValuePairs).containsKey("email")
-            assertThat(formFieldValue?.fieldValuePairs).containsKey("country")
+            assertThat(formFieldValue?.fieldValuePairs).containsKey(IdentifierSpec("emailSection"))
+            assertThat(formFieldValue?.fieldValuePairs).containsKey(IdentifierSpec("countrySection"))
         }
     }
 
@@ -71,8 +71,8 @@ class TransformElementToFormViewValueFlowTest {
             val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
 
             assertThat(formFieldValue).isNotNull()
-            assertThat(formFieldValue?.fieldValuePairs).doesNotContainKey("email")
-            assertThat(formFieldValue?.fieldValuePairs).containsKey("country")
+            assertThat(formFieldValue?.fieldValuePairs).doesNotContainKey(IdentifierSpec("emailSection"))
+            assertThat(formFieldValue?.fieldValuePairs).containsKey(IdentifierSpec("countrySection"))
         }
     }
 
@@ -85,8 +85,8 @@ class TransformElementToFormViewValueFlowTest {
             val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
 
             assertThat(formFieldValue).isNotNull()
-            assertThat(formFieldValue?.fieldValuePairs).doesNotContainKey("email")
-            assertThat(formFieldValue?.fieldValuePairs).containsKey("country")
+            assertThat(formFieldValue?.fieldValuePairs).doesNotContainKey(IdentifierSpec("emailSection"))
+            assertThat(formFieldValue?.fieldValuePairs).containsKey(IdentifierSpec("countrySection"))
         }
     }
 
