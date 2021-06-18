@@ -96,7 +96,7 @@ internal class TransformSpecToElement {
         FormElement.SaveForFutureUseElement(
             spec.identifier,
             SaveForFutureUseController(
-                spec.elementsOptionalOnFutureUse.map { element ->
+                spec.identifierRequiredForFutureUse.map { element ->
                     element.identifier
                 }
             )

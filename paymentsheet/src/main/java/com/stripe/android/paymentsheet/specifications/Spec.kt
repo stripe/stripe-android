@@ -54,7 +54,7 @@ sealed class FormItemSpec {
      * when save for future use is unchecked)
      */
     data class SaveForFutureUseSpec(
-        val elementsOptionalOnFutureUse: List<OptionalItemSpec>
+        val identifierRequiredForFutureUse: List<OptionalItemSpec>
     ) : FormItemSpec(), OptionalItemSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
