@@ -19,10 +19,10 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
     "sofort" to sofortParams
 )
 
-internal val nameSection = SectionSpec(IdentifierSpec("name"), Name)
-internal val emailSection = SectionSpec(IdentifierSpec("email"), Email)
-internal val countrySection = SectionSpec(IdentifierSpec("country"), Country)
-internal val mandate = StaticTextSpec(
+internal val sofortNameSection = SectionSpec(IdentifierSpec("name"), Name)
+internal val sofortEmailSection = SectionSpec(IdentifierSpec("email"), Email)
+internal val sofortCountrySection = SectionSpec(IdentifierSpec("country"), Country)
+internal val sofortMandate = StaticTextSpec(
     IdentifierSpec("mandate"),
     R.string.sofort_mandate,
     Color.Gray
@@ -30,11 +30,11 @@ internal val mandate = StaticTextSpec(
 val sofort = FormSpec(
     LayoutSpec(
         listOf(
-            nameSection,
-            emailSection,
-            countrySection,
-            mandate,
-            SaveForFutureUseSpec(listOf(nameSection, emailSection, mandate))
+            sofortNameSection,
+            sofortEmailSection,
+            sofortCountrySection,
+            sofortMandate,
+            SaveForFutureUseSpec(listOf(sofortNameSection, sofortEmailSection, sofortMandate))
         )
     ),
     sofortParamKey,

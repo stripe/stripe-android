@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
-import com.stripe.android.paymentsheet.specifications.mandate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -146,6 +145,11 @@ class TransformSpecToElementTest {
     @Test
     fun `Add a save for future use section spec sets the mandate element correctly`() =
         runBlocking {
+            val mandate = FormItemSpec.StaticTextSpec(
+                IdentifierSpec("mandate"),
+                R.string.sofort_mandate,
+                Color.Gray
+            )
             val optionalIdentifiers = listOf(nameSection, mandate)
             val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(optionalIdentifiers)
             val formElement = transformSpecToElement.transform(
