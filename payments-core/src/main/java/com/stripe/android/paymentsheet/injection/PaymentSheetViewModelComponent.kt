@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import dagger.BindsInstance
 import dagger.Component
-import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Singleton
@@ -28,9 +27,3 @@ internal interface PaymentSheetViewModelComponent {
         fun build(): PaymentSheetViewModelComponent
     }
 }
-
-/**
- * [Qualifier] for coroutine context used for IO.
- */
-@Qualifier
-annotation class IOContext

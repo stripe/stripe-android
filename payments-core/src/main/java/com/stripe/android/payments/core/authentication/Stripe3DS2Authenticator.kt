@@ -32,24 +32,25 @@ import java.security.cert.CertificateException
 import kotlin.coroutines.CoroutineContext
 
 /**
- * [IntentAuthenticator] implementation to authenticate through Stripe's 3ds2 SDK.
- *
- * TODO(ccen): Move this to a standalone gradle module.
+ * [IntentAuthenticator] authenticate through Stripe's 3ds2 SDK.
  */
 internal class Stripe3DS2Authenticator(
+    private val config: PaymentAuthConfig,
     private val stripeRepository: StripeRepository,
     private val webIntentAuthenticator: WebIntentAuthenticator,
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
-    private val threeDs2Service: StripeThreeDs2Service,
-    private val messageVersionRegistry: MessageVersionRegistry,
-    private val stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
     private val stripe3ds2CompletionStarterFactory: (AuthActivityStarterHost, Int) -> Stripe3ds2CompletionStarter,
     private val workContext: CoroutineContext,
     private val uiContext: CoroutineContext,
-    private val challengeProgressActivityStarter: ChallengeProgressActivityStarter = DefaultChallengeProgressActivityStarter()
+    private val threeDs2Service: StripeThreeDs2Service,
+    private val messageVersionRegistry: MessageVersionRegistry,
+    private val challengeProgressActivityStarter: ChallengeProgressActivityStarter
 ) : IntentAuthenticator {
+    init {
+        threeDs2Service.initialize(config.stripe3ds2Config.uiCustomization.uiCustomization)
+    }
 
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
@@ -125,7 +126,7 @@ internal class Stripe3DS2Authenticator(
                     host.activity,
                     stripe3ds2Fingerprint.directoryServerName,
                     false,
-                    stripe3ds2Config.uiCustomization.uiCustomization,
+                    config.stripe3ds2Config.uiCustomization.uiCustomization,
                     transaction.sdkTransactionId
                 )
             }
@@ -134,14 +135,14 @@ internal class Stripe3DS2Authenticator(
                     host.fragment.requireActivity(),
                     stripe3ds2Fingerprint.directoryServerName,
                     false,
-                    stripe3ds2Config.uiCustomization.uiCustomization,
+                    config.stripe3ds2Config.uiCustomization.uiCustomization,
                     transaction.sdkTransactionId
                 )
             }
         }
 
         val paymentRelayStarter = paymentRelayStarterFactory(host)
-        val timeout = stripe3ds2Config.timeout
+        val timeout = config.stripe3ds2Config.timeout
         runCatching {
             perform3ds2AuthenticationRequest(
                 transaction,

@@ -9,20 +9,25 @@ import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.payments.core.injection.AuthenticationComponent.Companion.ENABLE_LOGGING
+import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
  * [IntentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
  */
-internal class WebIntentAuthenticator(
+@Singleton
+internal class WebIntentAuthenticator @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
-    private val logger: Logger,
-    private val enableLogging: Boolean,
-    private val uiContext: CoroutineContext
+    @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
+    @UIContext private val uiContext: CoroutineContext
 ) : IntentAuthenticator {
 
     override suspend fun authenticate(
@@ -100,7 +105,7 @@ internal class WebIntentAuthenticator(
         shouldCancelIntentOnUserNavigation: Boolean = true
     ) = withContext(uiContext) {
         val paymentBrowserWebStarter = paymentBrowserAuthStarterFactory(host)
-        logger.debug("PaymentBrowserAuthStarter#start()")
+        Logger.getInstance(enableLogging).debug("PaymentBrowserAuthStarter#start()")
         paymentBrowserWebStarter.start(
             PaymentBrowserAuthContract.Args(
                 objectId = stripeIntent.id.orEmpty(),
