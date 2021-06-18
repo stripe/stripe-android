@@ -34,5 +34,4 @@ class EmailConfigTest {
         assertThat(emailConfig.filter("123^@gmail[\uD83E\uDD57.com"))
             .isEqualTo("123^@gmail[\uD83E\uDD57.com")
     }
-
 }

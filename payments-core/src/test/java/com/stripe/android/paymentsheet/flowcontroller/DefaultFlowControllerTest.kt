@@ -2,20 +2,14 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argWhere
-import com.nhaarman.mockitokotlin2.isNull
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
-import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
@@ -33,7 +27,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -64,6 +57,14 @@ import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -92,11 +93,16 @@ internal class DefaultFlowControllerTest {
         createFlowController()
     }
 
+    private val lifeCycleOwner = mock<LifecycleOwner>()
+
     private val testDispatcher = TestCoroutineDispatcher()
     private val testScope = TestCoroutineScope(testDispatcher + Job())
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
+
+    private val activityResultCaller = mock<ActivityResultCaller>()
+
     private lateinit var activity: ComponentActivity
 
     @BeforeTest
@@ -109,6 +115,22 @@ internal class DefaultFlowControllerTest {
         activityScenario.onActivity {
             activity = it
         }
+
+        whenever(
+            activityResultCaller.registerForActivityResult(
+                any<PaymentOptionContract>(),
+                any()
+            )
+        ).thenReturn(paymentOptionActivityLauncher)
+
+        whenever(
+            activityResultCaller.registerForActivityResult(
+                any<StripeGooglePayContract>(),
+                any()
+            )
+        ).thenReturn(googlePayActivityLauncher)
+
+        whenever(lifeCycleOwner.lifecycle).thenReturn(mock())
     }
 
     @AfterTest
@@ -593,18 +615,18 @@ internal class DefaultFlowControllerTest {
         flowControllerInitializer: FlowControllerInitializer
     ) = DefaultFlowController(
         testScope,
+        lifeCycleOwner,
         { activity.window.statusBarColor },
         { AuthActivityStarterHost.create(activity) },
         PaymentOptionFactory(activity.resources),
         paymentOptionCallback,
         paymentResultCallback,
+        activityResultCaller,
         flowControllerInitializer,
         eventReporter,
         SESSION_ID,
-        paymentOptionActivityLauncher,
-        googlePayActivityLauncher,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
-        mock<StripeApiRepository>(),
+        mock(),
         paymentController,
         { PaymentConfiguration.getInstance(activity) },
         { flowResultProcessor }

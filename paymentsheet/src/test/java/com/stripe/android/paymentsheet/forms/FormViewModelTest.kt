@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.elements.common.TextFieldController
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec.SectionFieldSpec.Name
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -12,38 +15,28 @@ class FormViewModelTest {
 
     @Test
     fun `Verify params are set when element flows are complete`() = runBlocking {
-        val formViewModel = FormViewModel(sofort)
+        val formViewModel = FormViewModel(sofort.layout)
 
-        val nameElement = formViewModel.getElement(Field.NameInput)
-        val emailElement = formViewModel.getElement(Field.EmailInput)
+        val nameElement = formViewModel.getController(Name) as TextFieldController
+        val emailElement = formViewModel.getController(Email) as TextFieldController
 
         nameElement.onValueChange("joe")
-        assertThat(formViewModel.paramMapFlow.first()).isNull()
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
+        ).isNull()
 
         emailElement.onValueChange("joe@gmail.com")
         assertThat(
-            formViewModel.paramMapFlow.first().toString().replace("\\s".toRegex(), "")
-        ).isEqualTo(
-            """
-                {
-                  billing_details={
-                    address={
-                      city=null,
-                      country=null,
-                      line1=null,
-                      line2=null,
-                      postal_code=null,
-                      state=null
-                    },
-                    name=joe,
-                    email=joe@gmail.com,
-                    phone=null
-                  },
-                  sofort={country=null}
-                }
-            """.replace("\\s".toRegex(), "")
-        )
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email)
+        ).isEqualTo("joe@gmail.com")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
+        ).isEqualTo("joe")
+
         emailElement.onValueChange("invalid.email@IncompleteDomain")
-        assertThat(formViewModel.paramMapFlow.first()).isNull()
+
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name)
+        ).isNull()
     }
 }

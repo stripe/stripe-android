@@ -1,16 +1,14 @@
 package com.stripe.android.payments.core.authentication
 
-import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
-import com.stripe.android.StripePaymentController
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.payments.core.injection.AuthenticationModule
 import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
@@ -83,9 +81,8 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
             uiContext: CoroutineContext,
             threeDs2Service: StripeThreeDs2Service,
             messageVersionRegistry: MessageVersionRegistry,
-            challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter,
             stripe3ds2Config: PaymentAuthConfig.Stripe3ds2Config,
-            stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>?
+            stripe3ds2ChallengeLauncherFactory: (AuthActivityStarterHost, Int) -> Stripe3ds2CompletionStarter
         ) = DaggerAuthenticationComponent.builder().authenticationModule(
             AuthenticationModule(
                 stripeRepository,
@@ -99,9 +96,8 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor()
                 uiContext,
                 threeDs2Service,
                 messageVersionRegistry,
-                challengeProgressActivityStarter,
                 stripe3ds2Config,
-                stripe3ds2ChallengeLauncher
+                stripe3ds2ChallengeLauncherFactory
             )
         ).build().registry
     }

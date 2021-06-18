@@ -15,13 +15,9 @@ import kotlin.test.assertNull
 class CustomerTest {
 
     @Test
-    fun fromString_whenStringIsNull_returnsNull() {
-        assertNull(Customer.fromString(null))
-    }
-
-    @Test
     fun fromJson_whenNotACustomer_returnsNull() {
-        assertNull(parse(NON_CUSTOMER_OBJECT))
+        assertThat(parse(NON_CUSTOMER_OBJECT))
+            .isNull()
     }
 
     @Test
@@ -78,10 +74,12 @@ class CustomerTest {
             )
         }
 
-        sourcesObject.put("data", sourcesArray)
-        sourcesObject.put("total_count", 5)
-
-        rawJsonCustomer.put("sources", sourcesObject)
+        rawJsonCustomer.put(
+            "sources",
+            sourcesObject
+                .put("data", sourcesArray)
+                .put("total_count", 5)
+        )
 
         // Verify JSON manipulation
         assertEquals(

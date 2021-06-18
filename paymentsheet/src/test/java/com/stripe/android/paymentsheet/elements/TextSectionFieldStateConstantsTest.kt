@@ -13,12 +13,12 @@ class TextSectionFieldStateConstantsTest {
             Error.Incomplete.shouldShowError(
                 true
             )
-        ).isEqualTo(false)
+        ).isFalse()
         assertThat(
             Error.Incomplete.shouldShowError(
                 false
             )
-        ).isEqualTo(true)
+        ).isTrue()
     }
 
     @Test
@@ -27,12 +27,12 @@ class TextSectionFieldStateConstantsTest {
             Error.Invalid.shouldShowError(
                 true
             )
-        ).isEqualTo(true)
+        ).isTrue()
         assertThat(
             Error.Invalid.shouldShowError(
                 false
             )
-        ).isEqualTo(true)
+        ).isTrue()
     }
 
     @Test
@@ -41,12 +41,12 @@ class TextSectionFieldStateConstantsTest {
             Error.Blank.shouldShowError(
                 true
             )
-        ).isEqualTo(false)
+        ).isFalse()
         assertThat(
             Error.Blank.shouldShowError(
                 false
             )
-        ).isEqualTo(false)
+        ).isFalse()
     }
 
     @Test
@@ -55,11 +55,11 @@ class TextSectionFieldStateConstantsTest {
             Valid.Limitless.shouldShowError(
                 true
             )
-        ).isEqualTo(false)
+        ).isFalse()
         assertThat(
             Valid.Limitless.shouldShowError(
                 false
             )
-        ).isEqualTo(false)
+        ).isFalse()
     }
 }

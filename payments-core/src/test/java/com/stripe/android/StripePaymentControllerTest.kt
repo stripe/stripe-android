@@ -4,18 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.KArgumentCaptor
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
-import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -48,6 +39,13 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 import kotlin.test.AfterTest
@@ -67,8 +65,6 @@ internal class StripePaymentControllerTest {
             .thenReturn(sdkTransactionId)
     }
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
-    private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter =
-        mock()
     private val alipayRepository = mock<AlipayRepository>()
     private val stripeRepository = FakeStripeRepository()
 
@@ -256,10 +252,7 @@ internal class StripePaymentControllerTest {
             assertThat(actualResponse.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
         }
 
-    private fun createController(
-        paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
-        paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? = null
-    ): StripePaymentController {
+    private fun createController(): StripePaymentController {
         return StripePaymentController(
             context,
             { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
@@ -270,10 +263,7 @@ internal class StripePaymentControllerTest {
             threeDs2Service,
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            challengeProgressActivityStarter,
             alipayRepository,
-            paymentRelayLauncher = paymentRelayLauncher,
-            paymentBrowserAuthLauncher = paymentBrowserAuthLauncher,
             workContext = testDispatcher,
             uiContext = testDispatcher
         )

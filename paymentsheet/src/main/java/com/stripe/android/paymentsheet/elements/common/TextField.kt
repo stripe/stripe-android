@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.elements.common
 
 import android.util.Log
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalContentAlpha
@@ -20,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusOrder
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.asLiveData
@@ -29,6 +29,13 @@ internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFoc
     ImeAction.Next
 } ?: ImeAction.Done
 
+internal data class TextFieldColors(
+    val placeholderColor: Color = Color(0x14000000),
+    val backgroundColor: Color = Color.Transparent,
+    val focusedIndicatorColor: Color = Color.Transparent, // primary color by default
+    val unfocusedIndicatorColor: Color = Color.Transparent
+)
+
 /**
  * This is focused on converting an `Element` into what is displayed in a textField.
  * - some focus logic
@@ -37,32 +44,36 @@ internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFoc
  */
 @Composable
 internal fun TextField(
-    textFieldElement: TextFieldElement,
+    textFieldController: TextFieldController,
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,
     modifier: Modifier = Modifier,
-    @StringRes label: Int? = null, // Let the caller choose if they want a label, if it is in a section by itself it might not make sense.
 ) {
-    Log.d("Construct", "SimpleTextFieldElement ${textFieldElement.debugLabel}")
+    Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
 
-    val value by textFieldElement.input.asLiveData().observeAsState("")
-    val shouldShowError by textFieldElement.visibleError.asLiveData().observeAsState(false)
-    val elementIsFull by textFieldElement.isFull.asLiveData().observeAsState(false)
+    val value by textFieldController.fieldValue.asLiveData().observeAsState("")
+    val shouldShowError by textFieldController.visibleError.asLiveData().observeAsState(false)
+    val fieldIsFull by textFieldController.isFull.asLiveData().observeAsState(false)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
+    val textFieldColors = TextFieldColors()
     val colors = TextFieldDefaults.textFieldColors(
         textColor = if (shouldShowError) {
             MaterialTheme.colors.error
         } else {
             LocalContentColor.current.copy(LocalContentAlpha.current)
-        }
+        },
+        placeholderColor = textFieldColors.placeholderColor,
+        backgroundColor = textFieldColors.backgroundColor,
+        focusedIndicatorColor = textFieldColors.focusedIndicatorColor,
+        unfocusedIndicatorColor = textFieldColors.unfocusedIndicatorColor
     )
 
     // This is setup so that when a field is full it still allows more characters
     // to be entered, it just triggers next focus when the event happens.
     @Suppress("UNUSED_VALUE")
-    processedIsFull = if (elementIsFull) {
+    processedIsFull = if (fieldIsFull) {
         if (!processedIsFull) {
             nextFocus?.requestFocus()
         }
@@ -73,15 +84,15 @@ internal fun TextField(
 
     TextField(
         value = value,
-        onValueChange = { textFieldElement.onValueChange(it) },
+        onValueChange = { textFieldController.onValueChange(it) },
         isError = shouldShowError,
-        label = { label?.let { Text(text = stringResource(it)) } },
+        label = { Text(text = stringResource(textFieldController.label)) },
         modifier = modifier
             .fillMaxWidth()
             .focusOrder(myFocus) { nextFocus?.requestFocus() }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {
-                    textFieldElement.onFocusChange(it.isFocused)
+                    textFieldController.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
             },

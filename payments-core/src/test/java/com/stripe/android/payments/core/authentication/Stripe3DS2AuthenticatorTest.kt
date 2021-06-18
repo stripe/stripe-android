@@ -2,18 +2,8 @@ package com.stripe.android.payments.core.authentication
 
 import android.content.Context
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.KArgumentCaptor
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentRelayStarter
@@ -31,7 +21,6 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
@@ -46,6 +35,15 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -68,12 +66,10 @@ class Stripe3DS2AuthenticatorTest {
     private val threeDs2Service = mock<StripeThreeDs2Service>()
     private val messageVersionRegistry = MessageVersionRegistry()
     private val challengeProgressActivityStarter =
-        mock<StripePaymentController.ChallengeProgressActivityStarter>()
+        mock<Stripe3DS2Authenticator.ChallengeProgressActivityStarter>()
     private val stripe3ds2Config = PaymentAuthConfig.Stripe3ds2Config.Builder()
         .setTimeout(5)
         .build()
-    private val stripe3ds2ChallengeLauncher =
-        mock<ActivityResultLauncher<PaymentFlowResult.Unvalidated>>()
 
     private val paymentRelayStarter = mock<PaymentRelayStarter>()
     private val relayStarterArgsArgumentCaptor: KArgumentCaptor<PaymentRelayStarter.Args> =
@@ -90,11 +86,11 @@ class Stripe3DS2AuthenticatorTest {
         analyticsRequestFactory,
         threeDs2Service,
         messageVersionRegistry,
-        challengeProgressActivityStarter,
         stripe3ds2Config,
-        stripe3ds2ChallengeLauncher,
+        { _, _ -> mock() },
         testDispatcher,
-        testDispatcher
+        testDispatcher,
+        challengeProgressActivityStarter
     )
 
     @Before

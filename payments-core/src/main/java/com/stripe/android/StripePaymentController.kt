@@ -2,6 +2,8 @@ package com.stripe.android
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -32,14 +34,13 @@ import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
+import com.stripe.android.payments.Stripe3ds2CompletionContract
+import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.payments.core.authentication.DefaultIntentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.IntentAuthenticatorRegistry
-import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
-import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
-import com.stripe.android.stripe3ds2.views.ChallengeProgressActivity
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -67,15 +68,11 @@ internal class StripePaymentController internal constructor(
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
         AnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
-    challengeProgressActivityStarter: ChallengeProgressActivityStarter =
-        ChallengeProgressActivityStarter.Default(),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
-    private val paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null,
-    private val paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? = null,
-    stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? = null,
     workContext: CoroutineContext = Dispatchers.IO,
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
+
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
@@ -95,16 +92,27 @@ internal class StripePaymentController internal constructor(
     private val logger = Logger.getInstance(enableLogging)
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
+    private val hasCompatibleBrowser: Boolean by lazy {
+        BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
+    }
+
+    /**
+     * [paymentRelayLauncher] is mutable and might be updated during
+     * through [registerLaunchersWithActivityResultCaller]
+     */
+    private var paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null
     private val paymentRelayStarterFactory = { host: AuthActivityStarterHost ->
         paymentRelayLauncher?.let {
             PaymentRelayStarter.Modern(it)
         } ?: PaymentRelayStarter.Legacy(host)
     }
 
-    private val hasCompatibleBrowser: Boolean by lazy {
-        BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
-    }
-
+    /**
+     * [paymentBrowserAuthLauncher] is mutable and might be updated during
+     * through [registerLaunchersWithActivityResultCaller]
+     */
+    private var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
+        null
     private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarterHost ->
         paymentBrowserAuthLauncher?.let {
             PaymentBrowserAuthStarter.Modern(it)
@@ -114,6 +122,19 @@ internal class StripePaymentController internal constructor(
             defaultReturnUrl
         )
     }
+
+    /**
+     * [stripe3ds2ChallengeLauncher] is mutable and might be updated during
+     * through [registerLaunchersWithActivityResultCaller]
+     */
+    private var stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? =
+        null
+    private val stripe3ds2CompletionStarterFactory =
+        { host: AuthActivityStarterHost, requestCode: Int ->
+            stripe3ds2ChallengeLauncher?.let {
+                Stripe3ds2CompletionStarter.Modern(it)
+            } ?: Stripe3ds2CompletionStarter.Legacy(host, requestCode)
+        }
 
     private val authenticatorRegistry: IntentAuthenticatorRegistry =
         DefaultIntentAuthenticatorRegistry.createInstance(
@@ -128,15 +149,41 @@ internal class StripePaymentController internal constructor(
             uiContext,
             threeDs2Service,
             messageVersionRegistry,
-            challengeProgressActivityStarter,
             config.stripe3ds2Config,
-            stripe3ds2ChallengeLauncher
+            stripe3ds2CompletionStarterFactory
         )
 
     init {
         threeDs2Service.initialize(
             config.stripe3ds2Config.uiCustomization.uiCustomization
         )
+    }
+
+    override fun registerLaunchersWithActivityResultCaller(
+        activityResultCaller: ActivityResultCaller,
+        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
+    ) {
+        paymentRelayLauncher = activityResultCaller.registerForActivityResult(
+            PaymentRelayContract(),
+            activityResultCallback
+        )
+        paymentBrowserAuthLauncher = activityResultCaller.registerForActivityResult(
+            PaymentBrowserAuthContract(defaultReturnUrl),
+            activityResultCallback
+        )
+        stripe3ds2ChallengeLauncher = activityResultCaller.registerForActivityResult(
+            Stripe3ds2CompletionContract(),
+            activityResultCallback
+        )
+    }
+
+    override fun unregisterLaunchers() {
+        paymentRelayLauncher?.unregister()
+        paymentBrowserAuthLauncher?.unregister()
+        stripe3ds2ChallengeLauncher?.unregister()
+        paymentRelayLauncher = null
+        paymentBrowserAuthLauncher = null
+        stripe3ds2ChallengeLauncher = null
     }
 
     /**
@@ -574,34 +621,6 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    internal interface ChallengeProgressActivityStarter {
-        fun start(
-            context: Context,
-            directoryServerName: String,
-            cancelable: Boolean,
-            uiCustomization: StripeUiCustomization,
-            sdkTransactionId: SdkTransactionId
-        )
-
-        class Default : ChallengeProgressActivityStarter {
-            override fun start(
-                context: Context,
-                directoryServerName: String,
-                cancelable: Boolean,
-                uiCustomization: StripeUiCustomization,
-                sdkTransactionId: SdkTransactionId
-            ) {
-                ChallengeProgressActivity.show(
-                    context,
-                    directoryServerName,
-                    cancelable,
-                    uiCustomization,
-                    sdkTransactionId
-                )
-            }
-        }
-    }
-
     internal companion object {
         internal const val PAYMENT_REQUEST_CODE = 50000
         internal const val SETUP_REQUEST_CODE = 50001
@@ -630,10 +649,9 @@ internal class StripePaymentController internal constructor(
          */
         @JvmSynthetic
         internal fun getRequestCode(params: ConfirmStripeIntentParams): Int {
-            return if (params is ConfirmPaymentIntentParams) {
-                PAYMENT_REQUEST_CODE
-            } else {
-                SETUP_REQUEST_CODE
+            return when (params) {
+                is ConfirmPaymentIntentParams -> PAYMENT_REQUEST_CODE
+                is ConfirmSetupIntentParams -> SETUP_REQUEST_CODE
             }
         }
 
