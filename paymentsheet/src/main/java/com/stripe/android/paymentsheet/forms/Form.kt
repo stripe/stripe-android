@@ -51,7 +51,6 @@ internal fun Form(
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
-            .padding(formElementPadding)
     ) {
         fieldLayout.elements.forEach { element ->
             when (element) {
