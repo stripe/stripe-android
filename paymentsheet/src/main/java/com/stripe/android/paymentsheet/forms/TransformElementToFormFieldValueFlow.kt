@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.elements.common.Controller
-import com.stripe.android.paymentsheet.elements.common.FormElement
-import com.stripe.android.paymentsheet.specification.IdentifierSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -62,4 +62,10 @@ internal class TransformElementToFormFieldValueFlow(
     ) = combine(value.fieldValue, value.isComplete) { fieldValue, isComplete ->
         Pair(field, FieldSnapshot(fieldValue, field, isComplete))
     }
+
+    data class FieldSnapshot(
+        val fieldValue: String,
+        val identifier: IdentifierSpec,
+        val isComplete: Boolean
+    )
 }

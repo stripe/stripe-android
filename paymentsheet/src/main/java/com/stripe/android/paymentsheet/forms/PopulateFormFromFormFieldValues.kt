@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.elements.common.FormElement
+import com.stripe.android.paymentsheet.FormElement
+
 
 internal class PopulateFormFromFormFieldValues(
     val elements: List<FormElement>

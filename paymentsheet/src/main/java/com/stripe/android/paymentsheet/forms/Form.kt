@@ -143,9 +143,3 @@ class FormViewModel(
         populateFormFromFormFieldValues.populateWith(formFieldValues)
     }
 }
-
-data class FieldSnapshot(
-    val fieldValue: String,
-    val identifier: IdentifierSpec,
-    val isComplete: Boolean
-)
