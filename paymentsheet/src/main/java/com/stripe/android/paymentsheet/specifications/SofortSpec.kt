@@ -4,10 +4,10 @@ import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec.SectionFieldSpec.Name
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.StaticTextSpec
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 
 internal val sofortParams: MutableMap<String, Any?> = mutableMapOf(
     "country" to null,

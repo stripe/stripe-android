@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.elements.country.CountryUtils
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import java.util.Locale
 
 /**
@@ -42,7 +42,7 @@ class TransformFormToPaymentMethod {
 
     companion object {
         /**
-         * This function will looks for each of the keys in the mapStructure and
+         * This function will look for each of the keys in the mapStructure and
          * if the formField contains a key that matches it will populate the value.
          *
          * For example:

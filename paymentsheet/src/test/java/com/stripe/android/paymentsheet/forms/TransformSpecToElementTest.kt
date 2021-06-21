@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -26,19 +27,19 @@ class TransformSpecToElementTest {
 
     private val nameSection = FormItemSpec.SectionSpec(
         IdentifierSpec("nameSection"),
-        FormItemSpec.SectionSpec.SectionFieldSpec.Name
+        SectionFieldSpec.Name
     )
 
     private val emailSection = FormItemSpec.SectionSpec(
         IdentifierSpec("emailSection"),
-        FormItemSpec.SectionSpec.SectionFieldSpec.Email
+        SectionFieldSpec.Email
     )
 
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
         val countrySection = FormItemSpec.SectionSpec(
             IdentifierSpec("countrySection"),
-            FormItemSpec.SectionSpec.SectionFieldSpec.Country
+            SectionFieldSpec.Country
         )
         val formElement = transformSpecToElement.transform(
             LayoutSpec(
