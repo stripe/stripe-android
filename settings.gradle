@@ -3,6 +3,7 @@ enableFeaturePreview("VERSION_CATALOGS")
 include ':paymentsheet-example'
 include ':stripe-test-e2e'
 include ':example'
+include ':example-forms'
 include ':payments-core'
 include ':payments'
 include ':paymentsheet'

@@ -26,7 +26,7 @@ data class LayoutSpec(val items: List<FormItemSpec>) {
 data class IdentifierSpec(val value: String)
 
 /**
- * This is used to define each section in the visual form layout
+ * This is used to define each section in the visual form layout specification
  */
 sealed class FormItemSpec {
     data class SectionSpec(
