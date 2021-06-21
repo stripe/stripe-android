@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.forms
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 import com.stripe.android.paymentsheet.specifications.sofort
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

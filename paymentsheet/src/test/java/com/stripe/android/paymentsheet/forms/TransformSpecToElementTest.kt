@@ -23,19 +23,19 @@ class TransformSpecToElementTest {
 
     private val nameSection = FormItemSpec.SectionSpec(
         IdentifierSpec("nameSection"),
-        FormItemSpec.SectionSpec.SectionFieldSpec.Name
+        SectionFieldSpec.Name
     )
 
     private val emailSection = FormItemSpec.SectionSpec(
         IdentifierSpec("emailSection"),
-        FormItemSpec.SectionSpec.SectionFieldSpec.Email
+        SectionFieldSpec.Email
     )
 
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
         val countrySection = FormItemSpec.SectionSpec(
             IdentifierSpec("countrySection"),
-            FormItemSpec.SectionSpec.SectionFieldSpec.Country
+            SectionFieldSpec.Country
         )
         val formElement = transformSpecToElement.transform(
             LayoutSpec(

@@ -32,13 +32,6 @@ sealed class FormItemSpec {
         val field: SectionFieldSpec
     ) : FormItemSpec() {
 
-        sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
-            object Name : SectionFieldSpec(IdentifierSpec("name"))
-
-            object Email : SectionFieldSpec(IdentifierSpec("email"))
-
-            object Country : SectionFieldSpec(IdentifierSpec("country"))
-        }
     }
 
     /**
@@ -49,4 +42,12 @@ sealed class FormItemSpec {
         @StringRes val stringResId: Int,
         val color: Color
     ) : FormItemSpec()
+}
+
+sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
+    object Name : SectionFieldSpec(IdentifierSpec("name"))
+
+    object Email : SectionFieldSpec(IdentifierSpec("email"))
+
+    object Country : SectionFieldSpec(IdentifierSpec("country"))
 }

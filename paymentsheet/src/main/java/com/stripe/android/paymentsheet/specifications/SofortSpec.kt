@@ -18,15 +18,15 @@ val sofort = FormSpec(
         listOf(
             FormItemSpec.SectionSpec(
                 IdentifierSpec("name"),
-                FormItemSpec.SectionSpec.SectionFieldSpec.Name
+                SectionFieldSpec.Name
             ),
             FormItemSpec.SectionSpec(
                 IdentifierSpec("email"),
-                FormItemSpec.SectionSpec.SectionFieldSpec.Email
+                SectionFieldSpec.Email
             ),
             FormItemSpec.SectionSpec(
                 IdentifierSpec("country"),
-                FormItemSpec.SectionSpec.SectionFieldSpec.Country
+                SectionFieldSpec.Country
             ),
             FormItemSpec.StaticTextSpec(
                 IdentifierSpec("mandate"),

@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 
 /**
  * The purpose of this class is to transform a LayoutSpec data object into an Element, which
@@ -30,16 +31,16 @@ internal class TransformSpecToElement {
     ): FormElement.SectionElement {
 
         val fieldElement = when (spec.field) {
-            FormItemSpec.SectionSpec.SectionFieldSpec.Email -> transform(
-                spec.field as FormItemSpec.SectionSpec.SectionFieldSpec.Email,
+            SectionFieldSpec.Email -> transform(
+                spec.field as SectionFieldSpec.Email,
                 focusRequesterCount
             )
-            FormItemSpec.SectionSpec.SectionFieldSpec.Name -> transform(
-                spec.field as FormItemSpec.SectionSpec.SectionFieldSpec.Name,
+            SectionFieldSpec.Name -> transform(
+                spec.field as SectionFieldSpec.Name,
                 focusRequesterCount
             )
-            FormItemSpec.SectionSpec.SectionFieldSpec.Country -> transform(
-                spec.field as FormItemSpec.SectionSpec.SectionFieldSpec.Country
+            SectionFieldSpec.Country -> transform(
+                spec.field as SectionFieldSpec.Country
             )
         }
 
@@ -60,7 +61,7 @@ internal class TransformSpecToElement {
         )
 
     private fun transform(
-        spec: FormItemSpec.SectionSpec.SectionFieldSpec.Name,
+        spec: SectionFieldSpec.Name,
         focusRequesterCount: FocusRequesterCount
     ) =
         FormElement.SectionElement.SectionFieldElement.Name(
@@ -71,7 +72,7 @@ internal class TransformSpecToElement {
 
 
     private fun transform(
-        spec: FormItemSpec.SectionSpec.SectionFieldSpec.Email,
+        spec: SectionFieldSpec.Email,
         focusRequesterCount: FocusRequesterCount
     ) =
         FormElement.SectionElement.SectionFieldElement.Email(
@@ -81,7 +82,7 @@ internal class TransformSpecToElement {
         )
 
 
-    private fun transform(spec: FormItemSpec.SectionSpec.SectionFieldSpec.Country) =
+    private fun transform(spec: SectionFieldSpec.Country) =
         FormElement.SectionElement.SectionFieldElement.Country(
             spec.identifier,
             DropdownFieldController(CountryConfig())
