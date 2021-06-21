@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/StripePaymentOptionItemContainer"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
+        style="@style/StripePaymentOptionItemCard"
+        android:duplicateParentState="true"
+        app:layout_constraintBottom_toTopOf="@id/label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/brand_icon"
+            style="@style/StripePaymentOptionItemCardImage"
+            android:contentDescription="@null" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/label"
+        style="@style/StripePaymentSheetPaymentMethodsLabel"
+        android:duplicateParentState="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/card"
+        app:layout_constraintTop_toBottomOf="@+id/card" />
+
+    <ImageView
+        android:id="@+id/check_icon"
+        style="@style/StripePaymentOptionItemCardCheck"
+        android:duplicateParentState="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,50 +1,93 @@
 name: CI
 on:
-    push:
-        branches:
-            - master
-    pull_request:
+  push:
+    branches:
+      - master
+  pull_request:
 jobs:
-    check:
-        name: Check
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        steps:
-            - uses: actions/checkout@v2
-            - uses: gradle/wrapper-validation-action@v1
-            - uses: actions/setup-java@v1
-              with:
-                  java-version: 8
-            - uses: actions/cache@v1
-              with:
-                path: ~/.gradle/caches
-                key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-            - name: Ktlint
-              run: ./gradlew ktlint
-            - name: Checkstyle
-              run: ./gradlew checkstyle
-            - name: Lint
-              run: ./gradlew lintRelease
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Ktlint
+        run: ./gradlew ktlint
+      - name: Checkstyle
+        run: ./gradlew checkstyle
+      - name: Lint
+        run: ./gradlew lintRelease
 
-    unit-tests:
-        name: Unit tests
-        runs-on: ubuntu-latest
-        timeout-minutes: 35
-        steps:
-            - uses: actions/checkout@v2
-            - uses: gradle/wrapper-validation-action@v1
-            - uses: actions/setup-java@v1
-              with:
-                  # use Java 8 for Locale and Currency compatibility with Android
-                  java-version: 8
-            - uses: actions/cache@v1
-              with:
-                path: ~/.gradle/caches
-                key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
-            - name: Unit tests
-              run: ./gradlew testDebugUnitTest
-            - uses: actions/upload-artifact@v2
-              if: failure()
-              with:
-                name: unit-test-report
-                path: stripe/build/reports/tests/testDebugUnitTest/
+      # Check if there has been a binary incompatible change to the API.
+      # If this change is intentional, run `./gradlew apiDump` and commit the new API files.
+      - name: Check binary compatibility
+        run: ./gradlew apiCheck
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Unit tests
+        run: ./gradlew :payments-core:testDebugUnitTest  :paymentsheet:testDebugUnitTest
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: unit-test-report
+          path: payments-core/build/reports/tests/testDebugUnitTest/
+
+  end-to-end-tests:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: End-to-end tests
+        env:
+          STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
+        run: ./gradlew :stripe-test-e2e:testDebugUnitTest
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: unit-test-report
+          path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/

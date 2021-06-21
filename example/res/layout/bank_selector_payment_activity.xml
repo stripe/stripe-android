@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <Button
+        android:id="@+id/select_payment_method_button"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/example_vertical_spacing"
+        android:text="@string/payment_session_select_payment"
+        />
+
+    <TextView
+        android:id="@+id/payment_method_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:typeface="monospace" />
+
+    <TextView
+        android:id="@+id/bank_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingTop="20dp"
+        android:visibility="gone" />
+</LinearLayout>

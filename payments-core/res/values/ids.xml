@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <item name="stripe_default_reader_id" type="id" />
+    <item name="stripe_payment_methods_add_card" type="id" />
+    <item name="stripe_payment_methods_add_fpx" type="id" />
+    <item name="stripe_payment_methods_add_netbanking" type="id" />
+    <item name="stripe_add_payment_method_form" type="id" />
+    <item name="stripe_add_payment_method_footer" type="id" />
+    <item name="stripe_payment_methods_footer" type="id" />
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/stripe_card_widget_progress_size"
+    android:layout_height="@dimen/stripe_card_widget_progress_size">
+
+    <ProgressBar
+        android:id="@+id/card_loading"
+        android:background="@android:color/transparent"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/stripe_card_widget_progress_foreground"
+        android:indeterminateTintMode="src_in"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="1dp" />
+</merge>

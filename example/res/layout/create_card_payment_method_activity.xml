@@ -1,52 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="invisible" />
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
-        <TextView
-            android:text="@string/create_payment_method_header"
-            style="@style/Header" />
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progress_bar"
+                style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="invisible" />
 
-        <com.stripe.android.view.CardMultilineWidget
-            android:id="@+id/card_multiline_widget"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <TextView
+                style="@style/Header"
+                android:text="@string/create_payment_method_header" />
 
-        <Button
-            android:id="@+id/create_button"
-            android:layout_height="wrap_content"
-            android:layout_width="320dp"
-            android:text="@string/create_payment_method" />
+            <!-- The style and background color for CardFormView are customizable,
+            please refer to the doc for more details-->
+            <com.stripe.android.view.CardFormView
+                android:id="@+id/card_form_view"
+                style="@style/StripeCardFormView.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:backgroundColorStateList="@color/card_form_view_bg_color_overriden" />
 
-        <TextView
-            style="@style/Header"
-            android:layout_marginTop="30dp"
-            android:text="@string/paymentMethods" />
+            <Button
+                android:id="@+id/create_button"
+                android:layout_height="wrap_content"
+                android:layout_width="320dp"
+                android:enabled="false"
+                android:text="@string/create_payment_method" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/payment_methods"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+            <Button
+                android:id="@+id/toggle_card_form_view"
+                android:layout_height="wrap_content"
+                android:layout_width="320dp"
+                android:text="@string/toggle_card_form_view" />
 
-    </LinearLayout>
+            <TextView
+                style="@style/Header"
+                android:layout_marginTop="30dp"
+                android:text="@string/paymentMethods" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/payment_methods"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+    </ScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

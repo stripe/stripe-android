@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="colorPrimary">@color/blurple</item>
+        <item name="colorPrimaryDark">@color/appPrimaryDark</item>
         <item name="colorAccent">@color/accent</item>
         <item name="colorControlActivated">@color/accent</item>
         <item name="titleTextColor">@color/title</item>
@@ -11,7 +11,7 @@
 
     <style name="StripeDefaultTheme" parent="StripeBaseTheme">
         <!-- Applied to toolbar background -->
-        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimary">@color/blurple</item>
 
         <!-- Applied to status bar -->
         <item name="colorPrimaryDark">@color/primaryDark</item>
@@ -43,7 +43,7 @@
     <!-- Applied to 3DS2 Challenge Screen -->
     <style name="Stripe3DS2Theme" parent="StripeDefault3DS2Theme">
         <!-- 3DS2 Challenge Screen toolbar background -->
-        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimary">@color/blurple</item>
         <!-- 3DS2 Challenge Screen status bar -->
         <item name="colorPrimaryDark">@color/primaryDark</item>
         <!-- 3DS2 Challenge Screen toolbar text -->

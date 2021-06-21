@@ -12,8 +12,6 @@ import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.stripe.android.CustomerSession
-import com.stripe.android.EphemeralKeyProvider
-import com.stripe.android.EphemeralKeyUpdateListener
 import com.stripe.example.R
 import org.junit.Before
 import org.junit.Rule
@@ -32,12 +30,8 @@ class AddFpxPaymentMethodTest {
     fun setup() {
         CustomerSession.initCustomerSession(
             context,
-            object : EphemeralKeyProvider {
-                override fun createEphemeralKey(
-                    apiVersion: String,
-                    keyUpdateListener: EphemeralKeyUpdateListener
-                ) {
-                }
+            ephemeralKeyProvider = { _, _ ->
+                // noop
             }
         )
     }
@@ -54,7 +48,7 @@ class AddFpxPaymentMethodTest {
             .perform(click())
 
         // click on first bank in the list
-        onView(withId(R.id.fpx_list)).perform(
+        onView(withId(R.id.bank_list)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
         )
     }

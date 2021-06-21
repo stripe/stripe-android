@@ -1,31 +1,35 @@
+import java.time.Duration
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlinVersion = '1.4.21'
-    ext.dokkaVersion = '1.4.0-rc'
+    ext.kotlinVersion = '1.5.10'
+    ext.dokkaVersion = '1.4.32'
 
     repositories {
-        jcenter()
+        mavenCentral()
         google()
+        gradlePluginPortal()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:2.0.0'
+        classpath 'com.android.tools.build:gradle:4.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.6.0"
     }
 }
 
 plugins {
-    id 'io.codearte.nexus-staging' version '0.22.0'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
 }
 
 allprojects {
     group = GROUP
 
     repositories {
+        mavenCentral()
         google()
-        jcenter()
+        gradlePluginPortal()
     }
 
     task checkstyle(type: Checkstyle) {
@@ -43,18 +47,20 @@ allprojects {
 }
 
 ext {
-    buildToolsVersion = "30.0.2"
+    buildToolsVersion = "30.0.3"
     compileSdkVersion = 30
 
-    kotlinCoroutinesVersion = '1.4.2'
-    androidLifecycleVersion = '2.2.0'
+    kotlinCoroutinesVersion = '1.5.0'
+    composeVersion = '1.0.0-beta08'
     espressoVersion = '3.3.0'
-    ktlintVersion = '0.40.0'
-    materialVersion = '1.2.1'
-
-    fragmentVersion = '1.3.0-rc01'
+    ktlintVersion = '0.41.0'
+    materialVersion = '1.3.0'
+    daggerVersion = '2.37'
 
     androidTestVersion = '1.3.0'
+
+    group_name = GROUP
+    version_name = VERSION_NAME
 }
 
 if (JavaVersion.current().isJava8Compatible()) {
@@ -65,8 +71,28 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
-nexusStaging {
-    username = project.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
-    password = project.hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+nexusPublishing {
     packageGroup = GROUP
+
+    repositories {
+        sonatype {
+            username = project.findProperty('NEXUS_USERNAME') ?: ""
+            password = project.findProperty('NEXUS_PASSWORD') ?: ""
+        }
+    }
+
+    clientTimeout = Duration.ofMinutes(5)
+    connectTimeout = Duration.ofMinutes(1)
+
+    transitionCheckOptions {
+        maxRetries.set(40)
+        delayBetween.set(Duration.ofSeconds(10))
+    }
+}
+
+apply plugin: 'binary-compatibility-validator'
+
+apiValidation {
+    ignoredPackages += ["com.stripe.android.databinding"]
+    ignoredProjects += ["example", "paymentsheet-example"]
 }

@@ -1,5 +1,62 @@
 # Migration Guide
 
+## Migrating from versions < 17.0.0
+- Changes to `Stripe`
+    - `ComponentActivity` is now required for payment confirmation methods to make operations
+       lifecycle-aware.
+    - `authenticatePayment` and `authenticateSetup` have been removed
+    - `createCardToken()` now requires `CardParams` instead of `Card`
+- Changes to `ConfirmPaymentIntentParams`
+    - `returnUrl` has been removed as a parameter on `ConfirmPaymentIntentParams` static creation
+       methods. The SDK manages setting this value internally.
+    - `extraParams` property has been removed. Static creation methods that accept this parameter
+      have been removed.
+- Changes to `ConfirmSetupIntentParams`
+    - `returnUrl` has been removed as a parameter on `ConfirmSetupIntentParams` static creation
+       methods. The SDK manages setting this value internally.
+- Changes to `Card`
+     - `number` and `cvc` properties have been removed to reflect the Stripe API
+     - `metadata` has been removed to reflect that it is no longer returned to clients using a
+       publishable key
+     - `Card.Builder` has been removed
+     - `fromString()` and `fromJson()` static methods have been removed
+     - `toPaymentMethodsParams()`, `toPaymentMethodParamsCard()`, `toBuilder()`, and validation
+       instance methods have been removed
+- Changes to `PaymentMethod`
+     - `metadata` has been removed to reflect that it is no longer returned to clients using a
+       publishable key
+     - `PaymentMethod.Card.Builder` has been removed
+- Changes to `PaymentMethodCreateParams`
+     - `Ideal.Builder`, `Fpx.Builder`, and `SepaDebit.Builder` have been removed
+- Changes to `Source`
+     - `metadata` has been removed to reflect that it is no longer returned to clients using a
+       publishable key
+- Changes to `SourceParams`
+     - Most setter methods have been removed
+     - `extraParams` property has been removed
+- Changes to `Customer`
+    - Remove `fromString()` and `fromJson()`
+    - Rename `CustomerSource` to `CustomerPaymentSource` and make a sealed class with types
+      `CustomerBankAccount`, `CustomerCard`, and `CustomerSource`
+- Changes to `CardBrand`
+    - Deprecated methods have been removed
+- Changes to `CardInputWidget`
+    - `card` and `cardBuilder` properties have been removed; use `cardParams` instead
+- Changes to `CardMultilineWidget`
+    - `card` and `cardBuilder` properties have been removed; use `cardParams` instead
+- Changes to `CardNumberEditText`
+    - `lengthMax` and `cardNumber` properties have been removed
+- Changes to `CvcEditText`
+    - `cvcValue` property has been removed
+- Changes to `ExpiryDateEditText`
+    - `validDateFields` property has been removed
+- Changes to `StripeEditText`
+    - `cachedColorStateList` property has been removed
+- Other changes
+    - `GooglePayConfig` now requires instantiated `PaymentConfiguration`
+    - `CardUtils` is now `internal`
+    - `StripeTextUtils` has been removed
+
 ## Migrating from versions < 16.0.0
 - Changes to `CardInputWidget` and `CardMultilineWidget`
     -  To enable 19-digit card support, [PaymentConfiguration.init]
@@ -285,7 +342,7 @@
     - `PaymentSession#onDestroy()` has been removed; the `listener` instance is now released
       automatically when the host `Activity` or `Fragment` is destroyed
     - Remove `PaymentSessionData.paymentSessionData`; this data will be returned via
-      `PaymentSessionListener#onPaymentSessionDataChanged()
+      `PaymentSessionListener#onPaymentSessionDataChanged()`
 - Changes to `StripeSourceTypeModel`
     - Rename to `SourceTypeModel` and make a sealed class
     - Move `SourceCardData` subclass to `SourceTypeModel.Card`
@@ -774,7 +831,7 @@
     stripe.retrievePaymentIntentSynchronous(clientSecret);
     ```
 
-- `PaymentIntentParams` is now [`ConfirmPaymentIntentParams`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/ConfirmPaymentIntentParams.java) and its method names have been simplified.
+- `PaymentIntentParams` is now [`ConfirmPaymentIntentParams`](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/model/ConfirmPaymentIntentParams.java) and its method names have been simplified.
   See [#1172](https://github.com/stripe/stripe-android/pull/1172).
     ```java
     // before
@@ -933,7 +990,7 @@ StripeIntent.Status.Succeeded
    CustomerSession.getInstance().setCustomerShippingInformation(listener);
    ```
 
-- [`PaymentIntent`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/PaymentIntent.java) has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
+- [`PaymentIntent`](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/model/PaymentIntent.java) has been updated to reflect [API version 2019-02-11](https://stripe.com/docs/upgrades#2019-02-11)
     - `PaymentIntent.Status.RequiresSource` is now `PaymentIntent.Status.RequiresPaymentMethod`
     - `PaymentIntent.Status.RequiresSourceAction` is now `PaymentIntent.Status.RequiresAction`
     - `PaymentIntent.NextActionType.AuthorizeWithUrl` has been removed
@@ -942,7 +999,7 @@ StripeIntent.Status.Succeeded
     - `PaymentIntent#requiresAction()` has been added as a convenience
     - `PaymentIntent#getStatus()` now returns a `PaymentIntent.Status` enum value instead of a `String`
 
-- [`Address`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/Address.java) is now immutable and its setters have been removed.
+- [`Address`](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/model/Address.java) is now immutable and its setters have been removed.
   Use `Address.Builder` to create a new `Address` object.
 
 ## Migrating from versions < 7.0.0

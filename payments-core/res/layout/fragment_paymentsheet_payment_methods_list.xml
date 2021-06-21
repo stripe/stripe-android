@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="@dimen/stripe_paymentsheet_paymentoptions_margin_top"
+    android:layout_marginBottom="@dimen/stripe_paymentsheet_paymentoptions_margin_bottom"
+    tools:context=".paymentsheet.PaymentSheetListFragment">
+
+    <TextView
+        android:id="@+id/header"
+        style="@style/StripePaymentSheetTitle"
+        android:layout_width="wrap_content"
+        android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+        android:text="@string/stripe_paymentsheet_select_payment_method" />
+
+    <TextView
+        android:id="@+id/total"
+        style="@style/StripePaymentSheetTotalLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
+        android:text="@string/stripe_paymentsheet_total_amount" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:layout_marginTop="7dp"
+        android:paddingHorizontal="17dp" />
+
+</LinearLayout>

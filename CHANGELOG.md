@@ -1,5 +1,175 @@
 # CHANGELOG
 
+## 17.0.0 - unreleased
+This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
+
+* [3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10` and Coroutines to `1.5.0`
+
+## 16.10.0 - 2021-05-28
+* [3752](https://github.com/stripe/stripe-android/pull/3752) Support connected accounts when using Google Pay in PaymentSheet
+* [3761](https://github.com/stripe/stripe-android/pull/3761) Publish `CardFormView`
+* [3762](https://github.com/stripe/stripe-android/pull/3762) Add SetupIntent support in PaymentSheet
+* [3769](https://github.com/stripe/stripe-android/pull/3769) Upgrade Google Pay SDK to `18.1.3`
+
+## 16.9.0 - 2021-05-21
+* [3727](https://github.com/stripe/stripe-android/pull/3727) Upgrade Gradle to `7.0.2`
+* [3734](https://github.com/stripe/stripe-android/pull/3734) Upgrade `androidx.appcompat:appcompat` to `1.3.0`
+* [3735](https://github.com/stripe/stripe-android/pull/3735) Upgrade `fragment-ktx` to `1.3.4`
+* [3737](https://github.com/stripe/stripe-android/pull/3737) Add `Stripe.createRadarSession()` API binding for `/v1/radar/session`
+* [3739](https://github.com/stripe/stripe-android/pull/3739) Downgrade Kotlin from `1.5.0` to `1.4.32`
+
+## 16.8.2 - 2021-05-14
+* [3709](https://github.com/stripe/stripe-android/pull/3709) Upgrade org.jetbrains.kotlin.plugin.serialization to `1.5.0`
+* [3710](https://github.com/stripe/stripe-android/pull/3710) Upgrade kotlinx-serialization-json to `1.2.0`
+* [3711](https://github.com/stripe/stripe-android/pull/3711) Upgrade Gradle to `7.0.1`
+* [3712](https://github.com/stripe/stripe-android/pull/3712) Move PaymentSheet example into its own app
+* [3717](https://github.com/stripe/stripe-android/pull/3717) Upgrade mockito-core to `3.10.0`
+* [3721](https://github.com/stripe/stripe-android/pull/3721) Fix crash on Android 8 and 9 when opening the PaymentSheet
+* [3722](https://github.com/stripe/stripe-android/pull/3722) Upgrade Android Gradle Plugin to `4.2.1`
+
+## 16.8.0 - 2021-05-07
+This release adds a prebuilt UI.   It combines all the steps required to pay - collecting payment details and confirming the payment - into a single sheet that displays on top of your app.  See the [guide](https://stripe.com/docs/payments/accept-a-payment?platform=android) for more details.
+
+* [#3663](https://github.com/stripe/stripe-android/pull/3663) Add support for using Chrome to host a 3DS1 authentication page when Custom Tabs are not available
+* [#3677](https://github.com/stripe/stripe-android/pull/3677) Upgrade Android Gradle Plugin to `4.2.0`
+* [#3680](https://github.com/stripe/stripe-android/pull/3680) Deprecate `returnUrl` in some `ConfirmPaymentIntentParams` create() methods
+   * A custom `return_url` is not needed to return control to the app after an authentication attempt 
+* [#3681](https://github.com/stripe/stripe-android/pull/3681) Reset PaymentIntent and SetupIntent status after 3DS1 cancellation in Custom Tabs
+   * When a customer closed a 3DS1 authentication page hosted in Custom Tabs, the Intent's `status` was not reset
+     from `requires_action` to `requires_payment_method`. This is now fixed.
+* [#3685](https://github.com/stripe/stripe-android/pull/3685) Upgrade Kotlin to `1.5.0`
+* [#3687](https://github.com/stripe/stripe-android/pull/3687) Add support for PaymentSheet prebuilt UI.
+* [#3696](https://github.com/stripe/stripe-android/pull/3696) Upgrade `activity-ktx` to `1.2.3`
+
+
+## 16.7.1 - 2021-04-29
+* [#3653](https://github.com/stripe/stripe-android/pull/3653) Support WeChat Pay for creating a `PaymentMethod` and confirming a `PaymentIntent`
+    * WeChat Pay is still in beta. To enable support in API bindings, pass the `StripeApiBeta.WeChatPayV1` as an argument when instantiating a `Stripe` instance.
+* [#3567](https://github.com/stripe/stripe-android/pull/3567) Use `lifecycleScope` where possible in `Stripe.kt`
+    * When calling payment and setup confirmation methods (e.g. `confirmPayment()`), using
+      a `ComponentActivity` subclass (e.g. `AppCompatActivity`) will make the call lifecycle-aware.
+* [#3635](https://github.com/stripe/stripe-android/pull/3635) Deprecate `extraParams` in `ConfirmPaymentIntentParams`
+    * Use `setupFutureUsage` instead.
+      ```kotlin
+      // before
+      ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+          params,
+          clientSecret,
+          extraParams = mapOf("setup_future_usage" to "off_session")
+      )
+      
+      // after
+      ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+          params,
+          clientSecret,
+          setupFutureUsage = SetupFutureUsage.OffSession
+      )
+      ```
+* [#3640](https://github.com/stripe/stripe-android/pull/3640) Add support for beta headers using `StripeApiBeta`
+    * The following example includes the `wechat_pay_beta=v1` flag in API requests:
+      ```kotlin
+      Stripe(
+          context,
+          publishableKey,
+          betas = setOf(StripeApiBeta.WechatPayV1)
+      )
+      ```
+* [#3644](https://github.com/stripe/stripe-android/pull/3644) Use Custom Tabs for 3DS1 payment authentication when available
+    * When a `ConfirmPaymentIntentParams` or `ConfirmSetupIntentParams` instance is created
+      **without** a custom `return_url` value and used to confirm a `PaymentIntent` or
+      `SetupIntent` **and** the device supports
+      [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/), 
+      use Custom Tabs instead of a WebView to render the authentication page.
+    * See [Stripe#confirmPayment()](https://github.com/stripe/stripe-android/blob/8bf5b738878362c6b9e4ac79edc7c515d9ba63ef/stripe/src/main/java/com/stripe/android/Stripe.kt#L145)
+      for more details.
+* [#3646](https://github.com/stripe/stripe-android/pull/3646) Upgrade 3DS2 SDK to `5.3.1`
+    * Gracefully handle unknown directory server ids
+* [#3656](https://github.com/stripe/stripe-android/pull/3656) Deprecate `return_url` in `ConfirmSetupIntentParams`
+    * Setting a custom `return_url` prevents authenticating 3DS1 with Custom Tabs.
+      Instead, a WebView fallback will be used.
+
+## 16.6.1 - 2021-04-26
+* [#3568](https://github.com/stripe/stripe-android/pull/3568) Add suspending function variants for payment confirmation methods
+* [#3587](https://github.com/stripe/stripe-android/pull/3587) Upgrade Kotlin to `1.4.32`
+* [#3606](https://github.com/stripe/stripe-android/pull/3606) Upgrade Gradle to `7.0`
+* [#3626](https://github.com/stripe/stripe-android/pull/3626) Upgrade Fragment to `1.3.3`
+* [#3632](https://github.com/stripe/stripe-android/pull/3632) Upgrade 3DS2 SDK to `5.3.0`
+    * Upgrade `nimbus-jose-jwt` to `9.8.1`
+    * Gracefully handle unknown directory servers
+
+## 16.5.0 - 2021-04-08
+* [#3557](https://github.com/stripe/stripe-android/pull/3557) Add suspending function variants of API methods
+* [#3559](https://github.com/stripe/stripe-android/pull/3559) Fix OXXO confirmation flow
+* [#3575](https://github.com/stripe/stripe-android/pull/3575) Upgrade `recyclerview` to `1.2.0`
+
+## 16.4.3 - 2021-04-02
+* [#3555](https://github.com/stripe/stripe-android/pull/3555) Fix 3DS2 challenge completion endpoint request
+
+## 16.4.2 - 2021-04-01
+* [#3548](https://github.com/stripe/stripe-android/pull/3548) Refine `PaymentAuthWebViewClient` completion URL logic
+* [#3549](https://github.com/stripe/stripe-android/pull/3549) Add SDK user agent to `PaymentAuthWebView`'s user agent
+* [#3551](https://github.com/stripe/stripe-android/pull/3551) Add extra headers to `PaymentAuthWebViewActivity`'s loadUrl request
+
+## 16.4.1 - 2021-04-01
+* [#3537](https://github.com/stripe/stripe-android/pull/3537) Add account id support in `IssuingCardPinService`
+* [#3538](https://github.com/stripe/stripe-android/pull/3538) Add support for retrying rate-limited API requests
+* [#3543](https://github.com/stripe/stripe-android/pull/3543) Add better support for auto-dismissing `PaymentAuthWebViewActivity` when `return_url` is not provided
+
+## 16.4.0 - 2021-03-29
+* [#3457](https://github.com/stripe/stripe-android/pull/3457) Fix issue where `StripeEditText` was overriding default text color changes
+* [#3476](https://github.com/stripe/stripe-android/pull/3476) Fix `PaymentMethodsAdapter` "new card" click handling
+* [#3479](https://github.com/stripe/stripe-android/pull/3479) Add support for Blik payment method
+* [#3482](https://github.com/stripe/stripe-android/pull/3482) Mark incomplete fields in `CardMultilineWidget` as invalid
+* [#3484](https://github.com/stripe/stripe-android/pull/3484) Add new method `CardInputWidget#setCvcLabel`
+* [#3493](https://github.com/stripe/stripe-android/pull/3493) Correctly return error results from `PaymentAuthWebViewActivity`
+* [#3504](https://github.com/stripe/stripe-android/pull/3504) Add default mandate data for all applicable payment method types
+* [#3507](https://github.com/stripe/stripe-android/pull/3507) Invoke issuing API requests on background thread
+* [#3508](https://github.com/stripe/stripe-android/pull/3508) Make `EphemeralKeyProvider` a fun interface
+* [#3517](https://github.com/stripe/stripe-android/pull/3517) Add retry logic for 3DS2 challenge completion endpoint
+* [#3519](https://github.com/stripe/stripe-android/pull/3519) Update AndroidX dependencies
+    * `androidx.activity:activity-ktx` to `1.2.2`
+    * `androidx.annotation:annotation` to `1.2.0`
+    * `androidx.fragment:fragment-ktx` to `1.3.2`
+    * `androidx.lifecycle:lifecycle-*` to `2.3.1`
+* [#3520](https://github.com/stripe/stripe-android/pull/3520) Invoke `CardInputWidget#cardInputListener` when postal code field gets focus
+* [#3524](https://github.com/stripe/stripe-android/pull/3524) Update `layoutDirection` for card widget fields
+    * Card number, expiration date, and CVC are always LTR
+    * Postal code is defined by the locale
+
+## 16.3.1 - 2021-03-16
+* [#3381](https://github.com/stripe/stripe-android/pull/3381) Add `fingerprint` property to `PaymentMethod.Card`
+* [#3401](https://github.com/stripe/stripe-android/pull/3401) Upgrade Gradle to `6.8.3`
+* [#3429](https://github.com/stripe/stripe-android/pull/3429) Fix `ExpiryDateEditText` error messages
+* [#3436](https://github.com/stripe/stripe-android/pull/3436) Upgrade `kotlin-coroutines` to `1.4.3`
+* [#3438](https://github.com/stripe/stripe-android/pull/3438) Upgrade Kotlin to `1.4.31`
+* [#3443](https://github.com/stripe/stripe-android/pull/3443) Create new transparent theme for invisible activities
+* [#3456](https://github.com/stripe/stripe-android/pull/3456) Fix tint flicker in `CardBrandView`
+* [#3460](https://github.com/stripe/stripe-android/pull/3460) Upgrade `activity-ktx` to `1.2.1`
+
+## 16.3.0 - 2021-02-11
+* [#3334](https://github.com/stripe/stripe-android/pull/3334) Upgrade Kotlin to `1.4.30`
+* [#3346](https://github.com/stripe/stripe-android/pull/3346) Upgrade Gradle to `6.8.2`
+* [#3349](https://github.com/stripe/stripe-android/pull/3349) Upgrade `material-components` to `1.3.0`
+* [#3359](https://github.com/stripe/stripe-android/pull/3359) Add `brand` and `last4` properties to `CardParams`
+* [#3367](https://github.com/stripe/stripe-android/pull/3367) Upgrade `fragment-ktx` to `1.3.0` and `activity-ktx` to `1.2.0`
+* [#3368](https://github.com/stripe/stripe-android/pull/3368) Upgrade `androidx.lifecycle` dependencies to `2.3.0`
+* [#3372](https://github.com/stripe/stripe-android/pull/3372) Upgrade 3DS2 SDK to `5.2.0`
+    * Upgrade `nimbus-jose-jwt` to `9.5`
+    * Upgrade Kotlin to `1.4.30`
+    * Upgrade `material-components` to `1.3.0`
+    * Upgrade `activity-ktx` to `1.2.0` and `fragment-ktx` to `1.3.0`
+    * Upgrade `androidx.lifecycle` to `2.3.0`
+    * Migrate `ProgressBar` to `CircularProgressIndicator`
+
+## 16.2.1 - 2021-01-29
+* [#3275](https://github.com/stripe/stripe-android/pull/3257) Fix spinner positioning in `CardMultilineWidget`
+* [#3275](https://github.com/stripe/stripe-android/pull/3275) Upgrade Android Gradle Plugin to `4.1.2`
+* [#3291](https://github.com/stripe/stripe-android/pull/3291) Upgrade Gradle to `6.8.1`
+* [#3300](https://github.com/stripe/stripe-android/pull/3300) Upgrade AndroidX fragment dependency to `1.3.0-rc2`
+* [#3302](https://github.com/stripe/stripe-android/pull/3302) Add support for creating `afterpay_clearpay` payment methods
+* [#3315](https://github.com/stripe/stripe-android/pull/3315) Upgrade 3DS2 SDK to `5.1.1`
+    * Upgrade `nimbus-jose-jwt` to `9.4.2`
+
 ## 16.2.0 - 2021-01-11
 * [#3088](https://github.com/stripe/stripe-android/pull/3088) Mark some builders in `PaymentMethodCreateParams` as deprecated
 * [#3134](https://github.com/stripe/stripe-android/pull/3134) Upgrade Kotlin to `1.4.21`
@@ -99,6 +269,8 @@ This release adds support for 19-digit cards in `CardInputWidget` and `CardMulti
 ## 15.0.1 - 2020-07-28
 * [#2641](https://github.com/stripe/stripe-android/pull/2641) Add support for Bank Account as source on `Customer` object
 * [#2643](https://github.com/stripe/stripe-android/pull/2643) Add missing fields to `Customer` model
+* [#2644](https://github.com/stripe/stripe-android/pull/2644) Support new directory server network names
+     * Enable support for Discover and other new networks
 * [#2646](https://github.com/stripe/stripe-android/pull/2646) Allow `CardMultilineWidget`'s `TextInputLayout`s to be styled
 * [#2649](https://github.com/stripe/stripe-android/pull/2649) Add `@JvmOverloads` to `GooglePayJsonFactory` methods
 * [#2651](https://github.com/stripe/stripe-android/pull/2651) Update Kotlin coroutines to `1.3.8`

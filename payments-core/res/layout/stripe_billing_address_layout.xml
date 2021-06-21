@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/StripePaymentAddPaymentMethodMaterialCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.stripe.android.view.CountryTextInputLayout
+                android:id="@+id/country_layout"
+                style="@style/StripePaymentSheetAutocompleteTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:countryAutoCompleteStyle="@style/StripePaymentSheetCountryItem"
+                app:countryItemLayout="@layout/stripe_country_dropdown_item"
+                app:helperTextEnabled="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/address1_divider"
+                style="@style/StripePaymentSheetFormDivider"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/address1_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/country_layout" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/address1_layout"
+                style="@style/StripePaymentSheetTextInputLayout"
+                android:hint="@string/address_label_address_line1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/address2_divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/address1_divider">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/address1"
+                    style="@style/StripePaymentSheetTextInputEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:id="@+id/address2_divider"
+                style="@style/StripePaymentSheetFormDivider"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/address2_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/address1_layout" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/address2_layout"
+                style="@style/StripePaymentSheetTextInputLayout"
+                android:visibility="gone"
+                android:hint="@string/address_label_address_line2_optional"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/city_postal_divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/address2_divider">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/address2"
+                    style="@style/StripePaymentSheetTextInputEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:id="@+id/city_postal_divider"
+                style="@style/StripePaymentSheetFormDivider"
+                app:layout_constraintBottom_toTopOf="@+id/city_postal_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/address2_layout" />
+
+            <LinearLayout
+                android:id="@+id/city_postal_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                app:layout_constraintBottom_toTopOf="@+id/state_divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/city_postal_divider">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/city_layout"
+                    style="@style/StripePaymentSheetTextInputLayout"
+                    android:hint="@string/address_label_city"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/city"
+                        style="@style/StripePaymentSheetTextInputEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/postal_code_layout"
+                    style="@style/StripePaymentSheetTextInputLayout"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+
+                    <com.stripe.android.view.StripeEditText
+                        android:id="@+id/postal_code"
+                        style="@style/StripePaymentSheetTextInputEditText"
+                        android:inputType="textPostalAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/state_divider"
+                style="@style/StripePaymentSheetFormDivider"
+                app:layout_constraintBottom_toTopOf="@+id/state_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/city_postal_container" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/state_layout"
+                style="@style/StripePaymentSheetTextInputLayout"
+                android:hint="@string/address_label_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/state_divider">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/state"
+                    style="@style/StripePaymentSheetTextInputEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</merge>

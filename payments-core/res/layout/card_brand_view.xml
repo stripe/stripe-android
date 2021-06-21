@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/card_brand_view_width"
+        android:layout_height="@dimen/card_brand_view_height"
+        android:contentDescription="@null"
+        app:srcCompat="@drawable/stripe_ic_unknown" />
+
+    <com.stripe.android.view.CardWidgetProgressView
+        android:id="@+id/progress"
+        android:layout_width="@dimen/stripe_card_widget_progress_size"
+        android:layout_height="@dimen/stripe_card_widget_progress_size"
+        android:layout_gravity="top|end" />
+</merge>

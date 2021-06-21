@@ -15,19 +15,19 @@ import com.stripe.android.view.AddPaymentMethodActivityStarter;
 import com.stripe.android.view.FpxBank;
 import com.stripe.example.R;
 import com.stripe.example.Settings;
-import com.stripe.example.databinding.FpxPaymentActivityBinding;
+import com.stripe.example.databinding.BankSelectorPaymentActivityBinding;
 
 import java.util.Objects;
 
 public class FpxPaymentActivity extends AppCompatActivity {
 
-    private FpxPaymentActivityBinding viewBinding;
+    private BankSelectorPaymentActivityBinding viewBinding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        viewBinding = FpxPaymentActivityBinding.inflate(getLayoutInflater());
+        viewBinding = BankSelectorPaymentActivityBinding.inflate(getLayoutInflater());
 
         setContentView(viewBinding.getRoot());
         setTitle(R.string.fpx_payment_example);
@@ -72,16 +72,16 @@ public class FpxPaymentActivity extends AppCompatActivity {
 
         final FpxBank fpxBank = FpxBank.get(fpxBankCode);
         if (fpxBank != null) {
-            viewBinding.fpxBankInfo.setVisibility(View.VISIBLE);
-            viewBinding.fpxBankInfo.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            viewBinding.bankInfo.setVisibility(View.VISIBLE);
+            viewBinding.bankInfo.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     ContextCompat.getDrawable(this, fpxBank.getBrandIconResId()),
                     null,
                     null,
                     null
             );
-            viewBinding.fpxBankInfo.setText(fpxBank.getDisplayName());
+            viewBinding.bankInfo.setText(fpxBank.getDisplayName());
         } else {
-            viewBinding.fpxBankInfo.setVisibility(View.GONE);
+            viewBinding.bankInfo.setVisibility(View.GONE);
         }
     }
 }

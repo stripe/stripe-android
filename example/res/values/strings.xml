@@ -16,9 +16,11 @@
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
     <string name="create_payment_method">Create Payment Method</string>
+    <string name="toggle_card_form_view">Toggle CardFormView</string>
     <string name="create_token">Create Token</string>
     <string name="launch_confirm_pm_sepa_debit">Confirm with SEPA Debit Payment Method</string>
     <string name="fpx_payment_example">FPX Payment Example</string>
+    <string name="netbanking_payment_example">Netbanking Payment Example</string>
     <string name="klarna_source_example">Klarna Source Example</string>
     <string name="bacs_debit_example">BACS Debit Confirmation Example</string>
     <string name="becs_debit_example">BECS Debit Confirmation Example</string>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Número do cartão</string>
+    <string name="acc_label_card_number_node">%s, número do cartão</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Data de validade</string>
+    <string name="acc_label_expiry_date_node">%s, data de validade</string>
+    <string name="acc_label_zip">C.P.</string>
+    <string name="acc_label_zip_short">C.P.</string>
+    <string name="add_card">Adicione um novo cartão de débito ou de crédito para efetuar compras nesta aplicação.</string>
+    <string name="added">Adicionado %s</string>
+    <string name="address_city_required">Introduza a sua cidade</string>
+    <string name="address_country_invalid">O seu país é inválido</string>
+    <string name="address_county_required">Introduza o seu concelho</string>
+    <string name="address_label_address">Endereço</string>
+    <string name="address_label_address_line1">Linha de endereço 1</string>
+    <string name="address_label_address_line1_optional">Linha de endereço 1 (opcional)</string>
+    <string name="address_label_address_line2_optional">Linha de endereço 2 (opcional)</string>
+    <string name="address_label_address_optional">Endereço (opcional)</string>
+    <string name="address_label_apt">Apt.</string>
+    <string name="address_label_apt_optional">Apt. (opcional)</string>
+    <string name="address_label_city">Cidade</string>
+    <string name="address_label_city_optional">Cidade (opcional)</string>
+    <string name="address_label_country">País</string>
+    <string name="address_label_county">Concelho</string>
+    <string name="address_label_county_optional">Concelho (opcional)</string>
+    <string name="address_label_name">Nome</string>
+    <string name="address_label_phone_number">Número de telefone</string>
+    <string name="address_label_phone_number_optional">Número de telefone (opcional)</string>
+    <string name="address_label_postal_code">Código postal</string>
+    <string name="address_label_postal_code_optional">Código postal (opcional)</string>
+    <string name="address_label_postcode">Código postal</string>
+    <string name="address_label_postcode_optional">Código postal (opcional)</string>
+    <string name="address_label_province">Província</string>
+    <string name="address_label_province_optional">Província (opcional)</string>
+    <string name="address_label_region_generic">Estado/Província/Região</string>
+    <string name="address_label_region_generic_optional">Estado/Província/Região (opcional)</string>
+    <string name="address_label_state">Estado</string>
+    <string name="address_label_state_optional">Estado (opcional)</string>
+    <string name="address_label_zip_code">Código postal</string>
+    <string name="address_label_zip_code_optional">Código postal (opcional)</string>
+    <string name="address_label_zip_postal_code">Código postal</string>
+    <string name="address_label_zip_postal_code_optional">Código postal (opcional)</string>
+    <string name="address_name_required">Introduza o seu nome</string>
+    <string name="address_phone_number_required">Introduza o seu número de telefone</string>
+    <string name="address_postal_code_invalid">O seu código postal é inválido.</string>
+    <string name="address_postcode_invalid">O seu código postal é inválido</string>
+    <string name="address_province_required">Introduza a sua província</string>
+    <string name="address_region_generic_required">Introduza o seu Estado/Província/Região</string>
+    <string name="address_required">Introduza o seu endereço</string>
+    <string name="address_shipping_address">Endereço de envio</string>
+    <string name="address_state_required">Introduza o seu estado</string>
+    <string name="address_zip_invalid">O seu código postal é inválido.</string>
+    <string name="address_zip_postal_invalid">O seu código postal é inválido</string>
+    <string name="becs_mandate_acceptance">
+    Ao fornecer os seus dados de conta bancária e ao confirmar este pagamento, declara que concorda com este
+    Pedido de Débito Direto e com o contrato de serviços de Pedido de Débito Direto e autoriza a
+    Stripe Payments Australia Pty Ltd ACN 160 180 343, número de ID de Utilizador de Débito Direto 507156
+    (“Stripe”) a debitar a sua conta através do Sistema BECS (Bulk Electronic Clearing System) em
+    nome de %1$s (o \"Comerciante\") em quaisquer montantes comunicados separadamente a si
+    pelo Comerciante. Certifica ainda que é um titular da conta ou um signatário autorizado
+    da conta acima indicada.
+    </string>
+    <string name="becs_widget_account_number">Número de conta</string>
+    <string name="becs_widget_account_number_incomplete">O número da sua conta está incompleto.</string>
+    <string name="becs_widget_account_number_required">O seu número de conta é obrigatório.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">O BSB que introduziu está incompleto.</string>
+    <string name="becs_widget_bsb_invalid">O BSB que introduziu é inválido.</string>
+    <string name="becs_widget_email">Endereço de email</string>
+    <string name="becs_widget_email_invalid">O seu endereço de email é inválido.</string>
+    <string name="becs_widget_email_required">O seu endereço de email é obrigatório.</string>
+    <string name="becs_widget_name">Nome</string>
+    <string name="becs_widget_name_required">O seu nome é obrigatório.</string>
+    <string name="card_ending_in">%1$s a terminar em %2$s</string>
+    <string name="close">Fechar</string>
+    <string name="delete_payment_method">Eliminar método de pagamento</string>
+    <string name="delete_payment_method_prompt_title">Eliminar método de pagamento?</string>
+    <string name="expiry_date_hint">MM/AA</string>
+    <string name="expiry_label_short">Validade</string>
+    <string name="fpx_bank_offline">%s - Offline</string>
+    <string name="incomplete_expiry_date">A data de validade do seu cartão está incompleta.</string>
+    <string name="invalid_card_number">O número do seu cartão é inválido.</string>
+    <string name="invalid_cvc">O código de segurança do seu cartão é inválido.</string>
+    <string name="invalid_expiry_month">O mês de validade do seu cartão é inválido.</string>
+    <string name="invalid_expiry_year">O ano de validade do seu cartão é inválido.</string>
+    <string name="invalid_shipping_information">Endereço de envio inválido</string>
+    <string name="invalid_zip">O seu código postal está incompleto.</string>
+    <string name="no_payment_methods">Nenhum método de pagamento.</string>
+    <string name="payment_method_add_new_card">Adicionar um novo cartão…</string>
+    <string name="payment_method_add_new_fpx">Selecionar conta bancária (FPX)…</string>
+    <string name="price_free">Gratuito</string>
+    <string name="removed">Removido %s</string>
+    <string name="secure_checkout">Finalização de compra segura</string>
+    <string name="stripe_failure_connection_error">Estamos com problemas de ligação relativamente ao nosso prestador de serviços de pagamentos. Verifique a sua ligação à Internet e tente novamente.</string>
+    <string name="stripe_failure_reason_authentication">Não conseguimos autenticar o seu método de pagamento. Selecione outro método de pagamento e tente novamente.</string>
+    <string name="stripe_failure_reason_timed_out">A autenticação do seu método de pagamento atingiu o tempo limite -- tente novamente</string>
+    <string name="stripe_paymentsheet_add_button_label">Adicionar</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Informações do cartão</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">País ou região</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">Adicione as suas informações de pagamento</string>
+    <string name="stripe_paymentsheet_back">Voltar</string>
+    <string name="stripe_paymentsheet_close">Fechar</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">MM/AA</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Novo cartão</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Ou pagar com um cartão</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Pagar %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
+    <string name="stripe_paymentsheet_primary_button_processing">A processar…</string>
+    <string name="stripe_paymentsheet_save_this_card">Guardar este cartão para pagamentos futuros</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Guardar este cartão para pagamentos futuros %s</string>
+    <string name="stripe_paymentsheet_select_payment_method">Selecione o seu método de pagamento</string>
+    <string name="stripe_paymentsheet_setup_button_label">Configurar</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="title_add_a_card">Adicionar um cartão</string>
+    <string name="title_add_an_address">Definir endereço</string>
+    <string name="title_bank_account">Conta bancária</string>
+    <string name="title_payment_method">Método de Pagamento</string>
+    <string name="title_select_shipping_method">Selecionar método de envio</string>
+</resources>

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="blurple">#635BFF</color>
+
     <color name="primary">#5F65D4</color>
     <color name="primaryDark">#392996</color>
+    <color name="appPrimaryDark">#1a1843</color>
     <color name="accent">#5469d4</color>
     <color name="title">#ffffff</color>
     <color name="textPrimary">#000000</color>

@@ -1,0 +1,134 @@
+apply plugin: "signing"
+apply plugin: "maven-publish"
+
+def getReleaseRepositoryUrl() {
+    return findProperty('RELEASE_REPOSITORY_URL') ?:
+            "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+}
+
+def getSnapshotRepositoryUrl() {
+    return findProperty('SNAPSHOT_REPOSITORY_URL') ?:
+            "https://oss.sonatype.org/content/repositories/snapshots/"
+}
+
+def getRepositoryUsername() {
+    return findProperty('NEXUS_USERNAME') ?: ""
+}
+
+def getRepositoryPassword() {
+    return findProperty('NEXUS_PASSWORD') ?: ""
+}
+
+task androidJavadocs(type: Javadoc) {
+    excludes = ['**/*.kt']
+    source = android.sourceSets.main.java.srcDirs
+    classpath = configurations.compile
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    archiveClassifier.set('javadoc')
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
+afterEvaluate { project ->
+    // See https://developer.android.com/studio/build/maven-publish-plugin
+    // and https://docs.gradle.org/current/userguide/publishing_maven.html
+    // and https://proandroiddev.com/android-maven-publish-for-your-libraries-b76ad47677df
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Adds Javadocs and Sources as separate jars.
+                artifact androidJavadocsJar
+                artifact androidSourcesJar
+                artifact bundleReleaseAar
+
+                groupId = rootProject.group_name
+                artifactId = project.artifactId
+                version = rootProject.version_name
+
+                pom {
+                    name = project.artifactName
+                    packaging = "aar"
+                    description = project.artifactDescrption
+                    url = "https://github.com/stripe/stripe-android"
+
+                    scm {
+                        url = "https://github.com/stripe/stripe-android"
+                        connection = "scm:org-856813@github.com:stripe/stripe-android.git"
+                        developerConnection = "scm:org-856813@github.com:stripe/stripe-android.git"
+                    }
+
+                    licenses {
+                        license {
+                            name = "The MIT License"
+                            url = "https://raw.githubusercontent.com/stripe/stripe-android/master/LICENSE"
+                            distribution = "repo"
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = "stripe"
+                            name = "Stripe"
+                        }
+                    }
+                }
+
+                pom.withXml {
+                    final dependenciesNode = asNode().appendNode("dependencies")
+                    ext.addDependency = { dep, scope ->
+                        logger.lifecycle("updating dep $dep")
+                        if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified") {
+                            return // invalid dependencies should be ignored
+                        }
+
+                        final depGroup = dep.group
+                        final depName = dep.name
+                        final depVersion = dep.version != 'unspecified' ? dep.version : VERSION_NAME
+
+                        final dependencyNode = dependenciesNode.appendNode("dependency")
+                        dependencyNode.appendNode("groupId", depGroup)
+                        dependencyNode.appendNode("artifactId", depName)
+                        dependencyNode.appendNode("version", depVersion)
+                        dependencyNode.appendNode("scope", scope)
+
+                    }
+                    configurations.api.getDependencies().each { dep -> addDependency(dep, "compile") }
+                    configurations.implementation.getDependencies().each { dep -> addDependency(dep, "runtime") }
+                }
+
+            }
+        }
+        repositories {
+            maven {
+                url getReleaseRepositoryUrl()
+                credentials {
+                    username = getRepositoryUsername()
+                    password = getRepositoryPassword()
+                }
+            }
+        }
+    }
+
+    signing {
+        required { gradle.taskGraph.hasTask("publish") }
+        useGpgCmd()
+        sign publishing.publications.release
+    }
+
+    tasks.withType(Sign) {
+        onlyIf { project.hasProperty('signing.gnupg.keyName') }
+    }
+
+    artifacts {
+        archives androidSourcesJar
+        archives androidJavadocsJar
+    }
+}

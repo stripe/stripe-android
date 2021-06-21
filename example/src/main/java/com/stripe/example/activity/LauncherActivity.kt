@@ -73,6 +73,10 @@ class LauncherActivity : AppCompatActivity() {
                 ConfirmSepaDebitActivity::class.java
             ),
             Item(
+                activity.getString(R.string.netbanking_payment_example),
+                NetbankingListPaymentActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.fpx_payment_example),
                 FpxPaymentActivity::class.java
             ),
@@ -106,7 +110,7 @@ class LauncherActivity : AppCompatActivity() {
             ),
             Item(
                 activity.getString(R.string.simple_payment_method_example),
-                SimplePaymentMethodConfirmationActivity::class.java
+                SimpleConfirmationActivity::class.java
             ),
             Item(
                 activity.getString(R.string.connect_example),

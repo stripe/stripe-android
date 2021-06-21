@@ -9,9 +9,9 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="true"
@@ -28,8 +28,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/name"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Jack" />
+                android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -42,8 +41,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/email"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="jack@stripe.com" />
+                android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
