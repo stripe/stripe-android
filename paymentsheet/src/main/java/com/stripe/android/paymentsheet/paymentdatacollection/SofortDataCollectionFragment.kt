@@ -15,7 +15,7 @@ import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.StripeTheme
 import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.forms.sofort
+import com.stripe.android.paymentsheet.specifications.sofort
 
 class SofortDataCollectionFragment : BasePaymentDataCollectionFragment() {
     val sofortFormViewModel: FormViewModel by viewModels { FormViewModel.Factory(sofort.layout) }
