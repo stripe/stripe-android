@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
@@ -64,7 +65,7 @@ internal class TransformSpecToElement {
         spec: SectionFieldSpec.Name,
         focusRequesterCount: FocusRequesterCount
     ) =
-        FormElement.SectionElement.SectionFieldElement.Name(
+        SectionFieldElement.Name(
             spec.identifier,
             TextFieldController(NameConfig()),
             focusRequesterCount.getAndIncrement()
@@ -75,7 +76,7 @@ internal class TransformSpecToElement {
         spec: SectionFieldSpec.Email,
         focusRequesterCount: FocusRequesterCount
     ) =
-        FormElement.SectionElement.SectionFieldElement.Email(
+        SectionFieldElement.Email(
             spec.identifier,
             TextFieldController(EmailConfig()),
             focusRequesterCount.getAndIncrement()
@@ -83,7 +84,7 @@ internal class TransformSpecToElement {
 
 
     private fun transform(spec: SectionFieldSpec.Country) =
-        FormElement.SectionElement.SectionFieldElement.Country(
+        SectionFieldElement.Country(
             spec.identifier,
             DropdownFieldController(CountryConfig())
         )
