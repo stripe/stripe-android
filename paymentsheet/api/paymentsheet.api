@@ -60,6 +60,10 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory :
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 
+public final class com/stripe/android/paymentsheet/specifications/BancontactSpecKt {
+	public static final fun getBancontact ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
+}
+
 public abstract class com/stripe/android/paymentsheet/specifications/FormElementSpec {
 	public static final field $stable I
 }
