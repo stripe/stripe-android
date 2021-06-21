@@ -27,18 +27,18 @@ internal class TextFieldControllerTest {
 
     private val config = TestConfig()
 
-    private val textFieldElement = TextFieldController(config)
+    private val controller = TextFieldController(config)
 
     @Test
     fun `verify onValueChange sets the paramValue`() {
         config.fakeState = Valid.Limitless
 
         var paramValue: String? = null
-        textFieldElement.fieldValue.asLiveData()
+        controller.fieldValue.asLiveData()
             .observeForever {
                 paramValue = it
             }
-        textFieldElement.onValueChange("newValue")
+        controller.onValueChange("newValue")
         assertThat(paramValue).isEqualTo("newValue")
     }
 
@@ -47,101 +47,101 @@ internal class TextFieldControllerTest {
         config.fakeState = ShowWhenNoFocus
 
         var errorMessageResId: Int? = 5
-        textFieldElement.errorMessage.asLiveData()
+        controller.errorMessage.asLiveData()
             .observeForever {
                 errorMessageResId = it
             }
 
-        textFieldElement.onValueChange("newValue")
+        controller.onValueChange("newValue")
         shadowOf(getMainLooper()).idle()
         assertThat(errorMessageResId).isEqualTo(R.string.incomplete)
     }
 
     @Test
-    fun `Verify is full set when the element state changes`() {
+    fun `Verify is full set when the controller field state changes`() {
         config.fakeState = Valid.Full
 
         var isFull = false
-        textFieldElement.isFull.asLiveData()
+        controller.isFull.asLiveData()
             .observeForever {
                 isFull = it
             }
 
-        textFieldElement.onValueChange("newValue")
+        controller.onValueChange("newValue")
         assertThat(isFull).isEqualTo(true)
     }
 
     @Test
-    fun `Verify is not full set when the element state changes`() {
+    fun `Verify is not full set when the controller field state changes`() {
         config.fakeState = Valid.Limitless
 
         var isFull = false
-        textFieldElement.isFull.asLiveData()
+        controller.isFull.asLiveData()
             .observeForever {
                 isFull = it
             }
 
-        textFieldElement.onValueChange("newValue")
+        controller.onValueChange("newValue")
         assertThat(isFull).isEqualTo(false)
     }
 
     @Test
-    fun `Verify is not complete set when the element state changes`() {
+    fun `Verify is not complete set when the controller field state changes`() {
         config.fakeState = Error.AlwaysError
 
         var isComplete = true
-        textFieldElement.isComplete.asLiveData()
+        controller.isComplete.asLiveData()
             .observeForever {
                 isComplete = it
             }
 
         assertThat(isComplete).isEqualTo(true)
-        textFieldElement.onValueChange("newValue")
+        controller.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(false)
     }
 
 
     @Test
-    fun `Verify is complete set when the element state changes`() {
+    fun `Verify is complete set when the controller field state changes`() {
 
         var isComplete = false
-        textFieldElement.isComplete.asLiveData()
+        controller.isComplete.asLiveData()
             .observeForever {
                 isComplete = it
             }
 
         config.fakeState = Error.AlwaysError
-        textFieldElement.onValueChange("newValue")
+        controller.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(false)
 
         config.fakeState = Valid.Limitless
-        textFieldElement.onValueChange("newValue")
+        controller.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(true)
     }
 
     @Test
     fun `Verify is visible error is true when onValueChange and shouldShowError returns true`() {
         var visibleError = false
-        textFieldElement.visibleError.asLiveData().observeForever {
+        controller.visibleError.asLiveData().observeForever {
             visibleError = it
         }
 
         config.fakeState = Valid.Full
-        textFieldElement.onValueChange("full")
+        controller.onValueChange("full")
         assertThat(visibleError).isEqualTo(false)
 
         config.fakeState = Error.AlwaysError
-        textFieldElement.onValueChange("always")
+        controller.onValueChange("always")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
     }
 
     @Test
-    fun `Verify is visible error set when the element state changes`() {
+    fun `Verify is visible error set when the controller field state changes`() {
         config.fakeState = Valid.Limitless
 
         var visibleError = false
-        textFieldElement.visibleError.asLiveData()
+        controller.visibleError.asLiveData()
             .observeForever {
                 visibleError = it
             }
@@ -149,7 +149,7 @@ internal class TextFieldControllerTest {
         assertThat(visibleError).isEqualTo(false)
 
         config.fakeState = Error.AlwaysError
-        textFieldElement.onValueChange("newValue")
+        controller.onValueChange("newValue")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
     }
@@ -158,18 +158,18 @@ internal class TextFieldControllerTest {
     fun `Verify correct value passed to config should show error`() {
         config.fakeState = ShowWhenNoFocus
         //Initialize the fieldState
-        textFieldElement.onValueChange("1a2b3c4d")
+        controller.onValueChange("1a2b3c4d")
 
         var visibleError = false
-        textFieldElement.visibleError.asLiveData()
+        controller.visibleError.asLiveData()
             .observeForever {
                 visibleError = it
             }
 
-        textFieldElement.onFocusChange(false)
+        controller.onFocusChange(false)
         assertThat(visibleError).isEqualTo(true)
 
-        textFieldElement.onFocusChange(true)
+        controller.onFocusChange(true)
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(false)
     }
@@ -177,15 +177,15 @@ internal class TextFieldControllerTest {
     @Test
     fun `Verify filter is called to set the input value`() {
         val numberConfigFilter = TestConfigFilter()
-        val textFieldElement = TextFieldController(numberConfigFilter)
+        val controller = TextFieldController(numberConfigFilter)
 
         var inputValue = ""
-        textFieldElement.fieldValue.asLiveData()
+        controller.fieldValue.asLiveData()
             .observeForever {
                 inputValue = it
             }
 
-        textFieldElement.onValueChange("1a2b3c4d")
+        controller.onValueChange("1a2b3c4d")
         shadowOf(getMainLooper()).idle()
         assertThat(inputValue).isEqualTo("1234")
     }

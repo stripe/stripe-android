@@ -1,22 +1,22 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.paymentsheet.specifications
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.forms.FormElementSpec.SectionSpec
+import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec
 
 
 /**
  * This class is used to define different forms full of fields.
  */
 data class FormSpec(
-    val layout: Layout,
+    val layout: LayoutSpec,
     val paramKey: MutableMap<String, Any?>,
 )
 
 /**
  * This is a data representation of the layout of UI fields on the screen.
  */
-data class Layout(val elements: List<FormElementSpec>) {
+data class LayoutSpec(val elements: List<FormElementSpec>) {
     val allFields
         get() = elements.filterIsInstance<SectionSpec>().map { it.field }
 }
