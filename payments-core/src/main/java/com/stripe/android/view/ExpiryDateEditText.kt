@@ -17,7 +17,7 @@ import kotlin.properties.Delegates
 /**
  * An [EditText] that handles putting numbers around a central divider character.
  */
-class ExpiryDateEditText @JvmOverloads constructor(
+open class ExpiryDateEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle

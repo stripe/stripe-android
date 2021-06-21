@@ -15,7 +15,7 @@ import com.stripe.android.model.CardBrand
 /**
  * A [StripeEditText] for CVC input.
  */
-class CvcEditText @JvmOverloads constructor(
+open class CvcEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
