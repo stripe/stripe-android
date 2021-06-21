@@ -17,19 +17,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
+import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 import com.stripe.android.paymentsheet.specifications.FormElementSpec.StaticTextSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -57,7 +57,7 @@ internal fun Form(
         fieldLayout.elements.forEach { element ->
             when (element) {
                 is SectionSpec -> {
-                    val controller = formViewModel.getController(element.field)
+                    val controller = formViewModel.getController(element.field.identifier)
                     val error by controller.errorMessage.asLiveData().observeAsState(null)
                     val sectionErrorString =
                         error?.let { stringResource(it, stringResource(controller.label)) }
@@ -115,9 +115,9 @@ class FormViewModel(
     }
 
     // This maps the field type to the controller
-    private val fieldControllerMap: Map<SectionFieldSpec, Controller> =
-        layout.allFields.associateWith { field ->
-            when (field) {
+    private val idControllerMap: Map<IdentifierSpec, Controller> =
+        layout.allFields.associate { field ->
+            field.identifier to when (field) {
                 Name -> TextFieldController(NameConfig()) // All configs should have the label passed in for consistency
                 Email -> TextFieldController(EmailConfig())
                 Country -> DropdownFieldController(CountryConfig())
@@ -125,49 +125,47 @@ class FormViewModel(
         }
 
     // This find the controller based on the field type
-    internal fun getController(type: SectionFieldSpec) =
-        requireNotNull(fieldControllerMap[type])
+    internal fun getController(type: IdentifierSpec) =
+        requireNotNull(idControllerMap[type])
 
-    fun getNumberTextFields() = fieldControllerMap.count { it.value is TextFieldController }
+    fun getNumberTextFields() = idControllerMap.count { it.value is TextFieldController }
 
     // This is null if any form field values are incomplete, otherwise it is an object
     // representing all the complete fields
     val completeFormValues: Flow<FormFieldValues?> = combine(
-        currentFormFieldValuesFlow(fieldControllerMap),
-        allFormFieldsComplete(fieldControllerMap)
+        currentFormFieldValuesFlow(idControllerMap),
+        allFormFieldsComplete(idControllerMap)
     ) { formFieldValue, isComplete ->
         formFieldValue.takeIf { isComplete }
     }
 
-    companion object {
-        // Flows of FormFieldValues for each of the fields as they are updated
-        fun currentFormFieldValuesFlow(fieldControllerMap: Map<SectionFieldSpec, Controller>) =
-            combine(getCurrentFieldValuePairs(fieldControllerMap))
-            {
-                transformToFormFieldValues(it)
-            }
-
-        fun transformToFormFieldValues(allFormFieldValues: Array<Pair<SectionFieldSpec, String>>) =
-            FormFieldValues(allFormFieldValues.toMap())
-
-        fun getCurrentFieldValuePairs(fieldControllerMap: Map<SectionFieldSpec, Controller>): List<Flow<Pair<SectionFieldSpec, String>>> {
-            return fieldControllerMap.map { fieldControllerEntry ->
-                getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
-            }
+    // Flows of FormFieldValues for each of the fields as they are updated
+    fun currentFormFieldValuesFlow(idControllerMap: Map<IdentifierSpec, Controller>) =
+        combine(getCurrentFieldValuePairs(idControllerMap))
+        {
+            transformToFormFieldValues(it)
         }
 
-        fun getCurrentFieldValuePair(
-            field: SectionFieldSpec,
-            value: Controller
-        ): Flow<Pair<SectionFieldSpec, String>> {
-            return value.fieldValue.map {
-                Pair(field, it)
-            }
-        }
+    fun transformToFormFieldValues(allFormFieldValues: Array<Pair<IdentifierSpec, String>>) =
+        FormFieldValues(allFormFieldValues.toMap())
 
-        fun allFormFieldsComplete(fieldControllerMap: Map<SectionFieldSpec, Controller>) =
-            combine(fieldControllerMap.values.map { it.isComplete }) { fieldCompleteStates ->
-                fieldCompleteStates.none { complete -> !complete }
-            }
+    fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>): List<Flow<Pair<IdentifierSpec, String>>> {
+        return idControllerMap.map { fieldControllerEntry ->
+            getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
+        }
     }
+
+    fun getCurrentFieldValuePair(
+        field: IdentifierSpec,
+        value: Controller
+    ): Flow<Pair<IdentifierSpec, String>> {
+        return value.fieldValue.map {
+            Pair(field, it)
+        }
+    }
+
+    fun allFormFieldsComplete(fieldControllerMap: Map<IdentifierSpec, Controller>) =
+        combine(fieldControllerMap.values.map { it.isComplete }) { fieldCompleteStates ->
+            fieldCompleteStates.none { complete -> !complete }
+        }
 }
