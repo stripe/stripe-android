@@ -61,37 +61,16 @@ public abstract class com/stripe/android/paymentsheet/specifications/FormElement
 
 public final class com/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec : com/stripe/android/paymentsheet/specifications/FormElementSpec {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;)V
 	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-	public final fun component2 ()Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec;
-	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec;)Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec;
+	public final fun component2 ()Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;)Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getField ()Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec;
+	public final fun getField ()Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;
 	public final fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract class com/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec {
-	public static final field $stable I
-	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-}
-
-public final class com/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec$Country : com/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec$Country;
-}
-
-public final class com/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec$Email : com/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec$Email;
-}
-
-public final class com/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec$Name : com/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/FormElementSpec$SectionSpec$SectionFieldSpec$Name;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/FormElementSpec$StaticTextSpec : com/stripe/android/paymentsheet/specifications/FormElementSpec {
@@ -147,6 +126,27 @@ public final class com/stripe/android/paymentsheet/specifications/LayoutSpec {
 	public final fun getElements ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Email : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Email;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Name : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Name;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/SofortSpecKt {
