@@ -86,6 +86,9 @@ class FormToPaymentMethodTransform {
                         formFieldKeyValues
                     )
                 }
+                else {
+                    dest[key] = mapStructure[key]
+                }
             }
         }
     }

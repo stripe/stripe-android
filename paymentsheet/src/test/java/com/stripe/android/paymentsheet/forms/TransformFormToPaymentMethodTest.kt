@@ -27,6 +27,7 @@ class FormToPaymentMethodTransformTest {
         ).isEqualTo(
             """
                 {
+                  type=sofort,
                   billing_details={
                     address={
                       city=null,
