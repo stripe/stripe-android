@@ -42,7 +42,7 @@ class TransformFormToPaymentMethod {
 
     companion object {
         /**
-         * This function will looks for each of the keys in the mapStructure and
+         * This function will look for each of the keys in the mapStructure and
          * if the formField contains a key that matches it will populate the value.
          *
          * For example:

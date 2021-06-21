@@ -20,19 +20,19 @@ data class LayoutSpec(val items: List<FormItemSpec>) {
         get() = items.filterIsInstance<SectionSpec>().map { it.field }
 }
 
+/**
+ * This uniquely identifies a element in the form.
+ */
 data class IdentifierSpec(val value: String)
 
 /**
  * This is used to define each section in the visual form layout
  */
-
 sealed class FormItemSpec {
     data class SectionSpec(
         val identifier: IdentifierSpec,
         val field: SectionFieldSpec
-    ) : FormItemSpec() {
-
-    }
+    ) : FormItemSpec()
 
     /**
      * This is for elements that do not receive user input
@@ -44,6 +44,9 @@ sealed class FormItemSpec {
     ) : FormItemSpec()
 }
 
+/**
+ * This represents a field in a section.
+ */
 sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
     object Name : SectionFieldSpec(IdentifierSpec("name"))
 
