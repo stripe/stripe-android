@@ -16,19 +16,19 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 val sofort = FormSpec(
     LayoutSpec(
         listOf(
-            FormElementSpec.SectionSpec(
+            FormItemSpec.SectionSpec(
                 IdentifierSpec("name"),
                 SectionFieldSpec.Name
             ),
-            FormElementSpec.SectionSpec(
+            FormItemSpec.SectionSpec(
                 IdentifierSpec("email"),
                 SectionFieldSpec.Email
             ),
-            FormElementSpec.SectionSpec(
+            FormItemSpec.SectionSpec(
                 IdentifierSpec("country"),
                 SectionFieldSpec.Country
             ),
-            FormElementSpec.StaticTextSpec(
+            FormItemSpec.StaticTextSpec(
                 IdentifierSpec("mandate"),
                 R.string.sofort_mandate,
                 Color.Gray

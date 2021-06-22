@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
@@ -18,8 +19,10 @@ class FormViewModelTest {
     fun `Verify params are set when element flows are complete`() = runBlocking {
         val formViewModel = FormViewModel(sofort.layout)
 
-        val nameElement = formViewModel.getController(Name.identifier) as TextFieldController
-        val emailElement = formViewModel.getController(Email.identifier) as TextFieldController
+        val nameElement =
+            (formViewModel.elements[0] as SectionElement).field.controller as TextFieldController
+        val emailElement =
+            (formViewModel.elements[1] as SectionElement).field.controller as TextFieldController
 
         nameElement.onValueChange("joe")
         assertThat(
