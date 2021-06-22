@@ -1,23 +1,23 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 import com.stripe.android.paymentsheet.specifications.sofortParamKey
 import org.junit.Test
 
-class FormToPaymentMethodTransformTest {
+class TransformFormToPaymentMethodTest {
 
     @Test
     fun `transform to payment method params`() {
-        val paymentMethodParams = FormToPaymentMethodTransform().transform(
+        val paymentMethodParams = TransformFormToPaymentMethod().transform(
             sofortParamKey,
             FormFieldValues(
                 mapOf(
-                    Name to "joe",
-                    Email to "joe@gmail.com",
-                    Country to "United States",
+                    Name.identifier to "joe",
+                    Email.identifier to "joe@gmail.com",
+                    Country.identifier to "United States",
                 )
             )
         )
@@ -27,6 +27,7 @@ class FormToPaymentMethodTransformTest {
         ).isEqualTo(
             """
                 {
+                  type=sofort,
                   billing_details={
                     address={
                       city=null,
