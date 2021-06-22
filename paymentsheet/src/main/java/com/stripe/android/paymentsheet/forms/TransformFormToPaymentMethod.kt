@@ -1,13 +1,13 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.elements.country.CountryUtils
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import java.util.Locale
 
 /**
  * This class will transform the fields in a form into a structure as defined by a map.
  */
-class FormToPaymentMethodTransform {
+class TransformFormToPaymentMethod {
     /**
      * This function will put the field values as defined in the formFieldValues into a map
      * according to the mapLayout structure.
@@ -26,7 +26,7 @@ class FormToPaymentMethodTransform {
         // Need to convert Country Fields to a country code to put it in the parameter map
         val formKeyValueMap = formFieldValues.fieldValuePairs
             .mapValues { entry ->
-                if (entry.key == Country) {
+                if (entry.key == Country.identifier) {
                     entry.value?.let {
                         CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
                     }
@@ -34,7 +34,7 @@ class FormToPaymentMethodTransform {
                     entry.value
                 }
             }
-            .mapKeys { it.key.identifier }
+            .mapKeys { it.key.value }
 
         createMap(mapStructure, destMap, formKeyValueMap)
         return destMap
@@ -42,7 +42,7 @@ class FormToPaymentMethodTransform {
 
     companion object {
         /**
-         * This function will looks for each of the keys in the mapStructure and
+         * This function will look for each of the keys in the mapStructure and
          * if the formField contains a key that matches it will populate the value.
          *
          * For example:
@@ -85,6 +85,9 @@ class FormToPaymentMethodTransform {
                         newDestMap,
                         formFieldKeyValues
                     )
+                }
+                else {
+                    dest[key] = mapStructure[key]
                 }
             }
         }
