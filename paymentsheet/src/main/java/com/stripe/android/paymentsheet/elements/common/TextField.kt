@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.asLiveData
-import com.stripe.android.paymentsheet.R
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
 internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
@@ -48,7 +47,6 @@ internal fun TextField(
     textFieldController: TextFieldController,
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,
-    optional: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
@@ -84,17 +82,11 @@ internal fun TextField(
         false
     }
 
-    val label = if (optional) {
-        stringResource(R.string.optional, stringResource(textFieldController.label))
-    } else {
-        stringResource(textFieldController.label)
-    }
-
     TextField(
         value = value,
         onValueChange = { textFieldController.onValueChange(it) },
         isError = shouldShowError,
-        label = { Text(text = label) },
+        label = { Text(text = stringResource(textFieldController.label)) },
         modifier = modifier
             .fillMaxWidth()
             .focusOrder(myFocus) { nextFocus?.requestFocus() }

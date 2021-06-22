@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,53 +56,57 @@ internal fun Form(
     ) {
         formViewModel.elements.forEach { element ->
 
-            when (element) {
-                is SectionElement -> {
-                    val controller = element.controller
+            AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
+                when (element) {
+                    is SectionElement -> {
+                        AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
+                            val controller = element.controller
 
-                    val error by controller.errorMessage.asLiveData().observeAsState(null)
-                    val sectionErrorString =
-                        error?.let { stringResource(it, stringResource(controller.label)) }
+                            val error by controller.errorMessage.asLiveData().observeAsState(null)
+                            val sectionErrorString =
+                                error?.let { stringResource(it, stringResource(controller.label)) }
 
-                    Section(sectionErrorString) {
-                        when (element.field) {
-                            is TextFieldElement -> {
-                                val focusRequesterIndex = element.field.focusIndexOrder
-                                TextField(
-                                    textFieldController = element.field.controller,
-                                    myFocus = focusRequesters[focusRequesterIndex],
-                                    nextFocus = focusRequesters.getOrNull(
-                                        focusRequesterIndex + 1
-                                    ),
-                                    optional = isOptionalIdentifiers.contains(element.identifier)
-                                )
-                            }
-                            is DropdownFieldElement -> {
-                                DropDown(element.field.controller)
+                            Section(sectionErrorString) {
+                                when (element.field) {
+                                    is TextFieldElement -> {
+                                        val focusRequesterIndex = element.field.focusIndexOrder
+                                        TextField(
+                                            textFieldController = element.field.controller,
+                                            myFocus = focusRequesters[focusRequesterIndex],
+                                            nextFocus = focusRequesters.getOrNull(
+                                                focusRequesterIndex + 1
+                                            )
+                                        )
+                                    }
+                                    is DropdownFieldElement -> {
+                                        DropDown(element.field.controller)
+                                    }
+                                }
                             }
                         }
                     }
-                }
-                is StaticTextElement -> {
-                    Text(
-                        stringResource(element.stringResId),
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = element.color
-                    )
-                }
-
-                is FormElement.SaveForFutureUseElement -> {
-                    val controller = element.controller
-                    val checked by controller.saveForFutureUse.asLiveData()
-                        .observeAsState(true)
-                    Row(modifier = Modifier.padding(vertical = 8.dp)) {
-                        Checkbox(
-                            checked = checked,
-                            onCheckedChange = { controller.onValueChange(it) }
+                    is StaticTextElement -> {
+                        Text(
+                            stringResource(element.stringResId),
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = element.color
                         )
-                        Text(stringResource(controller.label))
+                    }
+
+                    is FormElement.SaveForFutureUseElement -> {
+                        val controller = element.controller
+                        val checked by controller.saveForFutureUse.asLiveData()
+                            .observeAsState(true)
+                        Row(modifier = Modifier.padding(vertical = 8.dp)) {
+                            Checkbox(
+                                checked = checked,
+                                onCheckedChange = { controller.onValueChange(it) }
+                            )
+                            Text(stringResource(controller.label))
+                        }
                     }
                 }
+
             }
         }
     }
