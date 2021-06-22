@@ -66,8 +66,6 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getCountFocusableFields ()I
 	public final fun getCurrentFieldValueMap ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getCurrentFieldValuePair (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/elements/common/Controller;)Lkotlinx/coroutines/flow/Flow;
-	public final fun getCurrentFieldValuePairs (Ljava/util/Map;)Ljava/util/List;
 	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
 }
 

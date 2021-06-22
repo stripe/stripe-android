@@ -177,7 +177,7 @@ class FormViewModel(
         }
     }
 
-    fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>) =
+    private fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>) =
         idControllerMap.map { fieldControllerEntry ->
             getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
         }
