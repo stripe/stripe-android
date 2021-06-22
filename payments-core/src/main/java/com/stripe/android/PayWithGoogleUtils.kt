@@ -28,7 +28,8 @@ object PayWithGoogleUtils {
             for (i in 0 until totalLength) {
                 builder.append('#')
             }
-            val noDecimalCurrencyFormat = DecimalFormat(builder.toString(), DecimalFormatSymbols.getInstance(Locale.ROOT))
+            val noDecimalCurrencyFormat =
+                DecimalFormat(builder.toString(), DecimalFormatSymbols.getInstance(Locale.ROOT))
             noDecimalCurrencyFormat.currency = currency
             noDecimalCurrencyFormat.isGroupingUsed = false
             return noDecimalCurrencyFormat.format(price)
@@ -50,7 +51,8 @@ object PayWithGoogleUtils {
         val modBreak = 10.0.pow(fractionDigits.toDouble())
         val decimalPrice = price / modBreak
 
-        // No matter the Locale, Android Pay requires a dot for the decimal separator, and Arabic numbers.
+        // No matter the Locale, Android Pay requires a dot for the decimal separator, and Arabic
+        // numbers.
         val symbolOverride = DecimalFormatSymbols.getInstance(Locale.ROOT)
         val decimalFormat = DecimalFormat(builder.toString(), symbolOverride)
         decimalFormat.currency = currency
