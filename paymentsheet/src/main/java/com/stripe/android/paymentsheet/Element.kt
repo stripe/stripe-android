@@ -7,6 +7,9 @@ import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseControlle
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
+/**
+ * This is used to track the number of focus requesters in a form
+ */
 internal class FocusRequesterCount {
     private var value = 0
 
@@ -15,10 +18,16 @@ internal class FocusRequesterCount {
     fun get() = value
 }
 
+/**
+ * This is used to define which elements can be made optional
+ */
 interface OptionalElement {
     val identifier: IdentifierSpec
 }
 
+/**
+ * This interface is used to define the types of elements allowed in a section
+ */
 internal sealed interface SectionFieldElementType {
     val identifier: IdentifierSpec
     val controller: Controller
@@ -42,8 +51,8 @@ internal sealed class FormElement {
     abstract val identifier: IdentifierSpec
 
     /**
-     * This is an element that will make elements (as specified by identifier hidden
-     * when save for future use is unchecked)
+     * This is an element that has static text because it takes no user input, it is not
+     * outputted from the list of form field values.
      */
     internal data class StaticTextElement(
         override val identifier: IdentifierSpec,
@@ -65,28 +74,30 @@ internal sealed class FormElement {
         override val identifier: IdentifierSpec,
         val field: SectionFieldElementType,
         override val controller: Controller
-    ) : FormElement(), OptionalElement {
+    ) : FormElement(), OptionalElement
+}
 
-        sealed class SectionFieldElement {
-            abstract val identifier: IdentifierSpec
-            abstract val controller: Controller
+/**
+ * This is an element that is in a section and accepts user input.
+ */
+internal sealed class SectionFieldElement {
+    abstract val identifier: IdentifierSpec
+    abstract val controller: Controller
 
-            data class Name(
-                override val identifier: IdentifierSpec,
-                override val controller: TextFieldController,
-                override val focusIndexOrder: Int
-            ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    data class Name(
+        override val identifier: IdentifierSpec,
+        override val controller: TextFieldController,
+        override val focusIndexOrder: Int
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
-            data class Email(
-                override val identifier: IdentifierSpec,
-                override val controller: TextFieldController,
-                override val focusIndexOrder: Int
-            ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    data class Email(
+        override val identifier: IdentifierSpec,
+        override val controller: TextFieldController,
+        override val focusIndexOrder: Int
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
-            data class Country(
-                override val identifier: IdentifierSpec,
-                override val controller: DropdownFieldController
-            ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
-        }
-    }
+    data class Country(
+        override val identifier: IdentifierSpec,
+        override val controller: DropdownFieldController
+    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
 }

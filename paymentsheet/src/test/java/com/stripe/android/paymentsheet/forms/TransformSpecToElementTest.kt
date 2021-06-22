@@ -5,9 +5,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
-import com.stripe.android.paymentsheet.FormElement.SectionElement.SectionFieldElement.Country
-import com.stripe.android.paymentsheet.FormElement.SectionElement.SectionFieldElement.Email
-import com.stripe.android.paymentsheet.FormElement.SectionElement.SectionFieldElement.Name
+import com.stripe.android.paymentsheet.SectionFieldElement.Country
+import com.stripe.android.paymentsheet.SectionFieldElement.Email
+import com.stripe.android.paymentsheet.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.FormElement.StaticTextElement
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.EmailConfig
@@ -74,9 +74,6 @@ class TransformSpecToElementTest {
 
         val nameElement = (formElement.first() as SectionElement).field as Name
 
-        // With only a single field in a section the section controller is just a pass through
-        // of the section field controller
-
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.value).isEqualTo("name")
@@ -117,7 +114,7 @@ class TransformSpecToElementTest {
         assertThat(nameElement.focusIndexOrder).isEqualTo(0)
         assertThat(emailElement.focusIndexOrder).isEqualTo(1)
 
-        // It should equal as many text field as are present
+        // It should equal as many text fields as are present
         assertThat(focusRequesterCount.get()).isEqualTo(2)
     }
 

@@ -28,7 +28,7 @@ interface OptionalItemSpec {
     val identifier: IdentifierSpec
 }
 /**
- * This is used to define each section in the visual form layout
+ * This is used to define each section in the visual form layout specification
  */
 
 sealed class FormItemSpec {

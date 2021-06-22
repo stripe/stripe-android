@@ -20,7 +20,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.FormElement.StaticTextElement
 import com.stripe.android.paymentsheet.SectionFieldElementType
+import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
+import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
@@ -50,7 +54,7 @@ internal fun Form(
 
             AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
                 when (element) {
-                    is FormElement.SectionElement -> {
+                    is SectionElement -> {
                         AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
                             val controller = element.controller
 
@@ -60,24 +64,24 @@ internal fun Form(
 
                             Section(sectionErrorString) {
                                 when (element.field) {
-                                    is SectionFieldElementType.TextFieldElement -> {
+                                    is TextFieldElement -> {
                                         val focusRequesterIndex = element.field.focusIndexOrder
                                         TextField(
                                             textFieldController = element.field.controller,
                                             myFocus = focusRequesters[focusRequesterIndex],
                                             nextFocus = focusRequesters.getOrNull(
                                                 focusRequesterIndex + 1
-                                            ),
+                                            )
                                         )
                                     }
-                                    is SectionFieldElementType.DropdownFieldElement -> {
+                                    is DropdownFieldElement -> {
                                         DropDown(element.field.controller)
                                     }
                                 }
                             }
                         }
                     }
-                    is FormElement.StaticTextElement -> {
+                    is StaticTextElement -> {
                         Text(
                             stringResource(element.stringResId),
                             modifier = Modifier.padding(vertical = 8.dp),
@@ -98,6 +102,7 @@ internal fun Form(
                         }
                     }
                 }
+
             }
         }
     }
