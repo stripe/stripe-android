@@ -11,9 +11,19 @@ internal val bancontactParamKey: MutableMap<String, Any?> = mutableMapOf(
 val bancontact = FormSpec(
     LayoutSpec(
         listOf(
-            FormElementSpec.SectionSpec(FormElementSpec.SectionSpec.SectionFieldSpec.Name),
-            FormElementSpec.SectionSpec(FormElementSpec.SectionSpec.SectionFieldSpec.Email),
-            FormElementSpec.StaticTextSpec(R.string.sofort_mandate, Color.Gray)
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("name"),
+                SectionFieldSpec.Name
+            ),
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("email"),
+                SectionFieldSpec.Email
+            ),
+            FormItemSpec.StaticTextSpec(
+                IdentifierSpec("mandate"),
+                R.string.sofort_mandate,
+                Color.Gray
+            )
         )
     ),
     bancontactParamKey,
