@@ -65,28 +65,27 @@ internal sealed class FormElement {
         override val identifier: IdentifierSpec,
         val field: SectionFieldElementType,
         override val controller: Controller
-    ) : FormElement(), OptionalElement {
+    ) : FormElement(), OptionalElement
+}
 
-        sealed class SectionFieldElement {
-            abstract val identifier: IdentifierSpec
-            abstract val controller: Controller
+internal sealed class SectionFieldElement {
+    abstract val identifier: IdentifierSpec
+    abstract val controller: Controller
 
-            data class Name(
-                override val identifier: IdentifierSpec,
-                override val controller: TextFieldController,
-                override val focusIndexOrder: Int
-            ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    data class Name(
+        override val identifier: IdentifierSpec,
+        override val controller: TextFieldController,
+        override val focusIndexOrder: Int
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
-            data class Email(
-                override val identifier: IdentifierSpec,
-                override val controller: TextFieldController,
-                override val focusIndexOrder: Int
-            ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    data class Email(
+        override val identifier: IdentifierSpec,
+        override val controller: TextFieldController,
+        override val focusIndexOrder: Int
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
-            data class Country(
-                override val identifier: IdentifierSpec,
-                override val controller: DropdownFieldController
-            ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
-        }
-    }
+    data class Country(
+        override val identifier: IdentifierSpec,
+        override val controller: DropdownFieldController
+    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
 }
