@@ -3,6 +3,7 @@ package com.stripe.android
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Currency
+import java.util.Locale
 import kotlin.math.pow
 
 /**
@@ -27,7 +28,8 @@ object PayWithGoogleUtils {
             for (i in 0 until totalLength) {
                 builder.append('#')
             }
-            val noDecimalCurrencyFormat = DecimalFormat(builder.toString())
+            val noDecimalCurrencyFormat =
+                DecimalFormat(builder.toString(), DecimalFormatSymbols.getInstance(Locale.ROOT))
             noDecimalCurrencyFormat.currency = currency
             noDecimalCurrencyFormat.isGroupingUsed = false
             return noDecimalCurrencyFormat.format(price)
@@ -49,9 +51,9 @@ object PayWithGoogleUtils {
         val modBreak = 10.0.pow(fractionDigits.toDouble())
         val decimalPrice = price / modBreak
 
-        // No matter the Locale, Android Pay requires a dot for the decimal separator.
-        val symbolOverride = DecimalFormatSymbols()
-        symbolOverride.decimalSeparator = '.'
+        // No matter the Locale, Android Pay requires a dot for the decimal separator, and Arabic
+        // numbers.
+        val symbolOverride = DecimalFormatSymbols.getInstance(Locale.ROOT)
         val decimalFormat = DecimalFormat(builder.toString(), symbolOverride)
         decimalFormat.currency = currency
         decimalFormat.isGroupingUsed = false
