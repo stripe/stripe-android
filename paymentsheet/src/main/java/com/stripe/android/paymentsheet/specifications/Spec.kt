@@ -16,8 +16,14 @@ data class FormSpec(
  */
 data class LayoutSpec(val items: List<FormItemSpec>)
 
+/**
+ * This uniquely identifies a element in the form.
+ */
 data class IdentifierSpec(val value: String)
 
+/**
+ * Identifies a field that can be made optional.
+ */
 interface OptionalItemSpec {
     val identifier: IdentifierSpec
 }
@@ -29,16 +35,7 @@ sealed class FormItemSpec {
     data class SectionSpec(
         override val identifier: IdentifierSpec,
         val field: SectionFieldSpec
-    ) : FormItemSpec(), OptionalItemSpec {
-
-        sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
-            object Name : SectionFieldSpec(IdentifierSpec("name"))
-
-            object Email : SectionFieldSpec(IdentifierSpec("email"))
-
-            object Country : SectionFieldSpec(IdentifierSpec("country"))
-        }
-    }
+    ) : FormItemSpec(), OptionalItemSpec
 
     /**
      * This is for elements that do not receive user input
@@ -58,4 +55,15 @@ sealed class FormItemSpec {
     ) : FormItemSpec(), OptionalItemSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
+}
+
+/**
+ * This represents a field in a section.
+ */
+sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
+    object Name : SectionFieldSpec(IdentifierSpec("name"))
+
+    object Email : SectionFieldSpec(IdentifierSpec("email"))
+
+    object Country : SectionFieldSpec(IdentifierSpec("country"))
 }
