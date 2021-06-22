@@ -74,9 +74,6 @@ class TransformSpecToElementTest {
 
         val nameElement = (formElement.first() as SectionElement).field as Name
 
-        // With only a single field in a section the section controller is just a pass through
-        // of the section field controller
-
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.value).isEqualTo("name")
@@ -117,7 +114,7 @@ class TransformSpecToElementTest {
         assertThat(nameElement.focusIndexOrder).isEqualTo(0)
         assertThat(emailElement.focusIndexOrder).isEqualTo(1)
 
-        // It should equal as many text field as are present
+        // It should equal as many text fields as are present
         assertThat(focusRequesterCount.get()).isEqualTo(2)
     }
 

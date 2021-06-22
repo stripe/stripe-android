@@ -19,9 +19,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.FormElement.StaticTextElement
 import com.stripe.android.paymentsheet.SectionFieldElementType
+import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
+import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.DropDown
+import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -51,7 +56,7 @@ internal fun Form(
         formViewModel.elements.forEach { element ->
 
             when (element) {
-                is FormElement.SectionElement -> {
+                is SectionElement -> {
                     val controller = element.controller
 
                     val error by controller.errorMessage.asLiveData().observeAsState(null)
@@ -60,7 +65,7 @@ internal fun Form(
 
                     Section(sectionErrorString) {
                         when (element.field) {
-                            is SectionFieldElementType.TextFieldElement -> {
+                            is TextFieldElement -> {
                                 val focusRequesterIndex = element.field.focusIndexOrder
                                 TextField(
                                     textFieldController = element.field.controller,
@@ -71,13 +76,13 @@ internal fun Form(
                                     optional = isOptionalIdentifiers.contains(element.identifier)
                                 )
                             }
-                            is SectionFieldElementType.DropdownFieldElement -> {
+                            is DropdownFieldElement -> {
                                 DropDown(element.field.controller)
                             }
                         }
                     }
                 }
-                is FormElement.StaticTextElement -> {
+                is StaticTextElement -> {
                     Text(
                         stringResource(element.stringResId),
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -172,7 +177,7 @@ class FormViewModel(
             getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
         }
 
-    fun getCurrentFieldValuePair(
+    private fun getCurrentFieldValuePair(
         field: IdentifierSpec,
         value: Controller
     ) = combine(value.fieldValue, value.isComplete) { fieldValue, isComplete ->
