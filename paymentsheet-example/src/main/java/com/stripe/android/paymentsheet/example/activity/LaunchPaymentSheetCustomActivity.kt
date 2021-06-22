@@ -19,7 +19,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
     private lateinit var flowController: PaymentSheet.FlowController
 
     private val isLoading = MutableLiveData(true)
-    private val paymentComplete = MutableLiveData(false)
+    private val paymentCompleted = MutableLiveData(false)
     private val selectedPaymentMethod = MutableLiveData<PaymentOption?>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,8 +40,8 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
         setContent {
             MaterialTheme {
-                val inProgress by isLoading.observeAsState(true)
-                val paymentCompleted by paymentComplete.observeAsState(false)
+                val isLoadingState by isLoading.observeAsState(true)
+                val paymentCompletedState by paymentCompleted.observeAsState(false)
                 val status by viewModel.status.observeAsState("")
                 val paymentMethodLabel by selectedPaymentMethodLabel.observeAsState(stringResource(R.string.loading))
                 val paymentMethodIcon by selectedPaymentMethodIcon.observeAsState()
@@ -51,9 +51,9 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                     viewModel.statusDisplayed()
                 }
 
-                Receipt(inProgress) {
+                Receipt(isLoadingState) {
                     PaymentMethodSelector(
-                        isEnabled = !inProgress && !paymentCompleted,
+                        isEnabled = !isLoadingState && !paymentCompletedState,
                         paymentMethodLabel = paymentMethodLabel,
                         paymentMethodIcon = paymentMethodIcon,
                         onClick = {
@@ -61,7 +61,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                         }
                     )
                     BuyButton(
-                        buyButtonEnabled = !inProgress && !paymentCompleted &&
+                        buyButtonEnabled = !isLoadingState && !paymentCompletedState &&
                             selectedPaymentMethod.value != null,
                         onClick = {
                             isLoading.value = true
@@ -113,7 +113,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
         isLoading.value = false
         if (paymentResult !is PaymentSheetResult.Canceled) {
-            paymentComplete.value = true
+            paymentCompleted.value = true
         }
     }
 }
