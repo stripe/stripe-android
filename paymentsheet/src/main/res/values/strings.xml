@@ -14,4 +14,5 @@
     <string name="address_label_country" tools:ignore="MissingTranslation">Country</string>
     <string name="sofort_mandate">Need to fill in the sofort mandate acceptance.</string>
     <string name="save_for_future_use">Save for Future use</string>
+    <string name="optional">%s (Optional)</string>
 </resources>
