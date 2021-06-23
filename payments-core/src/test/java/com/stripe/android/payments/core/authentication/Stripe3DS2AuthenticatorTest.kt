@@ -88,7 +88,6 @@ class Stripe3DS2AuthenticatorTest {
         paymentRelayStarterFactory,
         analyticsRequestExecutor,
         analyticsRequestFactory,
-        { _, _ -> mock() },
         testDispatcher,
         testDispatcher,
         threeDs2Service,

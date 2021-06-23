@@ -7,7 +7,6 @@ import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.payments.core.authentication.IntentAuthenticator
 import com.stripe.android.payments.core.authentication.Stripe3DS2Authenticator
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
@@ -38,7 +37,6 @@ internal class Stripe3DSAuthenticatorModule {
         paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
         analyticsRequestFactory: AnalyticsRequestFactory,
-        stripe3ds2CompletionStarterFactory: (AuthActivityStarterHost, Int) -> Stripe3ds2CompletionStarter,
         @IOContext workContext: CoroutineContext,
         @UIContext uiContext: CoroutineContext
     ): IntentAuthenticator {
@@ -49,7 +47,6 @@ internal class Stripe3DSAuthenticatorModule {
             paymentRelayStarterFactory,
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            stripe3ds2CompletionStarterFactory,
             workContext,
             uiContext,
             StripeThreeDs2ServiceImpl(context, enableLogging),
