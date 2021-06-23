@@ -47,8 +47,9 @@ internal class GooglePayLauncherContract :
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"
+
             fun fromIntent(intent: Intent): Args? {
-                return intent.getParcelableExtra<Args>(EXTRA_ARGS)
+                return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }
     }
