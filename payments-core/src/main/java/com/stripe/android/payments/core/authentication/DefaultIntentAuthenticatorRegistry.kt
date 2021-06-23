@@ -40,12 +40,12 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor(
         }
     }
 
-    override fun onNewActivityResultCallerAndCallback(
+    override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
         intentAuthenticatorMap.values.forEach {
-            it.onNewActivityResultCallerAndCallback(activityResultCaller, activityResultCallback)
+            it.onNewActivityResultCaller(activityResultCaller, activityResultCallback)
         }
     }
 

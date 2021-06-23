@@ -21,7 +21,7 @@ internal interface ActivityResultLauncherHost {
      * [ActivityResultCallback] is available. This happens when the host Activity is recreated and
      * its [ActivityResultLauncher] needs to be re-registered.
      */
-    fun onNewActivityResultCallerAndCallback(
+    fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {

@@ -136,7 +136,7 @@ internal class StripePaymentController internal constructor(
             PaymentBrowserAuthContract(defaultReturnUrl),
             activityResultCallback
         )
-        authenticatorRegistry.onNewActivityResultCallerAndCallback(
+        authenticatorRegistry.onNewActivityResultCaller(
             activityResultCaller,
             activityResultCallback
         )

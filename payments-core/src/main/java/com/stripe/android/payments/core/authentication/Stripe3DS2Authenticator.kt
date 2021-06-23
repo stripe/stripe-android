@@ -58,7 +58,7 @@ internal class Stripe3DS2Authenticator(
 
     /**
      * [stripe3ds2ChallengeLauncher] is mutable and might be updated during
-     * through [onNewActivityResultCallerAndCallback]
+     * through [onNewActivityResultCaller]
      */
     private var stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? =
         null
@@ -83,7 +83,7 @@ internal class Stripe3DS2Authenticator(
         )
     }
 
-    override fun onNewActivityResultCallerAndCallback(
+    override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
