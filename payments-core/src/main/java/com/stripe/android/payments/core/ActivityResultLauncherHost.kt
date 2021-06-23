@@ -1,14 +1,15 @@
-package com.stripe.android.payments.core.authentication
+package com.stripe.android.payments.core
 
 import android.app.Activity
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.authentication.IntentAuthenticator
 import com.stripe.android.view.AuthActivityStarter
 
 /**
- * A host of [ActivityResultLauncher] which might start another [Activity] through
+ * A host of [ActivityResultLauncher] which is used to start another [Activity] through
  * [AuthActivityStarter].
  *
  * Gets notified when [ActivityResultLauncher] needs to be recreated or invalidated due to

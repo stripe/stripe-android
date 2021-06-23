@@ -6,7 +6,6 @@ import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.payments.core.authentication.DefaultIntentAuthenticatorRegistry
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.BindsInstance
@@ -48,11 +47,6 @@ internal interface AuthenticationComponent {
         @BindsInstance
         fun paymentBrowserAuthStarterFactory(
             paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter
-        ): Builder
-
-        @BindsInstance
-        fun stripe3ds2ChallengeLauncherFactory(
-            stripe3ds2ChallengeLauncherFactory: (AuthActivityStarterHost, Int) -> Stripe3ds2CompletionStarter
         ): Builder
 
         @BindsInstance
