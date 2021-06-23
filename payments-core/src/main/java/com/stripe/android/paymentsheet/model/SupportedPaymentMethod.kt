@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.specifications.FormType
 
 /**
  * Enum defining all payment methods supported in Payment Sheet.
@@ -11,17 +12,25 @@ import com.stripe.android.model.PaymentMethod
 internal enum class SupportedPaymentMethod(
     val paymentMethodType: PaymentMethod.Type,
     @StringRes val displayNameResource: Int,
-    @DrawableRes val iconResource: Int
+    @DrawableRes val iconResource: Int,
+    val formType: FormType? = null
 ) {
     Card(
         PaymentMethod.Type.Card,
         R.string.stripe_paymentsheet_payment_method_card,
-        R.drawable.stripe_ic_paymentsheet_add_pm_card
+        R.drawable.stripe_ic_paymentsheet_pm_card
     ),
-    Ideal(
-        PaymentMethod.Type.Ideal,
-        R.string.stripe_paymentsheet_payment_method_ideal,
-        R.drawable.stripe_ic_paymentsheet_add_pm_ideal
+    Bancontact(
+        PaymentMethod.Type.Bancontact,
+        R.string.stripe_paymentsheet_payment_method_bancontact,
+        R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+        FormType.Bancontact
+    ),
+    Sofort(
+        PaymentMethod.Type.Sofort,
+        R.string.stripe_paymentsheet_payment_method_sofort,
+        R.drawable.stripe_ic_paymentsheet_pm_sofort,
+        FormType.Sofort
     );
 
     override fun toString(): String {

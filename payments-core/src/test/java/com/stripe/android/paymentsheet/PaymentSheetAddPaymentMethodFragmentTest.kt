@@ -24,7 +24,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.IdealDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
+import com.stripe.android.paymentsheet.specifications.FormType
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -210,15 +211,20 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 )
             ).isInstanceOf(CardDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Ideal)
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
 
             idleLooper()
 
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                viewBinding.paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
-                fragment.childFragmentManager.findFragmentById(
-                    viewBinding.paymentMethodFragmentContainer.id
+                addedFragment?.arguments?.getParcelable<FormType>(
+                    ComposeFormDataCollectionFragment.EXTRA_FORM_TYPE
                 )
-            ).isInstanceOf(IdealDataCollectionFragment::class.java)
+            ).isEqualTo(FormType.Bancontact)
         }
     }
 

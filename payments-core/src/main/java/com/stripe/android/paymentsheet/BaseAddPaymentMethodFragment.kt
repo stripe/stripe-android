@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.BasePaymentDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.SofortDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -83,7 +83,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
             (fragment as? BasePaymentDataCollectionFragment)?.paramMapLiveData()
-                ?.observe(viewLifecycleOwner) { paramMap ->
+                ?.observe(viewLifecycleOwner) {
                     // Create PaymentSelection and set in sheetViewModel
                 }
         }
@@ -126,6 +126,11 @@ internal abstract class BaseAddPaymentMethodFragment(
     }
 
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
+        val args = requireArguments()
+        args.putParcelable(
+            ComposeFormDataCollectionFragment.EXTRA_FORM_TYPE,
+            paymentMethod.formType
+        )
         childFragmentManager.commit {
             setCustomAnimations(
                 AnimationConstants.FADE_IN,
@@ -136,7 +141,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             replace(
                 R.id.payment_method_fragment_container,
                 fragmentForPaymentMethod(paymentMethod),
-                arguments
+                args
             )
         }
     }
@@ -149,7 +154,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
                 SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
-                SupportedPaymentMethod.Ideal -> SofortDataCollectionFragment::class.java
+                else -> ComposeFormDataCollectionFragment::class.java
             }
     }
 }

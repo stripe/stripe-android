@@ -11,14 +11,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.StripeTheme
 import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.specifications.sofort
+import com.stripe.android.paymentsheet.forms.TransformFormToPaymentMethod
+import com.stripe.android.paymentsheet.specifications.FormType
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
-class SofortDataCollectionFragment : BasePaymentDataCollectionFragment() {
-    val sofortFormViewModel: FormViewModel by viewModels { FormViewModel.Factory(sofort.layout) }
+class ComposeFormDataCollectionFragment : BasePaymentDataCollectionFragment() {
+    val formSpec by lazy {
+        requireNotNull(
+            requireArguments().getParcelable<FormType>(EXTRA_FORM_TYPE)
+        ).getFormSpec()
+    }
+    val formViewModel: FormViewModel by viewModels { FormViewModel.Factory(formSpec.layout) }
 
     @ExperimentalAnimationApi
     override fun onCreateView(
@@ -34,18 +41,24 @@ class SofortDataCollectionFragment : BasePaymentDataCollectionFragment() {
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
-                    Form(sofortFormViewModel)
+                    Form(formViewModel)
                 }
             }
         }
     }
 
     override fun setProcessing(processing: Boolean) {
-        // Disable views
+        // TODO: Enable or disable views accordingly
     }
 
     // This can't be a var or we'll be reading from the ViewModel while the fragment is detached
-    override fun paramMapLiveData() = sofortFormViewModel.completeFormValues.asLiveData().map { mutableMap ->
-        mutableMap?.fieldValuePairs?.toMap()
+    override fun paramMapLiveData() = formViewModel.completeFormValues.map {
+        it?.let {
+            TransformFormToPaymentMethod().transform(formSpec.paramKey, it).toMap()
+        }
+    }.distinctUntilChanged().asLiveData()
+
+    companion object {
+        const val EXTRA_FORM_TYPE = "com.stripe.android.paymentsheet.extra_form_type"
     }
 }
