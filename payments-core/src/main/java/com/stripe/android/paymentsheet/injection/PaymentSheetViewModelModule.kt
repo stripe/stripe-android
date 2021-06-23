@@ -1,25 +1,18 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.app.Application
+import android.content.Context
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentController
-import com.stripe.android.StripeIntentResult
-import com.stripe.android.StripePaymentController
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.payments.PaymentFlowResultProcessor
-import com.stripe.android.payments.PaymentIntentFlowResultProcessor
-import com.stripe.android.payments.SetupIntentFlowResultProcessor
+import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.GooglePayRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -28,27 +21,27 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import javax.inject.Provider
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
 internal class PaymentSheetViewModelModule {
-    /**
-     * Provides a non-singleton PaymentConfiguration.
-     *
-     * Needs to be recalculated whenever needed to allow client to set the publishableKey and
-     * stripeAccountId in PaymentConfiguration any time before configuring the FlowController
-     * through configureWithPaymentIntent or configureWithSetupIntent.
-     *
-     * Should always be injected with [Lazy] or [Provider].
-     */
     @Provides
-    fun providePaymentConfiguration(application: Application): PaymentConfiguration {
-        return PaymentConfiguration.getInstance(application)
+    @Named(ENABLE_LOGGING)
+    fun provideEnabledLogging(): Boolean = true
+
+    @Provides
+    @Singleton
+    fun provideClientSecret(
+        starterArgs: PaymentSheetContract.Args
+    ): ClientSecret {
+        return starterArgs.clientSecret
     }
 
-    // Below are all Singleton instance to be injected into PaymentSheetViewModel
+    @Provides
+    @IOContext
+    fun provideWorkContext(): CoroutineContext = Dispatchers.IO
 
     @Provides
     @Singleton
@@ -61,19 +54,10 @@ internal class PaymentSheetViewModelModule {
 
     @Provides
     @Singleton
-    fun provideStripeApiRepository(
-        application: Application,
-        lazyPaymentConfiguration: Lazy<PaymentConfiguration>
-    ) = StripeApiRepository(
-        application,
-        { lazyPaymentConfiguration.get().publishableKey }
-    )
-
-    @Provides
-    @Singleton
     fun provideStripeIntentRepository(
         stripeApiRepository: StripeApiRepository,
-        lazyPaymentConfig: Lazy<PaymentConfiguration>
+        lazyPaymentConfig: Lazy<PaymentConfiguration>,
+        @IOContext workContext: CoroutineContext
     ): StripeIntentRepository {
         return StripeIntentRepository.Api(
             stripeRepository = stripeApiRepository,
@@ -81,7 +65,7 @@ internal class PaymentSheetViewModelModule {
                 lazyPaymentConfig.get().publishableKey,
                 lazyPaymentConfig.get().stripeAccountId
             ),
-            workContext = Dispatchers.IO
+            workContext = workContext
         )
     }
 
@@ -89,51 +73,27 @@ internal class PaymentSheetViewModelModule {
     @Singleton
     fun providePaymentMethodsApiRepository(
         stripeApiRepository: StripeApiRepository,
-        lazyPaymentConfig: Lazy<PaymentConfiguration>
+        lazyPaymentConfig: Lazy<PaymentConfiguration>,
+        @IOContext workContext: CoroutineContext
     ): PaymentMethodsRepository {
         return PaymentMethodsApiRepository(
             stripeRepository = stripeApiRepository,
             publishableKey = lazyPaymentConfig.get().publishableKey,
             stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-            workContext = Dispatchers.IO
+            workContext = workContext
         )
     }
 
-    @Provides
-    @Singleton
-    fun providePaymentFlowResultProcessor(
-        application: Application,
-        starterArgs: PaymentSheetContract.Args,
-        lazyPaymentConfig: Lazy<PaymentConfiguration>,
-        stripeApiRepository: StripeApiRepository,
-    ): PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>> {
-        return when (starterArgs.clientSecret) {
-            is PaymentIntentClientSecret -> PaymentIntentFlowResultProcessor(
-                application,
-                { lazyPaymentConfig.get().publishableKey },
-                stripeApiRepository,
-                enableLogging = true,
-                Dispatchers.IO
-            )
-            is SetupIntentClientSecret -> SetupIntentFlowResultProcessor(
-                application,
-                { lazyPaymentConfig.get().publishableKey },
-                stripeApiRepository,
-                enableLogging = true,
-                Dispatchers.IO
-            )
-        }
-    }
 
     @Provides
     @Singleton
     fun provideGooglePayRepository(
-        application: Application,
+        appContext: Context,
         starterArgs: PaymentSheetContract.Args
     ): GooglePayRepository {
         return starterArgs.config?.googlePay?.environment?.let { environment ->
             DefaultGooglePayRepository(
-                application,
+                appContext,
                 environment
             )
         } ?: GooglePayRepository.Disabled
@@ -142,41 +102,25 @@ internal class PaymentSheetViewModelModule {
     @Provides
     @Singleton
     fun providePrefsRepository(
-        application: Application,
+        appContext: Context,
         starterArgs: PaymentSheetContract.Args,
-        googlePayRepository: GooglePayRepository
+        googlePayRepository: GooglePayRepository,
+        @IOContext workContext: CoroutineContext
     ): PrefsRepository {
         return starterArgs.config?.customer?.let { (id) ->
             DefaultPrefsRepository(
-                application,
+                appContext,
                 customerId = id,
                 isGooglePayReady = { googlePayRepository.isReady().first() },
-                workContext = Dispatchers.IO
+                workContext = workContext
             )
         } ?: PrefsRepository.Noop()
     }
 
-    // TODO: Replace with an actual logger
     @Provides
     @Singleton
-    fun provideLogger() = Logger.noop()
+    fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
+        Logger.getInstance(enableLogging)
 
-    @Provides
-    @IOContext
-    fun provideWorkContext(): CoroutineContext = Dispatchers.IO
 
-    @Provides
-    @Singleton
-    fun provideStripePaymentController(
-        application: Application,
-        stripeApiRepository: StripeApiRepository,
-        lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
-    ): PaymentController {
-        return StripePaymentController(
-            application,
-            { lazyPaymentConfiguration.get().publishableKey },
-            stripeApiRepository,
-            enableLogging = true
-        )
-    }
 }

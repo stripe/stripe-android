@@ -31,7 +31,7 @@ internal class Stripe3DSAuthenticatorModule {
     @IntentAuthenticatorKey(NextActionData.SdkData.Use3DS2::class)
     internal fun provideStripe3DSAuthenticator(
         context: Context,
-        @Named(AuthenticationComponent.ENABLE_LOGGING) enableLogging: Boolean,
+        @Named(ENABLE_LOGGING) enableLogging: Boolean,
         stripeRepository: StripeRepository,
         webIntentAuthenticator: WebIntentAuthenticator,
         paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,

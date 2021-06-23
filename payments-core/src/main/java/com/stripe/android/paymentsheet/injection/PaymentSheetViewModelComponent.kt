@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
+import com.stripe.android.payments.core.injection.PaymentCommonModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -9,7 +10,13 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [PaymentSheetViewModelModule::class])
+@Component(
+    modules = [
+        PaymentCommonModule::class,
+        PaymentSheetViewModelModule::class,
+        PaymentSheetViewModelBindingModule::class
+    ]
+)
 internal interface PaymentSheetViewModelComponent {
     val viewModel: PaymentSheetViewModel
 
