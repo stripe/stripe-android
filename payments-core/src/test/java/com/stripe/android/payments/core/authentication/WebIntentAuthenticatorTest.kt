@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
@@ -43,7 +42,6 @@ class WebIntentAuthenticatorTest {
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
-    private val logger = mock<Logger>()
 
     private val testDispatcher = TestCoroutineDispatcher()
     private val host = mock<AuthActivityStarterHost>()
@@ -58,7 +56,6 @@ class WebIntentAuthenticatorTest {
         paymentBrowserAuthStarterFactory,
         analyticsRequestExecutor,
         analyticsRequestFactory,
-        logger,
         enableLogging = false,
         testDispatcher
     )
