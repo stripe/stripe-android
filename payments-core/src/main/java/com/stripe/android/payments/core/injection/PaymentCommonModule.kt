@@ -42,7 +42,6 @@ internal class PaymentCommonModule {
         return PaymentConfiguration.getInstance(appContext)
     }
 
-
     @Provides
     @Singleton
     fun provideStripeApiRepository(
@@ -94,5 +93,4 @@ internal class PaymentCommonModule {
             )
         }
     }
-
 }

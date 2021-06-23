@@ -84,7 +84,6 @@ internal class PaymentSheetViewModelModule {
         )
     }
 
-
     @Provides
     @Singleton
     fun provideGooglePayRepository(
@@ -121,6 +120,4 @@ internal class PaymentSheetViewModelModule {
     @Singleton
     fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
         Logger.getInstance(enableLogging)
-
-
 }

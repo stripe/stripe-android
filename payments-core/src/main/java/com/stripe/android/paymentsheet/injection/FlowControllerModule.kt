@@ -94,7 +94,4 @@ internal class FlowControllerModule {
     @Singleton
     fun provideViewModel(viewModelStoreOwner: ViewModelStoreOwner): FlowControllerViewModel =
         ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
-
-
-
 }
