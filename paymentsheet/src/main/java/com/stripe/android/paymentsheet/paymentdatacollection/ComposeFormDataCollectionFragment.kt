@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.StripeTheme
@@ -19,7 +20,11 @@ import com.stripe.android.paymentsheet.specifications.FormType
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-class ComposeFormDataCollectionFragment : BasePaymentDataCollectionFragment() {
+/**
+ * Fragment that displays a form for payment data collection based on the [FormType] received in the
+ * arguments bundle.
+ */
+class ComposeFormDataCollectionFragment : Fragment() {
     val formSpec by lazy {
         requireNotNull(
             requireArguments().getParcelable<FormType>(EXTRA_FORM_TYPE)
@@ -47,14 +52,23 @@ class ComposeFormDataCollectionFragment : BasePaymentDataCollectionFragment() {
         }
     }
 
-    override fun setProcessing(processing: Boolean) {
+    /**
+     * Inform the fragment whether PaymentSheet is in a processing state, so the fragment knows it
+     * should show as enabled or disabled.
+     */
+    fun setProcessing(processing: Boolean) {
         // TODO: Enable or disable views accordingly
     }
 
-    // This can't be a var or we'll be reading from the ViewModel while the fragment is detached
-    override fun paramMapLiveData() = formViewModel.completeFormValues.map {
+    /**
+     * Provide to PaymentSheet a LiveData of the map to be used to create the payment method through
+     * PaymentMethodCreateParams. If the form is currently invalid, the map is null.
+     * This can't be a var or we'll be reading from the ViewModel while the fragment is detached.
+     */
+    fun paramMapLiveData() = formViewModel.completeFormValues.map {
         it?.let {
-            TransformFormToPaymentMethod().transform(formSpec.paramKey, it).toMap()
+            TransformFormToPaymentMethod().transform(formSpec.paramKey, it).filterOutNullValues()
+                .toMap()
         }
     }.distinctUntilChanged().asLiveData()
 
@@ -62,3 +76,6 @@ class ComposeFormDataCollectionFragment : BasePaymentDataCollectionFragment() {
         const val EXTRA_FORM_TYPE = "com.stripe.android.paymentsheet.extra_form_type"
     }
 }
+
+@Suppress("UNCHECKED_CAST")
+fun <K, V> Map<K, V?>.filterOutNullValues() = filterValues { it != null } as Map<K, V>

@@ -1,20 +1,23 @@
 package com.stripe.android.paymentsheet.model
 
+import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.specifications.FormType
+import kotlinx.parcelize.Parcelize
 
 /**
  * Enum defining all payment methods supported in Payment Sheet.
  */
+@Parcelize
 internal enum class SupportedPaymentMethod(
     val paymentMethodType: PaymentMethod.Type,
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
     val formType: FormType? = null
-) {
+) : Parcelable {
     Card(
         PaymentMethod.Type.Card,
         R.string.stripe_paymentsheet_payment_method_card,

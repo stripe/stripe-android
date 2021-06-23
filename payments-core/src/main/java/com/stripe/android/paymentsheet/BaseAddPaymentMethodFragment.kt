@@ -16,7 +16,6 @@ import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.BasePaymentDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
@@ -78,14 +77,15 @@ internal abstract class BaseAddPaymentMethodFragment(
         replacePaymentMethodFragment(paymentMethods[0])
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            getFragment()?.setProcessing(isProcessing)
+            (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
         }
 
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            (fragment as? BasePaymentDataCollectionFragment)?.paramMapLiveData()
-                ?.observe(viewLifecycleOwner) {
+            (fragment as? ComposeFormDataCollectionFragment)?.let {
+                it.paramMapLiveData().observe(viewLifecycleOwner) {
                     // Create PaymentSelection and set in sheetViewModel
                 }
+            }
         }
 
         eventReporter.onShowNewPaymentOptionForm()
@@ -148,7 +148,6 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     private fun getFragment() =
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
-            as? BasePaymentDataCollectionFragment
 
     companion object {
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =

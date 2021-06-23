@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -52,7 +53,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddCardFragment] classes
+ * This is used by both the [PaymentSheetActivity] and the [CardDataCollectionFragment] classes
  * to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
  */
 internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
@@ -332,6 +333,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 // SavedSelection needs to happen after new cards have been saved.
                 when (selection.value) {
                     is PaymentSelection.New.Card -> stripeIntentResult.intent.paymentMethod?.let {
+                        PaymentSelection.Saved(it)
+                    }
+                    is PaymentSelection.NewPaymentMethod -> stripeIntentResult.intent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }
                     PaymentSelection.GooglePay -> selection.value
