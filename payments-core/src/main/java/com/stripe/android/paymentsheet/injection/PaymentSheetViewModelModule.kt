@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
+import android.app.Application
 import android.content.Context
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import dagger.Binds
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
@@ -26,98 +28,104 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal class PaymentSheetViewModelModule {
-    @Provides
-    @Named(ENABLE_LOGGING)
-    fun provideEnabledLogging(): Boolean = true
+internal abstract class PaymentSheetViewModelModule {
 
-    @Provides
-    @Singleton
-    fun provideClientSecret(
-        starterArgs: PaymentSheetContract.Args
-    ): ClientSecret {
-        return starterArgs.clientSecret
-    }
+    @Binds
+    abstract fun bindsApplicationForContext(application: Application): Context
 
-    @Provides
-    @IOContext
-    fun provideWorkContext(): CoroutineContext = Dispatchers.IO
+    companion object {
+        @Provides
+        @Named(ENABLE_LOGGING)
+        fun provideEnabledLogging(): Boolean = true
 
-    @Provides
-    @Singleton
-    fun provideApiRequestOptions(
-        lazyPaymentConfiguration: Lazy<PaymentConfiguration>
-    ) = ApiRequest.Options(
-        apiKey = lazyPaymentConfiguration.get().publishableKey,
-        stripeAccount = lazyPaymentConfiguration.get().stripeAccountId
-    )
+        @Provides
+        @Singleton
+        fun provideClientSecret(
+            starterArgs: PaymentSheetContract.Args
+        ): ClientSecret {
+            return starterArgs.clientSecret
+        }
 
-    @Provides
-    @Singleton
-    fun provideStripeIntentRepository(
-        stripeApiRepository: StripeApiRepository,
-        lazyPaymentConfig: Lazy<PaymentConfiguration>,
-        @IOContext workContext: CoroutineContext
-    ): StripeIntentRepository {
-        return StripeIntentRepository.Api(
-            stripeRepository = stripeApiRepository,
-            requestOptions = ApiRequest.Options(
-                lazyPaymentConfig.get().publishableKey,
-                lazyPaymentConfig.get().stripeAccountId
-            ),
-            workContext = workContext
+        @Provides
+        @IOContext
+        fun provideWorkContext(): CoroutineContext = Dispatchers.IO
+
+        @Provides
+        @Singleton
+        fun provideApiRequestOptions(
+            lazyPaymentConfiguration: Lazy<PaymentConfiguration>
+        ) = ApiRequest.Options(
+            apiKey = lazyPaymentConfiguration.get().publishableKey,
+            stripeAccount = lazyPaymentConfiguration.get().stripeAccountId
         )
-    }
 
-    @Provides
-    @Singleton
-    fun providePaymentMethodsApiRepository(
-        stripeApiRepository: StripeApiRepository,
-        lazyPaymentConfig: Lazy<PaymentConfiguration>,
-        @IOContext workContext: CoroutineContext
-    ): PaymentMethodsRepository {
-        return PaymentMethodsApiRepository(
-            stripeRepository = stripeApiRepository,
-            publishableKey = lazyPaymentConfig.get().publishableKey,
-            stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-            workContext = workContext
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideGooglePayRepository(
-        appContext: Context,
-        starterArgs: PaymentSheetContract.Args
-    ): GooglePayRepository {
-        return starterArgs.config?.googlePay?.environment?.let { environment ->
-            DefaultGooglePayRepository(
-                appContext,
-                environment
-            )
-        } ?: GooglePayRepository.Disabled
-    }
-
-    @Provides
-    @Singleton
-    fun providePrefsRepository(
-        appContext: Context,
-        starterArgs: PaymentSheetContract.Args,
-        googlePayRepository: GooglePayRepository,
-        @IOContext workContext: CoroutineContext
-    ): PrefsRepository {
-        return starterArgs.config?.customer?.let { (id) ->
-            DefaultPrefsRepository(
-                appContext,
-                customerId = id,
-                isGooglePayReady = { googlePayRepository.isReady().first() },
+        @Provides
+        @Singleton
+        fun provideStripeIntentRepository(
+            stripeApiRepository: StripeApiRepository,
+            lazyPaymentConfig: Lazy<PaymentConfiguration>,
+            @IOContext workContext: CoroutineContext
+        ): StripeIntentRepository {
+            return StripeIntentRepository.Api(
+                stripeRepository = stripeApiRepository,
+                requestOptions = ApiRequest.Options(
+                    lazyPaymentConfig.get().publishableKey,
+                    lazyPaymentConfig.get().stripeAccountId
+                ),
                 workContext = workContext
             )
-        } ?: PrefsRepository.Noop()
-    }
+        }
 
-    @Provides
-    @Singleton
-    fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-        Logger.getInstance(enableLogging)
+        @Provides
+        @Singleton
+        fun providePaymentMethodsApiRepository(
+            stripeApiRepository: StripeApiRepository,
+            lazyPaymentConfig: Lazy<PaymentConfiguration>,
+            @IOContext workContext: CoroutineContext
+        ): PaymentMethodsRepository {
+            return PaymentMethodsApiRepository(
+                stripeRepository = stripeApiRepository,
+                publishableKey = lazyPaymentConfig.get().publishableKey,
+                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                workContext = workContext
+            )
+        }
+
+        @Provides
+        @Singleton
+        fun provideGooglePayRepository(
+            appContext: Context,
+            starterArgs: PaymentSheetContract.Args
+        ): GooglePayRepository {
+            return starterArgs.config?.googlePay?.environment?.let { environment ->
+                DefaultGooglePayRepository(
+                    appContext,
+                    environment
+                )
+            } ?: GooglePayRepository.Disabled
+        }
+
+        @Provides
+        @Singleton
+        fun providePrefsRepository(
+            appContext: Context,
+            starterArgs: PaymentSheetContract.Args,
+            googlePayRepository: GooglePayRepository,
+            @IOContext workContext: CoroutineContext
+        ): PrefsRepository {
+            return starterArgs.config?.customer?.let { (id) ->
+                DefaultPrefsRepository(
+                    appContext,
+                    customerId = id,
+                    isGooglePayReady = { googlePayRepository.isReady().first() },
+                    workContext = workContext
+                )
+            } ?: PrefsRepository.Noop()
+        }
+
+        @Provides
+        @Singleton
+        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
+            Logger.getInstance(enableLogging)
+    }
 }

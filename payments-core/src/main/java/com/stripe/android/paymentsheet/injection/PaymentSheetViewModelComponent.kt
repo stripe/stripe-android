@@ -13,8 +13,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentCommonModule::class,
-        PaymentSheetViewModelModule::class,
-        PaymentSheetViewModelBindingModule::class
+        PaymentSheetViewModelModule::class
     ]
 )
 internal interface PaymentSheetViewModelComponent {
