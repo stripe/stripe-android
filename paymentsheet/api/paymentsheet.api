@@ -63,10 +63,6 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion {
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragmentKt {
-	public static final fun filterOutNullValues (Ljava/util/Map;)Ljava/util/Map;
-}
-
 public final class com/stripe/android/paymentsheet/specifications/BancontactSpecKt {
 	public static final fun getBancontact ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 }

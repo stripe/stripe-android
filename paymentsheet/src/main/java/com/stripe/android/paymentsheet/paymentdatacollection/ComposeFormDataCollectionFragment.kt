@@ -77,4 +77,4 @@ class ComposeFormDataCollectionFragment : Fragment() {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <K, V> Map<K, V?>.filterOutNullValues() = filterValues { it != null } as Map<K, V>
+private fun <K, V> Map<K, V?>.filterOutNullValues() = filterValues { it != null } as Map<K, V>
