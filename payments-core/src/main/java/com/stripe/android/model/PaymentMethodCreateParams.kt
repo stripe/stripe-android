@@ -52,7 +52,7 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmSynthetic
         get() {
             return when (type) {
-                Type.Card -> card?.attribution?.plus(productUsage)
+                Type.Card -> (card?.attribution ?: emptySet()).plus(productUsage)
                 else -> productUsage.takeIf { it.isNotEmpty() }
             }
         }
@@ -765,11 +765,13 @@ data class PaymentMethodCreateParams internal constructor(
          */
         internal fun createWithOverriddenParamMap(
             type: Type,
-            paramMap: Map<String, Any>
+            paramMap: Map<String, Any>,
+            productUsage: Set<String>,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = type,
-                overrideParamMap = paramMap
+                overrideParamMap = paramMap,
+                productUsage = productUsage
             )
         }
     }

@@ -151,7 +151,8 @@ class PaymentMethodCreateParamsTest {
         assertThat(
             PaymentMethodCreateParams.createWithOverriddenParamMap(
                 PaymentMethodCreateParams.Type.Card,
-                map
+                map,
+                emptySet()
             ).toParamMap()
         ).isEqualTo(map)
     }

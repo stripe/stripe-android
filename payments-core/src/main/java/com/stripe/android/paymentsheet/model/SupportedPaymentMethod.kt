@@ -43,7 +43,11 @@ internal enum class SupportedPaymentMethod(
 
     fun paymentMethodCreateParams(paramMap: Map<String, Any>) =
         PaymentMethodCreateParams.Type.fromPaymentMethodType(paymentMethodType)?.let {
-            PaymentMethodCreateParams.createWithOverriddenParamMap(it, paramMap)
+            PaymentMethodCreateParams.createWithOverriddenParamMap(
+                it,
+                paramMap,
+                setOf("PaymentSheet")
+            )
         }
 
     companion object {
