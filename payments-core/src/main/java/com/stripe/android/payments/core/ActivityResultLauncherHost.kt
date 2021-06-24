@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.IntentAuthenticator
 import com.stripe.android.view.AuthActivityStarter
@@ -15,7 +16,8 @@ import com.stripe.android.view.AuthActivityStarter
  * Gets notified when [ActivityResultLauncher] needs to be recreated or invalidated due to
  * host Activity recreation.
  */
-internal interface ActivityResultLauncherHost {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface ActivityResultLauncherHost {
     /**
      * Notify the [IntentAuthenticator] that a new [ActivityResultCaller] and
      * [ActivityResultCallback] is available. This happens when the host Activity is recreated and

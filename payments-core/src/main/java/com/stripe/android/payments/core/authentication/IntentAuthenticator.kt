@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.authentication
 
 import android.app.Activity
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
@@ -10,7 +11,8 @@ import com.stripe.android.view.AuthActivityStarterHost
 /**
  * A unit to authenticate a [StripeIntent] base on its next_action.
  */
-internal interface IntentAuthenticator : ActivityResultLauncherHost {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface IntentAuthenticator : ActivityResultLauncherHost {
 
     /**
      * Authenticates an [StripeIntent] based on its next_action

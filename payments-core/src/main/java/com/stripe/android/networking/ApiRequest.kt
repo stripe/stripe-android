@@ -1,6 +1,7 @@
 package com.stripe.android.networking
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.ApiKeyValidator
 import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
@@ -12,7 +13,8 @@ import java.io.UnsupportedEncodingException
 /**
  * A class representing a Stripe API or Analytics request.
  */
-internal data class ApiRequest internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class ApiRequest internal constructor(
     override val method: Method,
     override val baseUrl: String,
     override val params: Map<String, *>? = null,
@@ -46,8 +48,8 @@ internal data class ApiRequest internal constructor(
      * Data class representing options for a Stripe API request.
      */
     @Parcelize
-    internal data class Options internal constructor(
-        val apiKey: String,
+    data class Options internal constructor(
+        internal val apiKey: String,
         internal val stripeAccount: String? = null,
         internal val idempotencyKey: String? = null
     ) : Parcelable {
