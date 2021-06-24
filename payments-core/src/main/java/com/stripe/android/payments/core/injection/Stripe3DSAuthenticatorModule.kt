@@ -8,8 +8,8 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.authentication.IntentAuthenticator
-import com.stripe.android.payments.core.authentication.Stripe3DS2Authenticator
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
+import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.view.AuthActivityStarterHost

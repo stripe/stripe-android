@@ -1,4 +1,4 @@
-package com.stripe.android.payments.core.authentication
+package com.stripe.android.payments.core.authentication.threeds2
 
 import android.content.Context
 import android.content.Intent
@@ -14,7 +14,7 @@ internal class Stripe3ds2TransactionContract :
     ActivityResultContract<Stripe3ds2TransactionContract.Args, PaymentFlowResult.Unvalidated>() {
     override fun createIntent(
         context: Context,
-        input: Stripe3ds2TransactionContract.Args
+        input: Args
     ): Intent {
         return Intent(context, Stripe3ds2TransactionActivity::class.java)
             .putExtras(input.toBundle())
@@ -34,7 +34,7 @@ internal class Stripe3ds2TransactionContract :
         val threeDs1ReturnUrl: String?,
         val requestOptions: ApiRequest.Options
     ) : Parcelable {
-        fun toBundle() = bundleOf("" to this)
+        fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"

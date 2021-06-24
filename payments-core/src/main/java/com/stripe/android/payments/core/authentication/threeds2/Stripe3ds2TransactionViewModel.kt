@@ -1,4 +1,4 @@
-package com.stripe.android.payments.core.authentication
+package com.stripe.android.payments.core.authentication.threeds2
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

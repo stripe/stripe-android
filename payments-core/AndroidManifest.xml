@@ -48,6 +48,10 @@
             android:theme="@style/StripeDefaultTheme" />
 
         <activity
+            android:name=".payments.core.authentication.threeds2.Stripe3ds2TransactionActivity"
+            android:theme="@style/StripeDefaultTheme" />
+
+        <activity
             android:name=".paymentsheet.PaymentSheetActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
