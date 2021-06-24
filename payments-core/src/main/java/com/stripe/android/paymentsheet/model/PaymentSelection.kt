@@ -17,14 +17,6 @@ internal sealed class PaymentSelection : Parcelable {
         val paymentMethod: PaymentMethod
     ) : PaymentSelection()
 
-    @Parcelize
-    data class NewPaymentMethod(
-        @StringRes val labelResource: Int,
-        @DrawableRes val iconResource: Int,
-        val paymentMethodCreateParams: PaymentMethodCreateParams,
-        val shouldSavePaymentMethod: Boolean
-    ) : PaymentSelection()
-
     sealed class New : PaymentSelection() {
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
         abstract val shouldSavePaymentMethod: Boolean
@@ -33,6 +25,14 @@ internal sealed class PaymentSelection : Parcelable {
         data class Card(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             val brand: CardBrand,
+            override val shouldSavePaymentMethod: Boolean
+        ) : New()
+
+        @Parcelize
+        data class GenericPaymentMethod(
+            @StringRes val labelResource: Int,
+            @DrawableRes val iconResource: Int,
+            override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val shouldSavePaymentMethod: Boolean
         ) : New()
     }

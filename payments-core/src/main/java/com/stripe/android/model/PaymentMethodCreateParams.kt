@@ -5,13 +5,14 @@ import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import org.json.JSONException
 import org.json.JSONObject
 
 /**
  * Model for PaymentMethod creation parameters.
  *
- * Used by [Stripe.createPaymentMethodSynchronous]
+ * Used by [Stripe.createPaymentMethod] and [Stripe.createPaymentMethodSynchronous].
  *
  * See [Create a PaymentMethod](https://stripe.com/docs/api/payment_methods/create).
  *
@@ -34,7 +35,14 @@ data class PaymentMethodCreateParams internal constructor(
     internal val billingDetails: PaymentMethod.BillingDetails? = null,
 
     private val metadata: Map<String, String>? = null,
-    private val productUsage: Set<String> = emptySet()
+    private val productUsage: Set<String> = emptySet(),
+
+    /**
+     * If provided, will be used as the representation of this object when calling the Stripe API,
+     * instead of generating the map from its content.
+     * The values of the map must be any of the types supported by [android.os.Parcel.writeValue].
+     */
+    private val overrideParamMap: Map<String, @RawValue Any>? = null,
 ) : StripeParamsModel, Parcelable {
 
     val typeCode: String
@@ -149,17 +157,18 @@ data class PaymentMethodCreateParams internal constructor(
     )
 
     override fun toParamMap(): Map<String, Any> {
-        return mapOf(
-            PARAM_TYPE to type.code
-        ).plus(
-            billingDetails?.let {
-                mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
-            }.orEmpty()
-        ).plus(typeParams).plus(
-            metadata?.let {
-                mapOf(PARAM_METADATA to it)
-            }.orEmpty()
-        )
+        return overrideParamMap
+            ?: mapOf(
+                PARAM_TYPE to type.code
+            ).plus(
+                billingDetails?.let {
+                    mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
+                }.orEmpty()
+            ).plus(typeParams).plus(
+                metadata?.let {
+                    mapOf(PARAM_METADATA to it)
+                }.orEmpty()
+            )
     }
 
     private val typeParams: Map<String, Any>
@@ -181,29 +190,36 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
     internal enum class Type(
-        internal val code: String,
+        private val paymentMethodType: PaymentMethod.Type,
         val hasMandate: Boolean = false
     ) {
-        Card("card"),
-        Ideal("ideal", hasMandate = true),
-        Fpx("fpx"),
-        SepaDebit("sepa_debit", hasMandate = true),
-        AuBecsDebit("au_becs_debit", hasMandate = true),
-        BacsDebit("bacs_debit", hasMandate = true),
-        Sofort("sofort", hasMandate = true),
-        P24("p24"),
-        Bancontact("bancontact", hasMandate = true),
-        Giropay("giropay"),
-        Eps("eps", hasMandate = true),
-        Oxxo("oxxo"),
-        Alipay("alipay"),
-        GrabPay("grabpay"),
-        PayPal("paypal"),
-        AfterpayClearpay("afterpay_clearpay"),
-        Upi("upi"),
-        Netbanking("netbanking"),
-        Blik("blik"),
-        WeChatPay("wechat_pay")
+        Card(PaymentMethod.Type.Card),
+        Ideal(PaymentMethod.Type.Ideal, hasMandate = true),
+        Fpx(PaymentMethod.Type.Fpx),
+        SepaDebit(PaymentMethod.Type.SepaDebit, hasMandate = true),
+        AuBecsDebit(PaymentMethod.Type.AuBecsDebit, hasMandate = true),
+        BacsDebit(PaymentMethod.Type.BacsDebit, hasMandate = true),
+        Sofort(PaymentMethod.Type.Sofort, hasMandate = true),
+        P24(PaymentMethod.Type.P24),
+        Bancontact(PaymentMethod.Type.Bancontact, hasMandate = true),
+        Giropay(PaymentMethod.Type.Giropay),
+        Eps(PaymentMethod.Type.Eps, hasMandate = true),
+        Oxxo(PaymentMethod.Type.Oxxo),
+        Alipay(PaymentMethod.Type.Alipay),
+        GrabPay(PaymentMethod.Type.GrabPay),
+        PayPal(PaymentMethod.Type.PayPal),
+        AfterpayClearpay(PaymentMethod.Type.AfterpayClearpay),
+        Upi(PaymentMethod.Type.Upi),
+        Netbanking(PaymentMethod.Type.Netbanking),
+        Blik(PaymentMethod.Type.Blik),
+        WeChatPay(PaymentMethod.Type.WeChatPay);
+
+        internal val code = paymentMethodType.code
+
+        companion object {
+            internal fun fromPaymentMethodType(paymentMethodType: PaymentMethod.Type) =
+                values().firstOrNull { it.paymentMethodType == paymentMethodType }
+        }
     }
 
     @Parcelize
@@ -553,7 +569,7 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         /**
-         * @return params for creating a [PaymentMethod.Type.NetBanking] payment method
+         * @return params for creating a [PaymentMethod.Type.Netbanking] payment method
          */
         @JvmStatic
         @JvmOverloads
@@ -741,6 +757,18 @@ data class PaymentMethodCreateParams internal constructor(
                 type = Type.WeChatPay,
                 billingDetails = billingDetails,
                 metadata = metadata
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        internal fun createWithOverriddenParamMap(
+            type: Type,
+            paramMap: Map<String, Any>
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = type,
+                overrideParamMap = paramMap
             )
         }
     }

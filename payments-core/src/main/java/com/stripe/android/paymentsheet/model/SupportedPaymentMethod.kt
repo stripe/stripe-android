@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.specifications.FormType
 import kotlinx.parcelize.Parcelize
 
@@ -40,9 +41,13 @@ internal enum class SupportedPaymentMethod(
         return paymentMethodType.toString()
     }
 
-    companion object {
-        internal fun fromCode(code: String?): SupportedPaymentMethod? {
-            return values().firstOrNull { it.paymentMethodType.code == code }
+    fun paymentMethodCreateParams(paramMap: Map<String, Any>) =
+        PaymentMethodCreateParams.Type.fromPaymentMethodType(paymentMethodType)?.let {
+            PaymentMethodCreateParams.createWithOverriddenParamMap(it, paramMap)
         }
+
+    companion object {
+        internal fun fromCode(code: String?) =
+            values().firstOrNull { it.paymentMethodType.code == code }
     }
 }

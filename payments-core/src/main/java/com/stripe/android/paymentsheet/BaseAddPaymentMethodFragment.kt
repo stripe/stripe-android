@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
@@ -29,6 +30,8 @@ internal abstract class BaseAddPaymentMethodFragment(
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     protected lateinit var addPaymentMethodHeader: TextView
+
+    private lateinit var selectedPaymentMethod: SupportedPaymentMethod
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // When the fragment is destroyed and recreated, the child fragment is re-instantiated
@@ -81,9 +84,21 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            (fragment as? ComposeFormDataCollectionFragment)?.let {
-                it.paramMapLiveData().observe(viewLifecycleOwner) {
+            (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
+                formFragment.paramMapLiveData().observe(viewLifecycleOwner) { paramMap ->
                     // Create PaymentSelection and set in sheetViewModel
+                    sheetViewModel.updateSelection(
+                        paramMap?.run {
+                            selectedPaymentMethod.paymentMethodCreateParams(this)
+                        }?.let {
+                            PaymentSelection.New.GenericPaymentMethod(
+                                selectedPaymentMethod.displayNameResource,
+                                selectedPaymentMethod.iconResource,
+                                it,
+                                false
+                            )
+                        }
+                    )
                 }
             }
         }
@@ -126,11 +141,14 @@ internal abstract class BaseAddPaymentMethodFragment(
     }
 
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
+        selectedPaymentMethod = paymentMethod
+
         val args = requireArguments()
         args.putParcelable(
             ComposeFormDataCollectionFragment.EXTRA_FORM_TYPE,
             paymentMethod.formType
         )
+
         childFragmentManager.commit {
             setCustomAnimations(
                 AnimationConstants.FADE_IN,

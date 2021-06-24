@@ -314,7 +314,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)
             }
-            is PaymentSelection.New.Card -> {
+            is PaymentSelection.New -> {
                 confirmParamsFactory.create(paymentSelection)
             }
             else -> null
@@ -332,10 +332,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 // SavedSelection needs to happen after new cards have been saved.
                 when (selection.value) {
-                    is PaymentSelection.New.Card -> stripeIntentResult.intent.paymentMethod?.let {
-                        PaymentSelection.Saved(it)
-                    }
-                    is PaymentSelection.NewPaymentMethod -> stripeIntentResult.intent.paymentMethod?.let {
+                    is PaymentSelection.New -> stripeIntentResult.intent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }
                     PaymentSelection.GooglePay -> selection.value
