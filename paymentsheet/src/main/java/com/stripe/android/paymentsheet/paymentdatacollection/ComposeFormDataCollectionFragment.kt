@@ -53,17 +53,16 @@ class ComposeFormDataCollectionFragment : Fragment() {
     }
 
     /**
-     * Inform the fragment whether PaymentSheet is in a processing state, so the fragment knows it
-     * should show as enabled or disabled.
+     * Informs the fragment whether PaymentSheet is in a processing state, so the fragment knows it
+     * should show its UI as enabled or disabled.
      */
     fun setProcessing(processing: Boolean) {
         // TODO: Enable or disable views accordingly
     }
 
     /**
-     * Provide to PaymentSheet a LiveData of the map to be used to create the payment method through
+     * Provides to PaymentSheet a LiveData of the map to be used to create the payment method through
      * PaymentMethodCreateParams. If the form is currently invalid, the map is null.
-     * This can't be a var or we'll be reading from the ViewModel while the fragment is detached.
      */
     fun paramMapLiveData() = formViewModel.completeFormValues.map {
         it?.let {

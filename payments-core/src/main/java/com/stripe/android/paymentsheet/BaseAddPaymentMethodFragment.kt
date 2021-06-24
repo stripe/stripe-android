@@ -86,7 +86,6 @@ internal abstract class BaseAddPaymentMethodFragment(
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
             (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
                 formFragment.paramMapLiveData().observe(viewLifecycleOwner) { paramMap ->
-                    // Create PaymentSelection and set in sheetViewModel
                     sheetViewModel.updateSelection(
                         paramMap?.run {
                             selectedPaymentMethod.paymentMethodCreateParams(this)
