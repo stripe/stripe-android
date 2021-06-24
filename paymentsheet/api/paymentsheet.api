@@ -48,6 +48,25 @@ public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentM
 public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod$Companion {
 }
 
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment : androidx/fragment/app/Fragment {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion;
+	public static final field EXTRA_FORM_TYPE Ljava/lang/String;
+	public fun <init> ()V
+	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
+	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+	public final fun paramMapLiveData ()Landroidx/lifecycle/LiveData;
+	public final fun setProcessing (Z)V
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion {
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragmentKt {
+	public static final fun filterOutNullValues (Ljava/util/Map;)Ljava/util/Map;
+}
+
 public final class com/stripe/android/paymentsheet/specifications/BancontactSpecKt {
 	public static final fun getBancontact ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 }
@@ -98,6 +117,18 @@ public final class com/stripe/android/paymentsheet/specifications/FormSpec {
 	public final fun getParamKey ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/FormType : java/lang/Enum, android/os/Parcelable {
+	public static final field Bancontact Lcom/stripe/android/paymentsheet/specifications/FormType;
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Sofort Lcom/stripe/android/paymentsheet/specifications/FormType;
+	public fun describeContents ()I
+	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
+	public final fun getType ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/specifications/FormType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/specifications/FormType;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec {
