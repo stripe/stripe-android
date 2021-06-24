@@ -164,7 +164,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         stripeIntent.value?.let { stripeIntent ->
             return stripeIntent.paymentMethodTypes.mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
-            }
+            }.filter { it == SupportedPaymentMethod.Card }
         }
 
         return emptyList()
