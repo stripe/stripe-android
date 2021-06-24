@@ -763,7 +763,6 @@ data class PaymentMethodCreateParams internal constructor(
         /**
          * @return params for creating a payment method with overridden map representation.
          */
-        @JvmStatic
         internal fun createWithOverriddenParamMap(
             type: Type,
             paramMap: Map<String, Any>
