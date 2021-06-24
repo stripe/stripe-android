@@ -133,6 +133,30 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun createWithOverriddenParamMap_toParamMap_shouldCreateExpectedMap() {
+        val map = mapOf(
+            "type" to "test",
+            "bacs_debit" to mapOf(
+                "account_number" to "00012345",
+                "sort_code" to "108800"
+            ),
+            "some_key" to mapOf(
+                "other_key" to mapOf(
+                    "third_key" to "value"
+                )
+            ),
+            "phone" to "1-800-555-1234"
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.createWithOverriddenParamMap(
+                PaymentMethodCreateParams.Type.Card,
+                map
+            ).toParamMap()
+        ).isEqualTo(map)
+    }
+
+    @Test
     fun equals_withFpx() {
         assertEquals(createFpx(), createFpx())
     }
