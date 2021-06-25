@@ -43,3 +43,7 @@ jobs:
         with:
           old-file-path: aar/payments-core-debug-master.aar
           new-file-path: aar/payments-core-debug-pr.aar
+      - uses: actions/upload-artifact@v2
+        with:
+          name: diffuse-output
+          path: ${{ steps.diffuse.outputs.diff-file }}
