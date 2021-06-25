@@ -34,13 +34,8 @@ import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
-import com.stripe.android.payments.Stripe3ds2CompletionContract
-import com.stripe.android.payments.Stripe3ds2CompletionStarter
 import com.stripe.android.payments.core.authentication.DefaultIntentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.IntentAuthenticatorRegistry
-import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
-import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
-import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -58,12 +53,6 @@ internal class StripePaymentController internal constructor(
     private val publishableKeyProvider: Provider<String>,
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
-    messageVersionRegistry: MessageVersionRegistry =
-        MessageVersionRegistry(),
-    config: PaymentAuthConfig =
-        PaymentAuthConfig.get(),
-    threeDs2Service: StripeThreeDs2Service =
-        StripeThreeDs2ServiceImpl(context, enableLogging),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
@@ -89,7 +78,6 @@ internal class StripePaymentController internal constructor(
         workContext
     )
 
-    private val logger = Logger.getInstance(enableLogging)
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
     private val hasCompatibleBrowser: Boolean by lazy {
@@ -123,41 +111,18 @@ internal class StripePaymentController internal constructor(
         )
     }
 
-    /**
-     * [stripe3ds2ChallengeLauncher] is mutable and might be updated during
-     * through [registerLaunchersWithActivityResultCaller]
-     */
-    private var stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? =
-        null
-    private val stripe3ds2CompletionStarterFactory =
-        { host: AuthActivityStarterHost, requestCode: Int ->
-            stripe3ds2ChallengeLauncher?.let {
-                Stripe3ds2CompletionStarter.Modern(it)
-            } ?: Stripe3ds2CompletionStarter.Legacy(host, requestCode)
-        }
-
     private val authenticatorRegistry: IntentAuthenticatorRegistry =
         DefaultIntentAuthenticatorRegistry.createInstance(
+            context,
             stripeRepository,
             paymentRelayStarterFactory,
             paymentBrowserAuthStarterFactory,
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            logger,
             enableLogging,
             workContext,
             uiContext,
-            threeDs2Service,
-            messageVersionRegistry,
-            config.stripe3ds2Config,
-            stripe3ds2CompletionStarterFactory
         )
-
-    init {
-        threeDs2Service.initialize(
-            config.stripe3ds2Config.uiCustomization.uiCustomization
-        )
-    }
 
     override fun registerLaunchersWithActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
@@ -171,8 +136,8 @@ internal class StripePaymentController internal constructor(
             PaymentBrowserAuthContract(defaultReturnUrl),
             activityResultCallback
         )
-        stripe3ds2ChallengeLauncher = activityResultCaller.registerForActivityResult(
-            Stripe3ds2CompletionContract(),
+        authenticatorRegistry.onNewActivityResultCaller(
+            activityResultCaller,
             activityResultCallback
         )
     }
@@ -180,10 +145,9 @@ internal class StripePaymentController internal constructor(
     override fun unregisterLaunchers() {
         paymentRelayLauncher?.unregister()
         paymentBrowserAuthLauncher?.unregister()
-        stripe3ds2ChallengeLauncher?.unregister()
         paymentRelayLauncher = null
         paymentBrowserAuthLauncher = null
-        stripe3ds2ChallengeLauncher = null
+        authenticatorRegistry.onLauncherInvalidated()
     }
 
     /**
@@ -383,6 +347,7 @@ internal class StripePaymentController internal constructor(
         )
     }
 
+    // TODO(ccen) create a SourceAuthenticator and register it in [IntentAuthenticatorRegistry]
     private suspend fun onSourceRetrieved(
         host: AuthActivityStarterHost,
         source: Source,

@@ -29,10 +29,10 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
-import com.stripe.android.paymentsheet.injection.IOContext
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -52,8 +52,8 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddCardFragment] classes
- * to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
+ * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddPaymentMethodFragment]
+ * classes to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
  */
 internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     return when (this) {

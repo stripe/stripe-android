@@ -85,6 +85,10 @@ public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentM
 public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod$Companion {
 }
 
+public final class com/stripe/android/paymentsheet/specifications/BancontactSpecKt {
+	public static final fun getBancontact ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
+}
+
 public abstract class com/stripe/android/paymentsheet/specifications/FormItemSpec {
 	public static final field $stable I
 }
