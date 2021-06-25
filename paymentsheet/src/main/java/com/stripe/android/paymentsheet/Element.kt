@@ -63,7 +63,7 @@ internal sealed class FormElement {
 
     /**
      * This is an element that will make elements (as specified by identifier) hidden
-     * when save for future use is unchecked)
+     * when "save for future" use is unchecked
      */
     data class SaveForFutureUseElement(
         override val identifier: IdentifierSpec,
