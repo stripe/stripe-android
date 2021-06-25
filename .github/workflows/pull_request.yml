@@ -9,12 +9,12 @@ jobs:
         with:
           ref: master
       - name: Build in master
-        run: ./gradlew :payments-core:assembleDebug && mv payments-core/build/outputs/aar/payments-core-debug.aar payments-core/build/outputs/aar/payments-core-debug-master.aar
+        run: ./gradlew :payments-core:assembleRelease && mv payments-core/build/outputs/aar/payments-core-release.aar payments-core/build/outputs/aar/payments-core-release-master.aar
       - name: Upload AAR
         uses: actions/upload-artifact@v1
         with:
           name: aar
-          path: payments-core/build/outputs/aar/payments-core-debug-master.aar
+          path: payments-core/build/outputs/aar/payments-core-release-master.aar
 
   # Checkout PR branch and build the APK
   build-pr:
@@ -22,12 +22,12 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Build from PR
-        run: ./gradlew :payments-core:assembleDebug && mv payments-core/build/outputs/aar/payments-core-debug.aar payments-core/build/outputs/aar/payments-core-debug-pr.aar
+        run: ./gradlew :payments-core:assembleRelease && mv payments-core/build/outputs/aar/payments-core-release.aar payments-core/build/outputs/aar/payments-core-release-pr.aar
       - name: Upload AAR
         uses: actions/upload-artifact@v1
         with:
           name: aar
-          path: payments-core/build/outputs/aar/payments-core-debug-pr.aar
+          path: payments-core/build/outputs/aar/payments-core-release-pr.aar
   # Execute Diffuse only when the two AARs are built successfully
   diffuse:
     needs: [build-master, build-pr]
@@ -42,8 +42,8 @@ jobs:
         id: diffuse
         uses: usefulness/diffuse-action@v1
         with:
-          old-file-path: aar/payments-core-debug-master.aar
-          new-file-path: aar/payments-core-debug-pr.aar
+          old-file-path: aar/payments-core-release-master.aar
+          new-file-path: aar/payments-core-release-pr.aar
 
       # Post comment with output
 
