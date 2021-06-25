@@ -31,7 +31,7 @@ class PaymentIntentTest {
             .isEqualTo(PaymentIntent.CaptureMethod.Automatic)
         assertThat(paymentIntent.confirmationMethod)
             .isEqualTo(PaymentIntent.ConfirmationMethod.Manual)
-        assertThat(paymentIntent.nextAction)
+        assertThat(paymentIntent.nextActionData)
             .isNotNull()
         assertThat(paymentIntent.receiptEmail)
             .isEqualTo("jenny@example.com")

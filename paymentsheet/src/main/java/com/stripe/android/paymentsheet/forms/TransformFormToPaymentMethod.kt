@@ -85,8 +85,7 @@ class TransformFormToPaymentMethod {
                         newDestMap,
                         formFieldKeyValues
                     )
-                }
-                else {
+                } else {
                     dest[key] = mapStructure[key]
                 }
             }

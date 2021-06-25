@@ -66,8 +66,4 @@ internal interface AuthenticationComponent {
 
         fun build(): AuthenticationComponent
     }
-
-    companion object {
-        const val ENABLE_LOGGING = "enableLogging"
-    }
 }

@@ -1,8 +1,9 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.PaymentIntent.CaptureMethod
+import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 import org.json.JSONObject
 import java.util.regex.Pattern
 
@@ -97,12 +98,6 @@ data class PaymentIntent internal constructor(
      * `false` if the object exists in test mode.
      */
     override val isLiveMode: Boolean,
-
-    /**
-     * If present, this property tells you what actions you need to take in order for your
-     * customer to fulfill a payment using the provided source.
-     */
-    val nextAction: Map<String, @RawValue Any?>? = null,
 
     override val paymentMethod: PaymentMethod? = null,
 
