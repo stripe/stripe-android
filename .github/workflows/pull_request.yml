@@ -51,6 +51,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Diffuse output
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: peter-evans/create-or-update-comment@v1
         if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
