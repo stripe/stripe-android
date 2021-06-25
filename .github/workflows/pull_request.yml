@@ -39,11 +39,13 @@ jobs:
         with:
           name: aar
       - name: diffuse
+        id: diffuse
         uses: usefulness/diffuse-action@v1
         with:
           old-file-path: aar/payments-core-debug-master.aar
           new-file-path: aar/payments-core-debug-pr.aar
-      - uses: actions/upload-artifact@v2
+      - name: Upload diffuse output
+        uses: actions/upload-artifact@v2
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}
