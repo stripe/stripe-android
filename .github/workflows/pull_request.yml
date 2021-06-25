@@ -1,0 +1,45 @@
+name: payments-core size diff
+on: [pull_request]
+jobs:
+  # Checkout master branch and build the APK
+  build-master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          ref: master
+      - name: Build in master
+        run: ./gradlew :payments-core:assembleDebug && mv payments-core/build/outputs/aar/payments-core-debug.aar payments-core/build/outputs/aar/payments-core-debug-master.aar
+      - name: Upload AAR
+        uses: actions/upload-artifact@v1
+        with:
+          name: aar
+          path: payments-core/build/outputs/aar/payments-core-debug-master.aar
+
+  # Checkout PR branch and build the APK
+  build-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build from PR
+        run: ./gradlew :payments-core:assembleDebug && mv payments-core/build/outputs/aar/payments-core-debug.aar payments-core/build/outputs/aar/payments-core-debug-pr.aar
+      - name: Upload AAR
+        uses: actions/upload-artifact@v1
+        with:
+          name: aar
+          path: payments-core/build/outputs/aar/payments-core-debug-pr.aar
+  # Execute Diffuse only when the two AARs are built successfully
+  diffuse:
+    needs: [build-master, build-pr]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Download AARs
+        uses: actions/download-artifact@v1
+        with:
+          name: aar
+      - name: diffuse
+        uses: usefulness/diffuse-action@v1
+        with:
+          old-file-path: aar/payments-core-debug-master.aar
+          new-file-path: aar/payments-core-debug-pr.aar
