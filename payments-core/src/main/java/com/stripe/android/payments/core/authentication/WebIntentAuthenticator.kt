@@ -9,7 +9,7 @@ import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.payments.core.injection.AuthenticationComponent.Companion.ENABLE_LOGGING
+import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext

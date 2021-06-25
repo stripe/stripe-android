@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -21,6 +22,7 @@ internal class TransformSpecToElement {
     fun transform(layout: LayoutSpec, focusRequesterCount: FocusRequesterCount) =
         layout.items.map {
             when (it) {
+                is FormItemSpec.SaveForFutureUseSpec -> transform(it)
                 is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
                 is FormItemSpec.StaticTextSpec -> transform(it)
             }
@@ -55,6 +57,8 @@ internal class TransformSpecToElement {
     }
 
     private fun transform(spec: FormItemSpec.StaticTextSpec) =
+        // It could be argued that the static text should have a controller, but
+        // since it doesn't provide a form field we leave it out for now
         FormElement.StaticTextElement(
             spec.identifier,
             spec.stringResId,
@@ -71,7 +75,6 @@ internal class TransformSpecToElement {
             focusRequesterCount.getAndIncrement()
         )
 
-
     private fun transform(
         spec: SectionFieldSpec.Email,
         focusRequesterCount: FocusRequesterCount
@@ -82,11 +85,19 @@ internal class TransformSpecToElement {
             focusRequesterCount.getAndIncrement()
         )
 
-
     private fun transform(spec: SectionFieldSpec.Country) =
         SectionFieldElement.Country(
             spec.identifier,
             DropdownFieldController(CountryConfig())
         )
 
+    private fun transform(spec: FormItemSpec.SaveForFutureUseSpec) =
+        FormElement.SaveForFutureUseElement(
+            spec.identifier,
+            SaveForFutureUseController(
+                spec.identifierRequiredForFutureUse.map { element ->
+                    element.identifier
+                }
+            )
+        )
 }

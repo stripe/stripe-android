@@ -3,10 +3,13 @@ package com.stripe.android.paymentsheet.forms
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FocusRequesterCount
+import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.FormElement.StaticTextElement
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement.*
+import com.stripe.android.paymentsheet.SectionFieldElement.Country
+import com.stripe.android.paymentsheet.SectionFieldElement.Email
+import com.stripe.android.paymentsheet.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
@@ -14,6 +17,8 @@ import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class TransformSpecToElementTest {
@@ -134,4 +139,34 @@ class TransformSpecToElementTest {
         assertThat(mandateElement.stringResId).isEqualTo(mandate.stringResId)
         assertThat(mandateElement.identifier).isEqualTo(mandate.identifier)
     }
+
+    @Test
+    fun `Add a save for future use section spec sets the mandate element correctly`() =
+        runBlocking {
+            val mandate = FormItemSpec.StaticTextSpec(
+                IdentifierSpec("mandate"),
+                R.string.sofort_mandate,
+                Color.Gray
+            )
+            val optionalIdentifiers = listOf(nameSection, mandate)
+            val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(optionalIdentifiers)
+            val formElement = transformSpecToElement.transform(
+                LayoutSpec(
+                    listOf(saveForFutureUseSpec)
+                ),
+                FocusRequesterCount()
+            )
+
+            val saveForFutureUseElement = formElement.first() as FormElement.SaveForFutureUseElement
+            val saveForFutureUseController = saveForFutureUseElement.controller
+
+            assertThat(saveForFutureUseElement.identifier).isEqualTo(saveForFutureUseSpec.identifier)
+
+            assertThat(saveForFutureUseController.optionalIdentifiers.first()).isEmpty()
+
+            saveForFutureUseController.onValueChange(false)
+            assertThat(saveForFutureUseController.optionalIdentifiers.first()).isEqualTo(
+                optionalIdentifiers.map { it.identifier }
+            )
+        }
 }

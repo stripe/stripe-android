@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
@@ -18,7 +19,14 @@ internal class FocusRequesterCount {
 }
 
 /**
- * This abstract is used to define the types of elements allowed in a section
+ * This is used to define which elements can be made optional
+ */
+interface OptionalElement {
+    val identifier: IdentifierSpec
+}
+
+/**
+ * This interface is used to define the types of elements allowed in a section
  */
 internal sealed interface SectionFieldElementType {
     val identifier: IdentifierSpec
@@ -35,7 +43,8 @@ internal sealed interface SectionFieldElementType {
 }
 
 /**
- * This is used to define each section in the visual form layout as an element.
+ * This is used to define each section in the visual form layout.
+ * Each item in the layout has an identifier and a controller associated with it.
  */
 internal sealed class FormElement {
     abstract val controller: Controller?
@@ -50,16 +59,22 @@ internal sealed class FormElement {
         val stringResId: Int,
         val color: Color,
         override val controller: Controller? = null,
-    ) : FormElement()
+    ) : FormElement(), OptionalElement
 
     /**
-     * This is an element that contains another element.
+     * This is an element that will make elements (as specified by identifier) hidden
+     * when "save for future" use is unchecked
      */
+    data class SaveForFutureUseElement(
+        override val identifier: IdentifierSpec,
+        override val controller: SaveForFutureUseController,
+    ) : FormElement()
+
     data class SectionElement(
         override val identifier: IdentifierSpec,
         val field: SectionFieldElementType,
         override val controller: Controller
-    ) : FormElement()
+    ) : FormElement(), OptionalElement
 }
 
 /**
