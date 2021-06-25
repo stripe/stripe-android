@@ -52,8 +52,8 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddCardFragment] classes
- * to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
+ * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddPaymentMethodFragment]
+ * classes to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
  */
 internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     return when (this) {

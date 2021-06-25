@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.specifications
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
 
 /**
  * This class is used to define different forms full of fields.
@@ -15,10 +14,7 @@ data class FormSpec(
 /**
  * This is a data representation of the layout of UI fields on the screen.
  */
-data class LayoutSpec(val items: List<FormItemSpec>) {
-    val allFields
-        get() = items.filterIsInstance<SectionSpec>().map { it.field }
-}
+data class LayoutSpec(val items: List<FormItemSpec>)
 
 /**
  * This uniquely identifies a element in the form.
@@ -26,22 +22,39 @@ data class LayoutSpec(val items: List<FormItemSpec>) {
 data class IdentifierSpec(val value: String)
 
 /**
+ * Identifies a field that can be made optional.
+ */
+interface OptionalItemSpec {
+    val identifier: IdentifierSpec
+}
+/**
  * This is used to define each section in the visual form layout specification
  */
+
 sealed class FormItemSpec {
     data class SectionSpec(
-        val identifier: IdentifierSpec,
+        override val identifier: IdentifierSpec,
         val field: SectionFieldSpec
-    ) : FormItemSpec()
+    ) : FormItemSpec(), OptionalItemSpec
 
     /**
      * This is for elements that do not receive user input
      */
     data class StaticTextSpec(
-        val identifier: IdentifierSpec,
+        override val identifier: IdentifierSpec,
         @StringRes val stringResId: Int,
         val color: Color
-    ) : FormItemSpec()
+    ) : FormItemSpec(), OptionalItemSpec
+
+    /**
+     * This is an element that will make elements (as specified by identifer hidden
+     * when save for future use is unchecked)
+     */
+    data class SaveForFutureUseSpec(
+        val identifierRequiredForFutureUse: List<OptionalItemSpec>
+    ) : FormItemSpec(), OptionalItemSpec {
+        override val identifier = IdentifierSpec("save_for_future_use")
+    }
 }
 
 /**
