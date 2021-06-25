@@ -1,66 +1,71 @@
-name: payments-core size diff
+name: Binary size diff
 on: [pull_request]
+params:
+  - name: payments-core-release
+    build-target: :payments-core:assembleRelease
+    build-output: payments-core/build/outputs/aar/payments-core-release.aar
+    format: aar
 jobs:
   # Checkout master branch and build the APK
   build-master:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-        with:
-          ref: master
-      - name: Build in master
-        run: ./gradlew :payments-core:assembleRelease && mv payments-core/build/outputs/aar/payments-core-release.aar payments-core/build/outputs/aar/payments-core-release-master.aar
-      - name: Upload AAR
-        uses: actions/upload-artifact@v1
-        with:
-          name: aar
-          path: payments-core/build/outputs/aar/payments-core-release-master.aar
+      - ${{ each parameter in params }}:
+        - uses: actions/checkout@v1
+          with:
+            ref: master
+        - name: Build in master
+          run: ./gradlew ${{ parameter.build-target }} && mv ${{ parameter.build-output }} ${{ parameter.name }}-master.${{ parameter.format }}
+        - name: Upload AAR
+          uses: actions/upload-artifact@v1
+          with:
+            name: aar
+            path: ${{ parameter.name }}-master.${{ parameter.format }}
 
   # Checkout PR branch and build the APK
-  build-pr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Build from PR
-        run: ./gradlew :payments-core:assembleRelease && mv payments-core/build/outputs/aar/payments-core-release.aar payments-core/build/outputs/aar/payments-core-release-pr.aar
-      - name: Upload AAR
-        uses: actions/upload-artifact@v1
-        with:
-          name: aar
-          path: payments-core/build/outputs/aar/payments-core-release-pr.aar
-  # Execute Diffuse only when the two AARs are built successfully
-  diffuse:
-    needs: [build-master, build-pr]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Download AARs
-        uses: actions/download-artifact@v1
-        with:
-          name: aar
-      - name: diffuse
-        id: diffuse
-        uses: usefulness/diffuse-action@v1
-        with:
-          old-file-path: aar/payments-core-release-master.aar
-          new-file-path: aar/payments-core-release-pr.aar
-
-      # Post comment with output
-
-      - uses: peter-evans/find-comment@v1
-        id: find_comment
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body-includes: Diffuse output
-
-      - uses: peter-evans/create-or-update-comment@v1
-        if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
-        with:
-          body: |
-            Diffuse output:
-
-            ${{ steps.diffuse.outputs.diff-gh-comment }}
-          edit-mode: replace
-          comment-id: ${{ steps.find_comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+#  build-pr:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v1
+#      - name: Build from PR
+#        run: ./gradlew :payments-core:assembleRelease && mv payments-core/build/outputs/aar/payments-core-release.aar payments-core-release-pr.aar
+#      - name: Upload AAR
+#        uses: actions/upload-artifact@v1
+#        with:
+#          name: aar
+#          path: payments-core-release-pr.aar
+#
+#  # Execute Diffuse only when the two AARs are built successfully
+#  diffuse:
+#    needs: [build-master, build-pr]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v1
+#      - name: Download AARs
+#        uses: actions/download-artifact@v1
+#        with:
+#          name: aar
+#      - name: diffuse
+#        id: diffuse
+#        uses: usefulness/diffuse-action@v1
+#        with:
+#          old-file-path: aar/payments-core-release-master.aar
+#          new-file-path: aar/payments-core-release-pr.aar
+#      # Post comment with output
+#      - uses: peter-evans/find-comment@v1
+#        id: find_comment
+#        with:
+#          issue-number: ${{ github.event.pull_request.number }}
+#          body-includes: Diffuse output
+#
+#      - uses: peter-evans/create-or-update-comment@v1
+#        if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
+#        with:
+#          body: |
+#            Diffuse output:
+#
+#            ${{ steps.diffuse.outputs.diff-gh-comment }}
+#          edit-mode: replace
+#          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+#          issue-number: ${{ github.event.pull_request.number }}
+#          token: ${{ secrets.GITHUB_TOKEN }}
