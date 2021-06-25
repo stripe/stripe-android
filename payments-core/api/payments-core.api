@@ -1992,15 +1992,14 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public final fun component10 ()Ljava/lang/String;
 	public final fun component11 ()Ljava/lang/String;
 	public final fun component12 ()Z
-	public final fun component13 ()Ljava/util/Map;
-	public final fun component14 ()Lcom/stripe/android/model/PaymentMethod;
+	public final fun component13 ()Lcom/stripe/android/model/PaymentMethod;
+	public final fun component14 ()Ljava/lang/String;
 	public final fun component15 ()Ljava/lang/String;
-	public final fun component16 ()Ljava/lang/String;
-	public final fun component17 ()Lcom/stripe/android/model/StripeIntent$Status;
-	public final fun component19 ()Lcom/stripe/android/model/PaymentIntent$Error;
+	public final fun component16 ()Lcom/stripe/android/model/StripeIntent$Status;
+	public final fun component18 ()Lcom/stripe/android/model/PaymentIntent$Error;
+	public final fun component19 ()Lcom/stripe/android/model/PaymentIntent$Shipping;
 	public final fun component2 ()Ljava/util/List;
-	public final fun component20 ()Lcom/stripe/android/model/PaymentIntent$Shipping;
-	public final fun component21 ()Lcom/stripe/android/model/StripeIntent$NextActionData;
+	public final fun component20 ()Lcom/stripe/android/model/StripeIntent$NextActionData;
 	public final fun component3 ()Ljava/lang/Long;
 	public final fun component4 ()J
 	public final fun component5 ()Lcom/stripe/android/model/PaymentIntent$CancellationReason;
@@ -2008,8 +2007,8 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;
 	public final fun component9 ()J
-	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLjava/util/Map;Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Lcom/stripe/android/model/StripeIntent$NextActionData;)Lcom/stripe/android/model/PaymentIntent;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentIntent;Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLjava/util/Map;Lcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Lcom/stripe/android/model/StripeIntent$NextActionData;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Lcom/stripe/android/model/StripeIntent$NextActionData;)Lcom/stripe/android/model/PaymentIntent;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentIntent;Ljava/lang/String;Ljava/util/List;Ljava/lang/Long;JLcom/stripe/android/model/PaymentIntent$CancellationReason;Lcom/stripe/android/model/PaymentIntent$CaptureMethod;Ljava/lang/String;Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;JLjava/lang/String;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent$Status;Lcom/stripe/android/model/StripeIntent$Usage;Lcom/stripe/android/model/PaymentIntent$Error;Lcom/stripe/android/model/PaymentIntent$Shipping;Lcom/stripe/android/model/StripeIntent$NextActionData;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentIntent;
@@ -2025,7 +2024,6 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public fun getId ()Ljava/lang/String;
 	public fun getLastErrorMessage ()Ljava/lang/String;
 	public final fun getLastPaymentError ()Lcom/stripe/android/model/PaymentIntent$Error;
-	public final fun getNextAction ()Ljava/util/Map;
 	public fun getNextActionData ()Lcom/stripe/android/model/StripeIntent$NextActionData;
 	public fun getNextActionType ()Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;

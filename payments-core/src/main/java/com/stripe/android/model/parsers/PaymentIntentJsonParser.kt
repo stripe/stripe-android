@@ -4,7 +4,6 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
-import com.stripe.android.model.StripeJsonUtils.jsonArrayToList
 import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
@@ -50,7 +49,6 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         val setupFutureUsage = StripeIntent.Usage.fromCode(
             optString(json, FIELD_SETUP_FUTURE_USAGE)
         )
-        val nextAction = StripeJsonUtils.optMap(json, FIELD_NEXT_ACTION)
         val lastPaymentError =
             json.optJSONObject(FIELD_LAST_PAYMENT_ERROR)?.let {
                 ErrorJsonParser().parse(it)
@@ -76,7 +74,6 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             currency = currency,
             description = description,
             isLiveMode = livemode,
-            nextAction = nextAction,
             paymentMethod = paymentMethod,
             paymentMethodId = paymentMethodId,
             receiptEmail = receiptEmail,
@@ -119,7 +116,7 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     }
 
     internal class ShippingJsonParser : ModelJsonParser<PaymentIntent.Shipping> {
-        override fun parse(json: JSONObject): PaymentIntent.Shipping? {
+        override fun parse(json: JSONObject): PaymentIntent.Shipping {
             return PaymentIntent.Shipping(
                 address = json.optJSONObject(FIELD_ADDRESS)?.let {
                     AddressJsonParser().parse(it)
