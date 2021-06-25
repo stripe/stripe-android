@@ -26,6 +26,8 @@
      - `metadata` has been removed to reflect that it is no longer returned to clients using a
        publishable key
      - `PaymentMethod.Card.Builder` has been removed
+- Changes to `PaymentIntent`
+    - `nextAction` property has been removed. Use `nextActionData` instead.
 - Changes to `PaymentMethodCreateParams`
      - `Ideal.Builder`, `Fpx.Builder`, and `SepaDebit.Builder` have been removed
 - Changes to `Source`
