@@ -9,12 +9,12 @@ jobs:
         with:
           ref: master
       - name: Build in master
-        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
+        run: ./gradlew :example:assembleRelease && mv example/build/outputs/apk/release/example-release-unsigned.apk example/build/outputs/apk/release/example-release-master.apk
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
           name: apk
-          path: paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
+          path: example/build/outputs/apk/release/example-release-master.apk
 
   # Checkout PR branch and build the APK
   build-pr:
@@ -22,12 +22,12 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Build from PR
-        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
+        run: ./gradlew :example:assembleRelease && mv example/build/outputs/apk/release/example-release-unsigned.apk example/build/outputs/apk/release/example-release-pr.apk
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
           name: apk
-          path: paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
+          path: example/build/outputs/apk/release/example-release-pr.apk
 
   # Execute Diffuse only when the two APKs are built successfully
   diffuse:
@@ -43,8 +43,8 @@ jobs:
         id: diffuse
         uses: usefulness/diffuse-action@v1
         with:
-          old-file-path: apk/paymentsheet-example-release-master.apk
-          new-file-path: apk/paymentsheet-example-release-pr.apk
+          old-file-path: apk/example-release-master.apk
+          new-file-path: apk/example-release-pr.apk
 
       # Post comment with output
 
