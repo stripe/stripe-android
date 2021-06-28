@@ -24,8 +24,6 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
-import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.utils.ParcelUtils
@@ -56,7 +54,6 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 internal class StripePaymentControllerTest {
     private val activity: ComponentActivity = mock()
-    private val threeDs2Service: StripeThreeDs2Service = mock()
     private val sdkTransactionId = mock<SdkTransactionId>().also {
         whenever(it.value).thenReturn(UUID.randomUUID().toString())
     }
@@ -258,9 +255,6 @@ internal class StripePaymentControllerTest {
             { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
             stripeRepository,
             false,
-            MessageVersionRegistry(),
-            CONFIG,
-            threeDs2Service,
             analyticsRequestExecutor,
             analyticsRequestFactory,
             alipayRepository,
@@ -347,13 +341,5 @@ internal class StripePaymentControllerTest {
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID
         )
-
-        private val CONFIG = PaymentAuthConfig.Builder()
-            .set3ds2Config(
-                PaymentAuthConfig.Stripe3ds2Config.Builder()
-                    .setTimeout(5)
-                    .build()
-            )
-            .build()
     }
 }

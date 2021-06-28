@@ -21,6 +21,7 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
@@ -67,9 +68,12 @@ class Stripe3DS2AuthenticatorTest {
     private val messageVersionRegistry = MessageVersionRegistry()
     private val challengeProgressActivityStarter =
         mock<Stripe3DS2Authenticator.ChallengeProgressActivityStarter>()
-    private val stripe3ds2Config = PaymentAuthConfig.Stripe3ds2Config.Builder()
-        .setTimeout(5)
-        .build()
+
+    private val paymentAuthConfig = PaymentAuthConfig.Builder().set3ds2Config(
+        PaymentAuthConfig.Stripe3ds2Config.Builder()
+            .setTimeout(5)
+            .build()
+    ).build()
 
     private val paymentRelayStarter = mock<PaymentRelayStarter>()
     private val relayStarterArgsArgumentCaptor: KArgumentCaptor<PaymentRelayStarter.Args> =
@@ -79,18 +83,17 @@ class Stripe3DS2AuthenticatorTest {
     private val transaction = mock<Transaction>()
 
     private val authenticator = Stripe3DS2Authenticator(
+        paymentAuthConfig,
         stripeRepository,
         webIntentAuthenticator,
         paymentRelayStarterFactory,
         analyticsRequestExecutor,
         analyticsRequestFactory,
+        testDispatcher,
+        testDispatcher,
         threeDs2Service,
         messageVersionRegistry,
-        stripe3ds2Config,
-        { _, _ -> mock() },
-        testDispatcher,
-        testDispatcher,
-        challengeProgressActivityStarter
+        challengeProgressActivityStarter,
     )
 
     @Before

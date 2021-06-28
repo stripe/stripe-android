@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.payments.core.injection.PaymentCommonModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
@@ -15,7 +16,12 @@ import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [FlowControllerModule::class])
+@Component(
+    modules = [
+        PaymentCommonModule::class,
+        FlowControllerModule::class
+    ]
+)
 internal interface FlowControllerComponent {
     val flowController: DefaultFlowController
 

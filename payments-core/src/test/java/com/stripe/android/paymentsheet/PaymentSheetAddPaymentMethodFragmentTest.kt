@@ -15,6 +15,7 @@ import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -24,7 +25,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.IdealDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
+import com.stripe.android.paymentsheet.specifications.FormType
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -55,6 +57,19 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         createFragment { fragment, viewBinding ->
             fragment.sheetViewModel._processing.value = true
             assertThat(viewBinding.googlePayButton.isEnabled).isFalse()
+        }
+    }
+
+    @Ignore("Disabled until more payment methods are supported")
+    @Test
+    fun `when processing then payment methods UI should be disabled`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "sofort"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            fragment.sheetViewModel._processing.value = true
+            val adapter = viewBinding.paymentMethodsRecycler.adapter as AddPaymentMethodsAdapter
+            assertThat(adapter.isEnabled).isFalse()
         }
     }
 
@@ -192,7 +207,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     @Test
     fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
         val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "ideal"))
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "sofort"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
@@ -210,15 +225,45 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 )
             ).isInstanceOf(CardDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Ideal)
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
 
             idleLooper()
 
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                viewBinding.paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(
+                addedFragment?.arguments?.getParcelable<FormType>(
+                    ComposeFormDataCollectionFragment.EXTRA_FORM_TYPE
+                )
+            ).isEqualTo(FormType.Bancontact)
+        }
+    }
+
+    @Test
+    fun `when payment method selection changes then it's updated in ViewModel`() {
+        createFragment { fragment, viewBinding ->
             assertThat(
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
                 )
-            ).isInstanceOf(IdealDataCollectionFragment::class.java)
+            ).isInstanceOf(CardDataCollectionFragment::class.java)
+
+            var paymentSelection: PaymentSelection? = null
+            fragment.sheetViewModel.selection.observeForever {
+                paymentSelection = it
+            }
+
+            fragment.sheetViewModel.updateSelection(
+                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+            assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
+
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            idleLooper()
+            assertThat(paymentSelection).isNull()
         }
     }
 

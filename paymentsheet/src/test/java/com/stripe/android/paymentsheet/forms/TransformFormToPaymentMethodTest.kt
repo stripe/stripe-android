@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.FormElementSpec.SectionSpec.SectionFieldSpec.Name
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 import com.stripe.android.paymentsheet.specifications.sofortParamKey
 import org.junit.Test
 
@@ -27,6 +27,7 @@ class TransformFormToPaymentMethodTest {
         ).isEqualTo(
             """
                 {
+                  type=sofort,
                   billing_details={
                     address={
                       city=null,

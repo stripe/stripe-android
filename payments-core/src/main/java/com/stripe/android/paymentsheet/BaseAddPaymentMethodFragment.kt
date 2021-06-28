@@ -15,9 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.IdealDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -29,6 +30,8 @@ internal abstract class BaseAddPaymentMethodFragment(
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     protected lateinit var addPaymentMethodHeader: TextView
+
+    private lateinit var selectedPaymentMethod: SupportedPaymentMethod
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // When the fragment is destroyed and recreated, the child fragment is re-instantiated
@@ -76,6 +79,29 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         replacePaymentMethodFragment(paymentMethods[0])
 
+        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
+        }
+
+        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
+            (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
+                formFragment.paramMapLiveData.observe(viewLifecycleOwner) { paramMap ->
+                    sheetViewModel.updateSelection(
+                        paramMap?.run {
+                            selectedPaymentMethod.paymentMethodCreateParams(this)
+                        }?.let {
+                            PaymentSelection.New.GenericPaymentMethod(
+                                selectedPaymentMethod.displayNameResource,
+                                selectedPaymentMethod.iconResource,
+                                it,
+                                false
+                            )
+                        }
+                    )
+                }
+            }
+        }
+
         eventReporter.onShowNewPaymentOptionForm()
     }
 
@@ -114,6 +140,14 @@ internal abstract class BaseAddPaymentMethodFragment(
     }
 
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
+        selectedPaymentMethod = paymentMethod
+
+        val args = requireArguments()
+        args.putParcelable(
+            ComposeFormDataCollectionFragment.EXTRA_FORM_TYPE,
+            paymentMethod.formType
+        )
+
         childFragmentManager.commit {
             setCustomAnimations(
                 AnimationConstants.FADE_IN,
@@ -124,16 +158,19 @@ internal abstract class BaseAddPaymentMethodFragment(
             replace(
                 R.id.payment_method_fragment_container,
                 fragmentForPaymentMethod(paymentMethod),
-                arguments
+                args
             )
         }
     }
+
+    private fun getFragment() =
+        childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
                 SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
-                SupportedPaymentMethod.Ideal -> IdealDataCollectionFragment::class.java
+                else -> ComposeFormDataCollectionFragment::class.java
             }
     }
 }
