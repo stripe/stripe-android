@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.GooglePayRepository
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowControllerInitializer
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerInitializer
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
@@ -70,13 +69,11 @@ internal class FlowControllerModule {
     @Provides
     @Singleton
     fun provideEventReporter(
-        sessionId: SessionId,
         appContext: Context,
         lazyPaymentConfiguration: Lazy<PaymentConfiguration>
     ): EventReporter {
         return DefaultEventReporter(
             mode = EventReporter.Mode.Custom,
-            sessionId,
             DefaultDeviceIdRepository(appContext, Dispatchers.IO),
             AnalyticsRequestExecutor.Default(),
             AnalyticsRequestFactory(
@@ -85,10 +82,6 @@ internal class FlowControllerModule {
             Dispatchers.IO
         )
     }
-
-    @Provides
-    @Singleton
-    fun provideSessionId() = SessionId()
 
     @Provides
     @Singleton
