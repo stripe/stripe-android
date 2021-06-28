@@ -234,10 +234,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
-                addedFragment?.arguments?.getParcelable<SupportedPaymentMethod>(
+                addedFragment?.arguments?.getString(
                     ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD
                 )
-            ).isEqualTo(SupportedPaymentMethod.Bancontact)
+            ).isEqualTo(SupportedPaymentMethod.Bancontact.name)
         }
     }
 

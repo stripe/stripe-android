@@ -27,8 +27,9 @@ import kotlinx.coroutines.flow.map
 class ComposeFormDataCollectionFragment : Fragment() {
     val formSpec by lazy {
         requireNotNull(
-            requireArguments().getParcelable<SupportedPaymentMethod>(EXTRA_PAYMENT_METHOD)
-                ?.getFormSpec()
+            requireArguments().getString(EXTRA_PAYMENT_METHOD)?.let {
+                SupportedPaymentMethod.valueOf(it).getFormSpec()
+            }
         )
     }
     val formViewModel: FormViewModel by viewModels { FormViewModel.Factory(formSpec.layout) }

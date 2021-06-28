@@ -150,9 +150,9 @@ internal abstract class BaseAddPaymentMethodFragment(
         selectedPaymentMethod = paymentMethod
 
         val args = requireArguments()
-        args.putParcelable(
+        args.putString(
             ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD,
-            paymentMethod
+            paymentMethod.name
         )
 
         childFragmentManager.commit {
