@@ -6,6 +6,11 @@ import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
+/**
+ * This class will take a list of form elements and optional identifiers.
+ * [transformFlow] is the only public method and it will transform
+ * the list of form elements into a [FormFieldValues].
+ */
 internal class TransformElementToFormFieldValueFlow(
     val elements: List<FormElement>,
     val optionalIdentifiers: Flow<List<IdentifierSpec>>
@@ -22,8 +27,10 @@ internal class TransformElementToFormFieldValueFlow(
         it.toMap()
     }
 
-    // This is null if any form field values are incomplete, otherwise it is an object
-    // representing all the complete fields
+    /**
+     * This will return null if any form field values are incomplete, otherwise it is an object
+     * representing all the complete, non-optional fields.
+     */
     fun transformFlow() = combine(
         currentFieldValueMap,
         optionalIdentifiers
@@ -35,7 +42,7 @@ internal class TransformElementToFormFieldValueFlow(
         idFieldSnapshotMap: Map<IdentifierSpec, FieldSnapshot>,
         optionalIdentifiers: List<IdentifierSpec>
     ): FormFieldValues? {
-        // This will hit twice in a row when the save for future use state changes: once for the
+        // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the optionalFields changing
         val optionalFilteredFieldSnapshotMap = idFieldSnapshotMap.filter {
             !optionalIdentifiers.contains(it.key)
