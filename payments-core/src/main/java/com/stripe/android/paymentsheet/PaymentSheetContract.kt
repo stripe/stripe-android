@@ -6,13 +6,12 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentSheetContract :
+class PaymentSheetContract :
     ActivityResultContract<PaymentSheetContract.Args, PaymentSheetResult>() {
     override fun createIntent(
         context: Context,
@@ -33,20 +32,39 @@ internal class PaymentSheetContract :
     }
 
     @Parcelize
-    internal data class Args(
-        val clientSecret: ClientSecret,
-        val sessionId: SessionId,
-        @ColorInt val statusBarColor: Int?,
-        val config: PaymentSheet.Configuration?
+    class Args private constructor(
+        internal val clientSecret: ClientSecret,
+        internal val config: PaymentSheet.Configuration?,
+        @ColorInt val statusBarColor: Int? = null,
     ) : ActivityStarter.Args {
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
         val isGooglePayEnabled: Boolean
             get() = googlePayConfig != null && clientSecret is PaymentIntentClientSecret
 
-        internal companion object {
+        companion object {
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
+
+            fun createPaymentIntentArgs(
+                clientSecret: String,
+                config: PaymentSheet.Configuration?,
+                statusBarColor: Int? = null,
+            ) = Args(
+                PaymentIntentClientSecret(clientSecret),
+                config,
+                statusBarColor
+            )
+
+            fun createSetupIntentArgs(
+                clientSecret: String,
+                config: PaymentSheet.Configuration?,
+                statusBarColor: Int? = null,
+            ) = Args(
+                PaymentIntentClientSecret(clientSecret),
+                config,
+                statusBarColor
+            )
         }
     }
 

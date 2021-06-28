@@ -457,7 +457,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     } ?: run {
                         DefaultEventReporter(
                             mode = EventReporter.Mode.Complete,
-                            starterArgsSupplier().sessionId,
+                            null,
                             applicationSupplier()
                         )
                     }
