@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
@@ -17,7 +18,7 @@ class TransformElementToFormViewValueFlowTest {
     private val emailController = TextFieldController(EmailConfig())
     private val emailSection = FormElement.SectionElement(
         identifier = IdentifierSpec("emailSection"),
-        FormElement.SectionElement.SectionFieldElement.Email(
+        SectionFieldElement.Email(
             IdentifierSpec("email"),
             emailController,
             0
@@ -28,7 +29,7 @@ class TransformElementToFormViewValueFlowTest {
     private val countryController = DropdownFieldController(CountryConfig())
     private val countrySection = FormElement.SectionElement(
         identifier = IdentifierSpec("countrySection"),
-        FormElement.SectionElement.SectionFieldElement.Country(
+        SectionFieldElement.Country(
             IdentifierSpec("country"),
             countryController
         ),

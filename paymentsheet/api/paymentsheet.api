@@ -20,6 +20,7 @@ public abstract interface class com/stripe/android/paymentsheet/elements/common/
 	public abstract fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun getLabel ()I
 	public abstract fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun onValueChange (Ljava/lang/String;)V
 }
 
 public final class com/stripe/android/paymentsheet/elements/common/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/common/Controller {
@@ -33,23 +34,8 @@ public final class com/stripe/android/paymentsheet/elements/common/SaveForFuture
 	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
 	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+	public fun onValueChange (Ljava/lang/String;)V
 	public final fun onValueChange (Z)V
-}
-
-public final class com/stripe/android/paymentsheet/forms/FieldSnapshot {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Z)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Z)Lcom/stripe/android/paymentsheet/forms/FieldSnapshot;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FieldSnapshot;Ljava/lang/String;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FieldSnapshot;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFieldValue ()Ljava/lang/String;
-	public final fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-	public fun hashCode ()I
-	public final fun isComplete ()Z
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormFieldValues {
@@ -65,8 +51,8 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;)V
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getCountFocusableFields ()I
-	public final fun getCurrentFieldValueMap ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
+	public final fun populateFormViewValues (Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)V
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
