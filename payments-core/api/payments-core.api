@@ -4055,7 +4055,7 @@ public final class com/stripe/android/model/StripeIntent$Usage : java/lang/Enum 
 	public static fun values ()[Lcom/stripe/android/model/StripeIntent$Usage;
 }
 
-public final class com/stripe/android/model/StripeIntentKt {
+public final class com/stripe/android/model/StripeIntentKtxKt {
 	public static final fun getRequestCode (Lcom/stripe/android/model/StripeIntent;)I
 }
 
