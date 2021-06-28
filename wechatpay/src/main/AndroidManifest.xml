@@ -9,9 +9,11 @@
     </queries>
 
     <application>
+        <!--singleTop launchMode is required to capture callback from WeChat SDK
+        through Activity#onNewIntent-->
         <activity
             android:name=".WeChatPayAuthActivity"
             android:exported="true"
-            android:launchMode="singleTop"/>
+            android:launchMode="singleTop" />
     </application>
 </manifest>
