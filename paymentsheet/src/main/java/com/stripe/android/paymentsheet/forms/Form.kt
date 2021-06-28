@@ -22,13 +22,11 @@ import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.FormElement.StaticTextElement
-import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -41,8 +39,8 @@ internal fun Form(
 ) {
     val focusRequesters =
         List(formViewModel.getCountFocusableFields()) { FocusRequester() }
-    val isOptionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
-        emptyList<IdentifierSpec>()
+    val optionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
+        emptyList()
     )
 
     Column(
@@ -52,10 +50,10 @@ internal fun Form(
     ) {
         formViewModel.elements.forEach { element ->
 
-            AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
+            AnimatedVisibility(!optionalIdentifiers.contains(element.identifier)) {
                 when (element) {
                     is SectionElement -> {
-                        AnimatedVisibility(!isOptionalIdentifiers.contains(element.identifier)) {
+                        AnimatedVisibility(!optionalIdentifiers.contains(element.identifier)) {
                             val controller = element.controller
 
                             val error by controller.errorMessage.asLiveData().observeAsState(null)

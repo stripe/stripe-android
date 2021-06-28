@@ -1,25 +1,29 @@
 package com.stripe.android.paymentsheet.example.activity
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import androidx.core.view.isInvisible
+import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetCustomBinding
 import com.stripe.android.paymentsheet.model.PaymentOption
 
 internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
-    private val viewBinding by lazy {
-        ActivityPaymentSheetCustomBinding.inflate(layoutInflater)
-    }
-
     private lateinit var flowController: PaymentSheet.FlowController
+
+    private val isLoading = MutableLiveData(true)
+    private val paymentCompleted = MutableLiveData(false)
+    private val selectedPaymentMethod = MutableLiveData<PaymentOption?>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(viewBinding.root)
 
         flowController = PaymentSheet.FlowController.create(
             this,
@@ -27,48 +31,53 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             ::onPaymentSheetResult
         )
 
-        viewModel.inProgress.observe(this) {
-            viewBinding.progressBar.isInvisible = !it
+        val selectedPaymentMethodLabel = selectedPaymentMethod.map {
+            it?.label ?: resources.getString(R.string.select)
+        }
+        val selectedPaymentMethodIcon = selectedPaymentMethod.map {
+            it?.drawableResourceId
         }
 
-        viewModel.status.observe(this) {
-            viewBinding.status.text = it
-        }
+        setContent {
+            MaterialTheme {
+                val isLoadingState by isLoading.observeAsState(true)
+                val paymentCompletedState by paymentCompleted.observeAsState(false)
+                val status by viewModel.status.observeAsState("")
+                val paymentMethodLabel by selectedPaymentMethodLabel.observeAsState(stringResource(R.string.loading))
+                val paymentMethodIcon by selectedPaymentMethodIcon.observeAsState()
 
-        startCheckout()
-    }
+                if (status.isNotBlank()) {
+                    Toast.makeText(LocalContext.current, status, Toast.LENGTH_SHORT).show()
+                    viewModel.statusDisplayed()
+                }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.payment_sheet_custom, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.refresh_key) {
-            resetViews()
-            startCheckout()
-            return true
-        }
-
-        return super.onOptionsItemSelected(item)
-    }
-
-    private fun startCheckout() {
-        prepareCheckout { customerConfig, clientSecret ->
-            if (isSetupIntent) {
-                flowController.configureWithSetupIntent(
-                    clientSecret,
-                    makeConfiguration(customerConfig),
-                    ::onConfigured
-                )
-            } else {
-                flowController.configureWithPaymentIntent(
-                    clientSecret,
-                    makeConfiguration(customerConfig),
-                    ::onConfigured
-                )
+                Receipt(isLoadingState) {
+                    PaymentMethodSelector(
+                        isEnabled = !isLoadingState && !paymentCompletedState,
+                        paymentMethodLabel = paymentMethodLabel,
+                        paymentMethodIcon = paymentMethodIcon,
+                        onClick = {
+                            flowController.presentPaymentOptions()
+                        }
+                    )
+                    BuyButton(
+                        buyButtonEnabled = !isLoadingState && !paymentCompletedState &&
+                            selectedPaymentMethod.value != null,
+                        onClick = {
+                            isLoading.value = true
+                            flowController.confirm()
+                        }
+                    )
+                }
             }
+        }
+
+        prepareCheckout { customerConfig, clientSecret ->
+            flowController.configureWithPaymentIntent(
+                clientSecret,
+                makeConfiguration(customerConfig),
+                ::onConfigured
+            )
         }
     }
 
@@ -84,7 +93,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
     private fun onConfigured(success: Boolean, error: Throwable?) {
         if (success) {
-            onFlowControllerReady()
+            onPaymentOption(flowController.getPaymentOption())
         } else {
             viewModel.status.postValue(
                 "Failed to configure PaymentSheetFlowController: ${error?.message}"
@@ -92,60 +101,19 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         }
     }
 
-    private fun onFlowControllerReady() {
-        viewBinding.paymentMethod.setOnClickListener {
-            flowController.presentPaymentOptions()
-        }
-        viewBinding.buyButton.setOnClickListener {
-            flowController.confirm()
-        }
-        onPaymentOption(flowController.getPaymentOption())
-    }
-
     private fun onPaymentOption(paymentOption: PaymentOption?) {
-        viewBinding.paymentMethod.isEnabled = true
-
-        if (paymentOption != null) {
-            viewBinding.paymentMethod.text = paymentOption.label
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                paymentOption.drawableResourceId,
-                0,
-                0,
-                0
-            )
-            viewBinding.buyButton.isEnabled = true
-        } else {
-            viewBinding.paymentMethod.text = "Select"
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                null,
-                null,
-                null,
-                null
-            )
-            viewBinding.buyButton.isEnabled = false
-        }
-    }
-
-    private fun resetViews() {
-        viewBinding.paymentMethod.text = "Loading..."
-        viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-            null,
-            null,
-            null,
-            null
-        )
-        disableViews()
-    }
-
-    private fun disableViews() {
-        viewBinding.paymentMethod.isEnabled = false
-        viewBinding.buyButton.isEnabled = false
+        isLoading.value = false
+        selectedPaymentMethod.value = paymentOption
     }
 
     override fun onPaymentSheetResult(
         paymentResult: PaymentSheetResult
     ) {
         super.onPaymentSheetResult(paymentResult)
-        disableViews()
+
+        isLoading.value = false
+        if (paymentResult !is PaymentSheetResult.Canceled) {
+            paymentCompleted.value = true
+        }
     }
 }
