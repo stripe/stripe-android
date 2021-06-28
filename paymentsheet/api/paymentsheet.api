@@ -92,8 +92,8 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 	public fun <init> ()V
 	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
+	public final fun getParamMapLiveData ()Landroidx/lifecycle/LiveData;
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-	public final fun paramMapLiveData ()Landroidx/lifecycle/LiveData;
 	public final fun setProcessing (Z)V
 }
 
