@@ -11,7 +11,9 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.common.TextFieldState
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.*
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error.AlwaysError
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.Full
+import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.Limitless
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +33,7 @@ internal class TextFieldControllerTest {
 
     @Test
     fun `verify onValueChange sets the paramValue`() {
-        config.fakeState = Valid.Limitless
+        config.fakeState = Limitless
 
         var paramValue: String? = null
         controller.fieldValue.asLiveData()
@@ -59,7 +61,7 @@ internal class TextFieldControllerTest {
 
     @Test
     fun `Verify is full set when the controller field state changes`() {
-        config.fakeState = Valid.Full
+        config.fakeState = Full
 
         var isFull = false
         controller.isFull.asLiveData()
@@ -73,7 +75,7 @@ internal class TextFieldControllerTest {
 
     @Test
     fun `Verify is not full set when the controller field state changes`() {
-        config.fakeState = Valid.Limitless
+        config.fakeState = Limitless
 
         var isFull = false
         controller.isFull.asLiveData()
@@ -87,7 +89,7 @@ internal class TextFieldControllerTest {
 
     @Test
     fun `Verify is not complete set when the controller field state changes`() {
-        config.fakeState = Error.AlwaysError
+        config.fakeState = AlwaysError
 
         var isComplete = true
         controller.isComplete.asLiveData()
@@ -100,7 +102,6 @@ internal class TextFieldControllerTest {
         assertThat(isComplete).isEqualTo(false)
     }
 
-
     @Test
     fun `Verify is complete set when the controller field state changes`() {
 
@@ -110,11 +111,11 @@ internal class TextFieldControllerTest {
                 isComplete = it
             }
 
-        config.fakeState = Error.AlwaysError
+        config.fakeState = AlwaysError
         controller.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(false)
 
-        config.fakeState = Valid.Limitless
+        config.fakeState = Limitless
         controller.onValueChange("newValue")
         assertThat(isComplete).isEqualTo(true)
     }
@@ -126,11 +127,11 @@ internal class TextFieldControllerTest {
             visibleError = it
         }
 
-        config.fakeState = Valid.Full
+        config.fakeState = Full
         controller.onValueChange("full")
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeState = Error.AlwaysError
+        config.fakeState = AlwaysError
         controller.onValueChange("always")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
@@ -138,7 +139,7 @@ internal class TextFieldControllerTest {
 
     @Test
     fun `Verify is visible error set when the controller field state changes`() {
-        config.fakeState = Valid.Limitless
+        config.fakeState = Limitless
 
         var visibleError = false
         controller.visibleError.asLiveData()
@@ -148,7 +149,7 @@ internal class TextFieldControllerTest {
 
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeState = Error.AlwaysError
+        config.fakeState = AlwaysError
         controller.onValueChange("newValue")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
@@ -157,7 +158,7 @@ internal class TextFieldControllerTest {
     @Test
     fun `Verify correct value passed to config should show error`() {
         config.fakeState = ShowWhenNoFocus
-        //Initialize the fieldState
+        // Initialize the fieldState
         controller.onValueChange("1a2b3c4d")
 
         var visibleError = false
@@ -192,11 +193,12 @@ internal class TextFieldControllerTest {
 
     private class TestConfig : TextFieldConfig {
         override val debugLabel = "debugLabel"
+
         @StringRes
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        var fakeState: TextFieldState = Valid.Limitless
+        var fakeState: TextFieldState = Limitless
 
         override fun determineState(input: String): TextFieldState =
             fakeState
@@ -206,11 +208,12 @@ internal class TextFieldControllerTest {
 
     private class TestConfigFilter : TextFieldConfig {
         override val debugLabel = "debugLabel"
+
         @StringRes
         override val label: Int = R.string.address_label_name
         override val keyboard: KeyboardType = KeyboardType.Ascii
 
-        val fakeState: TextFieldState = Valid.Limitless
+        val fakeState: TextFieldState = Limitless
 
         override fun determineState(input: String): TextFieldState = fakeState
 
@@ -222,9 +225,9 @@ internal class TextFieldControllerTest {
             override fun isValid(): Boolean = false
             override fun isFull(): Boolean = false
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+
             @StringRes
             override fun getErrorMessageResId(): Int = R.string.incomplete
         }
     }
-
 }
