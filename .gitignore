@@ -40,6 +40,10 @@ payments-core/target
 payments-core/gen
 payments-core/bin
 payments-core/*.log
+wechatpay/target
+wechatpay/gen
+wechatpay/bin
+wechatpay/*.log
 example/bin
 example/target
 example/gen

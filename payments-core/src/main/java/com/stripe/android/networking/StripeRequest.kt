@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.exception.InvalidRequestException
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
@@ -9,12 +10,13 @@ import java.util.HashSet
 /**
  * A class representing a request to a Stripe-owned service.
  */
-internal abstract class StripeRequest {
-    abstract val method: Method
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class StripeRequest {
+    internal abstract val method: Method
     abstract val baseUrl: String
     abstract val params: Map<String, *>?
-    abstract val mimeType: MimeType
-    abstract val headersFactory: RequestHeadersFactory
+    internal abstract val mimeType: MimeType
+    internal abstract val headersFactory: RequestHeadersFactory
 
     private val queryStringFactory = QueryStringFactory()
     internal val compactParams: Map<String, *>?

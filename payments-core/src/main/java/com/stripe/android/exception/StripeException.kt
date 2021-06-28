@@ -1,5 +1,6 @@
 package com.stripe.android.exception
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.StripeError
 import org.json.JSONException
 import java.io.IOException
@@ -43,7 +44,8 @@ abstract class StripeException(
             message == ex.message
     }
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         fun create(throwable: Throwable): StripeException {
             return when (throwable) {
                 is StripeException -> throwable
