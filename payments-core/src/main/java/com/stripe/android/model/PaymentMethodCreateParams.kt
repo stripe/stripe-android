@@ -761,6 +761,13 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         /**
+         * Create a [PaymentMethodCreateParams] which overrides the default [Map] representation for
+         * interaction with the Stripe API.
+         *
+         * @param paramMap The map representation for interaction with the
+         * [PaymentMethod creation API](https://stripe.com/docs/api/payment_methods/create).
+         * It should be valid according to the API documentation, including a required `type` entry.
+         *
          * @return params for creating a payment method with overridden map representation.
          */
         internal fun createWithOverriddenParamMap(
