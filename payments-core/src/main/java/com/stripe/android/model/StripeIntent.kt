@@ -248,5 +248,3 @@ sealed interface StripeIntent : StripeModel {
         data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
     }
 }
-
-fun StripeIntent.getRequestCode() = StripePaymentController.getRequestCode(this)
