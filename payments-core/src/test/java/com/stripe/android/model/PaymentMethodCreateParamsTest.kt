@@ -150,7 +150,7 @@ class PaymentMethodCreateParamsTest {
 
         assertThat(
             PaymentMethodCreateParams.createWithOverriddenParamMap(
-                PaymentMethodCreateParams.Type.Card,
+                PaymentMethodCreateParams.Type.Card(),
                 map,
                 emptySet()
             ).toParamMap()
@@ -213,7 +213,7 @@ class PaymentMethodCreateParamsTest {
             PaymentMethodCreateParams.createCard(cardParams)
         ).isEqualTo(
             PaymentMethodCreateParams(
-                type = PaymentMethodCreateParams.Type.Card,
+                type = PaymentMethodCreateParams.Type.Card(),
                 card = PaymentMethodCreateParams.Card(
                     number = CardNumberFixtures.VISA_NO_SPACES,
                     expiryMonth = 12,

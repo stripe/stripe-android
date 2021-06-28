@@ -101,7 +101,7 @@ class AnalyticsRequestFactoryTest {
         assertThat(
             analyticsRequestFactory
                 .createPaymentMethodCreation(
-                    PaymentMethodCreateParams.Type.Card,
+                    PaymentMethodCreateParams.Type.Card(),
                     ATTRIBUTION
                 ).params
         ).isEqualTo(

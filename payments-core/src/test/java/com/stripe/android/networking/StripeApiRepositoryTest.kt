@@ -960,7 +960,7 @@ internal class StripeApiRepositoryTest {
 
             create().createPaymentMethod(
                 PaymentMethodCreateParams.createWithOverriddenParamMap(
-                    PaymentMethodCreateParams.Type.Card,
+                    PaymentMethodCreateParams.Type.Card(),
                     paramMap,
                     setOf("PaymentSheet")
                 ),
