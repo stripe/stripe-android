@@ -216,7 +216,8 @@ data class PaymentMethodCreateParams internal constructor(
 
         @Parcelize class GenericPaymentMethod(
             override val code: String,
-            override val hasMandate: Boolean = false) : Type(code, hasMandate)
+            override val hasMandate: Boolean = false
+        ) : Type(code, hasMandate)
     }
 
     @Parcelize
