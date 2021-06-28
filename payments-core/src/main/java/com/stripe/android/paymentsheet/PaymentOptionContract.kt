@@ -6,7 +6,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -32,7 +31,6 @@ internal class PaymentOptionContract :
     internal data class Args(
         val stripeIntent: StripeIntent,
         val paymentMethods: List<PaymentMethod>,
-        val sessionId: SessionId,
         val config: PaymentSheet.Configuration?,
         val isGooglePayReady: Boolean,
         val newCard: PaymentSelection.New.Card?,

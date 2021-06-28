@@ -30,12 +30,9 @@ class DefaultEventReporterTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    private val sessionId = SessionId()
-
     private val eventReporterFactory: (EventReporter.Mode) -> EventReporter = { mode ->
         DefaultEventReporter(
             mode,
-            sessionId,
             FakeDeviceIdRepository(),
             analyticsRequestExecutor,
             analyticsRequestFactory,
@@ -86,18 +83,6 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentSuccess() should fire analytics request with session id`() {
-        completeEventReporter.onPaymentSuccess(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        )
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                req.compactParams?.get("session_id") == sessionId.value
-            }
-        )
-    }
-
-    @Test
     fun `onPaymentSuccess() should fire analytics request with valid device id`() {
         completeEventReporter.onPaymentSuccess(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -116,7 +101,6 @@ class DefaultEventReporterTest {
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
         DefaultEventReporter(
             EventReporter.Mode.Complete,
-            sessionId,
             ApplicationProvider.getApplicationContext()
         )
     }

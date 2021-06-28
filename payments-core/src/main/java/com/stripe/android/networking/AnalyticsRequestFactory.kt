@@ -11,7 +11,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.paymentsheet.analytics.DeviceId
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.utils.ContextUtils.packageInfo
 import javax.inject.Provider
 
@@ -154,7 +153,6 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createRequest(
         event: PaymentSheetEvent,
-        sessionId: SessionId?,
         deviceId: DeviceId
     ): AnalyticsRequest {
         return AnalyticsRequest(
@@ -162,10 +160,6 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
                 event.toString()
             ).plus(
                 FIELD_DEVICE_ID to deviceId.value
-            ).plus(
-                sessionId?.let {
-                    mapOf(FIELD_SESSION_ID to sessionId.value)
-                }.orEmpty()
             )
         )
     }

@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import org.jetbrains.annotations.TestOnly
@@ -14,7 +13,6 @@ internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
     private val statusBarColor: () -> Int?
 ) : PaymentSheetLauncher {
-    private val sessionId: SessionId = SessionId()
 
     constructor(
         activity: ComponentActivity,
@@ -70,7 +68,6 @@ internal class DefaultPaymentSheetLauncher(
     ) = present(
         PaymentSheetContract.Args(
             PaymentIntentClientSecret(paymentIntentClientSecret),
-            sessionId,
             statusBarColor(),
             configuration
         )
@@ -82,7 +79,6 @@ internal class DefaultPaymentSheetLauncher(
     ) = present(
         PaymentSheetContract.Args(
             SetupIntentClientSecret(setupIntentClientSecret),
-            sessionId,
             statusBarColor(),
             configuration
         )
