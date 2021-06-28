@@ -30,19 +30,20 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from an Activity.
+     * This constructor must be called no later than `Activity#onCreate()`.
      *
      * @param activity the Activity that is launching the [GooglePayPaymentMethodLauncher]
      *
      * @param readyCallback called after determining whether Google Pay is available and ready on
      * the device. [present] may only be called if Google Pay is ready.
      *
-     * @param callback called with the result of the [GooglePayPaymentMethodLauncher] operation
+     * @param resultCallback called with the result of the [GooglePayPaymentMethodLauncher] operation
      */
     internal constructor(
         activity: ComponentActivity,
         config: Config,
         readyCallback: ReadyCallback,
-        callback: ResultCallback
+        resultCallback: ResultCallback
     ) : this(
         activity.lifecycleScope,
         config,
@@ -56,25 +57,26 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
         activity.registerForActivityResult(
             GooglePayPaymentMethodLauncherContract()
         ) {
-            callback.onResult(it)
+            resultCallback.onResult(it)
         }
     )
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from a Fragment.
+     * This constructor must be called no later than `Fragment#onViewCreated()`.
      *
      * @param fragment the Fragment that is launching the [GooglePayPaymentMethodLauncher]
      *
      * @param readyCallback called after determining whether Google Pay is available and ready on
      * the device. [present] may only be called if Google Pay is ready.
      *
-     * @param callback called with the result of the [GooglePayPaymentMethodLauncher] operation
+     * @param resultCallback called with the result of the [GooglePayPaymentMethodLauncher] operation
      */
     internal constructor(
         fragment: Fragment,
         config: Config,
         readyCallback: ReadyCallback,
-        callback: ResultCallback
+        resultCallback: ResultCallback
     ) : this(
         fragment.viewLifecycleOwner.lifecycleScope,
         config,
@@ -88,7 +90,7 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
         fragment.registerForActivityResult(
             GooglePayPaymentMethodLauncherContract()
         ) {
-            callback.onResult(it)
+            resultCallback.onResult(it)
         }
     )
 
@@ -103,6 +105,11 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
         }
     }
 
+    /**
+     * Present the Google Pay UI when the final amount of the transaction is not yet known.
+     *
+     * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
+     */
     fun present(currencyCode: String) {
         check(isReady) {
             "present() may only be called when Google Pay is available on this device."
@@ -117,6 +124,11 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
         )
     }
 
+    /**
+     * Present the Google Pay UI when the final amount of the transaction is known.
+     *
+     * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
+     */
     fun present(
         currencyCode: String,
         amount: Int
