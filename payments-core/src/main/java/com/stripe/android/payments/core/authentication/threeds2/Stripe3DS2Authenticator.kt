@@ -1,4 +1,4 @@
-package com.stripe.android.payments.core.authentication
+package com.stripe.android.payments.core.authentication.threeds2
 
 import android.content.Context
 import androidx.activity.result.ActivityResultCallback
@@ -22,6 +22,8 @@ import com.stripe.android.payments.DefaultStripeChallengeStatusReceiver
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.payments.Stripe3ds2CompletionStarter
+import com.stripe.android.payments.core.authentication.IntentAuthenticator
+import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
