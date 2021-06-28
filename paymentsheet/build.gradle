@@ -55,7 +55,6 @@ configurations {
 }
 
 dependencies {
-//    implementation project(":payments-core")
     implementation libraries.androidx.fragment.ktx
     implementation libraries.androidx.lifecycle.livedata.ktx
     implementation libraries.androidx.lifecycle.viewmodel.ktx
