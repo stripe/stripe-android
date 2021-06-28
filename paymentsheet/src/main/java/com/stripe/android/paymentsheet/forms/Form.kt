@@ -50,7 +50,6 @@ internal fun Form(
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
-            .padding(formElementPadding)
     ) {
         formViewModel.elements.forEach { element ->
 

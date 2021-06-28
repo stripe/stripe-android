@@ -9,7 +9,7 @@
         android:maxHeight="16dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
-        android:src="@drawable/stripe_ic_paymentsheet_add_pm_card"
+        android:src="@drawable/stripe_ic_paymentsheet_pm_card"
         android:contentDescription="@null" />
 
     <TextView

@@ -39,7 +39,7 @@ import com.stripe.android.view.StripeEditText
 internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>(
     private val viewModelClass: Class<ViewModelType>,
     private val viewModelFactory: ViewModelProvider.Factory
-) : BasePaymentDataCollectionFragment() {
+) : Fragment() {
     // Because the ViewModel is a subclass of BaseSheetViewModel (depending on whether we're going
     // through the complete or custom flow), we need to parameterize the ViewModel class so it is
     // properly reused if it was already created.

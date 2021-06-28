@@ -57,7 +57,7 @@ internal class TransformSpecToElement {
     }
 
     private fun transform(spec: FormItemSpec.StaticTextSpec) =
-    // It could be argued that the static text should have a controller, but
+        // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         FormElement.StaticTextElement(
             spec.identifier,
@@ -75,7 +75,6 @@ internal class TransformSpecToElement {
             focusRequesterCount.getAndIncrement()
         )
 
-
     private fun transform(
         spec: SectionFieldSpec.Email,
         focusRequesterCount: FocusRequesterCount
@@ -86,13 +85,11 @@ internal class TransformSpecToElement {
             focusRequesterCount.getAndIncrement()
         )
 
-
     private fun transform(spec: SectionFieldSpec.Country) =
         SectionFieldElement.Country(
             spec.identifier,
             DropdownFieldController(CountryConfig())
         )
-
 
     private fun transform(spec: FormItemSpec.SaveForFutureUseSpec) =
         FormElement.SaveForFutureUseElement(
