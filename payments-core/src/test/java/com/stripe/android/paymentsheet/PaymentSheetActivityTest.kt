@@ -31,7 +31,6 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -76,7 +75,6 @@ internal class PaymentSheetActivityTest {
         context,
         PaymentSheetContract.Args(
             PaymentIntentClientSecret("client_secret"),
-            sessionId = SessionId(),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             PaymentSheetFixtures.CONFIG_CUSTOMER
         )

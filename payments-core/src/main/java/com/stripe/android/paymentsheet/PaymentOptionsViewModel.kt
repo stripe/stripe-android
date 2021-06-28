@@ -136,7 +136,6 @@ internal class PaymentOptionsViewModel(
                 prefsRepository,
                 DefaultEventReporter(
                     mode = EventReporter.Mode.Custom,
-                    starterArgs.sessionId,
                     application
                 ),
                 workContext = Dispatchers.IO,

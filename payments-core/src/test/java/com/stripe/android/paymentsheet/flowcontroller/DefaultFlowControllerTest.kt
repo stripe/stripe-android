@@ -44,7 +44,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -234,7 +233,6 @@ internal class DefaultFlowControllerTest {
                 it == PaymentOptionContract.Args(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     paymentMethods = emptyList(),
-                    sessionId = SESSION_ID,
                     config = null,
                     isGooglePayReady = false,
                     newCard = null,
@@ -600,7 +598,6 @@ internal class DefaultFlowControllerTest {
         paymentResultCallback,
         flowControllerInitializer,
         eventReporter,
-        SESSION_ID,
         paymentOptionActivityLauncher,
         googlePayActivityLauncher,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
@@ -651,8 +648,6 @@ internal class DefaultFlowControllerTest {
     }
 
     private companion object {
-        private val SESSION_ID = SessionId()
-
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
             label = "····4242"

@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
@@ -60,7 +59,6 @@ internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
     private val eventReporter: EventReporter,
-    private val sessionId: SessionId,
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>,
     private val googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>,
     private val viewModel: FlowControllerViewModel,
@@ -159,7 +157,6 @@ internal class DefaultFlowController @Inject internal constructor(
             PaymentOptionContract.Args(
                 stripeIntent = initData.stripeIntent,
                 paymentMethods = initData.paymentMethods,
-                sessionId = sessionId,
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,

@@ -29,7 +29,6 @@ import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.flowcontroller.ActivityLauncherFactory
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowControllerInitializer
@@ -93,13 +92,11 @@ internal class FlowControllerModule {
     @Provides
     @Singleton
     fun provideEventReporter(
-        sessionId: SessionId,
         appContext: Context,
         lazyPaymentConfiguration: Lazy<PaymentConfiguration>
     ): EventReporter {
         return DefaultEventReporter(
             mode = EventReporter.Mode.Custom,
-            sessionId,
             DefaultDeviceIdRepository(appContext, Dispatchers.IO),
             AnalyticsRequestExecutor.Default(),
             AnalyticsRequestFactory(
@@ -108,10 +105,6 @@ internal class FlowControllerModule {
             Dispatchers.IO
         )
     }
-
-    @Provides
-    @Singleton
-    fun provideSessionId() = SessionId()
 
     /**
      * Provides the paymentOptionActivityLauncher instance.
