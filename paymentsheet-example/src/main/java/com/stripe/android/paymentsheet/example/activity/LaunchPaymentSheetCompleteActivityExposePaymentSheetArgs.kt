@@ -2,21 +2,28 @@ package com.stripe.android.paymentsheet.example.activity
 
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetContract
 
-internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
+internal class LaunchPaymentSheetCompleteActivityExposePaymentSheetArgs :
+    BasePaymentSheetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
-
         setContent {
             MaterialTheme {
+                val stripeLauncher =
+                    rememberLauncherForActivityResult(contract = PaymentSheetContract())
+                    {
+                        onPaymentSheetResult(it)
+                    }
+
                 val inProgress by viewModel.inProgress.observeAsState(false)
                 val status by viewModel.status.observeAsState("")
 
@@ -30,12 +37,14 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
                         buyButtonEnabled = !inProgress,
                         onClick = {
                             prepareCheckout { customerConfig, clientSecret ->
-                                paymentSheet.presentWithPaymentIntent(
-                                    clientSecret,
-                                    PaymentSheet.Configuration(
-                                        merchantDisplayName = merchantName,
-                                        customer = customerConfig,
-                                        googlePay = googlePayConfig,
+                                stripeLauncher.launch(
+                                    PaymentSheetContract.Args.createPaymentIntentArgs(
+                                        clientSecret,
+                                        PaymentSheet.Configuration(
+                                            merchantDisplayName = merchantName,
+                                            customer = customerConfig,
+                                            googlePay = googlePayConfig,
+                                        )
                                     )
                                 )
                             }

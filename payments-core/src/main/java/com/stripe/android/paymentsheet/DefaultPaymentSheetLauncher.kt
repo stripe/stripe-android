@@ -8,6 +8,10 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.paymentsheet.analytics.SessionId
 import org.jetbrains.annotations.TestOnly
 
+/**
+ * This is used internally for integrations that don't use Jetpack Compose and are
+ * able to pass in an activity.
+ */
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
     private val statusBarColor: () -> Int?
