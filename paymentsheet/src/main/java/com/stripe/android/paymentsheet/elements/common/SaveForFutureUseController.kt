@@ -23,4 +23,8 @@ class SaveForFutureUseController(identifiersRequiredForFutureUse: List<Identifie
     fun onValueChange(saveForFutureUse: Boolean) {
         _saveForFutureUse.value = saveForFutureUse
     }
+
+    override fun onValueChange(saveForFutureUseValue: String) {
+        _saveForFutureUse.value = saveForFutureUseValue.toBooleanStrictOrNull() ?: true
+    }
 }

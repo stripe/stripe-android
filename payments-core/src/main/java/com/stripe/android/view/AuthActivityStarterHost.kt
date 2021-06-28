@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 
 /**
@@ -10,16 +11,17 @@ import androidx.fragment.app.Fragment
  * an activity. [ActivityHost] and [FragmentHost] hold references to Android components, so they
  * should only be used in a lifecycle-aware scope.
  */
-internal sealed class AuthActivityStarterHost {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class AuthActivityStarterHost {
     abstract fun startActivityForResult(
         target: Class<*>,
         extras: Bundle,
         requestCode: Int
     )
 
-    abstract val statusBarColor: Int?
+    internal abstract val statusBarColor: Int?
 
-    class ActivityHost(
+    internal class ActivityHost(
         val activity: ComponentActivity,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
@@ -36,7 +38,7 @@ internal sealed class AuthActivityStarterHost {
         }
     }
 
-    class FragmentHost(
+    internal class FragmentHost(
         val fragment: Fragment,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {

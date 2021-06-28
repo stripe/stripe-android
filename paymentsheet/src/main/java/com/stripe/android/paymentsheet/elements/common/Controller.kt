@@ -10,4 +10,6 @@ sealed interface Controller {
     val fieldValue: Flow<String>
     val isComplete: Flow<Boolean>
     val errorMessage: Flow<Int?>
+
+    fun onValueChange(value: String)
 }

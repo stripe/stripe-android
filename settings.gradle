@@ -6,6 +6,7 @@ include ':example'
 include ':payments-core'
 include ':payments'
 include ':paymentsheet'
+include ':wechatpay'
 
 dependencyResolutionManagement {
     versionCatalogs {

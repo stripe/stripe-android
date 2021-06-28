@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.parcelize.Parcelize
 
@@ -241,7 +242,8 @@ sealed interface StripeIntent : StripeModel {
             }
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
-        internal data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
+        data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
     }
 }
