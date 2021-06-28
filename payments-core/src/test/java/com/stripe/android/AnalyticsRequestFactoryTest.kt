@@ -308,7 +308,7 @@ class AnalyticsRequestFactoryTest {
     fun `create should create object with expected url and headers`() {
         val sdkVersion = Stripe.VERSION_NAME
         val analyticsRequest = analyticsRequestFactory.createPaymentMethodCreation(
-            PaymentMethodCreateParams.Type.Card,
+            PaymentMethodCreateParams.Type.Card(),
             emptySet()
         )
         assertThat(analyticsRequest.headers)
