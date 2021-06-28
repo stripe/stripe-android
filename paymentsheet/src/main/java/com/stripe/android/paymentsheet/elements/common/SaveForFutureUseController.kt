@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
-class SaveForFutureUseController(identifiersRequiredForFutureUse: List<IdentifierSpec> = emptyList()) :
+class SaveForFutureUseController(
+    identifiersRequiredForFutureUse: List<IdentifierSpec> = emptyList()
+) :
     Controller {
     override val label: Int = R.string.save_for_future_use
     private val _saveForFutureUse = MutableStateFlow(true)

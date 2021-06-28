@@ -59,7 +59,7 @@ class FormViewModelTest {
         }
 
     @Test
-    fun `Verify if a field is optional and invalid it is not in the formViewValue result and does not impact the complete state`() =
+    fun `Optional invalid fields arent in the formViewValue and has no effect on complete state`() {
         runBlocking {
             // Here we have one optional and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
@@ -93,6 +93,7 @@ class FormViewModelTest {
                 emailSection.identifier
             )
         }
+    }
 
     /**
      * This is serving as more of an integration test of forms from
@@ -106,10 +107,10 @@ class FormViewModelTest {
              */
             val formViewModel = FormViewModel(sofort.layout)
 
-            val nameElement =
-                (formViewModel.elements[0] as SectionElement).field.controller as TextFieldController
-            val emailElement =
-                (formViewModel.elements[1] as SectionElement).field.controller as TextFieldController
+            val nameElement = (formViewModel.elements[0] as SectionElement)
+                .field.controller as TextFieldController
+            val emailElement = (formViewModel.elements[1] as SectionElement)
+                .field.controller as TextFieldController
 
             nameElement.onValueChange("joe")
             assertThat(
