@@ -71,13 +71,11 @@ public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentM
 public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod$Companion {
 }
 
-public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod : java/lang/Enum, android/os/Parcelable {
+public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod : java/lang/Enum {
 	public static final field Bancontact Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Card Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Companion Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion;
 	public static final field Sofort Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
-	public fun describeContents ()I
 	public final fun getCode ()Ljava/lang/String;
 	public final fun getDisplayNameResource ()I
 	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
@@ -85,7 +83,6 @@ public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod 
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static fun values ()[Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion {
