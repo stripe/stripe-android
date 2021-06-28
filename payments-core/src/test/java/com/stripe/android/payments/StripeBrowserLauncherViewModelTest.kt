@@ -3,6 +3,7 @@ package com.stripe.android.payments
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -26,11 +27,14 @@ class StripeBrowserLauncherViewModelTest {
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
 
+    private val savedStateHandle = SavedStateHandle()
+
     private val viewModel = StripeBrowserLauncherViewModel(
         analyticsRequestExecutor,
         analyticsRequestFactory,
         BrowserCapabilities.CustomTabs,
-        "Verify your payment"
+        "Verify your payment",
+        savedStateHandle
     )
 
     @Test
@@ -87,6 +91,19 @@ class StripeBrowserLauncherViewModelTest {
                     sourceId = ""
                 )
             )
+    }
+
+    @Test
+    fun `hasLaunched should set entry on savedStateHandle`() {
+        assertThat(
+            savedStateHandle.contains(StripeBrowserLauncherViewModel.KEY_HAS_LAUNCHED)
+        ).isFalse()
+
+        viewModel.hasLaunched = true
+
+        assertThat(
+            savedStateHandle.contains(StripeBrowserLauncherViewModel.KEY_HAS_LAUNCHED)
+        ).isTrue()
     }
 
     private companion object {
