@@ -1,28 +1,7 @@
 package com.stripe.android.paymentsheet.specifications
 
-import android.os.Parcelable
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
-import kotlinx.parcelize.Parcelize
-
-/**
- * Parcelable identifier of the form that should be displayed in a
- * ComposeFormDataCollectionFragment, passed to the fragment in the arguments bundle.
- *
- * This is needed to avoid a circular dependency from the 'paymentsheet' module to 'payments-core'.
- * Once PaymentSheet code has been moved into 'paymentsheet', SupportedPaymentMethod can be used
- * instead.
- */
-@Parcelize
-enum class FormType(val type: String) : Parcelable {
-    Bancontact("bancontact"),
-    Sofort("sofort");
-
-    fun getFormSpec() = when (this) {
-        Bancontact -> bancontact
-        Sofort -> sofort
-    }
-}
 
 /**
  * This class is used to define different forms full of fields.
@@ -48,6 +27,7 @@ data class IdentifierSpec(val value: String)
 interface OptionalItemSpec {
     val identifier: IdentifierSpec
 }
+
 /**
  * This is used to define each section in the visual form layout specification
  */
