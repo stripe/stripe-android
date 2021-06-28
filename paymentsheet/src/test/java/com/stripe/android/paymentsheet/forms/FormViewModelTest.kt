@@ -5,11 +5,11 @@ import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 import com.stripe.android.paymentsheet.specifications.sofort
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

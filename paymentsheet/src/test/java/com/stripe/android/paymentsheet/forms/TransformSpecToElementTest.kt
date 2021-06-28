@@ -5,11 +5,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.FormElement.StaticTextElement
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.SectionFieldElement.Name
-import com.stripe.android.paymentsheet.FormElement.StaticTextElement
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
