@@ -39,4 +39,3 @@ val sofort = FormSpec(
     ),
     sofortParamKey,
 )
-

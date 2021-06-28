@@ -934,6 +934,46 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun createPaymentMethodWithOverriddenParamMap_withAttribution_shouldPopulateProductUsage() =
+        testDispatcher.runBlockingTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentMethodFixtures.CARD_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val paramMap = mapOf(
+                "type" to "test",
+                "bacs_debit" to mapOf(
+                    "account_number" to "00012345",
+                    "sort_code" to "108800"
+                ),
+                "some_key" to mapOf(
+                    "other_key" to mapOf(
+                        "third_key" to "value"
+                    )
+                ),
+                "phone" to "1-800-555-1234"
+            )
+
+            create().createPaymentMethod(
+                PaymentMethodCreateParams.createWithOverriddenParamMap(
+                    PaymentMethodCreateParams.Type.Card,
+                    paramMap,
+                    setOf("PaymentSheet")
+                ),
+                DEFAULT_OPTIONS
+            )
+
+            verifyFraudDetectionDataAndAnalyticsRequests(
+                AnalyticsEvent.PaymentMethodCreate,
+                productUsage = listOf("PaymentSheet")
+            )
+        }
+
+    @Test
     fun createSepaDebitPaymentMethod_shouldNotPopulateProductUsage() =
         testDispatcher.runBlockingTest {
             val stripeResponse = StripeResponse(

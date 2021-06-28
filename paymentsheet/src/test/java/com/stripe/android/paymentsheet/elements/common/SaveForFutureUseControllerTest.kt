@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.elements.common
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -28,6 +27,5 @@ class SaveForFutureUseControllerTest {
             assertThat(saveForFutureUseController.optionalIdentifiers.first()).isEqualTo(
                 optionalIdentifiers
             )
-
         }
 }
