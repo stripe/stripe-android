@@ -24,15 +24,11 @@ import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.FormElement.StaticTextElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
-import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.DropDown
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 
 internal val formElementPadding = 16.dp
 
@@ -103,6 +99,7 @@ internal fun Form(
                         }
                     }
                 }
+
             }
         }
     }
@@ -139,55 +136,12 @@ class FormViewModel(
         .firstOrNull()?.controller?.optionalIdentifiers
         ?: MutableStateFlow(emptyList())
 
-    // This maps the field type to the controller
-    private val idControllerMap = elements
-        .filter { it.controller != null }
-        .associate { Pair(it.identifier, it.controller!!) }
+    val completeFormValues = TransformElementToFormFieldValueFlow(
+        elements, optionalIdentifiers
+    ).transformFlow()
 
-    val currentFieldValueMap = combine(
-        getCurrentFieldValuePairs(idControllerMap)
-    ) {
-        it.toMap()
-    }
-
-    // This is null if any form field values are incomplete, otherwise it is an object
-    // representing all the complete fields
-    val completeFormValues: Flow<FormFieldValues?> = combine(
-        currentFieldValueMap,
-        optionalIdentifiers
-    ) { idFieldSnapshotMap, optionalIdentifiers ->
-
-        // This will hit twice in a row when the save for future use state changes: once for the
-        // saveController changing and once for the the optionalFields changing
-        val optionalFilteredFieldSnapshotMap = idFieldSnapshotMap.filter {
-            !optionalIdentifiers.contains(it.key)
-        }
-
-        FormFieldValues(
-            optionalFilteredFieldSnapshotMap.mapValues {
-                it.value.fieldValue
-            }
-        ).takeIf {
-            optionalFilteredFieldSnapshotMap.values.map { it.isComplete }
-                .none { complete -> !complete }
-        }
-    }
-
-    private fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>) =
-        idControllerMap.map { fieldControllerEntry ->
-            getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
-        }
-
-    private fun getCurrentFieldValuePair(
-        field: IdentifierSpec,
-        value: Controller
-    ) = combine(value.fieldValue, value.isComplete) { fieldValue, isComplete ->
-        Pair(field, FieldSnapshot(fieldValue, field, isComplete))
+    internal val populateFormFromFormFieldValues = PopulateFormFromFormFieldValues(elements)
+    fun populateFormViewValues(formFieldValues: FormFieldValues) {
+        populateFormFromFormFieldValues.populateWith(formFieldValues)
     }
 }
-
-data class FieldSnapshot(
-    val fieldValue: String,
-    val identifier: IdentifierSpec,
-    val isComplete: Boolean
-)

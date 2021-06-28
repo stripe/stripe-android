@@ -13,7 +13,6 @@ import kotlin.coroutines.CoroutineContext
 
 internal class DefaultEventReporter internal constructor(
     private val mode: EventReporter.Mode,
-    private val sessionId: SessionId?,
     private val deviceIdRepository: DeviceIdRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
@@ -22,12 +21,10 @@ internal class DefaultEventReporter internal constructor(
 
     internal constructor(
         mode: EventReporter.Mode,
-        sessionId: SessionId?,
         context: Context,
         workContext: CoroutineContext = Dispatchers.IO
     ) : this(
         mode,
-        sessionId,
         DefaultDeviceIdRepository(context, workContext),
         AnalyticsRequestExecutor.Default(),
         AnalyticsRequestFactory(
@@ -104,7 +101,6 @@ internal class DefaultEventReporter internal constructor(
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event,
-                    sessionId,
                     deviceId
                 )
             )
