@@ -40,7 +40,9 @@ class TransformElementToFormViewValueFlowTest {
 
     private val transformElementToFormFieldValueFlow = TransformElementToFormFieldValueFlow(
         listOf(countrySection, emailSection),
-        optionalIdentifersFlow
+        optionalIdentifersFlow,
+        showingMandate,
+        saveForFutureUse
     )
 
     @Test
