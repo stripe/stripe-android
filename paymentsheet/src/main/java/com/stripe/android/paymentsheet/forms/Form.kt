@@ -21,7 +21,7 @@ import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
-import com.stripe.android.paymentsheet.FormElement.StaticTextElement
+import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.DropDown
@@ -78,7 +78,7 @@ internal fun Form(
                             }
                         }
                     }
-                    is StaticTextElement -> {
+                    is MandateTextElement -> {
                         Text(
                             stringResource(element.stringResId),
                             modifier = Modifier.padding(vertical = 8.dp),

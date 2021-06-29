@@ -19,7 +19,7 @@ val bancontact = FormSpec(
                 IdentifierSpec("email"),
                 SectionFieldSpec.Email
             ),
-            FormItemSpec.StaticTextSpec(
+            FormItemSpec.MandateTextSpec(
                 IdentifierSpec("mandate"),
                 R.string.sofort_mandate,
                 Color.Gray
