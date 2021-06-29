@@ -78,8 +78,8 @@ internal class PaymentSheetActivityTest {
         context,
         PaymentSheetContract.Args(
             PaymentIntentClientSecret("client_secret"),
+            PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            PaymentSheetFixtures.CONFIG_CUSTOMER
         )
     )
 

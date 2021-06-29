@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
+import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -32,7 +33,7 @@ class PaymentSheetContract :
     }
 
     @Parcelize
-    class Args private constructor(
+    class Args @VisibleForTesting internal constructor(
         internal val clientSecret: ClientSecret,
         internal val config: PaymentSheet.Configuration?,
         @ColorInt val statusBarColor: Int? = null,
