@@ -43,7 +43,7 @@ internal class GooglePayLauncherContract :
         internal val clientSecret: String,
         internal val config: GooglePayLauncher.Config,
     ) : Parcelable {
-        fun toBundle() = bundleOf("" to this)
+        fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"
