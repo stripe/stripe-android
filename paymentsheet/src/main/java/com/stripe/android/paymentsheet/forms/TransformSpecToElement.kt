@@ -61,7 +61,7 @@ internal class TransformSpecToElement {
     }
 
     private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
-    // It could be argued that the static text should have a controller, but
+        // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         FormElement.MandateTextElement(
             spec.identifier,

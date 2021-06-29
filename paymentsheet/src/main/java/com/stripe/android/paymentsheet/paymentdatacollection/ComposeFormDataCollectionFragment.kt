@@ -33,7 +33,7 @@ class ComposeFormDataCollectionFragment : Fragment() {
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
             formSpec.layout,
-            "Merchant Name, Inc." //TODO: Replace with argument.
+            "Merchant Name, Inc." // TODO: Replace with argument.
         )
     }
 
