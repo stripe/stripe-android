@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,8 +19,9 @@ class PaymentSheetContract :
         context: Context,
         input: Args
     ): Intent {
+        val statusBarColor = (context as? Activity)?.window?.statusBarColor
         return Intent(context, PaymentSheetActivity::class.java)
-            .putExtra(EXTRA_ARGS, input)
+            .putExtra(EXTRA_ARGS, input.copy(statusBarColor = statusBarColor))
     }
 
     override fun parseResult(
@@ -36,7 +38,7 @@ class PaymentSheetContract :
     data class Args @VisibleForTesting internal constructor(
         internal val clientSecret: ClientSecret,
         internal val config: PaymentSheet.Configuration?,
-        @ColorInt val statusBarColor: Int? = null,
+        @ColorInt internal val statusBarColor: Int? = null,
     ) : ActivityStarter.Args {
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
         val isGooglePayEnabled: Boolean
@@ -49,22 +51,18 @@ class PaymentSheetContract :
 
             fun createPaymentIntentArgs(
                 clientSecret: String,
-                config: PaymentSheet.Configuration? = null,
-                statusBarColor: Int? = null,
+                config: PaymentSheet.Configuration? = null
             ) = Args(
                 PaymentIntentClientSecret(clientSecret),
-                config,
-                statusBarColor
+                config
             )
 
             fun createSetupIntentArgs(
                 clientSecret: String,
-                config: PaymentSheet.Configuration? = null,
-                statusBarColor: Int? = null,
+                config: PaymentSheet.Configuration? = null
             ) = Args(
                 PaymentIntentClientSecret(clientSecret),
-                config,
-                statusBarColor
+                config
             )
         }
     }
@@ -78,8 +76,10 @@ class PaymentSheetContract :
         }
     }
 
-    private companion object {
-        private const val EXTRA_ARGS =
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal companion object {
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+        const val EXTRA_ARGS =
             "com.stripe.android.paymentsheet.PaymentSheetContract.extra_args"
         private const val EXTRA_RESULT =
             "com.stripe.android.paymentsheet.PaymentSheetContract.extra_result"

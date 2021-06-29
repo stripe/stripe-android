@@ -13,7 +13,6 @@ import org.jetbrains.annotations.TestOnly
  */
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
-    private val statusBarColor: () -> Int?
 ) : PaymentSheetLauncher {
 
     constructor(
@@ -24,11 +23,7 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract()
         ) {
             callback.onPaymentSheetResult(it)
-        },
-
-        // lazily access the statusBarColor in case the value changes between when this
-        // class is instantiated and the payment sheet is launched
-        { getStatusBarColor(activity) }
+        }
     )
 
     constructor(
@@ -39,11 +34,7 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract()
         ) {
             callback.onPaymentSheetResult(it)
-        },
-
-        // lazily access the statusBarColor in case the value changes between when this
-        // class is instantiated and the payment sheet is launched
-        { getStatusBarColor(fragment.activity) }
+        }
     )
 
     @TestOnly
@@ -57,11 +48,7 @@ internal class DefaultPaymentSheetLauncher(
             registry
         ) {
             callback.onPaymentSheetResult(it)
-        },
-
-        // lazily access the statusBarColor in case the value changes between when this
-        // class is instantiated and the payment sheet is launched
-        { getStatusBarColor(fragment.activity) }
+        }
     )
 
     override fun presentWithPaymentIntent(
@@ -70,8 +57,7 @@ internal class DefaultPaymentSheetLauncher(
     ) = present(
         PaymentSheetContract.Args.createPaymentIntentArgs(
             paymentIntentClientSecret,
-            configuration,
-            statusBarColor(),
+            configuration
         )
     )
 
@@ -81,16 +67,11 @@ internal class DefaultPaymentSheetLauncher(
     ) = present(
         PaymentSheetContract.Args.createSetupIntentArgs(
             setupIntentClientSecret,
-            configuration,
-            statusBarColor(),
+            configuration
         )
     )
 
     private fun present(args: PaymentSheetContract.Args) {
         activityResultLauncher.launch(args)
-    }
-
-    private companion object {
-        private fun getStatusBarColor(activity: Activity?) = activity?.window?.statusBarColor
     }
 }
