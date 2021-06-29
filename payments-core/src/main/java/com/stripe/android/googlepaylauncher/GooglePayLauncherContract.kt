@@ -23,8 +23,7 @@ internal class GooglePayLauncherContract :
             }
         }
 
-        // TODO(mshafrir-stripe): update target activity
-        return Intent(context, StripeGooglePayActivity::class.java)
+        return Intent(context, GooglePayLauncherActivity::class.java)
             .putExtras(extras)
     }
 
@@ -32,10 +31,7 @@ internal class GooglePayLauncherContract :
         resultCode: Int,
         intent: Intent?
     ): GooglePayLauncher.Result {
-        return intent?.getParcelableExtra(EXTRA_RESULT)
-            ?: GooglePayLauncher.Result.Failed(
-                IllegalArgumentException("Could not parse a valid result.")
-            )
+        return GooglePayLauncher.Result.fromIntent(intent)
     }
 
     @Parcelize

@@ -24,6 +24,7 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONException
@@ -33,6 +34,12 @@ import org.json.JSONObject
  * An interface for data operations on Stripe API objects.
  */
 internal interface StripeRepository {
+
+    suspend fun retrieveStripeIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList()
+    ): StripeIntent
 
     @Throws(
         AuthenticationException::class,

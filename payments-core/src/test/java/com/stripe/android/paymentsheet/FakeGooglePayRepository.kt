@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 internal class FakeGooglePayRepository(
-    private var isReady: Boolean
+    internal var value: Boolean
 ) : GooglePayRepository {
-    override fun isReady(): Flow<Boolean> = flowOf(isReady)
+    override fun isReady(): Flow<Boolean> = flowOf(value)
 }
