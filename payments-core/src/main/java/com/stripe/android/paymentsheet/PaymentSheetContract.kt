@@ -33,7 +33,7 @@ class PaymentSheetContract :
     }
 
     @Parcelize
-    class Args @VisibleForTesting internal constructor(
+    data class Args @VisibleForTesting internal constructor(
         internal val clientSecret: ClientSecret,
         internal val config: PaymentSheet.Configuration?,
         @ColorInt val statusBarColor: Int? = null,
@@ -49,7 +49,7 @@ class PaymentSheetContract :
 
             fun createPaymentIntentArgs(
                 clientSecret: String,
-                config: PaymentSheet.Configuration?,
+                config: PaymentSheet.Configuration? = null,
                 statusBarColor: Int? = null,
             ) = Args(
                 PaymentIntentClientSecret(clientSecret),
@@ -59,7 +59,7 @@ class PaymentSheetContract :
 
             fun createSetupIntentArgs(
                 clientSecret: String,
-                config: PaymentSheet.Configuration?,
+                config: PaymentSheet.Configuration? = null,
                 statusBarColor: Int? = null,
             ) = Args(
                 PaymentIntentClientSecret(clientSecret),

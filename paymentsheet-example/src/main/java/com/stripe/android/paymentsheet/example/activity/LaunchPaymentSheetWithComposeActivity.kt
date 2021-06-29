@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetContract
 
-internal class LaunchPaymentSheetCompleteActivityExposePaymentSheetArgs :
+internal class LaunchPaymentSheetWithComposeActivity :
     BasePaymentSheetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
