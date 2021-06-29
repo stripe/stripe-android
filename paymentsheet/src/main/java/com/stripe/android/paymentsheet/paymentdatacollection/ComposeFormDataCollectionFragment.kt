@@ -30,7 +30,12 @@ class ComposeFormDataCollectionFragment : Fragment() {
             requireArguments().getParcelable<FormType>(EXTRA_FORM_TYPE)
         ).getFormSpec()
     }
-    val formViewModel: FormViewModel by viewModels { FormViewModel.Factory(formSpec.layout) }
+    val formViewModel: FormViewModel by viewModels {
+        FormViewModel.Factory(
+            formSpec.layout,
+            "Merchant Name, Inc." //TODO: Replace with argument.
+        )
+    }
 
     @ExperimentalAnimationApi
     override fun onCreateView(

@@ -19,12 +19,16 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  * controller will be a pass through of the field controller.
  */
 internal class TransformSpecToElement {
-    fun transform(layout: LayoutSpec, focusRequesterCount: FocusRequesterCount) =
+    fun transform(
+        layout: LayoutSpec,
+        merchantName: String,
+        focusRequesterCount: FocusRequesterCount
+    ) =
         layout.items.map {
             when (it) {
-                is FormItemSpec.SaveForFutureUseSpec -> transform(it)
+                is FormItemSpec.SaveForFutureUseSpec -> transform(it, merchantName)
                 is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
-                is FormItemSpec.MandateTextSpec -> transform(it)
+                is FormItemSpec.MandateTextSpec -> transform(it, merchantName)
             }
         }
 
@@ -56,13 +60,14 @@ internal class TransformSpecToElement {
         )
     }
 
-    private fun transform(spec: FormItemSpec.MandateTextSpec) =
-        // It could be argued that the static text should have a controller, but
+    private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
+    // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         FormElement.MandateTextElement(
             spec.identifier,
             spec.stringResId,
-            spec.color
+            spec.color,
+            merchantName
         )
 
     private fun transform(
@@ -91,13 +96,14 @@ internal class TransformSpecToElement {
             DropdownFieldController(CountryConfig())
         )
 
-    private fun transform(spec: FormItemSpec.SaveForFutureUseSpec) =
+    private fun transform(spec: FormItemSpec.SaveForFutureUseSpec, merchantName: String) =
         FormElement.SaveForFutureUseElement(
             spec.identifier,
             SaveForFutureUseController(
                 spec.identifierRequiredForFutureUse.map { element ->
                     element.identifier
                 }
-            )
+            ),
+            merchantName
         )
 }
