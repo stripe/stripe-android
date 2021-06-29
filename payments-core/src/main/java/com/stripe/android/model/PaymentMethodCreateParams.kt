@@ -194,43 +194,36 @@ data class PaymentMethodCreateParams internal constructor(
             }.orEmpty()
         }
 
-    internal sealed class Type : Parcelable {
-        abstract val code: String
-        abstract val hasMandate: Boolean
+    internal enum class Type(
+        private val paymentMethodType: PaymentMethod.Type,
+        val hasMandate: Boolean = false
+    ) {
+        Card(PaymentMethod.Type.Card),
+        Ideal(PaymentMethod.Type.Ideal, hasMandate = true),
+        Fpx(PaymentMethod.Type.Fpx),
+        SepaDebit(PaymentMethod.Type.SepaDebit, hasMandate = true),
+        AuBecsDebit(PaymentMethod.Type.AuBecsDebit, hasMandate = true),
+        BacsDebit(PaymentMethod.Type.BacsDebit, hasMandate = true),
+        Sofort(PaymentMethod.Type.Sofort, hasMandate = true),
+        P24(PaymentMethod.Type.P24),
+        Bancontact(PaymentMethod.Type.Bancontact, hasMandate = true),
+        Giropay(PaymentMethod.Type.Giropay),
+        Eps(PaymentMethod.Type.Eps, hasMandate = true),
+        Oxxo(PaymentMethod.Type.Oxxo),
+        Alipay(PaymentMethod.Type.Alipay),
+        GrabPay(PaymentMethod.Type.GrabPay),
+        PayPal(PaymentMethod.Type.PayPal),
+        AfterpayClearpay(PaymentMethod.Type.AfterpayClearpay),
+        Upi(PaymentMethod.Type.Upi),
+        Netbanking(PaymentMethod.Type.Netbanking),
+        Blik(PaymentMethod.Type.Blik),
+        WeChatPay(PaymentMethod.Type.WeChatPay);
 
-        @Parcelize
-        data class GenericPaymentMethod(
-            override val code: String,
-            override val hasMandate: Boolean = false
-        ) : Type()
+        internal val code = paymentMethodType.code
 
         companion object {
-            val Card: Type = GenericPaymentMethod(PaymentMethod.Type.Card.code)
-            val Ideal: Type = GenericPaymentMethod(PaymentMethod.Type.Ideal.code, hasMandate = true)
-            val Fpx: Type = GenericPaymentMethod(PaymentMethod.Type.Fpx.code)
-            val SepaDebit: Type =
-                GenericPaymentMethod(PaymentMethod.Type.SepaDebit.code, hasMandate = true)
-            val AuBecsDebit: Type =
-                GenericPaymentMethod(PaymentMethod.Type.AuBecsDebit.code, hasMandate = true)
-            val BacsDebit: Type =
-                GenericPaymentMethod(PaymentMethod.Type.BacsDebit.code, hasMandate = true)
-            val Sofort: Type =
-                GenericPaymentMethod(PaymentMethod.Type.Sofort.code, hasMandate = true)
-            val P24: Type = GenericPaymentMethod(PaymentMethod.Type.P24.code)
-            val Bancontact: Type =
-                GenericPaymentMethod(PaymentMethod.Type.Bancontact.code, hasMandate = true)
-            val Giropay: Type = GenericPaymentMethod(PaymentMethod.Type.Giropay.code)
-            val Eps: Type = GenericPaymentMethod(PaymentMethod.Type.Eps.code, hasMandate = true)
-            val Oxxo: Type = GenericPaymentMethod(PaymentMethod.Type.Oxxo.code)
-            val Alipay: Type = GenericPaymentMethod(PaymentMethod.Type.Alipay.code)
-            val GrabPay: Type = GenericPaymentMethod(PaymentMethod.Type.GrabPay.code)
-            val PayPal: Type = GenericPaymentMethod(PaymentMethod.Type.PayPal.code)
-            val AfterpayClearpay: Type =
-                GenericPaymentMethod(PaymentMethod.Type.AfterpayClearpay.code)
-            val Upi: Type = GenericPaymentMethod(PaymentMethod.Type.Upi.code)
-            val Netbanking: Type = GenericPaymentMethod(PaymentMethod.Type.Netbanking.code)
-            val Blik: Type = GenericPaymentMethod(PaymentMethod.Type.Blik.code)
-            val WeChatPay: Type = GenericPaymentMethod(PaymentMethod.Type.WeChatPay.code)
+            internal fun fromCode(code: String) =
+                values().firstOrNull { it.paymentMethodType.code == code }
         }
     }
 

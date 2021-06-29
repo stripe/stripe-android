@@ -89,13 +89,14 @@ internal abstract class BaseAddPaymentMethodFragment(
                 formFragment.paramMapLiveData.observe(viewLifecycleOwner) { paramMap ->
                     sheetViewModel.updateSelection(
                         paramMap?.run {
-                            PaymentMethodCreateParams(
-                                PaymentMethodCreateParams.Type.GenericPaymentMethod(
-                                    paramMap["type"] as String
-                                ),
-                                overrideParamMap = paramMap,
-                                productUsage = setOf("PaymentSheet")
-                            )
+                            PaymentMethodCreateParams.Type.fromCode(paramMap["type"] as String)
+                                ?.let {
+                                    PaymentMethodCreateParams(
+                                        it,
+                                        overrideParamMap = paramMap,
+                                        productUsage = setOf("PaymentSheet")
+                                    )
+                                }
                         }?.let {
                             PaymentSelection.New.GenericPaymentMethod(
                                 selectedPaymentMethod.displayNameResource,
