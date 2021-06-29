@@ -160,13 +160,15 @@ class TransformSpecToElementTest {
             val saveForFutureUseElement = formElement.first() as FormElement.SaveForFutureUseElement
             val saveForFutureUseController = saveForFutureUseElement.controller
 
-            assertThat(saveForFutureUseElement.identifier).isEqualTo(saveForFutureUseSpec.identifier)
+            assertThat(saveForFutureUseElement.identifier)
+                .isEqualTo(saveForFutureUseSpec.identifier)
 
             assertThat(saveForFutureUseController.optionalIdentifiers.first()).isEmpty()
 
             saveForFutureUseController.onValueChange(false)
-            assertThat(saveForFutureUseController.optionalIdentifiers.first()).isEqualTo(
-                optionalIdentifiers.map { it.identifier }
-            )
+            assertThat(saveForFutureUseController.optionalIdentifiers.first())
+                .isEqualTo(
+                    optionalIdentifiers.map { it.identifier }
+                )
         }
 }

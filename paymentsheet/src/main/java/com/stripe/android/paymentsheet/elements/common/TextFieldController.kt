@@ -42,7 +42,7 @@ internal class TextFieldController(
         onValueChange("")
     }
 
-    fun onValueChange(displayFormatted: String) {
+    override fun onValueChange(displayFormatted: String) {
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value

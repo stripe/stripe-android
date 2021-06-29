@@ -24,7 +24,10 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
-        StripeBrowserLauncherViewModel.Factory(application)
+        StripeBrowserLauncherViewModel.Factory(
+            application,
+            this
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,14 +45,20 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             viewModel.getResultIntent(args)
         )
 
-        val launcher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
-            ::onResult
-        )
+        if (viewModel.hasLaunched) {
+            finish()
+        } else {
+            val launcher = registerForActivityResult(
+                ActivityResultContracts.StartActivityForResult(),
+                ::onResult
+            )
 
-        launcher.launch(
-            viewModel.createLaunchIntent(args)
-        )
+            launcher.launch(
+                viewModel.createLaunchIntent(args)
+            )
+
+            viewModel.hasLaunched = true
+        }
     }
 
     private fun onResult(activityResult: ActivityResult) {

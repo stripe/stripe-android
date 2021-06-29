@@ -11,7 +11,6 @@ import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.SessionId
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
@@ -45,7 +44,6 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
         args: PaymentOptionContract.Args = PaymentOptionContract.Args(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentMethods = emptyList(),
-            sessionId = SessionId(),
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
             newCard = null,

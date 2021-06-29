@@ -23,4 +23,8 @@ internal class DropdownFieldController(
     fun onValueChange(index: Int) {
         _selectedIndex.value = index
     }
+
+    override fun onValueChange(value: String) {
+        _selectedIndex.value = displayItems.indexOf(value).takeUnless { it == -1 } ?: 0
+    }
 }

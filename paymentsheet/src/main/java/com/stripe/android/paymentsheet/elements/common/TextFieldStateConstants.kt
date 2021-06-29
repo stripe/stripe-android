@@ -14,8 +14,7 @@ internal class TextFieldStateConstants {
             override fun isFull(): Boolean = true
         }
 
-        object Limitless : Valid() // no auto-advance
-        {
+        object Limitless : Valid() { // no auto-advance
             override fun isFull(): Boolean = false
         }
     }
@@ -27,7 +26,7 @@ internal class TextFieldStateConstants {
         object AlwaysError : Error() {
             override fun shouldShowError(hasFocus: Boolean): Boolean = true
             @StringRes
-            override fun getErrorMessageResId():  Int = R.string.invalid
+            override fun getErrorMessageResId(): Int = R.string.invalid
         }
 
         object Incomplete : Error() {

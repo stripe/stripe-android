@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.stripe.android.payments.wechatpay">
+
+    <!-- WeChat Pay SDK will try to open the WeChat app installed on the device, the queries tag
+         is necessary to make WeChat app package visible for the app post Android 11 -->
+    <queries>
+        <package android:name="com.tencent.mm" />
+    </queries>
+
+    <application>
+        <!--singleTop launchMode is required to capture callback from WeChat SDK
+        through Activity#onNewIntent-->
+        <activity
+            android:name=".WeChatPayAuthActivity"
+            android:exported="true"
+            android:launchMode="singleTop" />
+    </application>
+</manifest>
