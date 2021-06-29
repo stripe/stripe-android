@@ -33,7 +33,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 internal class GooglePayLauncherViewModel(
@@ -214,10 +213,9 @@ internal class GooglePayLauncherViewModel(
                     enableLogging,
                     workContext = workContext
                 ),
-
                 GooglePayJsonFactory(
                     googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
-                    isJcbEnabled = args.config.merchantCountryCode == Locale.JAPAN.country
+                    isJcbEnabled = args.config.isJcbEnabled
                 ),
                 googlePayRepository
             ) as T

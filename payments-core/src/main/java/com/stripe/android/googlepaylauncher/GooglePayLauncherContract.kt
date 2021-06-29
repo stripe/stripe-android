@@ -31,7 +31,11 @@ internal class GooglePayLauncherContract :
         resultCode: Int,
         intent: Intent?
     ): GooglePayLauncher.Result {
-        return GooglePayLauncher.Result.fromIntent(intent)
+        return intent?.getParcelableExtra(EXTRA_RESULT) ?: GooglePayLauncher.Result.Failed(
+            IllegalStateException(
+                "Error while processing result from Google Pay."
+            )
+        )
     }
 
     @Parcelize
@@ -39,12 +43,12 @@ internal class GooglePayLauncherContract :
         internal val clientSecret: String,
         internal val config: GooglePayLauncher.Config,
     ) : Parcelable {
-        fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"
 
-            fun fromIntent(intent: Intent): Args? {
+            internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }

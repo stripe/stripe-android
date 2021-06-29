@@ -1,10 +1,8 @@
 package com.stripe.android.googlepaylauncher
 
-import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
@@ -13,11 +11,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import java.util.Locale
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment.
  */
-internal class GooglePayLauncher internal constructor(
+class GooglePayLauncher internal constructor(
     lifecycleScope: CoroutineScope,
     private val config: Config,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
@@ -36,7 +35,7 @@ internal class GooglePayLauncher internal constructor(
      *
      * @param callback called with the result of the [GooglePayLauncher] operation
      */
-    internal constructor(
+    constructor(
         activity: ComponentActivity,
         config: Config,
         readyCallback: ReadyCallback,
@@ -68,7 +67,7 @@ internal class GooglePayLauncher internal constructor(
      *
      * @param callback called with the result of the [GooglePayLauncher] operation
      */
-    internal constructor(
+    constructor(
         fragment: Fragment,
         config: Config,
         readyCallback: ReadyCallback,
@@ -115,7 +114,7 @@ internal class GooglePayLauncher internal constructor(
     }
 
     @Parcelize
-    internal data class Config @JvmOverloads constructor(
+    data class Config @JvmOverloads constructor(
         val environment: GooglePayEnvironment,
         val merchantCountryCode: String,
         val merchantName: String,
@@ -135,10 +134,14 @@ internal class GooglePayLauncher internal constructor(
          * has existing payment methods.
          */
         var existingPaymentMethodRequired: Boolean = false
-    ) : Parcelable
+    ) : Parcelable {
+
+        internal val isJcbEnabled: Boolean
+            get() = merchantCountryCode.equals(Locale.JAPAN.country, ignoreCase = true)
+    }
 
     @Parcelize
-    internal data class BillingAddressConfig @JvmOverloads constructor(
+    data class BillingAddressConfig @JvmOverloads constructor(
         internal val isRequired: Boolean = false,
 
         /**
@@ -167,9 +170,7 @@ internal class GooglePayLauncher internal constructor(
         }
     }
 
-    internal sealed class Result : Parcelable {
-        fun toBundle() = bundleOf(EXTRA_RESULT to this)
-
+    sealed class Result : Parcelable {
         @Parcelize
         object Completed : Result()
 
@@ -180,28 +181,13 @@ internal class GooglePayLauncher internal constructor(
 
         @Parcelize
         object Canceled : Result()
-
-        internal companion object {
-            private const val EXTRA_RESULT = "result"
-
-            /**
-             * @return the [Result] object from the given `Intent`
-             */
-            internal fun fromIntent(intent: Intent?): Result {
-                return intent?.getParcelableExtra(EXTRA_RESULT) ?: Failed(
-                    IllegalStateException(
-                        "Error while processing result from Google Pay."
-                    )
-                )
-            }
-        }
     }
 
-    internal fun interface ReadyCallback {
+    fun interface ReadyCallback {
         fun onReady(isReady: Boolean)
     }
 
-    internal fun interface ResultCallback {
+    fun interface ResultCallback {
         fun onResult(result: Result)
     }
 }

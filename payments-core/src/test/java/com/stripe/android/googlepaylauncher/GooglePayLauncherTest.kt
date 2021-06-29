@@ -99,6 +99,21 @@ class GooglePayLauncherTest {
         }
     }
 
+    @Test
+    fun `isJcbEnabled should return expected value for different merchantCountryCode`() {
+        assertThat(
+            CONFIG.copy(merchantCountryCode = "US").isJcbEnabled
+        ).isFalse()
+
+        assertThat(
+            CONFIG.copy(merchantCountryCode = "JP").isJcbEnabled
+        ).isTrue()
+
+        assertThat(
+            CONFIG.copy(merchantCountryCode = "jp").isJcbEnabled
+        ).isTrue()
+    }
+
     private class FakeGooglePayRepository(
         private var isReady: Boolean
     ) : GooglePayRepository {

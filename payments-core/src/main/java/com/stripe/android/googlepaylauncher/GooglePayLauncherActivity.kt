@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.AutoResolveHelper
@@ -93,16 +94,6 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
         disableAnimations()
     }
 
-//    /**
-//     * Check that Google Pay is available and ready
-//     */
-//    private suspend fun onReadyToPay(paymentDataRequest: JSONObject): Task<PaymentData> {
-//        require(viewModel.isReadyToPay()) {
-//            "Google Pay is unavailable."
-//        }
-//        return viewModel.createLoadPaymentDataTask(paymentDataRequest)
-//    }
-
     private fun payWithGoogle(task: Task<PaymentData>) {
         AutoResolveHelper.resolveTask(
             task,
@@ -181,9 +172,10 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     private fun finishWithResult(result: GooglePayLauncher.Result) {
         setResult(
             RESULT_OK,
-            Intent().putExtras(
-                result.toBundle()
-            )
+            Intent()
+                .putExtras(
+                    bundleOf(GooglePayLauncherContract.EXTRA_RESULT to result)
+                )
         )
         finish()
     }
