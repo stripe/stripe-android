@@ -54,7 +54,7 @@ internal sealed class FormElement {
      * This is an element that has static text because it takes no user input, it is not
      * outputted from the list of form field values.
      */
-    internal data class StaticTextElement(
+    internal data class MandateTextElement(
         override val identifier: IdentifierSpec,
         val stringResId: Int,
         val color: Color,

@@ -24,7 +24,7 @@ internal class TransformSpecToElement {
             when (it) {
                 is FormItemSpec.SaveForFutureUseSpec -> transform(it)
                 is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
-                is FormItemSpec.StaticTextSpec -> transform(it)
+                is FormItemSpec.MandateTextSpec -> transform(it)
             }
         }
 
@@ -56,10 +56,10 @@ internal class TransformSpecToElement {
         )
     }
 
-    private fun transform(spec: FormItemSpec.StaticTextSpec) =
+    private fun transform(spec: FormItemSpec.MandateTextSpec) =
         // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
-        FormElement.StaticTextElement(
+        FormElement.MandateTextElement(
             spec.identifier,
             spec.stringResId,
             spec.color

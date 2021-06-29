@@ -5,7 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
-import com.stripe.android.paymentsheet.FormElement.StaticTextElement
+import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
@@ -120,7 +120,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a mandate section spec setup of the mandate element correctly`() {
-        val mandate = FormItemSpec.StaticTextSpec(
+        val mandate = FormItemSpec.MandateTextSpec(
             IdentifierSpec("mandate"),
             R.string.sofort_mandate,
             Color.Gray
@@ -132,7 +132,7 @@ class TransformSpecToElementTest {
             FocusRequesterCount()
         )
 
-        val mandateElement = formElement.first() as StaticTextElement
+        val mandateElement = formElement.first() as MandateTextElement
 
         assertThat(mandateElement.controller).isNull()
         assertThat(mandateElement.color).isEqualTo(mandate.color)
@@ -143,7 +143,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Add a save for future use section spec sets the mandate element correctly`() =
         runBlocking {
-            val mandate = FormItemSpec.StaticTextSpec(
+            val mandate = FormItemSpec.MandateTextSpec(
                 IdentifierSpec("mandate"),
                 R.string.sofort_mandate,
                 Color.Gray

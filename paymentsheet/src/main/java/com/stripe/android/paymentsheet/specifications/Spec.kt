@@ -61,7 +61,7 @@ sealed class FormItemSpec {
     /**
      * This is for elements that do not receive user input
      */
-    data class StaticTextSpec(
+    data class MandateTextSpec(
         override val identifier: IdentifierSpec,
         @StringRes val stringResId: Int,
         val color: Color
