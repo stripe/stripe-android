@@ -4,8 +4,8 @@ import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
+import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
@@ -45,6 +45,7 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(countrySection)
             ),
+            "Example, Inc.",
             FocusRequesterCount()
         )
 
@@ -69,6 +70,7 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(nameSection)
             ),
+            "Example, Inc.",
             FocusRequesterCount()
         )
 
@@ -85,6 +87,7 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(emailSection)
             ),
+            "Example, Inc.",
             FocusRequesterCount()
         )
 
@@ -103,6 +106,7 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(nameSection, emailSection)
             ),
+            "Example, Inc.",
             focusRequesterCount
         )
 
@@ -129,6 +133,7 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(mandate)
             ),
+            "Example, Inc.",
             FocusRequesterCount()
         )
 
@@ -154,6 +159,7 @@ class TransformSpecToElementTest {
                 LayoutSpec(
                     listOf(saveForFutureUseSpec)
                 ),
+                "Example, Inc.",
                 FocusRequesterCount()
             )
 
