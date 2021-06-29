@@ -23,7 +23,6 @@ internal class GooglePayLauncherContract :
             }
         }
 
-        // TODO(mshafrir-stripe): update target activity
         return Intent(context, GooglePayLauncherActivity::class.java)
             .putExtras(extras)
     }

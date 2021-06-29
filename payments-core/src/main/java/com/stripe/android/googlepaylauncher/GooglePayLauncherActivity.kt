@@ -7,10 +7,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
-import com.google.android.gms.wallet.PaymentDataRequest
-import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
@@ -33,9 +32,6 @@ import org.json.JSONObject
  * for a guide to troubleshooting Google Pay issues.
  */
 internal class GooglePayLauncherActivity : AppCompatActivity() {
-    private val paymentsClient: PaymentsClient by lazy {
-        PaymentsClientFactory(this).create(args.config.environment)
-    }
     private val viewModel: GooglePayLauncherViewModel by viewModels {
         GooglePayLauncherViewModel.Factory(
             application,
@@ -53,13 +49,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        overridePendingTransition(0, 0)
-        setResult(
-            RESULT_OK,
-            Intent().putExtras(
-                GooglePayLauncherResult.Canceled.toBundle()
-            )
-        )
+        disableAnimations()
 
         val nullableArgs = GooglePayLauncherContract.Args.fromIntent(intent)
         if (nullableArgs == null) {
@@ -83,9 +73,11 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 runCatching {
-                    viewModel.createPaymentDataRequest()
+                    viewModel.createLoadPaymentDataTask()
                 }.fold(
-                    onSuccess = ::isReadyToPay,
+                    onSuccess = {
+                        payWithGoogle(it)
+                    },
                     onFailure = {
                         viewModel.updateResult(
                             GooglePayLauncher.Result.Failed(it)
@@ -98,36 +90,22 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(0, 0)
+        disableAnimations()
     }
 
-    /**
-     * Check that Google Pay is available and ready
-     */
-    private fun isReadyToPay(paymentDataRequest: JSONObject) {
-        paymentsClient.isReadyToPay(
-            viewModel.createIsReadyToPayRequest()
-        ).addOnCompleteListener { task ->
-            runCatching {
-                require(task.isSuccessful) { "Google Pay is unavailable." }
-            }.fold(
-                onSuccess = {
-                    payWithGoogle(paymentDataRequest)
-                },
-                onFailure = {
-                    viewModel.updateResult(
-                        GooglePayLauncher.Result.Failed(it)
-                    )
-                }
-            )
-        }
-    }
+//    /**
+//     * Check that Google Pay is available and ready
+//     */
+//    private suspend fun onReadyToPay(paymentDataRequest: JSONObject): Task<PaymentData> {
+//        require(viewModel.isReadyToPay()) {
+//            "Google Pay is unavailable."
+//        }
+//        return viewModel.createLoadPaymentDataTask(paymentDataRequest)
+//    }
 
-    private fun payWithGoogle(paymentDataRequest: JSONObject) {
+    private fun payWithGoogle(task: Task<PaymentData>) {
         AutoResolveHelper.resolveTask(
-            paymentsClient.loadPaymentData(
-                PaymentDataRequest.fromJson(paymentDataRequest.toString())
-            ),
+            task,
             this,
             LOAD_PAYMENT_DATA_REQUEST_CODE
         )
@@ -208,6 +186,11 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             )
         )
         finish()
+    }
+
+    private fun disableAnimations() {
+        // this is a transparent Activity so we want to disable animations
+        overridePendingTransition(0, 0)
     }
 
     private companion object {

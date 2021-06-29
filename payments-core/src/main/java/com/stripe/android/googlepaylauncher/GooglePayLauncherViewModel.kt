@@ -8,9 +8,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.wallet.PaymentData
+import com.google.android.gms.wallet.PaymentDataRequest
+import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
@@ -22,38 +26,46 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.DefaultGooglePayRepository
+import com.stripe.android.paymentsheet.GooglePayRepository
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 internal class GooglePayLauncherViewModel(
+    private val paymentsClient: PaymentsClient,
     private val requestOptions: ApiRequest.Options,
     private val args: GooglePayLauncherContract.Args,
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
-    private val googlePayJsonFactory: GooglePayJsonFactory
+    private val googlePayJsonFactory: GooglePayJsonFactory,
+    private val googlePayRepository: GooglePayRepository
 ) : ViewModel() {
     var hasLaunched: Boolean = false
 
     private val _googleResult = MutableLiveData<GooglePayLauncher.Result>()
     internal val googlePayResult = _googleResult.distinctUntilChanged()
 
-    fun createIsReadyToPayRequest(): IsReadyToPayRequest {
-        return IsReadyToPayRequest.fromJson(
-            googlePayJsonFactory.createIsReadyToPayRequest().toString()
-        )
-    }
-
     fun updateResult(result: GooglePayLauncher.Result) {
         _googleResult.value = result
     }
 
+    @VisibleForTesting
+    suspend fun isReadyToPay(): Boolean {
+        return googlePayRepository.isReady().first()
+    }
+
+    @VisibleForTesting
     suspend fun createPaymentDataRequest(): JSONObject {
         val transactionInfo = createTransactionInfo(
-            getStripeIntent(args.clientSecret)
+            stripeRepository.retrieveStripeIntent(
+                args.clientSecret,
+                requestOptions,
+            )
         )
 
         return googlePayJsonFactory.createPaymentDataRequest(
@@ -92,35 +104,13 @@ internal class GooglePayLauncherViewModel(
         }
     }
 
-    @VisibleForTesting
-    internal suspend fun getStripeIntent(
-        clientSecret: String
-    ): StripeIntent {
-        return when {
-            PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
-                requireNotNull(
-                    stripeRepository.retrievePaymentIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                ) {
-                    "Could not retrieve PaymentIntent."
-                }
-            }
-            SetupIntent.ClientSecret.isMatch(clientSecret) -> {
-                requireNotNull(
-                    stripeRepository.retrieveSetupIntent(
-                        clientSecret,
-                        requestOptions
-                    )
-                ) {
-                    "Could not retrieve SetupIntent."
-                }
-            }
-            else -> {
-                error("Invalid client secret.")
-            }
+    suspend fun createLoadPaymentDataTask(): Task<PaymentData> {
+        check(isReadyToPay()) {
+            "Google Pay is unavailable."
         }
+        return paymentsClient.loadPaymentData(
+            PaymentDataRequest.fromJson(createPaymentDataRequest().toString())
+        )
     }
 
     suspend fun confirmPaymentIntent(
@@ -177,6 +167,8 @@ internal class GooglePayLauncherViewModel(
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            val googlePayEnvironment = args.config.environment
+
             val config = PaymentConfiguration.getInstance(application)
             val publishableKey = config.publishableKey
             val stripeAccountId = config.stripeAccountId
@@ -186,7 +178,29 @@ internal class GooglePayLauncherViewModel(
                 { publishableKey },
                 workContext = workContext
             )
+
+            val billingAddressConfig = args.config.billingAddressConfig
+            val googlePayRepository = DefaultGooglePayRepository(
+                application,
+                googlePayEnvironment,
+                GooglePayJsonFactory.BillingAddressParameters(
+                    billingAddressConfig.isRequired,
+                    when (billingAddressConfig.format) {
+                        GooglePayLauncher.BillingAddressConfig.Format.Min -> {
+                            GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                        }
+                        GooglePayLauncher.BillingAddressConfig.Format.Full -> {
+                            GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                        }
+                    },
+                    billingAddressConfig.isPhoneNumberRequired
+                ),
+                args.config.existingPaymentMethodRequired,
+                Logger.getInstance(enableLogging)
+            )
+
             return GooglePayLauncherViewModel(
+                PaymentsClientFactory(application).create(googlePayEnvironment),
                 ApiRequest.Options(
                     publishableKey,
                     stripeAccountId
@@ -204,7 +218,8 @@ internal class GooglePayLauncherViewModel(
                 GooglePayJsonFactory(
                     googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
                     isJcbEnabled = args.config.merchantCountryCode == Locale.JAPAN.country
-                )
+                ),
+                googlePayRepository
             ) as T
         }
     }

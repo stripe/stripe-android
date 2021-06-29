@@ -1,6 +1,9 @@
 package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.wallet.PaymentData
+import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
@@ -12,17 +15,21 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.AbsPaymentController
+import com.stripe.android.paymentsheet.FakeGooglePayRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -40,22 +47,53 @@ class GooglePayLauncherViewModelTest {
         )
     )
 
+    private val googlePayRepository = FakeGooglePayRepository(true)
+
+    private val task = mock<Task<PaymentData>>()
+    private val paymentsClient = mock<PaymentsClient>().also {
+        whenever(it.loadPaymentData(any()))
+            .thenReturn(task)
+    }
+
     private val viewModel = GooglePayLauncherViewModel(
+        paymentsClient,
         REQUEST_OPTIONS,
         ARGS,
         stripeRepository,
         paymentController,
-        googlePayJsonFactory
+        googlePayJsonFactory,
+        googlePayRepository
     )
-
-    @BeforeTest
-    fun setup() {
-    }
 
     @AfterTest
     fun cleanup() {
         testDispatcher.cleanupTestCoroutines()
     }
+
+    @Test
+    fun `isReadyToPay() should return expected value`() = testDispatcher.runBlockingTest {
+        assertThat(viewModel.isReadyToPay())
+            .isTrue()
+    }
+
+    @Test
+    fun `createLoadPaymentDataTask() should throw expected exception when Google Pay is not available`() =
+        testDispatcher.runBlockingTest {
+            googlePayRepository.value = false
+
+            val error = assertFailsWith<IllegalStateException> {
+                viewModel.createLoadPaymentDataTask()
+            }
+            assertThat(error.message)
+                .isEqualTo("Google Pay is unavailable.")
+        }
+
+    @Test
+    fun `createLoadPaymentDataTask() should return task when Google Pay is available`() =
+        testDispatcher.runBlockingTest {
+            assertThat(viewModel.createLoadPaymentDataTask())
+                .isNotNull()
+        }
 
     @Test
     fun `createTransactionInfo() with PaymentIntent should return expected TransactionInfo`() {
@@ -86,42 +124,6 @@ class GooglePayLauncherViewModelTest {
         assertThat(error.message)
             .isEqualTo("SetupIntents are not currently supported in GooglePayLauncher.")
     }
-
-    @Test
-    fun `getStripeIntent() with PaymentIntent client secret should return a PaymentIntent`() =
-        testDispatcher.runBlockingTest {
-            assertThat(
-                viewModel.getStripeIntent(
-                    "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s"
-                )
-            ).isEqualTo(
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-            )
-        }
-
-    @Test
-    fun `getStripeIntent() with SetupIntent client secret should return a SetupIntent`() =
-        testDispatcher.runBlockingTest {
-            assertThat(
-                viewModel.getStripeIntent(
-                    "seti_1GSmaFCRMbs6FrXfmjThcHan_secret_H0oC2iSB4FtW4d"
-                )
-            ).isEqualTo(
-                SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
-            )
-        }
-
-    @Test
-    fun `getStripeIntent() with invalid client secret should throw exception`() =
-        testDispatcher.runBlockingTest {
-            val error = assertFailsWith<IllegalStateException> {
-                viewModel.getStripeIntent(
-                    "invalid!"
-                )
-            }
-            assertThat(error.message)
-                .isEqualTo("Invalid client secret.")
-        }
 
     @Test
     fun `getResultFromConfirmation() using PaymentIntent should return expected result`() =
@@ -190,6 +192,25 @@ class GooglePayLauncherViewModelTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
+
+        override suspend fun retrieveStripeIntent(
+            clientSecret: String,
+            options: ApiRequest.Options,
+            expandFields: List<String>
+        ): StripeIntent {
+            return when {
+                clientSecret.startsWith("pi_") -> {
+                    retrievePaymentIntent(clientSecret, options, expandFields)
+                }
+                clientSecret.startsWith("seti_") -> {
+                    retrieveSetupIntent(clientSecret, options, expandFields)
+                }
+                else -> {
+                    error("Invalid clientSecret")
+                }
+            }
+        }
+
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,

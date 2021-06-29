@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.filterNotNull
 internal class DefaultGooglePayRepository(
     private val context: Context,
     private val environment: GooglePayEnvironment,
+    private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters? = null,
+    private val existingPaymentMethodRequired: Boolean = true,
     private val logger: Logger = Logger.noop()
 ) : GooglePayRepository {
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
@@ -42,6 +44,8 @@ internal class DefaultGooglePayRepository(
             PaymentSheet.GooglePayConfiguration.Environment.Test ->
                 GooglePayEnvironment.Test
         },
+        billingAddressParameters = null,
+        existingPaymentMethodRequired = true,
         logger
     )
 
@@ -56,7 +60,8 @@ internal class DefaultGooglePayRepository(
 
         val request = IsReadyToPayRequest.fromJson(
             googlePayJsonFactory.createIsReadyToPayRequest(
-                existingPaymentMethodRequired = true
+                billingAddressParameters = billingAddressParameters,
+                existingPaymentMethodRequired = existingPaymentMethodRequired
             ).toString()
         )
 
@@ -64,6 +69,8 @@ internal class DefaultGooglePayRepository(
             .addOnCompleteListener { task ->
                 val isReady = runCatching {
                     task.getResult(ApiException::class.java) == true
+                }.onFailure {
+                    logger.error("Google Pay check failed.", it)
                 }.getOrDefault(false)
                 logger.info("Google Pay ready? $isReady")
                 isReadyState.value = isReady
