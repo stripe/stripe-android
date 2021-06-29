@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
