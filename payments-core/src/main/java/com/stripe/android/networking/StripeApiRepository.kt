@@ -37,6 +37,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeErrorJsonParser
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
@@ -100,6 +101,32 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     init {
         fireFraudDetectionDataRequest()
+    }
+
+    override suspend fun retrieveStripeIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): StripeIntent {
+        return when {
+            PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
+                requireNotNull(
+                    retrievePaymentIntent(clientSecret, options, expandFields)
+                ) {
+                    "Could not retrieve PaymentIntent."
+                }
+            }
+            SetupIntent.ClientSecret.isMatch(clientSecret) -> {
+                requireNotNull(
+                    retrieveSetupIntent(clientSecret, options, expandFields)
+                ) {
+                    "Could not retrieve SetupIntent."
+                }
+            }
+            else -> {
+                error("Invalid client secret.")
+            }
+        }
     }
 
     /**
