@@ -40,6 +40,11 @@ data class PaymentMethodCreateParams internal constructor(
     /**
      * If provided, will be used as the representation of this object when calling the Stripe API,
      * instead of generating the map from its content.
+     *
+     * The map should be valid according to the
+     * [PaymentMethod creation API](https://stripe.com/docs/api/payment_methods/create)
+     * documentation, including a required `type` entry.
+     *
      * The values of the map must be any of the types supported by [android.os.Parcel.writeValue].
      */
     private val overrideParamMap: Map<String, @RawValue Any>? = null,
@@ -217,8 +222,8 @@ data class PaymentMethodCreateParams internal constructor(
         internal val code = paymentMethodType.code
 
         companion object {
-            internal fun fromPaymentMethodType(paymentMethodType: PaymentMethod.Type) =
-                values().firstOrNull { it.paymentMethodType == paymentMethodType }
+            internal fun fromCode(code: String) =
+                values().firstOrNull { it.paymentMethodType.code == code }
         }
     }
 

@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -88,7 +89,14 @@ internal abstract class BaseAddPaymentMethodFragment(
                 formFragment.paramMapLiveData.observe(viewLifecycleOwner) { paramMap ->
                     sheetViewModel.updateSelection(
                         paramMap?.run {
-                            selectedPaymentMethod.paymentMethodCreateParams(this)
+                            PaymentMethodCreateParams.Type.fromCode(paramMap["type"] as String)
+                                ?.let {
+                                    PaymentMethodCreateParams(
+                                        it,
+                                        overrideParamMap = paramMap,
+                                        productUsage = setOf("PaymentSheet")
+                                    )
+                                }
                         }?.let {
                             PaymentSelection.New.GenericPaymentMethod(
                                 selectedPaymentMethod.displayNameResource,
@@ -143,9 +151,9 @@ internal abstract class BaseAddPaymentMethodFragment(
         selectedPaymentMethod = paymentMethod
 
         val args = requireArguments()
-        args.putParcelable(
-            ComposeFormDataCollectionFragment.EXTRA_FORM_TYPE,
-            paymentMethod.formType
+        args.putString(
+            ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD,
+            paymentMethod.name
         )
 
         childFragmentManager.commit {
