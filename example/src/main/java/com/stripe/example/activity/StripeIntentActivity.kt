@@ -13,7 +13,7 @@ import com.stripe.android.getSetupIntentResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.MandateDataParams
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.StripeFactory
@@ -66,7 +66,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
     protected fun createAndConfirmPaymentIntent(
         country: String,
-        paymentMethodCreateParams: PaymentMethodCreateParams?,
+        paymentMethodCreateParams: PaymentMethodCreateParamsInterface?,
         shippingDetails: ConfirmPaymentIntentParams.Shipping? = null,
         stripeAccountId: String? = null,
         existingPaymentMethodId: String? = null,
@@ -95,7 +95,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
     protected fun createAndConfirmSetupIntent(
         country: String,
-        params: PaymentMethodCreateParams,
+        params: PaymentMethodCreateParamsInterface,
         stripeAccountId: String? = null
     ) {
         keyboardController.hide()
@@ -112,7 +112,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
     private fun handleCreatePaymentIntentResponse(
         responseData: JSONObject,
-        params: PaymentMethodCreateParams?,
+        params: PaymentMethodCreateParamsInterface?,
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,
         stripeAccountId: String?,
         existingPaymentMethodId: String?,
@@ -145,7 +145,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
     private fun handleCreateSetupIntentResponse(
         responseData: JSONObject,
-        params: PaymentMethodCreateParams,
+        params: PaymentMethodCreateParamsInterface,
         stripeAccountId: String?
     ) {
         val secret = responseData.getString("secret")

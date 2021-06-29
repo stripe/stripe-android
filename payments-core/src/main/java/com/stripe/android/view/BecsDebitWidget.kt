@@ -12,6 +12,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.BecsDebitWidgetBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 
 /**
  * A form for accepting a customer's BECS account information.
@@ -184,7 +185,7 @@ class BecsDebitWidget @JvmOverloads constructor(
     }
 
     /**
-     * If the input is valid, will return a [PaymentMethodCreateParams] instance;
+     * If the input is valid, will return a [PaymentMethodCreateParamsInterface] instance;
      * otherwise, will return `null`.
      */
     val params: PaymentMethodCreateParams?

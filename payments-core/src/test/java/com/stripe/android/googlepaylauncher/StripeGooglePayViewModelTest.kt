@@ -8,6 +8,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
@@ -165,7 +166,7 @@ class StripeGooglePayViewModelTest {
         var requestOptions: ApiRequest.Options? = null
         val stripeRepository = object : AbsFakeStripeRepository() {
             override suspend fun createPaymentMethod(
-                paymentMethodCreateParams: PaymentMethodCreateParams,
+                paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
                 options: ApiRequest.Options
             ): PaymentMethod? {
                 requestOptions = options

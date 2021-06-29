@@ -9,6 +9,14 @@ import kotlinx.parcelize.RawValue
 import org.json.JSONException
 import org.json.JSONObject
 
+/** Need to be an abstract class in order to have an internal member variable */
+abstract class PaymentMethodCreateParamsInterface : Parcelable {
+    internal abstract val attribution: Set<String>?
+    abstract val analyticsTypeCode: String
+    abstract fun toParamMap(): Map<String, Any>
+    abstract fun hasMandate(): Boolean
+}
+
 /**
  * Model for PaymentMethod creation parameters.
  *
@@ -43,12 +51,13 @@ data class PaymentMethodCreateParams internal constructor(
      * The values of the map must be any of the types supported by [android.os.Parcel.writeValue].
      */
     private val overrideParamMap: Map<String, @RawValue Any>? = null,
-) : StripeParamsModel, Parcelable {
+) : StripeParamsModel, PaymentMethodCreateParamsInterface(), Parcelable {
 
-    val typeCode: String
+    override val analyticsTypeCode: String
         get() = type.code
 
-    internal val attribution: Set<String>?
+    // TODO: THis was changed from internal to override
+    override val attribution: Set<String>?
         @JvmSynthetic
         get() {
             return when (type) {
@@ -170,6 +179,8 @@ data class PaymentMethodCreateParams internal constructor(
                 }.orEmpty()
             )
     }
+
+    override fun hasMandate() = type.hasMandate
 
     private val typeParams: Map<String, Any>
         get() {

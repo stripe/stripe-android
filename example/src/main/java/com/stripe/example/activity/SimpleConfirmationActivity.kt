@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.example.R
 import com.stripe.example.databinding.DropdownMenuPopupItemBinding
 import com.stripe.example.databinding.SimplePaymentMethodActivityBinding
@@ -33,7 +34,7 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
             )
         }
 
-    private val paymentMethodCreateParams: PaymentMethodCreateParams
+    private val paymentMethodCreateParams: PaymentMethodCreateParamsInterface
         get() {
             val dropdownItem = this.dropdownItem
             val billingDetails = PaymentMethod.BillingDetails(
@@ -110,7 +111,7 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
         val country: String,
         @DrawableRes val icon: Int,
         val createParams:
-            (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
+            (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParamsInterface,
         val requiresName: Boolean = true,
         val requiresEmail: Boolean = false
     ) {

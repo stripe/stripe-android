@@ -5,7 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import kotlinx.parcelize.Parcelize
 
 internal sealed class PaymentSelection : Parcelable {
@@ -18,12 +18,12 @@ internal sealed class PaymentSelection : Parcelable {
     ) : PaymentSelection()
 
     sealed class New : PaymentSelection() {
-        abstract val paymentMethodCreateParams: PaymentMethodCreateParams
+        abstract val paymentMethodCreateParams: PaymentMethodCreateParamsInterface
         abstract val shouldSavePaymentMethod: Boolean
 
         @Parcelize
         data class Card(
-            override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            override val paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
             val brand: CardBrand,
             override val shouldSavePaymentMethod: Boolean
         ) : New()
@@ -32,7 +32,7 @@ internal sealed class PaymentSelection : Parcelable {
         data class GenericPaymentMethod(
             @StringRes val labelResource: Int,
             @DrawableRes val iconResource: Int,
-            override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            override val paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
             override val shouldSavePaymentMethod: Boolean
         ) : New()
     }

@@ -22,7 +22,8 @@ data class ConfirmSetupIntentParams internal constructor(
      */
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
 
-    @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+    // TODO: THis is a change to the interface from PaymentMethodCreateParams to PaymentMethodCreateParamsInterface, all the same member variables are accessible.
+    @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParamsInterface? = null,
 
     /**
      * The URL to redirect your customer back to after they authenticate on the payment method’s
@@ -96,7 +97,7 @@ data class ConfirmSetupIntentParams internal constructor(
     private val mandateDataParams: Map<String, Any>?
         get() {
             return mandateData?.toParamMap()
-                ?: if (paymentMethodCreateParams?.type?.hasMandate == true && mandateId == null) {
+                ?: if (paymentMethodCreateParams?.hasMandate() == true && mandateId == null) {
                     // Populate with default "online" MandateData
                     MandateDataParams(MandateDataParams.Type.Online.DEFAULT).toParamMap()
                 } else {
@@ -165,7 +166,7 @@ data class ConfirmSetupIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         fun create(
-            paymentMethodCreateParams: PaymentMethodCreateParams,
+            paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
             clientSecret: String,
             mandateData: MandateDataParams? = null,
             mandateId: String? = null

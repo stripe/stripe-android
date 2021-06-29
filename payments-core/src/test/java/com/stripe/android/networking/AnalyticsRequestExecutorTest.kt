@@ -29,7 +29,7 @@ class AnalyticsRequestExecutorTest {
     private val analyticsRequest =
         AnalyticsRequestFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
             .createPaymentMethodCreation(
-                PaymentMethodCreateParams.Type.Card,
+                PaymentMethodCreateParams.Type.Card.code,
                 emptySet()
             )
 

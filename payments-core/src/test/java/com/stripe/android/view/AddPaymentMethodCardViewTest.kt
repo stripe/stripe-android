@@ -1,7 +1,7 @@
 package com.stripe.android.view
 
 import android.view.inputmethod.EditorInfo
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
@@ -19,7 +19,7 @@ class AddPaymentMethodCardViewTest {
 
     @Test
     fun softEnterKey_whenDataIsValid_hidesKeyboardAndAttemptsToSave() {
-        `when`<PaymentMethodCreateParams>(addPaymentMethodCardView.createParams)
+        `when`<PaymentMethodCreateParamsInterface>(addPaymentMethodCardView.createParams)
             .thenReturn(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
 
         AddPaymentMethodCardView.OnEditorActionListenerImpl(

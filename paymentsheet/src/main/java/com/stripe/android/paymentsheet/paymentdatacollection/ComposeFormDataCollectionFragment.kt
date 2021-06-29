@@ -62,7 +62,7 @@ class ComposeFormDataCollectionFragment : Fragment() {
 
     /**
      * Provides to PaymentSheet a LiveData of the map to be used to create the payment method through
-     * PaymentMethodCreateParams. If the form is currently invalid, the map is null.
+     * PaymentMethodCreateParamsInterface. If the form is currently invalid, the map is null.
      *
      * This must be lazy or we'll be reading from the ViewModel while the fragment is detached.
      */

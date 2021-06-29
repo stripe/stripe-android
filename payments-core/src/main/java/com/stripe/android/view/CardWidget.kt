@@ -4,6 +4,7 @@ import android.text.TextWatcher
 import androidx.annotation.IntRange
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 
 internal interface CardWidget {
     /**

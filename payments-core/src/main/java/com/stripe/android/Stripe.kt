@@ -25,7 +25,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.RadarSession
@@ -792,7 +792,7 @@ class Stripe internal constructor(
      * See [Create a PaymentMethod](https://stripe.com/docs/api/payment_methods/create).
      * `POST /v1/payment_methods`
      *
-     * @param paymentMethodCreateParams the [PaymentMethodCreateParams] to be used
+     * @param paymentMethodCreateParams the [PaymentMethodCreateParamsInterface] to be used
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
@@ -801,7 +801,7 @@ class Stripe internal constructor(
     @UiThread
     @JvmOverloads
     fun createPaymentMethod(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
+        paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentMethod>
@@ -841,7 +841,7 @@ class Stripe internal constructor(
     @WorkerThread
     @JvmOverloads
     fun createPaymentMethodSynchronous(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
+        paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): PaymentMethod? {

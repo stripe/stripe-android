@@ -16,7 +16,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.RadarSession
@@ -93,7 +93,7 @@ suspend fun Stripe.confirmAlipayPayment(
     APIException::class
 )
 suspend fun Stripe.createPaymentMethod(
-    paymentMethodCreateParams: PaymentMethodCreateParams,
+    paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
     idempotencyKey: String? = null,
     stripeAccountId: String? = this.stripeAccountId
 ): PaymentMethod = runApiRequest {

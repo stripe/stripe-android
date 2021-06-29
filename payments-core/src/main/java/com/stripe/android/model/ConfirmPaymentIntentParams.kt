@@ -17,7 +17,8 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class ConfirmPaymentIntentParams internal constructor(
-    val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+    // TODO: THis is a change to the interface from PaymentMethodCreateParams to PaymentMethodCreateParamsInterface, all the same member variables are accessible.
+    val paymentMethodCreateParams: PaymentMethodCreateParamsInterface? = null,
 
     /**
      * ID of the payment method (a PaymentMethod, Card, or compatible Source object) to attach to
@@ -196,7 +197,7 @@ data class ConfirmPaymentIntentParams internal constructor(
     private val mandateDataParams: Map<String, Any>?
         get() {
             return mandateData?.toParamMap()
-                ?: if (paymentMethodCreateParams?.type?.hasMandate == true && mandateId == null) {
+                ?: if (paymentMethodCreateParams?.hasMandate() == true && mandateId == null) {
                     // Populate with default "online" MandateData
                     MandateDataParams(MandateDataParams.Type.Online.DEFAULT).toParamMap()
                 } else {
@@ -395,7 +396,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         @JvmOverloads
         @JvmStatic
         fun createWithPaymentMethodCreateParams(
-            paymentMethodCreateParams: PaymentMethodCreateParams,
+            paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
             clientSecret: String,
             savePaymentMethod: Boolean? = null,
             mandateId: String? = null,

@@ -25,6 +25,7 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -55,10 +56,10 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
     private lateinit var bottomSpace: Space
 
     /**
-     * A [PaymentMethodCreateParams] instance if card and billing address details are valid;
+     * A [PaymentMethodCreateParamsInterface] instance if card and billing address details are valid;
      * otherwise, `null`.
      */
-    private val paymentMethodParams: PaymentMethodCreateParams?
+    private val paymentMethodParams: PaymentMethodCreateParamsInterface?
         get() {
             val cardParams = billingAddressView.address.value?.let { billingAddress ->
                 cardMultilineWidget.cardParams?.also { cardParams ->

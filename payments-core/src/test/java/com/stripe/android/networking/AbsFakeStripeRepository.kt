@@ -11,7 +11,7 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
@@ -91,7 +91,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     }
 
     override suspend fun createPaymentMethod(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
+        paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
         options: ApiRequest.Options
     ): PaymentMethod? {
         return null

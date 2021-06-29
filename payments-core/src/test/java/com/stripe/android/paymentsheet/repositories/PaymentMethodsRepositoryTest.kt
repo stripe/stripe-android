@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -71,7 +71,7 @@ internal class PaymentMethodsRepositoryTest {
         }
 
         override suspend fun createPaymentMethod(
-            paymentMethodCreateParams: PaymentMethodCreateParams,
+            paymentMethodCreateParams: PaymentMethodCreateParamsInterface,
             options: ApiRequest.Options
         ): PaymentMethod? {
             return createPaymentMethod

@@ -8,6 +8,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.example.R
 import com.stripe.example.databinding.CreateSepaDebitActivityBinding
 
@@ -64,7 +65,7 @@ class ConfirmSepaDebitActivity : StripeIntentActivity() {
         snackbarController.show("Error during confirmation: ${throwable.message}")
     }
 
-    private fun createPaymentMethodParams(iban: String): PaymentMethodCreateParams {
+    private fun createPaymentMethodParams(iban: String): PaymentMethodCreateParamsInterface {
         return PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.SepaDebit(iban),
             PaymentMethod.BillingDetails.Builder()

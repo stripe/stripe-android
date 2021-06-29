@@ -101,7 +101,7 @@ class AnalyticsRequestFactoryTest {
         assertThat(
             analyticsRequestFactory
                 .createPaymentMethodCreation(
-                    PaymentMethodCreateParams.Type.Card,
+                    PaymentMethodCreateParams.Type.Card.code,
                     ATTRIBUTION
                 ).params
         ).isEqualTo(
@@ -222,7 +222,10 @@ class AnalyticsRequestFactoryTest {
         assertThat(params)
             .hasSize(AnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 2)
         assertEquals(API_KEY, params[AnalyticsRequestFactory.FIELD_PUBLISHABLE_KEY])
-        assertEquals(Source.SourceType.SEPA_DEBIT, params[AnalyticsRequestFactory.FIELD_SOURCE_TYPE])
+        assertEquals(
+            Source.SourceType.SEPA_DEBIT,
+            params[AnalyticsRequestFactory.FIELD_SOURCE_TYPE]
+        )
 
         assertEquals(Build.VERSION.SDK_INT, params[AnalyticsRequestFactory.FIELD_OS_VERSION])
         assertNotNull(params[AnalyticsRequestFactory.FIELD_OS_RELEASE])
@@ -308,7 +311,7 @@ class AnalyticsRequestFactoryTest {
     fun `create should create object with expected url and headers`() {
         val sdkVersion = Stripe.VERSION_NAME
         val analyticsRequest = analyticsRequestFactory.createPaymentMethodCreation(
-            PaymentMethodCreateParams.Type.Card,
+            PaymentMethodCreateParams.Type.Card.code,
             emptySet()
         )
         assertThat(analyticsRequest.headers)

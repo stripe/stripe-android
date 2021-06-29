@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.liveData
 import com.stripe.android.createPaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import com.stripe.example.StripeFactory
 
 internal class PaymentMethodViewModel(
@@ -13,7 +13,7 @@ internal class PaymentMethodViewModel(
     private val stripe = StripeFactory(application).create()
 
     internal fun createPaymentMethod(
-        params: PaymentMethodCreateParams
+        params: PaymentMethodCreateParamsInterface
     ) = liveData {
         emit(
             runCatching {

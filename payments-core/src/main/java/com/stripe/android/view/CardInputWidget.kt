@@ -39,6 +39,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsInterface
 import kotlin.properties.Delegates
 
 /**
@@ -196,7 +197,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
     /**
-     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
+     * A [PaymentMethodCreateParamsInterface] representing the card details and postal code if all fields
      * are valid; otherwise `null`
      */
     override val paymentMethodCreateParams: PaymentMethodCreateParams?
