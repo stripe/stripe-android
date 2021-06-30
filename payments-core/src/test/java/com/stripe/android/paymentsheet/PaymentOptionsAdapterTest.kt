@@ -84,7 +84,7 @@ class PaymentOptionsAdapterTest {
         assertThat(adapter.getItemViewType(1))
             .isEqualTo(PaymentOptionsAdapter.ViewType.GooglePay.ordinal)
         assertThat(adapter.getItemViewType(2))
-            .isEqualTo(PaymentOptionsAdapter.ViewType.Card.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.SavedPaymentMethod.ordinal)
     }
 
     @Test
@@ -97,9 +97,9 @@ class PaymentOptionsAdapterTest {
         assertThat(adapter.getItemViewType(0))
             .isEqualTo(PaymentOptionsAdapter.ViewType.AddCard.ordinal)
         assertThat(adapter.getItemViewType(1))
-            .isEqualTo(PaymentOptionsAdapter.ViewType.Card.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.SavedPaymentMethod.ordinal)
         assertThat(adapter.getItemViewType(2))
-            .isEqualTo(PaymentOptionsAdapter.ViewType.Card.ordinal)
+            .isEqualTo(PaymentOptionsAdapter.ViewType.SavedPaymentMethod.ordinal)
     }
 
     @Test
@@ -179,8 +179,8 @@ class PaymentOptionsAdapterTest {
         }
 
         assertThat(adapter.selectedItem)
-            .isInstanceOf(PaymentOptionsAdapter.Item.ExistingPaymentMethod::class.java)
-        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.ExistingPaymentMethod).paymentMethod)
+            .isInstanceOf(PaymentOptionsAdapter.Item.SavedPaymentMethod::class.java)
+        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.SavedPaymentMethod).paymentMethod)
             .isEqualTo(savedPaymentMethod)
     }
 
@@ -199,8 +199,8 @@ class PaymentOptionsAdapterTest {
         }
 
         assertThat(adapter.selectedItem)
-            .isInstanceOf(PaymentOptionsAdapter.Item.ExistingPaymentMethod::class.java)
-        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.ExistingPaymentMethod).paymentMethod)
+            .isInstanceOf(PaymentOptionsAdapter.Item.SavedPaymentMethod::class.java)
+        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.SavedPaymentMethod).paymentMethod)
             .isEqualTo(selectedPaymentMethod)
     }
 
@@ -219,8 +219,8 @@ class PaymentOptionsAdapterTest {
         }
 
         assertThat(adapter.selectedItem)
-            .isInstanceOf(PaymentOptionsAdapter.Item.ExistingPaymentMethod::class.java)
-        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.ExistingPaymentMethod).paymentMethod)
+            .isInstanceOf(PaymentOptionsAdapter.Item.SavedPaymentMethod::class.java)
+        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.SavedPaymentMethod).paymentMethod)
             .isEqualTo(savedPaymentMethod)
     }
 

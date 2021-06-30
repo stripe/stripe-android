@@ -119,7 +119,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.updatePaymentMethods()
         viewModel.fetchStripeIntent()
 
         starterArgs.statusBarColor?.let {

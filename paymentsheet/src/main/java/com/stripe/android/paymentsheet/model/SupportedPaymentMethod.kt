@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.specifications.bancontact
 import com.stripe.android.paymentsheet.specifications.sofort
 
 /**
- * Enum defining all payment methods supported in Payment Sheet.
+ * Enum defining all payment method types for which Payment Sheet can collect payment data.
  */
 enum class SupportedPaymentMethod(
     val code: String,

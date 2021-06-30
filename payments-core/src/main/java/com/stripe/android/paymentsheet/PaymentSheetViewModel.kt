@@ -23,7 +23,6 @@ import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.googlepaylauncher.getErrorResourceID
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
@@ -39,11 +38,14 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.SupportedSavedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -142,6 +144,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    @VisibleForTesting
     fun fetchIsGooglePayReady() {
         if (isGooglePayReady.value == null) {
             if (args.isGooglePayEnabled) {
@@ -154,17 +157,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             } else {
                 _isGooglePayReady.value = false
             }
-        }
-    }
-
-    fun updatePaymentMethods() {
-        viewModelScope.launch {
-            _paymentMethods.value = customerConfig?.let {
-                paymentMethodsRepository.get(
-                    it,
-                    PaymentMethod.Type.Card
-                )
-            }.orEmpty()
         }
     }
 
@@ -190,6 +182,47 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 stripeIntentValidator.requireValid(stripeIntent)
             }.fold(
                 onSuccess = {
+                    updatePaymentMethods(stripeIntent)
+                    resetViewState(stripeIntent, userErrorMessage = null)
+                },
+                onFailure = ::onFatal
+            )
+        }
+    }
+
+    /**
+     * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
+     * was provided.
+     * It will fetch only the payment method types accepted by the [stripeIntent] and defined in
+     * [SupportedSavedPaymentMethod].
+     */
+    @VisibleForTesting
+    fun updatePaymentMethods(stripeIntent: StripeIntent) {
+        viewModelScope.launch {
+            runCatching {
+                customerConfig?.let { customerConfig ->
+                    stripeIntent.paymentMethodTypes.mapNotNull {
+                        SupportedSavedPaymentMethod.fromCode(it)
+                    }.map {
+                        async {
+                            paymentMethodsRepository.get(
+                                customerConfig,
+                                it.type
+                            )
+                        }
+                    }.awaitAll().flatten().filter { paymentMethod ->
+                        SupportedSavedPaymentMethod.isSupported(paymentMethod).also { valid ->
+                            if (!valid) {
+                                logger.error(
+                                    "Discarding invalid payment method ${paymentMethod.id}"
+                                )
+                            }
+                        }
+                    }
+                }.orEmpty()
+            }.fold(
+                onSuccess = {
+                    _paymentMethods.value = it
                     setStripeIntent(stripeIntent)
                     resetViewState(stripeIntent, userErrorMessage = null)
                 },

@@ -11,11 +11,12 @@ import com.stripe.android.R
 import com.stripe.android.databinding.LayoutPaymentsheetAddCardItemBinding
 import com.stripe.android.databinding.LayoutPaymentsheetGooglePayItemBinding
 import com.stripe.android.databinding.LayoutPaymentsheetPaymentMethodItemBinding
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.getIcon
+import com.stripe.android.paymentsheet.model.getLabel
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
@@ -47,7 +48,7 @@ internal class PaymentOptionsAdapter(
             Item.AddCard,
             Item.GooglePay.takeIf { config.isGooglePayReady }
         ) + config.sortedPaymentMethods.map {
-            Item.ExistingPaymentMethod(it)
+            Item.SavedPaymentMethod(it)
         }
 
         this.items = items
@@ -63,9 +64,9 @@ internal class PaymentOptionsAdapter(
 
     /**
      * The initial selection position follows this prioritization:
-     * 1. The index of [Item.ExistingPaymentMethod] if it matches the [SavedSelection]
+     * 1. The index of [Item.SavedPaymentMethod] if it matches the [SavedSelection]
      * 2. The index of [Item.GooglePay] if it exists
-     * 3. The index of the first [Item.ExistingPaymentMethod]
+     * 3. The index of the first [Item.SavedPaymentMethod]
      * 4. None (-1)
      */
     private fun findInitialSelectedPosition(
@@ -78,7 +79,7 @@ internal class PaymentOptionsAdapter(
                     SavedSelection.GooglePay -> item is Item.GooglePay
                     is SavedSelection.PaymentMethod -> {
                         when (item) {
-                            is Item.ExistingPaymentMethod -> {
+                            is Item.SavedPaymentMethod -> {
                                 savedSelection.id == item.paymentMethod.id
                             }
                             else -> false
@@ -92,7 +93,7 @@ internal class PaymentOptionsAdapter(
             items.indexOfFirst { it is Item.GooglePay }.takeIf { it != -1 },
 
             // the first payment method
-            items.indexOfFirst { it is Item.ExistingPaymentMethod }.takeIf { it != -1 }
+            items.indexOfFirst { it is Item.SavedPaymentMethod }.takeIf { it != -1 }
         ).firstOrNull() ?: NO_POSITION
     }
 
@@ -105,7 +106,7 @@ internal class PaymentOptionsAdapter(
                 PaymentSelection.GooglePay -> item is Item.GooglePay
                 is PaymentSelection.Saved -> {
                     when (item) {
-                        is Item.ExistingPaymentMethod -> {
+                        is Item.SavedPaymentMethod -> {
                             paymentSelection.paymentMethod.id == item.paymentMethod.id
                         }
                         else -> false
@@ -135,7 +136,7 @@ internal class PaymentOptionsAdapter(
             when (newSelectedItem) {
                 Item.AddCard -> null
                 Item.GooglePay -> PaymentSelection.GooglePay
-                is Item.ExistingPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
+                is Item.SavedPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
             }?.let { paymentSelection ->
                 paymentOptionSelectedListener(
                     paymentSelection,
@@ -162,7 +163,7 @@ internal class PaymentOptionsAdapter(
                     onItemSelected(bindingAdapterPosition, isClick = true)
                 }
             }
-            ViewType.Card -> CardViewHolder(parent).apply {
+            ViewType.SavedPaymentMethod -> SavedPaymentMethodViewHolder(parent).apply {
                 itemView.setOnClickListener {
                     onItemSelected(bindingAdapterPosition, isClick = true)
                 }
@@ -175,11 +176,11 @@ internal class PaymentOptionsAdapter(
         position: Int
     ) {
         val item = items[position]
-        if (holder is CardViewHolder) {
+        if (holder is SavedPaymentMethodViewHolder) {
             holder.setSelected(position == selectedItemPosition)
 
             when (item) {
-                is Item.ExistingPaymentMethod -> {
+                is Item.SavedPaymentMethod -> {
                     holder.bindPaymentMethod(item.paymentMethod)
                 }
                 else -> {
@@ -192,7 +193,7 @@ internal class PaymentOptionsAdapter(
         holder.setEnabled(isEnabled)
     }
 
-    private class CardViewHolder(
+    private class SavedPaymentMethodViewHolder(
         private val binding: LayoutPaymentsheetPaymentMethodItemBinding
     ) : PaymentOptionViewHolder(binding.root) {
         constructor(parent: ViewGroup) : this(
@@ -208,34 +209,9 @@ internal class PaymentOptionsAdapter(
             binding.checkIcon.elevation = binding.card.elevation + 1
         }
 
-        fun bindPaymentMethod(method: PaymentMethod) {
-            // TODO: Communicate error if card data not present
-            method.card?.let { card ->
-                bind(
-                    brand = card.brand,
-                    last4 = card.last4
-                )
-            }
-        }
-
-        private fun bind(
-            brand: CardBrand,
-            last4: String?
-        ) {
-            binding.brandIcon.setImageResource(
-                when (brand) {
-                    CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa
-                    CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex
-                    CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover
-                    CardBrand.JCB -> R.drawable.stripe_ic_paymentsheet_card_jcb
-                    CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
-                    CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
-                    CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
-                    CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
-                }
-            )
-            binding.label.text = itemView.context
-                .getString(R.string.paymentsheet_payment_method_item_card_number, last4)
+        fun bindPaymentMethod(paymentMethod: PaymentMethod) {
+            binding.brandIcon.setImageResource(paymentMethod.getIcon() ?: 0)
+            binding.label.text = paymentMethod.getLabel(itemView.resources)
         }
 
         fun setSelected(selected: Boolean) {
@@ -322,7 +298,7 @@ internal class PaymentOptionsAdapter(
     }
 
     internal enum class ViewType {
-        Card,
+        SavedPaymentMethod,
         AddCard,
         GooglePay
     }
@@ -338,10 +314,10 @@ internal class PaymentOptionsAdapter(
             override val viewType: ViewType = ViewType.GooglePay
         }
 
-        data class ExistingPaymentMethod(
+        data class SavedPaymentMethod(
             val paymentMethod: PaymentMethod
         ) : Item() {
-            override val viewType: ViewType = ViewType.Card
+            override val viewType: ViewType = ViewType.SavedPaymentMethod
         }
     }
 }
