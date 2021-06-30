@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.country.CountryUtils
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.IdealBank
 import java.util.Locale
 
 /**
@@ -26,18 +28,33 @@ class TransformFormToPaymentMethod {
         // Need to convert Country Fields to a country code to put it in the parameter map
         val formKeyValueMap = formFieldValues.fieldValuePairs
             .mapValues { entry ->
-                if (entry.key == Country.identifier) {
-                    entry.value?.let {
-                        CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
+                when (entry.key) {
+                    Country.identifier -> {
+                        transformCountry(entry.value)
                     }
-                } else {
-                    entry.value
+                    IdealBank.identifier -> {
+                        val test = transformIdealBank(entry.value)
+                        test
+                    }
+                    else -> {
+                        entry.value
+                    }
                 }
             }
             .mapKeys { it.key.value }
 
         createMap(mapStructure, destMap, formKeyValueMap)
         return destMap
+    }
+
+    private fun transformCountry(countryDisplayName: String?) = countryDisplayName?.let {
+        CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
+    }
+
+    private fun transformIdealBank(bankDisplayName: String?) = bankDisplayName?.let {
+        IdealBankConfig.DISPLAY_TO_PARAM
+            .firstOrNull { it.displayName == bankDisplayName }
+            ?.paymentMethodParamFieldValue
     }
 
     companion object {
