@@ -23,6 +23,7 @@ val bancontact = FormSpec(
         listOf(
             bancontactNameSection,
             bancontactEmailSection,
+            bancontactMandate,
             SaveForFutureUseSpec(
                 listOf(
                     bancontactEmailSection, bancontactMandate
