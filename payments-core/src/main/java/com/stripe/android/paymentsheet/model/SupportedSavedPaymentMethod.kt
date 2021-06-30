@@ -17,8 +17,6 @@ internal enum class SupportedSavedPaymentMethod(
     val type: PaymentMethod.Type
 ) {
     Card(PaymentMethod.Type.Card),
-    Bancontact(PaymentMethod.Type.Bancontact),
-    Sofort(PaymentMethod.Type.Sofort),
     SepaDebit(PaymentMethod.Type.SepaDebit);
 
     companion object {
@@ -28,8 +26,6 @@ internal enum class SupportedSavedPaymentMethod(
         internal fun isSupported(paymentMethod: PaymentMethod) =
             when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> paymentMethod.card != null
-                PaymentMethod.Type.Bancontact -> true
-                PaymentMethod.Type.Sofort -> paymentMethod.sofort != null
                 PaymentMethod.Type.SepaDebit -> paymentMethod.sepaDebit != null
                 else -> false
             }
@@ -40,8 +36,6 @@ internal enum class SupportedSavedPaymentMethod(
 internal fun PaymentMethod.getIcon(): Int? = when (type) {
     PaymentMethod.Type.Card -> card?.brand?.getIcon()
         ?: R.drawable.stripe_ic_paymentsheet_card_unknown
-    PaymentMethod.Type.Bancontact -> R.drawable.stripe_ic_paymentsheet_pm_bancontact
-    PaymentMethod.Type.Sofort -> R.drawable.stripe_ic_paymentsheet_pm_sofort
     PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_pm_sepa_debit
     else -> null
 }
