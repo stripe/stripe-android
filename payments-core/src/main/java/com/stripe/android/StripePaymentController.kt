@@ -16,6 +16,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
@@ -160,8 +161,18 @@ internal class StripePaymentController internal constructor(
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
 
-        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-            ?: defaultReturnUrl.value
+        val returnUrl =
+            shouldOverrideReturnUrl(
+                confirmStripeIntentParams,
+                requestOptions
+            ).let { shouldOverrideReturnUrl ->
+                if (shouldOverrideReturnUrl) {
+                    confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                        ?: defaultReturnUrl.value
+                } else {
+                    confirmStripeIntentParams.returnUrl
+                }
+            }
 
         runCatching {
             when (confirmStripeIntentParams) {
@@ -586,10 +597,43 @@ internal class StripePaymentController internal constructor(
         }
     }
 
+    /**
+     * Decide if a [StripeIntent] confirmation request's returnUrl should be overriden
+     * to [DefaultReturnUrl] if client doesn't set any value.
+     */
+    private suspend fun shouldOverrideReturnUrl(
+        confirmStripeIntentParams: ConfirmStripeIntentParams,
+        requestOptions: ApiRequest.Options
+    ): Boolean {
+        // Get payment method type if it's set in confirmStripeIntentParams,
+        // otherwise get the type by fetching the StripeIntent
+        val paymentMethodType =
+            when (confirmStripeIntentParams) {
+                is ConfirmPaymentIntentParams -> {
+                    confirmStripeIntentParams.paymentMethodCreateParams
+                }
+                is ConfirmSetupIntentParams -> {
+                    confirmStripeIntentParams.paymentMethodCreateParams
+                }
+            }?.type?.paymentMethodType ?: run {
+                stripeRepository.retrieveStripeIntent(
+                    confirmStripeIntentParams.clientSecret,
+                    requestOptions,
+                    EXPAND_PAYMENT_METHOD
+                ).paymentMethod?.type
+            }
+        return !RETURN_URL_OVERRIDE_BLOCKLIST.contains(paymentMethodType)
+    }
+
     internal companion object {
         internal const val PAYMENT_REQUEST_CODE = 50000
         internal const val SETUP_REQUEST_CODE = 50001
         internal const val SOURCE_REQUEST_CODE = 50002
+
+        /**
+         * List of payment methods not to override the return_url to [DefaultReturnUrl]
+         */
+        internal val RETURN_URL_OVERRIDE_BLOCKLIST = setOf(PaymentMethod.Type.WeChatPay)
 
         /**
          * Get the appropriate request code for the given stripe intent type

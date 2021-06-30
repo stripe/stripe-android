@@ -195,7 +195,7 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
     internal enum class Type(
-        private val paymentMethodType: PaymentMethod.Type,
+        internal val paymentMethodType: PaymentMethod.Type,
         val hasMandate: Boolean = false
     ) {
         Card(PaymentMethod.Type.Card),

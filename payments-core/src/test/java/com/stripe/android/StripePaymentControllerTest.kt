@@ -12,10 +12,12 @@ import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.AnalyticsEvent
@@ -94,6 +96,7 @@ internal class StripePaymentControllerTest {
     fun cleanup() {
         Dispatchers.resetMain()
         testDispatcher.cleanupTestCoroutines()
+        stripeRepository.retrieveStripeIntentResponse = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
     }
 
     @Test
@@ -249,6 +252,68 @@ internal class StripePaymentControllerTest {
             assertThat(actualResponse.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
         }
 
+    @Test
+    fun `returnUrl is overridden when PM from confirmStripeIntentParams is not in the blocklist`() =
+        testDispatcher.runBlockingTest {
+            controller.startConfirmAndAuth(
+                mock(),
+                ConfirmPaymentIntentParams(
+                    clientSecret = "clientSecret",
+                    paymentMethodCreateParams = PaymentMethodCreateParams.Companion.createBlik()
+                ),
+                REQUEST_OPTIONS
+            )
+            assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl)
+                .isEqualTo("stripesdk://payment_return_url/com.stripe.android.test")
+        }
+
+    @Test
+    fun `returnUrl is not overridden when PM from confirmStripeIntentParams is in the blocklist`() =
+        testDispatcher.runBlockingTest {
+            controller.startConfirmAndAuth(
+                mock(),
+                ConfirmPaymentIntentParams(
+                    clientSecret = "clientSecret",
+                    paymentMethodCreateParams = PaymentMethodCreateParams.Companion.createWeChatPay()
+                ),
+                REQUEST_OPTIONS
+            )
+            assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl).isNull()
+        }
+
+    @Test
+    fun `returnUrl is overridden when fetched PM is not in the block list`() =
+        testDispatcher.runBlockingTest {
+            controller.startConfirmAndAuth(
+                mock(),
+                ConfirmPaymentIntentParams(
+                    clientSecret = "clientSecret",
+                ),
+                REQUEST_OPTIONS
+            )
+            assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl)
+                .isEqualTo("stripesdk://payment_return_url/com.stripe.android.test")
+        }
+
+    @Test
+    fun `returnUrl is not overridden when fetched PM is in the block list`() =
+        testDispatcher.runBlockingTest {
+            stripeRepository.retrieveStripeIntentResponse =
+                PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
+            controller.startConfirmAndAuth(
+                mock(),
+                ConfirmPaymentIntentParams(
+                    clientSecret = "clientSecret",
+                ),
+                REQUEST_OPTIONS
+            )
+            assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl).isNull()
+        }
+
     private fun createController(): StripePaymentController {
         return StripePaymentController(
             context,
@@ -264,6 +329,7 @@ internal class StripePaymentControllerTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
+        var retrieveStripeIntentResponse = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
         var retrievePaymentIntentResponse = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
         var cancelPaymentIntentResponse = PaymentIntentFixtures.CANCELLED
         var confirmPaymentIntentResponse = PaymentIntentFixtures.PI_WITH_SHIPPING
@@ -289,6 +355,14 @@ internal class StripePaymentControllerTest {
                 Triple(clientSecret, options, expandFields)
             )
             return retrievePaymentIntentResponse
+        }
+
+        override suspend fun retrieveStripeIntent(
+            clientSecret: String,
+            options: ApiRequest.Options,
+            expandFields: List<String>
+        ): StripeIntent {
+            return retrieveStripeIntentResponse
         }
 
         override suspend fun retrieveSource(

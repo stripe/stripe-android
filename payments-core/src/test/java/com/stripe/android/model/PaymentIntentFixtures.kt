@@ -1004,7 +1004,28 @@ internal object PaymentIntentFixtures {
             }
           },
           "on_behalf_of": null,
-          "payment_method": "pm_1IlJH7BNJ02ErVOjxKQu1wfH",
+          "payment_method": {
+            "id": "pm_1J7sAgBNJ02ErVOjxd4BCQmH",
+            "object": "payment_method",
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "created": 1625016298,
+            "customer": null,
+            "livemode": true,
+            "type": "wechat_pay",
+            "wechat_pay": {}
+          },
           "payment_method_options": {
             "wechat_pay": {
             }
