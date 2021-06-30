@@ -38,11 +38,10 @@ internal class GooglePayLauncherContract :
         )
     }
 
-    @Parcelize
-    data class Args(
-        internal val clientSecret: String,
-        internal val config: GooglePayLauncher.Config,
-    ) : Parcelable {
+    sealed class Args : Parcelable {
+        abstract val clientSecret: String
+        abstract val config: GooglePayLauncher.Config
+
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
@@ -53,6 +52,19 @@ internal class GooglePayLauncherContract :
             }
         }
     }
+
+    @Parcelize
+    data class PaymentIntentArgs(
+        override val clientSecret: String,
+        override val config: GooglePayLauncher.Config,
+    ) : Args()
+
+    @Parcelize
+    data class SetupIntentArgs(
+        override val clientSecret: String,
+        override val config: GooglePayLauncher.Config,
+        internal val currencyCode: String
+    ) : Args()
 
     internal companion object {
         internal const val EXTRA_RESULT = "extra_result"

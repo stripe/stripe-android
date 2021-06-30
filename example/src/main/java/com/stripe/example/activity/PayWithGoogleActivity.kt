@@ -42,7 +42,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
         }
 
         viewBinding.googlePayButton.setOnClickListener {
-            googlePayLauncher.present(clientSecret)
+            googlePayLauncher.presentForPaymentIntent(clientSecret)
         }
     }
 }

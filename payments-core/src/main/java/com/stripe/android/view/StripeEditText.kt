@@ -47,7 +47,7 @@ open class StripeEditText @JvmOverloads constructor(
     @ColorInt
     private var externalErrorColor: Int? = null
 
-    private val textWatchers = mutableListOf<TextWatcher>()
+    private var textWatchers: MutableList<TextWatcher>? = null
 
     /**
      * Gets whether or not the text should be displayed in error mode.
@@ -96,6 +96,7 @@ open class StripeEditText @JvmOverloads constructor(
         }
 
     init {
+        textWatchers = mutableListOf()
         maxLines = 1
 
         listenForTextChanges()
@@ -264,17 +265,22 @@ open class StripeEditText @JvmOverloads constructor(
     @VisibleForTesting
     internal fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
 
+    /**
+     * Note: [addTextChangedListener] will potentially be called by a superclass constructor
+     */
     override fun addTextChangedListener(watcher: TextWatcher?) {
         super.addTextChangedListener(watcher)
+
         watcher?.let {
-            textWatchers.add(it)
+            textWatchers?.add(it)
         }
     }
 
     override fun removeTextChangedListener(watcher: TextWatcher?) {
         super.removeTextChangedListener(watcher)
+
         watcher?.let {
-            textWatchers.remove(it)
+            textWatchers?.remove(it)
         }
     }
 
@@ -282,11 +288,11 @@ open class StripeEditText @JvmOverloads constructor(
      * Set text without notifying its corresponding text watchers.
      */
     internal fun setTextSilent(text: CharSequence?) {
-        textWatchers.forEach {
+        textWatchers?.forEach {
             super.removeTextChangedListener(it)
         }
         setText(text)
-        textWatchers.forEach {
+        textWatchers?.forEach {
             super.addTextChangedListener(it)
         }
     }

@@ -921,7 +921,8 @@ public final class com/stripe/android/googlepaylauncher/GooglePayEnvironment : j
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncher {
 	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;)V
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;)V
-	public final fun present (Ljava/lang/String;)V
+	public final fun presentForPaymentIntent (Ljava/lang/String;)V
+	public final fun presentForSetupIntent (Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig : android/os/Parcelable {

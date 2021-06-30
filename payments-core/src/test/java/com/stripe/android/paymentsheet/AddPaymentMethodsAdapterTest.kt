@@ -33,6 +33,6 @@ class AddPaymentMethodsAdapterTest {
     }
 
     private fun createAdapter() = AddPaymentMethodsAdapter(
-        listOf(SupportedPaymentMethod.Card, SupportedPaymentMethod.Bancontact)
+        listOf(*SupportedPaymentMethod.values())
     ) { }
 }

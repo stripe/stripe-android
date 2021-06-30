@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import java.util.Locale
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment.
@@ -174,7 +175,11 @@ class GooglePayPaymentMethodLauncher internal constructor(
          * has existing payment methods.
          */
         var existingPaymentMethodRequired: Boolean = false
-    ) : Parcelable
+    ) : Parcelable {
+
+        internal val isJcbEnabled: Boolean
+            get() = merchantCountryCode.equals(Locale.JAPAN.country, ignoreCase = true)
+    }
 
     @Parcelize
     data class BillingAddressConfig @JvmOverloads constructor(

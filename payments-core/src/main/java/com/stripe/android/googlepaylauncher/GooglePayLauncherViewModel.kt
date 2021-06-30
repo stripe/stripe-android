@@ -59,13 +59,39 @@ internal class GooglePayLauncherViewModel(
     }
 
     @VisibleForTesting
-    suspend fun createPaymentDataRequest(): JSONObject {
-        val transactionInfo = createTransactionInfo(
-            stripeRepository.retrieveStripeIntent(
-                args.clientSecret,
-                requestOptions,
-            )
-        )
+    suspend fun createPaymentDataRequest(
+        args: GooglePayLauncherContract.Args
+    ): JSONObject {
+        val transactionInfo = when (args) {
+            is GooglePayLauncherContract.PaymentIntentArgs -> {
+                val paymentIntent = requireNotNull(
+                    stripeRepository.retrievePaymentIntent(
+                        args.clientSecret,
+                        requestOptions,
+                    )
+                ) {
+                    "Could not retrieve PaymentIntent."
+                }
+                createTransactionInfo(
+                    paymentIntent,
+                    paymentIntent.currency.orEmpty()
+                )
+            }
+            is GooglePayLauncherContract.SetupIntentArgs -> {
+                val setupIntent = requireNotNull(
+                    stripeRepository.retrieveSetupIntent(
+                        args.clientSecret,
+                        requestOptions,
+                    )
+                ) {
+                    "Could not retrieve SetupIntent."
+                }
+                createTransactionInfo(
+                    setupIntent,
+                    args.currencyCode
+                )
+            }
+        }
 
         return googlePayJsonFactory.createPaymentDataRequest(
             transactionInfo = transactionInfo,
@@ -73,9 +99,14 @@ internal class GooglePayLauncherViewModel(
                 merchantName = args.config.merchantName
             ),
             billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
-                isRequired = true,
-                format = GooglePayJsonFactory.BillingAddressParameters.Format.Min,
-                isPhoneNumberRequired = false
+                isRequired = args.config.billingAddressConfig.isRequired,
+                format = when (args.config.billingAddressConfig.format) {
+                    GooglePayLauncher.BillingAddressConfig.Format.Min ->
+                        GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                    GooglePayLauncher.BillingAddressConfig.Format.Full ->
+                        GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                },
+                isPhoneNumberRequired = args.config.billingAddressConfig.isPhoneNumberRequired
             ),
             isEmailRequired = args.config.isEmailRequired
         )
@@ -83,12 +114,13 @@ internal class GooglePayLauncherViewModel(
 
     @VisibleForTesting
     internal fun createTransactionInfo(
-        stripeIntent: StripeIntent
+        stripeIntent: StripeIntent,
+        currencyCode: String
     ): GooglePayJsonFactory.TransactionInfo {
         return when (stripeIntent) {
             is PaymentIntent -> {
                 GooglePayJsonFactory.TransactionInfo(
-                    currencyCode = stripeIntent.currency.orEmpty(),
+                    currencyCode = currencyCode,
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
@@ -98,8 +130,7 @@ internal class GooglePayLauncherViewModel(
             }
             is SetupIntent -> {
                 GooglePayJsonFactory.TransactionInfo(
-                    // TODO(mshafrir-stripe): get currencyCode for SetupIntents
-                    currencyCode = "",
+                    currencyCode = currencyCode,
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
@@ -115,7 +146,9 @@ internal class GooglePayLauncherViewModel(
             "Google Pay is unavailable."
         }
         return paymentsClient.loadPaymentData(
-            PaymentDataRequest.fromJson(createPaymentDataRequest().toString())
+            PaymentDataRequest.fromJson(
+                createPaymentDataRequest(args).toString()
+            )
         )
     }
 
