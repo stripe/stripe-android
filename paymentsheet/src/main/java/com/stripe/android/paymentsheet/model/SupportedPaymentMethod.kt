@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.FormSpec
 import com.stripe.android.paymentsheet.specifications.bancontact
+import com.stripe.android.paymentsheet.specifications.ideal
 import com.stripe.android.paymentsheet.specifications.sofort
 
 /**
@@ -35,6 +36,12 @@ enum class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_sofort,
         R.drawable.stripe_ic_paymentsheet_pm_sofort,
         sofort
+    ),
+    Ideal(
+        "ideal",
+        R.string.stripe_paymentsheet_payment_method_ideal,
+        R.drawable.stripe_ic_paymentsheet_pm_ideal,
+        ideal
     );
 
     override fun toString(): String {
