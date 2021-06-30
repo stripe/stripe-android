@@ -622,7 +622,7 @@ internal class StripePaymentController internal constructor(
                     EXPAND_PAYMENT_METHOD
                 ).paymentMethod?.type
             }
-        return RETURN_URL_OVERRIDE_ALLOWLIST.contains(paymentMethodType)
+        return !RETURN_URL_OVERRIDE_BLOCKLIST.contains(paymentMethodType)
     }
 
     internal companion object {
@@ -631,9 +631,9 @@ internal class StripePaymentController internal constructor(
         internal const val SOURCE_REQUEST_CODE = 50002
 
         /**
-         * List of payment methods to override the return_url to [DefaultReturnUrl]
+         * List of payment methods not to override the return_url to [DefaultReturnUrl]
          */
-        internal val RETURN_URL_OVERRIDE_ALLOWLIST = setOf(PaymentMethod.Type.Card)
+        internal val RETURN_URL_OVERRIDE_BLOCKLIST = setOf(PaymentMethod.Type.WeChatPay)
 
         /**
          * Get the appropriate request code for the given stripe intent type
