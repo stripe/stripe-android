@@ -22,7 +22,7 @@ class GooglePayLauncherContractTest {
         scenario.onFragment {
             val intent = contract.createIntent(
                 it.requireActivity(),
-                GooglePayLauncherContract.Args(
+                GooglePayLauncherContract.PaymentIntentArgs(
                     "pi_123_secret_456",
                     CONFIG
                 )

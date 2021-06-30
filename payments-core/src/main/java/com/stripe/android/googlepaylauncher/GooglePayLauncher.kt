@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
 import com.stripe.android.paymentsheet.GooglePayRepository
 import kotlinx.coroutines.CoroutineScope
@@ -31,15 +33,16 @@ class GooglePayLauncher internal constructor(
      * @param activity the Activity that is launching the [GooglePayLauncher]
      *
      * @param readyCallback called after determining whether Google Pay is available and ready on
-     * the device. [present] may only be called if Google Pay is ready.
+     * the device. [presentForPaymentIntent] and [presentForSetupIntent] may only be called if
+     * Google Pay is ready.
      *
-     * @param callback called with the result of the [GooglePayLauncher] operation
+     * @param resultCallback called with the result of the [GooglePayLauncher] operation
      */
     constructor(
         activity: ComponentActivity,
         config: Config,
         readyCallback: ReadyCallback,
-        callback: ResultCallback
+        resultCallback: ResultCallback
     ) : this(
         activity.lifecycleScope,
         config,
@@ -53,7 +56,7 @@ class GooglePayLauncher internal constructor(
         activity.registerForActivityResult(
             GooglePayLauncherContract()
         ) {
-            callback.onResult(it)
+            resultCallback.onResult(it)
         }
     )
 
@@ -63,15 +66,16 @@ class GooglePayLauncher internal constructor(
      * @param fragment the Fragment that is launching the [GooglePayLauncher]
      *
      * @param readyCallback called after determining whether Google Pay is available and ready on
-     * the device. [present] may only be called if Google Pay is ready.
+     * the device. [presentForPaymentIntent] and [presentForSetupIntent] may only be called if
+     * Google Pay is ready.
      *
-     * @param callback called with the result of the [GooglePayLauncher] operation
+     * @param resultCallback called with the result of the [GooglePayLauncher] operation
      */
     constructor(
         fragment: Fragment,
         config: Config,
         readyCallback: ReadyCallback,
-        callback: ResultCallback
+        resultCallback: ResultCallback
     ) : this(
         fragment.viewLifecycleOwner.lifecycleScope,
         config,
@@ -85,7 +89,7 @@ class GooglePayLauncher internal constructor(
         fragment.registerForActivityResult(
             GooglePayLauncherContract()
         ) {
-            callback.onResult(it)
+            resultCallback.onResult(it)
         }
     )
 
@@ -100,15 +104,52 @@ class GooglePayLauncher internal constructor(
         }
     }
 
-    fun present(clientSecret: String) {
+    /**
+     * Present Google Pay to collect customer payment details and use it to confirm the
+     * [PaymentIntent] represented by [clientSecret].
+     *
+     * [PaymentIntent.currency] and [PaymentIntent.amount] will be used to populate the Google
+     * Pay [TransactionInfo](https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo)
+     * object.
+     *
+     * @param clientSecret the PaymentIntent's [client secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     */
+    fun presentForPaymentIntent(clientSecret: String) {
         check(isReady) {
-            "present() may only be called when Google Pay is available on this device."
+            "presentForPaymentIntent() may only be called when Google Pay is available on this device."
         }
 
         activityResultLauncher.launch(
-            GooglePayLauncherContract.Args(
+            GooglePayLauncherContract.PaymentIntentArgs(
                 clientSecret = clientSecret,
                 config = config
+            )
+        )
+    }
+
+    /**
+     * Present Google Pay to collect customer payment details and use it to confirm the
+     * [SetupIntent] represented by [clientSecret].
+     *
+     * The Google Pay API requires a [currencyCode](https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo).
+     * [currencyCode] is required even though the SetupIntent API does not require it.
+     *
+     * @param clientSecret the SetupIntent's [client secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
+     * @param currencyCode The ISO 4217 alphabetic currency code.
+     */
+    fun presentForSetupIntent(
+        clientSecret: String,
+        currencyCode: String
+    ) {
+        check(isReady) {
+            "presentForSetupIntent() may only be called when Google Pay is available on this device."
+        }
+
+        activityResultLauncher.launch(
+            GooglePayLauncherContract.SetupIntentArgs(
+                clientSecret = clientSecret,
+                config = config,
+                currencyCode = currencyCode
             )
         )
     }
