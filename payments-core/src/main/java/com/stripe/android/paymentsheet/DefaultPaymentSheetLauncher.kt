@@ -1,17 +1,17 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import org.jetbrains.annotations.TestOnly
 
+/**
+ * This is used internally for integrations that don't use Jetpack Compose and are
+ * able to pass in an activity.
+ */
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
-    private val statusBarColor: () -> Int?
 ) : PaymentSheetLauncher {
 
     constructor(
@@ -22,11 +22,7 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract()
         ) {
             callback.onPaymentSheetResult(it)
-        },
-
-        // lazily access the statusBarColor in case the value changes between when this
-        // class is instantiated and the payment sheet is launched
-        { getStatusBarColor(activity) }
+        }
     )
 
     constructor(
@@ -37,11 +33,7 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract()
         ) {
             callback.onPaymentSheetResult(it)
-        },
-
-        // lazily access the statusBarColor in case the value changes between when this
-        // class is instantiated and the payment sheet is launched
-        { getStatusBarColor(fragment.activity) }
+        }
     )
 
     @TestOnly
@@ -55,20 +47,15 @@ internal class DefaultPaymentSheetLauncher(
             registry
         ) {
             callback.onPaymentSheetResult(it)
-        },
-
-        // lazily access the statusBarColor in case the value changes between when this
-        // class is instantiated and the payment sheet is launched
-        { getStatusBarColor(fragment.activity) }
+        }
     )
 
     override fun presentWithPaymentIntent(
         paymentIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?
     ) = present(
-        PaymentSheetContract.Args(
-            PaymentIntentClientSecret(paymentIntentClientSecret),
-            statusBarColor(),
+        PaymentSheetContract.Args.createPaymentIntentArgs(
+            paymentIntentClientSecret,
             configuration
         )
     )
@@ -77,18 +64,13 @@ internal class DefaultPaymentSheetLauncher(
         setupIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?
     ) = present(
-        PaymentSheetContract.Args(
-            SetupIntentClientSecret(setupIntentClientSecret),
-            statusBarColor(),
+        PaymentSheetContract.Args.createSetupIntentArgs(
+            setupIntentClientSecret,
             configuration
         )
     )
 
     private fun present(args: PaymentSheetContract.Args) {
         activityResultLauncher.launch(args)
-    }
-
-    private companion object {
-        private fun getStatusBarColor(activity: Activity?) = activity?.window?.statusBarColor
     }
 }
