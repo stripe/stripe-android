@@ -55,9 +55,14 @@ internal class GooglePayPaymentMethodLauncherViewModel(
                 merchantName = args.config.merchantName
             ),
             billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
-                isRequired = true,
-                format = GooglePayJsonFactory.BillingAddressParameters.Format.Min,
-                isPhoneNumberRequired = false
+                isRequired = args.config.billingAddressConfig.isRequired,
+                format = when (args.config.billingAddressConfig.format) {
+                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min ->
+                        GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full ->
+                        GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                },
+                isPhoneNumberRequired = args.config.billingAddressConfig.isPhoneNumberRequired
             ),
             isEmailRequired = args.config.isEmailRequired
         )

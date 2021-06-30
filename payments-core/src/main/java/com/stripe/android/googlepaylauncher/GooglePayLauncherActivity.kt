@@ -1,5 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
@@ -42,6 +43,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
     private lateinit var args: GooglePayLauncherContract.Args
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
@@ -52,18 +54,16 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
         disableAnimations()
 
-        val nullableArgs = GooglePayLauncherContract.Args.fromIntent(intent)
-        if (nullableArgs == null) {
+        args = runCatching {
+            requireNotNull(GooglePayLauncherContract.Args.fromIntent(intent)) {
+                "GooglePayLauncherActivity was started without arguments."
+            }
+        }.getOrElse {
             finishWithResult(
-                GooglePayLauncher.Result.Failed(
-                    RuntimeException(
-                        "GooglePayLauncherActivity was started without arguments."
-                    )
-                )
+                GooglePayLauncher.Result.Failed(it)
             )
             return
         }
-        args = nullableArgs
 
         viewModel.googlePayResult.observe(this) { googlePayResult ->
             googlePayResult?.let(::finishWithResult)
@@ -186,6 +186,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     }
 
     private companion object {
+        // the value isn't meaningful / is arbitrary
         private const val LOAD_PAYMENT_DATA_REQUEST_CODE = 4444
     }
 }
