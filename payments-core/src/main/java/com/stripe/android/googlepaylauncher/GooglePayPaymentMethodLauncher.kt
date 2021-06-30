@@ -19,7 +19,7 @@ import kotlinx.parcelize.Parcelize
  *
  * When successful, will return a [PaymentMethod] via [Result.Completed.paymentMethod].
  */
-internal class GooglePayPaymentMethodLauncher internal constructor(
+class GooglePayPaymentMethodLauncher internal constructor(
     lifecycleScope: CoroutineScope,
     private val config: Config,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
@@ -39,7 +39,7 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
      *
      * @param resultCallback called with the result of the [GooglePayPaymentMethodLauncher] operation
      */
-    internal constructor(
+    constructor(
         activity: ComponentActivity,
         config: Config,
         readyCallback: ReadyCallback,
@@ -72,7 +72,7 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
      *
      * @param resultCallback called with the result of the [GooglePayPaymentMethodLauncher] operation
      */
-    internal constructor(
+    constructor(
         fragment: Fragment,
         config: Config,
         readyCallback: ReadyCallback,
@@ -109,6 +109,8 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
      * Present the Google Pay UI when the final amount of the transaction is not yet known.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
+     *
+     * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
      */
     fun present(currencyCode: String) {
         check(isReady) {
@@ -128,6 +130,11 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
      * Present the Google Pay UI when the final amount of the transaction is known.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
+     *
+     * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
+     * @param amount Amount intended to be collected. A positive integer representing how much to
+     * charge in the smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge ¥100,
+     * a zero-decimal currency).
      */
     fun present(
         currencyCode: String,
@@ -147,7 +154,7 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     @Parcelize
-    internal data class Config @JvmOverloads constructor(
+    data class Config @JvmOverloads constructor(
         val environment: GooglePayEnvironment,
         val merchantCountryCode: String,
         val merchantName: String,
@@ -170,18 +177,18 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
     ) : Parcelable
 
     @Parcelize
-    internal data class BillingAddressConfig @JvmOverloads constructor(
-        internal val isRequired: Boolean = false,
+    data class BillingAddressConfig @JvmOverloads constructor(
+        val isRequired: Boolean = false,
 
         /**
          * Billing address format required to complete the transaction.
          */
-        internal val format: Format = Format.Min,
+        val format: Format = Format.Min,
 
         /**
          * Set to true if a phone number is required to process the transaction.
          */
-        internal val isPhoneNumberRequired: Boolean = false
+        val isPhoneNumberRequired: Boolean = false
     ) : Parcelable {
         /**
          * Billing address format required to complete the transaction.
@@ -199,7 +206,7 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
         }
     }
 
-    internal sealed class Result : Parcelable {
+    sealed class Result : Parcelable {
         @Parcelize
         data class Completed(
             val paymentMethod: PaymentMethod
@@ -214,11 +221,11 @@ internal class GooglePayPaymentMethodLauncher internal constructor(
         object Canceled : Result()
     }
 
-    internal fun interface ReadyCallback {
+    fun interface ReadyCallback {
         fun onReady(isReady: Boolean)
     }
 
-    internal fun interface ResultCallback {
+    fun interface ResultCallback {
         fun onResult(result: Result)
     }
 }
