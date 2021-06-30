@@ -108,6 +108,10 @@ class GooglePayLauncher internal constructor(
      * Present Google Pay to collect customer payment details and use it to confirm the
      * [PaymentIntent] represented by [clientSecret].
      *
+     * [PaymentIntent.currency] and [PaymentIntent.amount] will be used to populate the Google
+     * Pay [TransactionInfo](https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo)
+     * object.
+     *
      * @param clientSecret the PaymentIntent's [client secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
      */
     fun presentForPaymentIntent(clientSecret: String) {
