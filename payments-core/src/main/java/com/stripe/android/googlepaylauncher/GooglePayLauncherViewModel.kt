@@ -98,8 +98,15 @@ internal class GooglePayLauncherViewModel(
                 )
             }
             is SetupIntent -> {
-                // TODO(mshafrir-stripe): add SetupIntent support
-                error("SetupIntents are not currently supported in GooglePayLauncher.")
+                GooglePayJsonFactory.TransactionInfo(
+                    // TODO(mshafrir-stripe): get currencyCode for SetupIntents
+                    currencyCode = "",
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
+                    countryCode = args.config.merchantCountryCode,
+                    transactionId = stripeIntent.id,
+                    totalPrice = null,
+                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                )
             }
         }
     }
