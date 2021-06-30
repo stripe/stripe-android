@@ -56,6 +56,19 @@ class PaymentOptionFactoryTest {
     }
 
     @Test
+    fun `create() with invalid Card should return null`() {
+        assertThat(
+            factory.create(
+                PaymentSelection.Saved(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                        card = null
+                    )
+                )
+            )
+        ).isNull()
+    }
+
+    @Test
     fun `create() with card params should return expected object`() {
         assertThat(
             factory.create(

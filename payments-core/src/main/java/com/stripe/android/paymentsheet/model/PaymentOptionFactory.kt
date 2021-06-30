@@ -6,7 +6,7 @@ import com.stripe.android.R
 internal class PaymentOptionFactory(
     private val resources: Resources
 ) {
-    fun create(selection: PaymentSelection): PaymentOption {
+    fun create(selection: PaymentSelection): PaymentOption? {
         return when (selection) {
             PaymentSelection.GooglePay -> {
                 PaymentOption(
@@ -15,10 +15,14 @@ internal class PaymentOptionFactory(
                 )
             }
             is PaymentSelection.Saved -> {
-                PaymentOption(
-                    drawableResourceId = selection.paymentMethod.getIcon() ?: 0,
-                    label = selection.paymentMethod.getLabel(resources).orEmpty()
-                )
+                return if (SupportedSavedPaymentMethod.isSupported(selection.paymentMethod)) {
+                    PaymentOption(
+                        drawableResourceId = selection.paymentMethod.getIcon() ?: 0,
+                        label = selection.paymentMethod.getLabel(resources).orEmpty()
+                    )
+                } else {
+                    null
+                }
             }
             is PaymentSelection.New.Card -> {
                 PaymentOption(
