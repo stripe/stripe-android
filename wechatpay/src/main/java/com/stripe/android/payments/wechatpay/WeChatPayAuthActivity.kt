@@ -14,7 +14,6 @@ import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.modelpay.PayResp
-import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
@@ -22,7 +21,7 @@ internal class WeChatPayAuthActivity : AppCompatActivity(), IWXAPIEventHandler {
     @VisibleForTesting
     internal var weChatApiProvider = { WXAPIFactory.createWXAPI(this, null) }
 
-    private lateinit var weChatApi: IWXAPI
+    private val weChatApi by lazy { weChatApiProvider() }
 
     private var clientSecret: String? = null
 
@@ -33,7 +32,6 @@ internal class WeChatPayAuthActivity : AppCompatActivity(), IWXAPIEventHandler {
                 WeChatPayAuthContract.Args.fromIntent(intent),
                 { NULL_ARG_MSG }
             ).let {
-                weChatApi = weChatApiProvider()
                 clientSecret = it.clientSecret
                 launchWeChat(
                     it.weChat
@@ -58,7 +56,6 @@ internal class WeChatPayAuthActivity : AppCompatActivity(), IWXAPIEventHandler {
             Log.d(TAG, "onResp with errCode: ${resp.errCode}")
             when (resp.errCode) {
                 BaseResp.ErrCode.ERR_OK -> {
-                    // Yes, wechat use errorCode to tell you payment is successful
                     finishWithResult(StripeIntentResult.Outcome.SUCCEEDED)
                 }
                 BaseResp.ErrCode.ERR_USER_CANCEL -> {

@@ -74,17 +74,6 @@ class WeChatPayAuthActivityTest {
     }
 
     @Test
-    fun `when started with no intent should finish with exception`() {
-        testActivityWithIntent(null) {
-            assertResult(
-                it.getResult(),
-                StripeIntentResult.Outcome.FAILED,
-                WeChatPayAuthActivity.NULL_ARG_MSG
-            )
-        }
-    }
-
-    @Test
     fun `when started with invalid intent should finish with exception`() {
         testActivityWithIntent(
             createIntent(isValid = false)
@@ -154,6 +143,11 @@ class WeChatPayAuthActivityTest {
         }
     }
 
+    /**
+     * Asserts the [Instrumentation.ActivityResult] when [WeChatPayAuthActivity] finishes.
+     * Only assert the result's exception message when [exceptionMessage] is not null.
+     * Only assert the result's clientSecret if [hasClientSecret] is true.
+     */
     private fun assertResult(
         activityResult: Instrumentation.ActivityResult,
         flowOutcome: Int,
@@ -185,24 +179,28 @@ class WeChatPayAuthActivityTest {
     }
 
     private fun createIntent(isValid: Boolean = false) =
-        if (isValid) WeChatPayAuthContract().createIntent(
-            context,
-            WeChatPayAuthContract.Args(
-                WeChat(
-                    appId = APP_ID,
-                    partnerId = PARTNER_ID,
-                    prepayId = PREPAY_ID,
-                    packageValue = PACKAGE_VALUE,
-                    nonce = NONCE,
-                    timestamp = TIME_STAMP,
-                    sign = SIGN
-                ),
-                CLIENT_SECRET
+        if (isValid) {
+            WeChatPayAuthContract().createIntent(
+                context,
+                WeChatPayAuthContract.Args(
+                    WeChat(
+                        appId = APP_ID,
+                        partnerId = PARTNER_ID,
+                        prepayId = PREPAY_ID,
+                        packageValue = PACKAGE_VALUE,
+                        nonce = NONCE,
+                        timestamp = TIME_STAMP,
+                        sign = SIGN
+                    ),
+                    CLIENT_SECRET
+                )
             )
-        ) else Intent(
-            context,
-            WeChatPayAuthActivity::class.java
-        )
+        } else {
+            Intent(
+                context,
+                WeChatPayAuthActivity::class.java
+            )
+        }
 
     private companion object {
         const val APP_ID = "appId"
