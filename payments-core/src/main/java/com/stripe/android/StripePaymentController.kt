@@ -161,18 +161,10 @@ internal class StripePaymentController internal constructor(
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
 
-        val returnUrl =
-            shouldOverrideReturnUrl(
-                confirmStripeIntentParams,
-                requestOptions
-            ).let { shouldOverrideReturnUrl ->
-                if (shouldOverrideReturnUrl) {
-                    confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-                        ?: defaultReturnUrl.value
-                } else {
-                    confirmStripeIntentParams.returnUrl
-                }
-            }
+        val returnUrl = getOverrideReturnUrl(
+            confirmStripeIntentParams,
+            requestOptions
+        )
 
         runCatching {
             when (confirmStripeIntentParams) {
@@ -598,15 +590,18 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * Decide whether a [StripeIntent] confirmation request's returnUrl should be overridden
-     * to [DefaultReturnUrl] if client doesn't set any value.
+     * Return the overridden value for [ConfirmStripeIntentParams.returnUrl].
+     *
+     * If the payment method of the intent is in the [RETURN_URL_OVERRIDE_BLOCKLIST], then don't
+     * override the url; otherwise override it to [DefaultReturnUrl] if client doesn't set any value.
+     *
+     * To get the payment method, check if it's already set in [ConfirmStripeIntentParams],
+     * otherwise get the information by fetching the [StripeIntent].
      */
-    private suspend fun shouldOverrideReturnUrl(
+    private suspend fun getOverrideReturnUrl(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
-    ): Boolean {
-        // Get payment method type if it's set in confirmStripeIntentParams,
-        // otherwise get the type by fetching the StripeIntent
+    ): String? {
         val paymentMethodType =
             when (confirmStripeIntentParams) {
                 is ConfirmPaymentIntentParams -> {
@@ -622,7 +617,12 @@ internal class StripePaymentController internal constructor(
                     EXPAND_PAYMENT_METHOD
                 ).paymentMethod?.type
             }
-        return !RETURN_URL_OVERRIDE_BLOCKLIST.contains(paymentMethodType)
+        return if (RETURN_URL_OVERRIDE_BLOCKLIST.contains(paymentMethodType)) {
+            confirmStripeIntentParams.returnUrl
+        } else {
+            confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                ?: defaultReturnUrl.value
+        }
     }
 
     internal companion object {
