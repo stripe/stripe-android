@@ -628,6 +628,8 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     )
 
+    val PI_WITH_EXPANDED_PAYMENT_METHOD_JSON = PARSER.parse(EXPANDED_PAYMENT_METHOD_JSON)!!
+
     val PI_WITH_SHIPPING_JSON = JSONObject(
         """
         {

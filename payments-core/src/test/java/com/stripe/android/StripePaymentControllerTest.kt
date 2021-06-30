@@ -253,13 +253,13 @@ internal class StripePaymentControllerTest {
         }
 
     @Test
-    fun `returnUrl is overridden when PM from confirmStripeIntentParams is not in the blocklist`() =
+    fun `returnUrl is overridden when PM from confirmStripeIntentParams is in the allowList`() =
         testDispatcher.runBlockingTest {
             controller.startConfirmAndAuth(
                 mock(),
                 ConfirmPaymentIntentParams(
                     clientSecret = "clientSecret",
-                    paymentMethodCreateParams = PaymentMethodCreateParams.Companion.createBlik()
+                    paymentMethodCreateParams = PaymentMethodCreateParams.Companion.createCard(mock())
                 ),
                 REQUEST_OPTIONS
             )
@@ -269,7 +269,7 @@ internal class StripePaymentControllerTest {
         }
 
     @Test
-    fun `returnUrl is not overridden when PM from confirmStripeIntentParams is in the blocklist`() =
+    fun `returnUrl is not overridden when PM from confirmStripeIntentParams is not in the allowList`() =
         testDispatcher.runBlockingTest {
             controller.startConfirmAndAuth(
                 mock(),
@@ -284,7 +284,7 @@ internal class StripePaymentControllerTest {
         }
 
     @Test
-    fun `returnUrl is overridden when fetched PM is not in the block list`() =
+    fun `returnUrl is overridden when fetched PM is in the allowList`() =
         testDispatcher.runBlockingTest {
             controller.startConfirmAndAuth(
                 mock(),
@@ -299,7 +299,7 @@ internal class StripePaymentControllerTest {
         }
 
     @Test
-    fun `returnUrl is not overridden when fetched PM is in the block list`() =
+    fun `returnUrl is not overridden when fetched PM is not in the blockList`() =
         testDispatcher.runBlockingTest {
             stripeRepository.retrieveStripeIntentResponse =
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
@@ -329,7 +329,7 @@ internal class StripePaymentControllerTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        var retrieveStripeIntentResponse = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
+        var retrieveStripeIntentResponse = PaymentIntentFixtures.PI_WITH_EXPANDED_PAYMENT_METHOD_JSON
         var retrievePaymentIntentResponse = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
         var cancelPaymentIntentResponse = PaymentIntentFixtures.CANCELLED
         var confirmPaymentIntentResponse = PaymentIntentFixtures.PI_WITH_SHIPPING
