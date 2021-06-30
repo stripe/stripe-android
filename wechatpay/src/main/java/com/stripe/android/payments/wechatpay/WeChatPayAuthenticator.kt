@@ -3,6 +3,7 @@ package com.stripe.android.payments.wechatpay
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.networking.ApiRequest
@@ -19,7 +20,9 @@ class WeChatPayAuthenticator : IntentAuthenticator {
      * through [onNewActivityResultCaller]
      */
     private var weChatPayAuthLauncher: ActivityResultLauncher<WeChatPayAuthContract.Args>? = null
-    private val weChatAuthLauncherFactory =
+
+    @VisibleForTesting
+    internal var weChatAuthLauncherFactory =
         { host: AuthActivityStarterHost, requestCode: Int ->
             weChatPayAuthLauncher?.let {
                 WeChatPayAuthStarter.Modern(it)
@@ -59,7 +62,10 @@ class WeChatPayAuthenticator : IntentAuthenticator {
             host,
             stripeIntent.getRequestCode()
         ).start(
-            WeChatPayAuthContract.Args(weChatPayRedirect.weChat)
+            WeChatPayAuthContract.Args(
+                weChatPayRedirect.weChat,
+                stripeIntent.clientSecret.orEmpty()
+            )
         )
     }
 }
