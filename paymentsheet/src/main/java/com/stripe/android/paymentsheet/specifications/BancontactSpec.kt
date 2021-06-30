@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.specifications
 
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.LocalFieldTextStyle
 
 internal val bancontactParamKey: MutableMap<String, Any?> = mutableMapOf(
     "type" to "bancontact",
