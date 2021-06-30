@@ -598,7 +598,7 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * Decide if a [StripeIntent] confirmation request's returnUrl should be overriden
+     * Decide whether a [StripeIntent] confirmation request's returnUrl should be overridden
      * to [DefaultReturnUrl] if client doesn't set any value.
      */
     private suspend fun shouldOverrideReturnUrl(
