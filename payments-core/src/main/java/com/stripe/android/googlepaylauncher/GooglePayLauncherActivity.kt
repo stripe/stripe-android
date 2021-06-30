@@ -93,16 +93,6 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
         disableAnimations()
     }
 
-//    /**
-//     * Check that Google Pay is available and ready
-//     */
-//    private suspend fun onReadyToPay(paymentDataRequest: JSONObject): Task<PaymentData> {
-//        require(viewModel.isReadyToPay()) {
-//            "Google Pay is unavailable."
-//        }
-//        return viewModel.createLoadPaymentDataTask(paymentDataRequest)
-//    }
-
     private fun payWithGoogle(task: Task<PaymentData>) {
         AutoResolveHelper.resolveTask(
             task,

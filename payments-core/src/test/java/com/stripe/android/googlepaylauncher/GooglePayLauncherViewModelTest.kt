@@ -115,14 +115,22 @@ class GooglePayLauncherViewModelTest {
     }
 
     @Test
-    fun `createTransactionInfo() with SetupIntent should throw expected exception`() {
-        val error = assertFailsWith<IllegalStateException> {
-            viewModel.createTransactionInfo(
-                SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+    fun `createTransactionInfo() with SetupIntent should return expected TransactionInfo`() {
+        val transactionInfo = viewModel.createTransactionInfo(
+            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+        )
+        assertThat(transactionInfo)
+            .isEqualTo(
+                GooglePayJsonFactory.TransactionInfo(
+                    currencyCode = "",
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
+                    countryCode = "us",
+                    transactionId = "seti_1GSmaFCRMbs",
+                    totalPrice = null,
+                    totalPriceLabel = null,
+                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                )
             )
-        }
-        assertThat(error.message)
-            .isEqualTo("SetupIntents are not currently supported in GooglePayLauncher.")
     }
 
     @Test
