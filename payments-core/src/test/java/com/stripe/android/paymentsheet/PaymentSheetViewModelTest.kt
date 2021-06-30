@@ -157,6 +157,27 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
+    fun `updatePaymentMethods() should filter out invalid payment method types`() {
+        val viewModel = createViewModel(
+            paymentMethodsRepository = FakePaymentMethodsRepository(
+                listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(card = null), // invalid
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
+        )
+
+        var paymentMethods: List<PaymentMethod>? = null
+        viewModel.paymentMethods.observeForever {
+            paymentMethods = it
+        }
+
+        viewModel.updatePaymentMethods(PAYMENT_INTENT)
+        assertThat(paymentMethods)
+            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
+    @Test
     fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
         val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {

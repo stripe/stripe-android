@@ -33,15 +33,15 @@ internal enum class SupportedSavedPaymentMethod(
 }
 
 @DrawableRes
-internal fun PaymentMethod.getIcon(): Int? = when (type) {
-    PaymentMethod.Type.Card -> card?.brand?.getIcon()
+internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int? = when (type) {
+    PaymentMethod.Type.Card -> card?.brand?.getSavedPaymentMethodIcon()
         ?: R.drawable.stripe_ic_paymentsheet_card_unknown
     PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_pm_sepa_debit
     else -> null
 }
 
 @DrawableRes
-internal fun CardBrand.getIcon(): Int = when (this) {
+internal fun CardBrand.getSavedPaymentMethodIcon(): Int = when (this) {
     CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa
     CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex
     CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover

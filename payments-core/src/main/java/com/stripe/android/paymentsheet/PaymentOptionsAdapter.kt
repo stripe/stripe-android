@@ -15,7 +15,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.getIcon
+import com.stripe.android.paymentsheet.model.getSavedPaymentMethodIcon
 import com.stripe.android.paymentsheet.model.getLabel
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
@@ -210,7 +210,7 @@ internal class PaymentOptionsAdapter(
         }
 
         fun bindPaymentMethod(paymentMethod: PaymentMethod) {
-            binding.brandIcon.setImageResource(paymentMethod.getIcon() ?: 0)
+            binding.brandIcon.setImageResource(paymentMethod.getSavedPaymentMethodIcon() ?: 0)
             binding.label.text = paymentMethod.getLabel(itemView.resources)
         }
 
