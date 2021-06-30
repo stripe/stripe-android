@@ -15,7 +15,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
@@ -98,7 +97,8 @@ class GooglePayLauncherViewModelTest {
     @Test
     fun `createTransactionInfo() with PaymentIntent should return expected TransactionInfo`() {
         val transactionInfo = viewModel.createTransactionInfo(
-            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.currency.orEmpty()
         )
         assertThat(transactionInfo)
             .isEqualTo(
@@ -117,12 +117,13 @@ class GooglePayLauncherViewModelTest {
     @Test
     fun `createTransactionInfo() with SetupIntent should return expected TransactionInfo`() {
         val transactionInfo = viewModel.createTransactionInfo(
-            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            "usd"
         )
         assertThat(transactionInfo)
             .isEqualTo(
                 GooglePayJsonFactory.TransactionInfo(
-                    currencyCode = "",
+                    currencyCode = "usd",
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
                     countryCode = "us",
                     transactionId = "seti_1GSmaFCRMbs",
@@ -200,25 +201,6 @@ class GooglePayLauncherViewModelTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-
-        override suspend fun retrieveStripeIntent(
-            clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
-        ): StripeIntent {
-            return when {
-                clientSecret.startsWith("pi_") -> {
-                    retrievePaymentIntent(clientSecret, options, expandFields)
-                }
-                clientSecret.startsWith("seti_") -> {
-                    retrieveSetupIntent(clientSecret, options, expandFields)
-                }
-                else -> {
-                    error("Invalid clientSecret")
-                }
-            }
-        }
-
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,
@@ -237,7 +219,7 @@ class GooglePayLauncherViewModelTest {
     }
 
     private companion object {
-        val ARGS = GooglePayLauncherContract.Args(
+        val ARGS = GooglePayLauncherContract.PaymentIntentArgs(
             "pi_123_secret_456",
             GooglePayLauncher.Config(
                 GooglePayEnvironment.Test,
