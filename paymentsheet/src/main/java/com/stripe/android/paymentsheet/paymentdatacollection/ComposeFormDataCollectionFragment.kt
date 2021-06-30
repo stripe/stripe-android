@@ -28,7 +28,7 @@ class ComposeFormDataCollectionFragment : Fragment() {
     val formSpec by lazy {
         requireNotNull(
             requireArguments().getString(EXTRA_PAYMENT_METHOD)?.let {
-                SupportedPaymentMethod.valueOf(it).getFormSpec()
+                SupportedPaymentMethod.valueOf(it).formSpec
             }
         )
     }
