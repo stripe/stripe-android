@@ -33,8 +33,7 @@ class TransformFormToPaymentMethod {
                         transformCountry(entry.value)
                     }
                     IdealBank.identifier -> {
-                        val test = transformIdealBank(entry.value)
-                        test
+                        transformIdealBank(entry.value)
                     }
                     else -> {
                         entry.value
@@ -92,18 +91,22 @@ class TransformFormToPaymentMethod {
             formFieldKeyValues: Map<String, String?>
         ) {
             mapStructure.keys.forEach { key ->
-                if (mapStructure[key] == null) {
-                    dest[key] = formFieldKeyValues[key]
-                } else if (mapStructure[key] is MutableMap<*, *>) {
-                    val newDestMap = mutableMapOf<String, Any?>()
-                    dest[key] = newDestMap
-                    createMap(
-                        mapStructure[key] as MutableMap<String, Any?>,
-                        newDestMap,
-                        formFieldKeyValues
-                    )
-                } else {
-                    dest[key] = mapStructure[key]
+                when {
+                    mapStructure[key] == null -> {
+                        dest[key] = formFieldKeyValues[key]
+                    }
+                    mapStructure[key] is MutableMap<*, *> -> {
+                        val newDestMap = mutableMapOf<String, Any?>()
+                        dest[key] = newDestMap
+                        createMap(
+                            mapStructure[key] as MutableMap<String, Any?>,
+                            newDestMap,
+                            formFieldKeyValues
+                        )
+                    }
+                    else -> {
+                        dest[key] = mapStructure[key]
+                    }
                 }
             }
         }

@@ -14,7 +14,7 @@ class TransformFormToPaymentMethodTest {
     @Test
     fun `transform to payment method with bank`() {
         val paymentMethodParams = TransformFormToPaymentMethod().transform(
-            mutableMapOf(
+            mapOf(
                 "type" to "ideal",
                 "billing_details" to billingParams,
                 "ideal" to mapOf("bank" to null)
