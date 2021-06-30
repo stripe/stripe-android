@@ -41,6 +41,7 @@ import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
+import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -78,8 +79,8 @@ internal class PaymentSheetActivityTest {
         context,
         PaymentSheetContract.Args(
             PaymentIntentClientSecret("client_secret"),
+            PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            PaymentSheetFixtures.CONFIG_CUSTOMER
         )
     )
 
@@ -595,13 +596,24 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `sets expected statusBarColor`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).use {
-            it.onActivity { activity ->
-                assertThat(activity.window.statusBarColor)
-                    .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
-                scenario.moveToState(Lifecycle.State.DESTROYED)
-            }
+        val activityScenarioFactory = ActivityScenarioFactory(context)
+        val activityScenario = activityScenarioFactory.createAddPaymentMethodActivity()
+        activityScenario.moveToState(Lifecycle.State.CREATED)
+        activityScenario.onActivity { activity ->
+            activity.window.statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+
+            val intent = contract.createIntent(
+                activity,
+                PaymentSheetContract.Args(
+                    PaymentIntentClientSecret("client_secret"),
+                    PaymentSheetFixtures.CONFIG_CUSTOMER
+                )
+            )
+
+            val args =
+                intent.extras?.get(PaymentSheetContract.EXTRA_ARGS) as PaymentSheetContract.Args
+            assertThat(args.statusBarColor)
+                .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
         }
     }
 
