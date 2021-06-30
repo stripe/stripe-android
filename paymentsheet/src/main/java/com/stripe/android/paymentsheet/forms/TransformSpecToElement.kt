@@ -4,6 +4,7 @@ import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
@@ -48,6 +49,9 @@ internal class TransformSpecToElement {
             )
             SectionFieldSpec.Country -> transform(
                 spec.field as SectionFieldSpec.Country
+            )
+            SectionFieldSpec.IdealBank -> transform(
+                spec.field as SectionFieldSpec.IdealBank
             )
         }
 
@@ -94,6 +98,12 @@ internal class TransformSpecToElement {
         SectionFieldElement.Country(
             spec.identifier,
             DropdownFieldController(CountryConfig())
+        )
+
+    private fun transform(spec: SectionFieldSpec.IdealBank) =
+        SectionFieldElement.IdealBank(
+            spec.identifier,
+            DropdownFieldController(IdealBankConfig())
         )
 
     private fun transform(spec: FormItemSpec.SaveForFutureUseSpec, merchantName: String) =

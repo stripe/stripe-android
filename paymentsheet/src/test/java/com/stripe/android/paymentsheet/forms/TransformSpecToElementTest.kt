@@ -7,10 +7,12 @@ import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -62,6 +64,35 @@ class TransformSpecToElementTest {
         assertThat(countrySectionElement.identifier.value).isEqualTo("countrySection")
 
         assertThat(countryElement.identifier.value).isEqualTo("country")
+    }
+
+    @Test
+    fun `Adding a ideal bank section sets up the section and country elements correctly`() {
+        val idealSection = FormItemSpec.SectionSpec(
+            IdentifierSpec("idealSection"),
+            SectionFieldSpec.IdealBank
+        )
+        val formElement = transformSpecToElement.transform(
+            LayoutSpec(
+                listOf(idealSection)
+            ),
+            "Example, Inc.",
+            FocusRequesterCount()
+        )
+
+        val idealSectionElement = formElement.first() as SectionElement
+        val idealElement = idealSectionElement.field as SectionFieldElement.IdealBank
+
+        // With only a single field in a section the section controller is just a pass through
+        // of the section field controller
+        assertThat(idealSectionElement.controller).isEqualTo(idealElement.controller)
+
+        // Verify the correct config is setup for the controller
+        assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
+
+        assertThat(idealSectionElement.identifier.value).isEqualTo("idealSection")
+
+        assertThat(idealElement.identifier.value).isEqualTo("bank")
     }
 
     @Test

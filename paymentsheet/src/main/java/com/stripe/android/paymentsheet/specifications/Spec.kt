@@ -67,4 +67,6 @@ sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
     object Email : SectionFieldSpec(IdentifierSpec("email"))
 
     object Country : SectionFieldSpec(IdentifierSpec("country"))
+
+    object IdealBank : SectionFieldSpec(IdentifierSpec("bank"))
 }
