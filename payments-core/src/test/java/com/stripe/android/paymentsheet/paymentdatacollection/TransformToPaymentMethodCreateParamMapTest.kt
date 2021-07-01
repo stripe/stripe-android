@@ -1,30 +1,30 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.paymentsheet.paymentdatacollection
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
-import com.stripe.android.paymentsheet.specifications.billingParams
-import com.stripe.android.paymentsheet.specifications.sofortParamKey
 import org.junit.Test
 
-class TransformFormToPaymentMethodTest {
+class TransformToPaymentMethodCreateParamMapTest {
 
     @Test
     fun `transform to payment method with bank`() {
-        val paymentMethodParams = TransformFormToPaymentMethod().transform(
-            mapOf(
-                "type" to "ideal",
-                "billing_details" to billingParams,
-                "ideal" to mapOf("bank" to null)
-            ),
-            FormFieldValues(
+        val paymentMethodParams = TransformToPaymentMethodCreateParams()
+            .transform(
+                FormFieldValues(
+                    mapOf(
+                        SectionFieldSpec.IdealBank.identifier to "ABN AMRO"
+                    )
+                ),
                 mapOf(
-                    SectionFieldSpec.IdealBank.identifier to "ABN AMRO"
-                )
+                    "type" to "ideal",
+                    "billing_details" to billingParams,
+                    "ideal" to mapOf("bank" to null)
+                ),
             )
-        )
 
         assertThat(paymentMethodParams.toString().replace("\\s".toRegex(), ""))
             .isEqualTo(
@@ -36,16 +36,21 @@ class TransformFormToPaymentMethodTest {
 
     @Test
     fun `transform to payment method params`() {
-        val paymentMethodParams = TransformFormToPaymentMethod().transform(
-            sofortParamKey,
-            FormFieldValues(
+        val paymentMethodParams = TransformToPaymentMethodCreateParams()
+            .transform(
+                FormFieldValues(
+                    mapOf(
+                        Name.identifier to "joe",
+                        Email.identifier to "joe@gmail.com",
+                        Country.identifier to "United States",
+                    )
+                ),
                 mapOf(
-                    Name.identifier to "joe",
-                    Email.identifier to "joe@gmail.com",
-                    Country.identifier to "United States",
-                )
+                    "type" to "sofort",
+                    "billing_details" to billingParams,
+                    "sofort" to mapOf("country" to null)
+                ),
             )
-        )
 
         assertThat(
             paymentMethodParams.toString().replace("\\s".toRegex(), "")
@@ -71,4 +76,24 @@ class TransformFormToPaymentMethodTest {
             """.replace("\\s".toRegex(), "")
         )
     }
+
+    companion object {
+        val addressParams: MutableMap<String, Any?> = mutableMapOf(
+            "city" to null,
+            "country" to null,
+            "line1" to null,
+            "line2" to null,
+            "postal_code" to null,
+            "state" to null,
+        )
+
+        val billingParams: MutableMap<String, Any?> = mutableMapOf(
+            "address" to addressParams,
+            "name" to null,
+            "email" to null,
+            "phone" to null,
+        )
+    }
 }
+
+
