@@ -20,8 +20,6 @@ import com.stripe.android.stripe3ds2.views.ChallengeProgressFragmentFactory
 import kotlinx.coroutines.launch
 
 /**
- * Work in progress!
- *
  * A transparent [Activity] that will initiate a 3DS2 transaction by making the authentication
  * request (AReq) and handling the response (ARes). Depending on the response,
  * [Stripe3ds2TransactionActivity] might start the challenge flow UI, complete using the
