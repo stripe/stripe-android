@@ -153,13 +153,13 @@ class FormViewModel(
         ?: MutableStateFlow(emptyList())
 
     val saveForFutureUse = elements
-        .filterIsInstance<FormElement.SaveForFutureUseElement>()
+        .filterIsInstance<SaveForFutureUseElement>()
         .firstOrNull()?.controller?.saveForFutureUse ?: MutableStateFlow(false)
 
     // Mandate is showing if it is an element of the form and it isn't optional
     val showingMandate = optionalIdentifiers.map {
         elements
-            .filterIsInstance<StaticTextElement>()
+            .filterIsInstance<MandateTextElement>()
             .firstOrNull()?.let { mandate ->
                 !it.contains(mandate.identifier)
             } ?: false
