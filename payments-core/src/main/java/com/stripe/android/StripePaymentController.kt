@@ -112,10 +112,10 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * A map between [StripeIntent] ids to its corresponding returnUrl.
+     * A map between 3ds1 [StripeIntent] ids to its corresponding returnUrl.
      * An entry will be removed once the [StripeIntent] is confirmed.
      */
-    private val intentReturnUrlMap = mutableMapOf<String, String>()
+    private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
     private val authenticatorRegistry: IntentAuthenticatorRegistry =
         DefaultIntentAuthenticatorRegistry.createInstance(
@@ -128,7 +128,7 @@ internal class StripePaymentController internal constructor(
             enableLogging,
             workContext,
             uiContext,
-            intentReturnUrlMap,
+            threeDs1IntentReturnUrlMap,
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -191,8 +191,12 @@ internal class StripePaymentController internal constructor(
             }
         }.fold(
             onSuccess = { intent ->
-                intent.id?.let {
-                    intentReturnUrlMap[it] = returnUrl
+                intent.nextActionData?.let {
+                    if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
+                        intent.id?.let { intentId ->
+                            threeDs1IntentReturnUrlMap[intentId] = returnUrl
+                        }
+                    }
                 }
                 handleNextAction(
                     host,

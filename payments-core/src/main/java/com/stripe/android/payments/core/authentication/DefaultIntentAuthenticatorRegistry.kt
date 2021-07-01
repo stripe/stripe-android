@@ -69,7 +69,7 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor(
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
-            intentReturnUrlMap: MutableMap<String, String>
+            threeDs1IntentReturnUrlMap: MutableMap<String, String>
         ) = DaggerAuthenticationComponent.builder()
             .context(context)
             .stripeRepository(stripeRepository)
@@ -80,7 +80,7 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor(
             .enableLogging(enableLogging)
             .workContext(workContext)
             .uiContext(uiContext)
-            .intentReturnUrlMap(intentReturnUrlMap)
+            .threeDs1IntentReturnUrlMap(threeDs1IntentReturnUrlMap)
             .build()
             .registry
     }

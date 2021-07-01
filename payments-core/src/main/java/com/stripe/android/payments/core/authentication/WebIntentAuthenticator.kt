@@ -28,7 +28,7 @@ internal class WebIntentAuthenticator @Inject constructor(
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
-    private val intentReturnUrlMap: MutableMap<String, String>,
+    private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
 ) : IntentAuthenticator {
 
     override suspend fun authenticate(
@@ -46,7 +46,7 @@ internal class WebIntentAuthenticator @Inject constructor(
             is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
                 authUrl = nextActionData.url
                 returnUrl = stripeIntent.id?.let {
-                    intentReturnUrlMap.remove(it)
+                    threeDs1IntentReturnUrlMap.remove(it)
                 }
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true
