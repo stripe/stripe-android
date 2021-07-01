@@ -131,10 +131,10 @@ internal class GooglePayLauncherViewModel(
             is SetupIntent -> {
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
-                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
-                    totalPrice = null,
+                    totalPrice = 0,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )
             }
