@@ -189,13 +189,15 @@ data class SetupIntent internal constructor(
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
 
         init {
-            require(PATTERN.matcher(value).matches()) {
+            require(isMatch(value)) {
                 "Invalid client secret: $value"
             }
         }
 
-        private companion object {
+        internal companion object {
             private val PATTERN = Pattern.compile("^seti_[^_]+_secret_[^_]+$")
+
+            fun isMatch(value: String) = PATTERN.matcher(value).matches()
         }
     }
 

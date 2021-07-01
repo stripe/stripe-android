@@ -23,8 +23,7 @@ internal class GooglePayLauncherContract :
             }
         }
 
-        // TODO(mshafrir-stripe): update target activity
-        return Intent(context, StripeGooglePayActivity::class.java)
+        return Intent(context, GooglePayLauncherActivity::class.java)
             .putExtras(extras)
     }
 
@@ -32,27 +31,40 @@ internal class GooglePayLauncherContract :
         resultCode: Int,
         intent: Intent?
     ): GooglePayLauncher.Result {
-        return intent?.getParcelableExtra(EXTRA_RESULT)
-            ?: GooglePayLauncher.Result.Failed(
-                IllegalArgumentException("Could not parse a valid result.")
+        return intent?.getParcelableExtra(EXTRA_RESULT) ?: GooglePayLauncher.Result.Failed(
+            IllegalStateException(
+                "Error while processing result from Google Pay."
             )
+        )
     }
 
-    @Parcelize
-    data class Args(
-        internal val clientSecret: String,
-        internal val config: GooglePayLauncher.Config,
-    ) : Parcelable {
-        fun toBundle() = bundleOf("" to this)
+    sealed class Args : Parcelable {
+        abstract val clientSecret: String
+        abstract val config: GooglePayLauncher.Config
+
+        internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"
 
-            fun fromIntent(intent: Intent): Args? {
+            internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }
     }
+
+    @Parcelize
+    data class PaymentIntentArgs(
+        override val clientSecret: String,
+        override val config: GooglePayLauncher.Config,
+    ) : Args()
+
+    @Parcelize
+    data class SetupIntentArgs(
+        override val clientSecret: String,
+        override val config: GooglePayLauncher.Config,
+        internal val currencyCode: String
+    ) : Args()
 
     internal companion object {
         internal const val EXTRA_RESULT = "extra_result"

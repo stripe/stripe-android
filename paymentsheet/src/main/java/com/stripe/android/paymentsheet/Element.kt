@@ -52,12 +52,14 @@ internal sealed class FormElement {
 
     /**
      * This is an element that has static text because it takes no user input, it is not
-     * outputted from the list of form field values.
+     * outputted from the list of form field values.  If the stringResId contains a %s, the first
+     * one will be populated in the form with the merchantName parameter.
      */
-    internal data class StaticTextElement(
+    internal data class MandateTextElement(
         override val identifier: IdentifierSpec,
         val stringResId: Int,
         val color: Color,
+        val merchantName: String?,
         override val controller: Controller? = null,
     ) : FormElement(), OptionalElement
 
@@ -68,6 +70,7 @@ internal sealed class FormElement {
     data class SaveForFutureUseElement(
         override val identifier: IdentifierSpec,
         override val controller: SaveForFutureUseController,
+        val merchantName: String?
     ) : FormElement()
 
     data class SectionElement(
@@ -97,6 +100,11 @@ internal sealed class SectionFieldElement {
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
     data class Country(
+        override val identifier: IdentifierSpec,
+        override val controller: DropdownFieldController
+    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
+
+    data class IdealBank internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
     ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement

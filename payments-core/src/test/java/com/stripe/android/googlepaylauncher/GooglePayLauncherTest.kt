@@ -47,7 +47,7 @@ class GooglePayLauncherTest {
     }
 
     @Test
-    fun `present() should successfully return a result when Google Pay is available`() {
+    fun `presentForPaymentIntent() should successfully return a result when Google Pay is available`() {
         scenario.onFragment { fragment ->
             val launcher = GooglePayLauncher(
                 testScope,
@@ -66,7 +66,7 @@ class GooglePayLauncherTest {
             assertThat(readyCallbackInvocations)
                 .containsExactly(true)
 
-            launcher.present("pi_123_secret_456")
+            launcher.presentForPaymentIntent("pi_123_secret_456")
 
             assertThat(results)
                 .containsExactly(GooglePayLauncher.Result.Completed)
@@ -74,7 +74,7 @@ class GooglePayLauncherTest {
     }
 
     @Test
-    fun `present() should throw IllegalStateException when Google Pay is not available`() {
+    fun `presentForPaymentIntent() should throw IllegalStateException when Google Pay is not available`() {
         scenario.onFragment { fragment ->
             val launcher = GooglePayLauncher(
                 testScope,
@@ -94,9 +94,24 @@ class GooglePayLauncherTest {
                 .containsExactly(false)
 
             assertFailsWith<IllegalStateException> {
-                launcher.present("pi_123")
+                launcher.presentForPaymentIntent("pi_123")
             }
         }
+    }
+
+    @Test
+    fun `isJcbEnabled should return expected value for different merchantCountryCode`() {
+        assertThat(
+            CONFIG.copy(merchantCountryCode = "US").isJcbEnabled
+        ).isFalse()
+
+        assertThat(
+            CONFIG.copy(merchantCountryCode = "JP").isJcbEnabled
+        ).isTrue()
+
+        assertThat(
+            CONFIG.copy(merchantCountryCode = "jp").isJcbEnabled
+        ).isTrue()
     }
 
     private class FakeGooglePayRepository(

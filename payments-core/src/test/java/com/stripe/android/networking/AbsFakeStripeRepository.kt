@@ -21,11 +21,20 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONObject
 
 internal abstract class AbsFakeStripeRepository : StripeRepository {
+
+    override suspend fun retrieveStripeIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): StripeIntent {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,

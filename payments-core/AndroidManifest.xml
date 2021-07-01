@@ -61,6 +61,10 @@
         <activity
             android:name=".googlepaylauncher.StripeGooglePayActivity"
             android:theme="@style/StripeGooglePayDefaultTheme" />
+
+        <activity
+            android:name=".googlepaylauncher.GooglePayLauncherActivity"
+            android:theme="@style/StripeGooglePayDefaultTheme" />
     </application>
 
     <!--

@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
-import com.stripe.android.paymentsheet.specifications.FormType
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -235,10 +234,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
-                addedFragment?.arguments?.getParcelable<FormType>(
-                    ComposeFormDataCollectionFragment.EXTRA_FORM_TYPE
+                addedFragment?.arguments?.getString(
+                    ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD
                 )
-            ).isEqualTo(FormType.Bancontact)
+            ).isEqualTo(SupportedPaymentMethod.Bancontact.name)
         }
     }
 

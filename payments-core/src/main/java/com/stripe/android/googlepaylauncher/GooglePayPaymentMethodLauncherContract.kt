@@ -23,8 +23,7 @@ internal class GooglePayPaymentMethodLauncherContract :
             }
         }
 
-        // TODO(mshafrir-stripe): update target activity
-        return Intent(context, StripeGooglePayActivity::class.java)
+        return Intent(context, GooglePayPaymentMethodLauncherActivity::class.java)
             .putExtras(extras)
     }
 
@@ -44,7 +43,9 @@ internal class GooglePayPaymentMethodLauncherContract :
         internal val currencyCode: String,
         internal val amount: Int?
     ) : Parcelable {
-        fun toBundle() = bundleOf("" to this)
+        val hasAmount get() = amount != null
+
+        fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"

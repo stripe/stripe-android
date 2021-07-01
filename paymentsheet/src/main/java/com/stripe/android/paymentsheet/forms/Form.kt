@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,9 +21,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.FocusRequesterCount
-import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.FormElement.MandateTextElement
+import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
-import com.stripe.android.paymentsheet.FormElement.StaticTextElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.DropDown
@@ -50,10 +52,18 @@ internal fun Form(
     ) {
         formViewModel.elements.forEach { element ->
 
-            AnimatedVisibility(!optionalIdentifiers.contains(element.identifier)) {
+            AnimatedVisibility(
+                !optionalIdentifiers.contains(element.identifier),
+                enter = EnterTransition.None,
+                exit = ExitTransition.None
+            ) {
                 when (element) {
                     is SectionElement -> {
-                        AnimatedVisibility(!optionalIdentifiers.contains(element.identifier)) {
+                        AnimatedVisibility(
+                            !optionalIdentifiers.contains(element.identifier),
+                            enter = EnterTransition.None,
+                            exit = ExitTransition.None
+                        ) {
                             val controller = element.controller
 
                             val error by controller.errorMessage.asLiveData().observeAsState(null)
@@ -79,15 +89,15 @@ internal fun Form(
                             }
                         }
                     }
-                    is StaticTextElement -> {
+                    is MandateTextElement -> {
                         Text(
-                            stringResource(element.stringResId),
+                            stringResource(element.stringResId, element.merchantName ?: ""),
                             modifier = Modifier.padding(vertical = 8.dp),
                             color = element.color
                         )
                     }
 
-                    is FormElement.SaveForFutureUseElement -> {
+                    is SaveForFutureUseElement -> {
                         val controller = element.controller
                         val checked by controller.saveForFutureUse.asLiveData()
                             .observeAsState(true)
@@ -96,7 +106,7 @@ internal fun Form(
                                 checked = checked,
                                 onCheckedChange = { controller.onValueChange(it) }
                             )
-                            Text(stringResource(controller.label))
+                            Text(stringResource(controller.label, element.merchantName ?: ""))
                         }
                     }
                 }
@@ -115,13 +125,15 @@ internal fun Form(
  */
 class FormViewModel(
     layout: LayoutSpec,
+    merchantName: String,
 ) : ViewModel() {
     class Factory(
         private val layout: LayoutSpec,
+        private val merchantName: String
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(layout) as T
+            return FormViewModel(layout, merchantName) as T
         }
     }
 
@@ -129,10 +141,14 @@ class FormViewModel(
     fun getCountFocusableFields() = focusIndex.get()
 
     private val specToFormTransform = TransformSpecToElement()
-    internal val elements = specToFormTransform.transform(layout, focusIndex)
+    internal val elements = specToFormTransform.transform(
+        layout,
+        merchantName,
+        focusIndex
+    )
 
     val optionalIdentifiers = elements
-        .filterIsInstance<FormElement.SaveForFutureUseElement>()
+        .filterIsInstance<SaveForFutureUseElement>()
         .firstOrNull()?.controller?.optionalIdentifiers
         ?: MutableStateFlow(emptyList())
 

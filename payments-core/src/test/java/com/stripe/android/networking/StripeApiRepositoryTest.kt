@@ -1050,6 +1050,19 @@ internal class StripeApiRepositoryTest {
             .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
     }
 
+    @Test
+    fun `retrieveStripeIntent() with invalid client secret should throw exception`() =
+        testDispatcher.runBlockingTest {
+            val error = assertFailsWith<IllegalStateException> {
+                stripeApiRepository.retrieveStripeIntent(
+                    "invalid!",
+                    DEFAULT_OPTIONS
+                )
+            }
+            assertThat(error.message)
+                .isEqualTo("Invalid client secret.")
+        }
+
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
         event: AnalyticsEvent,
         productUsage: List<String>? = null

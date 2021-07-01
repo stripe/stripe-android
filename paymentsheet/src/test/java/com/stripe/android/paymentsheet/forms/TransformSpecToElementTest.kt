@@ -4,13 +4,15 @@ import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
-import com.stripe.android.paymentsheet.FormElement.StaticTextElement
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -45,6 +47,7 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(countrySection)
             ),
+            "Example, Inc.",
             FocusRequesterCount()
         )
 
@@ -64,11 +67,41 @@ class TransformSpecToElementTest {
     }
 
     @Test
+    fun `Adding a ideal bank section sets up the section and country elements correctly`() {
+        val idealSection = FormItemSpec.SectionSpec(
+            IdentifierSpec("idealSection"),
+            SectionFieldSpec.IdealBank
+        )
+        val formElement = transformSpecToElement.transform(
+            LayoutSpec(
+                listOf(idealSection)
+            ),
+            "Example, Inc.",
+            FocusRequesterCount()
+        )
+
+        val idealSectionElement = formElement.first() as SectionElement
+        val idealElement = idealSectionElement.field as SectionFieldElement.IdealBank
+
+        // With only a single field in a section the section controller is just a pass through
+        // of the section field controller
+        assertThat(idealSectionElement.controller).isEqualTo(idealElement.controller)
+
+        // Verify the correct config is setup for the controller
+        assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
+
+        assertThat(idealSectionElement.identifier.value).isEqualTo("idealSection")
+
+        assertThat(idealElement.identifier.value).isEqualTo("bank")
+    }
+
+    @Test
     fun `Add a name section spec sets up the name element correctly`() {
         val formElement = transformSpecToElement.transform(
             LayoutSpec(
                 listOf(nameSection)
             ),
+            "Example, Inc.",
             FocusRequesterCount()
         )
 
@@ -85,6 +118,7 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(emailSection)
             ),
+            "Example, Inc.",
             FocusRequesterCount()
         )
 
@@ -103,6 +137,7 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(nameSection, emailSection)
             ),
+            "Example, Inc.",
             focusRequesterCount
         )
 
@@ -120,7 +155,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a mandate section spec setup of the mandate element correctly`() {
-        val mandate = FormItemSpec.StaticTextSpec(
+        val mandate = FormItemSpec.MandateTextSpec(
             IdentifierSpec("mandate"),
             R.string.sofort_mandate,
             Color.Gray
@@ -129,10 +164,11 @@ class TransformSpecToElementTest {
             LayoutSpec(
                 listOf(mandate)
             ),
+            "Example, Inc.",
             FocusRequesterCount()
         )
 
-        val mandateElement = formElement.first() as StaticTextElement
+        val mandateElement = formElement.first() as MandateTextElement
 
         assertThat(mandateElement.controller).isNull()
         assertThat(mandateElement.color).isEqualTo(mandate.color)
@@ -143,7 +179,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Add a save for future use section spec sets the mandate element correctly`() =
         runBlocking {
-            val mandate = FormItemSpec.StaticTextSpec(
+            val mandate = FormItemSpec.MandateTextSpec(
                 IdentifierSpec("mandate"),
                 R.string.sofort_mandate,
                 Color.Gray
@@ -154,6 +190,7 @@ class TransformSpecToElementTest {
                 LayoutSpec(
                     listOf(saveForFutureUseSpec)
                 ),
+                "Example, Inc.",
                 FocusRequesterCount()
             )
 
