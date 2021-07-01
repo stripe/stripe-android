@@ -15,8 +15,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.getSavedPaymentMethodIcon
 import com.stripe.android.paymentsheet.model.getLabel
+import com.stripe.android.paymentsheet.model.getSavedPaymentMethodIcon
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
