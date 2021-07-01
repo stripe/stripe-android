@@ -27,13 +27,13 @@ internal class WebIntentAuthenticator @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    @UIContext private val uiContext: CoroutineContext
+    @UIContext private val uiContext: CoroutineContext,
+    private val returnUrlSupplier: () -> String?
 ) : IntentAuthenticator {
 
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         val authUrl: String
@@ -45,7 +45,7 @@ internal class WebIntentAuthenticator @Inject constructor(
             // can only triggered when `use_stripe_sdk=true`
             is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
                 authUrl = nextActionData.url
-                returnUrl = threeDs1ReturnUrl
+                returnUrl = returnUrlSupplier()
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true
                 analyticsRequestExecutor.executeAsync(

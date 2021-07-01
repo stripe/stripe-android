@@ -111,6 +111,12 @@ internal class StripePaymentController internal constructor(
         )
     }
 
+    /**
+     * returnUrl passed to [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams], this value
+     * will change upon any new intent confirmation.
+     */
+    private var returnUrl: String? = null
+
     private val authenticatorRegistry: IntentAuthenticatorRegistry =
         DefaultIntentAuthenticatorRegistry.createInstance(
             context,
@@ -122,6 +128,7 @@ internal class StripePaymentController internal constructor(
             enableLogging,
             workContext,
             uiContext,
+            { returnUrl },
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -160,7 +167,7 @@ internal class StripePaymentController internal constructor(
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
 
-        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+        returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
             ?: defaultReturnUrl.value
 
         runCatching {
@@ -187,7 +194,6 @@ internal class StripePaymentController internal constructor(
                 handleNextAction(
                     host,
                     intent,
-                    returnUrl,
                     requestOptions
                 )
             },
@@ -295,7 +301,6 @@ internal class StripePaymentController internal constructor(
                 handleNextAction(
                     host = host,
                     stripeIntent = stripeIntent,
-                    returnUrl = null,
                     requestOptions = requestOptions
                 )
             },
@@ -546,13 +551,11 @@ internal class StripePaymentController internal constructor(
     override suspend fun handleNextAction(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        returnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         authenticatorRegistry.getAuthenticator(stripeIntent).authenticate(
             host,
             stripeIntent,
-            returnUrl,
             requestOptions
         )
     }

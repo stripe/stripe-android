@@ -64,6 +64,9 @@ internal interface AuthenticationComponent {
         @BindsInstance
         fun uiContext(@UIContext uiContext: CoroutineContext): Builder
 
+        @BindsInstance
+        fun returnUrlSupplier(supplier: () -> String?): Builder
+
         fun build(): AuthenticationComponent
     }
 }

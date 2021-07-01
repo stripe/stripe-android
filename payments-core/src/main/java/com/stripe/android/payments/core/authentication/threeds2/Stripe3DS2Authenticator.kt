@@ -74,7 +74,6 @@ internal class Stripe3DS2Authenticator(
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         handle3ds2Auth(

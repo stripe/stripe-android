@@ -81,7 +81,6 @@ internal abstract class AbsPaymentController : PaymentController {
     override suspend fun handleNextAction(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        returnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
     }
