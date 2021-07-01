@@ -77,7 +77,7 @@ internal class GooglePayPaymentMethodLauncherViewModel(
             totalPriceStatus = when (args.hasAmount) {
                 true -> GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
 
-                false -> GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown
+                false -> GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
             },
             countryCode = args.config.merchantCountryCode,
             totalPrice = args.amount,
