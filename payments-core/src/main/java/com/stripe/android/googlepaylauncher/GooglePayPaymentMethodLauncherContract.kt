@@ -41,10 +41,8 @@ internal class GooglePayPaymentMethodLauncherContract :
     data class Args(
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
-        internal val amount: Int?
+        internal val amount: Int
     ) : Parcelable {
-        val hasAmount get() = amount != null
-
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
