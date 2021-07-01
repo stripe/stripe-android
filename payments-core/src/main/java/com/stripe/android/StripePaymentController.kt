@@ -112,10 +112,10 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * returnUrl passed to [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams], this value
-     * will change upon any new intent confirmation.
+     * A map between [StripeIntent] ids to its corresponding returnUrl.
+     * An entry will be removed once the [StripeIntent] is confirmed.
      */
-    private var returnUrl: String? = null
+    private val intentReturnUrlMap = mutableMapOf<String, String>()
 
     private val authenticatorRegistry: IntentAuthenticatorRegistry =
         DefaultIntentAuthenticatorRegistry.createInstance(
@@ -128,7 +128,7 @@ internal class StripePaymentController internal constructor(
             enableLogging,
             workContext,
             uiContext,
-            { returnUrl },
+            intentReturnUrlMap,
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -167,7 +167,7 @@ internal class StripePaymentController internal constructor(
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
 
-        returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
             ?: defaultReturnUrl.value
 
         runCatching {
@@ -191,6 +191,9 @@ internal class StripePaymentController internal constructor(
             }
         }.fold(
             onSuccess = { intent ->
+                intent.id?.let {
+                    intentReturnUrlMap[it] = returnUrl
+                }
                 handleNextAction(
                     host,
                     intent,

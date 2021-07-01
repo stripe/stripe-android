@@ -52,7 +52,7 @@ class WebIntentAuthenticatorTest {
         argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
 
-    private var returnUrlFor3ds1: String? = RETURN_URL_FOR_3DS1
+    private var threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
     private val authenticator = WebIntentAuthenticator(
         paymentBrowserAuthStarterFactory,
@@ -60,18 +60,18 @@ class WebIntentAuthenticatorTest {
         analyticsRequestFactory,
         enableLogging = false,
         testDispatcher,
-        { returnUrlFor3ds1 }
+        threeDs1IntentReturnUrlMap
     )
 
     @Before
     fun setUp() {
-        returnUrlFor3ds1 = RETURN_URL_FOR_3DS1
+        threeDs1IntentReturnUrlMap[PAYMENT_INTENT_ID_FOR_3DS1] = RETURN_URL_FOR_3DS1
         whenever(paymentBrowserAuthStarterFactory(any())).thenReturn(paymentBrowserWebStarter)
     }
 
     @Test
     fun authenticate_whenSdk3ds1() {
-        returnUrlFor3ds1 = null
+        threeDs1IntentReturnUrlMap.remove(PAYMENT_INTENT_ID_FOR_3DS1)
         verifyAuthenticate(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1,
             expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
@@ -90,6 +90,7 @@ class WebIntentAuthenticatorTest {
             expectedRequestCode = PAYMENT_REQUEST_CODE,
             expectedAnalyticsEvent = AnalyticsEvent.Auth3ds1Sdk
         )
+        assertThat(threeDs1IntentReturnUrlMap).doesNotContainKey(PAYMENT_INTENT_ID_FOR_3DS1)
     }
 
     @Test
@@ -170,6 +171,7 @@ class WebIntentAuthenticatorTest {
     private companion object {
         private const val ACCOUNT_ID = "acct_123"
 
+        private const val PAYMENT_INTENT_ID_FOR_3DS1 = "pi_1EceMnCRMbs6FrXfCXdF8dnx"
         private const val RETURN_URL_FOR_3DS1 = "stripesdk://payment_return_url"
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

@@ -65,7 +65,7 @@ internal interface AuthenticationComponent {
         fun uiContext(@UIContext uiContext: CoroutineContext): Builder
 
         @BindsInstance
-        fun returnUrlSupplier(supplier: () -> String?): Builder
+        fun intentReturnUrlMap(intentReturnUrlMap: MutableMap<String, String>): Builder
 
         fun build(): AuthenticationComponent
     }
