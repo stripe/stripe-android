@@ -81,6 +81,9 @@ internal enum class AnalyticsEvent(internal val code: String) {
 
     RadarSessionCreate("radar_session_create"),
 
+    GooglePayLauncherInit("googlepaylauncher_init"),
+    GooglePayPaymentMethodLauncherInit("googlepaypaymentmethodlauncher_init"),
+
     CardMetadataPublishableKeyAvailable("card_metadata_pk_available"),
     CardMetadataPublishableKeyUnavailable("card_metadata_pk_unavailable"),
 

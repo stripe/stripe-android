@@ -11,8 +11,12 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -39,6 +43,15 @@ class GooglePayPaymentMethodLauncherTest {
         GooglePayPaymentMethodLauncher.ReadyCallback(readyCallbackInvocations::add)
     private val resultCallback = GooglePayPaymentMethodLauncher.ResultCallback(results::add)
 
+    private val analyticsRequestFactory = AnalyticsRequestFactory(
+        ApplicationProvider.getApplicationContext(),
+        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+    )
+    private val firedEvents = mutableListOf<String>()
+    private val analyticsRequestExecutor = AnalyticsRequestExecutor {
+        firedEvents.add(it.params["event"].toString())
+    }
+
     @AfterTest
     fun cleanup() {
         testDispatcher.cleanupTestCoroutines()
@@ -61,7 +74,9 @@ class GooglePayPaymentMethodLauncherTest {
                     FakeActivityResultRegistry(result)
                 ) {
                     resultCallback.onResult(it)
-                }
+                },
+                analyticsRequestExecutor,
+                analyticsRequestFactory
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
 
@@ -74,6 +89,32 @@ class GooglePayPaymentMethodLauncherTest {
 
             assertThat(results)
                 .containsExactly(result)
+        }
+    }
+
+    @Test
+    fun `init should fire expected event`() {
+        val result = GooglePayPaymentMethodLauncher.Result.Completed(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+        scenario.onFragment { fragment ->
+            GooglePayPaymentMethodLauncher(
+                testScope,
+                CONFIG,
+                { FakeGooglePayRepository(true) },
+                readyCallback,
+                fragment.registerForActivityResult(
+                    GooglePayPaymentMethodLauncherContract(),
+                    FakeActivityResultRegistry(result)
+                ) {
+                    resultCallback.onResult(it)
+                },
+                analyticsRequestExecutor,
+                analyticsRequestFactory
+            )
+
+            assertThat(firedEvents)
+                .containsExactly("stripe_android.googlepaypaymentmethodlauncher_init")
         }
     }
 
@@ -94,7 +135,9 @@ class GooglePayPaymentMethodLauncherTest {
                     )
                 ) {
                     resultCallback.onResult(it)
-                }
+                },
+                analyticsRequestExecutor,
+                analyticsRequestFactory
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
 

@@ -5,8 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.networking.AnalyticsEvent
+import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -21,7 +25,9 @@ class GooglePayLauncher internal constructor(
     private val config: Config,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     private val readyCallback: ReadyCallback,
-    private val activityResultLauncher: ActivityResultLauncher<GooglePayLauncherContract.Args>
+    private val activityResultLauncher: ActivityResultLauncher<GooglePayLauncherContract.Args>,
+    analyticsRequestExecutor: AnalyticsRequestExecutor,
+    analyticsRequestFactory: AnalyticsRequestFactory
 ) {
     private var isReady = false
 
@@ -55,7 +61,12 @@ class GooglePayLauncher internal constructor(
             GooglePayLauncherContract()
         ) {
             resultCallback.onResult(it)
-        }
+        },
+        AnalyticsRequestExecutor.Default(),
+        AnalyticsRequestFactory(
+            activity,
+            PaymentConfiguration.getInstance(activity).publishableKey
+        )
     )
 
     /**
@@ -88,10 +99,20 @@ class GooglePayLauncher internal constructor(
             GooglePayLauncherContract()
         ) {
             resultCallback.onResult(it)
-        }
+        },
+        AnalyticsRequestExecutor.Default(),
+        AnalyticsRequestFactory(
+            fragment.requireContext(),
+            PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
+            setOf(PRODUCT_USAGE)
+        )
     )
 
     init {
+        analyticsRequestExecutor.executeAsync(
+            analyticsRequestFactory.createRequest(AnalyticsEvent.GooglePayLauncherInit)
+        )
+
         lifecycleScope.launch {
             val repository = googlePayRepositoryFactory(config.environment)
             readyCallback.onReady(
@@ -232,5 +253,9 @@ class GooglePayLauncher internal constructor(
 
     fun interface ResultCallback {
         fun onResult(result: Result)
+    }
+
+    internal companion object {
+        const val PRODUCT_USAGE = "GooglePayLauncher"
     }
 }
