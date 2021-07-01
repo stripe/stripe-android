@@ -161,7 +161,9 @@ class GooglePayPaymentMethodLauncher internal constructor(
         val merchantName: String,
 
         /**
-         * Flag to indicate whether Google Pay collect the customer's email address. Default to `false`.
+         * Flag to indicate whether Google Pay collect the customer's email address.
+         *
+         * Default to `false`.
          */
         var isEmailRequired: Boolean = false,
 
@@ -173,8 +175,10 @@ class GooglePayPaymentMethodLauncher internal constructor(
         /**
          * If `true`, Google Pay is considered ready if the customer's Google Pay wallet
          * has existing payment methods.
+         *
+         * Default to `true`.
          */
-        var existingPaymentMethodRequired: Boolean = false
+        var existingPaymentMethodRequired: Boolean = true
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
