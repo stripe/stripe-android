@@ -58,9 +58,11 @@ internal fun Form(
             ) {
                 when (element) {
                     is SectionElement -> {
-                        AnimatedVisibility(!optionalIdentifiers.contains(element.identifier),
+                        AnimatedVisibility(
+                            !optionalIdentifiers.contains(element.identifier),
                             enter = EnterTransition.None,
-                            exit = ExitTransition.None) {
+                            exit = ExitTransition.None
+                        ) {
                             val controller = element.controller
 
                             val error by controller.errorMessage.asLiveData().observeAsState(null)
