@@ -91,7 +91,7 @@ dependencies {
 
     // Assertions
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.2'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.3'
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation 'com.google.truth:truth:1.1.3'
 
