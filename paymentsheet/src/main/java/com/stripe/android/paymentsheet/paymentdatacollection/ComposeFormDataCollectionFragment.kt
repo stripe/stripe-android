@@ -60,26 +60,7 @@ class ComposeFormDataCollectionFragment : Fragment() {
         // TODO: Enable or disable views accordingly
     }
 
-    /**
-     * Provides to PaymentSheet a LiveData of the map to be used to create the payment method through
-     * PaymentMethodCreateParams. If the form is currently invalid, the map is null.
-     *
-     * This must be lazy or we'll be reading from the ViewModel while the fragment is detached.
-     */
-    val paramMapLiveData by lazy {
-        formViewModel.completeFormValues.map {
-            it?.let {
-                TransformFormToPaymentMethod().transform(formSpec.paramKey, it)
-                    .filterOutNullValues()
-                    .toMap()
-            }
-        }.distinctUntilChanged().asLiveData()
-    }
-
     companion object {
         const val EXTRA_FORM_TYPE = "com.stripe.android.paymentsheet.extra_form_type"
     }
 }
-
-@Suppress("UNCHECKED_CAST")
-private fun <K, V> Map<K, V?>.filterOutNullValues() = filterValues { it != null } as Map<K, V>

@@ -11,10 +11,12 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.TransformFormToPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
@@ -22,6 +24,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataColl
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
@@ -85,20 +89,34 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
             (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-                formFragment.paramMapLiveData.observe(viewLifecycleOwner) { paramMap ->
-                    sheetViewModel.updateSelection(
-                        paramMap?.run {
-                            selectedPaymentMethod.paymentMethodCreateParams(this)
-                        }?.let {
-                            PaymentSelection.New.GenericPaymentMethod(
-                                selectedPaymentMethod.displayNameResource,
-                                selectedPaymentMethod.iconResource,
-                                it,
-                                false
+
+                // I think we need to setup the shared formViewModel in another way.
+                val formViewModel = formFragment.formViewModel
+                val formSpec = formFragment.formSpec
+
+                formViewModel.completeFormValues.map { formFieldValues ->
+                    formFieldValues?.let { it ->
+                        selectedPaymentMethod.paymentMethodCreateParams(
+                            TransformFormToPaymentMethod().transform(
+                                formSpec.paramKey,
+                                it
+                            )
+                                .filterOutNullValues()
+                                .toMap()
+                        )?.let { paymentMethodCreateParams ->
+                            sheetViewModel.updateSelection(
+                                paymentMethodCreateParams.let {
+                                    PaymentSelection.New.GenericPaymentMethod(
+                                        selectedPaymentMethod.displayNameResource,
+                                        selectedPaymentMethod.iconResource,
+                                        it,
+                                        formFieldValues.saveForFutureUse
+                                    )
+                                }
                             )
                         }
-                    )
-                }
+                    }
+                }.distinctUntilChanged().asLiveData()
             }
         }
 
@@ -174,3 +192,6 @@ internal abstract class BaseAddPaymentMethodFragment(
             }
     }
 }
+
+@Suppress("UNCHECKED_CAST")
+private fun <K, V> Map<K, V?>.filterOutNullValues() = filterValues { it != null } as Map<K, V>
