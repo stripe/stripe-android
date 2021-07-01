@@ -15,6 +15,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progress_bar"
+                style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+
             <com.stripe.example.activity.GooglePayButton
                 android:id="@+id/google_pay_button"
                 android:layout_width="200dp"
