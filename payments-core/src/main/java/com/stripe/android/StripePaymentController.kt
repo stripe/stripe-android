@@ -541,11 +541,6 @@ internal class StripePaymentController internal constructor(
     /**
      * Determine which authentication mechanism should be used, or bypass authentication
      * if it is not needed.
-     *
-     * @param returnUrl in some cases, the return URL is not provided in
-     * [StripeIntent.NextActionData]. Specifically, it is not available in
-     * [StripeIntent.NextActionData.SdkData.Use3DS1]. Wire it through so that we can correctly
-     * determine how we should handle authentication.
      */
     @VisibleForTesting
     override suspend fun handleNextAction(
