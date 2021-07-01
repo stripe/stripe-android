@@ -122,7 +122,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             GooglePayPaymentMethodLauncherContract.Args(
                 config = config,
                 currencyCode = currencyCode,
-                amount = null
+                amount = 0
             )
         )
     }

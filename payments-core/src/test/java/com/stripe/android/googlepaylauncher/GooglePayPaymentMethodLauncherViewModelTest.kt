@@ -82,7 +82,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             .isEqualTo(
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = "usd",
-                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = "us",
                     transactionId = null,
                     totalPrice = 1000,
@@ -92,8 +92,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `createTransactionInfo() without amount should create expected TransactionInfo`() {
-        val transactionInfo = viewModel.createTransactionInfo(ARGS.copy(amount = null))
+    fun `createTransactionInfo() with 0 amount should create expected TransactionInfo`() {
+        val transactionInfo = viewModel.createTransactionInfo(ARGS.copy(amount = 0))
         assertThat(transactionInfo)
             .isEqualTo(
                 GooglePayJsonFactory.TransactionInfo(
@@ -101,7 +101,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = "us",
                     transactionId = null,
-                    totalPrice = null,
+                    totalPrice = 0,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )
             )
