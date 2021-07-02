@@ -1,5 +1,7 @@
 package com.stripe.android.googlepaylauncher
 
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,7 +10,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
 import kotlinx.parcelize.Parcelize
 
-internal class GooglePayLauncherContract :
+class GooglePayLauncherContract :
     ActivityResultContract<GooglePayLauncherContract.Args, GooglePayLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
@@ -38,9 +40,28 @@ internal class GooglePayLauncherContract :
         )
     }
 
+    /**
+     * Args for launching [GooglePayLauncherContract] to confirm a [PaymentIntent].
+     */
+    @Parcelize
+    data class PaymentIntentArgs(
+        override val clientSecret: String,
+        override val config: GooglePayLauncher.Config,
+    ) : Args()
+
+    /**
+     * Args for launching [GooglePayLauncherContract] to confirm a [SetupIntent].
+     */
+    @Parcelize
+    data class SetupIntentArgs(
+        override val clientSecret: String,
+        override val config: GooglePayLauncher.Config,
+        internal val currencyCode: String
+    ) : Args()
+
     sealed class Args : Parcelable {
-        abstract val clientSecret: String
-        abstract val config: GooglePayLauncher.Config
+        protected abstract val clientSecret: String
+        protected abstract val config: GooglePayLauncher.Config
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -52,19 +73,6 @@ internal class GooglePayLauncherContract :
             }
         }
     }
-
-    @Parcelize
-    data class PaymentIntentArgs(
-        override val clientSecret: String,
-        override val config: GooglePayLauncher.Config,
-    ) : Args()
-
-    @Parcelize
-    data class SetupIntentArgs(
-        override val clientSecret: String,
-        override val config: GooglePayLauncher.Config,
-        internal val currencyCode: String
-    ) : Args()
 
     internal companion object {
         internal const val EXTRA_RESULT = "extra_result"
