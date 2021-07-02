@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
-import com.stripe.android.paymentsheet.DefaultGooglePayRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.GooglePayRepository
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -57,7 +59,12 @@ internal class FlowControllerModule {
                 val googlePayRepository = environment?.let {
                     DefaultGooglePayRepository(
                         appContext,
-                        it
+                        when (environment) {
+                            PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                                GooglePayEnvironment.Production
+                            PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                                GooglePayEnvironment.Test
+                        }
                     )
                 } ?: GooglePayRepository.Disabled
                 googlePayRepository.isReady().first()

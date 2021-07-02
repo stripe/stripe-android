@@ -19,6 +19,7 @@ import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepaylauncher.GooglePayConfig
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.googlepaylauncher.getErrorResourceID
 import com.stripe.android.model.ConfirmStripeIntentParams
