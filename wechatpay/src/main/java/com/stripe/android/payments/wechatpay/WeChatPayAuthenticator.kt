@@ -44,7 +44,6 @@ class WeChatPayAuthenticator : IntentAuthenticator {
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         val weChatPayRedirect =
