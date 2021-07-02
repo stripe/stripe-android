@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.paymentsheet.example.activity.LaunchPaymentSheetCompleteActivity
 import com.stripe.android.paymentsheet.example.activity.LaunchPaymentSheetCustomActivity
-import com.stripe.android.paymentsheet.example.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -24,10 +23,6 @@ class MainActivity : AppCompatActivity() {
 
         viewBinding.launchCustomButton.setOnClickListener {
             startActivity(Intent(this, LaunchPaymentSheetCustomActivity::class.java))
-        }
-
-        viewBinding.launchPlaygroundButton.setOnClickListener {
-            startActivity(Intent(this, PaymentSheetPlaygroundActivity::class.java))
         }
     }
 }
