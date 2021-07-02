@@ -60,8 +60,8 @@ class GooglePayLauncherContract :
     ) : Args()
 
     sealed class Args : Parcelable {
-        protected abstract val clientSecret: String
-        protected abstract val config: GooglePayLauncher.Config
+        internal abstract val clientSecret: String
+        internal abstract val config: GooglePayLauncher.Config
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

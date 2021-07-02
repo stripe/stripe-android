@@ -50,7 +50,7 @@ class GooglePayPaymentMethodLauncherContract :
         internal val amount: Int
     ) : Parcelable {
 
-        fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"
