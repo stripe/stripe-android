@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -61,7 +62,7 @@ class PaymentSheetContract :
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null
             ) = Args(
-                PaymentIntentClientSecret(clientSecret),
+                SetupIntentClientSecret(clientSecret),
                 config
             )
         }
