@@ -410,6 +410,33 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `confirmPaymentSelection() with generic payment method should start paymentController`() =
+        runBlockingTest {
+            flowController.confirmPaymentSelection(
+                NEW_CARD_PAYMENT_SELECTION,
+                InitData(
+                    PaymentSheetFixtures.CONFIG_CUSTOMER,
+                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    listOf(PaymentMethod.Type.Card),
+                    PAYMENT_METHODS,
+                    SavedSelection.PaymentMethod(
+                        id = "pm_123456789"
+                    ),
+                    isGooglePayReady = false
+                )
+            )
+
+            verify(paymentController).startConfirmAndAuth(
+                any(),
+                any(),
+                any()
+            )
+
+        }
+
+
+    @Test
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
@@ -670,6 +697,11 @@ internal class DefaultFlowControllerTest {
     }
 
     private companion object {
+        private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Discover,
+            false
+        )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
             label = "····4242"
@@ -680,5 +712,8 @@ internal class DefaultFlowControllerTest {
             CardBrand.Visa,
             shouldSavePaymentMethod = true
         )
+        private val PAYMENT_METHODS =
+            listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
+
     }
 }
