@@ -1,14 +1,20 @@
 package com.stripe.android.view
 
+import android.os.Build
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.Locale
 import kotlin.test.Test
 
 /**
  * Test class for [CountryUtils]
  */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.P])
 class CountryUtilsTest {
 
     @Test
