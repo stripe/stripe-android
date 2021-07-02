@@ -432,9 +432,7 @@ internal class DefaultFlowControllerTest {
                 any(),
                 any()
             )
-
         }
-
 
     @Test
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
@@ -714,6 +712,5 @@ internal class DefaultFlowControllerTest {
         )
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
-
     }
 }

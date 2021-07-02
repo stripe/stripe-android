@@ -262,7 +262,6 @@ internal class DefaultFlowController @Inject internal constructor(
                         paymentSelection
                     )
                 }
-
             }
             else -> null
         }?.let { confirmParams ->
