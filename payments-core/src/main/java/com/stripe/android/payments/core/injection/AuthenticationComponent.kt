@@ -6,7 +6,7 @@ import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.authentication.DefaultIntentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.BindsInstance
 import dagger.Component
@@ -17,7 +17,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * [Component] for com.stripe.android.payments.core.authentication.
  *
- * It holds the dagger graph for [DefaultIntentAuthenticatorRegistry], with
+ * It holds the dagger graph for [DefaultPaymentAuthenticatorRegistry], with
  * more dependencies daggerized and a higher level [Component]s created, this class will be merged
  * into it.
  */
@@ -29,7 +29,7 @@ import kotlin.coroutines.CoroutineContext
     ]
 )
 internal interface AuthenticationComponent {
-    val registry: DefaultIntentAuthenticatorRegistry
+    val registry: DefaultPaymentAuthenticatorRegistry
 
     @Component.Builder
     interface Builder {

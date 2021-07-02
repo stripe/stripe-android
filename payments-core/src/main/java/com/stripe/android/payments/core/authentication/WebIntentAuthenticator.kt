@@ -19,7 +19,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * [IntentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
+ * [PaymentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
  */
 @Singleton
 internal class WebIntentAuthenticator @Inject constructor(
@@ -29,11 +29,11 @@ internal class WebIntentAuthenticator @Inject constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
-) : IntentAuthenticator {
+) : PaymentAuthenticator<StripeIntent> {
 
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
-        stripeIntent: StripeIntent,
+        authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         val authUrl: String
@@ -41,11 +41,11 @@ internal class WebIntentAuthenticator @Inject constructor(
         var shouldCancelSource = false
         var shouldCancelIntentOnUserNavigation = true
 
-        when (val nextActionData = stripeIntent.nextActionData) {
+        when (val nextActionData = authenticatable.nextActionData) {
             // can only triggered when `use_stripe_sdk=true`
             is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
                 authUrl = nextActionData.url
-                returnUrl = stripeIntent.id?.let {
+                returnUrl = authenticatable.id?.let {
                     threeDs1IntentReturnUrlMap.remove(it)
                 }
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
@@ -84,9 +84,9 @@ internal class WebIntentAuthenticator @Inject constructor(
 
         beginWebAuth(
             host,
-            stripeIntent,
-            StripePaymentController.getRequestCode(stripeIntent),
-            stripeIntent.clientSecret.orEmpty(),
+            authenticatable,
+            StripePaymentController.getRequestCode(authenticatable),
+            authenticatable.clientSecret.orEmpty(),
             authUrl,
             requestOptions.stripeAccount,
             returnUrl = returnUrl,
