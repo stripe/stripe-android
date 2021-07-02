@@ -77,8 +77,9 @@ internal class FlowControllerModule {
             DefaultDeviceIdRepository(appContext, Dispatchers.IO),
             AnalyticsRequestExecutor.Default(),
             AnalyticsRequestFactory(
-                appContext
-            ) { lazyPaymentConfiguration.get().publishableKey },
+                appContext,
+                { lazyPaymentConfiguration.get().publishableKey }
+            ),
             Dispatchers.IO
         )
     }
