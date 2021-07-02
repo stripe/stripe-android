@@ -9,7 +9,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
@@ -65,23 +64,6 @@ class Stripe3ds2TransactionActivityTest {
                     activity.supportFragmentManager.fragmentFactory
                 )
             }
-        }
-    }
-
-    @Test
-    fun `Activity should fail when source id is invalid`() {
-        ActivityScenario.launch<Stripe3ds2TransactionActivity>(
-            Intent(
-                ApplicationProvider.getApplicationContext(),
-                Stripe3ds2TransactionActivity::class.java
-            ).putExtras(
-                ARGS.toBundle()
-            )
-        ).use { activityScenario ->
-            val result = parseResult(activityScenario)
-            val exception = assertIs<InvalidRequestException>(result.exception)
-            assertThat(exception.message)
-                .isEqualTo("No such source: 'src_1ExkUeAWhjPjYwPiLWUvXrSA'")
         }
     }
 
