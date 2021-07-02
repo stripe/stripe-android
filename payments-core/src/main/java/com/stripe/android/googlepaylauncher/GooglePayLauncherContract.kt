@@ -1,13 +1,13 @@
 package com.stripe.android.googlepaylauncher
 
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
 
 class GooglePayLauncherContract :
