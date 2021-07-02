@@ -32,25 +32,23 @@ internal class LaunchPaymentSheetWithComposeActivity :
                     viewModel.statusDisplayed()
                 }
 
-                Receipt(inProgress) {
-                    BuyButton(
-                        buyButtonEnabled = !inProgress,
-                        onClick = {
-                            prepareCheckout { customerConfig, clientSecret ->
-                                stripeLauncher.launch(
-                                    PaymentSheetContract.Args.createPaymentIntentArgs(
-                                        clientSecret,
-                                        PaymentSheet.Configuration(
-                                            merchantDisplayName = merchantName,
-                                            customer = customerConfig,
-                                            googlePay = googlePayConfig,
-                                        )
+                Receipt(
+                    buyButtonEnabled = !inProgress,
+                    buyButtonClickListener = {
+                        prepareCheckout { customerConfig, clientSecret ->
+                            stripeLauncher.launch(
+                                PaymentSheetContract.Args.createPaymentIntentArgs(
+                                    clientSecret,
+                                    PaymentSheet.Configuration(
+                                        merchantDisplayName = merchantName,
+                                        customer = customerConfig,
+                                        googlePay = googlePayConfig,
                                     )
                                 )
-                            }
+                            )
                         }
-                    )
-                }
+                    }
+                )
             }
         }
     }
