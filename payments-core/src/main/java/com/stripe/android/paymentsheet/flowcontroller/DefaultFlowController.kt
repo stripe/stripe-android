@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
@@ -75,13 +76,15 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
     /**
-     * [PaymentFlowResultProcessor] is [Lazy] because it needs [FlowControllerViewModel.initData]
-     * to be set, which happens post [DefaultFlowController] creation and after
-     * [configureWithPaymentIntent] or [configureWithPaymentIntent] is called.
+     * [PaymentFlowResultProcessor] is wrapped with [Provider] because it needs
+     * [FlowControllerViewModel.initData] to be set, which might happen multiple times post
+     * [DefaultFlowController] creation and after [configureWithPaymentIntent] or
+     * [configureWithPaymentIntent] is called.
      * TODO: Observe on [FlowControllerViewModel.initData] change and initialize
      *   paymentFlowResultProcessor afterwards.
      */
-    private val lazyPaymentFlowResultProcessor: Lazy<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
+    private val paymentFlowResultProcessorProvider:
+        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
@@ -393,7 +396,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         lifecycleScope.launch {
             runCatching {
-                lazyPaymentFlowResultProcessor.get().processResult(
+                paymentFlowResultProcessorProvider.get().processResult(
                     paymentFlowResult
                 )
             }.fold(
