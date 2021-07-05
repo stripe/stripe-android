@@ -54,7 +54,7 @@ ext {
     composeVersion = '1.0.0-rc01'
     espressoVersion = '3.4.0'
     ktlintVersion = '0.41.0'
-    materialVersion = '1.3.0'
+    materialVersion = '1.4.0'
     daggerVersion = '2.37'
 
     androidTestVersion = '1.4.0'
