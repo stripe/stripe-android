@@ -32,12 +32,24 @@ Otherwise, to make it easier to diagnose your issue, please fill out the followi
 <!-- How did you install our SDK? Through a gradle dependency or a downloaded aar? -->
 
 ## Dependency Versions
-<!-- What version of our SDK are you using? You can find this by looking at the `dependencies` section of your project's `build.gradle` file.   -->
+<!-- What version of kotlin are you using? -->
+
+
+<!-- Plese post the output of the following script.  If the result does not contain a version number you will have to look it up manually:
+
+For stripe-android: 
+ ./gradlew :dependencies | grep com.android.tools.build
+
+For Android Gradle Plugin:
+ ./gradlew :dependencies | grep com.stripe:stripe-android
+
+For Gradle version:
+./gradlew -v
+-->
+
 stripe-android:
-<!-- What version of gradle are you using?  You can find this by looking at <PROJECT>/gradle/wrapper/gradle-wrapper.properties -->
-Gradle:
-<!--
 Android Gradle Plugin:
+Gradle:
 
 
 ## SDK classes
