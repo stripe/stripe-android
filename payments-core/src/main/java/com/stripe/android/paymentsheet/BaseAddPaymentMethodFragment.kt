@@ -175,7 +175,9 @@ internal abstract class BaseAddPaymentMethodFragment(
             }
 
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
-        private fun transformToPaymentSelection(
+
+        @VisibleForTesting
+        internal fun transformToPaymentSelection(
             formFieldValues: FormFieldValues?,
             paramKey: Map<String, Any?>,
             selectedPaymentMethodResources: SupportedPaymentMethod,
