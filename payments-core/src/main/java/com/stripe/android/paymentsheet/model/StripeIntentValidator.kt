@@ -24,10 +24,13 @@ internal class StripeIntentValidator {
                 )
             }
             stripeIntent is PaymentIntent &&
-                stripeIntent.status != StripeIntent.Status.RequiresPaymentMethod -> {
+                (
+                    (stripeIntent.status != StripeIntent.Status.RequiresPaymentMethod) &&
+                        (stripeIntent.status != StripeIntent.Status.RequiresAction)
+                    ) -> {
                 error(
                     """
-                        A PaymentIntent with status='requires_payment_method' is required.
+                        A PaymentIntent with status='requires_payment_method' or 'requires_action` is required.
                         The current PaymentIntent has status ${stripeIntent.status}.
                         See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status.
                     """.trimIndent()

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -32,7 +33,7 @@ class StripeIntentValidatorTest {
     }
 
     @Test
-    fun `requireValid() requires status = RequiresPaymentMethod`() {
+    fun `requireValid() processing is not valid`() {
         assertFails {
             validator.requireValid(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -40,5 +41,19 @@ class StripeIntentValidatorTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `requireValid() allows status = RequiresPaymentMethod`() {
+        validator.requireValid(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        )
+    }
+
+    @Test
+    fun `requireValid() allows status = RequiresAction`() {
+        validator.requireValid(
+            PaymentIntentJsonParser().parse(PaymentIntentFixtures.EXPANDED_PAYMENT_METHOD_JSON)!!,
+        )
     }
 }
