@@ -105,6 +105,7 @@ public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod 
 
 public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion {
 	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public final fun getSupportedSavedPaymentMethods ()Ljava/util/Set;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment : androidx/fragment/app/Fragment {
