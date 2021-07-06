@@ -41,8 +41,8 @@ class TransformElementToFormViewValueFlowTest {
     private val transformElementToFormFieldValueFlow = TransformElementToFormFieldValueFlow(
         listOf(countrySection, emailSection),
         optionalIdentifersFlow,
-        showingMandate,
-        saveForFutureUse
+        showingMandate = MutableStateFlow(true),
+        saveForFutureUse = MutableStateFlow(false)
     )
 
     @Test

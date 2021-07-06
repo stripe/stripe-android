@@ -192,6 +192,3 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
     }
 }
-
-@Suppress("UNCHECKED_CAST")
-private fun <K, V> Map<K, V?>.filterOutNullValues() = filterValues { it != null } as Map<K, V>
