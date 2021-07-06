@@ -21,7 +21,6 @@ internal class UnsupportedAuthenticator @Inject constructor(
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         val exception = stripeIntent.nextActionData?.let {

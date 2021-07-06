@@ -15,6 +15,33 @@ public abstract interface class com/stripe/android/paymentsheet/OptionalElement 
 	public abstract fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
 }
 
+public final class com/stripe/android/paymentsheet/elements/IdealBankConfig : com/stripe/android/paymentsheet/elements/common/DropdownConfig {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Companion;
+	public fun <init> ()V
+	public fun getDebugLabel ()Ljava/lang/String;
+	public fun getDisplayItems ()Ljava/util/List;
+	public fun getLabel ()I
+}
+
+public final class com/stripe/android/paymentsheet/elements/IdealBankConfig$Companion {
+	public final fun getDISPLAY_TO_PARAM ()Ljava/util/List;
+}
+
+public final class com/stripe/android/paymentsheet/elements/IdealBankConfig$Item {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getPaymentMethodParamFieldValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class com/stripe/android/paymentsheet/elements/common/Controller {
 	public abstract fun getErrorMessage ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
@@ -61,16 +88,6 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory :
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 
-public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod$Companion;
-	public fun <init> ()V
-	public final fun transform (Ljava/util/Map;Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)Ljava/util/Map;
-}
-
-public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod$Companion {
-}
-
 public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod : java/lang/Enum {
 	public static final field Bancontact Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Card Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
@@ -97,7 +114,6 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 	public fun <init> ()V
 	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
-	public final fun getParamMapLiveData ()Landroidx/lifecycle/LiveData;
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
 	public final fun setProcessing (Z)V
 }

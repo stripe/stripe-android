@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,10 +51,18 @@ internal fun Form(
     ) {
         formViewModel.elements.forEach { element ->
 
-            AnimatedVisibility(!optionalIdentifiers.contains(element.identifier)) {
+            AnimatedVisibility(
+                !optionalIdentifiers.contains(element.identifier),
+                enter = EnterTransition.None,
+                exit = ExitTransition.None
+            ) {
                 when (element) {
                     is SectionElement -> {
-                        AnimatedVisibility(!optionalIdentifiers.contains(element.identifier)) {
+                        AnimatedVisibility(
+                            !optionalIdentifiers.contains(element.identifier),
+                            enter = EnterTransition.None,
+                            exit = ExitTransition.None
+                        ) {
                             val controller = element.controller
 
                             val error by controller.errorMessage.asLiveData().observeAsState(null)

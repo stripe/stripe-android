@@ -34,7 +34,6 @@ class PaymentBrowserAuthStarterTest {
 
     private val legacyStarter = PaymentBrowserAuthStarter.Legacy(
         AuthActivityStarterHost.create(activity),
-        hasCompatibleBrowser = true,
         defaultReturnUrl
     )
 
@@ -79,7 +78,6 @@ class PaymentBrowserAuthStarterTest {
                 activity,
                 statusBarColor = Color.RED
             ),
-            hasCompatibleBrowser = true,
             defaultReturnUrl
         )
         legacyStarter.start(DATA)

@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -78,7 +79,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val apiRequestOptions: ApiRequest.Options,
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
-    private val paymentFlowResultProcessor: dagger.Lazy<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
+    private val paymentFlowResultProcessorProvider:
+        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val logger: Logger,
@@ -426,7 +428,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch {
             val result = runCatching {
                 withContext(workContext) {
-                    paymentFlowResultProcessor.get().processResult(
+                    paymentFlowResultProcessorProvider.get().processResult(
                         paymentFlowResult
                     )
                 }

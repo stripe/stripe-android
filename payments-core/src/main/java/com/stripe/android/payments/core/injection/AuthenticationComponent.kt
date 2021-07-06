@@ -64,6 +64,11 @@ internal interface AuthenticationComponent {
         @BindsInstance
         fun uiContext(@UIContext uiContext: CoroutineContext): Builder
 
+        @BindsInstance
+        fun threeDs1IntentReturnUrlMap(
+            threeDs1IntentReturnUrlMap: MutableMap<String, String>
+        ): Builder
+
         fun build(): AuthenticationComponent
     }
 }
