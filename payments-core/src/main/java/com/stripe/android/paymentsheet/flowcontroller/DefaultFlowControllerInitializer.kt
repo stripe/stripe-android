@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedSavedPaymentMethod
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.withContext
@@ -68,15 +68,15 @@ internal class DefaultFlowControllerInitializer(
         }.fold(
             onSuccess = { stripeIntent ->
                 val paymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
-                    SupportedSavedPaymentMethod.fromCode(it)
-                }.map {
-                    it.type
+                    PaymentMethod.Type.fromCode(it)
+                }.filter {
+                    SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
                 }
                 retrieveAllPaymentMethods(
                     types = paymentMethodTypes,
                     customerConfig
                 ).filter { paymentMethod ->
-                    SupportedSavedPaymentMethod.isValid(paymentMethod)
+                    paymentMethod.hasExpectedDetails()
                 }.let { paymentMethods ->
 
                     setLastSavedPaymentMethod(prefsRepository, isGooglePayReady, paymentMethods)

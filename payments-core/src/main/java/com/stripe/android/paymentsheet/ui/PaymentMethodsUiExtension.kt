@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.model
+package com.stripe.android.paymentsheet.ui
 
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
@@ -6,42 +6,16 @@ import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
-/**
- * Enum defining all types of saved payment method supported on Payment Sheet.
- *
- * These are fetched from the
- * [PaymentMethods API endpoint](https://stripe.com/docs/api/payment_methods/list) for returning
- * customers.
- */
-internal enum class SupportedSavedPaymentMethod(
-    val type: PaymentMethod.Type
-) {
-    Card(PaymentMethod.Type.Card),
-    SepaDebit(PaymentMethod.Type.SepaDebit);
-
-    companion object {
-        internal fun fromCode(code: String) =
-            values().firstOrNull { it.type.code == code }
-
-        internal fun isValid(paymentMethod: PaymentMethod) =
-            when (paymentMethod.type) {
-                PaymentMethod.Type.Card -> paymentMethod.card != null
-                PaymentMethod.Type.SepaDebit -> paymentMethod.sepaDebit != null
-                else -> false
-            }
-    }
-}
-
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int? = when (type) {
-    PaymentMethod.Type.Card -> card?.brand?.getSavedPaymentMethodIcon()
+    PaymentMethod.Type.Card -> card?.brand?.getCardBrandIcon()
         ?: R.drawable.stripe_ic_paymentsheet_card_unknown
     PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_pm_sepa_debit
     else -> null
 }
 
 @DrawableRes
-internal fun CardBrand.getSavedPaymentMethodIcon(): Int = when (this) {
+internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
     CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa
     CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex
     CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover

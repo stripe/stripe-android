@@ -2,6 +2,10 @@ package com.stripe.android.paymentsheet.model
 
 import android.content.res.Resources
 import com.stripe.android.R
+import com.stripe.android.paymentsheet.ui.createCardLabel
+import com.stripe.android.paymentsheet.ui.getCardBrandIcon
+import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 
 internal class PaymentOptionFactory(
     private val resources: Resources
@@ -22,7 +26,7 @@ internal class PaymentOptionFactory(
             }
             is PaymentSelection.New.Card -> {
                 PaymentOption(
-                    drawableResourceId = selection.brand.getSavedPaymentMethodIcon(),
+                    drawableResourceId = selection.brand.getCardBrandIcon(),
                     label = createCardLabel(
                         resources,
                         selection.paymentMethodCreateParams.card?.last4

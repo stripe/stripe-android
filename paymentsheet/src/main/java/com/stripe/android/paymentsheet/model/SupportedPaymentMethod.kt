@@ -51,5 +51,14 @@ enum class SupportedPaymentMethod(
     companion object {
         fun fromCode(code: String?) =
             values().firstOrNull { it.code == code }
+
+        /**
+         * Defines all types of saved payment method supported on Payment Sheet.
+         *
+         * These are fetched from the
+         * [PaymentMethods API endpoint](https://stripe.com/docs/api/payment_methods/list) for
+         * returning customers.
+         */
+        val supportedSavedPaymentMethods = setOf("card", "sepa_debit")
     }
 }

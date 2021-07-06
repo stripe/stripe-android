@@ -98,16 +98,44 @@ data class PaymentMethod internal constructor(
      */
     @JvmField val sepaDebit: SepaDebit? = null,
 
+    /**
+     * If this is an `au_becs_debit` PaymentMethod, this hash contains details about the bank account.
+     *
+     * [au_becs_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-au_becs_debit)
+     */
     @JvmField val auBecsDebit: AuBecsDebit? = null,
 
+    /**
+     * If this is a `bacs_debit` PaymentMethod, this hash contains details about the Bacs Direct Debit bank account.
+     *
+     * [bacs_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-bacs_debit)
+     */
     @JvmField val bacsDebit: BacsDebit? = null,
 
+    /**
+     * If this is a `sofort` PaymentMethod, this hash contains details about the SOFORT payment method.
+     *
+     * [sofort](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sofort)
+     */
     @JvmField val sofort: Sofort? = null,
 
     @JvmField val upi: Upi? = null,
 
     @JvmField val netbanking: Netbanking? = null
 ) : StripeModel {
+
+    internal fun hasExpectedDetails(): Boolean =
+        when (type) {
+            Type.Card -> card != null
+            Type.CardPresent -> cardPresent != null
+            Type.Fpx -> fpx != null
+            Type.Ideal -> ideal != null
+            Type.SepaDebit -> sepaDebit != null
+            Type.AuBecsDebit -> auBecsDebit != null
+            Type.BacsDebit -> bacsDebit != null
+            Type.Sofort -> sofort != null
+            else -> true
+        }
 
     @Parcelize
     enum class Type constructor(

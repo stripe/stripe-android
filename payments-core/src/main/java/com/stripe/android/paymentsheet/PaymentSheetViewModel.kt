@@ -23,6 +23,7 @@ import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.googlepaylauncher.getErrorResourceID
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
@@ -38,7 +39,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedSavedPaymentMethod
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -162,6 +163,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    /**
+     * Fetch the [StripeIntent] for the client secret received as parameter. If successful,
+     * continues through validation and fetching the saved payment methods for the customer.
+     */
     fun fetchStripeIntent() {
         viewModelScope.launch {
             runCatching {
@@ -196,7 +201,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
      * was provided.
      * It will fetch only the payment method types accepted by the [stripeIntent] and defined in
-     * [SupportedSavedPaymentMethod].
+     * [SupportedPaymentMethod.supportedSavedPaymentMethods].
      */
     @VisibleForTesting
     fun updatePaymentMethods(stripeIntent: StripeIntent) {
@@ -204,16 +209,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             runCatching {
                 customerConfig?.let { customerConfig ->
                     stripeIntent.paymentMethodTypes.mapNotNull {
-                        SupportedSavedPaymentMethod.fromCode(it)
+                        PaymentMethod.Type.fromCode(it)
+                    }.filter {
+                        SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
                     }.map {
                         async {
                             paymentMethodsRepository.get(
                                 customerConfig,
-                                it.type
+                                it
                             )
                         }
                     }.awaitAll().flatten().filter { paymentMethod ->
-                        SupportedSavedPaymentMethod.isValid(paymentMethod).also { valid ->
+                        paymentMethod.hasExpectedDetails().also { valid ->
                             if (!valid) {
                                 logger.error(
                                     "Discarding invalid payment method ${paymentMethod.id}"
