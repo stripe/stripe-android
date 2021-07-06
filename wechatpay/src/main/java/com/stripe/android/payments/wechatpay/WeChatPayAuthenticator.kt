@@ -7,13 +7,13 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.authentication.IntentAuthenticator
+import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.view.AuthActivityStarterHost
 
 /**
- * [IntentAuthenticator] authenticating through WeChatPay SDK.
+ * [PaymentAuthenticator] implementation to authenticate through WeChatPay SDK.
  */
-class WeChatPayAuthenticator : IntentAuthenticator {
+class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent> {
     /**
      * [weChatPayAuthLauncher] is mutable and might be updated during
      * through [onNewActivityResultCaller]
@@ -43,20 +43,20 @@ class WeChatPayAuthenticator : IntentAuthenticator {
 
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
-        stripeIntent: StripeIntent,
+        authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         val weChatPayRedirect =
             requireNotNull(
-                stripeIntent.nextActionData as? StripeIntent.NextActionData.WeChatPayRedirect
+                authenticatable.nextActionData as? StripeIntent.NextActionData.WeChatPayRedirect
             ) {
                 "stripeIntent.nextActionData should be WeChatPayRedirect, instead it is " +
-                    "${stripeIntent.nextActionData}"
+                    "${authenticatable.nextActionData}"
             }
 
         weChatAuthLauncherFactory(
             host,
-            stripeIntent.getRequestCode()
+            authenticatable.getRequestCode()
         ).start(
             WeChatPayAuthContract.Args(weChatPayRedirect.weChat)
         )

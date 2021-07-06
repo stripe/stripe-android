@@ -11,19 +11,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * [IntentAuthenticator] to return if there is no available authenticators. Informs the correct
+ * [PaymentAuthenticator] to return if there is no available authenticators. Informs the correct
  * dependency to include for that authenticator.
  */
 @Singleton
 internal class UnsupportedAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
-) : IntentAuthenticator {
+) : PaymentAuthenticator<StripeIntent> {
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
-        stripeIntent: StripeIntent,
+        authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        val exception = stripeIntent.nextActionData?.let {
+        val exception = authenticatable.nextActionData?.let {
             val nextActionType = it::class.java
             StripeException.create(
                 IllegalArgumentException(
@@ -41,7 +41,7 @@ internal class UnsupportedAuthenticator @Inject constructor(
             .start(
                 PaymentRelayStarter.Args.ErrorArgs(
                     exception = exception,
-                    requestCode = stripeIntent.getRequestCode()
+                    requestCode = authenticatable.getRequestCode()
                 )
             )
     }

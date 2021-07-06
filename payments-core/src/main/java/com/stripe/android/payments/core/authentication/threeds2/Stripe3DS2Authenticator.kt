@@ -22,7 +22,7 @@ import com.stripe.android.payments.DefaultStripeChallengeStatusReceiver
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.Stripe3ds2CompletionContract
 import com.stripe.android.payments.Stripe3ds2CompletionStarter
-import com.stripe.android.payments.core.authentication.IntentAuthenticator
+import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
@@ -39,7 +39,7 @@ import java.security.cert.CertificateException
 import kotlin.coroutines.CoroutineContext
 
 /**
- * [IntentAuthenticator] authenticating through Stripe's 3ds2 SDK.
+ * [PaymentAuthenticator] authenticating through Stripe's 3ds2 SDK.
  */
 internal class Stripe3DS2Authenticator(
     private val config: PaymentAuthConfig,
@@ -53,7 +53,7 @@ internal class Stripe3DS2Authenticator(
     private val threeDs2Service: StripeThreeDs2Service,
     private val messageVersionRegistry: MessageVersionRegistry,
     private val challengeProgressActivityStarter: ChallengeProgressActivityStarter
-) : IntentAuthenticator {
+) : PaymentAuthenticator<StripeIntent> {
     init {
         threeDs2Service.initialize(config.stripe3ds2Config.uiCustomization.uiCustomization)
     }
@@ -73,14 +73,14 @@ internal class Stripe3DS2Authenticator(
 
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
-        stripeIntent: StripeIntent,
+        authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         handle3ds2Auth(
             host,
-            stripeIntent,
+            authenticatable,
             requestOptions,
-            stripeIntent.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2
+            authenticatable.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2
         )
     }
 

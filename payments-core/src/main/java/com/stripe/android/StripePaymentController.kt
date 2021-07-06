@@ -32,8 +32,8 @@ import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
-import com.stripe.android.payments.core.authentication.DefaultIntentAuthenticatorRegistry
-import com.stripe.android.payments.core.authentication.IntentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -110,8 +110,8 @@ internal class StripePaymentController internal constructor(
      */
     private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
-    private val authenticatorRegistry: IntentAuthenticatorRegistry =
-        DefaultIntentAuthenticatorRegistry.createInstance(
+    private val authenticatorRegistry: PaymentAuthenticatorRegistry =
+        DefaultPaymentAuthenticatorRegistry.createInstance(
             context,
             stripeRepository,
             paymentRelayStarterFactory,
@@ -352,42 +352,16 @@ internal class StripePaymentController internal constructor(
         )
     }
 
-    // TODO(ccen) create a SourceAuthenticator and register it in [IntentAuthenticatorRegistry]
     private suspend fun onSourceRetrieved(
         host: AuthActivityStarterHost,
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
-        if (source.flow == Source.Flow.Redirect) {
-            startSourceAuth(
-                paymentBrowserAuthStarterFactory(host),
-                source,
-                requestOptions
-            )
-        } else {
-            bypassAuth(host, source, requestOptions.stripeAccount)
-        }
-    }
 
-    private suspend fun startSourceAuth(
-        paymentBrowserAuthStarter: PaymentBrowserAuthStarter,
-        source: Source,
-        requestOptions: ApiRequest.Options
-    ) = withContext(uiContext) {
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.AuthSourceRedirect)
-        )
-
-        paymentBrowserAuthStarter.start(
-            PaymentBrowserAuthContract.Args(
-                objectId = source.id.orEmpty(),
-                requestCode = SOURCE_REQUEST_CODE,
-                clientSecret = source.clientSecret.orEmpty(),
-                url = source.redirect?.url.orEmpty(),
-                returnUrl = source.redirect?.returnUrl,
-                enableLogging = enableLogging,
-                stripeAccountId = requestOptions.stripeAccount
-            )
+        authenticatorRegistry.getAuthenticator(source).authenticate(
+            host,
+            source,
+            requestOptions
         )
     }
 
@@ -553,17 +527,6 @@ internal class StripePaymentController internal constructor(
             stripeIntent,
             requestOptions
         )
-    }
-
-    private suspend fun bypassAuth(
-        host: AuthActivityStarterHost,
-        source: Source,
-        stripeAccountId: String?
-    ) = withContext(uiContext) {
-        paymentRelayStarterFactory(host)
-            .start(
-                PaymentRelayStarter.Args.SourceArgs(source, stripeAccountId)
-            )
     }
 
     private fun logReturnUrl(returnUrl: String?) {
