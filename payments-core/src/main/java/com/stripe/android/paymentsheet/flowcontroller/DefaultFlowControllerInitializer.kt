@@ -76,7 +76,7 @@ internal class DefaultFlowControllerInitializer(
                     types = paymentMethodTypes,
                     customerConfig
                 ).filter { paymentMethod ->
-                    SupportedSavedPaymentMethod.isSupported(paymentMethod)
+                    SupportedSavedPaymentMethod.isValid(paymentMethod)
                 }.let { paymentMethods ->
 
                     setLastSavedPaymentMethod(prefsRepository, isGooglePayReady, paymentMethods)

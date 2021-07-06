@@ -213,7 +213,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             )
                         }
                     }.awaitAll().flatten().filter { paymentMethod ->
-                        SupportedSavedPaymentMethod.isSupported(paymentMethod).also { valid ->
+                        SupportedSavedPaymentMethod.isValid(paymentMethod).also { valid ->
                             if (!valid) {
                                 logger.error(
                                     "Discarding invalid payment method ${paymentMethod.id}"

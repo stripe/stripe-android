@@ -23,7 +23,7 @@ internal enum class SupportedSavedPaymentMethod(
         internal fun fromCode(code: String) =
             values().firstOrNull { it.type.code == code }
 
-        internal fun isSupported(paymentMethod: PaymentMethod) =
+        internal fun isValid(paymentMethod: PaymentMethod) =
             when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> paymentMethod.card != null
                 PaymentMethod.Type.SepaDebit -> paymentMethod.sepaDebit != null
