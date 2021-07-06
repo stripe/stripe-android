@@ -111,6 +111,10 @@ internal abstract class BaseAddPaymentMethodFragment(
         paymentMethods: List<SupportedPaymentMethod>
     ) {
         viewBinding.paymentMethodsRecycler.isVisible = true
+        // The default item animator conflicts with `animateLayoutChanges`, causing a crash when
+        // quickly switching payment methods. Set to null since the items never change anyway.
+        viewBinding.paymentMethodsRecycler.itemAnimator = null
+
         val layoutManager = object : LinearLayoutManager(
             activity,
             HORIZONTAL,
