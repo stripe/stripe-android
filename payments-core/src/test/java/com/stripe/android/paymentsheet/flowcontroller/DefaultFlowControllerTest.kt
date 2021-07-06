@@ -27,6 +27,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -58,6 +59,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -427,10 +429,25 @@ internal class DefaultFlowControllerTest {
                 )
             )
 
+            val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                setupFutureUsage = null,
+                shipping = null,
+                savePaymentMethod = null,
+                paymentMethodOptions = null,
+                mandateId = null,
+                mandateData = null,
+            )
+            val apiOptions = ApiRequest.Options(
+                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccount = null
+            )
+
             verify(paymentController).startConfirmAndAuth(
                 any(),
-                any(),
-                any()
+                eq(confirmPaymentIntentParams),
+                eq(apiOptions)
             )
         }
 

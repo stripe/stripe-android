@@ -256,12 +256,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 confirmParamsFactory.create(paymentSelection)
             }
             is PaymentSelection.New -> {
-                when (paymentSelection) {
-                    is PaymentSelection.New.Card -> confirmParamsFactory.create(paymentSelection)
-                    is PaymentSelection.New.GenericPaymentMethod -> confirmParamsFactory.create(
-                        paymentSelection
-                    )
-                }
+                confirmParamsFactory.create(paymentSelection)
             }
             else -> null
         }?.let { confirmParams ->
