@@ -55,5 +55,11 @@ Gradle:
 ## SDK classes
 <!-- Which SDK classes are applicable to your issue? -->
 
+## Video
+<!-- If you are able to provide a video of the issue that would be helpful.  You can take a video of a connected device or emulator by:
+1. Open Android Studio.  
+2. Click on View -> Tool Windows -> Logcat
+3. In the left most side of the logcat window pane are some vertical icons, under the restart and settings icon is a camera and video.   Pressing either of these will allow you to take a screenshot or video of the issue. -->
+
 ## Other information
 <!-- Anything else you can include that'll make it easier for us to help you! -->
