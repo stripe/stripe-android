@@ -124,10 +124,10 @@ class GooglePayLauncherViewModelTest {
             .isEqualTo(
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = "usd",
-                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                     countryCode = "us",
                     transactionId = "seti_1GSmaFCRMbs",
-                    totalPrice = null,
+                    totalPrice = 0,
                     totalPriceLabel = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )

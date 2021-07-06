@@ -20,7 +20,6 @@ internal class OxxoAuthenticator @Inject constructor(
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         (stripeIntent.nextActionData as NextActionData.DisplayOxxoDetails).let { oxxoDetailsData ->
@@ -28,14 +27,12 @@ internal class OxxoAuthenticator @Inject constructor(
                 noOpIntentAuthenticator.authenticate(
                     host,
                     stripeIntent,
-                    threeDs1ReturnUrl,
                     requestOptions
                 )
             } else {
                 webIntentAuthenticator.authenticate(
                     host,
                     stripeIntent,
-                    threeDs1ReturnUrl,
                     requestOptions
                 )
             }

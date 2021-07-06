@@ -27,8 +27,6 @@ import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.BrowserCapabilities
-import com.stripe.android.payments.BrowserCapabilitiesSupplier
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
@@ -80,10 +78,6 @@ internal class StripePaymentController internal constructor(
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
-    private val hasCompatibleBrowser: Boolean by lazy {
-        BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
-    }
-
     /**
      * [paymentRelayLauncher] is mutable and might be updated during
      * through [registerLaunchersWithActivityResultCaller]
@@ -106,10 +100,15 @@ internal class StripePaymentController internal constructor(
             PaymentBrowserAuthStarter.Modern(it)
         } ?: PaymentBrowserAuthStarter.Legacy(
             host,
-            hasCompatibleBrowser,
             defaultReturnUrl
         )
     }
+
+    /**
+     * A map between 3ds1 [StripeIntent] ids to its corresponding returnUrl.
+     * An entry will be removed once the [StripeIntent] is confirmed.
+     */
+    private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
     private val authenticatorRegistry: IntentAuthenticatorRegistry =
         DefaultIntentAuthenticatorRegistry.createInstance(
@@ -122,6 +121,7 @@ internal class StripePaymentController internal constructor(
             enableLogging,
             workContext,
             uiContext,
+            threeDs1IntentReturnUrlMap,
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -133,7 +133,7 @@ internal class StripePaymentController internal constructor(
             activityResultCallback
         )
         paymentBrowserAuthLauncher = activityResultCaller.registerForActivityResult(
-            PaymentBrowserAuthContract(defaultReturnUrl),
+            PaymentBrowserAuthContract(),
             activityResultCallback
         )
         authenticatorRegistry.onNewActivityResultCaller(
@@ -184,10 +184,16 @@ internal class StripePaymentController internal constructor(
             }
         }.fold(
             onSuccess = { intent ->
+                intent.nextActionData?.let {
+                    if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
+                        intent.id?.let { intentId ->
+                            threeDs1IntentReturnUrlMap[intentId] = returnUrl
+                        }
+                    }
+                }
                 handleNextAction(
                     host,
                     intent,
-                    returnUrl,
                     requestOptions
                 )
             },
@@ -295,7 +301,6 @@ internal class StripePaymentController internal constructor(
                 handleNextAction(
                     host = host,
                     stripeIntent = stripeIntent,
-                    returnUrl = null,
                     requestOptions = requestOptions
                 )
             },
@@ -536,23 +541,16 @@ internal class StripePaymentController internal constructor(
     /**
      * Determine which authentication mechanism should be used, or bypass authentication
      * if it is not needed.
-     *
-     * @param returnUrl in some cases, the return URL is not provided in
-     * [StripeIntent.NextActionData]. Specifically, it is not available in
-     * [StripeIntent.NextActionData.SdkData.Use3DS1]. Wire it through so that we can correctly
-     * determine how we should handle authentication.
      */
     @VisibleForTesting
     override suspend fun handleNextAction(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        returnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         authenticatorRegistry.getAuthenticator(stripeIntent).authenticate(
             host,
             stripeIntent,
-            returnUrl,
             requestOptions
         )
     }

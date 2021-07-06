@@ -25,8 +25,7 @@ import kotlin.coroutines.CoroutineContext
 @Component(
     modules = [
         AuthenticationModule::class,
-        Stripe3DSAuthenticatorModule::class,
-        WeChatPayAuthenticatorModule::class
+        Stripe3DSAuthenticatorModule::class
     ]
 )
 internal interface AuthenticationComponent {
@@ -64,6 +63,11 @@ internal interface AuthenticationComponent {
 
         @BindsInstance
         fun uiContext(@UIContext uiContext: CoroutineContext): Builder
+
+        @BindsInstance
+        fun threeDs1IntentReturnUrlMap(
+            threeDs1IntentReturnUrlMap: MutableMap<String, String>
+        ): Builder
 
         fun build(): AuthenticationComponent
     }

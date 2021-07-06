@@ -10,6 +10,7 @@ import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.paymentsheet.DefaultGooglePayRepository
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.GooglePayRepository
+import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -23,6 +24,7 @@ import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -31,8 +33,13 @@ internal class FlowControllerModule {
     @Named(ENABLE_LOGGING)
     fun provideEnabledLogging(): Boolean = false
 
+    /**
+     * [FlowController]'s clientSecret might be updated multiple times through
+     * [FlowController.configureWithSetupIntent] or [FlowController.configureWithPaymentIntent].
+     *
+     * Should always be injected with [Provider].
+     */
     @Provides
-    @Singleton
     fun provideClientSecret(
         viewModel: FlowControllerViewModel
     ): ClientSecret {

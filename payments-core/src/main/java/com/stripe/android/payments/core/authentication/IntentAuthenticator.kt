@@ -19,13 +19,11 @@ interface IntentAuthenticator : ActivityResultLauncherHost {
      *
      * @param host the host([Activity] or [Fragment]) where client is calling from, used to redirect back to client.
      * @param stripeIntent the intent to authenticate
-     * @param threeDs1ReturnUrl a dedicated deeplink URL to return to only for 3ds1 web authentication. TODO(ccen): move it to [WebIntentAuthenticator]
      * @param requestOptions configurations for the API request which triggers the authentication
      */
     suspend fun authenticate(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String?,
         requestOptions: ApiRequest.Options
     )
 }
