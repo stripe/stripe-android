@@ -51,7 +51,9 @@ internal fun DropDown(
             )
             Icon(
                 Icons.Filled.ArrowDropDown,
-                contentDescription = "Localized description"
+                contentDescription = "Localized description",
+                modifier = Modifier
+                    .clickable(onClick = { expanded = true })
             )
         }
         DropdownMenu(
