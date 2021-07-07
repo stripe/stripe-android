@@ -24,6 +24,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
@@ -412,7 +413,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPaymentSelection() with generic payment method should start paymentController`() =
+    fun `confirmPaymentSelection() with new card payment method should start paymentController`() =
         runBlockingTest {
             flowController.confirmPaymentSelection(
                 NEW_CARD_PAYMENT_SELECTION,
@@ -429,27 +430,60 @@ internal class DefaultFlowControllerTest {
                 )
             )
 
-            val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                setupFutureUsage = null,
-                shipping = null,
-                savePaymentMethod = null,
-                paymentMethodOptions = null,
-                mandateId = null,
-                mandateData = null,
-            )
-            val apiOptions = ApiRequest.Options(
-                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccount = null
-            )
-
-            verify(paymentController).startConfirmAndAuth(
-                any(),
-                eq(confirmPaymentIntentParams),
-                eq(apiOptions)
+            verifyPaymentSelection(
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD
             )
         }
+
+    @Test
+    fun `confirmPaymentSelection() with generic payment method should start paymentController`() {
+        flowController.confirmPaymentSelection(
+            GENERIC_PAYMENT_SELECTION,
+            InitData(
+                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                listOf(PaymentMethod.Type.Card),
+                PAYMENT_METHODS,
+                SavedSelection.PaymentMethod(
+                    id = "pm_123456789"
+                ),
+                isGooglePayReady = false
+            )
+        )
+
+        verifyPaymentSelection(
+            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            GENERIC_PAYMENT_SELECTION.paymentMethodCreateParams
+        )
+    }
+
+    private fun verifyPaymentSelection(
+        clientSecret: String,
+        paymentMethodCreateParams: PaymentMethodCreateParams
+    ) = runBlockingTest {
+        val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
+            clientSecret = clientSecret,
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            setupFutureUsage = null,
+            shipping = null,
+            savePaymentMethod = null,
+            paymentMethodOptions = null,
+            mandateId = null,
+            mandateData = null,
+        )
+        val apiOptions = ApiRequest.Options(
+            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccount = null
+        )
+
+        verify(paymentController).startConfirmAndAuth(
+            any(),
+            eq(confirmPaymentIntentParams),
+            eq(apiOptions)
+        )
+    }
 
     @Test
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
@@ -716,6 +750,16 @@ internal class DefaultFlowControllerTest {
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Discover,
             false
+        )
+        private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
+            iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
+            labelResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+            paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverriddenParamMap(
+                PaymentMethodCreateParams.Type.Bancontact,
+                emptyMap(),
+                emptySet()
+            ),
+            shouldSavePaymentMethod = false
         )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
