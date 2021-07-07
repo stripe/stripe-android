@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
@@ -14,13 +15,69 @@ import com.stripe.android.paymentsheet.specifications.sofort
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLooper
 
+@RunWith(RobolectricTestRunner::class)
 class FormViewModelTest {
     private val emailSection = FormItemSpec.SectionSpec(IdentifierSpec("emailSection"), Email)
     private val countrySection = FormItemSpec.SectionSpec(
         IdentifierSpec("countrySection"),
         Country
     )
+
+    @Test
+    fun `Verify setting save for future use`() {
+        val formViewModel = FormViewModel(
+            LayoutSpec(
+                listOf(
+                    emailSection,
+                    countrySection,
+                    FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                )
+            ),
+            "Example, Inc."
+        )
+
+        val values = mutableListOf<Boolean>()
+        formViewModel.saveForFutureUse.asLiveData()
+            .observeForever {
+                values.add(it)
+            }
+        assertThat(values[0]).isTrue()
+
+        formViewModel.setSaveForFutureUse(false)
+
+        assertThat(values[1]).isFalse()
+    }
+
+    @Test
+    fun `Verify setting save for future use visibility`() {
+        val formViewModel = FormViewModel(
+            LayoutSpec(
+                listOf(
+                    emailSection,
+                    countrySection,
+                    FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                )
+            ),
+            "Example, Inc."
+        )
+
+        val values = mutableListOf<List<IdentifierSpec>>()
+        formViewModel.optionalIdentifiers.asLiveData()
+            .observeForever {
+                values.add(it)
+            }
+        assertThat(values[0]).isEmpty()
+
+        formViewModel.setSaveForFutureUseVisibility(false)
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec("save_for_future_use"))
+    }
 
     @Test
     fun `Verify if a field is optional and valid it is not in the formViewValueResult`() =

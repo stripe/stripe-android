@@ -46,6 +46,18 @@ class ComposeFormDataCollectionFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
+        formViewModel.setSaveForFutureUse(
+            requireArguments().getBoolean(
+                EXTRA_SAVE_FOR_FUTURE_USE_VALUE
+            )
+        )
+
+        formViewModel.setSaveForFutureUseVisibility(
+            requireArguments().getBoolean(
+                EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY
+            )
+        )
+
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {
@@ -65,5 +77,9 @@ class ComposeFormDataCollectionFragment : Fragment() {
 
     companion object {
         const val EXTRA_PAYMENT_METHOD = "com.stripe.android.paymentsheet.extra_payment_method"
+        const val EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY =
+            "com.stripe.android.paymentsheet.extra_save_for_future_use_visibility"
+        const val EXTRA_SAVE_FOR_FUTURE_USE_VALUE =
+            "com.stripe.android.paymentsheet.extra_save_for_future_use_value"
     }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -288,6 +289,66 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         assertThat(selection?.iconResource).isEqualTo(
             com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_pm_sofort
         )
+    }
+
+    @Test
+    fun `Verify Compose argument in guest setup intent`(){
+        val args = Bundle()
+        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
+            args,
+            isCustomer = false,
+            isSetupIntent = true
+        )
+
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
+            .isFalse()
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
+            .isTrue()
+    }
+
+    @Test
+    fun `Verify Compose argument in guest payment intent`(){
+        val args = Bundle()
+        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
+            args,
+            isCustomer = false,
+            isSetupIntent = false
+        )
+
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
+            .isFalse()
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
+            .isFalse()
+    }
+
+    @Test
+    fun `Verify Compose argument in new or returning user setup intent`(){
+        val args = Bundle()
+        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
+            args,
+            isCustomer = true,
+            isSetupIntent = true
+        )
+
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
+            .isFalse()
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
+            .isTrue()
+    }
+
+    @Test
+    fun `Verify Compose argument in new or returning user payment intent`(){
+        val args = Bundle()
+        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
+            args,
+            isCustomer = true,
+            isSetupIntent = false
+        )
+
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
+            .isTrue()
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
+            .isTrue()
     }
 
     private fun createFragment(
