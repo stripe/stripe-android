@@ -48,7 +48,7 @@ sealed class FormItemSpec {
     ) : FormItemSpec(), OptionalItemSpec
 
     /**
-     * This is an element that will make elements (as specified by identifer hidden
+     * This is an element that will make elements (as specified by identifier hidden
      * when save for future use is unchecked)
      */
     data class SaveForFutureUseSpec(
@@ -66,7 +66,8 @@ sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
 
     object Email : SectionFieldSpec(IdentifierSpec("email"))
 
-    object Country : SectionFieldSpec(IdentifierSpec("country"))
+    data class Country(val onlyShowCountryCodes: Set<String> = emptySet()) :
+        SectionFieldSpec(IdentifierSpec("country"))
 
     object IdealBank : SectionFieldSpec(IdentifierSpec("bank"))
 }

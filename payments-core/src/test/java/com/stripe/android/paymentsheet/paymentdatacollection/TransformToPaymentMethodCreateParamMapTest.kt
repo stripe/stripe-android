@@ -43,7 +43,7 @@ class TransformToPaymentMethodCreateParamMapTest {
                     mapOf(
                         Name.identifier to "joe",
                         Email.identifier to "joe@gmail.com",
-                        Country.identifier to "United States",
+                        Country().identifier to "United States",
                     ),
                     saveForFutureUse = true,
                     showsMandate = false

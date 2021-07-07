@@ -19,7 +19,7 @@ class FormViewModelTest {
     private val emailSection = FormItemSpec.SectionSpec(IdentifierSpec("emailSection"), Email)
     private val countrySection = FormItemSpec.SectionSpec(
         IdentifierSpec("countrySection"),
-        Country
+        Country()
     )
 
     @Test

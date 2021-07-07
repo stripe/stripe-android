@@ -9,7 +9,7 @@ import org.junit.Test
 import java.util.Locale
 
 class DropdownFieldControllerTest {
-    private val countryConfig = CountryConfig(Locale.US)
+    private val countryConfig = CountryConfig(locale=Locale.US)
     private val controller = DropdownFieldController(countryConfig)
 
     @Test

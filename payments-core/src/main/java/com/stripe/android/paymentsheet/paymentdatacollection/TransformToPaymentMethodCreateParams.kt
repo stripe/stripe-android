@@ -55,7 +55,7 @@ internal class TransformToPaymentMethodCreateParams {
         val formKeyValueMap = formFieldValues.fieldValuePairs
             .mapValues { entry ->
                 when (entry.key) {
-                    Country.identifier -> {
+                    Country().identifier -> {
                         transformCountry(entry.value)
                     }
                     IdealBank.identifier -> {
