@@ -44,12 +44,12 @@ dependencies {
     javadocDeps libraries.androidx.appcompat
     javadocDeps "com.google.android.material:material:$materialVersion"
 
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation "org.mockito:mockito-core:3.11.2"
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation 'org.robolectric:robolectric:4.6.1'
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation 'org.json:json:20210307'
-    testImplementation "org.mockito.kotlin:mockito-kotlin:3.2.0"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"

@@ -60,6 +60,8 @@ ext {
     androidTestVersion = '1.4.0'
     junitVersion = '4.13.2'
     robolectricVersion = '4.6'
+    mockitoCoreVersion = '3.11.2'
+    mockitoKotlinVersion = '3.2.0'
 
     group_name = GROUP
     version_name = VERSION_NAME
