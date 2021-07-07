@@ -66,6 +66,11 @@ sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
 
     object Email : SectionFieldSpec(IdentifierSpec("email"))
 
+    /**
+     * This is the specification for a country field.
+     * @property onlyShowCountryCodes: a list of country code that should be shown.  If empty all
+     * countries will be shown.
+     */
     data class Country(val onlyShowCountryCodes: Set<String> = emptySet()) :
         SectionFieldSpec(IdentifierSpec("country"))
 
