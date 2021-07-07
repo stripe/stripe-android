@@ -15,9 +15,9 @@ data class CheckoutRequest(
 @Serializable
 data class CheckoutResponse(
     val publishableKey: String,
-    val customerId: String,
-    val customerEphemeralKeySecret: String,
-    val intentClientSecret: String
+    val intentClientSecret: String,
+    val customerId: String? = null,
+    val customerEphemeralKeySecret: String? = null
 )
 
 interface CheckoutBackendApi {

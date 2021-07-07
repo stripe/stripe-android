@@ -48,7 +48,7 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     }
 
     protected fun prepareCheckout(
-        onSuccess: (PaymentSheet.CustomerConfiguration, String) -> Unit
+        onSuccess: (PaymentSheet.CustomerConfiguration?, String) -> Unit
     ) {
         viewModel.prepareCheckout(
             Repository.CheckoutCustomer.Returning,
@@ -61,10 +61,16 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
                     PaymentConfiguration.init(this, checkoutResponse.publishableKey)
 
                     onSuccess(
-                        PaymentSheet.CustomerConfiguration(
-                            id = checkoutResponse.customerId,
-                            ephemeralKeySecret = checkoutResponse.customerEphemeralKeySecret
-                        ),
+                        if (checkoutResponse.customerId != null
+                            && checkoutResponse.customerEphemeralKeySecret != null
+                        ) {
+                            PaymentSheet.CustomerConfiguration(
+                                id = checkoutResponse.customerId,
+                                ephemeralKeySecret = checkoutResponse.customerEphemeralKeySecret
+                            )
+                        } else {
+                            null
+                        },
                         checkoutResponse.intentClientSecret
                     )
                 }
