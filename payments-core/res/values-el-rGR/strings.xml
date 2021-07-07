@@ -101,7 +101,6 @@
     <string name="stripe_paymentsheet_back">Πίσω</string>
     <string name="stripe_paymentsheet_close">Κλείσιμο</string>
     <string name="stripe_paymentsheet_expiration_date_hint">ΜΜ / ΕΕ</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Νέα κάρτα</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Ή πληρωμή με κάρτα</string>
     <string name="stripe_paymentsheet_pay_button_amount">Πληρωμή %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Πληρωμή</string>
