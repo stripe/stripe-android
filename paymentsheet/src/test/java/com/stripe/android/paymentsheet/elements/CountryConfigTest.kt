@@ -10,12 +10,14 @@ class CountryConfigTest {
 
     @Test
     fun `Verify the displayed country list`() {
-        assertThat(CountryConfig(locale = Locale.US).getDisplayItems()[0]).isEqualTo("United States")
+        assertThat(CountryConfig(locale = Locale.US).getDisplayItems()[0])
+            .isEqualTo("United States")
     }
 
     @Test
     fun `Verify the label`() {
-        assertThat(CountryConfig(locale = Locale.US).label).isEqualTo(R.string.address_label_country)
+        assertThat(CountryConfig(locale = Locale.US).label)
+            .isEqualTo(R.string.address_label_country)
     }
 
     @Test
