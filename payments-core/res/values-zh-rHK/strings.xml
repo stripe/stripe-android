@@ -102,7 +102,6 @@
     <string name="stripe_paymentsheet_back">上一步</string>
     <string name="stripe_paymentsheet_close">關閉</string>
     <string name="stripe_paymentsheet_expiration_date_hint">月月/年年</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ 新卡</string>
     <string name="stripe_paymentsheet_or_pay_with_card">或用銀行卡支付</string>
     <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
     <string name="stripe_paymentsheet_pay_button_label">支付</string>

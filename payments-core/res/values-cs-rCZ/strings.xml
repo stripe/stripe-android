@@ -102,7 +102,6 @@
     <string name="stripe_paymentsheet_back">Zpět</string>
     <string name="stripe_paymentsheet_close">Zavřít</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nová karta</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Nebo zaplatit kartou</string>
     <string name="stripe_paymentsheet_pay_button_amount">Zaplatit %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Zaplatit</string>

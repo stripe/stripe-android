@@ -102,7 +102,6 @@
     <string name="stripe_paymentsheet_back">Wstecz</string>
     <string name="stripe_paymentsheet_close">Zamknij</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ nowa karta</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Lub zapłać kartą</string>
     <string name="stripe_paymentsheet_pay_button_amount">Zapłać %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Zapłać</string>

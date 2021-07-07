@@ -102,7 +102,6 @@
     <string name="stripe_paymentsheet_back">Tagasi</string>
     <string name="stripe_paymentsheet_close">Sulge</string>
     <string name="stripe_paymentsheet_expiration_date_hint">KK / AA</string>
-    <string name="stripe_paymentsheet_new_card_button_label">Lisa uus kaart</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Või makske kaardiga</string>
     <string name="stripe_paymentsheet_pay_button_amount">Maksa %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Maksa</string>

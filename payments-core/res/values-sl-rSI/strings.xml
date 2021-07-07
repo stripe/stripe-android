@@ -102,7 +102,6 @@
     <string name="stripe_paymentsheet_back">Nazaj</string>
     <string name="stripe_paymentsheet_close">Zapri</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/LL</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nova kartica</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Ali pa plačajte s kartico</string>
     <string name="stripe_paymentsheet_pay_button_amount">Plačaj %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Plačaj</string>

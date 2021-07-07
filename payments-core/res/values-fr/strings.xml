@@ -102,7 +102,6 @@
     <string name="stripe_paymentsheet_back">Retour</string>
     <string name="stripe_paymentsheet_close">Fermer</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / AA</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nouvelle carte</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Ou payez par carte bancaire</string>
     <string name="stripe_paymentsheet_pay_button_amount">Payer %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Payer</string>
