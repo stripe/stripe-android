@@ -28,7 +28,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private val customer: Repository.CheckoutCustomer
         get() = when (viewBinding.customerRadioGroup.checkedRadioButtonId) {
-            R.id.guest_customer_button -> Repository.CheckoutCustomer.New
+            R.id.guest_customer_button -> Repository.CheckoutCustomer.Guest
             R.id.new_customer_button -> {
                 viewModel.temporaryCustomerId?.let {
                     Repository.CheckoutCustomer.WithId(it)
@@ -120,46 +120,42 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun startCompleteCheckout() {
         val clientSecret = viewModel.clientSecret.value ?: return
-        val customerConfig = viewModel.customerConfig.value ?: return
 
         if (viewModel.checkoutMode == Repository.CheckoutMode.Setup) {
             paymentSheet.presentWithSetupIntent(
                 clientSecret,
-                makeConfiguration(customerConfig)
+                makeConfiguration()
             )
         } else {
             paymentSheet.presentWithPaymentIntent(
                 clientSecret,
-                makeConfiguration(customerConfig)
+                makeConfiguration()
             )
         }
     }
 
     private fun configureCustomCheckout() {
         val clientSecret = viewModel.clientSecret.value ?: return
-        val customerConfig = viewModel.customerConfig.value ?: return
 
         if (viewModel.checkoutMode == Repository.CheckoutMode.Setup) {
             flowController.configureWithSetupIntent(
                 clientSecret,
-                makeConfiguration(customerConfig),
+                makeConfiguration(),
                 ::onConfigured
             )
         } else {
             flowController.configureWithPaymentIntent(
                 clientSecret,
-                makeConfiguration(customerConfig),
+                makeConfiguration(),
                 ::onConfigured
             )
         }
     }
 
-    private fun makeConfiguration(
-        customerConfig: PaymentSheet.CustomerConfiguration? = null
-    ): PaymentSheet.Configuration {
+    private fun makeConfiguration(): PaymentSheet.Configuration {
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
-            customer = customerConfig,
+            customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig
         )
     }
