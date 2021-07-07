@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.elements.common.Controller
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.common.OptionalIdentifierListElement
 import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.common.SetupIntentHiddenFieldController
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
@@ -71,7 +73,16 @@ internal sealed class FormElement {
         override val identifier: IdentifierSpec,
         override val controller: SaveForFutureUseController,
         val merchantName: String?
-    ) : FormElement()
+    ) : FormElement(), OptionalIdentifierListElement
+
+    /**
+     * This is an element that will make elements (as specified by identifier) hidden
+     * when SetupIntent is used in the form
+     */
+    data class SetupIntentHiddenFieldsElement(
+        override val identifier: IdentifierSpec,
+        override val controller: SetupIntentHiddenFieldController,
+    ) : FormElement(), OptionalIdentifierListElement
 
     data class SectionElement(
         override val identifier: IdentifierSpec,

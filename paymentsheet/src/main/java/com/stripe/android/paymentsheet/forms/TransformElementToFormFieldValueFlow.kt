@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.combine
  */
 internal class TransformElementToFormFieldValueFlow(
     val elements: List<FormElement>,
-    val optionalIdentifiers: Flow<List<IdentifierSpec>>,
+    val optionalIdentifiers: Flow<Set<IdentifierSpec>>,
     val showingMandate: Flow<Boolean>,
     val saveForFutureUse: Flow<Boolean>
 ) {
@@ -44,7 +44,7 @@ internal class TransformElementToFormFieldValueFlow(
 
     private fun transform(
         idFieldSnapshotMap: Map<IdentifierSpec, FieldSnapshot>,
-        optionalIdentifiers: List<IdentifierSpec>,
+        optionalIdentifiers: Set<IdentifierSpec>,
         showingMandate: Boolean,
         saveForFutureUse: Boolean
     ): FormFieldValues? {

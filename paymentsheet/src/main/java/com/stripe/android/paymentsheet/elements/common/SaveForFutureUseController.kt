@@ -8,8 +8,7 @@ import kotlinx.coroutines.flow.map
 
 class SaveForFutureUseController(
     identifiersRequiredForFutureUse: List<IdentifierSpec> = emptyList()
-) :
-    Controller {
+) : Controller, OptionalIdentifierListController {
     override val label: Int = R.string.save_for_future_use
     private val _saveForFutureUse = MutableStateFlow(true)
     val saveForFutureUse: Flow<Boolean> = _saveForFutureUse
@@ -17,9 +16,12 @@ class SaveForFutureUseController(
     override val errorMessage: Flow<Int?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
 
-    val optionalIdentifiers: Flow<List<IdentifierSpec>> =
+    override val optionalIdentifiers: Flow<Set<IdentifierSpec>> =
         saveForFutureUse.map { saveFutureUseInstance ->
-            identifiersRequiredForFutureUse.takeUnless { saveFutureUseInstance } ?: emptyList()
+            identifiersRequiredForFutureUse
+                .takeUnless { saveFutureUseInstance }
+                ?.toSet()
+                ?: emptySet()
         }
 
     fun onValueChange(saveForFutureUse: Boolean) {

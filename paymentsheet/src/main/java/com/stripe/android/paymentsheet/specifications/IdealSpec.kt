@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.specifications
 
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.specifications.FormItemSpec.MandateTextSpec
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.MandateTextSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.IdealBank
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
@@ -27,6 +27,7 @@ internal val idealMandate = MandateTextSpec(
     R.string.sofort_mandate,
     Color.Gray
 )
+internal val idealSaveForFutureUse = SaveForFutureUseSpec(listOf(idealEmailSection, idealMandate))
 val ideal = FormSpec(
     LayoutSpec(
         listOf(
@@ -34,7 +35,12 @@ val ideal = FormSpec(
             idealEmailSection,
             idealBankSection,
             idealMandate,
-            SaveForFutureUseSpec(listOf(idealEmailSection, idealMandate))
+            idealSaveForFutureUse,
+            FormItemSpec.SetupIntentHiddenFields(
+                idealSaveForFutureUse.identifierRequiredForFutureUse.plus(
+                    idealSaveForFutureUse
+                )
+            )
         )
     ),
     idealParamKey,

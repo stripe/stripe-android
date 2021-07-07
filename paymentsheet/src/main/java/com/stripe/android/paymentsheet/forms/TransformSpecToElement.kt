@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.common.SetupIntentHiddenFieldController
 import com.stripe.android.paymentsheet.elements.common.TextFieldController
 import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -30,6 +31,7 @@ internal class TransformSpecToElement {
                 is FormItemSpec.SaveForFutureUseSpec -> transform(it, merchantName)
                 is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
                 is FormItemSpec.MandateTextSpec -> transform(it, merchantName)
+                is FormItemSpec.SetupIntentHiddenFields -> transform(it)
             }
         }
 
@@ -115,5 +117,15 @@ internal class TransformSpecToElement {
                 }
             ),
             merchantName
+        )
+
+    private fun transform(spec: FormItemSpec.SetupIntentHiddenFields): FormElement =
+        FormElement.SetupIntentHiddenFieldsElement(
+            spec.identifier,
+            SetupIntentHiddenFieldController(
+                spec.identifierSetupIntentHiddenFields.map { element ->
+                    element.identifier
+                }
+            )
         )
 }

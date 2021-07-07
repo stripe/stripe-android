@@ -56,6 +56,12 @@ sealed class FormItemSpec {
     ) : FormItemSpec(), OptionalItemSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
+
+    data class SetupIntentHiddenFields(
+        val identifierSetupIntentHiddenFields: List<OptionalItemSpec>
+    ) : FormItemSpec(), OptionalItemSpec {
+        override val identifier = IdentifierSpec("setup_intent_hidden")
+    }
 }
 
 /**

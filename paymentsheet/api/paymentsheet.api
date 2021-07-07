@@ -50,7 +50,7 @@ public abstract interface class com/stripe/android/paymentsheet/elements/common/
 	public abstract fun onValueChange (Ljava/lang/String;)V
 }
 
-public final class com/stripe/android/paymentsheet/elements/common/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/common/Controller {
+public final class com/stripe/android/paymentsheet/elements/common/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/common/Controller, com/stripe/android/paymentsheet/elements/common/OptionalIdentifierListController {
 	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Ljava/util/List;)V
@@ -58,7 +58,7 @@ public final class com/stripe/android/paymentsheet/elements/common/SaveForFuture
 	public fun getErrorMessage ()Lkotlinx/coroutines/flow/Flow;
 	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public fun getLabel ()I
-	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
+	public fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
 	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
 	public fun onValueChange (Ljava/lang/String;)V
@@ -77,6 +77,7 @@ public final class com/stripe/android/paymentsheet/forms/FormFieldValues {
 public final class com/stripe/android/paymentsheet/forms/FormViewModel : androidx/lifecycle/ViewModel {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/lang/String;)V
+	public final fun enableSetupIntent (Z)V
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getCountFocusableFields ()I
 	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
@@ -116,6 +117,7 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 	public static final field Companion Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion;
 	public static final field EXTRA_PAYMENT_METHOD Ljava/lang/String;
 	public fun <init> ()V
+	public final fun enableSetupIntent (Z)V
 	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
@@ -172,6 +174,19 @@ public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$S
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getField ()Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;
 	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$SetupIntentHiddenFields : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/OptionalItemSpec {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SetupIntentHiddenFields;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SetupIntentHiddenFields;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SetupIntentHiddenFields;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getIdentifierSetupIntentHiddenFields ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

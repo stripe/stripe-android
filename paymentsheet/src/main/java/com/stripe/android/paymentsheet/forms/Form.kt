@@ -24,13 +24,16 @@ import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.FormElement.SetupIntentHiddenFieldsElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.common.DropDown
+import com.stripe.android.paymentsheet.elements.common.OptionalIdentifierListElement
 import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 internal val formElementPadding = 16.dp
@@ -109,6 +112,9 @@ internal fun Form(
                             Text(stringResource(controller.label, element.merchantName ?: ""))
                         }
                     }
+                    is SetupIntentHiddenFieldsElement -> {
+                        // This element is not visible
+                    }
                 }
             }
         }
@@ -140,6 +146,12 @@ class FormViewModel(
     private var focusIndex = FocusRequesterCount()
     fun getCountFocusableFields() = focusIndex.get()
 
+    fun enableSetupIntent(enableSetupIntent: Boolean) {
+        elements.filterIsInstance<SetupIntentHiddenFieldsElement>().firstOrNull()
+            ?.controller
+            ?.onValueChange(enableSetupIntent)
+    }
+
     private val specToFormTransform = TransformSpecToElement()
     internal val elements = specToFormTransform.transform(
         layout,
@@ -147,10 +159,15 @@ class FormViewModel(
         focusIndex
     )
 
-    val optionalIdentifiers = elements
-        .filterIsInstance<SaveForFutureUseElement>()
-        .firstOrNull()?.controller?.optionalIdentifiers
-        ?: MutableStateFlow(emptyList())
+    val optionalIdentifiers = combine(
+        elements
+            .filterIsInstance<OptionalIdentifierListElement>()
+            .map {
+                it.controller.optionalIdentifiers
+            }
+    ) {
+        it.toList().flatten().toSet()
+    }
 
     val saveForFutureUse = elements
         .filterIsInstance<SaveForFutureUseElement>()
