@@ -61,16 +61,7 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
                     PaymentConfiguration.init(this, checkoutResponse.publishableKey)
 
                     onSuccess(
-                        if (checkoutResponse.customerId != null
-                            && checkoutResponse.customerEphemeralKeySecret != null
-                        ) {
-                            PaymentSheet.CustomerConfiguration(
-                                id = checkoutResponse.customerId,
-                                ephemeralKeySecret = checkoutResponse.customerEphemeralKeySecret
-                            )
-                        } else {
-                            null
-                        },
+                        checkoutResponse.makeCustomerConfig(),
                         checkoutResponse.intentClientSecret
                     )
                 }

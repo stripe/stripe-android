@@ -59,15 +59,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 // which will be used on all Stripe API calls
                 PaymentConfiguration.init(getApplication(), it.publishableKey)
 
-                customerConfig.value =
-                    if (it.customerId != null && it.customerEphemeralKeySecret != null) {
-                        PaymentSheet.CustomerConfiguration(
-                            id = it.customerId,
-                            ephemeralKeySecret = it.customerEphemeralKeySecret
-                        )
-                    } else {
-                        null
-                    }
+                customerConfig.value = it.makeCustomerConfig()
                 clientSecret.value = it.intentClientSecret
             },
             onFailure = {

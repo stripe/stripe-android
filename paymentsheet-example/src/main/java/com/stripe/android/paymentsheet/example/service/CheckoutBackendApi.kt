@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.service
 
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.Serializable
 import retrofit2.http.Body
 import retrofit2.http.Headers
@@ -18,7 +19,17 @@ data class CheckoutResponse(
     val intentClientSecret: String,
     val customerId: String? = null,
     val customerEphemeralKeySecret: String? = null
-)
+) {
+    internal fun makeCustomerConfig() =
+        if (customerId != null && customerEphemeralKeySecret != null) {
+            PaymentSheet.CustomerConfiguration(
+                id = customerId,
+                ephemeralKeySecret = customerEphemeralKeySecret
+            )
+        } else {
+            null
+        }
+}
 
 interface CheckoutBackendApi {
 
