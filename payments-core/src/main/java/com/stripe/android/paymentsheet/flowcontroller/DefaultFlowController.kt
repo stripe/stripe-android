@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -245,7 +246,8 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun confirmPaymentSelection(
+    @VisibleForTesting
+    fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
         initData: InitData
     ) {
@@ -256,7 +258,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)
             }
-            is PaymentSelection.New.Card -> {
+            is PaymentSelection.New -> {
                 confirmParamsFactory.create(paymentSelection)
             }
             else -> null
