@@ -27,7 +27,7 @@ internal val sofortMandate = MandateTextSpec(
     R.string.sofort_mandate,
     Color.Gray
 )
-val sofort = FormSpec(
+internal val sofort = FormSpec(
     LayoutSpec(
         listOf(
             sofortNameSection,
