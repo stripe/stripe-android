@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Nomor kartu</string>
+    <string name="acc_label_card_number_node">%s, Nomor kartu</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Tanggal kedaluwarsa</string>
+    <string name="acc_label_expiry_date_node">%s, Tanggal kedaluwarsa</string>
+    <string name="acc_label_zip">Kode ZIP</string>
+    <string name="acc_label_zip_short">ZIP</string>
+    <string name="add_card">Tambahkan kartu kredit atau kartu debit baru untuk melakukan pembelian di aplikasi ini.</string>
+    <string name="added">%s Ditambahkan</string>
+    <string name="address_city_required">Masukkan kota Anda</string>
+    <string name="address_country_invalid">Negara Anda tidak valid</string>
+    <string name="address_county_required">Masukkan county Anda</string>
+    <string name="address_label_address">Alamat</string>
+    <string name="address_label_address_line1">Baris alamat ke-1</string>
+    <string name="address_label_address_line1_optional">Baris alamat ke-1 (opsional)</string>
+    <string name="address_label_address_line2_optional">Baris alamat ke-2 (opsional)</string>
+    <string name="address_label_address_optional">Alamat (opsional)</string>
+    <string name="address_label_apt">Apt.</string>
+    <string name="address_label_apt_optional">Apt. (opsional)</string>
+    <string name="address_label_city">Kota</string>
+    <string name="address_label_city_optional">Kota (opsional)</string>
+    <string name="address_label_country">Negara</string>
+    <string name="address_label_county">County</string>
+    <string name="address_label_county_optional">County (opsional)</string>
+    <string name="address_label_name">Nama</string>
+    <string name="address_label_phone_number">Nomor telepon</string>
+    <string name="address_label_phone_number_optional">Nomor telepon (opsional)</string>
+    <string name="address_label_postal_code">Kode pos</string>
+    <string name="address_label_postal_code_optional">Kode pos (opsional)</string>
+    <string name="address_label_postcode">Kode pos</string>
+    <string name="address_label_postcode_optional">Kode Pos (opsional)</string>
+    <string name="address_label_province">Provinsi</string>
+    <string name="address_label_province_optional">Provinsi (opsional)</string>
+    <string name="address_label_region_generic">Negara Bagian / Provinsi / Wilayah</string>
+    <string name="address_label_region_generic_optional">Negara Bagian / Provinsi / Wilayah (opsional)</string>
+    <string name="address_label_state">Negara Bagian</string>
+    <string name="address_label_state_optional">Negara Bagian (opsional)</string>
+    <string name="address_label_zip_code">Kode ZIP</string>
+    <string name="address_label_zip_code_optional">Kode ZIP (opsional)</string>
+    <string name="address_label_zip_postal_code">Kode Pos/ZIP</string>
+    <string name="address_label_zip_postal_code_optional">Kode Pos / ZIP (opsional)</string>
+    <string name="address_name_required">Masukkan nama Anda</string>
+    <string name="address_phone_number_required">Masukkan nomor telepon Anda</string>
+    <string name="address_postal_code_invalid">Kode pos Anda tidak valid</string>
+    <string name="address_postcode_invalid">Kode pos Anda tidak valid</string>
+    <string name="address_province_required">Masukkan provinsi Anda</string>
+    <string name="address_region_generic_required">Masukkan Negara Bagian/Provinsi/Wilayah Anda</string>
+    <string name="address_required">Masukkan alamat Anda</string>
+    <string name="address_shipping_address">Alamat Pengiriman</string>
+    <string name="address_state_required">Masukkan negara bagian Anda</string>
+    <string name="address_zip_invalid">Kode ZIP Anda tidak valid.</string>
+    <string name="address_zip_postal_invalid">Kode Pos/ZIP Anda tidak valid</string>
+    <string name="becs_mandate_acceptance">
+    Dengan memberikan detail rekening bank Anda dan mengonfirmasi pembayaran ini, berarti Anda setuju dengan
+    Permintaan Debit Langsung ini dan perjanjian layanan Permintaan Debit Langsung, serta mengotorisasi
+    Stripe Payments Australia Pty Ltd ACN 160 180 343 dengan nomor Identifikasi Pengguna Debit Langsung 507156
+    (“Stripe”) untuk mendebit rekening Anda melalui Bulk Electronic Clearing System (BECS) atas nama
+    %1$s (\"Merchant\") sejumlah yang dikomunikasikan secara terpisah kepada Anda
+    oleh Merchant. Anda menyatakan diri sebagai pemilik akun atau
+    penandatangan yang diotorisasi atas akun yang tercantum di atas.
+    </string>
+    <string name="becs_widget_account_number">Nomor rekening</string>
+    <string name="becs_widget_account_number_incomplete">Nomor rekening Anda tidak lengkap.</string>
+    <string name="becs_widget_account_number_required">Nomor rekening Anda harus diisi.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">BSB yang Anda masukkan tidak lengkap.</string>
+    <string name="becs_widget_bsb_invalid">BSB yang Anda masukkan tidak valid.</string>
+    <string name="becs_widget_email">Alamat Email</string>
+    <string name="becs_widget_email_invalid">Alamat email Anda tidak valid.</string>
+    <string name="becs_widget_email_required">Alamat email Anda harus diisi.</string>
+    <string name="becs_widget_name">Nama</string>
+    <string name="becs_widget_name_required">Nama Anda harus diisi.</string>
+    <string name="card_ending_in">%1$s berakhiran %2$s</string>
+    <string name="close">Tutup</string>
+    <string name="delete_payment_method">Hapus Metode Pembayaran</string>
+    <string name="delete_payment_method_prompt_title">Hapus metode pembayaran?</string>
+    <string name="expiry_date_hint">BB/TT</string>
+    <string name="expiry_label_short">Kedaluwarsa</string>
+    <string name="fpx_bank_offline">%s - Offline</string>
+    <string name="incomplete_expiry_date">Tanggal kedaluwarsa kartu Anda tidak lengkap.</string>
+    <string name="invalid_card_number">Nomor kartu Anda tidak valid.</string>
+    <string name="invalid_cvc">Kode keamanan kartu Anda tidak valid.</string>
+    <string name="invalid_expiry_month">Bulan kedaluwarsa kartu Anda tidak valid.</string>
+    <string name="invalid_expiry_year">Tahun kedaluwarsa kartu Anda tidak valid.</string>
+    <string name="invalid_shipping_information">Alamat Pengiriman Tidak Valid</string>
+    <string name="invalid_zip">Kode pos Anda tidak lengkap.</string>
+    <string name="no_payment_methods">Tidak ada metode pembayaran.</string>
+    <string name="payment_method_add_new_card">Tambahkan kartu baru...</string>
+    <string name="payment_method_add_new_fpx">Pilih Rekening Bank (FPX)…</string>
+    <string name="price_free">Gratis</string>
+    <string name="removed">%s Dihapus</string>
+    <string name="secure_checkout">Checkout Aman</string>
+    <string name="stripe_failure_connection_error">Kami mengalami masalah saat menghubungkan ke penyedia layanan pembayaran kami. Periksa koneksi internet Anda dan coba lagi.</string>
+    <string name="stripe_failure_reason_authentication">Kami tidak dapat mengautentikasi metode pembayaran Anda. Pilih metode pembayaran yang berbeda dan coba lagi.</string>
+    <string name="stripe_failure_reason_timed_out">Waktu autentikasi metode pembayaran Anda habis -- coba lagi</string>
+    <string name="stripe_paymentsheet_add_button_label">Tambahkan</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Tambahkan</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Informasi kartu</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Negara atau wilayah</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">Tambahkan informasi pembayaran Anda</string>
+    <string name="stripe_paymentsheet_back">Kembali</string>
+    <string name="stripe_paymentsheet_close">Tutup</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">BB / TT</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Atau bayar dengan kartu</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Bayar %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Bayar</string>
+    <string name="stripe_paymentsheet_payment_method_card">Kartu</string>
+    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
+    <string name="stripe_paymentsheet_primary_button_processing">Memproses...</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Simpan kartu ini untuk pembayaran %s mendatang</string>
+    <string name="stripe_paymentsheet_select_payment_method">Pilih metode pembayaran Anda</string>
+    <string name="stripe_paymentsheet_setup_button_label">Siapkan</string>
+    <string name="title_add_a_card">Tambahkan sebuah Kartu</string>
+    <string name="title_add_an_address">Atur Alamat</string>
+    <string name="title_bank_account">Rekening bank</string>
+    <string name="title_payment_method">Metode Pembayaran</string>
+    <string name="title_select_shipping_method">Pilih Metode Pengiriman</string>
+</resources>
