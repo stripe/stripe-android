@@ -8,7 +8,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.stripe.android.R
-import com.stripe.android.databinding.LayoutPaymentsheetAddCardItemBinding
+import com.stripe.android.databinding.LayoutPaymentsheetAddNewPaymentMethodItemBinding
 import com.stripe.android.databinding.LayoutPaymentsheetGooglePayItemBinding
 import com.stripe.android.databinding.LayoutPaymentsheetPaymentMethodItemBinding
 import com.stripe.android.model.PaymentMethod
@@ -155,7 +155,7 @@ internal class PaymentOptionsAdapter(
         viewType: Int
     ): PaymentOptionViewHolder {
         return when (ViewType.values()[viewType]) {
-            ViewType.AddCard -> AddCardViewHolder(parent).apply {
+            ViewType.AddCard -> AddNewPaymentMethodViewHolder(parent).apply {
                 itemView.setOnClickListener(addCardClickListener)
             }
             ViewType.GooglePay -> GooglePayViewHolder(parent).apply {
@@ -228,13 +228,13 @@ internal class PaymentOptionsAdapter(
         }
     }
 
-    private class AddCardViewHolder(
-        private val binding: LayoutPaymentsheetAddCardItemBinding
+    private class AddNewPaymentMethodViewHolder(
+        private val binding: LayoutPaymentsheetAddNewPaymentMethodItemBinding
     ) : PaymentOptionViewHolder(
         binding.root
     ) {
         constructor(parent: ViewGroup) : this(
-            LayoutPaymentsheetAddCardItemBinding.inflate(
+            LayoutPaymentsheetAddNewPaymentMethodItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false

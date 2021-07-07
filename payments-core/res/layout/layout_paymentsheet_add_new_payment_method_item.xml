@@ -25,7 +25,7 @@
         android:id="@+id/label"
         style="@style/StripePaymentSheetPaymentMethodsLabel"
         android:duplicateParentState="true"
-        android:text="@string/stripe_paymentsheet_new_card_button_label"
+        android:text="@string/stripe_paymentsheet_add_payment_method_button_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
