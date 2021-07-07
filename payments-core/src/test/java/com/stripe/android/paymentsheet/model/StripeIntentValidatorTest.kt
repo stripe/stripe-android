@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.model
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
+import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -44,16 +46,32 @@ class StripeIntentValidatorTest {
     }
 
     @Test
-    fun `requireValid() allows status = RequiresPaymentMethod`() {
+    fun `PaymentIntent requireValid() allows status = RequiresPaymentMethod`() {
         validator.requireValid(
             PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         )
     }
 
     @Test
-    fun `requireValid() allows status = RequiresAction`() {
+    fun `PaymentIntent requireValid() allows status = RequiresAction`() {
         validator.requireValid(
             PaymentIntentJsonParser().parse(PaymentIntentFixtures.EXPANDED_PAYMENT_METHOD_JSON)!!,
+        )
+    }
+
+    @Test
+    fun `SetupIntent requireValid() allows status = RequiresPaymentMethod`() {
+        validator.requireValid(
+            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+        )
+    }
+
+    @Test
+    fun `SetupIntent requireValid() allows status = RequiresAction`() {
+        validator.requireValid(
+            SetupIntentJsonParser().parse(
+                SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT_JSON
+            )!!
         )
     }
 }
