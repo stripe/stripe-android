@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.elements.common.Section
 import com.stripe.android.paymentsheet.elements.common.TextField
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 
 internal val formElementPadding = 16.dp
 
@@ -151,8 +152,21 @@ class FormViewModel(
         .firstOrNull()?.controller?.optionalIdentifiers
         ?: MutableStateFlow(emptyList())
 
+    val saveForFutureUse = elements
+        .filterIsInstance<SaveForFutureUseElement>()
+        .firstOrNull()?.controller?.saveForFutureUse ?: MutableStateFlow(false)
+
+    // Mandate is showing if it is an element of the form and it isn't optional
+    val showingMandate = optionalIdentifiers.map {
+        elements
+            .filterIsInstance<MandateTextElement>()
+            .firstOrNull()?.let { mandate ->
+                !it.contains(mandate.identifier)
+            } ?: false
+    }
+
     val completeFormValues = TransformElementToFormFieldValueFlow(
-        elements, optionalIdentifiers
+        elements, optionalIdentifiers, showingMandate, saveForFutureUse
     ).transformFlow()
 
     internal val populateFormFromFormFieldValues = PopulateFormFromFormFieldValues(elements)

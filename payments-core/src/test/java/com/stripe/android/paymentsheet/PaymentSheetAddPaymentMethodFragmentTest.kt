@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -264,6 +265,29 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             idleLooper()
             assertThat(paymentSelection).isNull()
         }
+    }
+
+    @Test
+    fun `payment method selection has the fields from formFieldValues`() {
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = emptyMap(),
+            saveForFutureUse = true,
+            showsMandate = false
+        )
+        val selection = BaseAddPaymentMethodFragment.transformToPaymentSelection(
+            formFieldValues,
+            mapOf(
+                "type" to "sofort"
+            ),
+            SupportedPaymentMethod.Sofort
+        )
+        assertThat(selection?.shouldSavePaymentMethod).isTrue()
+        assertThat(selection?.labelResource).isEqualTo(
+            com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_sofort
+        )
+        assertThat(selection?.iconResource).isEqualTo(
+            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_pm_sofort
+        )
     }
 
     private fun createFragment(

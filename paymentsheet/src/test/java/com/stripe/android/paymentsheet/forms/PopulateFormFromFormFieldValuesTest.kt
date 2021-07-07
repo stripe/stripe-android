@@ -26,7 +26,9 @@ class PopulateFormFromFormFieldValuesTest {
     fun `Populate form elements from form field values`() {
         runBlocking {
             val formFieldValues = FormFieldValues(
-                mapOf(emailSection.identifier to "valid@email.com")
+                mapOf(emailSection.identifier to "valid@email.com"),
+                showsMandate = true,
+                saveForFutureUse = false
             )
             PopulateFormFromFormFieldValues(
                 listOf(emailSection)
@@ -41,7 +43,9 @@ class PopulateFormFromFormFieldValuesTest {
     fun `Attempt to populate with a value not in the form`() {
         runBlocking {
             val formFieldValues = FormFieldValues(
-                mapOf(IdentifierSpec("not in list form elements") to "valid@email.com")
+                mapOf(IdentifierSpec("not in list form elements") to "valid@email.com"),
+                showsMandate = true,
+                saveForFutureUse = false
             )
             PopulateFormFromFormFieldValues(
                 listOf(emailSection)
@@ -55,7 +59,11 @@ class PopulateFormFromFormFieldValuesTest {
     @Test
     fun `Attempt to populate form with no values`() {
         runBlocking {
-            val formFieldValues = FormFieldValues(mapOf())
+            val formFieldValues = FormFieldValues(
+                mapOf(),
+                showsMandate = true,
+                saveForFutureUse = false
+            )
             PopulateFormFromFormFieldValues(
                 listOf(emailSection)
             ).populateWith(formFieldValues)

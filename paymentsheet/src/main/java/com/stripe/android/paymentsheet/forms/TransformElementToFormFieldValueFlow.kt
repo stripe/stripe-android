@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.combine
  */
 internal class TransformElementToFormFieldValueFlow(
     val elements: List<FormElement>,
-    val optionalIdentifiers: Flow<List<IdentifierSpec>>
+    val optionalIdentifiers: Flow<List<IdentifierSpec>>,
+    val showingMandate: Flow<Boolean>,
+    val saveForFutureUse: Flow<Boolean>
 ) {
 
     // This maps the field type to the controller
@@ -33,14 +35,18 @@ internal class TransformElementToFormFieldValueFlow(
      */
     fun transformFlow() = combine(
         currentFieldValueMap,
-        optionalIdentifiers
-    ) { idFieldSnapshotMap, optionalIdentifiers ->
-        transform(idFieldSnapshotMap, optionalIdentifiers)
+        optionalIdentifiers,
+        showingMandate,
+        saveForFutureUse
+    ) { idFieldSnapshotMap, optionalIdentifiers, showingMandate, saveForFutureUse ->
+        transform(idFieldSnapshotMap, optionalIdentifiers, showingMandate, saveForFutureUse)
     }
 
     private fun transform(
         idFieldSnapshotMap: Map<IdentifierSpec, FieldSnapshot>,
-        optionalIdentifiers: List<IdentifierSpec>
+        optionalIdentifiers: List<IdentifierSpec>,
+        showingMandate: Boolean,
+        saveForFutureUse: Boolean
     ): FormFieldValues? {
         // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the optionalFields changing
@@ -51,7 +57,9 @@ internal class TransformElementToFormFieldValueFlow(
         return FormFieldValues(
             optionalFilteredFieldSnapshotMap.mapValues {
                 it.value.fieldValue
-            }
+            },
+            showingMandate,
+            saveForFutureUse
         ).takeIf {
             optionalFilteredFieldSnapshotMap.values.map { it.isComplete }
                 .none { complete -> !complete }

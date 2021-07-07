@@ -67,10 +67,11 @@ public final class com/stripe/android/paymentsheet/elements/common/SaveForFuture
 
 public final class com/stripe/android/paymentsheet/forms/FormFieldValues {
 	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Ljava/util/Map;)V
-	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Map;ZZ)V
+	public synthetic fun <init> (Ljava/util/Map;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getFieldValuePairs ()Ljava/util/Map;
+	public final fun getSaveForFutureUse ()Z
+	public final fun getShowsMandate ()Z
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel : androidx/lifecycle/ViewModel {
@@ -79,6 +80,8 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getCountFocusableFields ()I
 	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getShowingMandate ()Lkotlinx/coroutines/flow/Flow;
 	public final fun populateFormViewValues (Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)V
 }
 
