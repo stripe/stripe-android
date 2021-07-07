@@ -7,10 +7,10 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class SaveForFutureUseControllerTest {
-    val mandateIdentifier = IdentifierSpec("mandate")
-    val nameSectionIdentifier = IdentifierSpec("name")
-    val optionalIdentifiers = listOf(nameSectionIdentifier, mandateIdentifier)
-    val saveForFutureUseController = SaveForFutureUseController(optionalIdentifiers)
+    private val mandateIdentifier = IdentifierSpec("mandate")
+    private val nameSectionIdentifier = IdentifierSpec("name")
+    private val optionalIdentifiers = listOf(nameSectionIdentifier, mandateIdentifier)
+    private val saveForFutureUseController = SaveForFutureUseController(optionalIdentifiers)
 
     @Test
     fun `Save for future use is initialized as true and no optional items`() =
@@ -25,7 +25,7 @@ class SaveForFutureUseControllerTest {
             saveForFutureUseController.onValueChange(false)
             assertThat(saveForFutureUseController.saveForFutureUse.first()).isFalse()
             assertThat(saveForFutureUseController.optionalIdentifiers.first()).isEqualTo(
-                optionalIdentifiers
+                optionalIdentifiers.toSet()
             )
         }
 }

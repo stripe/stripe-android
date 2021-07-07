@@ -36,7 +36,7 @@ class TransformElementToFormViewValueFlowTest {
         countryController
     )
 
-    private val optionalIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())
+    private val optionalIdentifersFlow = MutableStateFlow<Set<IdentifierSpec>>(emptySet())
 
     private val transformElementToFormFieldValueFlow = TransformElementToFormFieldValueFlow(
         listOf(countrySection, emailSection),
@@ -71,7 +71,7 @@ class TransformElementToFormViewValueFlowTest {
     fun `If an optional field is incomplete field pairs have the non-optional values`() {
         runBlocking {
             emailController.onValueChange("email is invalid")
-            optionalIdentifersFlow.value = listOf(emailSection.identifier)
+            optionalIdentifersFlow.value = setOf(emailSection.identifier)
 
             val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
 
@@ -87,7 +87,7 @@ class TransformElementToFormViewValueFlowTest {
     fun `If an optional field is complete field pairs contain only the non-optional values`() {
         runBlocking {
             emailController.onValueChange("email@valid.com")
-            optionalIdentifersFlow.value = listOf(emailSection.identifier)
+            optionalIdentifersFlow.value = setOf(emailSection.identifier)
 
             val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
 

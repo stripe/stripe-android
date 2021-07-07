@@ -205,7 +205,42 @@ class TransformSpecToElementTest {
             saveForFutureUseController.onValueChange(false)
             assertThat(saveForFutureUseController.optionalIdentifiers.first())
                 .isEqualTo(
-                    optionalIdentifiers.map { it.identifier }
+                    optionalIdentifiers.map { it.identifier }.toSet()
+                )
+        }
+
+    @Test
+    fun `Add a setup intent element that hides fields correctly`() =
+        runBlocking {
+            val mandate = FormItemSpec.MandateTextSpec(
+                IdentifierSpec("mandate"),
+                R.string.sofort_mandate,
+                Color.Gray
+            )
+            val optionalIdentifiers = listOf(nameSection, mandate)
+            val setupIntentHiddenFieldSpec =
+                FormItemSpec.SetupIntentHiddenFields(optionalIdentifiers)
+            val formElement = transformSpecToElement.transform(
+                LayoutSpec(
+                    listOf(setupIntentHiddenFieldSpec)
+                ),
+                "Example, Inc.",
+                FocusRequesterCount()
+            )
+
+            val setupIntentHiddenFieldsElement =
+                formElement.first() as FormElement.SetupIntentHiddenFieldsElement
+            val setupIntentHiddenFieldsController = setupIntentHiddenFieldsElement.controller
+
+            assertThat(setupIntentHiddenFieldsElement.identifier)
+                .isEqualTo(setupIntentHiddenFieldSpec.identifier)
+
+            assertThat(setupIntentHiddenFieldsController.optionalIdentifiers.first()).isEmpty()
+
+            setupIntentHiddenFieldsController.onValueChange(true)
+            assertThat(setupIntentHiddenFieldsController.optionalIdentifiers.first())
+                .isEqualTo(
+                    optionalIdentifiers.map { it.identifier }.toSet()
                 )
         }
 }
