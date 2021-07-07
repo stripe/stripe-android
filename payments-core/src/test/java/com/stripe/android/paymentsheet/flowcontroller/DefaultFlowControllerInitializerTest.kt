@@ -11,13 +11,23 @@ import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -32,13 +42,21 @@ internal class DefaultFlowControllerInitializerTest {
         StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
     private val paymentMethodsRepository = FakePaymentMethodsRepository(PAYMENT_METHODS)
 
+    @Captor
+    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<PaymentMethod.Type>
+
+    @BeforeTest
+    fun setup() {
+        MockitoAnnotations.openMocks(this)
+    }
+
     @AfterTest
     fun after() {
         testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
-    fun `init without configuration should return expect result`() =
+    fun `init without configuration should return expected result`() =
         testDispatcher.runBlockingTest {
             assertThat(
                 initializer.init(
@@ -62,7 +80,7 @@ internal class DefaultFlowControllerInitializerTest {
         }
 
     @Test
-    fun `init with configuration should return expect result`() = testDispatcher.runBlockingTest {
+    fun `init with configuration should return expected result`() = testDispatcher.runBlockingTest {
         prefsRepository.savePaymentSelection(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
@@ -243,8 +261,54 @@ internal class DefaultFlowControllerInitializerTest {
             assertThat(prefsRepository.getSavedSelection()).isEqualTo(SavedSelection.GooglePay)
         }
 
-    private fun testDefaultSavedSelection() {
-    }
+    @Test
+    fun `init() with customer should fetch only supported payment method types`() =
+        testDispatcher.runBlockingTest {
+            val paymentMethodsRepository = mock<PaymentMethodsRepository> {
+                whenever(it.get(any(), any())).thenReturn(emptyList())
+            }
+
+            val initializer = createInitializer()
+            val paymentMethodTypes = listOf(
+                "card", // valid and supported
+                "fpx", // valid but not supported
+                "invalid_type" // unknown type
+            )
+
+            initializer.init(
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                StripeIntentRepository.Static(
+                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = paymentMethodTypes
+                    )
+                ),
+                paymentMethodsRepository,
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            )
+
+            verify(paymentMethodsRepository).get(any(), capture(paymentMethodTypeCaptor))
+            assertThat(paymentMethodTypeCaptor.allValues)
+                .containsExactly(PaymentMethod.Type.Card)
+        }
+
+    @Test
+    fun `init() with customer should filter out invalid payment method types`() =
+        testDispatcher.runBlockingTest {
+            val initResult = createInitializer().init(
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD),
+                FakePaymentMethodsRepository(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(card = null), // invalid
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                    )
+                ),
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            ) as FlowControllerInitializer.InitResult.Success
+
+            assertThat(initResult.initData.paymentMethods)
+                .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        }
 
     @Test
     fun `init() when PaymentIntent has invalid status should return null`() =

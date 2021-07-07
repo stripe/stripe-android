@@ -21,6 +21,8 @@
     <string name="stripe_paymentsheet_payment_method_bancontact" tools:ignore="MissingTranslation">Bancontact</string>
     <!-- Title for iDEAL payment method -->
     <string name="stripe_paymentsheet_payment_method_ideal" tools:ignore="MissingTranslation">iDEAL</string>
+    <!-- Title for Sepa Debit payment method -->
+    <string name="stripe_paymentsheet_payment_method_sepa_debit" tools:ignore="MissingTranslation">SEPA Debit</string>
     <!-- Title for Sofort payment method -->
     <string name="stripe_paymentsheet_payment_method_sofort" tools:ignore="MissingTranslation">Sofort</string>
 </resources>

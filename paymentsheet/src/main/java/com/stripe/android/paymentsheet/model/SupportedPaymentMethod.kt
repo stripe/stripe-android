@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.specifications.ideal
 import com.stripe.android.paymentsheet.specifications.sofort
 
 /**
- * Enum defining all payment methods supported in Payment Sheet.
+ * Enum defining all payment method types for which Payment Sheet can collect payment data.
  *
  * FormSpec is optionally null only because Card is not converted to the compose model.
  */
@@ -51,5 +51,14 @@ enum class SupportedPaymentMethod(
     companion object {
         fun fromCode(code: String?) =
             values().firstOrNull { it.code == code }
+
+        /**
+         * Defines all types of saved payment method supported on Payment Sheet.
+         *
+         * These are fetched from the
+         * [PaymentMethods API endpoint](https://stripe.com/docs/api/payment_methods/list) for
+         * returning customers.
+         */
+        val supportedSavedPaymentMethods = setOf("card", "sepa_debit")
     }
 }

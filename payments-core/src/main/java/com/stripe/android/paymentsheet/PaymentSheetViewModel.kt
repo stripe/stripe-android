@@ -39,11 +39,14 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -144,6 +147,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    @VisibleForTesting
     fun fetchIsGooglePayReady() {
         if (isGooglePayReady.value == null) {
             if (args.isGooglePayEnabled) {
@@ -159,17 +163,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun updatePaymentMethods() {
-        viewModelScope.launch {
-            _paymentMethods.value = customerConfig?.let {
-                paymentMethodsRepository.get(
-                    it,
-                    PaymentMethod.Type.Card
-                )
-            }.orEmpty()
-        }
-    }
-
+    /**
+     * Fetch the [StripeIntent] for the client secret received as parameter. If successful,
+     * continues through validation and fetching the saved payment methods for the customer.
+     */
     fun fetchStripeIntent() {
         viewModelScope.launch {
             runCatching {
@@ -192,6 +189,49 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 stripeIntentValidator.requireValid(stripeIntent)
             }.fold(
                 onSuccess = {
+                    updatePaymentMethods(stripeIntent)
+                    resetViewState(stripeIntent, userErrorMessage = null)
+                },
+                onFailure = ::onFatal
+            )
+        }
+    }
+
+    /**
+     * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
+     * was provided.
+     * It will fetch only the payment method types accepted by the [stripeIntent] and defined in
+     * [SupportedPaymentMethod.supportedSavedPaymentMethods].
+     */
+    @VisibleForTesting
+    fun updatePaymentMethods(stripeIntent: StripeIntent) {
+        viewModelScope.launch {
+            runCatching {
+                customerConfig?.let { customerConfig ->
+                    stripeIntent.paymentMethodTypes.mapNotNull {
+                        PaymentMethod.Type.fromCode(it)
+                    }.filter {
+                        SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
+                    }.map {
+                        async {
+                            paymentMethodsRepository.get(
+                                customerConfig,
+                                it
+                            )
+                        }
+                    }.awaitAll().flatten().filter { paymentMethod ->
+                        paymentMethod.hasExpectedDetails().also { valid ->
+                            if (!valid) {
+                                logger.error(
+                                    "Discarding invalid payment method ${paymentMethod.id}"
+                                )
+                            }
+                        }
+                    }
+                }.orEmpty()
+            }.fold(
+                onSuccess = {
+                    _paymentMethods.value = it
                     setStripeIntent(stripeIntent)
                     resetViewState(stripeIntent, userErrorMessage = null)
                 },

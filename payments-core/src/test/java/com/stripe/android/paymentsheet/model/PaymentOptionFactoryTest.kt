@@ -47,15 +47,6 @@ class PaymentOptionFactoryTest {
     }
 
     @Test
-    fun `create() with FPX PaymentMethod should return null`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.Saved(PaymentMethodFixtures.FPX_PAYMENT_METHOD)
-            )
-        ).isNull()
-    }
-
-    @Test
     fun `create() with card params should return expected object`() {
         assertThat(
             factory.create(
