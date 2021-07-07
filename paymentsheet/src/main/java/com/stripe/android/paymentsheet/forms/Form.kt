@@ -87,7 +87,10 @@ internal fun Form(
                                         )
                                     }
                                     is DropdownFieldElement -> {
-                                        DropDown(element.field.controller)
+                                        DropDown(
+                                            element.field.controller.label,
+                                            element.field.controller
+                                        )
                                     }
                                 }
                             }
