@@ -112,7 +112,10 @@ internal fun Form(
                                 checked = checked,
                                 onCheckedChange = { controller.onValueChange(it) }
                             )
-                            Text(stringResource(controller.label, element.merchantName ?: ""))
+                            Text(
+                                stringResource(controller.label, element.merchantName ?: ""),
+                                Modifier.padding(start = 8.dp)
+                            )
                         }
                     }
                 }
