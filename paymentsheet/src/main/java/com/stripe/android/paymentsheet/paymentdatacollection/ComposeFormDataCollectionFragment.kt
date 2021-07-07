@@ -28,10 +28,11 @@ class ComposeFormDataCollectionFragment : Fragment() {
             }
         )
     }
+
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
             formSpec.layout,
-            "Merchant Name, Inc." // TODO: Replace with argument.
+            requireNotNull(requireArguments().getString(EXTRA_MERCHANT_NAME))
         )
     }
 
@@ -65,5 +66,6 @@ class ComposeFormDataCollectionFragment : Fragment() {
 
     companion object {
         const val EXTRA_PAYMENT_METHOD = "com.stripe.android.paymentsheet.extra_payment_method"
+        const val EXTRA_MERCHANT_NAME = "com.stripe.android.paymentsheet.extra_merchant_name"
     }
 }

@@ -107,7 +107,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
     <string name="stripe_paymentsheet_pay_button_label">支付</string>
     <string name="stripe_paymentsheet_primary_button_processing">正在处理...</string>
-    <string name="stripe_paymentsheet_save_this_card">保存该卡，用于未来的付款</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存该卡，用于未来的 %s 付款</string>
     <string name="stripe_paymentsheet_select_payment_method">选择您的支付方式</string>
     <string name="stripe_paymentsheet_setup_button_label">设置</string>

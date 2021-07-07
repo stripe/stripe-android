@@ -107,7 +107,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">Betala %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Betala</string>
     <string name="stripe_paymentsheet_primary_button_processing">Bearbetar ...</string>
-    <string name="stripe_paymentsheet_save_this_card">Spara kortet för framtida betalningar</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spara detta kort för framtiden %s betalningar</string>
     <string name="stripe_paymentsheet_select_payment_method">Välj din betalningsmetod</string>
     <string name="stripe_paymentsheet_setup_button_label">Konfigurera</string>

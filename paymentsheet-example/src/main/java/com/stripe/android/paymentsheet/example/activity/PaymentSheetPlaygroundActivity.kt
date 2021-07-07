@@ -125,20 +125,12 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (viewModel.checkoutMode == Repository.CheckoutMode.Setup) {
             paymentSheet.presentWithSetupIntent(
                 clientSecret,
-                PaymentSheet.Configuration(
-                    merchantDisplayName = merchantName,
-                    customer = customerConfig,
-                    googlePay = googlePayConfig,
-                )
+                makeConfiguration(customerConfig)
             )
         } else {
             paymentSheet.presentWithPaymentIntent(
                 clientSecret,
-                PaymentSheet.Configuration(
-                    merchantDisplayName = merchantName,
-                    customer = customerConfig,
-                    googlePay = googlePayConfig,
-                )
+                makeConfiguration(customerConfig)
             )
         }
     }

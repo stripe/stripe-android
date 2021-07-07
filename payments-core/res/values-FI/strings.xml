@@ -107,7 +107,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">Maksa %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Maksa</string>
     <string name="stripe_paymentsheet_primary_button_processing">Käsitellään...</string>
-    <string name="stripe_paymentsheet_save_this_card">Tallenna tämä kortti tulevia maksuja varten</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Tallenna tämä kortti tulevia maksuja (%s) varten</string>
     <string name="stripe_paymentsheet_select_payment_method">Valitse maksutapa</string>
     <string name="stripe_paymentsheet_setup_button_label">Määritä</string>

@@ -107,7 +107,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">%s を支払う</string>
     <string name="stripe_paymentsheet_pay_button_label">支払う: </string>
     <string name="stripe_paymentsheet_primary_button_processing">処理中...</string>
-    <string name="stripe_paymentsheet_save_this_card">今後の支払いのためにこのカードを保存する</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">今後の %s の支払いのためにこのカードを保存する</string>
     <string name="stripe_paymentsheet_select_payment_method">支払い方法を選択してください</string>
     <string name="stripe_paymentsheet_setup_button_label">設定</string>
