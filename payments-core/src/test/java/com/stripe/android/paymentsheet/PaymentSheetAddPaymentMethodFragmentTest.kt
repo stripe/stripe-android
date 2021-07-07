@@ -292,7 +292,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
-    fun `Verify Compose argument in guest setup intent`(){
+    fun `Verify Compose argument in guest setup intent`() {
         val args = Bundle()
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
@@ -307,7 +307,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
-    fun `Verify Compose argument in guest payment intent`(){
+    fun `Verify Compose argument in guest payment intent`() {
         val args = Bundle()
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
@@ -322,7 +322,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
-    fun `Verify Compose argument in new or returning user setup intent`(){
+    fun `Verify Compose argument in new or returning user setup intent`() {
         val args = Bundle()
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
@@ -337,7 +337,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
-    fun `Verify Compose argument in new or returning user payment intent`(){
+    fun `Verify Compose argument in new or returning user payment intent`() {
         val args = Bundle()
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,

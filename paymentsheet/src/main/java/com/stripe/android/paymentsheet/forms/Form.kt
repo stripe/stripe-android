@@ -164,7 +164,8 @@ class FormViewModel(
         .filterIsInstance<SaveForFutureUseElement>()
         .firstOrNull()
 
-    val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse ?: MutableStateFlow(false)
+    val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
+        ?: MutableStateFlow(false)
 
     val optionalIdentifiers =
         combine(

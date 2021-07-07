@@ -83,6 +83,8 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getShowingMandate ()Lkotlinx/coroutines/flow/Flow;
 	public final fun populateFormViewValues (Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)V
+	public final fun setSaveForFutureUse (Z)V
+	public final fun setSaveForFutureUseVisibility (Z)V
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
@@ -115,6 +117,8 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion;
 	public static final field EXTRA_PAYMENT_METHOD Ljava/lang/String;
+	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VALUE Ljava/lang/String;
+	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY Ljava/lang/String;
 	public fun <init> ()V
 	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
