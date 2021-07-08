@@ -34,7 +34,13 @@ class ComposeFormDataCollectionFragment : Fragment() {
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
             formSpec.layout,
-            requireNotNull(requireArguments().getString(EXTRA_MERCHANT_NAME))
+            requireArguments().getBoolean(
+                EXTRA_SAVE_FOR_FUTURE_USE_VALUE
+            ),
+            requireArguments().getBoolean(
+                EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY
+            ),
+            requireNotNull(requireArguments().getString(EXTRA_MERCHANT_NAME)),
         )
     }
 
@@ -68,6 +74,10 @@ class ComposeFormDataCollectionFragment : Fragment() {
 
     companion object {
         const val EXTRA_PAYMENT_METHOD = "com.stripe.android.paymentsheet.extra_payment_method"
+        const val EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY =
+            "com.stripe.android.paymentsheet.extra_save_for_future_use_visibility"
+        const val EXTRA_SAVE_FOR_FUTURE_USE_VALUE =
+            "com.stripe.android.paymentsheet.extra_save_for_future_use_value"
         const val EXTRA_MERCHANT_NAME = "com.stripe.android.paymentsheet.extra_merchant_name"
     }
 }

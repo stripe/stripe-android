@@ -58,18 +58,20 @@ public final class com/stripe/android/paymentsheet/forms/FormFieldValues {
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel : androidx/lifecycle/ViewModel {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getCountFocusableFields ()I
 	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getShowingMandate ()Lkotlinx/coroutines/flow/Flow;
 	public final fun populateFormViewValues (Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)V
+	public final fun setSaveForFutureUse (Z)V
+	public final fun setSaveForFutureUseVisibility (Z)V
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 
@@ -98,6 +100,8 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 	public static final field Companion Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion;
 	public static final field EXTRA_MERCHANT_NAME Ljava/lang/String;
 	public static final field EXTRA_PAYMENT_METHOD Ljava/lang/String;
+	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VALUE Ljava/lang/String;
+	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY Ljava/lang/String;
 	public fun <init> ()V
 	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
