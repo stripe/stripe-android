@@ -8,9 +8,10 @@ import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
 import java.util.regex.Pattern
 
-internal class EmailConfig() :
+internal class EmailConfig :
     TextFieldConfig {
     override val debugLabel = "email"
+
     @StringRes
     override val label = R.string.email
     override val keyboard = KeyboardType.Email
@@ -21,6 +22,10 @@ internal class EmailConfig() :
      * the regular expression.
      */
     override fun filter(userTyped: String) = userTyped
+
+    override fun convertToRaw(it: String) = it
+
+    override fun convertFromRaw(rawValue: String) = rawValue
 
     override fun determineState(input: String): TextFieldState {
         return when {

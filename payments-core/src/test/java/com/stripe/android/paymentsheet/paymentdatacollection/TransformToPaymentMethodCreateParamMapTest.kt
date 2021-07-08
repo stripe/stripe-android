@@ -18,7 +18,7 @@ class TransformToPaymentMethodCreateParamMapTest {
                     mapOf(
                         SectionFieldSpec.IdealBank.identifier to FormFieldEntry(
                             ElementType.IdealBank,
-                            "ABN AMRO",
+                            "abn_amro",
                             true
                         )
                     ),
@@ -58,7 +58,7 @@ class TransformToPaymentMethodCreateParamMapTest {
                         ),
                         SectionFieldSpec.Country.identifier to FormFieldEntry(
                             ElementType.Country,
-                            "United States",
+                            "US",
                             true
                         ),
                     ),

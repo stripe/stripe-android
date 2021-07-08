@@ -71,14 +71,14 @@ internal class TransformElementToFormFieldValueFlow(
 
     private fun getCurrentFieldValuePair(
         field: IdentifierSpec,
-        value: Controller
-    ) = combine(value.fieldValue, value.isComplete) { fieldValue, isComplete ->
+        controller: Controller
+    ) = combine(controller.rawFieldValue, controller.isComplete) { rawFieldValue, isComplete ->
         Pair(
             field,
             FormFieldEntry(
-                value = fieldValue,
+                value = rawFieldValue,
                 isComplete = isComplete,
-                type = value.elementType
+                type = controller.elementType
             )
         )
     }

@@ -22,4 +22,6 @@ internal class NameConfig : TextFieldConfig {
     }
 
     override fun filter(userTyped: String) = userTyped.filter { it.isLetter() }
+    override fun convertToRaw(it: String) = it
+    override fun convertFromRaw(rawValue: String) = rawValue
 }

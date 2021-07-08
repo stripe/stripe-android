@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.R
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class IdealBankConfig : DropdownConfig {
+internal class IdealBankConfig : DropdownConfig {
     override val debugLabel = "idealBank"
 
     @StringRes
@@ -14,6 +14,13 @@ class IdealBankConfig : DropdownConfig {
     override val elementType = ElementType.IdealBank
 
     override fun getDisplayItems() = DISPLAY_TO_PARAM.map { it.displayName }
+    override fun convertFromRaw(rawValue: String) = DISPLAY_TO_PARAM
+        .firstOrNull { it.paymentMethodParamFieldValue == rawValue }
+        ?.paymentMethodParamFieldValue ?: DISPLAY_TO_PARAM[0].displayName
+
+    override fun convertToRaw(bankDisplayName: String) = DISPLAY_TO_PARAM
+        .firstOrNull { it.displayName == bankDisplayName }
+        ?.paymentMethodParamFieldValue
 
     companion object {
         val DISPLAY_TO_PARAM: List<Item> = listOf(

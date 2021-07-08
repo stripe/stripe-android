@@ -15,4 +15,12 @@ internal class CountryConfig(val locale: Locale = Locale.getDefault()) : Dropdow
 
     override fun getDisplayItems(): List<String> =
         CountryUtils.getOrderedCountries(locale).map { it.name }
+
+    override fun convertFromRaw(rawValue: String) =
+        CountryUtils.getCountryByCode(CountryCode.create(rawValue), Locale.getDefault())?.name
+            ?: getDisplayItems()[0]
+
+    override fun convertToRaw(it: String) =
+        CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
+            ?: null
 }

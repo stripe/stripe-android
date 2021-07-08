@@ -34,6 +34,8 @@ internal class TextFieldController @VisibleForTesting constructor(
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: Flow<String> = _fieldValue
 
+    override val rawFieldValue: Flow<String> = _fieldValue.map { textFieldConfig.convertToRaw(it) }
+
     private val _fieldState = MutableStateFlow<TextFieldState>(Error.AlwaysError)
 
     private val _hasFocus = MutableStateFlow(false)
@@ -53,11 +55,21 @@ internal class TextFieldController @VisibleForTesting constructor(
         onValueChange("")
     }
 
-    override fun onValueChange(displayFormatted: String) {
+    /**
+     * This is called when the value changed to is a display value.
+     */
+    fun onValueChange(displayFormatted: String) {
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
         _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
+    }
+
+    /**
+     * This is called when the value changed to is a raw backing value, not a display value.
+     */
+    override fun onRawValueChange(rawValue: String) {
+        onValueChange(textFieldConfig.convertFromRaw(rawValue))
     }
 
     fun onFocusChange(newHasFocus: Boolean) {

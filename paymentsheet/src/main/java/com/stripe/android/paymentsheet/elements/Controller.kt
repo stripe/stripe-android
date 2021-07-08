@@ -9,9 +9,10 @@ import kotlinx.coroutines.flow.Flow
 internal sealed interface Controller {
     val label: Int
     val fieldValue: Flow<String>
+    val rawFieldValue: Flow<String?>
     val isComplete: Flow<Boolean>
     val errorMessage: Flow<Int?>
     val elementType: ElementType
 
-    fun onValueChange(value: String)
+    fun onRawValueChange(rawValue: String)
 }
