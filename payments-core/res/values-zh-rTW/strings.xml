@@ -99,7 +99,6 @@
     <string name="stripe_paymentsheet_close">關閉</string>
     <string name="stripe_paymentsheet_pay_button_amount">支付 %s</string>
     <string name="stripe_paymentsheet_pay_button_label">支付</string>
-    <string name="stripe_paymentsheet_save_this_card">保存該卡，用於未來的付款。</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存該卡，用於未來的 %s 付款。</string>
     <string name="stripe_paymentsheet_setup_button_label">設定</string>
     <string name="stripe_paymentsheet_total_amount">總金額：%s</string>

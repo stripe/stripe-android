@@ -430,7 +430,12 @@ class CardDataCollectionFragmentTest {
     fun `empty merchant display name shows correct message`() {
         createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { _, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.text)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_save_this_card))
+                .isEqualTo(
+                    context.getString(
+                        R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
+                        "com.stripe.android.test"
+                    )
+                )
         }
     }
 

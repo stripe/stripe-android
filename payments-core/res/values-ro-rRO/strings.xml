@@ -106,7 +106,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">Plătiți %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Plătiți</string>
     <string name="stripe_paymentsheet_primary_button_processing">Se procesează...</string>
-    <string name="stripe_paymentsheet_save_this_card">Salvați acest card pentru plăți viitoare</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salvați acest card pentru plăți viitoare către %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Selectați metoda de plată</string>
     <string name="stripe_paymentsheet_setup_button_label">Configurare</string>

@@ -106,7 +106,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">%s öde</string>
     <string name="stripe_paymentsheet_pay_button_label">Öde</string>
     <string name="stripe_paymentsheet_primary_button_processing">İşleniyor...</string>
-    <string name="stripe_paymentsheet_save_this_card">Gelecekteki ödemeler için bu kart kaydedilsin</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
     <string name="stripe_paymentsheet_select_payment_method">Ödeme yönteminizi seçin</string>
     <string name="stripe_paymentsheet_setup_button_label">Ayarla</string>
