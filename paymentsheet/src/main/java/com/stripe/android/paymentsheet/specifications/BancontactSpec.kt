@@ -18,7 +18,7 @@ internal val bancontactMandate = FormItemSpec.MandateTextSpec(
     R.string.sofort_mandate,
     Color.Gray
 )
-val bancontact = FormSpec(
+internal val bancontact = FormSpec(
     LayoutSpec(
         listOf(
             bancontactNameSection,

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -135,6 +136,7 @@ internal fun Form(
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FormViewModel(
     layout: LayoutSpec,
     merchantName: String,

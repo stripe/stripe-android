@@ -97,7 +97,6 @@
     <string name="stripe_paymentsheet_add_button_label">添加</string>
     <string name="stripe_paymentsheet_back">上一步</string>
     <string name="stripe_paymentsheet_close">關閉</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ 新卡</string>
     <string name="stripe_paymentsheet_pay_button_amount">支付 %s</string>
     <string name="stripe_paymentsheet_pay_button_label">支付</string>
     <string name="stripe_paymentsheet_save_this_card">保存該卡，用於未來的付款。</string>

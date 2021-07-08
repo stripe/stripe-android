@@ -102,7 +102,6 @@
     <string name="stripe_paymentsheet_back">Назад</string>
     <string name="stripe_paymentsheet_close">Затваряне</string>
     <string name="stripe_paymentsheet_expiration_date_hint">ММ / ГГ</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Нова карта</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Или платете с карта</string>
     <string name="stripe_paymentsheet_pay_button_amount">Плащане %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Плащане</string>

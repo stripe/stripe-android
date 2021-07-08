@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
  * Fragment that displays a form for payment data collection based on the [SupportedPaymentMethod]
  * received in the arguments bundle.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ComposeFormDataCollectionFragment : Fragment() {
     val formSpec by lazy {
         requireNotNull(

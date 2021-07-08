@@ -27,7 +27,7 @@ internal val idealMandate = MandateTextSpec(
     R.string.sofort_mandate,
     Color.Gray
 )
-val ideal = FormSpec(
+internal val ideal = FormSpec(
     LayoutSpec(
         listOf(
             idealNameSection,
