@@ -16,23 +16,6 @@ public final class com/stripe/android/paymentsheet/ElementType : java/lang/Enum 
 	public static fun values ()[Lcom/stripe/android/paymentsheet/ElementType;
 }
 
-public final class com/stripe/android/paymentsheet/elements/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/Controller {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getElementType ()Lcom/stripe/android/paymentsheet/ElementType;
-	public fun getErrorMessage ()Lkotlinx/coroutines/flow/Flow;
-	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getLabel ()I
-	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
-	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
-	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
-	public fun onRawValueChange (Ljava/lang/String;)V
-	public final fun onValueChange (Z)V
-}
-
 public final class com/stripe/android/paymentsheet/forms/FormFieldEntry {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;Z)V
