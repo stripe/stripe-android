@@ -24,7 +24,7 @@ internal class DropdownFieldController(
         is IdealBankConfig -> ElementType.IdealBank
         is CountryConfig -> ElementType.Country
         else -> {
-            // required for ktlint
+            // required for ktlint still need to figure out.
             ElementType.Name
         }
     }
