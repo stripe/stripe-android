@@ -316,7 +316,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             amount = paymentIntent.amount?.toInt(),
                             countryCode = args.googlePayConfig?.countryCode.orEmpty(),
                             currencyCode = paymentIntent.currency.orEmpty(),
-                            merchantName = args.config?.merchantDisplayName,
+                            merchantName = merchantName,
                             transactionId = paymentIntent.id
                         ),
                         statusBarColor = args.statusBarColor

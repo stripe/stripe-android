@@ -697,6 +697,17 @@ internal class PaymentSheetViewModelTest {
         assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
     }
 
+    @Test
+    fun `When configuration is empty, merchant name should reflect the app name`() {
+        val viewModel = createViewModel(
+            args = ARGS_WITHOUT_CUSTOMER
+        )
+
+        // In a real app, the app name will be used. In tests the package name is returned.
+        assertThat(viewModel.merchantName)
+            .isEqualTo("com.stripe.android.test")
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(

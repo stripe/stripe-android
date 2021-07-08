@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error.Blank
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error.Incomplete
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error.Invalid
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.Limitless
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Incomplete
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Invalid
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Limitless
 import org.junit.Test
 
 class EmailConfigTest {

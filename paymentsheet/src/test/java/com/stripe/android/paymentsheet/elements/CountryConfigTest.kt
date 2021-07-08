@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import org.junit.Test
 import java.util.Locale
 

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements.common
+package com.stripe.android.paymentsheet.elements
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
