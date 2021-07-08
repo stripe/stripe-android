@@ -422,29 +422,21 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun createPaymentSheetResult(
         stripeIntentResult: StripeIntentResult<StripeIntent>
-    ): PaymentSheetResult {
-        val stripeIntent = stripeIntentResult.intent
-        return when {
-            stripeIntent.status == StripeIntent.Status.Succeeded ||
-                stripeIntent.status == StripeIntent.Status.RequiresCapture -> {
-                PaymentSheetResult.Completed
-            }
-            stripeIntentResult.outcome == StripeIntentResult.Outcome.CANCELED -> {
-                PaymentSheetResult.Canceled
-            }
-            stripeIntent.lastErrorMessage != null -> {
-                PaymentSheetResult.Failed(
-                    error = IllegalArgumentException(
-                        "Failed to confirm ${stripeIntent.javaClass.simpleName}: " +
-                            stripeIntent.lastErrorMessage
+    ) = when (stripeIntentResult.outcome) {
+        StripeIntentResult.Outcome.SUCCEEDED -> {
+            PaymentSheetResult.Completed
+        }
+        StripeIntentResult.Outcome.CANCELED -> {
+            PaymentSheetResult.Canceled
+        }
+        else -> {
+            PaymentSheetResult.Failed(
+                error = stripeIntentResult.intent.lastErrorMessage?.let {
+                    IllegalArgumentException(
+                        "Failed to confirm ${stripeIntentResult.intent.javaClass.simpleName}: $it"
                     )
-                )
-            }
-            else -> {
-                PaymentSheetResult.Failed(
-                    error = RuntimeException("Failed to complete payment.")
-                )
-            }
+                } ?: RuntimeException("Failed to complete payment.")
+            )
         }
     }
 
