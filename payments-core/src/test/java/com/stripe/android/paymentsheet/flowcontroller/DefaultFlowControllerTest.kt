@@ -617,6 +617,78 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
+    fun `onPaymentFlowResult when processing payment method which has delay should invoke callback with Completed`() =
+        testDispatcher.runBlockingTest {
+            whenever(flowResultProcessor.processResult(any())).thenReturn(
+                PaymentIntentResult(
+                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                        paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                        status = StripeIntent.Status.Processing
+                    ),
+                    StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            var isReadyState = false
+            flowController.configureWithPaymentIntent(
+                PaymentSheetFixtures.CLIENT_SECRET
+            ) { isReady, _ ->
+                isReadyState = isReady
+            }
+            assertThat(isReadyState)
+                .isTrue()
+
+            flowController.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            verify(paymentResultCallback).onPaymentSheetResult(
+                argWhere { paymentResult ->
+                    paymentResult is PaymentSheetResult.Completed
+                }
+            )
+        }
+
+    @Test
+    fun `onPaymentFlowResult when processing payment method which does not have delay should invoke callback with Failed`() =
+        testDispatcher.runBlockingTest {
+            whenever(flowResultProcessor.processResult(any())).thenReturn(
+                PaymentIntentResult(
+                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        status = StripeIntent.Status.Processing
+                    ),
+                    StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            var isReadyState = false
+            flowController.configureWithPaymentIntent(
+                PaymentSheetFixtures.CLIENT_SECRET
+            ) { isReady, _ ->
+                isReadyState = isReady
+            }
+            assertThat(isReadyState)
+                .isTrue()
+
+            flowController.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            verify(paymentResultCallback).onPaymentSheetResult(
+                argWhere { paymentResult ->
+                    paymentResult is PaymentSheetResult.Failed
+                }
+            )
+        }
+
+    @Test
     fun `onPaymentFlowResult when canceled should invoke callback with Cancelled`() =
         testDispatcher.runBlockingTest {
             whenever(flowResultProcessor.processResult(any())).thenReturn(
