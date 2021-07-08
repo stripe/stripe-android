@@ -8,12 +8,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
-import com.stripe.android.paymentsheet.elements.common.TextFieldController
-import com.stripe.android.paymentsheet.elements.common.TextFieldState
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error.AlwaysError
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.Full
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.Limitless
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.AlwaysError
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Full
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Limitless
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

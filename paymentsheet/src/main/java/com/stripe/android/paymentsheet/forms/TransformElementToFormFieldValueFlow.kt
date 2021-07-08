@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.elements.common.Controller
+import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
