@@ -22,6 +22,7 @@ public final class com/stripe/android/paymentsheet/elements/IdealBankConfig : co
 	public fun <init> ()V
 	public fun getDebugLabel ()Ljava/lang/String;
 	public fun getDisplayItems ()Ljava/util/List;
+	public fun getElementType ()Lcom/stripe/android/paymentsheet/ElementType;
 	public fun getLabel ()I
 }
 

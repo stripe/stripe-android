@@ -23,10 +23,7 @@ internal class TextFieldController @VisibleForTesting constructor(
         textFieldConfig: TextFieldConfig
     ) : this(
         textFieldConfig,
-        when (textFieldConfig) {
-            is NameConfig -> ElementType.Name
-            is EmailConfig -> ElementType.Email
-        }
+        textFieldConfig.elementType
     )
 
     @StringRes

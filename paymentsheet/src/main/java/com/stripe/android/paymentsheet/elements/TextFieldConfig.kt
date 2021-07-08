@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.paymentsheet.ElementType
 
 internal sealed interface TextFieldConfig {
     val debugLabel: String
@@ -10,6 +11,9 @@ internal sealed interface TextFieldConfig {
 
     /** This is the type of keyboard to use for this field */
     val keyboard: KeyboardType
+
+    /** This is the element type **/
+    val elementType: ElementType
 
     /** This will determine the state of the field based on the text */
     fun determineState(input: String): TextFieldState

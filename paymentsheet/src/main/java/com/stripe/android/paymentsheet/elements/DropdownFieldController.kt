@@ -20,11 +20,7 @@ internal class DropdownFieldController(
     override val fieldValue = selectedIndex.map { displayItems[it] }
     override val errorMessage: Flow<Int?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
-
-    override val elementType: ElementType = when (config) {
-        is IdealBankConfig -> ElementType.IdealBank
-        is CountryConfig -> ElementType.Country
-    }
+    override val elementType: ElementType = config.elementType
 
     fun onValueChange(index: Int) {
         _selectedIndex.value = index

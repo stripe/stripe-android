@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.R
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -10,6 +11,7 @@ class IdealBankConfig : DropdownConfig {
 
     @StringRes
     override val label = R.string.title_bank_account
+    override val elementType = ElementType.IdealBank
 
     override fun getDisplayItems() = DISPLAY_TO_PARAM.map { it.displayName }
 
