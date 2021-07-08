@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.common.TextFieldController
+import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -26,7 +27,13 @@ class PopulateFormFromFormFieldValuesTest {
     fun `Populate form elements from form field values`() {
         runBlocking {
             val formFieldValues = FormFieldValues(
-                mapOf(emailSection.identifier to "valid@email.com"),
+                mapOf(
+                    emailSection.identifier to FormFieldEntry(
+                        ElementType.Email,
+                        "valid@email.com",
+                        true
+                    )
+                ),
                 showsMandate = true,
                 saveForFutureUse = false
             )
@@ -43,7 +50,13 @@ class PopulateFormFromFormFieldValuesTest {
     fun `Attempt to populate with a value not in the form`() {
         runBlocking {
             val formFieldValues = FormFieldValues(
-                mapOf(IdentifierSpec("not in list form elements") to "valid@email.com"),
+                mapOf(
+                    IdentifierSpec("not in list form elements") to FormFieldEntry(
+                        ElementType.Email,
+                        "valid@email.com",
+                        true
+                    )
+                ),
                 showsMandate = true,
                 saveForFutureUse = false
             )

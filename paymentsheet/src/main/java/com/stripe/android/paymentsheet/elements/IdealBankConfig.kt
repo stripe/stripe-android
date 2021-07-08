@@ -2,17 +2,25 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.common.DropdownConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class IdealBankConfig : DropdownConfig {
+internal class IdealBankConfig : DropdownConfig {
     override val debugLabel = "idealBank"
 
     @StringRes
     override val label = R.string.title_bank_account
+    override val elementType = ElementType.IdealBank
 
     override fun getDisplayItems() = DISPLAY_TO_PARAM.map { it.displayName }
+    override fun convertFromRaw(rawValue: String) = DISPLAY_TO_PARAM
+        .firstOrNull { it.paymentMethodParamFieldValue == rawValue }
+        ?.paymentMethodParamFieldValue ?: DISPLAY_TO_PARAM[0].displayName
+
+    override fun convertToRaw(bankDisplayName: String) = DISPLAY_TO_PARAM
+        .firstOrNull { it.displayName == bankDisplayName }
+        ?.paymentMethodParamFieldValue
 
     companion object {
         val DISPLAY_TO_PARAM: List<Item> = listOf(

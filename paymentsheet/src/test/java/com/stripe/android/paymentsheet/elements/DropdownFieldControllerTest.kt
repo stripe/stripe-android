@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.country.CountryConfig
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test

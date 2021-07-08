@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.ElementType
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 import org.junit.Test
@@ -15,7 +16,11 @@ class TransformToPaymentMethodCreateParamMapTest {
             .transform(
                 FormFieldValues(
                     mapOf(
-                        SectionFieldSpec.IdealBank.identifier to "ABN AMRO"
+                        SectionFieldSpec.IdealBank.identifier to FormFieldEntry(
+                            ElementType.IdealBank,
+                            "abn_amro",
+                            true
+                        )
                     ),
                     saveForFutureUse = true,
                     showsMandate = false
@@ -41,9 +46,21 @@ class TransformToPaymentMethodCreateParamMapTest {
             .transform(
                 FormFieldValues(
                     mapOf(
-                        Name.identifier to "joe",
-                        Email.identifier to "joe@gmail.com",
-                        Country().identifier to "United States",
+                        Name.identifier to FormFieldEntry(
+                            ElementType.Name,
+                            "joe",
+                            true
+                        ),
+                        Email.identifier to FormFieldEntry(
+                            ElementType.Email,
+                            "joe@gmail.com",
+                            true
+                        ),
+                        SectionFieldSpec.Country().identifier to FormFieldEntry(
+                            ElementType.Country,
+                            "US",
+                            true
+                        ),
                     ),
                     saveForFutureUse = true,
                     showsMandate = false

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements.common
+package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -7,10 +7,10 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class SaveForFutureUseControllerTest {
-    val mandateIdentifier = IdentifierSpec("mandate")
-    val nameSectionIdentifier = IdentifierSpec("name")
-    val optionalIdentifiers = listOf(nameSectionIdentifier, mandateIdentifier)
-    val saveForFutureUseController = SaveForFutureUseController(optionalIdentifiers)
+    private val mandateIdentifier = IdentifierSpec("mandate")
+    private val nameSectionIdentifier = IdentifierSpec("name")
+    private val optionalIdentifiers = listOf(nameSectionIdentifier, mandateIdentifier)
+    private val saveForFutureUseController = SaveForFutureUseController(optionalIdentifiers)
 
     @Test
     fun `Save for future use is initialized as true and no optional items`() =

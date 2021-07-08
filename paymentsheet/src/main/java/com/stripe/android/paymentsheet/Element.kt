@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.elements.common.Controller
-import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.common.TextFieldController
+import com.stripe.android.paymentsheet.elements.Controller
+import com.stripe.android.paymentsheet.elements.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
 /**
@@ -78,6 +79,19 @@ internal sealed class FormElement {
         val field: SectionFieldElementType,
         override val controller: Controller
     ) : FormElement(), OptionalElement
+}
+
+/**
+ * This class defines the type of the element in cases where the value of the element is pull
+ * from the element itself, [FormFieldValues]
+ */
+enum class ElementType {
+    Name,
+    Email,
+    Country,
+    SaveForFutureUse,
+    Mandate,
+    IdealBank,
 }
 
 /**
