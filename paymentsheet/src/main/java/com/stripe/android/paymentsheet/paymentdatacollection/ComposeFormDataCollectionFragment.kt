@@ -48,6 +48,14 @@ class ComposeFormDataCollectionFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
+//        if (SupportedPaymentMethod.Sofort == requireArguments().getString(EXTRA_PAYMENT_METHOD)
+//            ?.let {
+//                SupportedPaymentMethod.valueOf(it)
+//            }
+//        ) {
+//            formViewModel.enableSetupIntent(true)
+//        }
+
         setContent {
             StripeTheme {
                 Column(Modifier.fillMaxSize()) {

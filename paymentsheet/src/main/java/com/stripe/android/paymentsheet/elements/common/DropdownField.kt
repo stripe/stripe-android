@@ -45,24 +45,22 @@ internal fun DropDown(
     val items = controller.displayItems
     var expanded by remember { mutableStateOf(false) }
 
+    val stringVal: (String) -> Unit = { }
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
             .background(Color.Transparent)
     ) {
         Box {
-            DropdownLabel(label)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom
             ) {
-                Text(
-                    items[selectedIndex],
-                    modifier = Modifier
-                        .fillMaxWidth(.9f)
-                        .clickable(onClick = { expanded = true })
-                        .padding(16.dp)
-                )
+
+//                androidx.compose.material.TextField(
+//                    value = items[selectedIndex] as String,
+//                    onValueChanged = stringVal as (String) -> Unit
+//                )
                 Icon(
                     Icons.Filled.ArrowDropDown,
                     contentDescription = "Localized description",
