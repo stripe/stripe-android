@@ -16,34 +16,6 @@ public final class com/stripe/android/paymentsheet/ElementType : java/lang/Enum 
 	public static fun values ()[Lcom/stripe/android/paymentsheet/ElementType;
 }
 
-public final class com/stripe/android/paymentsheet/elements/IdealBankConfig : com/stripe/android/paymentsheet/elements/DropdownConfig {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Companion;
-	public fun <init> ()V
-	public fun getDebugLabel ()Ljava/lang/String;
-	public fun getDisplayItems ()Ljava/util/List;
-	public fun getElementType ()Lcom/stripe/android/paymentsheet/ElementType;
-	public fun getLabel ()I
-}
-
-public final class com/stripe/android/paymentsheet/elements/IdealBankConfig$Companion {
-	public final fun getDISPLAY_TO_PARAM ()Ljava/util/List;
-}
-
-public final class com/stripe/android/paymentsheet/elements/IdealBankConfig$Item {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDisplayName ()Ljava/lang/String;
-	public final fun getPaymentMethodParamFieldValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/paymentsheet/elements/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/Controller {
 	public static final field $stable I
 	public fun <init> ()V
@@ -54,9 +26,10 @@ public final class com/stripe/android/paymentsheet/elements/SaveForFutureUseCont
 	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public fun getLabel ()I
 	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
+	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
 	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
-	public fun onValueChange (Ljava/lang/String;)V
+	public fun onRawValueChange (Ljava/lang/String;)V
 	public final fun onValueChange (Z)V
 }
 
