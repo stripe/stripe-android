@@ -21,7 +21,7 @@ internal class FocusRequesterCount {
 /**
  * This is used to define which elements can be made optional
  */
-interface OptionalElement {
+internal interface OptionalElement {
     val identifier: IdentifierSpec
 }
 
