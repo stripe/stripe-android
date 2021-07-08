@@ -26,10 +26,6 @@ internal class TextFieldController @VisibleForTesting constructor(
         when (textFieldConfig) {
             is NameConfig -> ElementType.Name
             is EmailConfig -> ElementType.Email
-            else -> {
-                // required for ktlint
-                ElementType.Name
-            }
         }
     )
 

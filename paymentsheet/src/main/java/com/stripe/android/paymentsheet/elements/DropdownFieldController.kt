@@ -20,13 +20,10 @@ internal class DropdownFieldController(
     override val fieldValue = selectedIndex.map { displayItems[it] }
     override val errorMessage: Flow<Int?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
+
     override val elementType: ElementType = when (config) {
         is IdealBankConfig -> ElementType.IdealBank
         is CountryConfig -> ElementType.Country
-        else -> {
-            // required for ktlint still need to figure out.
-            ElementType.Name
-        }
     }
 
     fun onValueChange(index: Int) {
