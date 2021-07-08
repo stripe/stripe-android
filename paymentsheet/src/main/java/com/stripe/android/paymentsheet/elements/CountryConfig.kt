@@ -1,8 +1,7 @@
-package com.stripe.android.paymentsheet.elements.country
+package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.common.DropdownConfig
 import java.util.Locale
 
 internal class CountryConfig(val locale: Locale = Locale.getDefault()) : DropdownConfig {

@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.common.DropdownConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class IdealBankConfig : DropdownConfig {
