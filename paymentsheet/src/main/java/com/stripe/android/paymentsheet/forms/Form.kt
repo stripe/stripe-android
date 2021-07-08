@@ -27,9 +27,9 @@ import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
-import com.stripe.android.paymentsheet.elements.common.DropDown
-import com.stripe.android.paymentsheet.elements.common.Section
-import com.stripe.android.paymentsheet.elements.common.TextField
+import com.stripe.android.paymentsheet.elements.DropDown
+import com.stripe.android.paymentsheet.elements.Section
+import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine

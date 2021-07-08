@@ -5,7 +5,7 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/paymentsheet/elements/IdealBankConfig : com/stripe/android/paymentsheet/elements/common/DropdownConfig {
+public final class com/stripe/android/paymentsheet/elements/IdealBankConfig : com/stripe/android/paymentsheet/elements/DropdownConfig {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Companion;
 	public fun <init> ()V
@@ -32,7 +32,7 @@ public final class com/stripe/android/paymentsheet/elements/IdealBankConfig$Item
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/paymentsheet/elements/common/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/common/Controller {
+public final class com/stripe/android/paymentsheet/elements/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/Controller {
 	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Ljava/util/List;)V
@@ -98,6 +98,7 @@ public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod$
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment : androidx/fragment/app/Fragment {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion;
+	public static final field EXTRA_MERCHANT_NAME Ljava/lang/String;
 	public static final field EXTRA_PAYMENT_METHOD Ljava/lang/String;
 	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VALUE Ljava/lang/String;
 	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY Ljava/lang/String;

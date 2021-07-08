@@ -177,7 +177,6 @@
     <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
     <string name="stripe_paymentsheet_add_payment_method_button_label" tools:ignore="MissingTranslation">+ Add</string>
-    <string name="stripe_paymentsheet_save_this_card">Save this card for future payments</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
     <!-- Title of a section containing a card form that will collect the payment information from the user -->
     <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>

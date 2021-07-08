@@ -97,7 +97,6 @@
         android:layout_height="wrap_content"
         android:checked="true"
         android:layout_marginStart="-6dp"
-        android:text="@string/stripe_paymentsheet_save_this_card"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/bottom_space" />

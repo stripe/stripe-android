@@ -153,6 +153,10 @@ internal abstract class BaseAddPaymentMethodFragment(
             ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD,
             paymentMethod.name
         )
+        args.putString(
+            ComposeFormDataCollectionFragment.EXTRA_MERCHANT_NAME,
+            sheetViewModel.merchantName
+        )
         addSaveForFutureUseArguments(
             args,
             isCustomer = sheetViewModel.customerConfig != null,

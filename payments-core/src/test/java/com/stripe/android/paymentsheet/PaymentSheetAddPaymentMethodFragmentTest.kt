@@ -244,6 +244,26 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
+    fun `when payment method is selected then merchant name is passed in fragment arguments`() {
+        createFragment { fragment, viewBinding ->
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+
+            idleLooper()
+
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                viewBinding.paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(
+                addedFragment?.arguments?.getString(
+                    ComposeFormDataCollectionFragment.EXTRA_MERCHANT_NAME
+                )
+            ).isEqualTo(PaymentSheetFixtures.MERCHANT_DISPLAY_NAME)
+        }
+    }
+
+    @Test
     fun `when payment method selection changes then it's updated in ViewModel`() {
         createFragment { fragment, viewBinding ->
             assertThat(

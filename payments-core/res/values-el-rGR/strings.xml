@@ -105,7 +105,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">Πληρωμή %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Πληρωμή</string>
     <string name="stripe_paymentsheet_primary_button_processing">Επεξεργασία…</string>
-    <string name="stripe_paymentsheet_save_this_card">Αποθηκεύστε αυτή την κάρτα για μελλοντικές πληρωμές</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Αποθηκεύστε αυτή την κάρτα για μελλοντικές %s πληρωμές</string>
     <string name="stripe_paymentsheet_select_payment_method">Επιλέξτε τη μέθοδο πληρωμής σας</string>
     <string name="stripe_paymentsheet_setup_button_label">Διαμόρφωση</string>
