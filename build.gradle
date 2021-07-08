@@ -93,6 +93,12 @@ nexusPublishing {
 }
 
 apply plugin: 'binary-compatibility-validator'
+apply plugin: 'org.jetbrains.dokka'
+
+
+tasks.dokkaHtmlMultiModule.configure {
+    outputDirectory = new File("${project.rootDir}/docs")
+}
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]

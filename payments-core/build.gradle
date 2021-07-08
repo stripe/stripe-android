@@ -65,7 +65,6 @@ dependencies {
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 
-    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:$dokkaVersion")
 }
 
 android {
@@ -117,7 +116,7 @@ android {
     }
 
     dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/")
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
     }
 
     buildFeatures {
