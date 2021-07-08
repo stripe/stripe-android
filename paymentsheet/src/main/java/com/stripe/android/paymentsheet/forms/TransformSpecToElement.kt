@@ -6,10 +6,10 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.common.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.common.TextFieldController
-import com.stripe.android.paymentsheet.elements.country.CountryConfig
+import com.stripe.android.paymentsheet.elements.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec

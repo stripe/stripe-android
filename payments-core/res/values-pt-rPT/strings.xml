@@ -106,7 +106,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">Pagar %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
     <string name="stripe_paymentsheet_primary_button_processing">A processar…</string>
-    <string name="stripe_paymentsheet_save_this_card">Guardar este cartão para pagamentos futuros</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Guardar este cartão para pagamentos futuros %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Selecione o seu método de pagamento</string>
     <string name="stripe_paymentsheet_setup_button_label">Configurar</string>

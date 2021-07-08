@@ -143,7 +143,13 @@ internal class StripePaymentControllerTest {
                     Triple(paymentIntent.id.orEmpty(), sourceId, REQUEST_OPTIONS)
                 )
 
-            assertThat(paymentIntentResult).isEqualTo(PaymentIntentResult(paymentIntent))
+            assertThat(paymentIntentResult).isEqualTo(
+                PaymentIntentResult(
+                    paymentIntent,
+                    0,
+                    "We are unable to authenticate your payment method. Please choose a different payment method and try again."
+                )
+            )
         }
 
     @Test

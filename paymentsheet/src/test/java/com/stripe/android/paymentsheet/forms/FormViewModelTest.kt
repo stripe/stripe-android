@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet.forms
 
+import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement.SectionElement
-import com.stripe.android.paymentsheet.elements.common.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.common.TextFieldController
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -14,13 +15,73 @@ import com.stripe.android.paymentsheet.specifications.sofort
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLooper
 
+@RunWith(RobolectricTestRunner::class)
 class FormViewModelTest {
     private val emailSection = FormItemSpec.SectionSpec(IdentifierSpec("emailSection"), Email)
     private val countrySection = FormItemSpec.SectionSpec(
         IdentifierSpec("countrySection"),
         Country
     )
+
+    @Test
+    fun `Verify setting save for future use`() {
+        val formViewModel = FormViewModel(
+            LayoutSpec(
+                listOf(
+                    emailSection,
+                    countrySection,
+                    FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                )
+            ),
+            true,
+            true,
+            "Example, Inc."
+        )
+
+        val values = mutableListOf<Boolean>()
+        formViewModel.saveForFutureUse.asLiveData()
+            .observeForever {
+                values.add(it)
+            }
+        assertThat(values[0]).isTrue()
+
+        formViewModel.setSaveForFutureUse(false)
+
+        assertThat(values[1]).isFalse()
+    }
+
+    @Test
+    fun `Verify setting save for future use visibility`() {
+        val formViewModel = FormViewModel(
+            LayoutSpec(
+                listOf(
+                    emailSection,
+                    countrySection,
+                    FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                )
+            ),
+            true,
+            true,
+            "Example, Inc."
+        )
+
+        val values = mutableListOf<List<IdentifierSpec>>()
+        formViewModel.optionalIdentifiers.asLiveData()
+            .observeForever {
+                values.add(it)
+            }
+        assertThat(values[0]).isEmpty()
+
+        formViewModel.setSaveForFutureUseVisibility(false)
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec("save_for_future_use"))
+    }
 
     @Test
     fun `Verify if a field is optional and valid it is not in the formViewValueResult`() =
@@ -35,6 +96,8 @@ class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
+                true,
+                true,
                 "Example, Inc."
             )
 
@@ -72,6 +135,8 @@ class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
+                true,
+                true,
                 "Example, Inc."
             )
 
@@ -107,7 +172,12 @@ class FormViewModelTest {
             /**
              * Using sofort as a complex enough example to test the form view model class.
              */
-            val formViewModel = FormViewModel(sofort.layout, "Example, Inc.")
+            val formViewModel = FormViewModel(
+                sofort.layout,
+                true,
+                true,
+                "Example, Inc."
+            )
 
             val nameElement = (formViewModel.elements[0] as SectionElement)
                 .field.controller as TextFieldController

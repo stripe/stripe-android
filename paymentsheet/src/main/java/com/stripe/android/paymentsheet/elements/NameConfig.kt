@@ -3,10 +3,8 @@ package com.stripe.android.paymentsheet.elements
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.common.TextFieldConfig
-import com.stripe.android.paymentsheet.elements.common.TextFieldState
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
 
 internal class NameConfig : TextFieldConfig {
     @StringRes

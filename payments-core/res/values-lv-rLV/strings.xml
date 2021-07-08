@@ -106,7 +106,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">Maksāt %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Maksāt</string>
     <string name="stripe_paymentsheet_primary_button_processing">Apstrādā…</string>
-    <string name="stripe_paymentsheet_save_this_card">Saglabāt šo karti maksājumiem nākotnē</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Saglabāt šo karti %s maksājumiem nākotnē</string>
     <string name="stripe_paymentsheet_select_payment_method">Izvēlēties savu maksājuma veidu</string>
     <string name="stripe_paymentsheet_setup_button_label">Iestatīt</string>

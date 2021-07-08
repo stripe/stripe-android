@@ -106,7 +106,6 @@
     <string name="stripe_paymentsheet_pay_button_amount">Zaplatit %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Zaplatit</string>
     <string name="stripe_paymentsheet_primary_button_processing">Zpracování...</string>
-    <string name="stripe_paymentsheet_save_this_card">Uložit tuto kartu pro budoucí platby</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložit tuto kartu pro budoucí platby %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Vyberte svou platební metodu</string>
     <string name="stripe_paymentsheet_setup_button_label">Nastavit</string>

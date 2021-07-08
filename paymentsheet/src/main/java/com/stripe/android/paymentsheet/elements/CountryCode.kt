@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements.country
+package com.stripe.android.paymentsheet.elements
 
 import java.util.Locale
 
