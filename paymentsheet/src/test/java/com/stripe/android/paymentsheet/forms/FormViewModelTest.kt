@@ -37,6 +37,8 @@ class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
+            true,
+            true,
             "Example, Inc."
         )
 
@@ -62,6 +64,8 @@ class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
+            true,
+            true,
             "Example, Inc."
         )
 
@@ -92,6 +96,8 @@ class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
+                true,
+                true,
                 "Example, Inc."
             )
 
@@ -129,6 +135,8 @@ class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
+                true,
+                true,
                 "Example, Inc."
             )
 
@@ -164,7 +172,12 @@ class FormViewModelTest {
             /**
              * Using sofort as a complex enough example to test the form view model class.
              */
-            val formViewModel = FormViewModel(sofort.layout, "Example, Inc.")
+            val formViewModel = FormViewModel(
+                sofort.layout,
+                true,
+                true,
+                "Example, Inc."
+            )
 
             val nameElement = (formViewModel.elements[0] as SectionElement)
                 .field.controller as TextFieldController

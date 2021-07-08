@@ -33,6 +33,12 @@ class ComposeFormDataCollectionFragment : Fragment() {
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
             formSpec.layout,
+            requireArguments().getBoolean(
+                EXTRA_SAVE_FOR_FUTURE_USE_VALUE
+            ),
+            requireArguments().getBoolean(
+                EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY
+            ),
             "Merchant Name, Inc." // TODO: Replace with argument.
         )
     }
@@ -46,18 +52,6 @@ class ComposeFormDataCollectionFragment : Fragment() {
         layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
-        )
-
-        formViewModel.setSaveForFutureUse(
-            requireArguments().getBoolean(
-                EXTRA_SAVE_FOR_FUTURE_USE_VALUE
-            )
-        )
-
-        formViewModel.setSaveForFutureUseVisibility(
-            requireArguments().getBoolean(
-                EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY
-            )
         )
 
         setContent {

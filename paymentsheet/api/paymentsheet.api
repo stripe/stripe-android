@@ -58,7 +58,7 @@ public final class com/stripe/android/paymentsheet/forms/FormFieldValues {
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel : androidx/lifecycle/ViewModel {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getCountFocusableFields ()I
 	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
@@ -71,7 +71,7 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 

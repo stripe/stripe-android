@@ -45,7 +45,7 @@ internal fun Form(
     val focusRequesters =
         List(formViewModel.getCountFocusableFields()) { FocusRequester() }
     val optionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
-        emptyList()
+        null
     )
 
     Column(
@@ -55,14 +55,14 @@ internal fun Form(
         formViewModel.elements.forEach { element ->
 
             AnimatedVisibility(
-                !optionalIdentifiers.contains(element.identifier),
+                optionalIdentifiers?.contains(element.identifier) == false,
                 enter = EnterTransition.None,
                 exit = ExitTransition.None
             ) {
                 when (element) {
                     is SectionElement -> {
                         AnimatedVisibility(
-                            !optionalIdentifiers.contains(element.identifier),
+                            optionalIdentifiers?.contains(element.identifier) == false,
                             enter = EnterTransition.None,
                             exit = ExitTransition.None
                         ) {
@@ -128,15 +128,24 @@ internal fun Form(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FormViewModel(
     layout: LayoutSpec,
+    saveForFutureUseInitialValue: Boolean,
+    saveForFutureUseInitialVisibility: Boolean,
     merchantName: String,
 ) : ViewModel() {
     class Factory(
         private val layout: LayoutSpec,
+        private val saveForFutureUseValue: Boolean,
+        private val saveForFutureUseVisibility: Boolean,
         private val merchantName: String
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(layout, merchantName) as T
+            return FormViewModel(
+                layout,
+                saveForFutureUseValue,
+                saveForFutureUseVisibility,
+                merchantName
+            ) as T
         }
     }
 
@@ -150,7 +159,7 @@ class FormViewModel(
         focusIndex
     )
 
-    private val saveForFutureUseVisible = MutableStateFlow(true)
+    private val saveForFutureUseVisible = MutableStateFlow(saveForFutureUseInitialVisibility)
 
     fun setSaveForFutureUseVisibility(isVisible: Boolean) {
         saveForFutureUseVisible.value = isVisible
@@ -162,12 +171,16 @@ class FormViewModel(
             .firstOrNull()?.controller?.onValueChange(value)
     }
 
+    init {
+        setSaveForFutureUse(saveForFutureUseInitialValue)
+    }
+
     private val saveForFutureUseElement = elements
         .filterIsInstance<SaveForFutureUseElement>()
         .firstOrNull()
 
     val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
-        ?: MutableStateFlow(false)
+        ?: MutableStateFlow(saveForFutureUseInitialValue)
 
     val optionalIdentifiers =
         combine(
