@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
+import com.stripe.android.paymentsheet.ElementType
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -10,6 +11,7 @@ internal sealed interface Controller {
     val fieldValue: Flow<String>
     val isComplete: Flow<Boolean>
     val errorMessage: Flow<Int?>
+    val elementType: ElementType
 
     fun onValueChange(value: String)
 }

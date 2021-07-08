@@ -17,7 +17,7 @@ internal class PopulateFormFromFormFieldValues(
             .filter { it.controller != null }
             .forEach {
                 formFieldValueMap[it.identifier]?.let { input ->
-                    it.controller?.onValueChange(input)
+                    input.value?.let { inputValue -> it.controller?.onValueChange(inputValue) }
                 }
             }
     }

@@ -122,9 +122,11 @@ class FormViewModelTest {
             emailElement.onValueChange("joe@gmail.com")
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                    ?.value
             ).isEqualTo("joe@gmail.com")
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name.identifier)
+                    ?.value
             ).isEqualTo("joe")
 
             emailElement.onValueChange("invalid.email@IncompleteDomain")

@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.ui.text.input.KeyboardType
 
-internal interface TextFieldConfig {
+internal sealed interface TextFieldConfig {
     val debugLabel: String
 
     /** This is the label to describe the field */

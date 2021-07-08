@@ -4,16 +4,20 @@ import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.annotation.StringRes
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.AlwaysError
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Full
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Limitless
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.verify
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -24,26 +28,22 @@ internal class TextFieldControllerTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val config = TestConfig()
-
-    private val controller = TextFieldController(config)
-
     @Test
     fun `verify onValueChange sets the paramValue`() {
-        config.fakeState = Limitless
+        val controller = createControllerWithState()
 
         var paramValue: String? = null
         controller.fieldValue.asLiveData()
             .observeForever {
                 paramValue = it
             }
-        controller.onValueChange("newValue")
-        assertThat(paramValue).isEqualTo("newValue")
+        controller.onValueChange("limitless")
+        assertThat(paramValue).isEqualTo("limitless")
     }
 
     @Test
     fun `verify the error message is set when should be visible`() {
-        config.fakeState = ShowWhenNoFocus
+        val controller = createControllerWithState()
 
         var errorMessageResId: Int? = 5
         controller.errorMessage.asLiveData()
@@ -51,14 +51,14 @@ internal class TextFieldControllerTest {
                 errorMessageResId = it
             }
 
-        controller.onValueChange("newValue")
+        controller.onValueChange("showWhenNoFocus")
         shadowOf(getMainLooper()).idle()
         assertThat(errorMessageResId).isEqualTo(R.string.incomplete)
     }
 
     @Test
     fun `Verify is full set when the controller field state changes`() {
-        config.fakeState = Full
+        val controller = createControllerWithState()
 
         var isFull = false
         controller.isFull.asLiveData()
@@ -66,13 +66,13 @@ internal class TextFieldControllerTest {
                 isFull = it
             }
 
-        controller.onValueChange("newValue")
+        controller.onValueChange("full")
         assertThat(isFull).isEqualTo(true)
     }
 
     @Test
     fun `Verify is not full set when the controller field state changes`() {
-        config.fakeState = Limitless
+        val controller = createControllerWithState()
 
         var isFull = false
         controller.isFull.asLiveData()
@@ -80,13 +80,14 @@ internal class TextFieldControllerTest {
                 isFull = it
             }
 
-        controller.onValueChange("newValue")
+        controller.onValueChange("limitless")
         assertThat(isFull).isEqualTo(false)
     }
 
     @Test
     fun `Verify is not complete set when the controller field state changes`() {
-        config.fakeState = AlwaysError
+        val controller = createControllerWithState()
+        controller.onValueChange("full")
 
         var isComplete = true
         controller.isComplete.asLiveData()
@@ -95,12 +96,13 @@ internal class TextFieldControllerTest {
             }
 
         assertThat(isComplete).isEqualTo(true)
-        controller.onValueChange("newValue")
+        controller.onValueChange("alwaysError")
         assertThat(isComplete).isEqualTo(false)
     }
 
     @Test
     fun `Verify is complete set when the controller field state changes`() {
+        val controller = createControllerWithState()
 
         var isComplete = false
         controller.isComplete.asLiveData()
@@ -108,35 +110,33 @@ internal class TextFieldControllerTest {
                 isComplete = it
             }
 
-        config.fakeState = AlwaysError
-        controller.onValueChange("newValue")
+        controller.onValueChange("alwaysError")
         assertThat(isComplete).isEqualTo(false)
 
-        config.fakeState = Limitless
-        controller.onValueChange("newValue")
+        controller.onValueChange("limitless")
         assertThat(isComplete).isEqualTo(true)
     }
 
     @Test
     fun `Verify is visible error is true when onValueChange and shouldShowError returns true`() {
+        val controller = createControllerWithState()
         var visibleError = false
         controller.visibleError.asLiveData().observeForever {
             visibleError = it
         }
 
-        config.fakeState = Full
         controller.onValueChange("full")
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeState = AlwaysError
-        controller.onValueChange("always")
+        createControllerWithState()
+        controller.onValueChange("alwaysError")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
     }
 
     @Test
     fun `Verify is visible error set when the controller field state changes`() {
-        config.fakeState = Limitless
+        val controller = createControllerWithState()
 
         var visibleError = false
         controller.visibleError.asLiveData()
@@ -146,17 +146,17 @@ internal class TextFieldControllerTest {
 
         assertThat(visibleError).isEqualTo(false)
 
-        config.fakeState = AlwaysError
-        controller.onValueChange("newValue")
+        controller.onValueChange("alwaysError")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
     }
 
     @Test
     fun `Verify correct value passed to config should show error`() {
-        config.fakeState = ShowWhenNoFocus
+        val controller = createControllerWithState()
+
         // Initialize the fieldState
-        controller.onValueChange("1a2b3c4d")
+        controller.onValueChange("showWhenNoFocus")
 
         var visibleError = false
         controller.visibleError.asLiveData()
@@ -174,47 +174,41 @@ internal class TextFieldControllerTest {
 
     @Test
     fun `Verify filter is called to set the input value`() {
-        val numberConfigFilter = TestConfigFilter()
-        val controller = TextFieldController(numberConfigFilter)
+        val config: TextFieldConfig = mock {
+            on { determineState("1234") } doReturn Limitless
+            on { filter("1a2b3c4d") } doReturn "1234"
+        }
 
-        var inputValue = ""
-        controller.fieldValue.asLiveData()
-            .observeForever {
-                inputValue = it
-            }
+        val controller = TextFieldController(config, ElementType.Email)
 
         controller.onValueChange("1a2b3c4d")
-        shadowOf(getMainLooper()).idle()
-        assertThat(inputValue).isEqualTo("1234")
+
+        verify(config).filter("1a2b3c4d")
     }
 
-    private class TestConfig : TextFieldConfig {
-        override val debugLabel = "debugLabel"
+    private fun createControllerWithState(): TextFieldController {
+        val config: TextFieldConfig = mock {
+            on { determineState("full") } doReturn Full
+            on { filter("full") } doReturn "full"
 
-        @StringRes
-        override val label: Int = R.string.address_label_name
-        override val keyboard: KeyboardType = KeyboardType.Ascii
+            on { determineState("limitless") } doReturn Limitless
+            on { filter("limitless") } doReturn "limitless"
 
-        var fakeState: TextFieldState = Limitless
+            on { determineState("alwaysError") } doReturn AlwaysError
+            on { filter("alwaysError") } doReturn "alwaysError"
 
-        override fun determineState(input: String): TextFieldState =
-            fakeState
+            on { determineState("blank") } doReturn Blank
+            on { filter("blank") } doReturn "blank"
 
-        override fun filter(userTyped: String): String = userTyped
-    }
+            on { determineState("showWhenNoFocus") } doReturn ShowWhenNoFocus
+            on { filter("showWhenNoFocus") } doReturn "showWhenNoFocus"
 
-    private class TestConfigFilter : TextFieldConfig {
-        override val debugLabel = "debugLabel"
+            // These are for the initial call to onValueChange("")
+            on { determineState("") } doReturn Blank
+            on { filter("") } doReturn ""
+        }
 
-        @StringRes
-        override val label: Int = R.string.address_label_name
-        override val keyboard: KeyboardType = KeyboardType.Ascii
-
-        val fakeState: TextFieldState = Limitless
-
-        override fun determineState(input: String): TextFieldState = fakeState
-
-        override fun filter(userTyped: String): String = userTyped.filter { Character.isDigit(it) }
+        return TextFieldController(config, ElementType.Email)
     }
 
     companion object {

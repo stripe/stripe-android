@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
+import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,9 +14,25 @@ import kotlinx.coroutines.flow.map
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal class TextFieldController(
-    private val textFieldConfig: TextFieldConfig
+internal class TextFieldController @VisibleForTesting constructor(
+    private val textFieldConfig: TextFieldConfig,
+    override val elementType: ElementType
 ) : Controller {
+
+    constructor(
+        textFieldConfig: TextFieldConfig
+    ) : this(
+        textFieldConfig,
+        when (textFieldConfig) {
+            is NameConfig -> ElementType.Name
+            is EmailConfig -> ElementType.Email
+            else -> {
+                // required for ktlint
+                ElementType.Name
+            }
+        }
+    )
+
     @StringRes
     override val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
