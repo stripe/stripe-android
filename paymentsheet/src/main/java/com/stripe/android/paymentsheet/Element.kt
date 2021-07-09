@@ -82,8 +82,7 @@ internal sealed class FormElement {
 }
 
 /**
- * This class defines the type of the element in cases where the value of the element is pull
- * from the element itself, [FormFieldValues]
+ * This class defines the type associated with the element or value.   See [FormFieldValues] and [Controller]
  */
 enum class ElementType {
     Name,
