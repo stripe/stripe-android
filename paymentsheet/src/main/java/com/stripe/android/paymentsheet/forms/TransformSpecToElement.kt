@@ -47,8 +47,8 @@ internal class TransformSpecToElement {
                 spec.field as SectionFieldSpec.Name,
                 focusRequesterCount
             )
-            SectionFieldSpec.Country -> transform(
-                spec.field as SectionFieldSpec.Country
+            is SectionFieldSpec.Country -> transform(
+                spec.field
             )
             SectionFieldSpec.IdealBank -> transform(
                 spec.field as SectionFieldSpec.IdealBank
@@ -97,7 +97,7 @@ internal class TransformSpecToElement {
     private fun transform(spec: SectionFieldSpec.Country) =
         SectionFieldElement.Country(
             spec.identifier,
-            DropdownFieldController(CountryConfig())
+            DropdownFieldController(CountryConfig(spec.onlyShowCountryCodes))
         )
 
     private fun transform(spec: SectionFieldSpec.IdealBank) =
