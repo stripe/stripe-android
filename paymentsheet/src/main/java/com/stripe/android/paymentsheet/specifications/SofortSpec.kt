@@ -25,7 +25,7 @@ internal val sofortCountrySection = SectionSpec(IdentifierSpec("country"), Count
 internal val sofortMandate = MandateTextSpec(
     IdentifierSpec("mandate"),
     R.string.sofort_mandate,
-    Color(0x757575)
+    Color.Gray
 )
 internal val sofort = FormSpec(
     LayoutSpec(
