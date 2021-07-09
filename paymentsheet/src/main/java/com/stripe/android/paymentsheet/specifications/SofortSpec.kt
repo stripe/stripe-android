@@ -34,8 +34,8 @@ internal val sofort = FormSpec(
             sofortNameSection,
             sofortEmailSection,
             sofortCountrySection,
+            SaveForFutureUseSpec(listOf(sofortNameSection, sofortEmailSection, sofortMandate)),
             sofortMandate,
-            SaveForFutureUseSpec(listOf(sofortNameSection, sofortEmailSection, sofortMandate))
         )
     ),
     sofortParamKey,
