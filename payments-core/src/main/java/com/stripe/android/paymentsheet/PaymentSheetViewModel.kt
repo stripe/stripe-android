@@ -433,15 +433,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun onPaymentFlowResult(paymentFlowResult: PaymentFlowResult.Unvalidated) {
         viewModelScope.launch {
-            val result = runCatching {
+            runCatching {
                 withContext(workContext) {
                     paymentFlowResultProcessorProvider.get().processResult(
                         paymentFlowResult
                     )
                 }
-            }
-
-            result.fold(
+            }.fold(
                 onSuccess = {
                     onStripeIntentResult(it)
                 },

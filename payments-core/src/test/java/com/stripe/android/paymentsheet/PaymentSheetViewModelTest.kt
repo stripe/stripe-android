@@ -446,6 +446,52 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
+    fun `onPaymentFlowResult() with processing status for payment method which has delay should report success event`() =
+        testDispatcher.runBlockingTest {
+            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
+                PaymentIntentResult(
+                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                        paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                        status = StripeIntent.Status.Processing
+                    ),
+                    StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+            viewModel.updateSelection(selection)
+
+            viewModel.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated()
+            )
+            verify(eventReporter)
+                .onPaymentSuccess(selection)
+        }
+
+    @Test
+    fun `onPaymentFlowResult() with processing status for payment method which does not have delay should report failure event`() =
+        testDispatcher.runBlockingTest {
+            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
+                PaymentIntentResult(
+                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        status = StripeIntent.Status.Processing
+                    ),
+                    StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            viewModel.updateSelection(selection)
+
+            viewModel.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated()
+            )
+            verify(eventReporter)
+                .onPaymentFailure(selection)
+        }
+
+    @Test
     fun `onPaymentFlowResult() should update emit API errors`() =
         testDispatcher.runBlockingTest {
             whenever(paymentFlowResultProcessor.processResult(any())).thenThrow(
