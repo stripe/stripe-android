@@ -48,6 +48,7 @@ internal fun TextField(
     myFocus: FocusRequester,
     nextFocus: FocusRequester?,
     modifier: Modifier = Modifier,
+    enabled: Boolean,
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
 
@@ -99,6 +100,7 @@ internal fun TextField(
         keyboardOptions = KeyboardOptions(imeAction = imeAction(nextFocus)),
         colors = colors,
         maxLines = 1,
-        singleLine = true
+        singleLine = true,
+        enabled = enabled
     )
 }

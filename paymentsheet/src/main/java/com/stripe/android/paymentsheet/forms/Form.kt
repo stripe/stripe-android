@@ -47,6 +47,7 @@ internal fun Form(
     val optionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
         null
     )
+    val enabled by formViewModel.enabled.asLiveData().observeAsState(true)
 
     Column(
         modifier = Modifier
@@ -68,9 +69,15 @@ internal fun Form(
                         ) {
                             val controller = element.controller
 
-                            val error by controller.errorMessage.asLiveData().observeAsState(null)
+                            val error by controller.errorMessage.asLiveData()
+                                .observeAsState(null)
                             val sectionErrorString =
-                                error?.let { stringResource(it, stringResource(controller.label)) }
+                                error?.let {
+                                    stringResource(
+                                        it,
+                                        stringResource(controller.label)
+                                    )
+                                }
 
                             Section(sectionErrorString) {
                                 when (element.field) {
@@ -81,16 +88,21 @@ internal fun Form(
                                             myFocus = focusRequesters[focusRequesterIndex],
                                             nextFocus = focusRequesters.getOrNull(
                                                 focusRequesterIndex + 1
-                                            )
+                                            ),
+                                            enabled = enabled
                                         )
                                     }
                                     is DropdownFieldElement -> {
-                                        DropDown(element.field.controller)
+                                        DropDown(
+                                            element.field.controller,
+                                            enabled
+                                        )
                                     }
                                 }
                             }
                         }
                     }
+
                     is MandateTextElement -> {
                         Text(
                             stringResource(element.stringResId, element.merchantName ?: ""),
@@ -106,7 +118,8 @@ internal fun Form(
                         Row(modifier = Modifier.padding(vertical = 8.dp)) {
                             Checkbox(
                                 checked = checked,
-                                onCheckedChange = { controller.onValueChange(it) }
+                                onCheckedChange = { controller.onValueChange(it) },
+                                enabled = enabled
                             )
                             Text(stringResource(controller.label, element.merchantName ?: ""))
                         }
@@ -149,7 +162,12 @@ class FormViewModel(
         }
     }
 
-    private var focusIndex = FocusRequesterCount()
+    val enabled = MutableStateFlow(true)
+    fun setEnabled(enabled: Boolean) {
+        this.enabled.value = enabled
+    }
+
+    internal var focusIndex = FocusRequesterCount()
     fun getCountFocusableFields() = focusIndex.get()
 
     private val specToFormTransform = TransformSpecToElement()

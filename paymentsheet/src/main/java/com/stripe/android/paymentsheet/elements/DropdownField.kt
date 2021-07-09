@@ -24,6 +24,7 @@ import androidx.lifecycle.asLiveData
 @Composable
 internal fun DropDown(
     controller: DropdownFieldController,
+    enabled: Boolean,
 ) {
     val selectedIndex by controller.selectedIndex.asLiveData().observeAsState(0)
     val items = controller.displayItems
@@ -38,7 +39,10 @@ internal fun DropDown(
             items[selectedIndex],
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = { expanded = true })
+                .clickable(
+                    enabled = enabled,
+                    onClick = { expanded = true }
+                )
                 .padding(16.dp)
         )
         DropdownMenu(
