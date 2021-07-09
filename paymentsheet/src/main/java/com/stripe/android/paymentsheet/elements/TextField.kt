@@ -33,7 +33,8 @@ internal data class TextFieldColors(
     val placeholderColor: Color = Color(0x14000000),
     val backgroundColor: Color = Color.Transparent,
     val focusedIndicatorColor: Color = Color.Transparent, // primary color by default
-    val unfocusedIndicatorColor: Color = Color.Transparent
+    val unfocusedIndicatorColor: Color = Color.Transparent,
+    val disabledIndicatorColor: Color = Color.Transparent
 )
 
 /**
@@ -68,6 +69,7 @@ internal fun TextField(
         placeholderColor = textFieldColors.placeholderColor,
         backgroundColor = textFieldColors.backgroundColor,
         focusedIndicatorColor = textFieldColors.focusedIndicatorColor,
+        disabledIndicatorColor = textFieldColors.disabledIndicatorColor,
         unfocusedIndicatorColor = textFieldColors.unfocusedIndicatorColor
     )
 

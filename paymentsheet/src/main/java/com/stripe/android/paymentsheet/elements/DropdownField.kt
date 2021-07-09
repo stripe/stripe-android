@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -29,6 +31,12 @@ internal fun DropDown(
     val selectedIndex by controller.selectedIndex.asLiveData().observeAsState(0)
     val items = controller.displayItems
     var expanded by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val currentTextColor = if (enabled) {
+        Color.Unspecified
+    } else {
+        TextFieldDefaults.textFieldColors().indicatorColor(enabled, false, interactionSource).value
+    }
 
     Box(
         modifier = Modifier
@@ -43,7 +51,8 @@ internal fun DropDown(
                     enabled = enabled,
                     onClick = { expanded = true }
                 )
-                .padding(16.dp)
+                .padding(16.dp),
+            color = currentTextColor
         )
         DropdownMenu(
             expanded = expanded,

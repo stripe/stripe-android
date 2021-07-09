@@ -79,7 +79,7 @@ internal fun Form(
                                     )
                                 }
 
-                            Section(sectionErrorString) {
+                            Section(sectionErrorString, enabled) {
                                 when (element.field) {
                                     is TextFieldElement -> {
                                         val focusRequesterIndex = element.field.focusIndexOrder
