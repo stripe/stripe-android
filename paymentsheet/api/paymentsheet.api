@@ -45,19 +45,6 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getCountFocusableFields ()I
-	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getShowingMandate ()Lkotlinx/coroutines/flow/Flow;
-	public final fun populateFormViewValues (Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)V
-	public final fun setSaveForFutureUse (Z)V
-	public final fun setSaveForFutureUseVisibility (Z)V
-}
-
-public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
-	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod : java/lang/Enum {

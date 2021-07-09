@@ -145,7 +145,7 @@ class FormViewModel(
     saveForFutureUseInitialVisibility: Boolean,
     merchantName: String,
 ) : ViewModel() {
-    class Factory(
+    internal class Factory(
         private val layout: LayoutSpec,
         private val saveForFutureUseValue: Boolean,
         private val saveForFutureUseVisibility: Boolean,
@@ -162,13 +162,13 @@ class FormViewModel(
         }
     }
 
-    val enabled = MutableStateFlow(true)
-    fun setEnabled(enabled: Boolean) {
+    internal val enabled = MutableStateFlow(true)
+    internal fun setEnabled(enabled: Boolean) {
         this.enabled.value = enabled
     }
 
     internal var focusIndex = FocusRequesterCount()
-    fun getCountFocusableFields() = focusIndex.get()
+    internal fun getCountFocusableFields() = focusIndex.get()
 
     private val specToFormTransform = TransformSpecToElement()
     internal val elements = specToFormTransform.transform(
@@ -179,11 +179,11 @@ class FormViewModel(
 
     private val saveForFutureUseVisible = MutableStateFlow(saveForFutureUseInitialVisibility)
 
-    fun setSaveForFutureUseVisibility(isVisible: Boolean) {
+    internal fun setSaveForFutureUseVisibility(isVisible: Boolean) {
         saveForFutureUseVisible.value = isVisible
     }
 
-    fun setSaveForFutureUse(value: Boolean) {
+    internal fun setSaveForFutureUse(value: Boolean) {
         elements
             .filterIsInstance<SaveForFutureUseElement>()
             .firstOrNull()?.controller?.onValueChange(value)
@@ -197,10 +197,10 @@ class FormViewModel(
         .filterIsInstance<SaveForFutureUseElement>()
         .firstOrNull()
 
-    val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
+    internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
         ?: MutableStateFlow(saveForFutureUseInitialValue)
 
-    val optionalIdentifiers =
+    internal val optionalIdentifiers =
         combine(
             saveForFutureUseVisible,
             saveForFutureUseElement?.controller?.optionalIdentifiers
@@ -216,7 +216,7 @@ class FormViewModel(
         }
 
     // Mandate is showing if it is an element of the form and it isn't optional
-    val showingMandate = optionalIdentifiers.map {
+    internal val showingMandate = optionalIdentifiers.map {
         elements
             .filterIsInstance<MandateTextElement>()
             .firstOrNull()?.let { mandate ->
@@ -229,7 +229,7 @@ class FormViewModel(
     ).transformFlow()
 
     internal val populateFormFromFormFieldValues = PopulateFormFromFormFieldValues(elements)
-    fun populateFormViewValues(formFieldValues: FormFieldValues) {
+    internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
         populateFormFromFormFieldValues.populateWith(formFieldValues)
     }
 }
