@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.DropdownMenu
@@ -31,9 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.lerp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.asLiveData
 
 @Composable
@@ -45,28 +45,41 @@ internal fun DropDown(
     val items = controller.displayItems
     var expanded by remember { mutableStateOf(false) }
 
-    val stringVal: (String) -> Unit = { }
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
             .background(Color.Transparent)
+
     ) {
         Box {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom
-            ) {
-
-//                androidx.compose.material.TextField(
-//                    value = items[selectedIndex] as String,
-//                    onValueChanged = stringVal as (String) -> Unit
-//                )
-                Icon(
-                    Icons.Filled.ArrowDropDown,
-                    contentDescription = "Localized description",
-                    modifier = Modifier
-                        .clickable(onClick = { expanded = true })
+            Column(
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    top = 4.dp,
+                    bottom = 8.dp
                 )
+            ) {
+                DropdownLabel(label)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        items[selectedIndex],
+                        modifier = Modifier
+                            .fillMaxWidth(.9f)
+                            .clickable(onClick = { expanded = true })
+                    )
+                    // TODO: THere is something wrong with the mandate - not showing
+                    // TODO: Change order of sofort elements
+                    Icon(
+                        Icons.Filled.ArrowDropDown,
+                        contentDescription = "Dropdown arrow",
+                        modifier = Modifier
+                            .height(24.dp)
+                            .clickable(onClick = { expanded = true })
+                    )
+                }
             }
         }
 
@@ -88,59 +101,23 @@ internal fun DropDown(
     }
 }
 
-@Composable
-fun DropdownLabel(
-    label: Int
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val labelAnimatedStyle = lerp(
-        MaterialTheme.typography.subtitle1,
-        MaterialTheme.typography.caption,
-        .5f
-    )
-    Decoration(
-        contentColor = TextFieldDefaults.textFieldColors()
-            .labelColor(
-                false,
-                false,
-                interactionSource
-            ).value,
-        typography = labelAnimatedStyle,
-        content = {
-            Text(
-                stringResource(label),
-                modifier = Modifier.padding(start = 16.dp),
-                color = Color.Gray,
-                fontSize = 12.sp,
-            )
-        }
-    )
-}
-
 /**
- * Set content color, typography and emphasis for [content] composable
+ * This will create the label for the DropdownTextField.
+ * Copied from androidx.compose.material.TextFieldImpl
  */
 @Composable
-internal fun Decoration(
-    contentColor: Color,
-    typography: TextStyle? = null,
-    contentAlpha: Float? = null,
-    content: @Composable () -> Unit
+fun DropdownLabel(
+    label: Int,
 ) {
-    val colorAndEmphasis: @Composable () -> Unit = @Composable {
-        CompositionLocalProvider(LocalContentColor provides contentColor) {
-            if (contentAlpha != null) {
-                CompositionLocalProvider(
-                    LocalContentAlpha provides contentAlpha,
-                    content = content
-                )
-            } else {
-                CompositionLocalProvider(
-                    LocalContentAlpha provides contentColor.alpha,
-                    content = content
-                )
-            }
-        }
-    }
-    if (typography != null) ProvideTextStyle(typography, colorAndEmphasis) else colorAndEmphasis()
+    val interactionSource = remember { MutableInteractionSource() }
+    Text(
+        stringResource(label),
+        color = TextFieldDefaults.textFieldColors()
+            .labelColor(
+                enabled = true,
+                error = false,
+                interactionSource = interactionSource
+            ).value,
+        style = MaterialTheme.typography.caption
+    )
 }
