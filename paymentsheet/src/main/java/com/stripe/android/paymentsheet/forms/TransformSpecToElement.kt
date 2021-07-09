@@ -15,9 +15,9 @@ import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 
 /**
- * The purpose of this function is to transform a LayoutSpec data object into an Element, which
+ * Transform a [LayoutSpec] data object into an Element, which
  * has a controller and identifier.  With only a single field in a section the section
- * controller will be a pass through of the field controller.
+ * controller will be a pass through the field controller.
  */
 internal fun transform(
     layout: LayoutSpec,
