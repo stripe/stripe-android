@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
+import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,9 +14,18 @@ import kotlinx.coroutines.flow.map
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal class TextFieldController(
-    private val textFieldConfig: TextFieldConfig
+internal class TextFieldController @VisibleForTesting constructor(
+    private val textFieldConfig: TextFieldConfig,
+    override val elementType: ElementType
 ) : Controller {
+
+    constructor(
+        textFieldConfig: TextFieldConfig
+    ) : this(
+        textFieldConfig,
+        textFieldConfig.elementType
+    )
+
     @StringRes
     override val label: Int = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
@@ -22,6 +33,8 @@ internal class TextFieldController(
     /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: Flow<String> = _fieldValue
+
+    override val rawFieldValue: Flow<String> = _fieldValue.map { textFieldConfig.convertToRaw(it) }
 
     private val _fieldState = MutableStateFlow<TextFieldState>(Error.AlwaysError)
 
@@ -42,11 +55,21 @@ internal class TextFieldController(
         onValueChange("")
     }
 
-    override fun onValueChange(displayFormatted: String) {
+    /**
+     * This is called when the value changed to is a display value.
+     */
+    fun onValueChange(displayFormatted: String) {
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
         _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
+    }
+
+    /**
+     * This is called when the value changed to is a raw backing value, not a display value.
+     */
+    override fun onRawValueChange(rawValue: String) {
+        onValueChange(textFieldConfig.convertFromRaw(rawValue))
     }
 
     fun onFocusChange(newHasFocus: Boolean) {

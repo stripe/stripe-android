@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
 /**
@@ -78,6 +79,18 @@ internal sealed class FormElement {
         val field: SectionFieldElementType,
         override val controller: Controller
     ) : FormElement(), OptionalElement
+}
+
+/**
+ * This class defines the type associated with the element or value.   See [FormFieldValues] and [Controller]
+ */
+enum class ElementType {
+    Name,
+    Email,
+    Country,
+    SaveForFutureUse,
+    Mandate,
+    IdealBank,
 }
 
 /**

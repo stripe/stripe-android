@@ -15,9 +15,11 @@ internal class PopulateFormFromFormFieldValues(
         val formFieldValueMap = formFieldValues.fieldValuePairs
         elements
             .filter { it.controller != null }
-            .forEach {
-                formFieldValueMap[it.identifier]?.let { input ->
-                    it.controller?.onValueChange(input)
+            .forEach { formElement ->
+                formFieldValueMap[formElement.identifier]?.let { input ->
+                    input.value?.let { inputValue ->
+                        formElement.controller?.onRawValueChange(inputValue)
+                    }
                 }
             }
     }

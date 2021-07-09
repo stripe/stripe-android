@@ -1,12 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.IdealBank
-import com.stripe.android.view.CountryUtils
-import java.util.Locale
 
 /**
  * This class will transform the fields in a form into a structure as defined by a map.
@@ -51,35 +46,12 @@ internal class TransformToPaymentMethodCreateParams {
     ): MutableMap<String, Any?> {
         val destMap = mutableMapOf<String, Any?>()
 
-        // Need to convert Country Fields to a country code to put it in the parameter map
         val formKeyValueMap = formFieldValues.fieldValuePairs
-            .mapValues { entry ->
-                when (entry.key) {
-                    Country.identifier -> {
-                        transformCountry(entry.value)
-                    }
-                    IdealBank.identifier -> {
-                        transformIdealBank(entry.value)
-                    }
-                    else -> {
-                        entry.value
-                    }
-                }
-            }
+            .mapValues { entry -> entry.value.value }
             .mapKeys { it.key.value }
 
         createMap(mapStructure, destMap, formKeyValueMap)
         return destMap
-    }
-
-    private fun transformCountry(countryDisplayName: String?) = countryDisplayName?.let {
-        CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
-    }
-
-    private fun transformIdealBank(bankDisplayName: String?) = bankDisplayName?.let {
-        IdealBankConfig.DISPLAY_TO_PARAM
-            .firstOrNull { it.displayName == bankDisplayName }
-            ?.paymentMethodParamFieldValue
     }
 
     companion object {

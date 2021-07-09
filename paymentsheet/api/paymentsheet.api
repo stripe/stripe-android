@@ -5,46 +5,31 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/paymentsheet/elements/IdealBankConfig : com/stripe/android/paymentsheet/elements/DropdownConfig {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Companion;
-	public fun <init> ()V
-	public fun getDebugLabel ()Ljava/lang/String;
-	public fun getDisplayItems ()Ljava/util/List;
-	public fun getLabel ()I
+public final class com/stripe/android/paymentsheet/ElementType : java/lang/Enum {
+	public static final field Country Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field Email Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field IdealBank Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field Mandate Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field Name Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field SaveForFutureUse Lcom/stripe/android/paymentsheet/ElementType;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/ElementType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/ElementType;
 }
 
-public final class com/stripe/android/paymentsheet/elements/IdealBankConfig$Companion {
-	public final fun getDISPLAY_TO_PARAM ()Ljava/util/List;
-}
-
-public final class com/stripe/android/paymentsheet/elements/IdealBankConfig$Item {
+public final class com/stripe/android/paymentsheet/forms/FormFieldEntry {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
+	public fun <init> (Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;Z)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/ElementType;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/elements/IdealBankConfig$Item;
+	public final fun component3 ()Z
+	public final fun copy (Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;Z)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDisplayName ()Ljava/lang/String;
-	public final fun getPaymentMethodParamFieldValue ()Ljava/lang/String;
+	public final fun getType ()Lcom/stripe/android/paymentsheet/ElementType;
+	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
+	public final fun isComplete ()Z
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/paymentsheet/elements/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/Controller {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getErrorMessage ()Lkotlinx/coroutines/flow/Flow;
-	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getLabel ()I
-	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
-	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
-	public fun onValueChange (Ljava/lang/String;)V
-	public final fun onValueChange (Z)V
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormFieldValues {

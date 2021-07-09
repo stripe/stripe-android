@@ -43,7 +43,7 @@ internal class TransformElementToFormFieldValueFlow(
     }
 
     private fun transform(
-        idFieldSnapshotMap: Map<IdentifierSpec, FieldSnapshot>,
+        idFieldSnapshotMap: Map<IdentifierSpec, FormFieldEntry>,
         optionalIdentifiers: List<IdentifierSpec>,
         showingMandate: Boolean,
         saveForFutureUse: Boolean
@@ -55,9 +55,7 @@ internal class TransformElementToFormFieldValueFlow(
         }
 
         return FormFieldValues(
-            optionalFilteredFieldSnapshotMap.mapValues {
-                it.value.fieldValue
-            },
+            optionalFilteredFieldSnapshotMap,
             showingMandate,
             saveForFutureUse
         ).takeIf {
@@ -73,14 +71,15 @@ internal class TransformElementToFormFieldValueFlow(
 
     private fun getCurrentFieldValuePair(
         field: IdentifierSpec,
-        value: Controller
-    ) = combine(value.fieldValue, value.isComplete) { fieldValue, isComplete ->
-        Pair(field, FieldSnapshot(fieldValue, field, isComplete))
+        controller: Controller
+    ) = combine(controller.rawFieldValue, controller.isComplete) { rawFieldValue, isComplete ->
+        Pair(
+            field,
+            FormFieldEntry(
+                value = rawFieldValue,
+                isComplete = isComplete,
+                type = controller.elementType
+            )
+        )
     }
-
-    data class FieldSnapshot(
-        val fieldValue: String,
-        val identifier: IdentifierSpec,
-        val isComplete: Boolean
-    )
 }
