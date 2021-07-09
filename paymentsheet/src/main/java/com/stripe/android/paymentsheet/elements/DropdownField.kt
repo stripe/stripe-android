@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,7 +34,7 @@ import androidx.lifecycle.asLiveData
 
 @Composable
 internal fun DropDown(
-    label: Int,
+    @StringRes label: Int,
     controller: DropdownFieldController,
 ) {
     val selectedIndex by controller.selectedIndex.asLiveData().observeAsState(0)
@@ -103,7 +104,7 @@ internal fun DropDown(
  */
 @Composable
 internal fun DropdownLabel(
-    label: Int,
+    @StringRes label: Int,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Text(
