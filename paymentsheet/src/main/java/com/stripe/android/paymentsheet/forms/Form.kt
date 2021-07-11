@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
@@ -94,6 +95,7 @@ internal fun Form(
                                     }
                                     is DropdownFieldElement -> {
                                         DropDown(
+                                            element.field.controller.label,
                                             element.field.controller,
                                             enabled
                                         )
@@ -106,6 +108,8 @@ internal fun Form(
                     is MandateTextElement -> {
                         Text(
                             stringResource(element.stringResId, element.merchantName ?: ""),
+                            fontSize = 10.sp,
+                            letterSpacing = .7.sp,
                             modifier = Modifier.padding(vertical = 8.dp),
                             color = element.color
                         )
@@ -121,7 +125,10 @@ internal fun Form(
                                 onCheckedChange = { controller.onValueChange(it) },
                                 enabled = enabled
                             )
-                            Text(stringResource(controller.label, element.merchantName ?: ""))
+                            Text(
+                                stringResource(controller.label, element.merchantName ?: ""),
+                                Modifier.padding(start = 8.dp)
+                            )
                         }
                     }
                 }

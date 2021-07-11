@@ -31,7 +31,7 @@ internal sealed interface TextFieldConfig {
     /**
      * This will convert the field to a raw value to use in the parameter map
      */
-    fun convertToRaw(it: String): String
+    fun convertToRaw(displayName: String): String
 
     /**
      * This will convert from a raw value used in the parameter map to a disiplayValue

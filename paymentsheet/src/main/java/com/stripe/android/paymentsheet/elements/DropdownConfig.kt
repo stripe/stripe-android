@@ -23,5 +23,5 @@ internal sealed interface DropdownConfig {
     /**
      * This will convert from a raw value used in the parameter map to a disiplayValue
      */
-    fun convertToRaw(it: String): String?
+    fun convertToRaw(displayName: String): String?
 }
