@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements.country
+package com.stripe.android.paymentsheet.elements
 
 internal data class Country(
     val code: CountryCode,

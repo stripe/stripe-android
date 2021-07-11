@@ -24,9 +24,11 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -58,6 +60,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -410,6 +413,79 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `confirmPaymentSelection() with new card payment method should start paymentController`() =
+        runBlockingTest {
+            flowController.confirmPaymentSelection(
+                NEW_CARD_PAYMENT_SELECTION,
+                InitData(
+                    PaymentSheetFixtures.CONFIG_CUSTOMER,
+                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    listOf(PaymentMethod.Type.Card),
+                    PAYMENT_METHODS,
+                    SavedSelection.PaymentMethod(
+                        id = "pm_123456789"
+                    ),
+                    isGooglePayReady = false
+                )
+            )
+
+            verifyPaymentSelection(
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+            )
+        }
+
+    @Test
+    fun `confirmPaymentSelection() with generic payment method should start paymentController`() {
+        flowController.confirmPaymentSelection(
+            GENERIC_PAYMENT_SELECTION,
+            InitData(
+                PaymentSheetFixtures.CONFIG_CUSTOMER,
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                listOf(PaymentMethod.Type.Card),
+                PAYMENT_METHODS,
+                SavedSelection.PaymentMethod(
+                    id = "pm_123456789"
+                ),
+                isGooglePayReady = false
+            )
+        )
+
+        verifyPaymentSelection(
+            PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            GENERIC_PAYMENT_SELECTION.paymentMethodCreateParams
+        )
+    }
+
+    private fun verifyPaymentSelection(
+        clientSecret: String,
+        paymentMethodCreateParams: PaymentMethodCreateParams
+    ) = runBlockingTest {
+        val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
+            clientSecret = clientSecret,
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            setupFutureUsage = null,
+            shipping = null,
+            savePaymentMethod = null,
+            paymentMethodOptions = null,
+            mandateId = null,
+            mandateData = null,
+        )
+        val apiOptions = ApiRequest.Options(
+            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccount = null
+        )
+
+        verify(paymentController).startConfirmAndAuth(
+            any(),
+            eq(confirmPaymentIntentParams),
+            eq(apiOptions)
+        )
+    }
+
+    @Test
     fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
@@ -536,6 +612,78 @@ internal class DefaultFlowControllerTest {
             verify(paymentResultCallback).onPaymentSheetResult(
                 argWhere { paymentResult ->
                     paymentResult is PaymentSheetResult.Completed
+                }
+            )
+        }
+
+    @Test
+    fun `onPaymentFlowResult when processing payment method which has delay should invoke callback with Completed`() =
+        testDispatcher.runBlockingTest {
+            whenever(flowResultProcessor.processResult(any())).thenReturn(
+                PaymentIntentResult(
+                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                        paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                        status = StripeIntent.Status.Processing
+                    ),
+                    StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            var isReadyState = false
+            flowController.configureWithPaymentIntent(
+                PaymentSheetFixtures.CLIENT_SECRET
+            ) { isReady, _ ->
+                isReadyState = isReady
+            }
+            assertThat(isReadyState)
+                .isTrue()
+
+            flowController.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            verify(paymentResultCallback).onPaymentSheetResult(
+                argWhere { paymentResult ->
+                    paymentResult is PaymentSheetResult.Completed
+                }
+            )
+        }
+
+    @Test
+    fun `onPaymentFlowResult when processing payment method which does not have delay should invoke callback with Failed`() =
+        testDispatcher.runBlockingTest {
+            whenever(flowResultProcessor.processResult(any())).thenReturn(
+                PaymentIntentResult(
+                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        status = StripeIntent.Status.Processing
+                    ),
+                    StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            var isReadyState = false
+            flowController.configureWithPaymentIntent(
+                PaymentSheetFixtures.CLIENT_SECRET
+            ) { isReady, _ ->
+                isReadyState = isReady
+            }
+            assertThat(isReadyState)
+                .isTrue()
+
+            flowController.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            verify(paymentResultCallback).onPaymentSheetResult(
+                argWhere { paymentResult ->
+                    paymentResult is PaymentSheetResult.Failed
                 }
             )
         }
@@ -670,6 +818,21 @@ internal class DefaultFlowControllerTest {
     }
 
     private companion object {
+        private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Discover,
+            false
+        )
+        private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
+            iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
+            labelResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+            paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverriddenParamMap(
+                PaymentMethodCreateParams.Type.Bancontact,
+                emptyMap(),
+                emptySet()
+            ),
+            shouldSavePaymentMethod = false
+        )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
             label = "····4242"
@@ -680,5 +843,7 @@ internal class DefaultFlowControllerTest {
             CardBrand.Visa,
             shouldSavePaymentMethod = true
         )
+        private val PAYMENT_METHODS =
+            listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
     }
 }

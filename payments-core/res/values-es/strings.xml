@@ -102,12 +102,10 @@
     <string name="stripe_paymentsheet_back">Atrás</string>
     <string name="stripe_paymentsheet_close">Cerrar</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / AA</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nueva tarjeta</string>
     <string name="stripe_paymentsheet_or_pay_with_card">O paga con tarjeta</string>
     <string name="stripe_paymentsheet_pay_button_amount">Pagar %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
     <string name="stripe_paymentsheet_primary_button_processing">Procesando...</string>
-    <string name="stripe_paymentsheet_save_this_card">Guardar esta tarjeta para realizar compras futuras</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Guardar esta tarjeta para realizar compras futuras en %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Selecciona tu método de pago</string>
     <string name="stripe_paymentsheet_setup_button_label">Configurar</string>

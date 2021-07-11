@@ -6,7 +6,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.authentication.IntentAuthenticator
+import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.view.AuthActivityStarter
 
 /**
@@ -19,7 +19,7 @@ import com.stripe.android.view.AuthActivityStarter
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface ActivityResultLauncherHost {
     /**
-     * Notify the [IntentAuthenticator] that a new [ActivityResultCaller] and
+     * Notify the [PaymentAuthenticator] that a new [ActivityResultCaller] and
      * [ActivityResultCallback] is available. This happens when the host Activity is recreated and
      * its [ActivityResultLauncher] needs to be re-registered.
      */

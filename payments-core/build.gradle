@@ -47,7 +47,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-core:3.11.2"
-    testImplementation 'org.robolectric:robolectric:4.5.1'
+    testImplementation 'org.robolectric:robolectric:4.6.1'
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation 'org.json:json:20210307'
     testImplementation "org.mockito.kotlin:mockito-kotlin:3.2.0"
@@ -65,7 +65,6 @@ dependencies {
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 
-    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:$dokkaVersion")
 }
 
 android {
@@ -117,7 +116,7 @@ android {
     }
 
     dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/")
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
     }
 
     buildFeatures {

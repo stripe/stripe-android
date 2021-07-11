@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements.common
+package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -28,7 +28,7 @@ internal data class CardStyle(
 @Composable
 internal fun Section(error: String?, content: @Composable () -> Unit) {
     val cardStyle = CardStyle()
-    Column(modifier = Modifier.padding(top = 8.dp)) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Card(
             border = BorderStroke(cardStyle.cardBorderWidth, cardStyle.cardBorderColor),
             elevation = cardStyle.cardElevation

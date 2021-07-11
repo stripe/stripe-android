@@ -11,18 +11,22 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import kotlinx.coroutines.flow.map
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
@@ -86,27 +90,17 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
             (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-                formFragment.paramMapLiveData.observe(viewLifecycleOwner) { paramMap ->
-                    sheetViewModel.updateSelection(
-                        paramMap?.run {
-                            PaymentMethodCreateParams.Type.fromCode(paramMap["type"] as String)
-                                ?.let {
-                                    PaymentMethodCreateParams(
-                                        it,
-                                        overrideParamMap = paramMap,
-                                        productUsage = setOf("PaymentSheet")
-                                    )
-                                }
-                        }?.let {
-                            PaymentSelection.New.GenericPaymentMethod(
-                                selectedPaymentMethod.displayNameResource,
-                                selectedPaymentMethod.iconResource,
-                                it,
-                                false
-                            )
-                        }
+                formFragment.formViewModel.completeFormValues.map { formFieldValues ->
+                    transformToPaymentSelection(
+                        formFieldValues,
+                        formFragment.formSpec.paramKey,
+                        selectedPaymentMethod
                     )
                 }
+                    .asLiveData()
+                    .observe(viewLifecycleOwner) { paymentSelection ->
+                        sheetViewModel.updateSelection(paymentSelection)
+                    }
             }
         }
 
@@ -118,6 +112,10 @@ internal abstract class BaseAddPaymentMethodFragment(
         paymentMethods: List<SupportedPaymentMethod>
     ) {
         viewBinding.paymentMethodsRecycler.isVisible = true
+        // The default item animator conflicts with `animateLayoutChanges`, causing a crash when
+        // quickly switching payment methods. Set to null since the items never change anyway.
+        viewBinding.paymentMethodsRecycler.itemAnimator = null
+
         val layoutManager = object : LinearLayoutManager(
             activity,
             HORIZONTAL,
@@ -155,6 +153,15 @@ internal abstract class BaseAddPaymentMethodFragment(
             ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD,
             paymentMethod.name
         )
+        args.putString(
+            ComposeFormDataCollectionFragment.EXTRA_MERCHANT_NAME,
+            sheetViewModel.merchantName
+        )
+        addSaveForFutureUseArguments(
+            args,
+            isCustomer = sheetViewModel.customerConfig != null,
+            isSetupIntent = sheetViewModel.stripeIntent.value is SetupIntent
+        )
 
         childFragmentManager.commit {
             setCustomAnimations(
@@ -180,5 +187,53 @@ internal abstract class BaseAddPaymentMethodFragment(
                 SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
                 else -> ComposeFormDataCollectionFragment::class.java
             }
+
+        private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
+
+        @VisibleForTesting
+        internal fun transformToPaymentSelection(
+            formFieldValues: FormFieldValues?,
+            paramKey: Map<String, Any?>,
+            selectedPaymentMethodResources: SupportedPaymentMethod,
+        ) = formFieldValues?.let {
+            transformToPaymentMethodCreateParams.transform(formFieldValues, paramKey)
+                ?.run {
+                    PaymentSelection.New.GenericPaymentMethod(
+                        selectedPaymentMethodResources.displayNameResource,
+                        selectedPaymentMethodResources.iconResource,
+                        this,
+                        formFieldValues.saveForFutureUse
+                    )
+                }
+        }
+
+        @VisibleForTesting
+        internal fun addSaveForFutureUseArguments(
+            args: Bundle,
+            isCustomer: Boolean,
+            isSetupIntent: Boolean
+        ) {
+            var saveForFutureUseValue = true
+            var saveForFutureUseVisible = true
+            if (!isCustomer) {
+                saveForFutureUseValue = false
+                saveForFutureUseVisible = false
+            }
+
+            // The order is important here, even if there is a customer the save for future
+            // use value should be true to collect all the details
+            if (isSetupIntent) {
+                saveForFutureUseVisible = false
+                saveForFutureUseValue = true
+            }
+            args.putBoolean(
+                ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY,
+                saveForFutureUseVisible
+            )
+            args.putBoolean(
+                ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE,
+                saveForFutureUseValue
+            )
+        }
     }
 }

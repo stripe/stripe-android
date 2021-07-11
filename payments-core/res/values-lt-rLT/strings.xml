@@ -102,12 +102,10 @@
     <string name="stripe_paymentsheet_back">Atgal</string>
     <string name="stripe_paymentsheet_close">Užverti</string>
     <string name="stripe_paymentsheet_expiration_date_hint">mm / MM</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nauja kortelė</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Arba mokėti kortele</string>
     <string name="stripe_paymentsheet_pay_button_amount">Mokėti %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Mokėti</string>
     <string name="stripe_paymentsheet_primary_button_processing">Apdorojama...</string>
-    <string name="stripe_paymentsheet_save_this_card">Išsaugoti kortelę vėlesniems mokėjimams</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Išsaugoti kortelę vėlesniems %s mokėjimams</string>
     <string name="stripe_paymentsheet_select_payment_method">Pasirinkite mokėjimo būdą</string>
     <string name="stripe_paymentsheet_setup_button_label">Nustatyti</string>

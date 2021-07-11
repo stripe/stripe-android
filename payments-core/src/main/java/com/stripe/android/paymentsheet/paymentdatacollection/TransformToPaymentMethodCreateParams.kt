@@ -1,15 +1,36 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.paymentsheet.paymentdatacollection
 
-import com.stripe.android.paymentsheet.elements.IdealBankConfig
-import com.stripe.android.paymentsheet.elements.country.CountryUtils
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.IdealBank
-import java.util.Locale
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 
 /**
  * This class will transform the fields in a form into a structure as defined by a map.
  */
-class TransformFormToPaymentMethod {
+internal class TransformToPaymentMethodCreateParams {
+    /**
+     * This function will convert formFieldValue to PaymentMethodCreateParams.
+     */
+    fun transform(
+        formFieldValues: FormFieldValues,
+        paramKey: Map<String, Any?>
+    ) = transformToPaymentMethodCreateParamsMap(
+        formFieldValues,
+        paramKey
+    )
+        .filterOutNullValues()
+        .toMap()
+        .run {
+            // TODO(brnunes): Comment why this check is needed.
+            PaymentMethodCreateParams.Type.fromCode(this["type"] as String)
+                ?.let {
+                    PaymentMethodCreateParams(
+                        it,
+                        overrideParamMap = this,
+                        productUsage = setOf("PaymentSheet")
+                    )
+                }
+        }
+
     /**
      * This function will put the field values as defined in the formFieldValues into a map
      * according to the mapLayout structure.
@@ -19,41 +40,18 @@ class TransformFormToPaymentMethod {
      * @param: formFieldValues: These are the fields and their values and based on the algorithm of this function
      * will be put into a map according to the mapStructure
      */
-    fun transform(
+    private fun transformToPaymentMethodCreateParamsMap(
+        formFieldValues: FormFieldValues,
         mapStructure: Map<String, Any?>,
-        formFieldValues: FormFieldValues
     ): MutableMap<String, Any?> {
         val destMap = mutableMapOf<String, Any?>()
 
-        // Need to convert Country Fields to a country code to put it in the parameter map
         val formKeyValueMap = formFieldValues.fieldValuePairs
-            .mapValues { entry ->
-                when (entry.key) {
-                    Country.identifier -> {
-                        transformCountry(entry.value)
-                    }
-                    IdealBank.identifier -> {
-                        transformIdealBank(entry.value)
-                    }
-                    else -> {
-                        entry.value
-                    }
-                }
-            }
+            .mapValues { entry -> entry.value.value }
             .mapKeys { it.key.value }
 
         createMap(mapStructure, destMap, formKeyValueMap)
         return destMap
-    }
-
-    private fun transformCountry(countryDisplayName: String?) = countryDisplayName?.let {
-        CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
-    }
-
-    private fun transformIdealBank(bankDisplayName: String?) = bankDisplayName?.let {
-        IdealBankConfig.DISPLAY_TO_PARAM
-            .firstOrNull { it.displayName == bankDisplayName }
-            ?.paymentMethodParamFieldValue
     }
 
     companion object {
@@ -112,3 +110,6 @@ class TransformFormToPaymentMethod {
         }
     }
 }
+
+@Suppress("UNCHECKED_CAST")
+private fun <K, V> Map<K, V?>.filterOutNullValues() = filterValues { it != null } as Map<K, V>

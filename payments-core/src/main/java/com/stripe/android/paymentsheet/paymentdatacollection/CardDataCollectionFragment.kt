@@ -322,12 +322,10 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
     }
 
     private fun setupSaveCardCheckbox() {
-        val merchantDisplayName = sheetViewModel.config?.merchantDisplayName.takeUnless {
-            it.isNullOrBlank()
-        }
-        saveCardCheckbox.text = merchantDisplayName?.let {
-            getString(R.string.stripe_paymentsheet_save_this_card_with_merchant_name, it)
-        } ?: getString(R.string.stripe_paymentsheet_save_this_card)
+        saveCardCheckbox.text = getString(
+            R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
+            sheetViewModel.merchantName
+        )
 
         saveCardCheckbox.isVisible = sheetViewModel.userCanChooseToSaveCard
         bottomSpace.isVisible = !saveCardCheckbox.isVisible

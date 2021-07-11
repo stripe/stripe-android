@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
+import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -17,26 +18,42 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Default registry to provide look ups for [IntentAuthenticator].
- * Should be only accessed through [DefaultIntentAuthenticatorRegistry.createInstance].
+ * Default registry to provide look ups for [PaymentAuthenticator].
+ * Should be only accessed through [DefaultPaymentAuthenticatorRegistry.createInstance].
  */
-internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor(
+internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
+    private val sourceAuthenticator: SourceAuthenticator,
     @IntentAuthenticatorMap
-    private val intentAuthenticatorMap:
-        Map<Class<out StripeIntent.NextActionData>, @JvmSuppressWildcards IntentAuthenticator>
-) : IntentAuthenticatorRegistry {
+    private val paymentAuthenticatorMap:
+        Map<Class<out StripeIntent.NextActionData>,
+            @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
+) : PaymentAuthenticatorRegistry {
 
-    override fun getAuthenticator(stripeIntent: StripeIntent): IntentAuthenticator {
-        if (!stripeIntent.requiresAction()) {
-            return noOpIntentAuthenticator
-        }
-
-        return stripeIntent.nextActionData?.let {
-            intentAuthenticatorMap
-                .getOrElse(it::class.java) { noOpIntentAuthenticator }
-        } ?: run {
-            noOpIntentAuthenticator
+    @Suppress("UNCHECKED_CAST")
+    override fun <Authenticatable> getAuthenticator(
+        authenticatable: Authenticatable
+    ): PaymentAuthenticator<Authenticatable> {
+        return when (authenticatable) {
+            is StripeIntent -> {
+                if (!authenticatable.requiresAction()) {
+                    return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
+                }
+                return (
+                    authenticatable.nextActionData?.let {
+                        paymentAuthenticatorMap
+                            .getOrElse(it::class.java) { noOpIntentAuthenticator }
+                    } ?: run {
+                        noOpIntentAuthenticator
+                    }
+                    ) as PaymentAuthenticator<Authenticatable>
+            }
+            is Source -> {
+                sourceAuthenticator as PaymentAuthenticator<Authenticatable>
+            }
+            else -> {
+                error("No suitable PaymentAuthenticator for $authenticatable")
+            }
         }
     }
 
@@ -44,20 +61,20 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
-        intentAuthenticatorMap.values.forEach {
+        paymentAuthenticatorMap.values.forEach {
             it.onNewActivityResultCaller(activityResultCaller, activityResultCallback)
         }
     }
 
     override fun onLauncherInvalidated() {
-        intentAuthenticatorMap.values.forEach {
+        paymentAuthenticatorMap.values.forEach {
             it.onLauncherInvalidated()
         }
     }
 
     companion object {
         /**
-         * Create an instance of [IntentAuthenticatorRegistry] with dagger.
+         * Create an instance of [PaymentAuthenticatorRegistry] with dagger.
          */
         fun createInstance(
             context: Context,
@@ -69,6 +86,7 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor(
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
+            threeDs1IntentReturnUrlMap: MutableMap<String, String>
         ) = DaggerAuthenticationComponent.builder()
             .context(context)
             .stripeRepository(stripeRepository)
@@ -79,6 +97,7 @@ internal class DefaultIntentAuthenticatorRegistry @Inject internal constructor(
             .enableLogging(enableLogging)
             .workContext(workContext)
             .uiContext(uiContext)
+            .threeDs1IntentReturnUrlMap(threeDs1IntentReturnUrlMap)
             .build()
             .registry
     }

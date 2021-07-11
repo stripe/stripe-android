@@ -102,12 +102,10 @@
     <string name="stripe_paymentsheet_back">Vissza</string>
     <string name="stripe_paymentsheet_close">Bezárás</string>
     <string name="stripe_paymentsheet_expiration_date_hint">HH / ÉÉ</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ új kártya</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Vagy fizetés kártyával</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s kifizetése</string>
     <string name="stripe_paymentsheet_pay_button_label">Fizetés:</string>
     <string name="stripe_paymentsheet_primary_button_processing">Feldolgozás...</string>
-    <string name="stripe_paymentsheet_save_this_card">A kártya mentése a későbbi fizetésekhez</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">A kártya mentése a(z) %s részére történő fizetésekhez</string>
     <string name="stripe_paymentsheet_select_payment_method">Fizetési mód kiválasztása</string>
     <string name="stripe_paymentsheet_setup_button_label">Beállítás</string>
