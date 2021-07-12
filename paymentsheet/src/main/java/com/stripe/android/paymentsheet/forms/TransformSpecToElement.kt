@@ -62,7 +62,8 @@ internal class TransformSpecToElement {
             identifier = spec.identifier,
             fieldElement,
             SectionController(
-                spec.title
+                spec.title,
+                listOf(fieldElement.controller)
             )
         )
     }

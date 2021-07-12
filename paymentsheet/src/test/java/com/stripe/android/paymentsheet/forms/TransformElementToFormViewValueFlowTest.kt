@@ -24,7 +24,7 @@ class TransformElementToFormViewValueFlowTest {
             emailController,
             0
         ),
-        SectionController(emailController.label)
+        SectionController(emailController.label, listOf(emailController))
     )
 
     private val countryController = DropdownFieldController(CountryConfig())
@@ -34,7 +34,7 @@ class TransformElementToFormViewValueFlowTest {
             IdentifierSpec("country"),
             countryController
         ),
-        SectionController(countryController.label)
+        SectionController(countryController.label, listOf(countryController))
     )
 
     private val optionalIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())

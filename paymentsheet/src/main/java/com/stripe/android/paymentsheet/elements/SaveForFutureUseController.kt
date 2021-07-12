@@ -16,7 +16,7 @@ internal class SaveForFutureUseController(
     override val fieldValue: Flow<String> = saveForFutureUse.map { it.toString() }
     override val rawFieldValue: Flow<String?> = fieldValue
 
-    override val errorMessage: Flow<Int?> = MutableStateFlow(null)
+    override val error: Flow<FieldError?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
     override val elementType: ElementType = ElementType.SaveForFutureUse
 

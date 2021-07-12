@@ -22,7 +22,7 @@ class PopulateFormFromFormFieldValuesTest {
     private val emailSection = FormElement.SectionElement(
         identifier = IdentifierSpec("emailSection"),
         emailFieldElement,
-        SectionController(emailController.label)
+        SectionController(emailController.label, listOf(emailController))
     )
 
     @Test

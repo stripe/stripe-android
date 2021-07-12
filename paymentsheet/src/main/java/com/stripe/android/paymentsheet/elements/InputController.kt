@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.ElementType
 import kotlinx.coroutines.flow.Flow
 
@@ -11,8 +12,14 @@ internal sealed interface InputController {
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>
     val isComplete: Flow<Boolean>
-    val errorMessage: Flow<Int?>
+    val error: Flow<FieldError?>
     val elementType: ElementType
 
     fun onRawValueChange(rawValue: String)
 }
+
+
+data class FieldError(
+    @StringRes val errorFieldLabel: Int,
+    @StringRes val errorMessage: Int
+)
