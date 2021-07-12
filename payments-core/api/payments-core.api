@@ -4418,6 +4418,8 @@ public final class com/stripe/android/model/TokenizationMethod : java/lang/Enum 
 
 public final class com/stripe/android/model/WeChat : com/stripe/android/model/StripeModel {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
@@ -4458,6 +4460,12 @@ public final class com/stripe/android/model/WeChatPayNextAction : com/stripe/and
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/parsers/PaymentIntentJsonParser : com/stripe/android/model/parsers/ModelJsonParser {
+	public fun <init> ()V
+	public fun parse (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentIntent;
+	public synthetic fun parse (Lorg/json/JSONObject;)Lcom/stripe/android/model/StripeModel;
 }
 
 public abstract class com/stripe/android/model/wallets/Wallet : com/stripe/android/model/StripeModel {
@@ -4584,6 +4592,8 @@ public final class com/stripe/android/networking/ApiRequest$Options : android/os
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/networking/ApiRequest$Options$Companion;
 	public static final field UNDEFINED_PUBLISHABLE_KEY Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/ApiRequest$Options;
 	public static synthetic fun copy$default (Lcom/stripe/android/networking/ApiRequest$Options;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest$Options;
 	public fun describeContents ()I
@@ -4621,10 +4631,16 @@ public final class com/stripe/android/payments/PaymentFlowResult$Unvalidated : a
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;ILcom/stripe/android/exception/StripeException;ZLjava/lang/String;Lcom/stripe/android/model/Source;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;ILcom/stripe/android/exception/StripeException;ZLjava/lang/String;Lcom/stripe/android/model/Source;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Lcom/stripe/android/exception/StripeException;
 	public final fun copy (Ljava/lang/String;ILcom/stripe/android/exception/StripeException;ZLjava/lang/String;Lcom/stripe/android/model/Source;Ljava/lang/String;)Lcom/stripe/android/payments/PaymentFlowResult$Unvalidated;
 	public static synthetic fun copy$default (Lcom/stripe/android/payments/PaymentFlowResult$Unvalidated;Ljava/lang/String;ILcom/stripe/android/exception/StripeException;ZLjava/lang/String;Lcom/stripe/android/model/Source;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/PaymentFlowResult$Unvalidated;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientSecret ()Ljava/lang/String;
+	public final fun getException ()Lcom/stripe/android/exception/StripeException;
+	public final fun getFlowOutcome ()I
 	public fun hashCode ()I
 	public final synthetic fun toBundle ()Landroid/os/Bundle;
 	public fun toString ()Ljava/lang/String;
@@ -4784,6 +4800,14 @@ public final class com/stripe/android/payments/core/injection/Stripe3DSAuthentic
 }
 
 public abstract interface annotation class com/stripe/android/payments/core/injection/UIContext : java/lang/annotation/Annotation {
+}
+
+public final class com/stripe/android/payments/core/injection/WeChatPayAuthenticatorModule_ProvideWeChatAuthenticator$payments_core_releaseFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/payments/core/injection/WeChatPayAuthenticatorModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/payments/core/injection/WeChatPayAuthenticatorModule;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/WeChatPayAuthenticatorModule_ProvideWeChatAuthenticator$payments_core_releaseFactory;
+	public fun get ()Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideWeChatAuthenticator$payments_core_release (Lcom/stripe/android/payments/core/injection/WeChatPayAuthenticatorModule;Lcom/stripe/android/payments/core/authentication/UnsupportedAuthenticator;)Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
 }
 
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
