@@ -1,9 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.elements.Controller
-import com.stripe.android.paymentsheet.idControllerMap
+import com.stripe.android.paymentsheet.elements.InputController
+import com.stripe.android.paymentsheet.inputIdControllerMap
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -20,7 +19,7 @@ internal class TransformElementToFormFieldValueFlow(
     val saveForFutureUse: Flow<Boolean>
 ) {
     private val currentFieldValueMap = combine(
-        getCurrentFieldValuePairs(elements.idControllerMap())
+        getCurrentFieldValuePairs(elements.inputIdControllerMap())
     ) {
         it.toMap()
     }
@@ -60,14 +59,14 @@ internal class TransformElementToFormFieldValueFlow(
         }
     }
 
-    private fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, Controller>) =
+    private fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, InputController>) =
         idControllerMap.map { fieldControllerEntry ->
             getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
         }
 
     private fun getCurrentFieldValuePair(
         identifier: IdentifierSpec,
-        controller: Controller
+        controller: InputController
     ) = combine(controller.rawFieldValue, controller.isComplete) { rawFieldValue, isComplete ->
         Pair(
             identifier,

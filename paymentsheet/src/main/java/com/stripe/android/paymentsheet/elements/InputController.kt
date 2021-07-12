@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 /**
  * This class provides the logic behind the fields.
  */
-internal sealed interface Controller {
+internal sealed interface InputController {
     val label: Int
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>

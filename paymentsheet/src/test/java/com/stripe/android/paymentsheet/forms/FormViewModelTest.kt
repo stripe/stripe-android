@@ -142,14 +142,14 @@ class FormViewModelTest {
             // Add text to the name to make it valid
             emailController.onValueChange("email@valid.com")
 
-            // Verify formFieldValues contains name
+            // Verify formFieldValues contains email
             assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).containsKey(
-                emailSection.identifier
+                emailSection.field.identifier
             )
 
             saveForFutureUseController.onValueChange(false)
 
-            // Verify formFieldValues does not contain name
+            // Verify formFieldValues does not contain email
             assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
                 emailSection.identifier
             )

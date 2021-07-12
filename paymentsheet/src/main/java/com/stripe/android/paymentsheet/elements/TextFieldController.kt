@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.map
 internal class TextFieldController @VisibleForTesting constructor(
     private val textFieldConfig: TextFieldConfig,
     override val elementType: ElementType
-) : Controller {
+) : InputController {
 
     constructor(
         textFieldConfig: TextFieldConfig

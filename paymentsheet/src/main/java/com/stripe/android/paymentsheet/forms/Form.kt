@@ -30,9 +30,8 @@ import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElem
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.Section
-import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextField
-import com.stripe.android.paymentsheet.idControllerMap
+import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -73,9 +72,11 @@ internal fun Form(
 
                             val error by controller.errorMessage.asLiveData().observeAsState(null)
                             val sectionErrorString =
-                                error?.let { stringResource(it, stringResource(controller.label)) }
+                                error?.let {
+                                    stringResource(it.errorMessage, stringResource(it.errorFieldLabel))
+                                }
 
-                            Section(sectionErrorString) {
+                            Section(controller.label, sectionErrorString) {
                                 when (element.field) {
                                     is TextFieldElement -> {
                                         val focusRequesterIndex = element.field.focusIndexOrder
@@ -193,6 +194,12 @@ class FormViewModel(
     val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
         ?: MutableStateFlow(saveForFutureUseInitialValue)
 
+    val sectionToFieldIdentifierMap = layout.items
+        .filterIsInstance<FormItemSpec.SectionSpec>()
+        .associate { sectionSpec ->
+            sectionSpec.identifier to sectionSpec.field.identifier
+        }
+
     val optionalIdentifiers =
         combine(
             saveForFutureUseVisible,
@@ -200,24 +207,22 @@ class FormViewModel(
                 ?: MutableStateFlow(emptyList())
         ) { showFutureUse, optionalIdentifiers ->
 
-            val sectionElementIdentifiers = elements.idControllerMap()
+            // For optional section identifiers, list of identifiers of elements in the section
+            val identifiers = sectionToFieldIdentifierMap
                 .filter { idControllerPair ->
                     optionalIdentifiers.contains(idControllerPair.key)
-                        && idControllerPair.value is SectionController
                 }
-                .values
-                .map { sectionController ->
-                    (sectionController as SectionController).fieldIdentifiers
+                .map { sectionToSectionFieldEntry ->
+                    sectionToSectionFieldEntry.value
                 }
-                .flatten()
 
             if (!showFutureUse && saveForFutureUseElement != null) {
                 optionalIdentifiers
-                    .plus(sectionElementIdentifiers)
+                    .plus(identifiers)
                     .plus(saveForFutureUseElement.identifier)
             } else {
                 optionalIdentifiers
-                    .plus(sectionElementIdentifiers)
+                    .plus(identifiers)
             }
         }
 

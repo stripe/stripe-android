@@ -9,7 +9,6 @@ import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -25,10 +24,7 @@ class TransformElementToFormViewValueFlowTest {
             emailController,
             0
         ),
-        SectionController(
-            emailController.label,
-            listOf(IdentifierSpec("email"))
-        )
+        SectionController(emailController.label)
     )
 
     private val countryController = DropdownFieldController(CountryConfig())
@@ -38,10 +34,7 @@ class TransformElementToFormViewValueFlowTest {
             IdentifierSpec("country"),
             countryController
         ),
-        SectionController(
-            countryController.label,
-            listOf(IdentifierSpec("country"))
-        )
+        SectionController(countryController.label)
     )
 
     private val optionalIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())
@@ -69,9 +62,9 @@ class TransformElementToFormViewValueFlowTest {
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("emailSection"))
+                .containsKey(IdentifierSpec("email"))
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("countrySection"))
+                .containsKey(IdentifierSpec("country"))
         }
     }
 
@@ -88,8 +81,6 @@ class TransformElementToFormViewValueFlowTest {
             assertThat(formFieldValue?.fieldValuePairs)
                 .doesNotContainKey(IdentifierSpec("email"))
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("countrySection"))
-            assertThat(formFieldValue?.fieldValuePairs)
                 .containsKey(IdentifierSpec("country"))
         }
     }
@@ -98,15 +89,15 @@ class TransformElementToFormViewValueFlowTest {
     fun `If an optional field is complete field pairs contain only the non-optional values`() {
         runBlocking {
             emailController.onValueChange("email@valid.com")
-            optionalIdentifersFlow.value = listOf(emailSection.identifier)
+            optionalIdentifersFlow.value = listOf(emailSection.field.identifier)
 
             val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
-                .doesNotContainKey(IdentifierSpec("emailSection"))
+                .doesNotContainKey(IdentifierSpec("email"))
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("countrySection"))
+                .containsKey(IdentifierSpec("country"))
         }
     }
 }

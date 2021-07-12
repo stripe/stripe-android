@@ -33,9 +33,14 @@ interface OptionalItemSpec {
  */
 
 sealed class FormItemSpec {
+
+    /**
+     * This represents a section in a form that contains other elements
+     */
     data class SectionSpec(
         override val identifier: IdentifierSpec,
-        val field: SectionFieldSpec
+        val field: SectionFieldSpec,
+        @StringRes val title: Int? = null
     ) : FormItemSpec(), OptionalItemSpec
 
     /**

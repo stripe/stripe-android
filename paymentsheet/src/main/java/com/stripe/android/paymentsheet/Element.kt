@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
@@ -32,7 +32,7 @@ internal interface OptionalElement {
  */
 internal sealed interface SectionFieldElementType {
     val identifier: IdentifierSpec
-    val controller: Controller
+    val controller: InputController
 
     interface TextFieldElement : SectionFieldElementType {
         override val controller: TextFieldController
@@ -49,8 +49,8 @@ internal sealed interface SectionFieldElementType {
  * Each item in the layout has an identifier and a controller associated with it.
  */
 internal sealed class FormElement {
-    abstract val controller: Controller?
     abstract val identifier: IdentifierSpec
+    abstract val controller: Any?
 
     /**
      * This is an element that has static text because it takes no user input, it is not
@@ -62,7 +62,7 @@ internal sealed class FormElement {
         val stringResId: Int,
         val color: Color,
         val merchantName: String?,
-        override val controller: Controller? = null,
+        override val controller: InputController? = null,
     ) : FormElement(), OptionalElement
 
     /**
@@ -82,9 +82,9 @@ internal sealed class FormElement {
     ) : FormElement(), OptionalElement
 }
 
-internal fun List<FormElement>.idControllerMap() = this
-    .filter { it.controller != null }
-    .associate { it.identifier to it.controller!! }
+internal fun List<FormElement>.inputIdControllerMap() = this
+    .filter { it.controller is InputController && it.controller != null }
+    .associate { it.identifier to (it.controller as InputController) }
     .plus(
         this
             .filterIsInstance<FormElement.SectionElement>()
@@ -92,7 +92,7 @@ internal fun List<FormElement>.idControllerMap() = this
     )
 
 /**
- * This class defines the type associated with the element or value.   See [FormFieldValues] and [Controller]
+ * This class defines the type associated with the element or value.   See [FormFieldValues] and [InputController]
  */
 enum class ElementType {
     Name,
@@ -101,7 +101,6 @@ enum class ElementType {
     SaveForFutureUse,
     Mandate,
     IdealBank,
-    Section,
 }
 
 /**
@@ -109,7 +108,7 @@ enum class ElementType {
  */
 internal sealed class SectionFieldElement {
     abstract val identifier: IdentifierSpec
-    abstract val controller: Controller
+    abstract val controller: Any
 
     data class Name(
         override val identifier: IdentifierSpec,
