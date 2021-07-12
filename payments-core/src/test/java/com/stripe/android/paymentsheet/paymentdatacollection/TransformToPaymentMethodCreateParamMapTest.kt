@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
@@ -56,7 +57,7 @@ class TransformToPaymentMethodCreateParamMapTest {
                             "joe@gmail.com",
                             true
                         ),
-                        SectionFieldSpec.Country.identifier to FormFieldEntry(
+                        IdentifierSpec("country") to FormFieldEntry(
                             ElementType.Country,
                             "US",
                             true

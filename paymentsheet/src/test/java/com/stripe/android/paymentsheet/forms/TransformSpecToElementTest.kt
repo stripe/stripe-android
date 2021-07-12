@@ -39,7 +39,7 @@ class TransformSpecToElementTest {
     fun `Adding a country section sets up the section and country elements correctly`() {
         val countrySection = FormItemSpec.SectionSpec(
             IdentifierSpec("countrySection"),
-            SectionFieldSpec.Country
+            SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
         val formElement = transform(
             LayoutSpec(
@@ -55,6 +55,9 @@ class TransformSpecToElementTest {
         // With only a single field in a section the section controller is just a pass through
         // of the section field controller
         assertThat(countrySectionElement.controller).isEqualTo(countryElement.controller)
+
+        assertThat(countryElement.controller.displayItems).hasSize(1)
+        assertThat(countryElement.controller.displayItems[0]).isEqualTo("Austria")
 
         // Verify the correct config is setup for the controller
         assertThat(countryElement.controller.label).isEqualTo(CountryConfig().label)

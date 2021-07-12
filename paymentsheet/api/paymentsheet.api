@@ -194,7 +194,16 @@ public abstract class com/stripe/android/paymentsheet/specifications/SectionFiel
 
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;Ljava/util/Set;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnlyShowCountryCodes ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Email : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
