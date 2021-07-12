@@ -172,7 +172,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         return emptyList()
     }
 
-    fun updateSelection(selection: PaymentSelection?) {
+    open fun updateSelection(selection: PaymentSelection?) {
         _selection.value = selection
     }
 

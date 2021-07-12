@@ -620,6 +620,17 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `updateSelection() should clear error message`() =
+        testDispatcher.runBlockingTest {
+            viewModel._viewState.value = PaymentSheetViewState.Reset(UserErrorMessage("error"))
+
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            viewModel.updateSelection(selection)
+
+            assertThat(viewModel.viewState.value?.errorMessage).isNull()
+        }
+
+    @Test
     fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
         val viewModel = createViewModel(
             stripeIntentRepository = StripeIntentRepository.Static(
