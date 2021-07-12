@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +27,9 @@ internal class TextFieldController @VisibleForTesting constructor(
         textFieldConfig,
         textFieldConfig.elementType
     )
+
+    val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
+    val keyboardType: KeyboardType = textFieldConfig.keyboard
 
     @StringRes
     override val label: Int = textFieldConfig.label

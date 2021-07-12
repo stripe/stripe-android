@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.R
@@ -8,8 +9,8 @@ import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
 import java.util.regex.Pattern
 
-internal class EmailConfig :
-    TextFieldConfig {
+internal class EmailConfig : TextFieldConfig {
+    override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "email"
 
     @StringRes
@@ -23,7 +24,7 @@ internal class EmailConfig :
      */
     override fun filter(userTyped: String) = userTyped
 
-    override fun convertToRaw(it: String) = it
+    override fun convertToRaw(displayName: String) = displayName
 
     override fun convertFromRaw(rawValue: String) = rawValue
 

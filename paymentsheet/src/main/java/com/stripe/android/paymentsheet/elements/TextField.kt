@@ -110,7 +110,11 @@ internal fun TextField(
                 }
                 hasFocus = it.isFocused
             },
-        keyboardOptions = KeyboardOptions(imeAction = imeAction(nextFocus)),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = textFieldController.keyboardType,
+            capitalization = textFieldController.capitalization,
+            imeAction = imeAction(nextFocus)
+        ),
         colors = colors,
         maxLines = 1,
         singleLine = true,
