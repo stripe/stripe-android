@@ -11,9 +11,7 @@ internal class SectionController(
         sectionFieldController.map {
             it.error
         }
-    ){
+    ) {
         it.firstOrNull()
     }
 }
-
-

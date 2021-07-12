@@ -113,7 +113,6 @@ class FormViewModelTest {
         assertThat(values[1][1]).isEqualTo(IdentifierSpec("email"))
     }
 
-
     @Test
     fun `Verify if a field is optional and valid it is not in the formViewValueResult`() =
         runBlocking {

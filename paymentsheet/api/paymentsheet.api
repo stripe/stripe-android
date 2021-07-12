@@ -45,19 +45,6 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getCountFocusableFields ()I
-	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getShowingMandate ()Lkotlinx/coroutines/flow/Flow;
-	public final fun populateFormViewValues (Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)V
-	public final fun setSaveForFutureUse (Z)V
-	public final fun setSaveForFutureUseVisibility (Z)V
-}
-
-public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
-	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod : java/lang/Enum {
@@ -132,14 +119,17 @@ public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$S
 
 public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/OptionalItemSpec {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
 	public final fun component2 ()Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;
-	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;Ljava/lang/Integer;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getField ()Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;
 	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getTitle ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

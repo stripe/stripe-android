@@ -18,8 +18,7 @@ internal sealed interface InputController {
     fun onRawValueChange(rawValue: String)
 }
 
-
-data class FieldError(
+internal data class FieldError(
     @StringRes val errorFieldLabel: Int,
     @StringRes val errorMessage: Int
 )
