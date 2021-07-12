@@ -24,7 +24,6 @@ dependencies {
     implementation libraries.androidx.lifecycle.livedata.ktx
     implementation libraries.androidx.lifecycle.viewmodel.ktx
     implementation libraries.androidx.lifecycle.viewmodel.savedstate
-    implementation libraries.androidx.localbroadcastmanager
     implementation libraries.androidx.fragment.ktx
     implementation libraries.androidx.constraintlayout
     implementation libraries.androidx.activity.ktx
