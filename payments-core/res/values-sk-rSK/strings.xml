@@ -102,12 +102,10 @@
     <string name="stripe_paymentsheet_back">Späť</string>
     <string name="stripe_paymentsheet_close">Zatvoriť</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nová karta</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Alebo zaplaťte kartou</string>
     <string name="stripe_paymentsheet_pay_button_amount">Zaplatiť %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Zaplatiť</string>
     <string name="stripe_paymentsheet_primary_button_processing">Prebieha spracovanie…</string>
-    <string name="stripe_paymentsheet_save_this_card">Uložiť túto kartu pre budúce platby</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložiť túto kartu pre budúce platby obchodníkovi %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Vyberte svoj spôsob platby</string>
     <string name="stripe_paymentsheet_setup_button_label">Nastaviť</string>

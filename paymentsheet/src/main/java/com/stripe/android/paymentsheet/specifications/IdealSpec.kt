@@ -27,14 +27,14 @@ internal val idealMandate = MandateTextSpec(
     R.string.sofort_mandate,
     Color.Gray
 )
-val ideal = FormSpec(
+internal val ideal = FormSpec(
     LayoutSpec(
         listOf(
             idealNameSection,
             idealEmailSection,
             idealBankSection,
+            SaveForFutureUseSpec(listOf(idealEmailSection, idealMandate)),
             idealMandate,
-            SaveForFutureUseSpec(listOf(idealEmailSection, idealMandate))
         )
     ),
     idealParamKey,

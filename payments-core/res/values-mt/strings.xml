@@ -102,12 +102,10 @@
     <string name="stripe_paymentsheet_back">Lura</string>
     <string name="stripe_paymentsheet_close">Agħlaq</string>
     <string name="stripe_paymentsheet_expiration_date_hint">XX / SS</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Kard Ġdida</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Jew ħallas bil-kard</string>
     <string name="stripe_paymentsheet_pay_button_amount">Ħallas %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Ħallas</string>
     <string name="stripe_paymentsheet_primary_button_processing">Qed jiġi pproċessat...</string>
-    <string name="stripe_paymentsheet_save_this_card">Erfa\' din il-kard għal pagamenti futuri</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Erfa\' din il-kard għal pagamenti futuri %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Agħżel il-metodu tal-ħlas tiegħek</string>
     <string name="stripe_paymentsheet_setup_button_label">Stabilixxi</string>

@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * [IntentAuthenticator] for [NextActionData.DisplayOxxoDetails], redirects to
+ * [PaymentAuthenticator] for [NextActionData.DisplayOxxoDetails], redirects to
  * [WebIntentAuthenticator] or [NoOpIntentAuthenticator] based on whether if there is a
  * hostedVoucherUrl set.
  */
@@ -16,26 +16,23 @@ import javax.inject.Singleton
 internal class OxxoAuthenticator @Inject constructor(
     private val webIntentAuthenticator: WebIntentAuthenticator,
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator
-) : IntentAuthenticator {
+) : PaymentAuthenticator<StripeIntent> {
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
-        stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String?,
+        authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        (stripeIntent.nextActionData as NextActionData.DisplayOxxoDetails).let { oxxoDetailsData ->
+        (authenticatable.nextActionData as NextActionData.DisplayOxxoDetails).let { oxxoDetailsData ->
             if (oxxoDetailsData.hostedVoucherUrl == null) {
                 noOpIntentAuthenticator.authenticate(
                     host,
-                    stripeIntent,
-                    threeDs1ReturnUrl,
+                    authenticatable,
                     requestOptions
                 )
             } else {
                 webIntentAuthenticator.authenticate(
                     host,
-                    stripeIntent,
-                    threeDs1ReturnUrl,
+                    authenticatable,
                     requestOptions
                 )
             }

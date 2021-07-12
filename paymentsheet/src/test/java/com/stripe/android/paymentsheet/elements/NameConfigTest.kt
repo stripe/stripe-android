@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Error.Blank
-import com.stripe.android.paymentsheet.elements.common.TextFieldStateConstants.Valid.Limitless
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Limitless
 import org.junit.Test
 
 class NameConfigTest {

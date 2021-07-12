@@ -105,7 +105,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     /**
-     * Present the Google Pay UI when the final amount of the transaction is not yet known.
+     * Present the Google Pay UI when the amount of the transaction is not yet known.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
      *
@@ -126,7 +126,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     /**
-     * Present the Google Pay UI when the final amount of the transaction is known.
+     * Present the Google Pay UI when the amount of the transaction is known.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
      *

@@ -53,7 +53,6 @@ class NoOpIntentAuthenticatorTest {
             authenticator.authenticate(
                 host,
                 PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-                null,
                 REQUEST_OPTIONS
             )
 
@@ -79,7 +78,6 @@ class NoOpIntentAuthenticatorTest {
             authenticator.authenticate(
                 host,
                 PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-                null,
                 REQUEST_OPTIONS
             )
 

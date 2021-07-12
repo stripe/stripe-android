@@ -276,7 +276,6 @@ class Stripe3DS2AuthenticatorTest {
             authenticator.authenticate(
                 host,
                 paymentIntent,
-                null,
                 REQUEST_OPTIONS
             )
             testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)
@@ -326,7 +325,6 @@ class Stripe3DS2AuthenticatorTest {
             authenticator.authenticate(
                 host,
                 PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
-                null,
                 REQUEST_OPTIONS
             )
             testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)

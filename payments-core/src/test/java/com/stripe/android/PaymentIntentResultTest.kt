@@ -40,6 +40,26 @@ class PaymentIntentResultTest {
     }
 
     @Test
+    fun outcome_whenCardAndProcessing_shouldReturnUnknown() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            isLiveMode = false,
+            id = "pi_12345",
+            currency = "usd",
+            paymentMethodTypes = listOf("card"),
+            status = StripeIntent.Status.Processing
+        )
+        val result = PaymentIntentResult(
+            intent = paymentIntent
+        )
+        assertThat(result.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
+    }
+
+    @Test
     fun `should parcelize correctly`() {
         ParcelUtils.verifyParcelRoundtrip(
             PaymentIntentResult(

@@ -5,70 +5,46 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/paymentsheet/FormFragment : androidx/fragment/app/Fragment {
+public final class com/stripe/android/paymentsheet/ElementType : java/lang/Enum {
+	public static final field Country Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field Email Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field IdealBank Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field Mandate Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field Name Lcom/stripe/android/paymentsheet/ElementType;
+	public static final field SaveForFutureUse Lcom/stripe/android/paymentsheet/ElementType;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/ElementType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/ElementType;
+}
+
+public final class com/stripe/android/paymentsheet/forms/FormFieldEntry {
 	public static final field $stable I
-	public fun <init> ()V
-	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-}
-
-public abstract interface class com/stripe/android/paymentsheet/OptionalElement {
-	public abstract fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-}
-
-public abstract interface class com/stripe/android/paymentsheet/elements/common/Controller {
-	public abstract fun getErrorMessage ()Lkotlinx/coroutines/flow/Flow;
-	public abstract fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public abstract fun getLabel ()I
-	public abstract fun isComplete ()Lkotlinx/coroutines/flow/Flow;
-	public abstract fun onValueChange (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/paymentsheet/elements/common/SaveForFutureUseController : com/stripe/android/paymentsheet/elements/common/Controller {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getErrorMessage ()Lkotlinx/coroutines/flow/Flow;
-	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getLabel ()I
-	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
-	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
-	public fun onValueChange (Ljava/lang/String;)V
-	public final fun onValueChange (Z)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;Z)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/ElementType;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;Z)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getType ()Lcom/stripe/android/paymentsheet/ElementType;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isComplete ()Z
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormFieldValues {
 	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Ljava/util/Map;)V
-	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Map;ZZ)V
+	public synthetic fun <init> (Ljava/util/Map;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getFieldValuePairs ()Ljava/util/Map;
+	public final fun getSaveForFutureUse ()Z
+	public final fun getShowsMandate ()Z
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel : androidx/lifecycle/ViewModel {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;)V
 	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getCountFocusableFields ()I
-	public final fun getOptionalIdentifiers ()Lkotlinx/coroutines/flow/Flow;
-	public final fun populateFormViewValues (Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)V
-}
-
-public final class com/stripe/android/paymentsheet/forms/FormViewModel$Factory : androidx/lifecycle/ViewModelProvider$Factory {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/lang/String;)V
-	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
-}
-
-public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod$Companion;
-	public fun <init> ()V
-	public final fun transform (Ljava/util/Map;Lcom/stripe/android/paymentsheet/forms/FormFieldValues;)Ljava/util/Map;
-}
-
-public final class com/stripe/android/paymentsheet/forms/TransformFormToPaymentMethod$Companion {
 }
 
 public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod : java/lang/Enum {
@@ -88,25 +64,24 @@ public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod 
 
 public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion {
 	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public final fun getSupportedSavedPaymentMethods ()Ljava/util/Set;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment : androidx/fragment/app/Fragment {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion;
+	public static final field EXTRA_MERCHANT_NAME Ljava/lang/String;
 	public static final field EXTRA_PAYMENT_METHOD Ljava/lang/String;
+	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VALUE Ljava/lang/String;
+	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY Ljava/lang/String;
 	public fun <init> ()V
 	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
-	public final fun getParamMapLiveData ()Landroidx/lifecycle/LiveData;
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
 	public final fun setProcessing (Z)V
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion {
-}
-
-public final class com/stripe/android/paymentsheet/specifications/BancontactSpecKt {
-	public static final fun getBancontact ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 }
 
 public abstract class com/stripe/android/paymentsheet/specifications/FormItemSpec {
@@ -170,10 +145,6 @@ public final class com/stripe/android/paymentsheet/specifications/FormSpec {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/paymentsheet/specifications/IdealSpecKt {
-	public static final fun getIdeal ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
-}
-
 public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
@@ -210,7 +181,16 @@ public abstract class com/stripe/android/paymentsheet/specifications/SectionFiel
 
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;Ljava/util/Set;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnlyShowCountryCodes ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Email : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
@@ -226,9 +206,5 @@ public final class com/stripe/android/paymentsheet/specifications/SectionFieldSp
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Name : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Name;
-}
-
-public final class com/stripe/android/paymentsheet/specifications/SofortSpecKt {
-	public static final fun getSofort ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 }
 

@@ -29,6 +29,8 @@ private val TealLight = Color(0xFF56c8d8)
 private val Purple = Color(0xFF4a148c)
 private val PurpleLight = Color(0xFF7c43bd)
 
+internal val GrayLight = Color(0xFFF8F8F8)
+
 private val StripeDarkPalette = darkColors(
     primary = Blue200,
     primaryVariant = Green400,

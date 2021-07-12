@@ -102,12 +102,10 @@
     <string name="stripe_paymentsheet_back">Back</string>
     <string name="stripe_paymentsheet_close">Close</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ New card</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
     <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Pay</string>
     <string name="stripe_paymentsheet_primary_button_processing">Processing...</string>
-    <string name="stripe_paymentsheet_save_this_card">Save this card for future payments</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
     <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
     <string name="stripe_paymentsheet_setup_button_label">Set up</string>
