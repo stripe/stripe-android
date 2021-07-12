@@ -10,26 +10,21 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 internal interface Stripe3ds2ChallengeResultProcessor {
     suspend fun process(challengeResult: ChallengeResult): PaymentFlowResult.Unvalidated
 }
 
-@Singleton
-internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
+internal class DefaultStripe3ds2ChallengeResultProcessor constructor(
     private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val retryDelaySupplier: RetryDelaySupplier,
-    @Named(ENABLE_LOGGING) enableLogging: Boolean,
+    enableLogging: Boolean,
     private val workContext: CoroutineContext
 ) : Stripe3ds2ChallengeResultProcessor {
     private val logger = Logger.getInstance(enableLogging)
