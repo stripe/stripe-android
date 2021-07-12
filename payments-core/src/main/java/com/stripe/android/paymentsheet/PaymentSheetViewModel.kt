@@ -190,7 +190,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }.fold(
                 onSuccess = {
                     updatePaymentMethods(stripeIntent)
-                    resetViewState(stripeIntent, userErrorMessage = null)
+                    resetViewState(stripeIntent)
                 },
                 onFailure = ::onFatal
             )
@@ -233,7 +233,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onSuccess = {
                     _paymentMethods.value = it
                     setStripeIntent(stripeIntent)
-                    resetViewState(stripeIntent, userErrorMessage = null)
+                    resetViewState(stripeIntent)
                 },
                 onFailure = ::onFatal
             )
@@ -256,6 +256,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+
+    override fun updateSelection(selection: PaymentSelection?) {
+        super.updateSelection(selection)
+        stripeIntent.value?.let {
+            resetViewState(it)
+        }
+    }
+
     private fun resetViewState(stripeIntent: StripeIntent, @IntegerRes stringResId: Int?) {
         resetViewState(
             stripeIntent,
@@ -263,7 +271,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    private fun resetViewState(stripeIntent: StripeIntent, userErrorMessage: String?) {
+    private fun resetViewState(stripeIntent: StripeIntent, userErrorMessage: String? = null) {
         when (stripeIntent) {
             is PaymentIntent -> {
                 val amount = stripeIntent.amount
@@ -426,7 +434,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
             }
             else -> {
-                stripeIntent.value?.let { resetViewState(it, userErrorMessage = null) }
+                stripeIntent.value?.let { resetViewState(it) }
             }
         }
     }
