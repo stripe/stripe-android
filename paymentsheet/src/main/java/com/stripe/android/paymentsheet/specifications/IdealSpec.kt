@@ -33,8 +33,8 @@ internal val ideal = FormSpec(
             idealNameSection,
             idealEmailSection,
             idealBankSection,
+            SaveForFutureUseSpec(listOf(idealEmailSection, idealMandate)),
             idealMandate,
-            SaveForFutureUseSpec(listOf(idealEmailSection, idealMandate))
         )
     ),
     idealParamKey,
