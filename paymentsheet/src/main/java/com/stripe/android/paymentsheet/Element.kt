@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -77,9 +78,18 @@ internal sealed class FormElement {
     data class SectionElement(
         override val identifier: IdentifierSpec,
         val field: SectionFieldElementType,
-        override val controller: Controller
+        override val controller: SectionController
     ) : FormElement(), OptionalElement
 }
+
+internal fun List<FormElement>.idControllerMap() = this
+    .filter { it.controller != null }
+    .associate { it.identifier to it.controller!! }
+    .plus(
+        this
+            .filterIsInstance<FormElement.SectionElement>()
+            .associate { it.field.identifier to it.field.controller }
+    )
 
 /**
  * This class defines the type associated with the element or value.   See [FormFieldValues] and [Controller]
@@ -91,6 +101,7 @@ enum class ElementType {
     SaveForFutureUse,
     Mandate,
     IdealBank,
+    Section,
 }
 
 /**

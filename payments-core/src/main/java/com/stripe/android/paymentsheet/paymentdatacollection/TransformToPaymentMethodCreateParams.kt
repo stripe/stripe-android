@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
+import android.util.Log
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 
@@ -20,6 +21,8 @@ internal class TransformToPaymentMethodCreateParams {
         .filterOutNullValues()
         .toMap()
         .run {
+            Log.d("STRIPE", this.toString())
+
             // TODO(brnunes): Comment why this check is needed.
             PaymentMethodCreateParams.Type.fromCode(this["type"] as String)
                 ?.let {

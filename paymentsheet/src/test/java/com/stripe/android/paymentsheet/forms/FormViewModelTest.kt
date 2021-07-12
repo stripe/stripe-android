@@ -84,6 +84,37 @@ class FormViewModelTest {
     }
 
     @Test
+    fun `Verify setting section as optional sets sub-fields as optional as well`() {
+        val formViewModel = FormViewModel(
+            LayoutSpec(
+                listOf(
+                    emailSection,
+                    countrySection,
+                    FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                )
+            ),
+            true,
+            true,
+            "Example, Inc."
+        )
+
+        val values = mutableListOf<List<IdentifierSpec>>()
+        formViewModel.optionalIdentifiers.asLiveData()
+            .observeForever {
+                values.add(it)
+            }
+        assertThat(values[0]).isEmpty()
+
+        formViewModel.setSaveForFutureUse(false)
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec("emailSection"))
+        assertThat(values[1][1]).isEqualTo(IdentifierSpec("email"))
+    }
+
+
+    @Test
     fun `Verify if a field is optional and valid it is not in the formViewValueResult`() =
         runBlocking {
             // Here we have one optional and one required field, country will always be in the result,
@@ -103,7 +134,9 @@ class FormViewModelTest {
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
-            val emailController = formViewModel.elements.map { it.controller }
+            val emailController = formViewModel.elements
+                .filterIsInstance<SectionElement>()
+                .map { it.field.controller }
                 .filterIsInstance(TextFieldController::class.java).first()
 
             // Add text to the name to make it valid
@@ -142,10 +175,12 @@ class FormViewModelTest {
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
-            val emailController = formViewModel.elements.map { it.controller }
+            val emailController = formViewModel.elements
+                .filterIsInstance<SectionElement>()
+                .map { it.field.controller }
                 .filterIsInstance(TextFieldController::class.java).first()
 
-            // Add text to the name to make it valid
+            // Add text to the email to make it invalid
             emailController.onValueChange("email is invalid")
 
             // Verify formFieldValues is null because the email is required and invalid

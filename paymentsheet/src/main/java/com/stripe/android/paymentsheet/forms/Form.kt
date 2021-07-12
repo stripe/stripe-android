@@ -29,7 +29,9 @@ import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElem
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.Section
+import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextField
+import com.stripe.android.paymentsheet.idControllerMap
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -188,12 +190,25 @@ class FormViewModel(
             saveForFutureUseElement?.controller?.optionalIdentifiers
                 ?: MutableStateFlow(emptyList())
         ) { showFutureUse, optionalIdentifiers ->
+
+            val sectionElementIdentifiers = elements.idControllerMap()
+                .filter { idControllerPair ->
+                    optionalIdentifiers.contains(idControllerPair.key)
+                        && idControllerPair.value is SectionController
+                }
+                .values
+                .map { sectionController ->
+                    (sectionController as SectionController).fieldIdentifiers
+                }
+                .flatten()
+
             if (!showFutureUse && saveForFutureUseElement != null) {
-                optionalIdentifiers.plus(
-                    saveForFutureUseElement.identifier
-                )
+                optionalIdentifiers
+                    .plus(sectionElementIdentifiers)
+                    .plus(saveForFutureUseElement.identifier)
             } else {
                 optionalIdentifiers
+                    .plus(sectionElementIdentifiers)
             }
         }
 

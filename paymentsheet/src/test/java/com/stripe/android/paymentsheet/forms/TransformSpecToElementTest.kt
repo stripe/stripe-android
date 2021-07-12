@@ -54,10 +54,6 @@ class TransformSpecToElementTest {
         val countrySectionElement = formElement.first() as SectionElement
         val countryElement = countrySectionElement.field as Country
 
-        // With only a single field in a section the section controller is just a pass through
-        // of the section field controller
-        assertThat(countrySectionElement.controller).isEqualTo(countryElement.controller)
-
         // Verify the correct config is setup for the controller
         assertThat(countryElement.controller.label).isEqualTo(CountryConfig().label)
 
@@ -82,10 +78,6 @@ class TransformSpecToElementTest {
 
         val idealSectionElement = formElement.first() as SectionElement
         val idealElement = idealSectionElement.field as SectionFieldElement.IdealBank
-
-        // With only a single field in a section the section controller is just a pass through
-        // of the section field controller
-        assertThat(idealSectionElement.controller).isEqualTo(idealElement.controller)
 
         // Verify the correct config is setup for the controller
         assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
