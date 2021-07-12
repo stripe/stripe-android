@@ -256,7 +256,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
         stripeIntent.value?.let {
