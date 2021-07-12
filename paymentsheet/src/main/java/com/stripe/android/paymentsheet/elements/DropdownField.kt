@@ -36,10 +36,17 @@ import androidx.lifecycle.asLiveData
 internal fun DropDown(
     @StringRes label: Int,
     controller: DropdownFieldController,
+    enabled: Boolean,
 ) {
     val selectedIndex by controller.selectedIndex.asLiveData().observeAsState(0)
     val items = controller.displayItems
     var expanded by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val currentTextColor = if (enabled) {
+        Color.Unspecified
+    } else {
+        TextFieldDefaults.textFieldColors().indicatorColor(enabled, false, interactionSource).value
+    }
 
     Box(
         modifier = Modifier
@@ -64,16 +71,19 @@ internal fun DropDown(
                         items[selectedIndex],
                         modifier = Modifier
                             .fillMaxWidth(.9f)
-                            .clickable(onClick = { expanded = true })
+                            .clickable(
+                                enabled = enabled,
+                                onClick = { expanded = true }
+                            ),
+                        color = currentTextColor
                     )
-                    // TODO: THere is something wrong with the mandate - not showing
-                    // TODO: Change order of sofort elements
                     Icon(
                         Icons.Filled.ArrowDropDown,
                         contentDescription = "Dropdown arrow",
                         modifier = Modifier
                             .height(24.dp)
-                            .clickable(onClick = { expanded = true })
+                            .clickable(onClick = { expanded = true }),
+                        tint = currentTextColor
                     )
                 }
             }
