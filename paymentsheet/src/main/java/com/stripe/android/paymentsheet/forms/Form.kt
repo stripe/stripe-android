@@ -123,10 +123,7 @@ internal fun Form(
                         val controller = element.controller
                         val checked by controller.saveForFutureUse.asLiveData()
                             .observeAsState(true)
-                        Row(
-                            modifier = Modifier
-                                .padding(vertical = 8.dp)
-                        ) {
+                        Row(modifier = Modifier.padding(vertical = 8.dp)) {
                             Checkbox(
                                 checked = checked,
                                 onCheckedChange = { controller.onValueChange(it) },

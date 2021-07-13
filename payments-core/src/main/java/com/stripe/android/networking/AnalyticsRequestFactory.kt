@@ -21,24 +21,29 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
     private val packageInfo: PackageInfo?,
     private val packageName: String,
-    private val publishableKeyProvider: Provider<String>
+    private val publishableKeyProvider: Provider<String>,
+    private val defaultProductUsageTokens: Set<String> = emptySet()
 ) {
     internal constructor(
         context: Context,
-        publishableKey: String
+        publishableKey: String,
+        defaultProductUsageTokens: Set<String> = emptySet(),
     ) : this(
         context,
-        { publishableKey }
+        { publishableKey },
+        defaultProductUsageTokens,
     )
 
     internal constructor(
         context: Context,
-        publishableKeyProvider: Provider<String>
+        publishableKeyProvider: Provider<String>,
+        defaultProductUsageTokens: Set<String> = emptySet(),
     ) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,
         context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider
+        publishableKeyProvider,
+        defaultProductUsageTokens
     )
 
     @JvmSynthetic
@@ -54,7 +59,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createTokenCreation(
-        productUsageTokens: Set<String>?,
+        productUsageTokens: Set<String>,
         tokenType: Token.Type,
     ): AnalyticsRequest {
         return createRequest(
@@ -67,7 +72,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createPaymentMethodCreation(
         paymentMethodType: PaymentMethodCreateParams.Type?,
-        productUsageTokens: Set<String>?,
+        productUsageTokens: Set<String>,
     ): AnalyticsRequest {
         return createRequest(
             AnalyticsEvent.PaymentMethodCreate,
@@ -79,7 +84,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createSourceCreation(
         @Source.SourceType sourceType: String,
-        productUsageTokens: Set<String>? = null,
+        productUsageTokens: Set<String> = emptySet(),
     ): AnalyticsRequest {
         return createRequest(
             AnalyticsEvent.SourceCreate,
@@ -90,7 +95,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createAddSource(
-        productUsageTokens: Set<String>? = null,
+        productUsageTokens: Set<String> = emptySet(),
         @Source.SourceType sourceType: String,
     ): AnalyticsRequest {
         return createRequest(
@@ -102,7 +107,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createDeleteSource(
-        productUsageTokens: Set<String>?,
+        productUsageTokens: Set<String>,
     ): AnalyticsRequest {
         return createRequest(
             AnalyticsEvent.CustomerDeleteSource,
@@ -112,7 +117,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createAttachPaymentMethod(
-        productUsageTokens: Set<String>?,
+        productUsageTokens: Set<String>,
     ): AnalyticsRequest {
         return createRequest(
             AnalyticsEvent.CustomerAttachPaymentMethod,
@@ -122,7 +127,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createDetachPaymentMethod(
-        productUsageTokens: Set<String>?
+        productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
             AnalyticsEvent.CustomerDetachPaymentMethod,
@@ -167,7 +172,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createRequest(
         event: AnalyticsEvent,
-        productUsageTokens: Set<String>? = null,
+        productUsageTokens: Set<String> = emptySet(),
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,
         threeDS2UiType: ThreeDS2UiType? = null
@@ -185,7 +190,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     private fun createParams(
         event: String,
-        productUsageTokens: Set<String>? = null,
+        productUsageTokens: Set<String> = emptySet(),
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,
         threeDS2UiType: ThreeDS2UiType? = null
@@ -193,9 +198,10 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         return createStandardParams(event)
             .plus(createAppDataParams())
             .plus(
-                productUsageTokens.takeUnless { it.isNullOrEmpty() }?.let {
-                    mapOf(FIELD_PRODUCT_USAGE to it.toList())
-                }.orEmpty()
+                defaultProductUsageTokens.plus(productUsageTokens)
+                    .takeUnless { it.isEmpty() }?.let {
+                        mapOf(FIELD_PRODUCT_USAGE to it.toList())
+                    }.orEmpty()
             )
             .plus(sourceType?.let { mapOf(FIELD_SOURCE_TYPE to it) }.orEmpty())
             .plus(createTokenTypeParam(sourceType, tokenType))

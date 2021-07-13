@@ -53,12 +53,12 @@ data class PaymentMethodCreateParams internal constructor(
     val typeCode: String
         get() = type.code
 
-    internal val attribution: Set<String>?
+    internal val attribution: Set<String>
         @JvmSynthetic
         get() {
             return when (type) {
                 Type.Card -> (card?.attribution ?: emptySet()).plus(productUsage)
-                else -> productUsage.takeIf { it.isNotEmpty() }
+                else -> productUsage
             }
         }
 
