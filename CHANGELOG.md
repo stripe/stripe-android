@@ -3,7 +3,13 @@
 ## 17.0.0 - unreleased
 This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
-* [3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10` and Coroutines to `1.5.0`
+* [3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10`
+* [3899](https://github.com/stripe/stripe-android/pull/3899) Introduce `GooglePayLauncher` and `GooglePayPaymentMethodLauncher`
+    * Drop-in classes that simplify integrating Google Pay
+* [3944](https://github.com/stripe/stripe-android/pull/3944) Introduce `GooglePayLauncherContract` and `GooglePayPaymentMethodLauncherContract`
+    * `ActivityResultContract` classes that enable integrating `GooglePayLauncher` and `GooglePayPaymentMethodLauncher` in Jetpack Compose
+* [3951](https://github.com/stripe/stripe-android/pull/3951) Upgrade material-components to `1.4.0`
+* [3976](https://github.com/stripe/stripe-android/pull/3976) Upgrade Kotlin Coroutines to `1.5.1`
 
 ## 16.10.2 - 2021-07-02
 * [3811](https://github.com/stripe/stripe-android/pull/3811) Fix `CountryCode` parceling
