@@ -13,6 +13,7 @@ import com.stripe.android.googlepaylauncher.FakeGooglePayRepository
 import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -197,6 +198,28 @@ internal class PaymentSheetViewModelTest {
                     CLIENT_SECRET
                 )
             )
+    }
+
+    @Test
+    fun `checkout() for Setup Intent with saved payment method that requires mandate should include mandate`() {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
+        )
+
+        val events = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
+        viewModel.startConfirm.observeForever {
+            events.add(it)
+        }
+
+        val paymentSelection =
+            PaymentSelection.Saved(PaymentMethodFixtures.AU_BECS_DEBIT_PAYMENT_METHOD)
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout(CheckoutIdentifier.None)
+
+        assertThat(events).hasSize(1)
+        val confirmParams = events[0].peekContent() as ConfirmSetupIntentParams
+        assertThat(confirmParams.mandateData)
+            .isNotNull()
     }
 
     @Test

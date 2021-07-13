@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.MandateDataParams
 
 /**
  * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams].
@@ -48,7 +49,10 @@ internal class ConfirmSetupIntentParamsFactory(
     override fun create(paymentSelection: PaymentSelection.Saved) =
         ConfirmSetupIntentParams.create(
             paymentMethodId = paymentSelection.paymentMethod.id.orEmpty(),
-            clientSecret = clientSecret.value
+            clientSecret = clientSecret.value,
+            mandateData = paymentSelection.paymentMethod.type?.requiresMandate?.let {
+                MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
+            }
         )
 
     override fun create(paymentSelection: PaymentSelection.New) =

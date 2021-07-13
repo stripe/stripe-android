@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.paymentsheet.analytics.DeviceId
@@ -71,7 +71,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentMethodCreation(
-        paymentMethodType: PaymentMethodCreateParams.Type?,
+        paymentMethodType: PaymentMethod.Type?,
         productUsageTokens: Set<String>,
     ): AnalyticsRequest {
         return createRequest(
