@@ -258,6 +258,6 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     internal companion object {
-        const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
+        internal const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
     }
 }
