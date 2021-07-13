@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.switchMap
+import androidx.lifecycle.map
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.repository.DefaultRepository
@@ -23,10 +23,8 @@ internal class PaymentSheetPlaygroundViewModel(
     val customerConfig = MutableLiveData<PaymentSheet.CustomerConfiguration?>()
     val clientSecret = MutableLiveData<String?>()
 
-    val readyToCheckout: LiveData<Boolean> = customerConfig.switchMap { customerConfig ->
-        clientSecret.switchMap { clientSecret ->
-            MutableLiveData(customerConfig != null && clientSecret != null)
-        }
+    val readyToCheckout: LiveData<Boolean> = clientSecret.map {
+        it != null
     }
 
     var checkoutMode: Repository.CheckoutMode? = null
@@ -61,10 +59,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 // which will be used on all Stripe API calls
                 PaymentConfiguration.init(getApplication(), it.publishableKey)
 
-                customerConfig.value = PaymentSheet.CustomerConfiguration(
-                    id = it.customerId,
-                    ephemeralKeySecret = it.customerEphemeralKeySecret
-                )
+                customerConfig.value = it.makeCustomerConfig()
                 clientSecret.value = it.intentClientSecret
             },
             onFailure = {

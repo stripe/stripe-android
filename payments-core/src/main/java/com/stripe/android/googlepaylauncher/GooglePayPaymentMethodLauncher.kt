@@ -7,8 +7,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.DefaultGooglePayRepository
-import com.stripe.android.paymentsheet.GooglePayRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -107,7 +105,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     /**
-     * Present the Google Pay UI when the final amount of the transaction is not yet known.
+     * Present the Google Pay UI when the amount of the transaction is not yet known.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
      *
@@ -128,7 +126,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     /**
-     * Present the Google Pay UI when the final amount of the transaction is known.
+     * Present the Google Pay UI when the amount of the transaction is known.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
      *

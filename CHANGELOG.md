@@ -5,7 +5,7 @@ This release includes several breaking changes. See the [migration guide](https:
 
 * [3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10` and Coroutines to `1.5.0`
 
-## 16.10.1 - unreleased
+## 16.10.2 - 2021-07-02
 * [3811](https://github.com/stripe/stripe-android/pull/3811) Fix `CountryCode` parceling
 * [3833](https://github.com/stripe/stripe-android/pull/3833) Fix coroutine usage in Stripe3DS2Authenticator
 * [3863](https://github.com/stripe/stripe-android/pull/3863) Make `PayWithGoogleUtils#getPriceString()` Locale-agnostic

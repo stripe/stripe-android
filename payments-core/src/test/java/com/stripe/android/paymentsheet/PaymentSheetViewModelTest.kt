@@ -9,6 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.googlepaylauncher.FakeGooglePayRepository
 import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -44,12 +45,17 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -66,6 +72,14 @@ internal class PaymentSheetViewModelTest {
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val paymentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
     private val application = ApplicationProvider.getApplicationContext<Application>()
+
+    @Captor
+    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<PaymentMethod.Type>
+
+    @BeforeTest
+    fun setup() {
+        MockitoAnnotations.openMocks(this)
+    }
 
     @AfterTest
     fun cleanup() {
@@ -86,7 +100,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.paymentMethods.observeForever {
             paymentMethods = it
         }
-        viewModel.updatePaymentMethods()
+        viewModel.updatePaymentMethods(PAYMENT_INTENT)
         assertThat(paymentMethods)
             .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
@@ -105,7 +119,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.paymentMethods.observeForever {
             paymentMethods = it
         }
-        viewModel.updatePaymentMethods()
+        viewModel.updatePaymentMethods(PAYMENT_INTENT)
         assertThat(requireNotNull(paymentMethods))
             .isEmpty()
     }
@@ -117,9 +131,51 @@ internal class PaymentSheetViewModelTest {
         viewModelWithoutCustomer.paymentMethods.observeForever {
             paymentMethods = it
         }
-        viewModelWithoutCustomer.updatePaymentMethods()
+        viewModelWithoutCustomer.updatePaymentMethods(PAYMENT_INTENT)
         assertThat(paymentMethods)
             .isEmpty()
+    }
+
+    @Test
+    fun `updatePaymentMethods() should fetch only supported payment method types`() =
+        testDispatcher.runBlockingTest {
+            val paymentMethodsRepository = mock<PaymentMethodsRepository>()
+            val viewModel = createViewModel(
+                paymentMethodsRepository = paymentMethodsRepository
+            )
+            val stripeIntent = PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf(
+                    "card", // valid and supported
+                    "fpx", // valid but not supported
+                    "invalid_type" // unknown type
+                )
+            )
+
+            viewModel.updatePaymentMethods(stripeIntent)
+            verify(paymentMethodsRepository).get(any(), capture(paymentMethodTypeCaptor))
+            assertThat(paymentMethodTypeCaptor.allValues)
+                .containsExactly(PaymentMethod.Type.Card)
+        }
+
+    @Test
+    fun `updatePaymentMethods() should filter out invalid payment method types`() {
+        val viewModel = createViewModel(
+            paymentMethodsRepository = FakePaymentMethodsRepository(
+                listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(card = null), // invalid
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
+        )
+
+        var paymentMethods: List<PaymentMethod>? = null
+        viewModel.paymentMethods.observeForever {
+            paymentMethods = it
+        }
+
+        viewModel.updatePaymentMethods(PAYMENT_INTENT)
+        assertThat(paymentMethods)
+            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 
     @Test
@@ -391,6 +447,52 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
+    fun `onPaymentFlowResult() with processing status for payment method which has delay should report success event`() =
+        testDispatcher.runBlockingTest {
+            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
+                PaymentIntentResult(
+                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                        paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                        status = StripeIntent.Status.Processing
+                    ),
+                    StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+            viewModel.updateSelection(selection)
+
+            viewModel.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated()
+            )
+            verify(eventReporter)
+                .onPaymentSuccess(selection)
+        }
+
+    @Test
+    fun `onPaymentFlowResult() with processing status for payment method which does not have delay should report failure event`() =
+        testDispatcher.runBlockingTest {
+            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
+                PaymentIntentResult(
+                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        status = StripeIntent.Status.Processing
+                    ),
+                    StripeIntentResult.Outcome.UNKNOWN
+                )
+            )
+
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            viewModel.updateSelection(selection)
+
+            viewModel.onPaymentFlowResult(
+                PaymentFlowResult.Unvalidated()
+            )
+            verify(eventReporter)
+                .onPaymentFailure(selection)
+        }
+
+    @Test
     fun `onPaymentFlowResult() should update emit API errors`() =
         testDispatcher.runBlockingTest {
             whenever(paymentFlowResultProcessor.processResult(any())).thenThrow(
@@ -552,7 +654,6 @@ internal class PaymentSheetViewModelTest {
     fun `fetchFragmentConfig() when all data is ready should emit value`() {
         viewModel.fetchStripeIntent()
         viewModel.fetchIsGooglePayReady()
-        viewModel.updatePaymentMethods()
 
         val configs = mutableListOf<FragmentConfig>()
         viewModel.fetchFragmentConfig().observeForever { config ->
@@ -641,6 +742,17 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewStates[0])
             .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
         assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
+    }
+
+    @Test
+    fun `When configuration is empty, merchant name should reflect the app name`() {
+        val viewModel = createViewModel(
+            args = ARGS_WITHOUT_CUSTOMER
+        )
+
+        // In a real app, the app name will be used. In tests the package name is returned.
+        assertThat(viewModel.merchantName)
+            .isEqualTo("com.stripe.android.test")
     }
 
     private fun createViewModel(

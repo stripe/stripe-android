@@ -3,11 +3,12 @@ package com.stripe.android.payments.core.injection
 import android.content.Context
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentRelayStarter
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.authentication.IntentAuthenticator
+import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
@@ -20,7 +21,7 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Provides [IntentAuthenticator] for [NextActionData.SdkData.Use3DS2].
+ * Provides [PaymentAuthenticator] for [NextActionData.SdkData.Use3DS2].
  * Requires 3ds2 SDK.
  */
 @Module
@@ -39,7 +40,7 @@ internal class Stripe3DSAuthenticatorModule {
         analyticsRequestFactory: AnalyticsRequestFactory,
         @IOContext workContext: CoroutineContext,
         @UIContext uiContext: CoroutineContext
-    ): IntentAuthenticator {
+    ): PaymentAuthenticator<StripeIntent> {
         return Stripe3DS2Authenticator(
             PaymentAuthConfig.get(),
             stripeRepository,

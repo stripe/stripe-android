@@ -102,12 +102,10 @@
     <string name="stripe_paymentsheet_back">上一步</string>
     <string name="stripe_paymentsheet_close">關閉</string>
     <string name="stripe_paymentsheet_expiration_date_hint">月月/年年</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ 新卡</string>
     <string name="stripe_paymentsheet_or_pay_with_card">或用銀行卡支付</string>
     <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
     <string name="stripe_paymentsheet_pay_button_label">支付</string>
     <string name="stripe_paymentsheet_primary_button_processing">正在處理...</string>
-    <string name="stripe_paymentsheet_save_this_card">保存該卡，用於未來的付款</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存該卡，用於未來的 %s 付款</string>
     <string name="stripe_paymentsheet_select_payment_method">選擇您的支付方式</string>
     <string name="stripe_paymentsheet_setup_button_label">設置</string>

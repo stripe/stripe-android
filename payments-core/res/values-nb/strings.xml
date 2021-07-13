@@ -102,12 +102,10 @@
     <string name="stripe_paymentsheet_back">Tilbake</string>
     <string name="stripe_paymentsheet_close">Lukk</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nytt kort</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Eller betal med et kort</string>
     <string name="stripe_paymentsheet_pay_button_amount">Betal %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Betal</string>
     <string name="stripe_paymentsheet_primary_button_processing">Behandler …</string>
-    <string name="stripe_paymentsheet_save_this_card">Lagre kortet til fremtidige betalinger</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Lagre kortet til fremtidige betalinger hos %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Velg betalingsmetode</string>
     <string name="stripe_paymentsheet_setup_button_label">Konfigurer</string>

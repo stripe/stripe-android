@@ -69,28 +69,52 @@ internal class PaymentCommonModule {
 
     @Provides
     @Singleton
-    fun providePaymentFlowResultProcessor(
+    fun providePaymentIntentFlowResultProcessor(
         appContext: Context,
-        clientSecret: ClientSecret,
         lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
         stripeApiRepository: StripeApiRepository,
         @Named(ENABLE_LOGGING) enableLogging: Boolean,
+    ): PaymentIntentFlowResultProcessor {
+        return PaymentIntentFlowResultProcessor(
+            appContext,
+            { lazyPaymentConfiguration.get().publishableKey },
+            stripeApiRepository,
+            enableLogging = enableLogging,
+            Dispatchers.IO
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideSetupIntentFlowResultProcessor(
+        appContext: Context,
+        lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
+        stripeApiRepository: StripeApiRepository,
+        @Named(ENABLE_LOGGING) enableLogging: Boolean,
+    ): SetupIntentFlowResultProcessor {
+        return SetupIntentFlowResultProcessor(
+            appContext,
+            { lazyPaymentConfiguration.get().publishableKey },
+            stripeApiRepository,
+            enableLogging = enableLogging,
+            Dispatchers.IO
+        )
+    }
+
+    /**
+     * Fetch the correct [PaymentFlowResultProcessor] based on current [ClientSecret].
+     *
+     * Should always be injected with [Provider].
+     */
+    @Provides
+    fun providePaymentFlowResultProcessor(
+        clientSecret: ClientSecret,
+        paymentIntentFlowResultProcessor: PaymentIntentFlowResultProcessor,
+        setupIntentFlowResultProcessor: SetupIntentFlowResultProcessor
     ): PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>> {
         return when (clientSecret) {
-            is PaymentIntentClientSecret -> PaymentIntentFlowResultProcessor(
-                appContext,
-                { lazyPaymentConfiguration.get().publishableKey },
-                stripeApiRepository,
-                enableLogging = enableLogging,
-                Dispatchers.IO
-            )
-            is SetupIntentClientSecret -> SetupIntentFlowResultProcessor(
-                appContext,
-                { lazyPaymentConfiguration.get().publishableKey },
-                stripeApiRepository,
-                enableLogging = enableLogging,
-                Dispatchers.IO
-            )
+            is PaymentIntentClientSecret -> paymentIntentFlowResultProcessor
+            is SetupIntentClientSecret -> setupIntentFlowResultProcessor
         }
     }
 }

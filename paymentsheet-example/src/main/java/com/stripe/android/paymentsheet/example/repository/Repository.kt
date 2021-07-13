@@ -4,6 +4,7 @@ import com.stripe.android.paymentsheet.example.service.CheckoutResponse
 
 internal interface Repository {
     sealed class CheckoutCustomer(val value: String) {
+        object Guest : CheckoutCustomer("guest")
         object New : CheckoutCustomer("new")
         object Returning : CheckoutCustomer("returning")
         data class WithId(val customerId: String) : CheckoutCustomer(customerId)

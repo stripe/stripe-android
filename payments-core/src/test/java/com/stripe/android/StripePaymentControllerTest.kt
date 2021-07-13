@@ -18,8 +18,6 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
@@ -27,8 +25,6 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.utils.ParcelUtils
-import com.stripe.android.view.AuthActivityStarterHost
-import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -37,12 +33,8 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
-import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
@@ -70,11 +62,6 @@ internal class StripePaymentControllerTest {
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
-    private val host = AuthActivityStarterHost.create(activity)
-
-    private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
-    private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
-
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val controller = createController()
@@ -156,7 +143,13 @@ internal class StripePaymentControllerTest {
                     Triple(paymentIntent.id.orEmpty(), sourceId, REQUEST_OPTIONS)
                 )
 
-            assertThat(paymentIntentResult).isEqualTo(PaymentIntentResult(paymentIntent))
+            assertThat(paymentIntentResult).isEqualTo(
+                PaymentIntentResult(
+                    paymentIntent,
+                    0,
+                    "We are unable to authenticate your payment method. Please choose a different payment method and try again."
+                )
+            )
         }
 
     @Test
@@ -168,27 +161,6 @@ internal class StripePaymentControllerTest {
             )
         ).isTrue()
     }
-
-    @Test
-    fun startAuthenticateSource_withNoneFlowSource_shouldBypassAuth() =
-        testDispatcher.runBlockingTest {
-            controller.startAuthenticateSource(
-                host = host,
-                source = SourceFixtures.SOURCE_WITH_SOURCE_ORDER.copy(
-                    flow = Source.Flow.None
-                ),
-                requestOptions = REQUEST_OPTIONS
-            )
-            verify(activity).startActivityForResult(
-                intentArgumentCaptor.capture(),
-                eq(StripePaymentController.SOURCE_REQUEST_CODE)
-            )
-            val intent = intentArgumentCaptor.firstValue
-            assertThat(intent.component?.className)
-                .isEqualTo(PaymentRelayActivity::class.java.name)
-
-            verifyAnalytics(AnalyticsEvent.AuthSourceStart)
-        }
 
     @Test
     fun result_creationRoundTrip_shouldReturnExpectedObject() {
@@ -324,15 +296,6 @@ internal class StripePaymentControllerTest {
             )
             return confirmPaymentIntentResponse
         }
-    }
-
-    private fun verifyAnalytics(event: AnalyticsEvent) {
-        verify(analyticsRequestExecutor)
-            .executeAsync(analyticsRequestArgumentCaptor.capture())
-        val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-        assertThat(
-            analyticsRequest.compactParams?.get(AnalyticsRequestFactory.FIELD_EVENT)
-        ).isEqualTo(event.toString())
     }
 
     private companion object {

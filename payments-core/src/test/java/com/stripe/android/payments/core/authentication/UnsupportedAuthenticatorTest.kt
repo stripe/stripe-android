@@ -52,7 +52,6 @@ class UnsupportedAuthenticatorTest {
         authenticator.authenticate(
             mock(),
             PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
-            null,
             REQUEST_OPTIONS
         )
 
@@ -77,7 +76,6 @@ class UnsupportedAuthenticatorTest {
         authenticator.authenticate(
             mock(),
             PI_SUCCEEDED,
-            null,
             REQUEST_OPTIONS
         )
 

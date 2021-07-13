@@ -39,6 +39,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
+    internal val merchantName = config?.merchantDisplayName
+        ?: application.applicationInfo.loadLabel(application.packageManager).toString()
 
     // a fatal error
     protected val _fatal = MutableLiveData<Throwable>()

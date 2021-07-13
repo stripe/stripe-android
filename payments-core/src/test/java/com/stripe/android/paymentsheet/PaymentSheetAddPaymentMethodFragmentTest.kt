@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -19,6 +20,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -242,6 +244,26 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
+    fun `when payment method is selected then merchant name is passed in fragment arguments`() {
+        createFragment { fragment, viewBinding ->
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+
+            idleLooper()
+
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                viewBinding.paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(
+                addedFragment?.arguments?.getString(
+                    ComposeFormDataCollectionFragment.EXTRA_MERCHANT_NAME
+                )
+            ).isEqualTo(PaymentSheetFixtures.MERCHANT_DISPLAY_NAME)
+        }
+    }
+
+    @Test
     fun `when payment method selection changes then it's updated in ViewModel`() {
         createFragment { fragment, viewBinding ->
             assertThat(
@@ -264,6 +286,89 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             idleLooper()
             assertThat(paymentSelection).isNull()
         }
+    }
+
+    @Test
+    fun `payment method selection has the fields from formFieldValues`() {
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = emptyMap(),
+            saveForFutureUse = true,
+            showsMandate = false
+        )
+        val selection = BaseAddPaymentMethodFragment.transformToPaymentSelection(
+            formFieldValues,
+            mapOf(
+                "type" to "sofort"
+            ),
+            SupportedPaymentMethod.Sofort
+        )
+        assertThat(selection?.shouldSavePaymentMethod).isTrue()
+        assertThat(selection?.labelResource).isEqualTo(
+            com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_sofort
+        )
+        assertThat(selection?.iconResource).isEqualTo(
+            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_pm_sofort
+        )
+    }
+
+    @Test
+    fun `Verify Compose argument in guest setup intent`() {
+        val args = Bundle()
+        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
+            args,
+            isCustomer = false,
+            isSetupIntent = true
+        )
+
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
+            .isFalse()
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
+            .isTrue()
+    }
+
+    @Test
+    fun `Verify Compose argument in guest payment intent`() {
+        val args = Bundle()
+        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
+            args,
+            isCustomer = false,
+            isSetupIntent = false
+        )
+
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
+            .isFalse()
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
+            .isFalse()
+    }
+
+    @Test
+    fun `Verify Compose argument in new or returning user setup intent`() {
+        val args = Bundle()
+        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
+            args,
+            isCustomer = true,
+            isSetupIntent = true
+        )
+
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
+            .isFalse()
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
+            .isTrue()
+    }
+
+    @Test
+    fun `Verify Compose argument in new or returning user payment intent`() {
+        val args = Bundle()
+        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
+            args,
+            isCustomer = true,
+            isSetupIntent = false
+        )
+
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
+            .isTrue()
+        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
+            .isTrue()
     }
 
     private fun createFragment(
