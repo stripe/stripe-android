@@ -9,6 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.googlepaylauncher.FakeGooglePayRepository
 import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
