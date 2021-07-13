@@ -49,7 +49,7 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun create3ds2Challenge(
         event: AnalyticsEvent,
-        uiTypeCode: String
+        uiTypeCode: String?
     ): AnalyticsRequest {
         return createRequest(
             event,

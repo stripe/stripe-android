@@ -47,10 +47,6 @@ module = "androidx.lifecycle:lifecycle-viewmodel-savedstate"
 version.ref = "androidx-lifecycle"
 module = "androidx.lifecycle:lifecycle-viewmodel-ktx"
 
-[libraries.androidx-localbroadcastmanager]
-version = "1.0.0"
-module = "androidx.localbroadcastmanager:localbroadcastmanager"
-
 [libraries.androidx-navigation-fragment-ktx]
 version.ref = "androidx-navigation"
 module = "androidx.navigation:navigation-fragment-ktx"
