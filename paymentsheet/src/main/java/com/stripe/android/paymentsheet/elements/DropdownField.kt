@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,7 +44,11 @@ internal fun DropDown(
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (enabled) {
-        Color.Unspecified
+        if (isSystemInDarkTheme()) {
+            Color.White
+        } else {
+            Color.Unspecified
+        }
     } else {
         TextFieldDefaults.textFieldColors().indicatorColor(enabled, false, interactionSource).value
     }

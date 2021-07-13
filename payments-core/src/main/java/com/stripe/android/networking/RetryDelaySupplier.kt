@@ -1,11 +1,18 @@
 package com.stripe.android.networking
 
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.pow
 
+@Singleton
 internal class RetryDelaySupplier(
-    private val incrementSeconds: Long = DEFAULT_INCREMENT_SECONDS
+    private val incrementSeconds: Long
 ) {
+
+    @Inject
+    constructor() : this(DEFAULT_INCREMENT_SECONDS)
+
     /**
      * Calculate an exponential backoff delay before retrying the next completion request
      * using the equation:

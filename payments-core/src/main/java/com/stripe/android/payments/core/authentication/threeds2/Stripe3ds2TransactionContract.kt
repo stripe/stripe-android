@@ -5,9 +5,12 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import kotlinx.parcelize.Parcelize
 
 internal class Stripe3ds2TransactionContract :
@@ -29,11 +32,17 @@ internal class Stripe3ds2TransactionContract :
 
     @Parcelize
     data class Args(
+        val sdkTransactionId: SdkTransactionId,
+        val config: PaymentAuthConfig.Stripe3ds2Config,
         val stripeIntent: StripeIntent,
         val nextActionData: StripeIntent.NextActionData.SdkData.Use3DS2,
         val threeDs1ReturnUrl: String?,
-        val requestOptions: ApiRequest.Options
+        val requestOptions: ApiRequest.Options,
+        val enableLogging: Boolean,
+        val statusBarColor: Int?
     ) : Parcelable {
+        val fingerprint: Stripe3ds2Fingerprint get() = Stripe3ds2Fingerprint(nextActionData)
+
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {

@@ -22,7 +22,6 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.CountryCode
 import com.stripe.android.view.CardFormView.Style
@@ -304,22 +303,6 @@ class CardFormView @JvmOverloads constructor(
         }
 
         cardMultilineWidget.setCvcIcon(R.drawable.stripe_ic_paymentsheet_cvc)
-
-        cardMultilineWidget.cardBrandIconSupplier =
-            CardMultilineWidget.CardBrandIconSupplier { cardBrand ->
-                CardMultilineWidget.CardBrandIcon(
-                    when (cardBrand) {
-                        CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa
-                        CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex
-                        CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover
-                        CardBrand.JCB -> R.drawable.stripe_ic_paymentsheet_card_jcb
-                        CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
-                        CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
-                        CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
-                        CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
-                    }
-                )
-            }
 
         cardMultilineWidget.cardNumberErrorListener =
             StripeEditText.ErrorMessageListener { errorMessage ->

@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
@@ -29,7 +29,7 @@ class AnalyticsRequestExecutorTest {
     private val analyticsRequest =
         AnalyticsRequestFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
             .createPaymentMethodCreation(
-                PaymentMethodCreateParams.Type.Card,
+                PaymentMethod.Type.Card,
                 emptySet()
             )
 
