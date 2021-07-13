@@ -122,7 +122,11 @@ internal class PaymentAuthWebViewActivityViewModel(
             return PaymentAuthWebViewActivityViewModel(
                 args,
                 AnalyticsRequestExecutor.Default(logger),
-                AnalyticsRequestFactory(application, publishableKey)
+                AnalyticsRequestFactory(
+                    application,
+                    publishableKey,
+                    defaultProductUsageTokens = setOf("PaymentAuthWebViewActivity")
+                )
             ) as T
         }
     }
