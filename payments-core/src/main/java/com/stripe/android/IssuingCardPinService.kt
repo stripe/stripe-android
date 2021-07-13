@@ -6,6 +6,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.EphemeralKeyManager.KeyManagerListener
 import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -370,7 +371,16 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         ): IssuingCardPinService {
             return IssuingCardPinService(
                 keyProvider,
-                StripeApiRepository(context, { publishableKey }, appInfo),
+                StripeApiRepository(
+                    context,
+                    { publishableKey },
+                    appInfo,
+                    analyticsRequestFactory = AnalyticsRequestFactory(
+                        context,
+                        { publishableKey },
+                        defaultProductUsageTokens = setOf("IssuingCardPinService")
+                    )
+                ),
                 StripeOperationIdFactory(),
                 stripeAccountId = stripeAccountId
             )
