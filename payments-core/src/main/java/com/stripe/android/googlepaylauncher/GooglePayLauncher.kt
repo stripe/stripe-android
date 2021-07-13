@@ -14,7 +14,12 @@ import kotlinx.parcelize.Parcelize
 import java.util.Locale
 
 /**
- * A drop-in class that presents a Google Pay sheet to collect a customer's payment.
+ * A drop-in class that presents a Google Pay sheet to collect customer payment details and use it
+ * to confirm a [PaymentIntent] or [SetupIntent]. When successful, will return [Result.Completed].
+ *
+ * Use [GooglePayLauncherContract] for Jetpack Compose integrations.
+ *
+ * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
 class GooglePayLauncher internal constructor(
     lifecycleScope: CoroutineScope,
