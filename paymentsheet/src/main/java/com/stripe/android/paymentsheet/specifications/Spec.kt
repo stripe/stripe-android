@@ -66,7 +66,7 @@ sealed class FormItemSpec {
 /**
  * This represents a field in a section.
  */
-sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
+sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     object Name : SectionFieldSpec(IdentifierSpec("name"))
 
     object Email : SectionFieldSpec(IdentifierSpec("email"))
@@ -80,4 +80,6 @@ sealed class SectionFieldSpec(val identifier: IdentifierSpec) {
         SectionFieldSpec(IdentifierSpec("country"))
 
     object IdealBank : SectionFieldSpec(IdentifierSpec("bank"))
+
+    data class GenericText(override val identifier: IdentifierSpec) : SectionFieldSpec(identifier)
 }

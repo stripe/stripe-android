@@ -15,3 +15,19 @@ internal val billingParams: MutableMap<String, Any?> = mutableMapOf(
     "email" to null,
     "phone" to null,
 )
+
+internal val billingUS = FormSpec(
+    LayoutSpec(
+        listOf(
+            FormItemSpec.SectionSpec(IdentifierSpec("name"), SectionFieldSpec.Name),
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("billingSection"),
+                SectionFieldSpec.GenericText(IdentifierSpec("city"))
+            ),
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("country"), SectionFieldSpec.Country()
+            ),
+        )
+    ),
+    sofortParamKey,
+)

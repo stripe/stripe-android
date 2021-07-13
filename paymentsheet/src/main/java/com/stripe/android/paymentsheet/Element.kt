@@ -101,6 +101,7 @@ enum class ElementType {
     SaveForFutureUse,
     Mandate,
     IdealBank,
+    GenericText
 }
 
 /**
