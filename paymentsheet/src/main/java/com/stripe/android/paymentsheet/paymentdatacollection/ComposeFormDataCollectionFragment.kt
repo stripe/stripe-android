@@ -69,7 +69,7 @@ class ComposeFormDataCollectionFragment : Fragment() {
      * should show its UI as enabled or disabled.
      */
     fun setProcessing(processing: Boolean) {
-        // TODO: Enable or disable views accordingly
+        formViewModel.setEnabled(!processing)
     }
 
     companion object {

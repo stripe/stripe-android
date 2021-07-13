@@ -12,10 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.GooglePayRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
@@ -112,12 +109,6 @@ class GooglePayLauncherTest {
         assertThat(
             CONFIG.copy(merchantCountryCode = "jp").isJcbEnabled
         ).isTrue()
-    }
-
-    private class FakeGooglePayRepository(
-        private var isReady: Boolean
-    ) : GooglePayRepository {
-        override fun isReady(): Flow<Boolean> = flowOf(isReady)
     }
 
     private class FakeActivityResultRegistry(

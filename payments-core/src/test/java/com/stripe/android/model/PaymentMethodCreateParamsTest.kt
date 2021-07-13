@@ -5,7 +5,6 @@ import com.stripe.android.CardNumberFixtures
 import com.stripe.android.view.AddPaymentMethodActivity
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class PaymentMethodCreateParamsTest {
 
@@ -159,13 +158,15 @@ class PaymentMethodCreateParamsTest {
 
     @Test
     fun equals_withFpx() {
-        assertEquals(createFpx(), createFpx())
+        assertThat(createFpx())
+            .isEqualTo(createFpx())
     }
 
     @Test
     fun attribution_whenFpxAndProductUsageIsEmpty_shouldBeNull() {
         val params = createFpx()
-        assertNull(params.attribution)
+        assertThat(params.attribution)
+            .isEmpty()
     }
 
     @Test

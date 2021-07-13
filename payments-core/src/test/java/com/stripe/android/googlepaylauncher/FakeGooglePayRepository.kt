@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.googlepaylauncher
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

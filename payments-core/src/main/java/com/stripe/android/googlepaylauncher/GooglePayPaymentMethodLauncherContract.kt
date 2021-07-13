@@ -6,9 +6,10 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
-internal class GooglePayPaymentMethodLauncherContract :
+class GooglePayPaymentMethodLauncherContract :
     ActivityResultContract<GooglePayPaymentMethodLauncherContract.Args, GooglePayPaymentMethodLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
@@ -37,13 +38,21 @@ internal class GooglePayPaymentMethodLauncherContract :
             )
     }
 
+    /**
+     * Args for launching [GooglePayPaymentMethodLauncherContract] to create a [PaymentMethod].
+     *
+     * @param config the [GooglePayPaymentMethodLauncher.Config] for this transaction
+     * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
+     * @param amount if the amount of the transaction is unknown at this time, set to `0`.
+     */
     @Parcelize
     data class Args(
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
         internal val amount: Int
     ) : Parcelable {
-        fun toBundle() = bundleOf(EXTRA_ARGS to this)
+
+        internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.GrayLight
 
 internal data class CardStyle(
     val cardBorderColor: Color = Color(0x14000000),
@@ -26,12 +27,17 @@ internal data class CardStyle(
  */
 @ExperimentalAnimationApi
 @Composable
-internal fun Section(error: String?, content: @Composable () -> Unit) {
+internal fun Section(error: String?, enabled: Boolean, content: @Composable () -> Unit) {
     val cardStyle = CardStyle()
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Card(
             border = BorderStroke(cardStyle.cardBorderWidth, cardStyle.cardBorderColor),
-            elevation = cardStyle.cardElevation
+            elevation = cardStyle.cardElevation,
+            backgroundColor = if (enabled) {
+                MaterialTheme.colors.surface
+            } else {
+                GrayLight
+            }
         ) {
             content()
         }
