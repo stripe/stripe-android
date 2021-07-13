@@ -388,12 +388,18 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Upgrade BouncyCastle to `1.65`
 
 ## 14.2.1 - 2020-03-26
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
 * [#2304](https://github.com/stripe/stripe-android/pull/2304) Force Canadian postal codes to be uppercase
 * [#2315](https://github.com/stripe/stripe-android/pull/2315) Add `Fragment` support to `AddPaymentMethodActivityStarter`
 * [#2325](https://github.com/stripe/stripe-android/pull/2325) Update `BecsDebitWidget`
 
 ## 14.2.0 - 2020-03-18
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+
 * [#2278](https://github.com/stripe/stripe-android/pull/2278) Add ability to require US ZIP code in `CardInputWidget` and `CardMultilineWidget`
 * [#2279](https://github.com/stripe/stripe-android/pull/2279) Default `CardMultilineWidget` to global postal code configuration
 * [#2282](https://github.com/stripe/stripe-android/pull/2282) Update pinned API version to `2020-03-02`
@@ -407,6 +413,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2297](https://github.com/stripe/stripe-android/pull/2297) Add `BecsDebitWidget.ValidParamsCallback`
 
 ## 14.1.1 - 2020-03-09
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+
 * [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
 * [#2260](https://github.com/stripe/stripe-android/pull/2260) Update Kotlin Gradle Plugin to `1.3.70`
 * [#2271](https://github.com/stripe/stripe-android/pull/2271) Update Proguard rules to remove unneeded BouncyCastle class
@@ -414,6 +423,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2274](https://github.com/stripe/stripe-android/pull/2274) Make `ConfirmPaymentIntentParams#savePaymentMethod` nullable
 
 ## 14.1.0 - 2020-03-02
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+
 * [#2207](https://github.com/stripe/stripe-android/pull/2207) Add `CardInputWidget#setPostalCodeTextWatcher`
 * [#2211](https://github.com/stripe/stripe-android/pull/2211) Add support for 16-digit Diners Club card numbers
 * [#2215](https://github.com/stripe/stripe-android/pull/2215) Set `CardInputWidget`'s postal code field's IME action to done
@@ -428,6 +440,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 ## 14.0.0 - 2020-02-18
 This release includes several breaking changes.
 See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
+
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
 
 * [#2136](https://github.com/stripe/stripe-android/pull/2136) Update `com.google.android.material:material` to `1.1.0`
 * [#2141](https://github.com/stripe/stripe-android/pull/2141) Fix crash when deleting a payment method in `PaymentMethodsActivity`
@@ -475,18 +490,30 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * Include sources
 
 ## 13.2.0 - 2020-02-03
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [13.2.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1330---2020-05-15) or greater.*
+
 * [#2112](https://github.com/stripe/stripe-android/pull/2112) Enable adding Mandate to confirm params
 * [#2113](https://github.com/stripe/stripe-android/pull/2113) Enable requiring postal code in `CardInputWidget` and `CardMultilineWidget`
 * [#2114](https://github.com/stripe/stripe-android/pull/2114) Fix bug in highlighting `StripeEditText` fields with errors
 
 ## 13.1.3 - 2020-01-27
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [13.2.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1330---2020-05-15) or greater.*
+
 * [#2105](https://github.com/stripe/stripe-android/pull/2105) Fix crash when confirming a Payment Intent or Setup Intent and an error is encountered
 
 ## 13.1.2 - 2020-01-23
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [13.2.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1330---2020-05-15) or greater.*
+
 * [#2093](https://github.com/stripe/stripe-android/pull/2093) Add `CardValidCallback` and add support in card forms
 * [#2094](https://github.com/stripe/stripe-android/pull/2094) Make `StripeError` serializable
 
 ## 13.1.1 - 2020-01-22
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [13.2.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1330---2020-05-15) or greater.*
+
 * [#2074](https://github.com/stripe/stripe-android/pull/2074) Populate `isSelected` for selected `PaymentMethodsAdapter` item
 * [#2076](https://github.com/stripe/stripe-android/pull/2076) Announce invalid fields when validating `CardInputWidget`
 * [#2077](https://github.com/stripe/stripe-android/pull/2077) Add delete payment method accessibility action in `PaymentMethodsAdapter`
@@ -500,6 +527,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Deprecate `BankAccount` for token creation
 
 ## 13.1.0 - 2020-01-16
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [13.2.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1330---2020-05-15) or greater.*
+
 * [#2055](https://github.com/stripe/stripe-android/pull/2055) Fix styling of `CardInputWidget` and `CardMultilineWidget`
     * `com.google.android.material:material:1.1.0-rc01` breaks `TextInputLayout` styling;
       fix by explicitly setting a style that extends `Widget.Design.TextInputLayout`
@@ -514,6 +544,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 ## 13.0.0 - 2020-01-13
 This release includes several breaking changes.
 See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
+
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [13.2.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1330---2020-05-15) or greater.*
 
 * [#1950](https://github.com/stripe/stripe-android/pull/1950) Add idempotency key for `Stripe` API POST methods
      ```kotlin
@@ -636,6 +669,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * Include sources
 
 ## 12.8.2 - 2019-12-20
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
     * Mark `PaymentSessionConfig#init()` with `shouldPrefetchCustomer` argument as deprecated
 * [#1980](https://github.com/stripe/stripe-android/pull/1980) Don't show a `Dialog` in `StripeActivity` if `isFinishing()`
@@ -643,10 +679,16 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1990](https://github.com/stripe/stripe-android/pull/1990) Relax validation of UK postal codes
 
 ## 12.8.1 - 2019-12-18
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1968](https://github.com/stripe/stripe-android/pull/1968) Upgrade 3DS2 SDK to `2.2.7`
     * Downgrade to `com.google.android.material:material:1.0.0`
 
 ## 12.8.0 - 2019-12-17
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1947](https://github.com/stripe/stripe-android/pull/1947) Allow setting of window flags on Stripe Activities
     * Basic Integration
       ```
@@ -680,6 +722,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1959](https://github.com/stripe/stripe-android/pull/1959) Upgrade 3DS2 SDK to `2.2.6`
 
 ## 12.7.0 - 2019-12-16
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1915](https://github.com/stripe/stripe-android/pull/1915) Update API version to [2019-12-03](https://stripe.com/docs/upgrades#2019-12-03)
 * [#1928](https://github.com/stripe/stripe-android/pull/1928) Make Payment Method `Wallet` a sealed class
 * [#1930](https://github.com/stripe/stripe-android/pull/1930) Update text size for `CardInputWidget` fields
@@ -702,10 +747,16 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
       * Kotlin: `cardInputWidget.postalCodeEnabled = true`
 
 ## 12.6.1 - 2019-12-02
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1897](https://github.com/stripe/stripe-android/pull/1897) Upgrade 3DS2 SDK to `2.2.4`
     * Fix crash when using Instant App
 
 ## 12.6.0 - 2019-11-27
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1859](https://github.com/stripe/stripe-android/pull/1859) Create `GooglePayJsonFactory`, a factory for generating Google Pay JSON request objects
 * [#1860](https://github.com/stripe/stripe-android/pull/1860) Namespace drawables with `stripe_` prefix
 * [#1861](https://github.com/stripe/stripe-android/pull/1861) Create `GooglePayResult` to parse and model Google Pay Payment Data response
@@ -728,6 +779,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Fix crash when using Instant App
 
 ## 12.5.0 - 2019-11-21
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1836](https://github.com/stripe/stripe-android/pull/1836) Add support for [statement_descriptor](https://stripe.com/docs/api/sources/object#source_object-statement_descriptor) field to `Source` model via `Source#statementDescriptor`
 * [#1837](https://github.com/stripe/stripe-android/pull/1837) Add support for [source_order](https://stripe.com/docs/api/sources/create#create_source-source_order) param via `SourceOrderParams`
 * [#1839](https://github.com/stripe/stripe-android/pull/1839) Add support for [source_order](https://stripe.com/docs/api/sources/object#source_object-source_order) field to `Source` model via `Source#sourceOrder`
@@ -747,6 +801,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Add Proguard rules
 
 ## 12.4.0 - 2019-11-13
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1792](https://github.com/stripe/stripe-android/pull/1792) Remove default selection of a Payment Method from `PaymentMethodsActivity`
 * [#1797](https://github.com/stripe/stripe-android/pull/1797) Document `StripeDefaultTheme` style
 * [#1799](https://github.com/stripe/stripe-android/pull/1799) Document `Stripe3DS2Theme` and related styles
@@ -760,6 +817,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * `PaymentSession#handlePaymentData()` now calls `PaymentSessionListener#onPaymentSessionDataChanged()` for any result from `PaymentMethodsActivity`
 
 ## 12.3.0 - 2019-11-05
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1775](https://github.com/stripe/stripe-android/pull/1775) Add support for idempotency key on Stripe Token API requests
 * [#1777](https://github.com/stripe/stripe-android/pull/1777) Make `Card` implement `Parcelable`
 * [#1781](https://github.com/stripe/stripe-android/pull/1781) Mark `Stripe#createToken()` as `@Deprecated`; replace with `Stripe#createCardToken()`
@@ -769,6 +829,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1788](https://github.com/stripe/stripe-android/pull/1788) Fix `ExpiryDateEditText` performance
 
 ## 12.2.0 - 2019-10-31
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1745](https://github.com/stripe/stripe-android/pull/1745) Make `StripeEditText` public
 * [#1746](https://github.com/stripe/stripe-android/pull/1746) Make `FpxBank` enum public
 * [#1748](https://github.com/stripe/stripe-android/pull/1748) Update FPX bank list with offline status
@@ -778,14 +841,23 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1765](https://github.com/stripe/stripe-android/pull/1765) Fix rotation issues with shipping info and shipping method selection screens
 
 ## 12.1.0 - 2019-10-22
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1738](https://github.com/stripe/stripe-android/pull/1738) Enable specifying Payment Method type to use in UI components
 
 ## 12.0.1 - 2019-10-21
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1721](https://github.com/stripe/stripe-android/pull/1721) Properly cleanup and destroy `PaymentAuthWebView`
 * [#1722](https://github.com/stripe/stripe-android/pull/1722) Fix crash in 3DS2 challenge screen when airplane mode is enabled
 * [#1731](https://github.com/stripe/stripe-android/pull/1731) Create `ConfirmSetupIntentParams.createWithoutPaymentMethod()`
 
 ## 12.0.0 - 2019-10-16
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [12.9.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1290---2020-05-15) or greater.*
+
 * [#1699](https://github.com/stripe/stripe-android/pull/1699) Remove deprecated methods
     * Replace `Stripe#createTokenSynchronous(Card)` with `Stripe#createCardTokenSynchronous(Card)`
     * Replace `Card#getCVC()` with `Card#getCvc()`
@@ -802,14 +874,23 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * Include sources
 
 ## 11.2.2 - 2019-10-11
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1686](https://github.com/stripe/stripe-android/pull/1686) Fix native crash on some devices in 3DS1 payment authentication WebView
 * [#1690](https://github.com/stripe/stripe-android/pull/1690) Bump API version to `2019-10-08`
 * [#1693](https://github.com/stripe/stripe-android/pull/1693) Add support for SEPA Debit in PaymentMethod
 
 ## 11.2.1 - 2019-10-11
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1677](https://github.com/stripe/stripe-android/pull/1677) Add logging to PaymentAuthWebViewActivity
 
 ## 11.2.0 - 2019-10-07
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1616](https://github.com/stripe/stripe-android/pull/1616) Make `AddPaymentMethodActivityStarter.Result.fromIntent()` public
 * [#1619](https://github.com/stripe/stripe-android/pull/1619) Add `CardMultilineWidget#getPaymentMethodBillingDetailsBuilder()`
 * [#1643](https://github.com/stripe/stripe-android/pull/1643) Create `Stripe.createCardTokenSynchronous()`
@@ -841,10 +922,16 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Prevent challenge screen's cancel button from being clicked more than once
 
 ## 11.1.4 - 2019-09-24
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1603](https://github.com/stripe/stripe-android/pull/1603) Update ProGuard rules for BouncyCastle
 * [#1608](https://github.com/stripe/stripe-android/pull/1608) Update ProGuard rules for Material Components
 
 ## 11.1.3 - 2019-09-18
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1582](https://github.com/stripe/stripe-android/pull/1582) Update 3DS2 SDK to 2.0.5
     * Add translations for `ko`, `nn`, `ru`, and `tr`
 * [#1583](https://github.com/stripe/stripe-android/pull/1583) Create `AddPaymentMethodActivityStarter.Result`
@@ -863,12 +950,21 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1587](https://github.com/stripe/stripe-android/pull/1587) Fix logic for entering 3DS2 challenge flow
 
 ## 11.1.2 - 2019-09-18
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1581](https://github.com/stripe/stripe-android/pull/1581) Fix WebView issues in API 21 and 22
 
 ## 11.1.1 - 2019-09-17
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1578](https://github.com/stripe/stripe-android/pull/1578) Disable dokka in `:stripe` to fix release process
 
 ## 11.1.0 - 2019-09-17
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1545](https://github.com/stripe/stripe-android/pull/1545) Add Connect Account Id support to `GooglePayConfig`
 * [#1560](https://github.com/stripe/stripe-android/pull/1560) Add swipe-to-delete gesture on added Payment Methods in `PaymentMethodsActivity`
 * [#1560](https://github.com/stripe/stripe-android/pull/1560) Fix `HandlerThread` leak in `PaymentController.ChallengeFlowStarterImpl`
@@ -878,26 +974,44 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1577](https://github.com/stripe/stripe-android/pull/1577) Fix `ShippingMethodView` height
 
 ## 11.0.5 - 2019-09-13
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1538](https://github.com/stripe/stripe-android/pull/1538) Update `PaymentAuthWebView` to fix issues
 
 ## 11.0.4 - 2019-09-13
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1533](https://github.com/stripe/stripe-android/pull/1533) Update 3DS2 SDK to 2.0.3
 * [#1534](https://github.com/stripe/stripe-android/pull/1534) Add ability to select checked item in `PaymentMethodsActivity`
 * [#1537](https://github.com/stripe/stripe-android/pull/1537) Fix out-of-band web payment authentication
 
 ## 11.0.3 - 2019-09-12
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1530](https://github.com/stripe/stripe-android/pull/1530) Finish `PaymentAuthWebViewActivity` after returning from bank app
 
 ## 11.0.2 - 2019-09-12
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1527](https://github.com/stripe/stripe-android/pull/1527) Support `"intent://"` URIs in payment auth WebView
 
 ## 11.0.1 - 2019-09-11
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1518](https://github.com/stripe/stripe-android/pull/1518) Fix crash when payment authentication is started from Fragment and user taps back twice
 * [#1523](https://github.com/stripe/stripe-android/pull/1523) Correctly handle deep-links in the in-app payment authentication WebView
 * [#1524](https://github.com/stripe/stripe-android/pull/1524) Update 3DS2 SDK to 2.0.2
     * Fix issue with 3DS2 encryption and older BouncyCastle versions
 
 ## 11.0.0 - 2019-09-10
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [11.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1130---2020-05-15) or greater.*
+
 * [#1474](https://github.com/stripe/stripe-android/pull/1474) Fix darkmode issue with "Add an Address" form's Country selection dropdown
 * [#1475](https://github.com/stripe/stripe-android/pull/1475) Hide keyboard after submitting "Add an Address" form in standard integration
 * [#1478](https://github.com/stripe/stripe-android/pull/1478) Migrate to AndroidX
@@ -923,6 +1037,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * Include sources
 
 ## 10.4.6 - 2019-10-14
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * Apply hot-fixes from 11.x
     * Update BouncyCastle Proguard rules.
       Keep only the BouncyCastle provider classes.
@@ -931,23 +1048,38 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
       on some devices.
 
 ## 10.4.5 - 2019-09-16
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * Apply hot-fixes from 11.x
     * Enable DOM storage in `PaymentAuthWebView` to fix crash
 
 ## 10.4.4 - 2019-09-13
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * Apply hot-fixes from 11.x
 
 ## 10.4.3 - 2019-09-04
 * [#1471](https://github.com/stripe/stripe-android/pull/1471) Fix issue with `CardUtils` visibility
 
 ## 10.4.2 - 2019-08-30
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1461](https://github.com/stripe/stripe-android/pull/1461) Fix crash in `PaymentAuthWebView`
 * [#1462](https://github.com/stripe/stripe-android/pull/1462) Animate selections in `PaymentMethodsActivity`
 
 ## 10.4.1 - 2019-08-30
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1457](https://github.com/stripe/stripe-android/pull/1457) Fix crash in "Add an Address" screen when value for Country is empty
 
 ## 10.4.0 - 2019-08-29
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1421](https://github.com/stripe/stripe-android/pull/1421) Create `PaymentMethodsActivityStarter.Result` to retrieve result of `PaymentMethodsActivity`
 * [#1427](https://github.com/stripe/stripe-android/pull/1427) Mark `Stripe` methods that accept a publishable key as deprecated
     ```
@@ -977,6 +1109,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Exclude `org.ow2.asm:asm` dependency
 
 ## 10.3.1 - 2018-08-22
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1394](https://github.com/stripe/stripe-android/pull/1394) Add `shouldPrefetchCustomer` arg to `PaymentSession.init()`
 * [#1395](https://github.com/stripe/stripe-android/pull/1395) Fix inconsistent usage of relative attributes on card icon in `CardMultilineWidget`
 * [#1412](https://github.com/stripe/stripe-android/pull/1412) Make `AddPaymentMethodActivityStarter()` available for starting `AddPaymentMethodActivity`
@@ -1010,6 +1145,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
       ```
 
 ## 10.3.0 - 2018-08-16
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1327](https://github.com/stripe/stripe-android/pull/1327) Deprecate `SourceCallback` and `TokenCallback`
     * Use `ApiResultCallback<Source>` and `ApiResultCallback<Token>` respectively
 * [#1332](https://github.com/stripe/stripe-android/pull/1332) Create `StripeParamsModel` interface for Stripe API param classes
@@ -1026,11 +1164,17 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Improve accessibility of select options on 3DS2 challenge screen by setting minimum height to 48dp
 
 ## 10.2.1 - 2019-08-06
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/-companion/index.html#com.stripe.android/Stripe.Companion/API_VERSION/#/PointingToDeclaration/)
 * [#1315](https://github.com/stripe/stripe-android/pull/1315) Create [SourceParams#createCardParamsFromGooglePay()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-source-params/-companion/create-card-params-from-google-pay.html)
 * [#1316](https://github.com/stripe/stripe-android/pull/1316) Fix issue where `InvalidRequestException` is thrown when confirming a Setup Intent using [ConfirmSetupIntentParams#create()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-confirm-setup-intent-params/-companion/create.html)
 
 ## 10.2.0 - 2019-08-05
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Add support for launching `PaymentSession` from a `Fragment`
     * [PaymentSession(Fragment)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-payment-session/index.html#com.stripe.android/PaymentSession/<init>/#androidx.fragment.app.Fragment#com.stripe.android.PaymentSessionConfig/PointingToDeclaration/)
 * [#1288](https://github.com/stripe/stripe-android/pull/1288) Upgrade Android Gradle Plugin to `3.5.0-rc02`
@@ -1046,12 +1190,18 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1304](https://github.com/stripe/stripe-android/pull/1304) Add [PaymentMethodCreateParams#createFromGooglePay()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-payment-method-create-params/-companion/create-from-google-pay.html) to create `PaymentMethodCreateParams` from a Google Pay [PaymentData](https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentData) object
 
 ## 10.1.1 - 2019-07-31
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Fix `StripeIntentResult.Status` logic
 * [#1276](https://github.com/stripe/stripe-android/pull/1276) Update Stripe 3DS2 library to `v1.1.5`
     * Fix crash in 3DS2 challenge flow when [conscrypt](https://github.com/google/conscrypt) is installed
 * [#1277](https://github.com/stripe/stripe-android/pull/1277) Fix StrictMode failure in `StripeFireAndForgetRequestExecutor`
 
 ## 10.1.0 - 2019-07-30
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1244](https://github.com/stripe/stripe-android/pull/1244) Add support for Stripe Connect in 3DS2
 * [#1256](https://github.com/stripe/stripe-android/pull/1256) Add `StripeIntentResult.Status` flag to 3DS1 authentication results
 * [#1257](https://github.com/stripe/stripe-android/pull/1257) Correctly pass `Status.FAILED` when 3DS2 auth fails
@@ -1063,14 +1213,23 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Add `Stripe3ds2UiCustomization.Builder.createWithAppTheme(Activity)` to create a `Stripe3ds2UiCustomization.Builder` based on the app theme
 
 ## 10.0.3 - 2019-07-24
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * Update Stripe 3DS2 library to `v1.1.2`
     * Disable R8 following [user-reported issue](https://github.com/stripe/stripe-android/issues/1236)
     * Update Proguard rules
 
 ## 10.0.2 - 2019-07-23
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1238](https://github.com/stripe/stripe-android/pull/1238) Update Proguard rules to fix integration issues with Stripe 3DS2 library
 
 ## 10.0.1 - 2019-07-22
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * [#1226](https://github.com/stripe/stripe-android/pull/1226) Prevent non-critical network requests from blocking API requests by moving fire-and-forget requests to separate thread
 * [#1228](https://github.com/stripe/stripe-android/pull/1228) Update to Android Gradle Plugin to 3.5.0-rc01
 * Update Stripe 3DS2 library to `v1.1.0`
@@ -1079,6 +1238,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Fix known issue with 3DS2 challenge flow and API 19 devices
 
 ## 10.0.0 - 2019-07-19
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [10.5.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1050---2020-05-15) or greater.*
+
 * Add support for 3DS2 authentication through the Payment Intents API and Setup Intents API. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
     * Payment Intents - see our guide for [Using Payment Intents on Android](https://stripe.com/docs/payments/payment-intents/android)
         * [Stripe#confirmPayment()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-payment.html) for automatic confirmation
@@ -1100,34 +1262,61 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * Include sources
 
 ## 9.3.8 - 2019-07-16
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1193](https://github.com/stripe/stripe-android/pull/1193) Fix `RuntimeException` related to 3DS2
 
 ## 9.3.7 - 2019-07-15
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1154](https://github.com/stripe/stripe-android/pull/1154) Fix `NullPointerException` in `PaymentMethodsActivity`
 * [#1174](https://github.com/stripe/stripe-android/pull/1174) Add `getCardBuilder()` method to Card widgets
 * [#1184](https://github.com/stripe/stripe-android/pull/1184) Fix `NullPointerException` related to 3DS2
 
 ## 9.3.6 - 2019-07-08
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1148](https://github.com/stripe/stripe-android/pull/1148) Fix 3DS2 dependency Proguard issues
 
 ## 9.3.5 - 2019-06-20
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1138](https://github.com/stripe/stripe-android/pull/1138) Fix `AppInfo` param name
 
 ## 9.3.4 - 2019-06-19
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1133](https://github.com/stripe/stripe-android/pull/1133) Make `AppInfo` public
 
 ## 9.3.3 - 2019-06-19
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1108](https://github.com/stripe/stripe-android/pull/1108) Create `Card#toBuilder()`
 * [#1114](https://github.com/stripe/stripe-android/pull/1114) Update `CustomerSession` methods to take `@NonNull` listener argument
 * [#1125](https://github.com/stripe/stripe-android/pull/1125) Create `StripeIntent` interface and move `PaymentIntent.Status` and `PaymentIntent.NextActionType` to `StripeIntent`
 
 ## 9.3.2 - 2019-06-12
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1104](https://github.com/stripe/stripe-android/pull/1104) Handle null response body
 
 ## 9.3.1 - 2019-06-12
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1099](https://github.com/stripe/stripe-android/pull/1099) Fix Gradle module issue
 
 ## 9.3.0 - 2019-06-12
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1019](https://github.com/stripe/stripe-android/pull/1019) Introduce `CustomerSession#detachPaymentMethod()`
 * [#1067](https://github.com/stripe/stripe-android/pull/1067) Remove `PaymentResultListener`. Replace `PaymentSession#completePayment()` with `PaymentSession#onCompleted()`.
 * [#1075](https://github.com/stripe/stripe-android/pull/1075) Make model classes final
@@ -1137,14 +1326,23 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1093](https://github.com/stripe/stripe-android/pull/1093) Add `Stripe#setAppInfo()`. See [Identifying your plug-in or library](https://stripe.com/docs/building-plugins#setappinfo) for more details.
 
 ## 9.2.0 - 2019-06-04
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1019](https://github.com/stripe/stripe-android/pull/1019) Upgrade pinned API version to `2019-05-16`
 * [#1036](https://github.com/stripe/stripe-android/pull/1036) Validate API key before every request
 * [#1046](https://github.com/stripe/stripe-android/pull/1046) Make `Card` model fields immutable
 
 ## 9.1.1 - 2019-05-28
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#1006](https://github.com/stripe/stripe-android/pull/1006) Remove null values in `PaymentMethod.BillingDetails#toMap()`
 
 ## 9.1.0 - 2019-05-28
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#952](https://github.com/stripe/stripe-android/pull/952) Update standard integration UI to use PaymentMethods instead of Sources
 * [#962](https://github.com/stripe/stripe-android/pull/962) Add initial dark theme support to widgets
 * [#963](https://github.com/stripe/stripe-android/pull/963) Add Autofill hints to forms
@@ -1154,10 +1352,17 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1001](https://github.com/stripe/stripe-android/pull/1001) Overload `PaymentSession#presentPaymentMethodSelection` to allow requiring postal field
 
 ## 9.0.1 - 2019-05-17
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#945](https://github.com/stripe/stripe-android/pull/945) Add `business_type` param to Account tokenization when available
 
 ## 9.0.0 - 2019-05-06
 Note: this release has breaking changes. See [MIGRATING.md](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md)
+
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements.*
+*Please upgrade to version [9.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#940---2020-05-15) or greater.*
+
 * [#873](https://github.com/stripe/stripe-android/pull/873) Update pinned API version to `2019-03-14`
 * [#875](https://github.com/stripe/stripe-android/pull/875) Inject `Context` in `CustomerSession` and `StripeApiHandler`
 * [#907](https://github.com/stripe/stripe-android/pull/907) Update `PaymentIntent` model for API `2019-02-11`
