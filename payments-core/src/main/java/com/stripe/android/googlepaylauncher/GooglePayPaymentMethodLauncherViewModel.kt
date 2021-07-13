@@ -15,6 +15,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -118,15 +119,24 @@ internal class GooglePayPaymentMethodLauncherViewModel(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val googlePayEnvironment = args.config.environment
+            val logger = Logger.getInstance(enableLogging)
 
             val config = PaymentConfiguration.getInstance(application)
             val publishableKey = config.publishableKey
             val stripeAccountId = config.stripeAccountId
 
+            val analyticsRequestFactory = AnalyticsRequestFactory(
+                application,
+                publishableKey,
+                setOf(PRODUCT_USAGE)
+            )
+
             val stripeRepository = StripeApiRepository(
                 application,
                 { publishableKey },
-                workContext = workContext
+                logger = logger,
+                workContext = workContext,
+                analyticsRequestFactory = analyticsRequestFactory
             )
 
             val billingAddressConfig = args.config.billingAddressConfig
@@ -146,7 +156,7 @@ internal class GooglePayPaymentMethodLauncherViewModel(
                     billingAddressConfig.isPhoneNumberRequired
                 ),
                 args.config.existingPaymentMethodRequired,
-                Logger.getInstance(enableLogging)
+                logger
             )
 
             return GooglePayPaymentMethodLauncherViewModel(
@@ -164,5 +174,9 @@ internal class GooglePayPaymentMethodLauncherViewModel(
                 googlePayRepository
             ) as T
         }
+    }
+
+    private companion object {
+        private const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
     }
 }

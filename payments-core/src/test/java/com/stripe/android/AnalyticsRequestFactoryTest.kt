@@ -181,12 +181,17 @@ class AnalyticsRequestFactoryTest {
             it.packageName = BuildConfig.LIBRARY_PACKAGE_NAME
         }
 
-        val params =
-            AnalyticsRequestFactory(packageManager, packageInfo, packageName) { API_KEY }
-                .createTokenCreation(
-                    ATTRIBUTION,
-                    Token.Type.Card
-                ).params
+        val factory = AnalyticsRequestFactory(
+            packageManager,
+            packageInfo,
+            packageName,
+            { API_KEY }
+        )
+        val params = factory.createTokenCreation(
+            ATTRIBUTION,
+            Token.Type.Card
+        ).params
+
         assertThat(params)
             .hasSize(AnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 1)
         assertEquals(API_KEY, params[AnalyticsRequestFactory.FIELD_PUBLISHABLE_KEY])
@@ -222,7 +227,10 @@ class AnalyticsRequestFactoryTest {
         assertThat(params)
             .hasSize(AnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 2)
         assertEquals(API_KEY, params[AnalyticsRequestFactory.FIELD_PUBLISHABLE_KEY])
-        assertEquals(Source.SourceType.SEPA_DEBIT, params[AnalyticsRequestFactory.FIELD_SOURCE_TYPE])
+        assertEquals(
+            Source.SourceType.SEPA_DEBIT,
+            params[AnalyticsRequestFactory.FIELD_SOURCE_TYPE]
+        )
 
         assertEquals(Build.VERSION.SDK_INT, params[AnalyticsRequestFactory.FIELD_OS_VERSION])
         assertNotNull(params[AnalyticsRequestFactory.FIELD_OS_RELEASE])
@@ -240,19 +248,27 @@ class AnalyticsRequestFactoryTest {
 
     @Test
     fun createAppDataParams_whenPackageNameIsEmpty_returnsEmptyMap() {
-        assertThat(
-            AnalyticsRequestFactory(null, null, "") { API_KEY }
-                .createAppDataParams()
-        ).isEmpty()
+        val factory = AnalyticsRequestFactory(
+            null,
+            null,
+            "",
+            { API_KEY }
+        )
+        assertThat(factory.createAppDataParams())
+            .isEmpty()
     }
 
     @Test
     fun createAppDataParams_whenPackageInfoNotFound_returnsEmptyMap() {
         val packageName = "fake_package"
-        assertThat(
-            AnalyticsRequestFactory(packageManager, null, packageName) { API_KEY }
-                .createAppDataParams()
-        ).isEmpty()
+        val factory = AnalyticsRequestFactory(
+            packageManager,
+            null,
+            packageName,
+            { API_KEY }
+        )
+        assertThat(factory.createAppDataParams())
+            .isEmpty()
     }
 
     @Test
@@ -294,10 +310,9 @@ class AnalyticsRequestFactoryTest {
     @Test
     fun `when publishable key is unavailable, create params with undefined key`() {
         val factory = AnalyticsRequestFactory(
-            context
-        ) {
-            throw RuntimeException()
-        }
+            context,
+            publishableKeyProvider = { throw RuntimeException() }
+        )
         val params = factory.createRequest(AnalyticsEvent.SourceRetrieve).params
 
         assertThat(params["publishable_key"])
@@ -320,6 +335,58 @@ class AnalyticsRequestFactoryTest {
             )
         assertThat(analyticsRequest.url)
             .isEqualTo("https://q.stripe.com?app_name=com.stripe.android.test&publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&analytics_ua=analytics.stripe_android-1.0&os_name=REL&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&event=stripe_android.payment_method_creation")
+    }
+
+    @Test
+    fun `product_usage param should include defaultProductUsageTokens and method argument`() {
+        val analyticsRequestFactory = AnalyticsRequestFactory(
+            context,
+            API_KEY,
+            defaultProductUsageTokens = setOf("Hello")
+        )
+
+        val analyticsRequest = analyticsRequestFactory.createSourceCreation(
+            Source.SourceType.CARD,
+            setOf("World")
+        )
+
+        val productUsage = analyticsRequest.params["product_usage"]
+        assertThat(productUsage)
+            .isEqualTo(listOf("Hello", "World"))
+    }
+
+    @Test
+    fun `product_usage param should de-dupe defaultProductUsageTokens and method argument`() {
+        val analyticsRequestFactory = AnalyticsRequestFactory(
+            context,
+            API_KEY,
+            defaultProductUsageTokens = setOf("Hello")
+        )
+
+        val analyticsRequest = analyticsRequestFactory.createSourceCreation(
+            Source.SourceType.CARD,
+            setOf("Hello")
+        )
+
+        assertThat(analyticsRequest.params["product_usage"])
+            .isEqualTo(listOf("Hello"))
+    }
+
+    @Test
+    fun `product_usage param should use defaultProductUsageTokens`() {
+        val analyticsRequestFactory = AnalyticsRequestFactory(
+            context,
+            API_KEY,
+            defaultProductUsageTokens = setOf("Hello")
+        )
+
+        val analyticsRequest = analyticsRequestFactory.createSourceCreation(
+            Source.SourceType.CARD
+        )
+
+        val productUsage = analyticsRequest.params["product_usage"]
+        assertThat(productUsage)
+            .isEqualTo(listOf("Hello"))
     }
 
     private companion object {
