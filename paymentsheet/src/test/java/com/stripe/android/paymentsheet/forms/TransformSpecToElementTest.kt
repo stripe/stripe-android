@@ -52,7 +52,7 @@ class TransformSpecToElementTest {
         )
 
         val countrySectionElement = formElement.first() as SectionElement
-        val countryElement = countrySectionElement.field as Country
+        val countryElement = countrySectionElement.fields[0] as Country
 
         assertThat(countryElement.controller.displayItems).hasSize(1)
         assertThat(countryElement.controller.displayItems[0]).isEqualTo("Austria")
@@ -80,7 +80,7 @@ class TransformSpecToElementTest {
         )
 
         val idealSectionElement = formElement.first() as SectionElement
-        val idealElement = idealSectionElement.field as SectionFieldElement.IdealBank
+        val idealElement = idealSectionElement.fields[0] as SectionFieldElement.IdealBank
 
         // Verify the correct config is setup for the controller
         assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
@@ -100,7 +100,7 @@ class TransformSpecToElementTest {
             FocusRequesterCount()
         )
 
-        val nameElement = (formElement.first() as SectionElement).field as Name
+        val nameElement = (formElement.first() as SectionElement).fields[0] as Name
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label).isEqualTo(NameConfig().label)
@@ -118,7 +118,7 @@ class TransformSpecToElementTest {
         )
 
         val emailSectionElement = formElement.first() as SectionElement
-        val emailElement = emailSectionElement.field as Email
+        val emailElement = emailSectionElement.fields[0] as Email
 
         // Verify the correct config is setup for the controller
         assertThat(emailElement.controller.label).isEqualTo(EmailConfig().label)
@@ -137,9 +137,9 @@ class TransformSpecToElementTest {
         )
 
         val nameSectionElement = formElement[0] as SectionElement
-        val nameElement = nameSectionElement.field as Name
+        val nameElement = nameSectionElement.fields[0] as Name
         val emailSectionElement = formElement[1] as SectionElement
-        val emailElement = emailSectionElement.field as Email
+        val emailElement = emailSectionElement.fields[0] as Email
 
         assertThat(nameElement.focusIndexOrder).isEqualTo(0)
         assertThat(emailElement.focusIndexOrder).isEqualTo(1)

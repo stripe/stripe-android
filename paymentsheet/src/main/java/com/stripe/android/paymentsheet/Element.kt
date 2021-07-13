@@ -77,9 +77,15 @@ internal sealed class FormElement {
 
     data class SectionElement(
         override val identifier: IdentifierSpec,
-        val field: SectionFieldElementType,
+        val fields: List<SectionFieldElementType>,
         override val controller: SectionController
-    ) : FormElement(), OptionalElement
+    ) : FormElement(), OptionalElement {
+        constructor(
+            identifier: IdentifierSpec,
+            field: SectionFieldElementType,
+            controller: SectionController
+        ) : this(identifier, listOf(field), controller)
+    }
 }
 
 internal fun List<FormElement>.inputIdControllerMap() = this
@@ -88,7 +94,9 @@ internal fun List<FormElement>.inputIdControllerMap() = this
     .plus(
         this
             .filterIsInstance<FormElement.SectionElement>()
-            .associate { it.field.identifier to it.field.controller }
+            .map { it.fields }
+            .flatten()
+            .associate { it.identifier to it.controller }
     )
 
 /**

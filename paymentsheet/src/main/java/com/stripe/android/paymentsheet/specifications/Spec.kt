@@ -39,9 +39,15 @@ sealed class FormItemSpec {
      */
     data class SectionSpec(
         override val identifier: IdentifierSpec,
-        val field: SectionFieldSpec,
-        @StringRes val title: Int? = null
-    ) : FormItemSpec(), OptionalItemSpec
+        val fields: List<SectionFieldSpec>,
+        @StringRes val title: Int? = null,
+    ) : FormItemSpec(), OptionalItemSpec {
+        constructor(
+            identifier: IdentifierSpec,
+            field: SectionFieldSpec,
+            title: Int? = null,
+        ) : this(identifier, listOf(field), title)
+    }
 
     /**
      * This is for elements that do not receive user input

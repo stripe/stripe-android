@@ -82,24 +82,27 @@ internal fun Form(
                                 }
 
                             Section(controller.label, sectionErrorString, enabled) {
-                                when (element.field) {
-                                    is TextFieldElement -> {
-                                        val focusRequesterIndex = element.field.focusIndexOrder
-                                        TextField(
-                                            textFieldController = element.field.controller,
-                                            myFocus = focusRequesters[focusRequesterIndex],
-                                            nextFocus = focusRequesters.getOrNull(
-                                                focusRequesterIndex + 1
-                                            ),
-                                            enabled = enabled
-                                        )
-                                    }
-                                    is DropdownFieldElement -> {
-                                        DropDown(
-                                            element.field.controller.label,
-                                            element.field.controller,
-                                            enabled
-                                        )
+
+                                element.fields.forEach { field ->
+                                    when (field) {
+                                        is TextFieldElement -> {
+                                            val focusRequesterIndex = field.focusIndexOrder
+                                            TextField(
+                                                textFieldController = field.controller,
+                                                myFocus = focusRequesters[focusRequesterIndex],
+                                                nextFocus = focusRequesters.getOrNull(
+                                                    focusRequesterIndex + 1
+                                                ),
+                                                enabled = enabled
+                                            )
+                                        }
+                                        is DropdownFieldElement -> {
+                                            DropDown(
+                                                field.controller.label,
+                                                field.controller,
+                                                enabled
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -211,7 +214,9 @@ class FormViewModel(
     internal val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<FormItemSpec.SectionSpec>()
         .associate { sectionSpec ->
-            sectionSpec.identifier to sectionSpec.field.identifier
+            sectionSpec.identifier to sectionSpec.fields.map {
+                it.identifier
+            }
         }
 
     internal val optionalIdentifiers =
@@ -229,6 +234,7 @@ class FormViewModel(
                 .map { sectionToSectionFieldEntry ->
                     sectionToSectionFieldEntry.value
                 }
+                .flatten()
 
             if (!showFutureUse && saveForFutureUseElement != null) {
                 optionalIdentifiers
