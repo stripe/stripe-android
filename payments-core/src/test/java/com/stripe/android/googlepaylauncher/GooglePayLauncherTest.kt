@@ -70,8 +70,8 @@ class GooglePayLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
-                analyticsRequestExecutor,
-                analyticsRequestFactory
+                analyticsRequestFactory,
+                analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
 
@@ -99,8 +99,8 @@ class GooglePayLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
-                analyticsRequestExecutor,
-                analyticsRequestFactory
+                analyticsRequestFactory,
+                analyticsRequestExecutor
             )
 
             assertThat(firedEvents)
@@ -122,8 +122,8 @@ class GooglePayLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
-                analyticsRequestExecutor,
-                analyticsRequestFactory
+                analyticsRequestFactory,
+                analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
 

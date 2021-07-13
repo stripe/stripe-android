@@ -26,8 +26,8 @@ class GooglePayLauncher internal constructor(
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     private val readyCallback: ReadyCallback,
     private val activityResultLauncher: ActivityResultLauncher<GooglePayLauncherContract.Args>,
-    analyticsRequestExecutor: AnalyticsRequestExecutor,
-    analyticsRequestFactory: AnalyticsRequestFactory
+    analyticsRequestFactory: AnalyticsRequestFactory,
+    analyticsRequestExecutor: AnalyticsRequestExecutor = AnalyticsRequestExecutor.Default()
 ) {
     private var isReady = false
 
@@ -62,7 +62,6 @@ class GooglePayLauncher internal constructor(
         ) {
             resultCallback.onResult(it)
         },
-        AnalyticsRequestExecutor.Default(),
         AnalyticsRequestFactory(
             activity,
             PaymentConfiguration.getInstance(activity).publishableKey
@@ -100,7 +99,6 @@ class GooglePayLauncher internal constructor(
         ) {
             resultCallback.onResult(it)
         },
-        AnalyticsRequestExecutor.Default(),
         AnalyticsRequestFactory(
             fragment.requireContext(),
             PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
