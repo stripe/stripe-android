@@ -7,7 +7,6 @@ import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.networking.AnalyticsEvent
@@ -101,7 +100,7 @@ class AnalyticsRequestFactoryTest {
         assertThat(
             analyticsRequestFactory
                 .createPaymentMethodCreation(
-                    PaymentMethodCreateParams.Type.Card,
+                    PaymentMethod.Type.Card,
                     ATTRIBUTION
                 ).params
         ).isEqualTo(
@@ -323,7 +322,7 @@ class AnalyticsRequestFactoryTest {
     fun `create should create object with expected url and headers`() {
         val sdkVersion = Stripe.VERSION_NAME
         val analyticsRequest = analyticsRequestFactory.createPaymentMethodCreation(
-            PaymentMethodCreateParams.Type.Card,
+            PaymentMethod.Type.Card,
             emptySet()
         )
         assertThat(analyticsRequest.headers)

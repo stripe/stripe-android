@@ -959,10 +959,10 @@ internal class StripeApiRepositoryTest {
             )
 
             create().createPaymentMethod(
-                PaymentMethodCreateParams.createWithOverriddenParamMap(
-                    PaymentMethodCreateParams.Type.Card,
-                    paramMap,
-                    setOf("PaymentSheet")
+                PaymentMethodCreateParams(
+                    PaymentMethod.Type.Card,
+                    overrideParamMap = paramMap,
+                    productUsage = setOf("PaymentSheet")
                 ),
                 DEFAULT_OPTIONS
             )
