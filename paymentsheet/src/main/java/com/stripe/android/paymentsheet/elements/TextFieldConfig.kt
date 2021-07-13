@@ -1,9 +1,13 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.ElementType
 
 internal sealed interface TextFieldConfig {
+    /** This specifies how the field should be capitalized **/
+    val capitalization: KeyboardCapitalization
+
     /** This is a label for debug logs **/
     val debugLabel: String
 
