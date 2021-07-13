@@ -89,7 +89,7 @@ class TransformElementToFormViewValueFlowTest {
     fun `If an optional field is complete field pairs contain only the non-optional values`() {
         runBlocking {
             emailController.onValueChange("email@valid.com")
-            optionalIdentifersFlow.value = listOf(emailSection.field.identifier)
+            optionalIdentifersFlow.value = listOf(emailSection.fields[0].identifier)
 
             val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
 

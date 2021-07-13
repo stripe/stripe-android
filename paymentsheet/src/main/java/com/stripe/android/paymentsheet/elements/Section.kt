@@ -51,7 +51,9 @@ internal fun Section(
                 GrayLight
             }
         ) {
-            content()
+            Column {
+                content()
+            }
         }
         AnimatedVisibility(error != null) {
             SectionError(error ?: "")

@@ -135,7 +135,9 @@ class FormViewModelTest {
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
             val emailController = formViewModel.elements
                 .filterIsInstance<SectionElement>()
-                .map { it.field.controller }
+                .map{it.fields}
+                .flatten()
+                .map { it.controller }
                 .filterIsInstance(TextFieldController::class.java).first()
 
             // Add text to the name to make it valid
@@ -143,7 +145,7 @@ class FormViewModelTest {
 
             // Verify formFieldValues contains email
             assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).containsKey(
-                emailSection.field.identifier
+                emailSection.fields[0].identifier
             )
 
             saveForFutureUseController.onValueChange(false)
@@ -175,8 +177,11 @@ class FormViewModelTest {
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
             val emailController = formViewModel.elements
+                .asSequence()
                 .filterIsInstance<SectionElement>()
-                .map { it.field.controller }
+                .map{it.fields}
+                .flatten()
+                .map { it.controller }
                 .filterIsInstance(TextFieldController::class.java).first()
 
             // Add text to the email to make it invalid
@@ -214,9 +219,9 @@ class FormViewModelTest {
             )
 
             val nameElement = (formViewModel.elements[0] as SectionElement)
-                .field.controller as TextFieldController
+                .fields[0].controller as TextFieldController
             val emailElement = (formViewModel.elements[1] as SectionElement)
-                .field.controller as TextFieldController
+                .fields[0].controller as TextFieldController
 
             nameElement.onValueChange("joe")
             assertThat(

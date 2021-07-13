@@ -39,37 +39,39 @@ internal class TransformSpecToElement {
         focusRequesterCount: FocusRequesterCount
     ): FormElement.SectionElement {
 
-        val fieldElement = when (spec.field) {
-            SectionFieldSpec.Email -> transform(
-                spec.field as SectionFieldSpec.Email,
-                focusRequesterCount
-            )
-            SectionFieldSpec.Name -> transform(
-                spec.field as SectionFieldSpec.Name,
-                focusRequesterCount
-            )
-            is SectionFieldSpec.Country -> transform(
-                spec.field
-            )
-            SectionFieldSpec.IdealBank -> transform(
-                spec.field as SectionFieldSpec.IdealBank
-            )
+        val fieldElements = spec.fields.map {
+            when (it) {
+                SectionFieldSpec.Email -> transform(
+                    it as SectionFieldSpec.Email,
+                    focusRequesterCount
+                )
+                SectionFieldSpec.Name -> transform(
+                    it as SectionFieldSpec.Name,
+                    focusRequesterCount
+                )
+                is SectionFieldSpec.Country -> transform(
+                    it
+                )
+                SectionFieldSpec.IdealBank -> transform(
+                    it as SectionFieldSpec.IdealBank
+                )
+            }
         }
 
         // The controller of the section element will be the same as the field element
         // as there is only a single field in a section
         return FormElement.SectionElement(
             identifier = spec.identifier,
-            fieldElement,
+            fieldElements,
             SectionController(
                 spec.title,
-                listOf(fieldElement.controller)
+                fieldElements.map { it.controller }
             )
         )
     }
 
     private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
-        // It could be argued that the static text should have a controller, but
+    // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         FormElement.MandateTextElement(
             spec.identifier,
