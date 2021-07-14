@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.elements.Controller
+import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.TextFieldController
@@ -31,7 +31,7 @@ internal interface OptionalElement {
  */
 internal sealed interface SectionFieldElementType {
     val identifier: IdentifierSpec
-    val controller: Controller
+    val controller: InputController
 
     interface TextFieldElement : SectionFieldElementType {
         override val controller: TextFieldController
@@ -48,7 +48,7 @@ internal sealed interface SectionFieldElementType {
  * Each item in the layout has an identifier and a controller associated with it.
  */
 internal sealed class FormElement {
-    abstract val controller: Controller?
+    abstract val controller: InputController?
     abstract val identifier: IdentifierSpec
 
     /**
@@ -61,7 +61,7 @@ internal sealed class FormElement {
         val stringResId: Int,
         val color: Color,
         val merchantName: String?,
-        override val controller: Controller? = null,
+        override val controller: InputController? = null,
     ) : FormElement(), OptionalElement
 
     /**
@@ -77,12 +77,12 @@ internal sealed class FormElement {
     data class SectionElement(
         override val identifier: IdentifierSpec,
         val field: SectionFieldElementType,
-        override val controller: Controller
+        override val controller: InputController
     ) : FormElement(), OptionalElement
 }
 
 /**
- * This class defines the type associated with the element or value.   See [FormFieldValues] and [Controller]
+ * This class defines the type associated with the element or value.   See [FormFieldValues] and [InputController]
  */
 enum class ElementType {
     Name,
@@ -98,7 +98,7 @@ enum class ElementType {
  */
 internal sealed class SectionFieldElement {
     abstract val identifier: IdentifierSpec
-    abstract val controller: Controller
+    abstract val controller: InputController
 
     data class Name(
         override val identifier: IdentifierSpec,
