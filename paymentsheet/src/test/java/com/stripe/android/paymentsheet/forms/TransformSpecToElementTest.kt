@@ -7,8 +7,10 @@ import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.SectionFieldElement.*
+import com.stripe.android.paymentsheet.SectionFieldElement.Country
+import com.stripe.android.paymentsheet.SectionFieldElement.Email
+import com.stripe.android.paymentsheet.SectionFieldElement.IdealBank
+import com.stripe.android.paymentsheet.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
