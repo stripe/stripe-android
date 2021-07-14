@@ -69,7 +69,8 @@ class GooglePayLauncher internal constructor(
         },
         AnalyticsRequestFactory(
             activity,
-            PaymentConfiguration.getInstance(activity).publishableKey
+            PaymentConfiguration.getInstance(activity).publishableKey,
+            setOf(PRODUCT_USAGE)
         )
     )
 
