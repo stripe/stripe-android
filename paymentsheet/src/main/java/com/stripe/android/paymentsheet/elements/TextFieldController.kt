@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
 /**
@@ -48,9 +49,13 @@ internal class TextFieldController @VisibleForTesting constructor(
     val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
         fieldState.shouldShowError(hasFocus)
     }
-    override val errorMessage: Flow<Int?> = visibleError.map { visibleError ->
-        _fieldState.value.getErrorMessageResId()?.takeIf { visibleError }
-    }
+    override val error: Flow<FieldError?> = visibleError
+        .filter { it }
+        .map {
+            _fieldState.value.getErrorMessageResId()?.let {
+                FieldError(label, it)
+            }
+        }
 
     val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
