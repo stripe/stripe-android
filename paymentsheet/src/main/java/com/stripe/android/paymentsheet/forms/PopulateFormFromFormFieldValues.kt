@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.idInputControllerMap
 internal fun populateWith(
     elements: List<FormElement>,
     formFieldValues: FormFieldValues
-    ) {
+) {
     val formFieldValueMap = formFieldValues.fieldValuePairs
     elements.idInputControllerMap()
         .forEach { formElementEntry ->

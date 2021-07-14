@@ -38,36 +38,36 @@ private fun transform(
     focusRequesterCount: FocusRequesterCount
 ): FormElement.SectionElement {
 
-        val fieldElements = spec.fields.map {
-            when (it) {
-                SectionFieldSpec.Email -> transform(
-                    it as SectionFieldSpec.Email,
-                    focusRequesterCount
-                )
-                SectionFieldSpec.Name -> transform(
-                    it as SectionFieldSpec.Name,
-                    focusRequesterCount
-                )
-                is SectionFieldSpec.Country -> transform(
-                    it
-                )
-                SectionFieldSpec.IdealBank -> transform(
-                    it as SectionFieldSpec.IdealBank
-                )
-            }
-        }
-
-        // The controller of the section element will be the same as the field element
-        // as there is only a single field in a section
-        return FormElement.SectionElement(
-            identifier = spec.identifier,
-            fieldElements,
-            SectionController(
-                spec.title,
-                fieldElements.map { it.controller }
+    val fieldElements = spec.fields.map {
+        when (it) {
+            SectionFieldSpec.Email -> transform(
+                it as SectionFieldSpec.Email,
+                focusRequesterCount
             )
-        )
+            SectionFieldSpec.Name -> transform(
+                it as SectionFieldSpec.Name,
+                focusRequesterCount
+            )
+            is SectionFieldSpec.Country -> transform(
+                it
+            )
+            SectionFieldSpec.IdealBank -> transform(
+                it as SectionFieldSpec.IdealBank
+            )
+        }
     }
+
+    // The controller of the section element will be the same as the field element
+    // as there is only a single field in a section
+    return FormElement.SectionElement(
+        identifier = spec.identifier,
+        fieldElements,
+        SectionController(
+            spec.title,
+            fieldElements.map { it.controller }
+        )
+    )
+}
 
 private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
 // It could be argued that the static text should have a controller, but
