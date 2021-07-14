@@ -5,29 +5,55 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.toColorInt
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.databinding.Stripe3ds2TransactionLayoutBinding
 import com.stripe.android.exception.StripeException
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.stripe3ds2.transaction.ChallengeContract
+import com.stripe.android.stripe3ds2.transaction.ChallengeResult
+import com.stripe.android.stripe3ds2.transaction.InitChallengeResult
+import com.stripe.android.stripe3ds2.views.ChallengeProgressFragmentFactory
+import kotlinx.coroutines.launch
 
 /**
- * Work in progress!
- *
  * A transparent [Activity] that will initiate a 3DS2 transaction by making the authentication
  * request (AReq) and handling the response (ARes). Depending on the response,
  * [Stripe3ds2TransactionActivity] might start the challenge flow UI, complete using the
  * frictionless flow, fall back to a web URL, or finish early if there is a failure.
  */
 internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
-    public override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        val args = runCatching {
-            requireNotNull(
+    private val viewBinding: Stripe3ds2TransactionLayoutBinding by lazy {
+        Stripe3ds2TransactionLayoutBinding.inflate(layoutInflater)
+    }
+
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        val argsResult = runCatching {
+            val args = requireNotNull(
                 Stripe3ds2TransactionContract.Args.fromIntent(intent)
             ) {
                 "Error while attempting to initiate 3DS2 transaction."
             }
-        }.getOrElse {
+
+            val accentColor =
+                args.config.uiCustomization.uiCustomization.accentColor?.let { accentColor ->
+                    runCatching { accentColor.toColorInt() }.getOrNull()
+                }
+            supportFragmentManager.fragmentFactory = ChallengeProgressFragmentFactory(
+                args.fingerprint.directoryServerName,
+                args.sdkTransactionId,
+                accentColor
+            )
+
+            args
+        }
+
+        super.onCreate(savedInstanceState)
+
+        val args = argsResult.getOrElse {
             finishWithResult(
                 PaymentFlowResult.Unvalidated(
                     flowOutcome = StripeIntentResult.Outcome.FAILED,
@@ -37,8 +63,66 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
             return
         }
 
+        setContentView(viewBinding.root)
+
+        args.statusBarColor?.let {
+            window.statusBarColor = it
+        }
+
         val viewModel by viewModels<Stripe3ds2TransactionViewModel> {
-            Stripe3ds2TransactionViewModelFactory()
+            Stripe3ds2TransactionViewModelFactory(
+                application,
+                this,
+                args
+            )
+        }
+
+        val onChallengeResult = { challengeResult: ChallengeResult ->
+            lifecycleScope.launch {
+                finishWithResult(
+                    viewModel.processChallengeResult(challengeResult)
+                )
+            }
+        }
+
+        val challengeLauncher = registerForActivityResult(
+            ChallengeContract()
+        ) {
+            onChallengeResult(it)
+        }
+
+        val browserLauncher = registerForActivityResult(
+            PaymentBrowserAuthContract()
+        ) {
+            finishWithResult(it)
+        }
+
+        if (!viewModel.hasCompleted) {
+            lifecycleScope.launchWhenResumed {
+                if (!isFinishing) {
+                    when (val nextStep = viewModel.start3ds2Flow()) {
+                        is NextStep.StartChallenge -> {
+                            // make the initial challenge request
+                            when (
+                                val initChallengeResult = viewModel.initChallenge(nextStep.args)
+                            ) {
+                                is InitChallengeResult.Start -> {
+                                    challengeLauncher.launch(initChallengeResult.challengeViewArgs)
+                                }
+                                is InitChallengeResult.End -> {
+                                    onChallengeResult(initChallengeResult.challengeResult)
+                                }
+                            }
+                        }
+                        is NextStep.StartFallback -> {
+                            browserLauncher.launch(nextStep.args)
+                        }
+                        is NextStep.Complete -> {
+                            finishWithResult(nextStep.result)
+                        }
+                    }
+                }
+            }
         }
     }
 

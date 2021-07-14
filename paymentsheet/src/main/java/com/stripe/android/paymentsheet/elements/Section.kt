@@ -27,9 +27,15 @@ import com.stripe.android.paymentsheet.GrayLight
  * This is the style for the section card
  */
 internal data class CardStyle(
-    val cardBorderColor: Color = Color(0x14000000),
+    private val isDarkTheme: Boolean,
+    val cardBorderColor: Color = if (isDarkTheme) {
+        Color(0xFF787880)
+    } else {
+        Color(0x14000000)
+    },
     val cardBorderWidth: Dp = 1.dp,
     val cardElevation: Dp = 0.dp,
+    val cardStyleBackground: Color = Color(0x20FFFFFF)
 )
 
 /**
@@ -56,12 +62,11 @@ internal data class SectionTitle @ExperimentalUnitApi constructor(
 internal fun Section(
     @StringRes title: Int?,
     error: String?,
-    enabled: Boolean,
     content: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         SectionTitle(title)
-        SectionCard(enabled, content)
+        SectionCard(content)
         AnimatedVisibility(error != null) {
             SectionError(error ?: "")
         }
@@ -97,18 +102,13 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
  */
 @Composable
 internal fun SectionCard(
-    enabled: Boolean,
     content: @Composable () -> Unit
 ) {
-    val cardStyle = CardStyle()
+    val cardStyle = CardStyle(isSystemInDarkTheme())
     Card(
         border = BorderStroke(cardStyle.cardBorderWidth, cardStyle.cardBorderColor),
         elevation = cardStyle.cardElevation,
-        backgroundColor = if (enabled) {
-            MaterialTheme.colors.surface
-        } else {
-            GrayLight
-        }
+        backgroundColor = cardStyle.cardStyleBackground
     ) {
         Column {
             content()

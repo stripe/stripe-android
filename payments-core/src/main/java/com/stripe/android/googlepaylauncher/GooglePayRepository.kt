@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.googlepaylauncher
 
 import android.content.Context
 import com.google.android.gms.common.api.ApiException
@@ -7,10 +7,18 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Logger
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
+
+fun interface GooglePayRepository {
+    fun isReady(): Flow<Boolean>
+
+    object Disabled : GooglePayRepository {
+        override fun isReady(): Flow<Boolean> = flowOf(false)
+    }
+}
 
 /**
  * The default implementation of [GooglePayRepository].
@@ -34,16 +42,11 @@ internal class DefaultGooglePayRepository(
 
     internal constructor(
         context: Context,
-        environment: PaymentSheet.GooglePayConfiguration.Environment,
+        environment: GooglePayEnvironment,
         logger: Logger = Logger.noop()
     ) : this(
         context,
-        when (environment) {
-            PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                GooglePayEnvironment.Production
-            PaymentSheet.GooglePayConfiguration.Environment.Test ->
-                GooglePayEnvironment.Test
-        },
+        environment,
         billingAddressParameters = null,
         existingPaymentMethodRequired = true,
         logger

@@ -5,10 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.DefaultGooglePayRepository
-import com.stripe.android.paymentsheet.GooglePayRepository
+import com.stripe.android.networking.AnalyticsEvent
+import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -16,16 +18,21 @@ import kotlinx.parcelize.Parcelize
 import java.util.Locale
 
 /**
- * A drop-in class that presents a Google Pay sheet to collect a customer's payment.
- *
+ * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
  * When successful, will return a [PaymentMethod] via [Result.Completed.paymentMethod].
+ *
+ * Use [GooglePayPaymentMethodLauncher] for Jetpack Compose integrations.
+ *
+ * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
 class GooglePayPaymentMethodLauncher internal constructor(
     lifecycleScope: CoroutineScope,
     private val config: Config,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     private val readyCallback: ReadyCallback,
-    private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+    private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+    analyticsRequestFactory: AnalyticsRequestFactory,
+    analyticsRequestExecutor: AnalyticsRequestExecutor = AnalyticsRequestExecutor.Default()
 ) {
     private var isReady = false
 
@@ -59,7 +66,11 @@ class GooglePayPaymentMethodLauncher internal constructor(
             GooglePayPaymentMethodLauncherContract()
         ) {
             resultCallback.onResult(it)
-        }
+        },
+        AnalyticsRequestFactory(
+            activity,
+            PaymentConfiguration.getInstance(activity).publishableKey
+        )
     )
 
     /**
@@ -92,10 +103,19 @@ class GooglePayPaymentMethodLauncher internal constructor(
             GooglePayPaymentMethodLauncherContract()
         ) {
             resultCallback.onResult(it)
-        }
+        },
+        AnalyticsRequestFactory(
+            fragment.requireContext(),
+            PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
+            setOf(PRODUCT_USAGE)
+        )
     )
 
     init {
+        analyticsRequestExecutor.executeAsync(
+            analyticsRequestFactory.createRequest(AnalyticsEvent.GooglePayPaymentMethodLauncherInit)
+        )
+
         lifecycleScope.launch {
             val repository = googlePayRepositoryFactory(config.environment)
             readyCallback.onReady(
@@ -107,7 +127,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     /**
-     * Present the Google Pay UI when the final amount of the transaction is not yet known.
+     * Present the Google Pay UI when the amount of the transaction is not yet known.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
      *
@@ -128,7 +148,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     /**
-     * Present the Google Pay UI when the final amount of the transaction is known.
+     * Present the Google Pay UI when the amount of the transaction is known.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
      *
@@ -236,5 +256,9 @@ class GooglePayPaymentMethodLauncher internal constructor(
 
     fun interface ResultCallback {
         fun onResult(result: Result)
+    }
+
+    internal companion object {
+        internal const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
     }
 }

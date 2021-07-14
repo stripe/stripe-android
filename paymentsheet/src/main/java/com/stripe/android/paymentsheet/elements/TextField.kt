@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
 import android.util.Log
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalContentAlpha
@@ -30,6 +31,13 @@ internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFoc
 } ?: ImeAction.Done
 
 internal data class TextFieldColors(
+    private val isDarkMode: Boolean,
+    private val defaultTextColor: Color,
+    val textColor: Color = if (isDarkMode) {
+        Color.White
+    } else {
+        defaultTextColor
+    },
     val placeholderColor: Color = Color(0x14000000),
     val backgroundColor: Color = Color.Transparent,
     val focusedIndicatorColor: Color = Color.Transparent, // primary color by default
@@ -59,12 +67,15 @@ internal fun TextField(
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
-    val textFieldColors = TextFieldColors()
+    val textFieldColors = TextFieldColors(
+        isSystemInDarkTheme(),
+        LocalContentColor.current.copy(LocalContentAlpha.current)
+    )
     val colors = TextFieldDefaults.textFieldColors(
         textColor = if (shouldShowError) {
             MaterialTheme.colors.error
         } else {
-            LocalContentColor.current.copy(LocalContentAlpha.current)
+            textFieldColors.textColor
         },
         placeholderColor = textFieldColors.placeholderColor,
         backgroundColor = textFieldColors.backgroundColor,
@@ -99,7 +110,11 @@ internal fun TextField(
                 }
                 hasFocus = it.isFocused
             },
-        keyboardOptions = KeyboardOptions(imeAction = imeAction(nextFocus)),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = textFieldController.keyboardType,
+            capitalization = textFieldController.capitalization,
+            imeAction = imeAction(nextFocus)
+        ),
         colors = colors,
         maxLines = 1,
         singleLine = true,
