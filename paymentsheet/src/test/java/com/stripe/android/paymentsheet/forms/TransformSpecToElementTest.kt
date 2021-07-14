@@ -8,13 +8,11 @@ import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.SectionFieldElement.Country
-import com.stripe.android.paymentsheet.SectionFieldElement.Email
-import com.stripe.android.paymentsheet.SectionFieldElement.Name
+import com.stripe.android.paymentsheet.SectionFieldElement.*
+import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -36,6 +34,30 @@ class TransformSpecToElementTest {
         IdentifierSpec("emailSection"),
         SectionFieldSpec.Email
     )
+
+    @Test
+    fun `Section with multiple fields contains all fields in the section element`() {
+        val formElement = transformSpecToElement.transform(
+            LayoutSpec(
+                listOf(
+                    FormItemSpec.SectionSpec(
+                        IdentifierSpec("multifieldSection"),
+                        listOf(
+                            SectionFieldSpec.Country(),
+                            SectionFieldSpec.IdealBank
+                        )
+                    )
+                )
+            ),
+            "Example, Inc.",
+            FocusRequesterCount()
+        )
+
+        val sectionElement = formElement[0] as SectionElement
+        assertThat(sectionElement.fields.size).isEqualTo(2)
+        assertThat(sectionElement.fields[0]).isInstanceOf(Country::class.java)
+        assertThat(sectionElement.fields[1]).isInstanceOf(IdealBank::class.java)
+    }
 
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
@@ -80,7 +102,7 @@ class TransformSpecToElementTest {
         )
 
         val idealSectionElement = formElement.first() as SectionElement
-        val idealElement = idealSectionElement.fields[0] as SectionFieldElement.IdealBank
+        val idealElement = idealSectionElement.fields[0] as IdealBank
 
         // Verify the correct config is setup for the controller
         assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)

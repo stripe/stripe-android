@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.inputIdControllerMap
+import com.stripe.android.paymentsheet.idInputControllerMap
 
 /**
  * This class will take a list of form elements and populate
@@ -14,7 +14,7 @@ internal class PopulateFormFromFormFieldValues(
         formFieldValues: FormFieldValues
     ) {
         val formFieldValueMap = formFieldValues.fieldValuePairs
-        elements.inputIdControllerMap()
+        elements.idInputControllerMap()
             .forEach { formElementEntry ->
                 formFieldValueMap[formElementEntry.key]?.let { input ->
                     input.value?.let { inputValue ->

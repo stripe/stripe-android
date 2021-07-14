@@ -88,7 +88,7 @@ internal sealed class FormElement {
     }
 }
 
-internal fun List<FormElement>.inputIdControllerMap() = this
+internal fun List<FormElement>.idInputControllerMap() = this
     .filter { it.controller is InputController && it.controller != null }
     .associate { it.identifier to (it.controller as InputController) }
     .plus(
@@ -116,7 +116,7 @@ enum class ElementType {
  */
 internal sealed class SectionFieldElement {
     abstract val identifier: IdentifierSpec
-    abstract val controller: Any
+    abstract val controller: InputController
 
     data class Name(
         override val identifier: IdentifierSpec,

@@ -134,6 +134,7 @@ class FormViewModelTest {
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
             val emailController = formViewModel.elements
+                .asSequence()
                 .filterIsInstance<SectionElement>()
                 .map { it.fields }
                 .flatten()
