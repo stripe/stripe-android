@@ -36,18 +36,6 @@ class CardFormViewTest {
         }
     }
 
-    private val standardNoPostalCardFormView: CardFormView by lazy {
-        activityScenarioFactory.createView {
-            CardFormView(
-                context = it,
-                attrs = Robolectric.buildAttributeSet()
-                    .addAttribute(R.attr.shouldShowPostalCodeView, "false")
-                    .build()
-
-            )
-        }
-    }
-
     private val borderLessCardFormView: CardFormView by lazy {
         activityScenarioFactory.createView {
             CardFormView(
@@ -59,30 +47,14 @@ class CardFormViewTest {
         }
     }
 
-    private val borderLessNoPostalCardFormView: CardFormView by lazy {
-        activityScenarioFactory.createView {
-            CardFormView(
-                context = it,
-                attrs = Robolectric.buildAttributeSet()
-                    .addAttribute(R.attr.cardFormStyle, "1")
-                    .addAttribute(R.attr.shouldShowPostalCodeView, "false")
-                    .build()
-            )
-        }
-    }
-
     private var standardBinding: StripeCardFormViewBinding? = null
-    private var standardNoPostalBinding: StripeCardFormViewBinding? = null
     private var borderlessBinding: StripeCardFormViewBinding? = null
-    private var borderlessNoPostalBinding: StripeCardFormViewBinding? = null
 
     @Before
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         standardBinding = StripeCardFormViewBinding.bind(standardCardFormView)
-        standardNoPostalBinding = StripeCardFormViewBinding.bind(standardNoPostalCardFormView)
         borderlessBinding = StripeCardFormViewBinding.bind(borderLessCardFormView)
-        borderlessNoPostalBinding = StripeCardFormViewBinding.bind(borderLessNoPostalCardFormView)
     }
 
     @After
@@ -269,55 +241,6 @@ class CardFormViewTest {
     }
 
     @Test
-    fun verifyStandardNoPostalStyle() {
-        idleLooper()
-        standardNoPostalBinding!!.let {
-            // 2 additional horizontal dividers added to card_multiline_widget.xml, now it has 4 child views
-            assertThat(it.cardMultilineWidget.childCount).isEqualTo(4)
-            // tl_card_number
-            assertThat(it.cardMultilineWidget.getChildAt(0)).isInstanceOf(
-                CardNumberTextInputLayout::class.java
-            )
-            // horizontal divider
-            assertThat(it.cardMultilineWidget.getChildAt(1)).isInstanceOf(
-                View::class.java
-            )
-            // second_row_layout
-            assertThat(it.cardMultilineWidget.getChildAt(2)).isInstanceOf(
-                LinearLayout::class.java
-            )
-            // horizontal divider
-            assertThat(it.cardMultilineWidget.getChildAt(3)).isInstanceOf(
-                View::class.java
-            )
-
-            // 1 vertical divider added between exp and cvc, now secondRowLayout has 4 child views
-            assertThat(it.cardMultilineWidget.secondRowLayout.childCount).isEqualTo(4)
-            // tl_expiry
-            assertThat(it.cardMultilineWidget.secondRowLayout.getChildAt(0)).isInstanceOf(
-                TextInputLayout::class.java
-            )
-            // vertical divider
-            assertThat(it.cardMultilineWidget.secondRowLayout.getChildAt(1)).isInstanceOf(
-                View::class.java
-            )
-            // tl_cvc
-            assertThat(it.cardMultilineWidget.secondRowLayout.getChildAt(2)).isInstanceOf(
-                TextInputLayout::class.java
-            )
-            // tl_postal_code(invisible)
-            assertThat(it.cardMultilineWidget.secondRowLayout.getChildAt(3)).isInstanceOf(
-                TextInputLayout::class.java
-            )
-
-            // divider with width=match_parent is hidden
-            assertThat(it.countryPostalDivider.isVisible).isFalse()
-            // postalCodeContainer is hidden
-            assertThat(it.postalCodeContainer.isVisible).isFalse()
-        }
-    }
-
-    @Test
     fun verifyBorderlessStyle() {
         idleLooper()
         borderlessBinding?.let {
@@ -350,54 +273,11 @@ class CardFormViewTest {
             // 1 horizontal divider added below tl_cvc, now it has 2 child views
             assertThat(it.cardMultilineWidget.cvcInputLayout.childCount).isEqualTo(2)
 
-            // divider with width=match_parent is invisible
-            assertThat(it.countryPostalDivider.isVisible).isFalse()
-
             // 1 horizontal divider added below countryLayout, now it has 2 child views
             assertThat(it.countryLayout.childCount).isEqualTo(2)
-        }
-    }
-
-    @Test
-    fun verifyBorderlessNoPostalStyle() {
-        idleLooper()
-        borderlessNoPostalBinding?.let {
-            // no child views added to card_multiline_widget.xml, it still has 2 child views
-            assertThat(it.cardMultilineWidget.childCount).isEqualTo(2)
-            // tl_card_number
-            assertThat(it.cardMultilineWidget.getChildAt(0)).isInstanceOf(
-                CardNumberTextInputLayout::class.java
-            )
-            // second_row_layout
-            assertThat(it.cardMultilineWidget.getChildAt(1)).isInstanceOf(
-                LinearLayout::class.java
-            )
-
-            // 1 horizontal divider added to tl_card_number, now it has 2 child views
-            assertThat(it.cardMultilineWidget.cardNumberTextInputLayout.childCount).isEqualTo(
-                2
-            )
-
-            // no vertical divider added between exp and cvc, secondRowLayout still has 3 child views
-            assertThat(it.cardMultilineWidget.secondRowLayout.childCount).isEqualTo(
-                3
-            )
-
-            // 1 horizontal divider added below tl_expiry, now it has 2 child views
-            assertThat(it.cardMultilineWidget.expiryTextInputLayout.childCount).isEqualTo(
-                2
-            )
-
-            // 1 horizontal divider added below tl_cvc, now it has 2 child views
-            assertThat(it.cardMultilineWidget.cvcInputLayout.childCount).isEqualTo(2)
 
             // divider with width=match_parent is invisible
             assertThat(it.countryPostalDivider.isVisible).isFalse()
-
-            // no horizontal divider added below countryLayout, it still has 1 child view
-            assertThat(it.countryLayout.childCount).isEqualTo(1)
-            // postalCodeContainer is hidden
-            assertThat(it.postalCodeContainer.isVisible).isFalse()
         }
     }
 
@@ -468,67 +348,6 @@ class CardFormViewTest {
                 )
 
             it.postalCode.setText(VALID_US_ZIP)
-            assertThat(currentIsValid)
-                .isTrue()
-            assertThat(currentInvalidFields)
-                .isEmpty()
-        }
-    }
-
-    @Test
-    fun testCardValidCallbackWithoutPostal() {
-        standardNoPostalBinding!!.let {
-            var currentIsValid = false
-            var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-            standardNoPostalCardFormView.setCardValidCallback { isValid, invalidFields ->
-                currentIsValid = isValid
-                currentInvalidFields = invalidFields
-            }
-
-            assertThat(currentIsValid)
-                .isFalse()
-            assertThat(currentInvalidFields)
-                .containsExactly(
-                    CardValidCallback.Fields.Number,
-                    CardValidCallback.Fields.Expiry,
-                    CardValidCallback.Fields.Cvc,
-                )
-
-            it.cardMultilineWidget.cardNumberEditText.setText(VISA_WITH_SPACES)
-            assertThat(currentIsValid)
-                .isFalse()
-            assertThat(currentInvalidFields)
-                .containsExactly(
-                    CardValidCallback.Fields.Expiry,
-                    CardValidCallback.Fields.Cvc,
-                )
-
-            it.cardMultilineWidget.expiryDateEditText.append("12")
-            assertThat(currentIsValid)
-                .isFalse()
-            assertThat(currentInvalidFields)
-                .containsExactly(
-                    CardValidCallback.Fields.Expiry,
-                    CardValidCallback.Fields.Cvc,
-                )
-
-            it.cardMultilineWidget.expiryDateEditText.append("50")
-            assertThat(currentIsValid)
-                .isFalse()
-            assertThat(currentInvalidFields)
-                .containsExactly(
-                    CardValidCallback.Fields.Cvc,
-                )
-
-            it.cardMultilineWidget.cvcEditText.append("12")
-            assertThat(currentIsValid)
-                .isFalse()
-            assertThat(currentInvalidFields)
-                .containsExactly(
-                    CardValidCallback.Fields.Cvc,
-                )
-
-            it.cardMultilineWidget.cvcEditText.append("3")
             assertThat(currentIsValid)
                 .isTrue()
             assertThat(currentInvalidFields)
