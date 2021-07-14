@@ -3,6 +3,13 @@
 ## 17.0.0 - unreleased
 This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
+### What's New
+This release introduces `GooglePayLauncher` and `GooglePayPaymentMethodLauncher` to simplify
+Google Pay integration. See the [Google Pay integration guide](https://stripe.com/docs/google-pay)
+for more details.
+
+### Notable Changes
+
 * [3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10`
 * [3883](https://github.com/stripe/stripe-android/pull/3883) Remove `PaymentIntent#nextAction`
 * [3899](https://github.com/stripe/stripe-android/pull/3899) Introduce `GooglePayLauncher` and `GooglePayPaymentMethodLauncher`
