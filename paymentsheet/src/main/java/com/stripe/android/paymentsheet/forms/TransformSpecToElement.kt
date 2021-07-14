@@ -40,19 +40,19 @@ private fun transform(
 
     val fieldElements = spec.fields.map {
         when (it) {
-            SectionFieldSpec.Email -> transform(
-                it as SectionFieldSpec.Email,
+            is SectionFieldSpec.Email -> transform(
+                it,
                 focusRequesterCount
             )
-            SectionFieldSpec.Name -> transform(
-                it as SectionFieldSpec.Name,
+            is SectionFieldSpec.Name -> transform(
+                it,
                 focusRequesterCount
             )
             is SectionFieldSpec.Country -> transform(
                 it
             )
-            SectionFieldSpec.IdealBank -> transform(
-                it as SectionFieldSpec.IdealBank
+            is SectionFieldSpec.IdealBank -> transform(
+                it
             )
         }
     }
