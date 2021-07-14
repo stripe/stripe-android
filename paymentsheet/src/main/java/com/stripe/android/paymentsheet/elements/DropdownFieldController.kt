@@ -19,7 +19,7 @@ internal class DropdownFieldController(
     override val label: Int = config.label
     override val fieldValue = selectedIndex.map { displayItems[it] }
     override val rawFieldValue = fieldValue.map { config.convertToRaw(it) }
-    override val errorMessage: Flow<Int?> = MutableStateFlow(null)
+    override val error: Flow<FieldError?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
     override val elementType: ElementType = config.elementType
 

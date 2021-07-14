@@ -45,15 +45,16 @@ internal class TextFieldControllerTest {
     fun `verify the error message is set when should be visible`() {
         val controller = createControllerWithState()
 
-        var errorMessageResId: Int? = 5
-        controller.errorMessage.asLiveData()
+        var fieldError: FieldError? = FieldError(5, 5)
+        controller.error.asLiveData()
             .observeForever {
-                errorMessageResId = it
+                fieldError = it
             }
 
         controller.onValueChange("showWhenNoFocus")
         shadowOf(getMainLooper()).idle()
-        assertThat(errorMessageResId).isEqualTo(R.string.incomplete)
+        assertThat(fieldError?.errorMessage).isEqualTo(R.string.incomplete)
+        assertThat(fieldError?.errorFieldLabel).isEqualTo(R.string.address_label_name)
     }
 
     @Test
@@ -206,6 +207,8 @@ internal class TextFieldControllerTest {
             // These are for the initial call to onValueChange("")
             on { determineState("") } doReturn Blank
             on { filter("") } doReturn ""
+
+            on { label } doReturn R.string.address_label_name
         }
 
         return TextFieldController(config, ElementType.Email)
