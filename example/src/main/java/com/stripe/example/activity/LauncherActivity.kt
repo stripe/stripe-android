@@ -65,8 +65,12 @@ class LauncherActivity : AppCompatActivity() {
                 FragmentExamplesActivity::class.java
             ),
             Item(
-                activity.getString(R.string.launch_pay_with_google),
-                PayWithGoogleActivity::class.java
+                activity.getString(R.string.googlepaylauncher_example),
+                GooglePayLauncherIntegrationActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.googlepaypaymentmethodlauncher_example),
+                GooglePayPaymentMethodLauncherIntegrationActivity::class.java
             ),
             Item(
                 activity.getString(R.string.launch_confirm_pm_sepa_debit),
