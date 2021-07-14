@@ -48,6 +48,10 @@ internal class TextFieldController @VisibleForTesting constructor(
     val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
         fieldState.shouldShowError(hasFocus)
     }
+
+    /**
+     * An error must be emitted if it is visible or not visible.
+     **/
     override val error: Flow<FieldError?> = visibleError.map { visibleError ->
         _fieldState.value.getErrorMessageResId()?.let {
             FieldError(label, it)

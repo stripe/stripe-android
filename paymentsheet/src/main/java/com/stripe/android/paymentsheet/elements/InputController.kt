@@ -4,10 +4,13 @@ import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.ElementType
 import kotlinx.coroutines.flow.Flow
 
+/** This is a generic controller */
+interface Controller
+
 /**
  * This class provides the logic behind the fields.
  */
-internal sealed interface InputController {
+internal sealed interface InputController : Controller {
     val label: Int
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>
