@@ -40,28 +40,7 @@ private fun transform(
     focusRequesterCount: FocusRequesterCount
 ): FormElement.SectionElement {
 
-    val fieldElements = spec.fields.map {
-        when (it) {
-            is SectionFieldSpec.Email -> transform(
-                it,
-                focusRequesterCount
-            )
-            is SectionFieldSpec.Name -> transform(
-                it,
-                focusRequesterCount
-            )
-            is SectionFieldSpec.Country -> transform(
-                it
-            )
-            is SectionFieldSpec.IdealBank -> transform(
-                it
-            )
-            is SectionFieldSpec.GenericText -> transform(
-                it,
-                focusRequesterCount
-            )
-        }
-    }
+    val fieldElements = transform(spec.fields, focusRequesterCount)
 
     // The controller of the section element will be the same as the field element
     // as there is only a single field in a section
@@ -73,6 +52,32 @@ private fun transform(
             fieldElements.map { it.controller }
         )
     )
+}
+
+private fun transform(
+    sectionFields: List<SectionFieldSpec>,
+    focusRequesterCount: FocusRequesterCount
+) = sectionFields.map {
+    when (it) {
+        is SectionFieldSpec.Email -> transform(
+            it,
+            focusRequesterCount
+        )
+        is SectionFieldSpec.Name -> transform(
+            it,
+            focusRequesterCount
+        )
+        is SectionFieldSpec.Country -> transform(
+            it
+        )
+        is SectionFieldSpec.IdealBank -> transform(
+            it
+        )
+        is SectionFieldSpec.GenericText -> transform(
+            it,
+            focusRequesterCount
+        )
+    }
 }
 
 private fun transform(
