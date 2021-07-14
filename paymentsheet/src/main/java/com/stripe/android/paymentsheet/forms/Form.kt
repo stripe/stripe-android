@@ -256,7 +256,7 @@ class FormViewModel(
                 ?: MutableStateFlow(emptyList())
         ) { showFutureUse, optionalIdentifiers ->
 
-            // For optional section identifiers, list of identifiers of elements in the section
+            // For optional *section* identifiers, list of identifiers of elements in the section
             val identifiers = sectionToFieldIdentifierMap
                 .filter { idControllerPair ->
                     optionalIdentifiers.contains(idControllerPair.key)
