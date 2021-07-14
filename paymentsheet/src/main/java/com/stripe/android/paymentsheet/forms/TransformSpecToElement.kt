@@ -18,128 +18,126 @@ import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 
 /**
- * The purpose of this class is to transform a LayoutSpec data object into an Element, which
+ * Transform a [LayoutSpec] data object into an Element, which
  * has a controller and identifier.  With only a single field in a section the section
- * controller will be a pass through of the field controller.
+ * controller will be a pass through the field controller.
  */
-internal class TransformSpecToElement {
-    fun transform(
-        layout: LayoutSpec,
-        merchantName: String,
-        focusRequesterCount: FocusRequesterCount
-    ) =
-        layout.items.map {
-            when (it) {
-                is FormItemSpec.SaveForFutureUseSpec -> transform(it, merchantName)
-                is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
-                is FormItemSpec.MandateTextSpec -> transform(it, merchantName)
-            }
+internal fun transform(
+    layout: LayoutSpec,
+    merchantName: String,
+    focusRequesterCount: FocusRequesterCount
+) =
+    layout.items.map {
+        when (it) {
+            is FormItemSpec.SaveForFutureUseSpec -> transform(it, merchantName)
+            is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
+            is FormItemSpec.MandateTextSpec -> transform(it, merchantName)
         }
-
-    private fun transform(
-        spec: FormItemSpec.SectionSpec,
-        focusRequesterCount: FocusRequesterCount
-    ): FormElement.SectionElement {
-
-        val fieldElements = spec.fields.map {
-            when (it) {
-                SectionFieldSpec.Email -> transform(
-                    it as SectionFieldSpec.Email,
-                    focusRequesterCount
-                )
-                SectionFieldSpec.Name -> transform(
-                    it as SectionFieldSpec.Name,
-                    focusRequesterCount
-                )
-                is SectionFieldSpec.Country -> transform(
-                    it
-                )
-                SectionFieldSpec.IdealBank -> transform(
-                    it as SectionFieldSpec.IdealBank
-                )
-                is SectionFieldSpec.GenericText -> transform(
-                    it,
-                    focusRequesterCount
-                )
-            }
-        }
-
-        // The controller of the section element will be the same as the field element
-        // as there is only a single field in a section
-        return FormElement.SectionElement(
-            identifier = spec.identifier,
-            fieldElements,
-            SectionController(
-                spec.title,
-                fieldElements.map { it.controller }
-            )
-        )
     }
 
-    private fun transform(
-        spec: SectionFieldSpec.GenericText,
-        focusRequesterCount: FocusRequesterCount
-    ): SectionFieldElementType =
-        SectionFieldElement.GenericText(
-            spec.identifier,
-            TextFieldController(
-                GenericTextFieldConfig(
-                    label = spec.label
-                )
-            ),
-            focusRequesterCount.getAndIncrement()
-        )
+private fun transform(
+    spec: FormItemSpec.SectionSpec,
+    focusRequesterCount: FocusRequesterCount
+): FormElement.SectionElement {
 
-    private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
-        // It could be argued that the static text should have a controller, but
-        // since it doesn't provide a form field we leave it out for now
-        FormElement.MandateTextElement(
-            spec.identifier,
-            spec.stringResId,
-            spec.color,
-            merchantName
-        )
+    val fieldElements = spec.fields.map {
+        when (it) {
+            SectionFieldSpec.Email -> transform(
+                it as SectionFieldSpec.Email,
+                focusRequesterCount
+            )
+            SectionFieldSpec.Name -> transform(
+                it as SectionFieldSpec.Name,
+                focusRequesterCount
+            )
+            is SectionFieldSpec.Country -> transform(
+                it
+            )
+            SectionFieldSpec.IdealBank -> transform(
+                it as SectionFieldSpec.IdealBank
+            )
+            is SectionFieldSpec.GenericText -> transform(
+                it,
+                focusRequesterCount
+            )
+        }
+    }
 
-    private fun transform(
-        spec: SectionFieldSpec.Name,
-        focusRequesterCount: FocusRequesterCount
-    ) =
-        SectionFieldElement.Name(
-            spec.identifier,
-            TextFieldController(NameConfig()),
-            focusRequesterCount.getAndIncrement()
+    // The controller of the section element will be the same as the field element
+    // as there is only a single field in a section
+    return FormElement.SectionElement(
+        identifier = spec.identifier,
+        fieldElements,
+        SectionController(
+            spec.title,
+            fieldElements.map { it.controller }
         )
-
-    private fun transform(
-        spec: SectionFieldSpec.Email,
-        focusRequesterCount: FocusRequesterCount
-    ) =
-        SectionFieldElement.Email(
-            spec.identifier,
-            TextFieldController(EmailConfig()),
-            focusRequesterCount.getAndIncrement()
-        )
-
-    private fun transform(spec: SectionFieldSpec.Country) =
-        SectionFieldElement.Country(
-            spec.identifier,
-            DropdownFieldController(CountryConfig(spec.onlyShowCountryCodes))
-        )
-
-    private fun transform(spec: SectionFieldSpec.IdealBank) =
-        SectionFieldElement.IdealBank(
-            spec.identifier,
-            DropdownFieldController(IdealBankConfig())
-        )
-
-    private fun transform(spec: FormItemSpec.SaveForFutureUseSpec, merchantName: String) =
-        FormElement.SaveForFutureUseElement(
-            spec.identifier,
-            SaveForFutureUseController(
-                spec.identifierRequiredForFutureUse.map { element ->
-                    element.identifier
-                }
-            ),
-            merchantName
-        )
+    )
 }
+
+private fun transform(
+    spec: SectionFieldSpec.GenericText,
+    focusRequesterCount: FocusRequesterCount
+): SectionFieldElementType =
+    SectionFieldElement.GenericText(
+        spec.identifier,
+        TextFieldController(
+            GenericTextFieldConfig(
+                label = spec.label
+            )
+        ),
+        focusRequesterCount.getAndIncrement()
+    )
+
+private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
+    // It could be argued that the static text should have a controller, but
+    // since it doesn't provide a form field we leave it out for now
+    FormElement.MandateTextElement(
+        spec.identifier,
+        spec.stringResId,
+        spec.color,
+        merchantName
+    )
+
+private fun transform(
+    spec: SectionFieldSpec.Name,
+    focusRequesterCount: FocusRequesterCount
+) =
+    SectionFieldElement.Name(
+        spec.identifier,
+        TextFieldController(NameConfig()),
+        focusRequesterCount.getAndIncrement()
+    )
+
+private fun transform(
+    spec: SectionFieldSpec.Email,
+    focusRequesterCount: FocusRequesterCount
+) =
+    SectionFieldElement.Email(
+        spec.identifier,
+        TextFieldController(EmailConfig()),
+        focusRequesterCount.getAndIncrement()
+    )
+
+private fun transform(spec: SectionFieldSpec.Country) =
+    SectionFieldElement.Country(
+        spec.identifier,
+        DropdownFieldController(CountryConfig(spec.onlyShowCountryCodes))
+    )
+
+private fun transform(spec: SectionFieldSpec.IdealBank) =
+    SectionFieldElement.IdealBank(
+        spec.identifier,
+        DropdownFieldController(IdealBankConfig())
+    )
+
+private fun transform(spec: FormItemSpec.SaveForFutureUseSpec, merchantName: String) =
+    FormElement.SaveForFutureUseElement(
+        spec.identifier,
+        SaveForFutureUseController(
+            spec.identifierRequiredForFutureUse.map { element ->
+                element.identifier
+            }
+        ),
+        merchantName
+    )

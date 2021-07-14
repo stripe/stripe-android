@@ -211,8 +211,7 @@ class FormViewModel(
     internal var focusIndex = FocusRequesterCount()
     internal fun getCountFocusableFields() = focusIndex.get()
 
-    private val specToFormTransform = TransformSpecToElement()
-    internal val elements = specToFormTransform.transform(
+    internal val elements = transform(
         layout,
         merchantName,
         focusIndex
@@ -289,8 +288,7 @@ class FormViewModel(
         elements, optionalIdentifiers, showingMandate, saveForFutureUse
     ).transformFlow()
 
-    internal val populateFormFromFormFieldValues = PopulateFormFromFormFieldValues(elements)
     internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
-        populateFormFromFormFieldValues.populateWith(formFieldValues)
+        populateWith(elements, formFieldValues)
     }
 }

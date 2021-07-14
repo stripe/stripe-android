@@ -81,7 +81,7 @@ internal sealed class FormElement {
         val fields: List<SectionFieldElementType>,
         override val controller: SectionController
     ) : FormElement(), OptionalElement {
-        constructor(
+        internal constructor(
             identifier: IdentifierSpec,
             field: SectionFieldElementType,
             controller: SectionController
