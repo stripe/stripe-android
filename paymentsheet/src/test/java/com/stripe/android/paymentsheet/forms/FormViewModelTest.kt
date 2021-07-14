@@ -135,7 +135,7 @@ class FormViewModelTest {
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
             val emailController = formViewModel.elements
                 .filterIsInstance<SectionElement>()
-                .map{it.fields}
+                .map { it.fields }
                 .flatten()
                 .map { it.controller }
                 .filterIsInstance(TextFieldController::class.java).first()
@@ -179,7 +179,7 @@ class FormViewModelTest {
             val emailController = formViewModel.elements
                 .asSequence()
                 .filterIsInstance<SectionElement>()
-                .map{it.fields}
+                .map { it.fields }
                 .flatten()
                 .map { it.controller }
                 .filterIsInstance(TextFieldController::class.java).first()
