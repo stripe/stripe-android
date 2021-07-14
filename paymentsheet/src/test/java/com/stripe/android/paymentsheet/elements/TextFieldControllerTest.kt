@@ -137,6 +137,9 @@ internal class TextFieldControllerTest {
 
     @Test
     fun `Verify is visible error set when the controller field state changes`() {
+        // We check both the visible state and the error object.  In the case of
+        // an incomplete field the error object should be null when the visible error goes away.
+
         val controller = createControllerWithState()
 
         var visibleError = false
@@ -145,11 +148,29 @@ internal class TextFieldControllerTest {
                 visibleError = it
             }
 
+        val error = mutableListOf<FieldError?>()
+        controller.error.asLiveData()
+            .observeForever {
+                error.add(it)
+            }
+
         assertThat(visibleError).isEqualTo(false)
+        assertThat(error.size).isEqualTo(1)
+        assertThat(error[0]).isNull()
 
         controller.onValueChange("alwaysError")
         shadowOf(getMainLooper()).idle()
+
         assertThat(visibleError).isEqualTo(true)
+        assertThat(error.size).isEqualTo(2)
+        assertThat(error[1]).isNotNull()
+
+        controller.onValueChange("full")
+        shadowOf(getMainLooper()).idle()
+
+        assertThat(visibleError).isEqualTo(false)
+        assertThat(error.size).isEqualTo(3)
+        assertThat(error[2]).isNull()
     }
 
     @Test
