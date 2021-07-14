@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
@@ -50,7 +51,7 @@ internal sealed interface SectionFieldElementType {
  */
 internal sealed class FormElement {
     abstract val identifier: IdentifierSpec
-    abstract val controller: Any?
+    abstract val controller: Controller?
 
     /**
      * This is an element that has static text because it takes no user input, it is not

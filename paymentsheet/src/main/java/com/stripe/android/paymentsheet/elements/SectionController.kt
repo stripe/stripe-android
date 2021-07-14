@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.combine
 internal class SectionController(
     val label: Int?,
     val sectionFieldController: List<InputController>
-) {
+) : Controller {
     val error: Flow<FieldError?> = combine(
         sectionFieldController.map {
             it.error
