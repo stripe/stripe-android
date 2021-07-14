@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.ElementType
 import kotlinx.coroutines.flow.Flow
 
 /** This is a generic controller */
-interface Controller
+internal interface Controller
 
 /**
  * This class provides the logic behind the fields.
