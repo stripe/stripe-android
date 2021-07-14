@@ -3,14 +3,12 @@ package com.stripe.android.payments.wechatpay
 import com.stripe.android.model.WeChat
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
-import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -23,21 +21,15 @@ import kotlin.test.assertFailsWith
 @ExperimentalCoroutinesApi
 class WeChatPayAuthenticatorTest {
     private val testDispatcher = TestCoroutineDispatcher()
-    private val mockWeChatAuthLauncherFactory: (AuthActivityStarterHost, Int) -> WeChatPayAuthStarter =
-        mock()
     private val mockWeChatPayAuthStarter: WeChatPayAuthStarter = mock()
     private val mockReflectionHelper: WeChatPayReflectionHelper = mock()
     private val authenticator = WeChatPayAuthenticator().also {
-        it.weChatAuthLauncherFactory = mockWeChatAuthLauncherFactory
+        it.weChatAuthLauncherFactory = { _, _ -> mockWeChatPayAuthStarter }
         it.reflectionHelper = mockReflectionHelper
     }
 
     @Before
     fun setUpMocks() {
-        whenever(mockWeChatAuthLauncherFactory(any(), any())).thenReturn(
-            mockWeChatPayAuthStarter
-        )
-
         whenever(mockReflectionHelper.isWeChatPayAvailable()).thenReturn(true)
     }
 

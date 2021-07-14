@@ -2,6 +2,7 @@ package com.stripe.android.payments.wechatpay.reflection
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.stripe.android.model.WeChat
 import com.stripe.android.payments.wechatpay.WeChatPayAuthActivity
 import java.lang.reflect.InvocationHandler
@@ -12,7 +13,8 @@ class DefaultWeChatPayReflectionHelper : WeChatPayReflectionHelper {
         return try {
             Class.forName("com.tencent.mm.opensdk.openapi.IWXAPIEventHandler")
             true
-        } catch (e: ClassNotFoundException) {
+        } catch (e: Exception) {
+            Log.e(TAG, "WeChatPay dependency not found")
             false
         }
     }
@@ -114,5 +116,9 @@ class DefaultWeChatPayReflectionHelper : WeChatPayReflectionHelper {
         val payRespErrorCode = Class.forName("com.tencent.mm.opensdk.modelpay.PayResp")
             .getField("errCode")
         return payRespErrorCode.get(payResp) as Int
+    }
+
+    private companion object {
+        val TAG = DefaultWeChatPayReflectionHelper::class.java.simpleName
     }
 }

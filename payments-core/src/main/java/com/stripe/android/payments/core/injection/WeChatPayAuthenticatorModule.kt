@@ -23,14 +23,15 @@ internal class WeChatPayAuthenticatorModule {
     internal fun provideWeChatAuthenticator(
         unsupportedAuthenticator: UnsupportedAuthenticator
     ): PaymentAuthenticator<StripeIntent> {
-        return try {
+        return runCatching {
             @Suppress("UNCHECKED_CAST")
             Class.forName(
                 "com.stripe.android.payments.wechatpay.WeChatPayAuthenticator"
             ).getConstructor()
                 .newInstance() as PaymentAuthenticator<StripeIntent>
-        } catch (e: ClassNotFoundException) {
-            unsupportedAuthenticator
-        }
+        }.fold(
+            onSuccess = { it },
+            onFailure = { unsupportedAuthenticator }
+        )
     }
 }
