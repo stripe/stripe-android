@@ -79,7 +79,7 @@ internal fun Form(
                         ) {
                             val controller = element.controller
 
-                            val error by controller.errorMessage.asLiveData()
+                            val error by controller.error.asLiveData()
                                 .observeAsState(null)
                             val sectionErrorString =
                                 error?.let {

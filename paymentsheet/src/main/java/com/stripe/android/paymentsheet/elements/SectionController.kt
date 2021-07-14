@@ -7,7 +7,7 @@ internal class SectionController(
     val label: Int?,
     val sectionFieldController: List<InputController>
 ) {
-    val errorMessage: Flow<FieldError?> = combine(
+    val error: Flow<FieldError?> = combine(
         sectionFieldController.map {
             it.error
         }
