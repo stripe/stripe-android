@@ -33,6 +33,7 @@ import com.stripe.android.view.CardValidCallback.Fields
  *
  * Use [R.styleable.StripeCardFormView_cardFormStyle] to toggle style between [Style.Standard] and [Style.Borderless],
  * Use [R.styleable.StripeCardFormView_backgroundColorStateList] to change the card form's background color in enable and disabled state.
+ * Use [R.styleable.StripeCardFormView_shouldShowPostalCodeView] to toggle the visibility of postal code view.
  *
  * To access the [CardParams], see details in [cardParams] property.
  * To get notified if the current card params are valid, set a [CardValidCallback] object with [setCardValidCallback].
@@ -67,19 +68,25 @@ class CardFormView @JvmOverloads constructor(
 
     private var cardValidCallback: CardValidCallback? = null
 
-    private val allEditTextFields: Collection<StripeEditText>
-        get() {
-            return listOf(
-                cardMultilineWidget.cardNumberEditText,
-                cardMultilineWidget.expiryDateEditText,
-                cardMultilineWidget.cvcEditText,
-                postalCodeView
-            )
-        }
+    private val allEditTextFields = mutableSetOf(
+        cardMultilineWidget.cardNumberEditText,
+        cardMultilineWidget.expiryDateEditText,
+        cardMultilineWidget.cvcEditText,
+        postalCodeView
+    )
+
+    private var shouldShowPostalCodeView: Boolean = true
 
     private val invalidFields: Set<Fields>
         get() {
-            return (cardMultilineWidget.invalidFields.toList() + listOfNotNull(Fields.Postal.takeIf { !isPostalValid() })).toSet()
+            return (
+                cardMultilineWidget.invalidFields.toList() +
+                    listOfNotNull(
+                        Fields.Postal.takeIf {
+                            shouldShowPostalCodeView && !isPostalValid()
+                        }
+                    )
+                ).toSet()
         }
 
     private val cardValidTextWatcher = object : StripeTextWatcher() {
@@ -139,9 +146,6 @@ class CardFormView @JvmOverloads constructor(
     init {
         orientation = VERTICAL
 
-        setupCountryAndPostal()
-        setupCardWidget()
-
         var backgroundColorStateList: ColorStateList? = null
 
         context.withStyledAttributes(
@@ -151,7 +155,12 @@ class CardFormView @JvmOverloads constructor(
             backgroundColorStateList =
                 getColorStateList(R.styleable.StripeCardFormView_backgroundColorStateList)
             style = Style.values()[getInt(R.styleable.StripeCardFormView_cardFormStyle, 0)]
+            shouldShowPostalCodeView =
+                getBoolean(R.styleable.StripeCardFormView_shouldShowPostalCodeView, true)
         }
+
+        setupCountryAndPostal()
+        setupCardWidget()
 
         backgroundColorStateList?.let {
             cardContainer.setCardBackgroundColor(it)
@@ -179,43 +188,48 @@ class CardFormView @JvmOverloads constructor(
     }
 
     private fun setupCountryAndPostal() {
-        // wire up postal code and country
-        updatePostalCodeViewLocale(countryLayout.selectedCountryCode)
+        // hide postal
+        if (shouldShowPostalCodeView) {
+            // wire up postal code and country
+            updatePostalCodeViewLocale(countryLayout.selectedCountryCode)
 
-        // color in sync with CardMultilineWidget
-        postalCodeView.setErrorColor(
-            ContextCompat.getColor(context, R.color.stripe_card_form_view_form_error)
-        )
+            // color in sync with CardMultilineWidget
+            postalCodeView.setErrorColor(
+                ContextCompat.getColor(context, R.color.stripe_card_form_view_form_error)
+            )
 
-        postalCodeView.internalFocusChangeListeners.add { _, hasFocus ->
-            if (!hasFocus) {
-                postalCodeView.shouldShowError =
-                    postalCodeView.fieldText.isNotBlank() && !isPostalValid()
+            postalCodeView.internalFocusChangeListeners.add { _, hasFocus ->
+                if (!hasFocus) {
+                    postalCodeView.shouldShowError =
+                        postalCodeView.fieldText.isNotBlank() && !isPostalValid()
 
-                if (postalCodeView.shouldShowError) {
-                    showPostalError()
-                } else {
-                    onFieldError(Fields.Postal, null)
+                    if (postalCodeView.shouldShowError) {
+                        showPostalError()
+                    } else {
+                        onFieldError(Fields.Postal, null)
+                    }
                 }
             }
-        }
 
-        postalCodeView.doAfterTextChanged {
-            onFieldError(Fields.Postal, null)
-        }
+            postalCodeView.doAfterTextChanged {
+                onFieldError(Fields.Postal, null)
+            }
 
-        postalCodeView.setErrorMessageListener { errorMessage ->
-            onFieldError(
-                Fields.Postal,
-                errorMessage
-            )
-        }
+            postalCodeView.setErrorMessageListener { errorMessage ->
+                onFieldError(
+                    Fields.Postal,
+                    errorMessage
+                )
+            }
 
-        countryLayout.countryCodeChangeCallback = { countryCode ->
-            updatePostalCodeViewLocale(countryCode)
-            postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(countryCode)
-            postalCodeView.shouldShowError = false
-            postalCodeView.text = null
+            countryLayout.countryCodeChangeCallback = { countryCode ->
+                updatePostalCodeViewLocale(countryCode)
+                postalCodeContainer.isVisible = CountryUtils.doesCountryUsePostalCode(countryCode)
+                postalCodeView.shouldShowError = false
+                postalCodeView.text = null
+            }
+        } else {
+            allEditTextFields.remove(postalCodeView)
         }
     }
 
@@ -383,6 +397,11 @@ class CardFormView @JvmOverloads constructor(
             cardMultilineWidget.childCount
         )
 
+        if (!shouldShowPostalCodeView) {
+            countryPostalDivider.isVisible = false
+            postalCodeContainer.isVisible = false
+        }
+
         // make cardElevation non zero to show border
         cardContainer.cardElevation =
             resources.getDimension(R.dimen.stripe_card_form_view_card_elevation)
@@ -418,15 +437,21 @@ class CardFormView @JvmOverloads constructor(
             1
         )
 
-        // add horizontal divider below countryLayout and hide countryPostalDivider
-        countryLayout.addView(
-            StripeHorizontalDividerBinding.inflate(
-                layoutInflater,
-                countryLayout,
-                false
-            ).root
-        )
+        // hide countryPostalDivider
         countryPostalDivider.isVisible = false
+
+        if (shouldShowPostalCodeView) {
+            // add horizontal divider below countryLayout
+            countryLayout.addView(
+                StripeHorizontalDividerBinding.inflate(
+                    layoutInflater,
+                    countryLayout,
+                    false
+                ).root
+            )
+        } else {
+            postalCodeContainer.isVisible = false
+        }
 
         // hide border
         cardContainer.cardElevation = 0f

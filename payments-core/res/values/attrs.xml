@@ -28,5 +28,6 @@
             <enum name="borderless" value="1" />
         </attr>
         <attr name="backgroundColorStateList" format="reference" />
+        <attr name="shouldShowPostalCodeView" format="boolean" />
     </declare-styleable>
 </resources>
