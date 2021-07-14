@@ -37,9 +37,8 @@ class PopulateFormFromFormFieldValuesTest {
                 showsMandate = true,
                 saveForFutureUse = false
             )
-            PopulateFormFromFormFieldValues(
-                listOf(emailSection)
-            ).populateWith(formFieldValues)
+
+            populateWith(listOf(emailSection), formFieldValues)
 
             assertThat(emailController.fieldValue.first())
                 .isEqualTo("valid@email.com")
@@ -60,9 +59,8 @@ class PopulateFormFromFormFieldValuesTest {
                 showsMandate = true,
                 saveForFutureUse = false
             )
-            PopulateFormFromFormFieldValues(
-                listOf(emailSection)
-            ).populateWith(formFieldValues)
+
+            populateWith(listOf(emailSection), formFieldValues)
 
             assertThat(emailController.fieldValue.first())
                 .isEqualTo("")
@@ -77,9 +75,8 @@ class PopulateFormFromFormFieldValuesTest {
                 showsMandate = true,
                 saveForFutureUse = false
             )
-            PopulateFormFromFormFieldValues(
-                listOf(emailSection)
-            ).populateWith(formFieldValues)
+
+            populateWith(listOf(emailSection), formFieldValues)
 
             assertThat(emailController.fieldValue.first())
                 .isEqualTo("")
