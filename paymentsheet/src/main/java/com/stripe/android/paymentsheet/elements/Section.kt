@@ -43,8 +43,8 @@ internal data class CardStyle(
  * Once credit card is converted use one of the default material theme styles.
  */
 internal data class SectionTitle @ExperimentalUnitApi constructor(
-    val light: Color = Color(0x00565656),
-    val dark: Color = Color(0x99FFFFFF),
+    val light: Color = Color.DarkGray,
+    val dark: Color = Color.White,
     val fontWeight: FontWeight = FontWeight.Bold,
     val paddingBottom: Dp = 4.dp,
     val letterSpacing: TextUnit = TextUnit(-0.01f, TextUnitType.Sp),
@@ -92,6 +92,7 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
                 fontWeight = sectionTitle.fontWeight,
                 letterSpacing = sectionTitle.letterSpacing,
             ),
+            modifier = Modifier.padding(vertical = 4.dp)
         )
     }
 }
