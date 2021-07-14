@@ -87,5 +87,8 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     object IdealBank : SectionFieldSpec(IdentifierSpec("bank"))
 
-    data class GenericText(override val identifier: IdentifierSpec) : SectionFieldSpec(identifier)
+    data class GenericText(
+        override val identifier: IdentifierSpec,
+        @StringRes val label: Int
+    ) : SectionFieldSpec(identifier)
 }

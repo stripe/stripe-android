@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.GenericTextFieldConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
@@ -79,14 +80,18 @@ internal class TransformSpecToElement {
         spec: SectionFieldSpec.GenericText,
         focusRequesterCount: FocusRequesterCount
     ): SectionFieldElementType =
-        SectionFieldElement.Name(
+        SectionFieldElement.GenericText(
             spec.identifier,
-            TextFieldController(NameConfig()),
+            TextFieldController(
+                GenericTextFieldConfig(
+                    label = spec.label
+                )
+            ),
             focusRequesterCount.getAndIncrement()
         )
 
     private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
-    // It could be argued that the static text should have a controller, but
+        // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         FormElement.MandateTextElement(
             spec.identifier,
