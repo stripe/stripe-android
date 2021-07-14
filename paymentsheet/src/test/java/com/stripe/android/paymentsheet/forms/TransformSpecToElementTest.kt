@@ -25,8 +25,6 @@ import org.junit.Test
 
 class TransformSpecToElementTest {
 
-    private val transformSpecToElement = TransformSpecToElement()
-
     private val nameSection = FormItemSpec.SectionSpec(
         IdentifierSpec("nameSection"),
         SectionFieldSpec.Name
@@ -39,7 +37,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Section with multiple fields contains all fields in the section element`() {
-        val formElement = transformSpecToElement.transform(
+        val formElement = transform(
             LayoutSpec(
                 listOf(
                     FormItemSpec.SectionSpec(
@@ -67,7 +65,7 @@ class TransformSpecToElementTest {
             IdentifierSpec("countrySection"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
-        val formElement = transformSpecToElement.transform(
+        val formElement = transform(
             LayoutSpec(
                 listOf(countrySection)
             ),
@@ -95,7 +93,7 @@ class TransformSpecToElementTest {
             IdentifierSpec("idealSection"),
             SectionFieldSpec.IdealBank
         )
-        val formElement = transformSpecToElement.transform(
+        val formElement = transform(
             LayoutSpec(
                 listOf(idealSection)
             ),
@@ -116,7 +114,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a name section spec sets up the name element correctly`() {
-        val formElement = transformSpecToElement.transform(
+        val formElement = transform(
             LayoutSpec(
                 listOf(nameSection)
             ),
@@ -133,7 +131,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a email section spec sets up the email element correctly`() {
-        val formElement = transformSpecToElement.transform(
+        val formElement = transform(
             LayoutSpec(
                 listOf(emailSection)
             ),
@@ -152,7 +150,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Adding to sections that get focus sets up the focus indexes correctly`() {
         val focusRequesterCount = FocusRequesterCount()
-        val formElement = transformSpecToElement.transform(
+        val formElement = transform(
             LayoutSpec(
                 listOf(nameSection, emailSection)
             ),
@@ -179,7 +177,7 @@ class TransformSpecToElementTest {
             R.string.sofort_mandate,
             Color.Gray
         )
-        val formElement = transformSpecToElement.transform(
+        val formElement = transform(
             LayoutSpec(
                 listOf(mandate)
             ),
@@ -205,7 +203,7 @@ class TransformSpecToElementTest {
             )
             val optionalIdentifiers = listOf(nameSection, mandate)
             val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(optionalIdentifiers)
-            val formElement = transformSpecToElement.transform(
+            val formElement = transform(
                 LayoutSpec(
                     listOf(saveForFutureUseSpec)
                 ),
