@@ -89,8 +89,12 @@ internal sealed class FormElement {
     }
 }
 
-internal fun List<FormElement>.idInputControllerMap() = this
-    .filter { it.controller is InputController && it.controller != null }
+/**
+ * This will get a map of all pairs of identifier to inputControllers, including the section
+ * fields, but not the sections themselves.
+ */
+internal fun List<FormElement>.getIdInputControllerMap() = this
+    .filter { it.controller is InputController }
     .associate { it.identifier to (it.controller as InputController) }
     .plus(
         this
