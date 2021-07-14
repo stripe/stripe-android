@@ -179,7 +179,7 @@ data class SetupIntent internal constructor(
         }
 
         internal companion object {
-            internal const val CODE_AUTHENTICATION_ERROR = "payment_intent_authentication_failure"
+            internal const val CODE_AUTHENTICATION_ERROR = "setup_intent_authentication_failure"
         }
     }
 

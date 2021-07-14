@@ -46,7 +46,7 @@ internal object SetupIntentFixtures {
             "created": 1561677666,
             "description": "a description",
             "last_setup_error": {
-                "code": "payment_intent_authentication_failure",
+                "code": "setup_intent_authentication_failure",
                 "doc_url": "https://stripe.com/docs/error-codes/payment-intent-authentication-failure",
                 "message": "The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again.",
                 "payment_method": {

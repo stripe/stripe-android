@@ -30,7 +30,6 @@ internal class IdealBankConfig : DropdownConfig {
             Item("Handelsbanken", "handelsbanken"),
             Item("ING", "ing"),
             Item("Knab", "knab"),
-            Item("Moneyou", "moneyou"),
             Item("Rabobank", "rabobank"),
             Item("Revolut", "revolut"),
             Item("RegioBank", "regiobank"),

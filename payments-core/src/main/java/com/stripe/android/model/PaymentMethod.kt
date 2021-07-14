@@ -141,29 +141,30 @@ data class PaymentMethod internal constructor(
     enum class Type constructor(
         @JvmField val code: String,
         @JvmField val isReusable: Boolean,
-        @JvmField val isVoucher: Boolean
+        @JvmField val isVoucher: Boolean,
+        @JvmField val requiresMandate: Boolean
     ) : Parcelable {
-        Card("card", isReusable = true, isVoucher = false),
-        CardPresent("card_present", isReusable = false, isVoucher = false),
-        Fpx("fpx", isReusable = false, isVoucher = false),
-        Ideal("ideal", isReusable = false, isVoucher = false),
-        SepaDebit("sepa_debit", isReusable = false, isVoucher = false),
-        AuBecsDebit("au_becs_debit", isReusable = true, isVoucher = false),
-        BacsDebit("bacs_debit", isReusable = true, isVoucher = false),
-        Sofort("sofort", isReusable = false, isVoucher = false),
-        Upi("upi", isReusable = false, isVoucher = false),
-        P24("p24", isReusable = false, isVoucher = false),
-        Bancontact("bancontact", isReusable = false, isVoucher = false),
-        Giropay("giropay", isReusable = false, isVoucher = false),
-        Eps("eps", isReusable = false, isVoucher = false),
-        Oxxo("oxxo", isReusable = false, isVoucher = true),
-        Alipay("alipay", isReusable = false, isVoucher = false),
-        GrabPay("grabpay", isReusable = false, isVoucher = false),
-        PayPal("paypal", isReusable = false, isVoucher = false),
-        AfterpayClearpay("afterpay_clearpay", isReusable = false, isVoucher = false),
-        Netbanking("netbanking", isReusable = false, isVoucher = false),
-        Blik("blik", isReusable = false, isVoucher = false),
-        WeChatPay("wechat_pay", isReusable = false, isVoucher = false);
+        Card("card", isReusable = true, isVoucher = false, requiresMandate = false),
+        CardPresent("card_present", isReusable = false, isVoucher = false, requiresMandate = false),
+        Fpx("fpx", isReusable = false, isVoucher = false, requiresMandate = false),
+        Ideal("ideal", isReusable = false, isVoucher = false, requiresMandate = true),
+        SepaDebit("sepa_debit", isReusable = false, isVoucher = false, requiresMandate = true),
+        AuBecsDebit("au_becs_debit", isReusable = true, isVoucher = false, requiresMandate = true),
+        BacsDebit("bacs_debit", isReusable = true, isVoucher = false, requiresMandate = true),
+        Sofort("sofort", isReusable = false, isVoucher = false, requiresMandate = true),
+        Upi("upi", isReusable = false, isVoucher = false, requiresMandate = false),
+        P24("p24", isReusable = false, isVoucher = false, requiresMandate = false),
+        Bancontact("bancontact", isReusable = false, isVoucher = false, requiresMandate = true),
+        Giropay("giropay", isReusable = false, isVoucher = false, requiresMandate = false),
+        Eps("eps", isReusable = false, isVoucher = false, requiresMandate = true),
+        Oxxo("oxxo", isReusable = false, isVoucher = true, requiresMandate = false),
+        Alipay("alipay", isReusable = false, isVoucher = false, requiresMandate = false),
+        GrabPay("grabpay", isReusable = false, isVoucher = false, requiresMandate = false),
+        PayPal("paypal", isReusable = false, isVoucher = false, requiresMandate = false),
+        AfterpayClearpay("afterpay_clearpay", isReusable = false, isVoucher = false, requiresMandate = false),
+        Netbanking("netbanking", isReusable = false, isVoucher = false, requiresMandate = false),
+        Blik("blik", isReusable = false, isVoucher = false, requiresMandate = false),
+        WeChatPay("wechat_pay", isReusable = false, isVoucher = false, requiresMandate = false);
 
         override fun toString(): String {
             return code
