@@ -9,7 +9,6 @@ Google Pay integration. See the [Google Pay integration guide](https://stripe.co
 for more details.
 
 ### Notable Changes
-
 * [3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10`
 * [3883](https://github.com/stripe/stripe-android/pull/3883) Remove `PaymentIntent#nextAction`
 * [3899](https://github.com/stripe/stripe-android/pull/3899) Introduce `GooglePayLauncher` and `GooglePayPaymentMethodLauncher`
