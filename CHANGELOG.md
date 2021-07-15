@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 17.0.0 - unreleased
+## 17.0.0 - 2021-07-15
 This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
 ### What's New
