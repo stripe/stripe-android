@@ -29,9 +29,6 @@ internal class WeChatPayAuthenticatorModule {
                 "com.stripe.android.payments.wechatpay.WeChatPayAuthenticator"
             ).getConstructor()
                 .newInstance() as PaymentAuthenticator<StripeIntent>
-        }.fold(
-            onSuccess = { it },
-            onFailure = { unsupportedAuthenticator }
-        )
+        }.getOrDefault(unsupportedAuthenticator)
     }
 }
