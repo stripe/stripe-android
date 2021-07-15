@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
  */
 internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
-    val viewModel: PaymentLauncherViewModel by viewModels {
+    private val viewModel: PaymentLauncherViewModel by viewModels {
         PaymentLauncherViewModel.Factory()
     }
 
@@ -23,6 +23,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             requireNotNull(PaymentLauncherContract.Args.fromIntent(intent))
         }.getOrElse {
             finishWithResult(PaymentResult.Failed(it))
+            return
         }
 
         when (args) {
