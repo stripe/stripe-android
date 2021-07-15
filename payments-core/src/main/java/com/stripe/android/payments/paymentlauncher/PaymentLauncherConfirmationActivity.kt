@@ -19,8 +19,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         when (val args = requireNotNull(PaymentLauncherHostContract.Args.fromIntent(intent))) {
             is PaymentLauncherHostContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams)
@@ -31,7 +29,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             is PaymentLauncherHostContract.Args.SetupIntentNextActionArgs -> {
                 viewModel.handleNextActionForSetupIntent(args.setupIntentClientSecret)
             }
-
         }
     }
 

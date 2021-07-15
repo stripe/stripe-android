@@ -16,7 +16,9 @@ internal class StripePaymentLauncher internal constructor(
         // confirm the intent with stripeRepository
         // resolve the nextActionData with authenticatorRegistry
         // report result to callback
-        hostActivityLauncher.launch(PaymentLauncherHostContract.Args(params))
+        hostActivityLauncher.launch(
+            PaymentLauncherHostContract.Args.IntentConfirmationArgs(params)
+        )
     }
 
     override fun confirm(params: ConfirmSetupIntentParams) {
@@ -24,7 +26,9 @@ internal class StripePaymentLauncher internal constructor(
         // confirm the intent with stripeRepository
         // resolve the nextActionData with authenticatorRegistry
         // report result to callback
-        hostActivityLauncher.launch(PaymentLauncherHostContract.Args(params))
+        hostActivityLauncher.launch(
+            PaymentLauncherHostContract.Args.IntentConfirmationArgs(params)
+        )
     }
 
     override fun handleNextActionForPaymentIntent(clientSecret: String) {
@@ -33,7 +37,7 @@ internal class StripePaymentLauncher internal constructor(
         // resolve the nextActionData with authenticatorRegistry
         // report result to callback
         hostActivityLauncher.launch(
-            PaymentLauncherHostContract.Args(
+            PaymentLauncherHostContract.Args.PaymentIntentNextActionArgs(
                 paymentIntentClientSecret = clientSecret
             )
         )
@@ -45,7 +49,7 @@ internal class StripePaymentLauncher internal constructor(
         // resolve the nextActionData with authenticatorRegistry
         // report result to callback
         hostActivityLauncher.launch(
-            PaymentLauncherHostContract.Args(
+            PaymentLauncherHostContract.Args.SetupIntentNextActionArgs(
                 setupIntentClientSecret = clientSecret
             )
         )
