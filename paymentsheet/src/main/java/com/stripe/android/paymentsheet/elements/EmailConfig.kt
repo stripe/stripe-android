@@ -14,7 +14,7 @@ internal class EmailConfig : TextFieldConfig {
     override val debugLabel = "email"
 
     @StringRes
-    override val label = R.string.email
+    override val label = R.string.becs_widget_email
     override val keyboard = KeyboardType.Email
     override val elementType = ElementType.Email
 

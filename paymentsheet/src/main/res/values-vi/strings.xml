@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Label for card number entry text field -->
+    <string name="acc_label_card_number">Số thẻ</string>
+    <string name="acc_label_card_number_node">%s, Số thẻ</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Ngày hết hạn</string>
+    <string name="acc_label_expiry_date_node">%s, Ngày hết hạn</string>
+    <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+    <string name="acc_label_zip">Mã ZIP</string>
+    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+    <string name="acc_label_zip_short">ZIP</string>
+    <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
+    <string name="add_card">Thêm thẻ ghi nợ hoặc thẻ tín dụng để mua hàng trong ứng dụng này.</string>
+    <!-- Message displayed when a payment method is removed, stating its name. -->
+    <string name="added">Đã thêm %s</string>
+    <!-- Error text indicating that city is required, used for all locations -->
+    <string name="address_city_required">Vui lòng nhập tên thành phố</string>
+    <!-- Error text indicating country is invalid -->
+    <string name="address_country_invalid">Tên quận không hợp lệ</string>
+    <!-- Error text indicating that county is required, used for UK addresses -->
+    <string name="address_county_required">Vui lòng nhập tên quận</string>
+    <!-- Caption for Address field on address form -->
+    <string name="address_label_address">Địa chỉ</string>
+    <!-- Address line 1 placeholder for billing address form. -->
+    <string name="address_label_address_line1">Dòng địa chỉ 1</string>
+    <!-- Label for input requesting the first line of an address where , used for international addresses -->
+    <string name="address_label_address_line1_optional">Dòng địa chỉ 1 (tùy chọn)</string>
+    <!-- Address line 2 placeholder for billing address form. -->
+    <string name="address_label_address_line2_optional">Dòng địa chỉ 2 (tùy chọn)</string>
+    <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+    <string name="address_label_address_optional">Địa chỉ (tùy chọn) </string>
+    <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
+    <string name="address_label_apt">Căn hộ</string>
+    <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+    <string name="address_label_apt_optional">Căn hộ (tùy chọn)</string>
+    <!-- Caption for City field on address form -->
+    <string name="address_label_city">Thành phố</string>
+    <!-- Label for input requesting city where input is optional, used for all locations -->
+    <string name="address_label_city_optional">Thành phố (tùy chọn)</string>
+    <!-- Caption for Country field on address form -->
+    <string name="address_label_country">Quốc gia</string>
+    <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+    <string name="address_label_county">Quận</string>
+    <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+    <string name="address_label_county_optional">Quận (tùy chọn)</string>
+    <!-- Caption for Name field on address form -->
+    <string name="address_label_name">Tên</string>
+    <!-- Label for input requesting phone number, used for all locations -->
+    <string name="address_label_phone_number">Số điện thoại</string>
+    <!-- Label for input requesting phone number where input is optional, used for all locations -->
+    <string name="address_label_phone_number_optional">Số điện thoại (tùy chọn)</string>
+    <!-- Short string for postal code (text used in non-US countries) -->
+    <string name="address_label_postal_code">Mã bưu điện</string>
+    <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+    <string name="address_label_postal_code_optional">Mã bưu điện (tùy chọn)</string>
+    <!-- Label for input requesting postcode, used for UK based addresses -->
+    <string name="address_label_postcode">Mã bưu điện</string>
+    <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+    <string name="address_label_postcode_optional">Mã bưu điện (tùy chọn)</string>
+    <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+    <string name="address_label_province">Tỉnh</string>
+    <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+    <string name="address_label_province_optional">Tỉnh (tùy chọn)</string>
+    <!-- Label for input requesting the region, used for international addresses -->
+    <string name="address_label_region_generic">Tiểu bang/Tỉnh/Khu vực</string>
+    <!-- Label for input requesting the region where input is optional, used for international addresses -->
+    <string name="address_label_region_generic_optional">Tiểu bang/Tỉnh/Khu vực (tùy chọn)</string>
+    <!-- Caption for State field on address form (only countries that use state , like United States) -->
+    <string name="address_label_state">Tiểu bang</string>
+    <!-- Label for input requesting state where input is optional, used for US based addresses -->
+    <string name="address_label_state_optional">Tiểu bang (tùy chọn)</string>
+    <!-- Label for input requesting zip code, used for US based addreses -->
+    <string name="address_label_zip_code">Mã ZIP</string>
+    <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+    <string name="address_label_zip_code_optional">Mã ZIP (tùy chọn)</string>
+    <!-- Label for input requesting postal code, used for international addresses -->
+    <string name="address_label_zip_postal_code">Mã bưu điện/ZIP</string>
+    <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+    <string name="address_label_zip_postal_code_optional">Mã bưu điện/ZIP (tùy chọn)</string>
+    <!-- Error text indicating name is required -->
+    <string name="address_name_required">Vui lòng nhập tên của bạn</string>
+    <!-- Error text indicating that phone number is required, used for all addresses -->
+    <string name="address_phone_number_required">Vui lòng nhập số điện thoại</string>
+    <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+    <string name="address_postal_code_invalid">Mã bưu điện không hợp lệ</string>
+    <!-- Error text indicating postcode is invalid, used for UK addresses -->
+    <string name="address_postcode_invalid">Mã bưu điện không hợp lệ</string>
+    <!-- Error text indicating that province is required, used for Canada addresses -->
+    <string name="address_province_required">Vui lòng nhập tên tỉnh</string>
+    <!-- Error text indicating that region is required, used for international addresses -->
+    <string name="address_region_generic_required">Vui lòng nhập tên Tiểu bang/Tỉnh/Khu vực</string>
+    <!-- Error text indicating that address is required, used for all locations -->
+    <string name="address_required">Vui lòng nhập địa chỉ email</string>
+    <!-- Title for shipping address entry section -->
+    <string name="address_shipping_address">Địa chỉ vận chuyển</string>
+    <!-- Error text indicating that state is required, used for US addresses -->
+    <string name="address_state_required">Vui lòng nhập tên tiểu bang</string>
+    <!-- Error text indicating zip code is invalid, used for US addresses -->
+    <string name="address_zip_invalid">Mã ZIP không hợp lệ</string>
+    <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+    <string name="address_zip_postal_invalid">Mã bưu điện/ZIP không hợp lệ</string>
+    <!-- Source type brand name -->
+    <string name="Bancontact">Bancontact</string>
+    <!-- BECS Debit Widget - mandate acceptance -->
+    <string name="becs_mandate_acceptance">
+    Khi cung cấp chi tiết tài khoản ngân hàng của bạn và xác nhận khoản thanh toán này, bạn đồng ý
+    với Yêu cầu Ghi nợ Trực tiếp này và thỏa thuận dịch vụ Yêu cầu Ghi nợ Trực tiếp và ủy quyền cho
+    Stripe Payments Australia Pty Ltd ACN 160 180 343 có số ID Người dùng Ghi nợ Trực tiếp là
+    507156 (“Stripe”), thay mặt cho %1$s (\"Người bán\") ghi nợ tài khoản thông qua Hệ thống thanh toán
+    bù trừ điện tử hàng loạt (BECS) đối với bất kỳ số tiền nào được Người bán thông báo riêng cho
+    bạn. Bạn xác nhận rằng bạn là chủ tài khoản hoặc người ký được ủy quyền trên tài khoản được
+    liệt kê ở trên.
+    </string>
+    <!-- Placeholder text for Account number entry field for BECS Debit. -->
+    <string name="becs_widget_account_number">Số tài khoản</string>
+    <!-- BECS Debit Widget - account number field - incomplete error message -->
+    <string name="becs_widget_account_number_incomplete">Số tài khoản của bạn chưa đầy đủ.</string>
+    <!-- BECS Debit Widget - account number field - required error message -->
+    <string name="becs_widget_account_number_required">Số tài khoản của bạn là bắt buộc.</string>
+    <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+    <string name="becs_widget_bsb">BSB</string>
+    <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+    <string name="becs_widget_bsb_incomplete">BSB mà bạn nhập chưa đầy đủ.</string>
+    <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+    <string name="becs_widget_bsb_invalid">BSB mà bạn nhập không hợp lệ.</string>
+    <!-- BECS Debit Widget - email address field - label -->
+    <string name="becs_widget_email">Địa chỉ email</string>
+    <!-- BECS Debit Widget - email address field - invalid error message -->
+    <string name="becs_widget_email_invalid">Địa chỉ email của bạn không hợp lệ.</string>
+    <!-- BECS Debit Widget - email address field - required error message -->
+    <string name="becs_widget_email_required">Địa chỉ email của bạn là bắt buộc.</string>
+    <!-- BECS Debit Widget - name field - label -->
+    <string name="becs_widget_name">Tên</string>
+    <!-- BECS Debit Widget - name field - required error message -->
+    <string name="becs_widget_name_required">Tên của bạn là bắt buộc.</string>
+    <!-- SEPA mandate text -->
+    <string name="By_providing_your_payment_information_and_confirming_this_payment_you_authorise_A__and_Stripe_our_payment_service_provider_to_send_instructions_to_your_bank_to_debit_your_account_and_B_your_bank_to_debit_your_account_in_accordance_with_those_instructions._As_part_of_your_rights_you_are_entitled_to_a_refund_from_your_bank_under_the_terms_and_conditions_of_your_agreement_with_your_bank._A_refund_must_be_claimed_within_8_weeks_starting_from_the_date_on_which_your_account_was_debited._Your_rights_are_explained_in_a_statement_that_you_can_obtain_from_your_bank._You_agree_to_receive_notifications_for_future_debits_up_to_2_days_before_they_occur.">Bằng việc cung cấp thông tin thanh toán của quý vị và xác nhận khoản thanh toán này, quý vị đã ủy quyền cho (A) %s và Stripe, nhà cung cấp dịch vụ thanh toán của chúng tôi, gửi hướng dẫn đến ngân hàng của quý vị để ghi nợ tài khoản của quý vị và (B) ngân hàng ghi nợ tài khoản của quý vị theo những hướng dẫn đó. Trong các quyền của mình, quý vị được hoàn tiền từ ngân hàng của mình theo các điều khoản và điều kiện trong thỏa thuận của quý vị với ngân hàng của quý vị. Khoản tiền hoàn phải được yêu cầu trong vòng 8 tuần kể từ ngày tài khoản của quý vị bị ghi nợ. Các quyền của quý vị được giải thích trong bản tuyên bố mà quý vị có thể nhận được từ ngân hàng của mình. Quý vị đồng ý nhận thông báo cho các khoản ghi nợ trong tương lai tối đa 2 ngày trước khi chúng xảy ra.</string>
+    <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+    <string name="card_ending_in">%1$s kết thúc bằng %2$s</string>
+    <!-- Text for close button -->
+    <string name="close">Đóng</string>
+    <!-- Accessibility action for deleting a payment method -->
+    <string name="delete_payment_method">Xóa phương thức thanh toán</string>
+    <string name="delete_payment_method_prompt_title">Xóa phương thức thanh toán?</string>
+    <!-- label for text field to enter card expiry -->
+    <string name="expiry_date_hint">Tháng/Năm</string>
+    <string name="expiry_label_short">Hết hạn</string>
+    <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+    <string name="fpx_bank_offline">%s - Ngoại tuyến</string>
+    <!-- iDEAL bank section title for iDEAL form entry. -->
+    <string name="iDEAL_Bank">Ngân hàng iDEAL</string>
+    <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+    <string name="incomplete_expiry_date">Ngày hết hạn trên thẻ không hợp lệ.</string>
+    <string name="invalid_card_number">Số thẻ của bạn không hợp lệ.</string>
+    <!-- Error message for card entry form when CVC/CVV is invalid -->
+    <string name="invalid_cvc">Mã bảo mật trên thẻ không hợp lệ.</string>
+    <!-- String to describe an invalid month in expiry date. -->
+    <string name="invalid_expiry_month">Tháng hết hạn trên thẻ của bạn không hợp lệ.</string>
+    <!-- String to describe an invalid year in expiry date. -->
+    <string name="invalid_expiry_year">Năm hết hạn trên thẻ của bạn không hợp lệ.</string>
+    <!-- Shipping form error message -->
+    <string name="invalid_shipping_information">Địa chỉ vận chuyển không hợp lệ</string>
+    <!-- Error message for when postal code in form is incomplete -->
+    <string name="invalid_zip">Mã bưu điện chưa đầy đủ.</string>
+    <!-- Text informing user there are no existing payment methods in the application -->
+    <string name="no_payment_methods">Không có phương thức thanh toán.</string>
+    <string name="payment_method_add_new_card">Thêm thẻ mới...</string>
+    <string name="payment_method_add_new_fpx">Chọn Tài khoản Ngân hàng (FPX)...</string>
+    <!-- Label for free shipping method -->
+    <string name="price_free">Miễn phí</string>
+    <!-- Message displayed when a payment method is removed, stating its name. -->
+    <string name="removed">Đã xóa %s</string>
+    <string name="secure_checkout">Bảo mật Thanh toán</string>
+    <!-- Payment method brand name -->
+    <string name="SEPA_Debit">Ghi nợ SEPA</string>
+    <!-- Payment Method type brand name
+   Source type brand name -->
+    <string name="Sofort">Sofort</string>
+    <!-- Generic error message shown when payment cannot be processed. -->
+    <string name="stripe_failure_connection_error">Chúng tôi đang gặp sự cố khi kết nối với nhà cung cấp dịch vụ thanh toán của mình. Vui lòng kiểm tra kết nối internet của bạn và thử lại.</string>
+    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+    <string name="stripe_failure_reason_authentication">Chúng tôi không thể xác thực phương thức thanh toán của bạn. Vui lòng chọn phương thức thanh toán khác và thử lại.</string>
+    <!-- Error when 3DS2 authentication timed out. -->
+    <string name="stripe_failure_reason_timed_out">Đã hết thời gian xác thực phương thức thanh toán -- hãy thử lại sau</string>
+    <!-- When an internal error is reported when a google pay payment is started. -->
+    <string name="stripe_google_pay_error_internal">Đã xảy ra lỗi nội bộ.</string>
+    <string name="stripe_paymentsheet_add_button_label">Thêm</string>
+    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Thêm</string>
+    <!-- Card details entry form header title -->
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Thông tin thẻ</string>
+    <!-- Country selector and postal code entry form header title -->
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Quốc gia hoặc khu vực</string>
+    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+    <string name="stripe_paymentsheet_add_payment_method_title">Thêm thông tin thanh toán của bạn</string>
+    <!-- Text for back button -->
+    <string name="stripe_paymentsheet_back">Quay lại</string>
+    <string name="stripe_paymentsheet_close">Đóng</string>
+    <!-- Error when the user presses submit and they have not filled in the email field. -->
+    <string name="stripe_paymentsheet_error_email_blank">Email của quý vị không được để trống.</string>
+    <!-- Error when the user presses submit and they have not filled in the name field. -->
+    <string name="stripe_paymentsheet_error_name_blank">Tên của quý vị không được để trống.</string>
+    <!-- label for text field to enter card expiry -->
+    <string name="stripe_paymentsheet_expiration_date_hint">Tháng /Năm</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Thẻ mới</string>
+    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+    <string name="stripe_paymentsheet_or_pay_with_card">Hoặc thanh toán bằng thẻ</string>
+    <!-- Label of a button that initiates payment when tapped -->
+    <string name="stripe_paymentsheet_pay_button_amount">Thanh toán %s</string>
+    <!-- Label for a button that starts processing the payment. -->
+    <string name="stripe_paymentsheet_pay_button_label">Thanh toán</string>
+    <!-- Title for credit card number entry field -->
+    <string name="stripe_paymentsheet_payment_method_card">Thẻ</string>
+    <!-- Source type brand name -->
+    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
+    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+    <string name="stripe_paymentsheet_primary_button_processing">Đang xử lý...</string>
+    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Lưu thẻ này để thanh toán nhanh %s sau này</string>
+    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+    <string name="stripe_paymentsheet_select_payment_method">Chọn phương thức thanh toán của bạn</string>
+    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+    <string name="stripe_paymentsheet_setup_button_label">Cài đặt</string>
+    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+    <string name="stripe_verify_your_payment">Xác minh thanh toán của quý vị</string>
+    <!-- An error message. -->
+    <string name="The_IBAN_you_entered_is_incomplete.">IBAN quý vị đã nhập chưa đầy đủ.</string>
+    <!-- An error message. -->
+    <string name="The_IBAN_you_entered_is_invalid__is_not_a_supported_country_code.">IBAN quý vị đã nhập không hợp lệ, \"%s\" không phải là mã quốc gia được hỗ trợ.</string>
+    <!-- An error message displayed when the customer's iban is invalid. -->
+    <string name="The_IBAN_you_entered_is_invalid.">IBAN quý vị đã nhập không hợp lệ.</string>
+    <string name="title_add_a_card">Thêm Thẻ</string>
+    <!-- Screen title telling users they should add an address -->
+    <string name="title_add_an_address">Đặt địa chỉ</string>
+    <!-- Label for Bank Account selection or detail entry form -->
+    <string name="title_bank_account">Tài khoản ngân hàng</string>
+    <!-- Title for Payment Method screen -->
+    <string name="title_payment_method">Phương thức thanh toán</string>
+    <!-- Screen title telling users they should select a shipping address -->
+    <string name="title_select_shipping_method">Chọn phương thức vận chuyển</string>
+    <!-- Error message when email is invalid -->
+    <string name="Your_email_is_invalid.">Email của quý vị không hợp lệ.</string>
+    <!-- An error message. -->
+    <string name="Your_IBAN_should_start_with_a_two_letter_country_code.">IBAN của quý vị phải bắt đầu bằng mã quốc gia gồm hai chữ cái.</string>
+    <!-- An error message. -->
+    <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">IBAN của quý vị phải bắt đầu bằng mã quốc gia gồm hai chữ cái.</string>
+    <!-- Error when customer's name is invalid -->
+    <string name="Your_name_is_invalid.">Tên của quý vị không hợp lệ.</string>
+</resources>

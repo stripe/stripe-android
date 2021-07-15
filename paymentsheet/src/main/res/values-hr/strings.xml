@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Label for card number entry text field -->
+    <string name="acc_label_card_number">Broj kartice</string>
+    <string name="acc_label_card_number_node">%s, broj kartice</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Datum isteka</string>
+    <string name="acc_label_expiry_date_node">%s, datum isteka</string>
+    <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+    <string name="acc_label_zip">ZIP broj</string>
+    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+    <string name="acc_label_zip_short">ZIP</string>
+    <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
+    <string name="add_card">Dodajte novu debitnu ili kreditnu karticu za obavljanje kupnji u ovoj aplikaciji.</string>
+    <!-- Message displayed when a payment method is removed, stating its name. -->
+    <string name="added">%s je dodano</string>
+    <!-- Error text indicating that city is required, used for all locations -->
+    <string name="address_city_required">Unesite svoj grad</string>
+    <!-- Error text indicating country is invalid -->
+    <string name="address_country_invalid">Vaša država nije valjana</string>
+    <!-- Error text indicating that county is required, used for UK addresses -->
+    <string name="address_county_required">Unesite svoju grofoviju</string>
+    <!-- Caption for Address field on address form -->
+    <string name="address_label_address">Adresa</string>
+    <!-- Address line 1 placeholder for billing address form. -->
+    <string name="address_label_address_line1">Ulica i kućni broj 1</string>
+    <!-- Label for input requesting the first line of an address where , used for international addresses -->
+    <string name="address_label_address_line1_optional">Ulica i kućni broj 1 (neobavezno)</string>
+    <!-- Address line 2 placeholder for billing address form. -->
+    <string name="address_label_address_line2_optional">Ulica i kućni broj 2 (neobavezno)</string>
+    <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+    <string name="address_label_address_optional">Adresa (neobavezno)</string>
+    <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
+    <string name="address_label_apt">Stan br.</string>
+    <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+    <string name="address_label_apt_optional">Stan br. (neobavezno)</string>
+    <!-- Caption for City field on address form -->
+    <string name="address_label_city">Grad</string>
+    <!-- Label for input requesting city where input is optional, used for all locations -->
+    <string name="address_label_city_optional">Grad (neobavezno)</string>
+    <!-- Caption for Country field on address form -->
+    <string name="address_label_country">Zemlja</string>
+    <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+    <string name="address_label_county">Grofovija</string>
+    <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+    <string name="address_label_county_optional">Grofovija (neobavezno)</string>
+    <!-- Caption for Name field on address form -->
+    <string name="address_label_name">Ime</string>
+    <!-- Label for input requesting phone number, used for all locations -->
+    <string name="address_label_phone_number">Telefonski broj</string>
+    <!-- Label for input requesting phone number where input is optional, used for all locations -->
+    <string name="address_label_phone_number_optional">Telefonski broj (neobavezno)</string>
+    <!-- Short string for postal code (text used in non-US countries) -->
+    <string name="address_label_postal_code">Poštanski broj</string>
+    <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+    <string name="address_label_postal_code_optional">Poštanski broj (neobavezno)</string>
+    <!-- Label for input requesting postcode, used for UK based addresses -->
+    <string name="address_label_postcode">Poštanski broj</string>
+    <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+    <string name="address_label_postcode_optional">Poštanski broj (neobavezno)</string>
+    <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+    <string name="address_label_province">Provincija</string>
+    <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+    <string name="address_label_province_optional">Provincija (neobavezno)</string>
+    <!-- Label for input requesting the region, used for international addresses -->
+    <string name="address_label_region_generic">Država / pokrajina / regija</string>
+    <!-- Label for input requesting the region where input is optional, used for international addresses -->
+    <string name="address_label_region_generic_optional">Država / pokrajina / regija (neobavezno)</string>
+    <!-- Caption for State field on address form (only countries that use state , like United States) -->
+    <string name="address_label_state">Država</string>
+    <!-- Label for input requesting state where input is optional, used for US based addresses -->
+    <string name="address_label_state_optional">Država (neobavezno)</string>
+    <!-- Label for input requesting zip code, used for US based addreses -->
+    <string name="address_label_zip_code">ZIP broj</string>
+    <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+    <string name="address_label_zip_code_optional">ZIP broj (neobavezno)</string>
+    <!-- Label for input requesting postal code, used for international addresses -->
+    <string name="address_label_zip_postal_code">Poštanski broj</string>
+    <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+    <string name="address_label_zip_postal_code_optional">Poštanski broj (neobavezno)</string>
+    <!-- Error text indicating name is required -->
+    <string name="address_name_required">Unesite svoje ime</string>
+    <!-- Error text indicating that phone number is required, used for all addresses -->
+    <string name="address_phone_number_required">Unesite svoj telefonski broj</string>
+    <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+    <string name="address_postal_code_invalid">Vaš poštanski broj nije valjan</string>
+    <!-- Error text indicating postcode is invalid, used for UK addresses -->
+    <string name="address_postcode_invalid">Vaš poštanski broj nije valjan</string>
+    <!-- Error text indicating that province is required, used for Canada addresses -->
+    <string name="address_province_required">Unesite svoju provinciju</string>
+    <!-- Error text indicating that region is required, used for international addresses -->
+    <string name="address_region_generic_required">Unesite državu/pokrajinu/regiju</string>
+    <!-- Error text indicating that address is required, used for all locations -->
+    <string name="address_required">Unesite svoju adresu</string>
+    <!-- Title for shipping address entry section -->
+    <string name="address_shipping_address">Adresa za otpremu</string>
+    <!-- Error text indicating that state is required, used for US addresses -->
+    <string name="address_state_required">Unesite svoju državu</string>
+    <!-- Error text indicating zip code is invalid, used for US addresses -->
+    <string name="address_zip_invalid">Vaš ZIP broj nije valjan.</string>
+    <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+    <string name="address_zip_postal_invalid">Vaš poštanski broj nije valjan</string>
+    <!-- Source type brand name -->
+    <string name="Bancontact">Bancontact</string>
+    <!-- BECS Debit Widget - mandate acceptance -->
+    <string name="becs_mandate_acceptance">
+    Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s 
+    ovim Zahtjevom za izravno terećenje i Ugovorom o usluzi za izravno terećenje te ovlašćujete
+    Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje
+    507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime %1$s 
+    (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. 
+    Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno 
+    navedenom računu.
+    </string>
+    <!-- Placeholder text for Account number entry field for BECS Debit. -->
+    <string name="becs_widget_account_number">Broj računa</string>
+    <!-- BECS Debit Widget - account number field - incomplete error message -->
+    <string name="becs_widget_account_number_incomplete">Vaš broj računa nije kompletan.</string>
+    <!-- BECS Debit Widget - account number field - required error message -->
+    <string name="becs_widget_account_number_required">Vaš broj računa je obavezan.</string>
+    <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+    <string name="becs_widget_bsb">BSB</string>
+    <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+    <string name="becs_widget_bsb_incomplete">Uneseni BSB nije kompletan.</string>
+    <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+    <string name="becs_widget_bsb_invalid">Uneseni BSB nije valjan.</string>
+    <!-- BECS Debit Widget - email address field - label -->
+    <string name="becs_widget_email">Adresa e-maila</string>
+    <!-- BECS Debit Widget - email address field - invalid error message -->
+    <string name="becs_widget_email_invalid">Vaša e-mail adresa nije valjana.</string>
+    <!-- BECS Debit Widget - email address field - required error message -->
+    <string name="becs_widget_email_required">Vaša e-mail adresa je obavezna.</string>
+    <!-- BECS Debit Widget - name field - label -->
+    <string name="becs_widget_name">Naziv</string>
+    <!-- BECS Debit Widget - name field - required error message -->
+    <string name="becs_widget_name_required">Vaše ime je obavezno.</string>
+    <!-- SEPA mandate text -->
+    <string name="By_providing_your_payment_information_and_confirming_this_payment_you_authorise_A__and_Stripe_our_payment_service_provider_to_send_instructions_to_your_bank_to_debit_your_account_and_B_your_bank_to_debit_your_account_in_accordance_with_those_instructions._As_part_of_your_rights_you_are_entitled_to_a_refund_from_your_bank_under_the_terms_and_conditions_of_your_agreement_with_your_bank._A_refund_must_be_claimed_within_8_weeks_starting_from_the_date_on_which_your_account_was_debited._Your_rights_are_explained_in_a_statement_that_you_can_obtain_from_your_bank._You_agree_to_receive_notifications_for_future_debits_up_to_2_days_before_they_occur.">Unošenjem vaših podataka o plaćanju, ovlašćujete (A) %s i Stripe, našeg davatelja usluga platnog prometa, da vašoj banci pošalje upute za terećenje vašeg računa, i (B) vašu banku za terećenje vašeg računa u skladu s tim uputama. U sklopu vaših prava, imate pravo na povrat novca od svoje banke prema uvjetima i odredbama ugovora s bankom. Povrat novca mora se zatražiti u roku od 8 tjedana počevši od datuma terećenja vašeg računa. Vaša prava objašnjena su u izjavi koju možete dobiti od svoje banke. Slažete se s primanjem obavijesti o budućim terećenjima do 2 dana prije njihova izvršenja.</string>
+    <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+    <string name="card_ending_in">%1$s završava na %2$s</string>
+    <!-- Text for close button -->
+    <string name="close">Zatvori</string>
+    <!-- Accessibility action for deleting a payment method -->
+    <string name="delete_payment_method">Izbriši način plaćanja</string>
+    <string name="delete_payment_method_prompt_title">Izbrisati način plaćanja?</string>
+    <!-- label for text field to enter card expiry -->
+    <string name="expiry_date_hint">MM/GG</string>
+    <string name="expiry_label_short">Istek</string>
+    <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+    <string name="fpx_bank_offline">%s - Izvan mreže</string>
+    <!-- iDEAL bank section title for iDEAL form entry. -->
+    <string name="iDEAL_Bank">iDEAL Bank</string>
+    <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+    <string name="incomplete_expiry_date">Datum isteka vaše kartice nije kompletan.</string>
+    <string name="invalid_card_number">Broj kartice nije valjan.</string>
+    <!-- Error message for card entry form when CVC/CVV is invalid -->
+    <string name="invalid_cvc">Sigurnosni kod vaše kartice nije valjan.</string>
+    <!-- String to describe an invalid month in expiry date. -->
+    <string name="invalid_expiry_month">Mjesec isteka kartice nije valjan.</string>
+    <!-- String to describe an invalid year in expiry date. -->
+    <string name="invalid_expiry_year">Godina isteka kartice nije valjana.</string>
+    <!-- Shipping form error message -->
+    <string name="invalid_shipping_information">Adresa za otpremu nije valjana</string>
+    <!-- Error message for when postal code in form is incomplete -->
+    <string name="invalid_zip">Vaš poštanski broj nije kompletan.</string>
+    <!-- Text informing user there are no existing payment methods in the application -->
+    <string name="no_payment_methods">Nema načina plaćanja.</string>
+    <string name="payment_method_add_new_card">Dodajte novu karticu...</string>
+    <string name="payment_method_add_new_fpx">Odaberite bankovni račun (FPX)...</string>
+    <!-- Label for free shipping method -->
+    <string name="price_free">Besplatno</string>
+    <!-- Message displayed when a payment method is removed, stating its name. -->
+    <string name="removed">%s je uklonjeno</string>
+    <string name="secure_checkout">Sigurna naplata</string>
+    <!-- Payment method brand name -->
+    <string name="SEPA_Debit">SEPA Debit</string>
+    <!-- Payment Method type brand name
+   Source type brand name -->
+    <string name="Sofort">Sofort</string>
+    <!-- Generic error message shown when payment cannot be processed. -->
+    <string name="stripe_failure_connection_error">Imamo problema u povezivanju s našim pružateljem platnih usluga. Provjerite vašu internet vezu i pokušajte ponovo.</string>
+    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+    <string name="stripe_failure_reason_authentication">Nismo mogli potvrditi vaš način plaćanja. Odaberite drugi način plaćanja i pokušajte ponovno.</string>
+    <!-- Error when 3DS2 authentication timed out. -->
+    <string name="stripe_failure_reason_timed_out">Istek vremena pri provjeri načina plaćanja -- pokušajte ponovno</string>
+    <!-- When an internal error is reported when a google pay payment is started. -->
+    <string name="stripe_google_pay_error_internal">Došlo je do pogreške sustava.</string>
+    <string name="stripe_paymentsheet_add_button_label">Dodaj</string>
+    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
+    <!-- Card details entry form header title -->
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Informacije o kartici</string>
+    <!-- Country selector and postal code entry form header title -->
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Zemlja ili regija</string>
+    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+    <string name="stripe_paymentsheet_add_payment_method_title">Dodavanje informacija o plaćanju</string>
+    <!-- Text for back button -->
+    <string name="stripe_paymentsheet_back">Natrag</string>
+    <string name="stripe_paymentsheet_close">Zatvori</string>
+    <!-- Error when the user presses submit and they have not filled in the email field. -->
+    <string name="stripe_paymentsheet_error_email_blank">Vaše e-mail ne može biti prazan.</string>
+    <!-- Error when the user presses submit and they have not filled in the name field. -->
+    <string name="stripe_paymentsheet_error_name_blank">Vaše ime ne može biti prazno.</string>
+    <!-- label for text field to enter card expiry -->
+    <string name="stripe_paymentsheet_expiration_date_hint">MM / GG</string>
+    <string name="stripe_paymentsheet_new_card_button_label">+ Nova kartica</string>
+    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+    <string name="stripe_paymentsheet_or_pay_with_card">Ili plati karticom</string>
+    <!-- Label of a button that initiates payment when tapped -->
+    <string name="stripe_paymentsheet_pay_button_amount">Plati %s</string>
+    <!-- Label for a button that starts processing the payment. -->
+    <string name="stripe_paymentsheet_pay_button_label">Plati</string>
+    <!-- Title for credit card number entry field -->
+    <string name="stripe_paymentsheet_payment_method_card">Kartica</string>
+    <!-- Source type brand name -->
+    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
+    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+    <string name="stripe_paymentsheet_primary_button_processing">Obrađuje se...</string>
+    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spremi ovu karticu za buduća plaćanja %s</string>
+    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+    <string name="stripe_paymentsheet_select_payment_method">Odaberite način plaćanja</string>
+    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+    <string name="stripe_paymentsheet_setup_button_label">Postavi</string>
+    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+    <string name="stripe_verify_your_payment">Potvrdite svoje plaćanje</string>
+    <!-- An error message. -->
+    <string name="The_IBAN_you_entered_is_incomplete.">Uneseni IBAN nije potpun.</string>
+    <!-- An error message. -->
+    <string name="The_IBAN_you_entered_is_invalid__is_not_a_supported_country_code.">Uneseni IBAN je neispravan, \"%s\" nije podržani broj države.</string>
+    <!-- An error message displayed when the customer's iban is invalid. -->
+    <string name="The_IBAN_you_entered_is_invalid.">Uneseni IBAN nije valjan.</string>
+    <string name="title_add_a_card">Dodaj karticu</string>
+    <!-- Screen title telling users they should add an address -->
+    <string name="title_add_an_address">Postavite adresu</string>
+    <!-- Label for Bank Account selection or detail entry form -->
+    <string name="title_bank_account">Bankovni račun</string>
+    <!-- Title for Payment Method screen -->
+    <string name="title_payment_method">Način plaćanja</string>
+    <!-- Screen title telling users they should select a shipping address -->
+    <string name="title_select_shipping_method">Odaberite način otpreme</string>
+    <!-- Error message when email is invalid -->
+    <string name="Your_email_is_invalid.">Vaš e-mail je neispravan.</string>
+    <!-- An error message. -->
+    <string name="Your_IBAN_should_start_with_a_two_letter_country_code.">Vaš bi IBAN trebao započeti s kodom države od dva slova.</string>
+    <!-- An error message. -->
+    <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">Vaš bi IBAN trebao započeti s kodom države od dva slova.</string>
+    <!-- Error when customer's name is invalid -->
+    <string name="Your_name_is_invalid.">Vaše ime je neispravno.</string>
+</resources>
