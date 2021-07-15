@@ -252,4 +252,6 @@
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Your name is invalid.</string>
 
-    </resources>
+    <string name="stripe_google_pay_error_resolution_required" tools:ignore="MissingTranslation">Completing the operation requires some form of resolution.</string>
+    <string name="stripe_paymentsheet_or_pay_using" tools:ignore="MissingTranslation">Or pay using</string>
+</resources>
