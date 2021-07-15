@@ -11,8 +11,8 @@ import kotlinx.parcelize.Parcelize
 /**
  * [ActivityResultContract] to start [PaymentLauncherConfirmationActivity] and return a [PaymentResult].
  */
-internal class PaymentLauncherHostContract :
-    ActivityResultContract<PaymentLauncherHostContract.Args, PaymentResult>() {
+internal class PaymentLauncherContract :
+    ActivityResultContract<PaymentLauncherContract.Args, PaymentResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(
             context,
@@ -28,17 +28,17 @@ internal class PaymentLauncherHostContract :
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         @Parcelize
-        class IntentConfirmationArgs(
+        data class IntentConfirmationArgs(
             val confirmStripeIntentParams: ConfirmStripeIntentParams
         ) : Args()
 
         @Parcelize
-        class PaymentIntentNextActionArgs(
+        data class PaymentIntentNextActionArgs(
             val paymentIntentClientSecret: String
         ) : Args()
 
         @Parcelize
-        class SetupIntentNextActionArgs(
+        data class SetupIntentNextActionArgs(
             val setupIntentClientSecret: String
         ) : Args()
 

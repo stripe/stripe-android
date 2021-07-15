@@ -19,14 +19,20 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        when (val args = requireNotNull(PaymentLauncherHostContract.Args.fromIntent(intent))) {
-            is PaymentLauncherHostContract.Args.IntentConfirmationArgs -> {
+        val args = kotlin.runCatching {
+            requireNotNull(PaymentLauncherContract.Args.fromIntent(intent))
+        }.getOrElse {
+            finishWithResult(PaymentResult.Failed(it))
+        }
+
+        when (args) {
+            is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams)
             }
-            is PaymentLauncherHostContract.Args.PaymentIntentNextActionArgs -> {
+            is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> {
                 viewModel.handleNextActionForPaymentIntent(args.paymentIntentClientSecret)
             }
-            is PaymentLauncherHostContract.Args.SetupIntentNextActionArgs -> {
+            is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
                 viewModel.handleNextActionForSetupIntent(args.setupIntentClientSecret)
             }
         }
@@ -36,9 +42,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
      * After confirmation and next action is handled, finish the activity with
      * corresponding [PaymentResult]
      */
-    private fun finishWithResult() {
-        // TODO: get the correct result
-        val result = PaymentResult.Canceled
+    private fun finishWithResult(result: PaymentResult) {
         setResult(
             Activity.RESULT_OK,
             Intent()

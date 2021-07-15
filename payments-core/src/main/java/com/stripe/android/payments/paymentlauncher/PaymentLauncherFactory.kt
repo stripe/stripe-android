@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
  * Factory to create a [PaymentLauncher].
  */
 internal class PaymentLauncherFactory(
-    private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherHostContract.Args>
+    private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
 ) {
 
     constructor(
@@ -16,7 +16,7 @@ internal class PaymentLauncherFactory(
         callback: PaymentLauncher.PaymentResultCallback
     ) : this(
         activity.registerForActivityResult(
-            PaymentLauncherHostContract(),
+            PaymentLauncherContract(),
             callback::onPaymentResult
         )
     )
@@ -26,7 +26,7 @@ internal class PaymentLauncherFactory(
         callback: PaymentLauncher.PaymentResultCallback
     ) : this(
         fragment.registerForActivityResult(
-            PaymentLauncherHostContract(),
+            PaymentLauncherContract(),
             callback::onPaymentResult
         )
     )

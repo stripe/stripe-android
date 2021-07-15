@@ -13,7 +13,7 @@ internal sealed class PaymentResult : Parcelable {
     object Completed : PaymentResult()
 
     @Parcelize
-    object Failed : PaymentResult() // default if no extra found
+    class Failed(val throwable: Throwable) : PaymentResult()
 
     @Parcelize
     object Canceled : PaymentResult()
@@ -26,7 +26,8 @@ internal sealed class PaymentResult : Parcelable {
 
         @JvmSynthetic
         fun fromIntent(intent: Intent?): PaymentResult {
-            return intent?.getParcelableExtra(EXTRA) ?: Failed
+            return intent?.getParcelableExtra(EXTRA)
+                ?: Failed(IllegalStateException("Failed to get PaymentResult from Intent"))
         }
     }
 }

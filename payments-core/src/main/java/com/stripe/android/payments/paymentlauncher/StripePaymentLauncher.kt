@@ -9,7 +9,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
  * handle next actions for intents.
  */
 internal class StripePaymentLauncher internal constructor(
-    private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherHostContract.Args>,
+    private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,
 ) : PaymentLauncher {
     override fun confirm(params: ConfirmPaymentIntentParams) {
         // start a new activity to
@@ -17,7 +17,7 @@ internal class StripePaymentLauncher internal constructor(
         // resolve the nextActionData with authenticatorRegistry
         // report result to callback
         hostActivityLauncher.launch(
-            PaymentLauncherHostContract.Args.IntentConfirmationArgs(params)
+            PaymentLauncherContract.Args.IntentConfirmationArgs(params)
         )
     }
 
@@ -27,7 +27,7 @@ internal class StripePaymentLauncher internal constructor(
         // resolve the nextActionData with authenticatorRegistry
         // report result to callback
         hostActivityLauncher.launch(
-            PaymentLauncherHostContract.Args.IntentConfirmationArgs(params)
+            PaymentLauncherContract.Args.IntentConfirmationArgs(params)
         )
     }
 
@@ -37,7 +37,7 @@ internal class StripePaymentLauncher internal constructor(
         // resolve the nextActionData with authenticatorRegistry
         // report result to callback
         hostActivityLauncher.launch(
-            PaymentLauncherHostContract.Args.PaymentIntentNextActionArgs(
+            PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
                 paymentIntentClientSecret = clientSecret
             )
         )
@@ -49,7 +49,7 @@ internal class StripePaymentLauncher internal constructor(
         // resolve the nextActionData with authenticatorRegistry
         // report result to callback
         hostActivityLauncher.launch(
-            PaymentLauncherHostContract.Args.SetupIntentNextActionArgs(
+            PaymentLauncherContract.Args.SetupIntentNextActionArgs(
                 setupIntentClientSecret = clientSecret
             )
         )
