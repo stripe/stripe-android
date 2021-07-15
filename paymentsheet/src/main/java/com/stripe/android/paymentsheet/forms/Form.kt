@@ -260,10 +260,9 @@ class FormViewModel(
                 .filter { idControllerPair ->
                     optionalIdentifiers.contains(idControllerPair.key)
                 }
-                .map { sectionToSectionFieldEntry ->
+                .flatMap { sectionToSectionFieldEntry ->
                     sectionToSectionFieldEntry.value
                 }
-                .flatten()
 
             if (!showFutureUse && saveForFutureUseElement != null) {
                 optionalIdentifiers
