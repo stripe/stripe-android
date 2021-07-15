@@ -4786,6 +4786,49 @@ public final class com/stripe/android/payments/core/injection/Stripe3DSAuthentic
 public abstract interface annotation class com/stripe/android/payments/core/injection/UIContext : java/lang/annotation/Annotation {
 }
 
+public abstract interface class com/stripe/android/payments/paymentlauncher/PaymentLauncher {
+	public static final field Companion Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$Companion;
+	public abstract fun confirm (Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
+	public abstract fun confirm (Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
+	public abstract fun handleNextActionForPaymentIntent (Ljava/lang/String;)V
+	public abstract fun handleNextActionForSetupIntent (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncher$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
+}
+
+public abstract interface class com/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback {
+	public abstract fun onPaymentResult (Lcom/stripe/android/payments/paymentlauncher/PaymentResult;)V
+}
+
+public abstract class com/stripe/android/payments/paymentlauncher/PaymentResult : android/os/Parcelable {
+	public final synthetic fun toBundle ()Landroid/os/Bundle;
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Canceled : com/stripe/android/payments/paymentlauncher/PaymentResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/payments/paymentlauncher/PaymentResult$Canceled;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Completed : com/stripe/android/payments/paymentlauncher/PaymentResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/StripeIntentResult;)V
+	public fun describeContents ()I
+	public final fun getIntentResult ()Lcom/stripe/android/StripeIntentResult;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Failed : com/stripe/android/payments/paymentlauncher/PaymentResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/payments/paymentlauncher/PaymentResult$Failed;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
 	public abstract fun onPaymentOption (Lcom/stripe/android/paymentsheet/model/PaymentOption;)V
 }
