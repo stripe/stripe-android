@@ -5,7 +5,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 
 /**
- * WIP - implementation of [PaymentLauncher], start an [PaymentConfirmationActivity] to confirm and
+ * WIP - implementation of [PaymentLauncher], start an [PaymentLauncherConfirmationActivity] to confirm and
  * handle next actions for intents.
  */
 internal class StripePaymentLauncher internal constructor(

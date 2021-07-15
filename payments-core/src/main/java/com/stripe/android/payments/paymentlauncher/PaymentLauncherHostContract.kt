@@ -9,42 +9,38 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import kotlinx.parcelize.Parcelize
 
 /**
- * [ActivityResultContract] to start [PaymentConfirmationActivity] and return a [PaymentResult].
+ * [ActivityResultContract] to start [PaymentLauncherConfirmationActivity] and return a [PaymentResult].
  */
 internal class PaymentLauncherHostContract :
     ActivityResultContract<PaymentLauncherHostContract.Args, PaymentResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
-        return Intent(context, PaymentConfirmationActivity::class.java).putExtras(input.toBundle())
+        return Intent(
+            context,
+            PaymentLauncherConfirmationActivity::class.java
+        ).putExtras(input.toBundle())
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): PaymentResult {
         return PaymentResult.fromIntent(intent)
     }
 
-    @Parcelize
-    internal data class Args(
-        val confirmStripeIntentParams: ConfirmStripeIntentParams? = null,
-        val paymentIntentClientSecret: String? = null,
-        val setupIntentClientSecret: String? = null,
-    ) : Parcelable {
+    sealed class Args : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
-        /**
-         * Validate the Arguments, only one value can be set.
-         */
-        fun isValid(): Boolean {
-            var nonNullParamCount = 0
-            listOf(
-                confirmStripeIntentParams,
-                paymentIntentClientSecret,
-                setupIntentClientSecret
-            ).forEach {
-                if (it != null) {
-                    nonNullParamCount++
-                }
-            }
-            return nonNullParamCount == 1
-        }
+        @Parcelize
+        class IntentConfirmationArgs(
+            val confirmStripeIntentParams: ConfirmStripeIntentParams
+        ) : Args()
+
+        @Parcelize
+        class PaymentIntentNextActionArgs(
+            val paymentIntentClientSecret: String
+        ) : Args()
+
+        @Parcelize
+        class SetupIntentNextActionArgs(
+            val setupIntentClientSecret: String
+        ) : Args()
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"

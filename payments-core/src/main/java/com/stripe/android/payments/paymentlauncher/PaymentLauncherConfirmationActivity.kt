@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
  * This activity starts activities to handle next actions, capture their result
  * and convert them to [PaymentResult] and return back to client.
  */
-internal class PaymentConfirmationActivity : AppCompatActivity() {
+internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
     val viewModel: PaymentLauncherViewModel by viewModels {
         PaymentLauncherViewModel.Factory()
@@ -20,21 +20,18 @@ internal class PaymentConfirmationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args =
-            requireNotNull(PaymentLauncherHostContract.Args.fromIntent(intent))
 
-        require(args.isValid())
+        when (val args = requireNotNull(PaymentLauncherHostContract.Args.fromIntent(intent))) {
+            is PaymentLauncherHostContract.Args.IntentConfirmationArgs -> {
+                viewModel.confirmStripeIntent(args.confirmStripeIntentParams)
+            }
+            is PaymentLauncherHostContract.Args.PaymentIntentNextActionArgs -> {
+                viewModel.handleNextActionForPaymentIntent(args.paymentIntentClientSecret)
+            }
+            is PaymentLauncherHostContract.Args.SetupIntentNextActionArgs -> {
+                viewModel.handleNextActionForSetupIntent(args.setupIntentClientSecret)
+            }
 
-        args.confirmStripeIntentParams?.let {
-            viewModel.confirmStripeIntent(it)
-        }
-
-        args.paymentIntentClientSecret?.let {
-            viewModel.handleNextActionForPaymentIntent(it)
-        }
-
-        args.setupIntentClientSecret?.let {
-            viewModel.handleNextActionForSetupIntent(it)
         }
     }
 
