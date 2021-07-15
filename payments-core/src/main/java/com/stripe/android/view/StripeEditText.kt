@@ -241,8 +241,7 @@ open class StripeEditText @JvmOverloads constructor(
     ) : InputConnectionWrapper(target, mutable) {
         override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
             // This method works on modern versions of Android with soft keyboard delete.
-            val textBeforeCursor = getTextBeforeCursor(1, 0) ?: ""
-            if (textBeforeCursor.isEmpty()) {
+            if (getTextBeforeCursor(1, 0)?.isEmpty() == true) {
                 deleteEmptyListener?.onDeleteEmpty()
             }
             return super.deleteSurroundingText(beforeLength, afterLength)
