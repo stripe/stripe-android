@@ -250,4 +250,20 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">Your IBAN should start with a two-letter country code.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Your name is invalid.</string>
+
+    <!-- Use when a required field has not been filled in -->
+    <string name="incomplete" tools:ignore="MissingTranslation">%s is incomplete.</string>
+    <!-- Use when a required field is not valid and cannot be corrected. -->
+    <string name="malformed" tools:ignore="MissingTranslation">%s is malformed.</string>
+    <!-- Use when a required field is blank and submit is clicked. -->
+    <string name="blank_and_required" tools:ignore="MissingTranslation">%s cannot be blank.</string>
+    <!-- Use when is not valid, but the exact problem is unknown. -->
+    <string name="invalid" tools:ignore="MissingTranslation">%s is invalid.</string>
+
+    <!-- Title for Bancontact payment method -->
+    <string name="stripe_paymentsheet_payment_method_bancontact">@string/Bancontact</string>
+    <!-- Title for Sepa Debit payment method -->
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">@string/SEPA_Debit</string>
+    <!-- Title for Sofort payment method -->
+    <string name="stripe_paymentsheet_payment_method_sofort">@string/Sofort</string>
 </resources>

@@ -247,4 +247,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">Vaša koda IBAN se mora začeti z dvomestno kodo države.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Vaše ime ni veljavno.</string>
+    <string name="stripe_paymentsheet_total_amount">Skupaj: %s</string>
 </resources>

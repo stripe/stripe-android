@@ -222,6 +222,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Изберете метод на плащане</string>
     <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
     <string name="stripe_paymentsheet_setup_button_label">Създаване</string>
+    <string name="stripe_paymentsheet_total_amount">Общо: %s</string>
     <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
     <string name="stripe_verify_your_payment">Потвърдете Вашето плащане</string>
     <!-- An error message. -->

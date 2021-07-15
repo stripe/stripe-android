@@ -247,4 +247,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">L-IBAN tiegħek għandu jibda b\'kodiċi tal-pajjiż magħmul minn żewġ ittri.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">L-isem li daħħalt mhux tajjeb.</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
 </resources>

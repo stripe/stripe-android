@@ -247,4 +247,10 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">您的 IBAN 應以一個兩字母的國家代碼開頭。</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">您的姓名無效。</string>
+    <!-- Title for Bancontact payment method -->
+    <string name="stripe_paymentsheet_payment_method_bancontact">@string/Bancontact</string>
+    <!-- Title for Sepa Debit payment method -->
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">@string/SEPA_Debit</string>
+    <!-- Title for Sofort payment method -->
+    <string name="stripe_paymentsheet_payment_method_sofort">@string/Sofort</string>
 </resources>

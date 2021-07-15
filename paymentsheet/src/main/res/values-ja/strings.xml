@@ -247,4 +247,10 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">IBANコードの先頭には 2 文字の国コードを入力してください。</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">名前が無効です。</string>
+    <!-- Title for Bancontact payment method -->
+    <string name="stripe_paymentsheet_payment_method_bancontact">@string/Bancontact</string>
+    <!-- Title for Sepa Debit payment method -->
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">@string/SEPA_Debit</string>
+    <!-- Title for Sofort payment method -->
+    <string name="stripe_paymentsheet_payment_method_sofort">@string/Sofort</string>
 </resources>

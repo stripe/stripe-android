@@ -249,4 +249,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">Jūsų IBAN turėtų prasidėti šalies kodu iš dviejų raidžių.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Jūsų vardas neteisingas.</string>
+    <string name="stripe_paymentsheet_total_amount">Bendra suma: %s</string>
 </resources>

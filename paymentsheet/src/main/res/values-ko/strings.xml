@@ -247,4 +247,10 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">이름이 잘못되었습니다.</string>
+    <!-- Title for Bancontact payment method -->
+    <string name="stripe_paymentsheet_payment_method_bancontact">@string/Bancontact</string>
+    <!-- Title for Sepa Debit payment method -->
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">@string/SEPA_Debit</string>
+    <!-- Title for Sofort payment method -->
+    <string name="stripe_paymentsheet_payment_method_sofort">@string/Sofort</string>
 </resources>

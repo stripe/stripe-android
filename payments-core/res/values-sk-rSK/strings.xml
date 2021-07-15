@@ -247,4 +247,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">Váš IBAN by mal začínať dvojpísmenovým kódom krajiny.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Vaše meno je neplatné.</string>
+    <string name="stripe_paymentsheet_total_amount">Celkovo: %s</string>
 </resources>

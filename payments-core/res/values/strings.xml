@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Label for card number entry text field -->
     <string name="acc_label_card_number">Card number</string>
     <string name="acc_label_card_number_node">%s, Card number</string>
@@ -222,6 +222,8 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
     <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
     <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+    <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+    <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
     <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
     <string name="stripe_paymentsheet_setup_button_label">Set up</string>
     <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
@@ -249,4 +251,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">Your IBAN should start with a two-letter country code.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Your name is invalid.</string>
-</resources>
+
+    </resources>

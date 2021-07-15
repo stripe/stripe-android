@@ -247,4 +247,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">Teie IBAN peab algama kahetähelise riigikoodiga.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Teie nimi on kehtetu.</string>
+    <string name="stripe_paymentsheet_total_amount">Kokku: %s</string>
 </resources>

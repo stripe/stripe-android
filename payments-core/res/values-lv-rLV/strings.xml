@@ -247,4 +247,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">IBAN sākumā jābūt divu burtu valsts kodam.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Jūsu vārds nav derīgs.</string>
+    <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
 </resources>

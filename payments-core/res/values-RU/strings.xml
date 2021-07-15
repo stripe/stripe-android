@@ -247,4 +247,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">Код IBAN должен начинаться с двухбуквенного кода страны.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">Недействительное имя.</string>
+    <string name="stripe_paymentsheet_total_amount">Всего: %s</string>
 </resources>

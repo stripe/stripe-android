@@ -247,4 +247,5 @@
     <string name="Your_IBAN_should_start_with_a_two_letter_country_code._copy">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
     <!-- Error when customer's name is invalid -->
     <string name="Your_name_is_invalid.">이름이 잘못되었습니다.</string>
+    <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
 </resources>
