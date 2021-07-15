@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Checkbox
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -32,9 +34,11 @@ import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
+import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
+import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -42,6 +46,7 @@ import kotlinx.coroutines.flow.map
 
 internal val formElementPadding = 16.dp
 
+@ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
 internal fun Form(
@@ -84,24 +89,36 @@ internal fun Form(
                                     )
                                 }
 
-                            Section(sectionErrorString) {
-                                when (element.field) {
-                                    is TextFieldElement -> {
-                                        val focusRequesterIndex = element.field.focusIndexOrder
-                                        TextField(
-                                            textFieldController = element.field.controller,
-                                            myFocus = focusRequesters[focusRequesterIndex],
-                                            nextFocus = focusRequesters.getOrNull(
-                                                focusRequesterIndex + 1
-                                            ),
-                                            enabled = enabled
-                                        )
+                            Section(controller.label, sectionErrorString) {
+                                element.fields.forEachIndexed { index, field ->
+                                    when (field) {
+                                        is TextFieldElement -> {
+                                            val focusRequesterIndex = field.focusIndexOrder
+                                            TextField(
+                                                textFieldController = field.controller,
+                                                myFocus = focusRequesters[focusRequesterIndex],
+                                                nextFocus = focusRequesters.getOrNull(
+                                                    focusRequesterIndex + 1
+                                                ),
+                                                enabled = enabled
+                                            )
+                                        }
+                                        is DropdownFieldElement -> {
+                                            DropDown(
+                                                field.controller.label,
+                                                field.controller,
+                                                enabled
+                                            )
+                                        }
                                     }
-                                    is DropdownFieldElement -> {
-                                        DropDown(
-                                            element.field.controller.label,
-                                            element.field.controller,
-                                            enabled
+                                    if (index != element.fields.size - 1) {
+                                        val cardStyle = CardStyle(isSystemInDarkTheme())
+                                        Divider(
+                                            color = cardStyle.cardBorderColor,
+                                            thickness = cardStyle.cardBorderWidth,
+                                            modifier = Modifier.padding(
+                                                horizontal = cardStyle.cardBorderWidth
+                                            )
                                         )
                                     }
                                 }
@@ -223,18 +240,37 @@ class FormViewModel(
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
         ?: MutableStateFlow(saveForFutureUseInitialValue)
 
+    internal val sectionToFieldIdentifierMap = layout.items
+        .filterIsInstance<FormItemSpec.SectionSpec>()
+        .associate { sectionSpec ->
+            sectionSpec.identifier to sectionSpec.fields.map {
+                it.identifier
+            }
+        }
+
     internal val optionalIdentifiers =
         combine(
             saveForFutureUseVisible,
             saveForFutureUseElement?.controller?.optionalIdentifiers
                 ?: MutableStateFlow(emptyList())
         ) { showFutureUse, optionalIdentifiers ->
+
+            // For optional *section* identifiers, list of identifiers of elements in the section
+            val identifiers = sectionToFieldIdentifierMap
+                .filter { idControllerPair ->
+                    optionalIdentifiers.contains(idControllerPair.key)
+                }
+                .flatMap { sectionToSectionFieldEntry ->
+                    sectionToSectionFieldEntry.value
+                }
+
             if (!showFutureUse && saveForFutureUseElement != null) {
-                optionalIdentifiers.plus(
-                    saveForFutureUseElement.identifier
-                )
+                optionalIdentifiers
+                    .plus(identifiers)
+                    .plus(saveForFutureUseElement.identifier)
             } else {
                 optionalIdentifiers
+                    .plus(identifiers)
             }
         }
 

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.getIdInputControllerMap
 
 /**
  * Takes a list of form elements and populate them with the values in
@@ -11,12 +12,11 @@ internal fun populateWith(
     formFieldValues: FormFieldValues
 ) {
     val formFieldValueMap = formFieldValues.fieldValuePairs
-    elements
-        .filter { it.controller != null }
-        .forEach { formElement ->
-            formFieldValueMap[formElement.identifier]?.let { input ->
+    elements.getIdInputControllerMap()
+        .forEach { formElementEntry ->
+            formFieldValueMap[formElementEntry.key]?.let { input ->
                 input.value?.let { inputValue ->
-                    formElement.controller?.onRawValueChange(inputValue)
+                    formElementEntry.value.onRawValueChange(inputValue)
                 }
             }
         }

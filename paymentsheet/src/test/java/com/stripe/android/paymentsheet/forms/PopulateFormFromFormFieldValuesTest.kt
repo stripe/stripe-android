@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.first
@@ -13,14 +14,15 @@ import org.junit.Test
 
 class PopulateFormFromFormFieldValuesTest {
     private val emailController = TextFieldController(EmailConfig())
+    private val emailFieldElement = SectionFieldElement.Email(
+        IdentifierSpec("email"),
+        emailController,
+        0
+    )
     private val emailSection = FormElement.SectionElement(
         identifier = IdentifierSpec("emailSection"),
-        SectionFieldElement.Email(
-            IdentifierSpec("email"),
-            emailController,
-            0
-        ),
-        emailController
+        emailFieldElement,
+        SectionController(emailController.label, listOf(emailController))
     )
 
     @Test
@@ -28,7 +30,7 @@ class PopulateFormFromFormFieldValuesTest {
         runBlocking {
             val formFieldValues = FormFieldValues(
                 mapOf(
-                    emailSection.identifier to FormFieldEntry(
+                    emailFieldElement.identifier to FormFieldEntry(
                         ElementType.Email,
                         "valid@email.com",
                         true

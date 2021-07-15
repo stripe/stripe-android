@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
@@ -12,9 +13,18 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.ExperimentalUnitApi
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
+/**
+ * This is the style for the section card
+ */
 internal data class CardStyle(
     private val isDarkTheme: Boolean,
     val cardBorderColor: Color = if (isDarkTheme) {
@@ -28,23 +38,80 @@ internal data class CardStyle(
 )
 
 /**
+ * This is the style for the section title.
+ *
+ * Once credit card is converted use one of the default material theme styles.
+ */
+internal data class SectionTitle @ExperimentalUnitApi constructor(
+    val light: Color = Color.DarkGray,
+    val dark: Color = Color.White,
+    val fontWeight: FontWeight = FontWeight.Bold,
+    val paddingBottom: Dp = 4.dp,
+    val letterSpacing: TextUnit = TextUnit(-0.01f, TextUnitType.Sp),
+    val fontSize: TextUnit = 13.sp
+)
+
+/**
  * This is a simple section that holds content in a card view.  It has a label, content specified
  * by the caller, and an error string.
  */
+@ExperimentalUnitApi // section title letter spacing can change without warning.
 @ExperimentalAnimationApi
 @Composable
-internal fun Section(error: String?, content: @Composable () -> Unit) {
-    val cardStyle = CardStyle(isSystemInDarkTheme())
+internal fun Section(
+    @StringRes title: Int?,
+    error: String?,
+    content: @Composable () -> Unit
+) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Card(
-            border = BorderStroke(cardStyle.cardBorderWidth, cardStyle.cardBorderColor),
-            elevation = cardStyle.cardElevation,
-            backgroundColor = cardStyle.cardStyleBackground
-        ) {
-            content()
-        }
+        SectionTitle(title)
+        SectionCard(content)
         AnimatedVisibility(error != null) {
             SectionError(error ?: "")
+        }
+    }
+}
+
+/**
+ * This is the layout for the section title
+ */
+@ExperimentalUnitApi
+@Composable
+internal fun SectionTitle(@StringRes titleText: Int?) {
+    val sectionTitle = SectionTitle()
+    titleText?.let {
+        Text(
+            text = stringResource(titleText),
+            color = if (isSystemInDarkTheme()) {
+                sectionTitle.dark
+            } else {
+                sectionTitle.light
+            },
+            style = MaterialTheme.typography.h6.copy(
+                fontSize = sectionTitle.fontSize,
+                fontWeight = sectionTitle.fontWeight,
+                letterSpacing = sectionTitle.letterSpacing,
+            ),
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+    }
+}
+
+/**
+ * This is the layout for the section card.
+ */
+@Composable
+internal fun SectionCard(
+    content: @Composable () -> Unit
+) {
+    val cardStyle = CardStyle(isSystemInDarkTheme())
+    Card(
+        border = BorderStroke(cardStyle.cardBorderWidth, cardStyle.cardBorderColor),
+        elevation = cardStyle.cardElevation,
+        backgroundColor = cardStyle.cardStyleBackground
+    ) {
+        Column {
+            content()
         }
     }
 }

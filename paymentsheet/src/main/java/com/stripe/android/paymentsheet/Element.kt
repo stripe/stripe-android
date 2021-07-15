@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.elements.InputController
+import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -48,8 +50,8 @@ internal sealed interface SectionFieldElementType {
  * Each item in the layout has an identifier and a controller associated with it.
  */
 internal sealed class FormElement {
-    abstract val controller: InputController?
     abstract val identifier: IdentifierSpec
+    abstract val controller: Controller?
 
     /**
      * This is an element that has static text because it takes no user input, it is not
@@ -76,10 +78,30 @@ internal sealed class FormElement {
 
     data class SectionElement(
         override val identifier: IdentifierSpec,
-        val field: SectionFieldElementType,
-        override val controller: InputController
-    ) : FormElement(), OptionalElement
+        val fields: List<SectionFieldElementType>,
+        override val controller: SectionController
+    ) : FormElement(), OptionalElement {
+        internal constructor(
+            identifier: IdentifierSpec,
+            field: SectionFieldElementType,
+            controller: SectionController
+        ) : this(identifier, listOf(field), controller)
+    }
 }
+
+/**
+ * This will get a map of all pairs of identifier to inputControllers, including the section
+ * fields, but not the sections themselves.
+ */
+internal fun List<FormElement>.getIdInputControllerMap() = this
+    .filter { it.controller is InputController }
+    .associate { it.identifier to (it.controller as InputController) }
+    .plus(
+        this
+            .filterIsInstance<FormElement.SectionElement>()
+            .flatMap { it.fields }
+            .associate { it.identifier to it.controller }
+    )
 
 /**
  * This class defines the type associated with the element or value.   See [FormFieldValues] and [InputController]

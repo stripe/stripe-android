@@ -7,14 +7,14 @@ import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
+import com.stripe.android.paymentsheet.SectionFieldElement.IdealBank
 import com.stripe.android.paymentsheet.SectionFieldElement.Name
+import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -36,6 +36,30 @@ class TransformSpecToElementTest {
     )
 
     @Test
+    fun `Section with multiple fields contains all fields in the section element`() {
+        val formElement = transform(
+            LayoutSpec(
+                listOf(
+                    FormItemSpec.SectionSpec(
+                        IdentifierSpec("multifieldSection"),
+                        listOf(
+                            SectionFieldSpec.Country(),
+                            SectionFieldSpec.IdealBank
+                        )
+                    )
+                )
+            ),
+            "Example, Inc.",
+            FocusRequesterCount()
+        )
+
+        val sectionElement = formElement[0] as SectionElement
+        assertThat(sectionElement.fields.size).isEqualTo(2)
+        assertThat(sectionElement.fields[0]).isInstanceOf(Country::class.java)
+        assertThat(sectionElement.fields[1]).isInstanceOf(IdealBank::class.java)
+    }
+
+    @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
         val countrySection = FormItemSpec.SectionSpec(
             IdentifierSpec("countrySection"),
@@ -50,11 +74,7 @@ class TransformSpecToElementTest {
         )
 
         val countrySectionElement = formElement.first() as SectionElement
-        val countryElement = countrySectionElement.field as Country
-
-        // With only a single field in a section the section controller is just a pass through
-        // of the section field controller
-        assertThat(countrySectionElement.controller).isEqualTo(countryElement.controller)
+        val countryElement = countrySectionElement.fields[0] as Country
 
         assertThat(countryElement.controller.displayItems).hasSize(1)
         assertThat(countryElement.controller.displayItems[0]).isEqualTo("Austria")
@@ -82,11 +102,7 @@ class TransformSpecToElementTest {
         )
 
         val idealSectionElement = formElement.first() as SectionElement
-        val idealElement = idealSectionElement.field as SectionFieldElement.IdealBank
-
-        // With only a single field in a section the section controller is just a pass through
-        // of the section field controller
-        assertThat(idealSectionElement.controller).isEqualTo(idealElement.controller)
+        val idealElement = idealSectionElement.fields[0] as IdealBank
 
         // Verify the correct config is setup for the controller
         assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
@@ -106,7 +122,7 @@ class TransformSpecToElementTest {
             FocusRequesterCount()
         )
 
-        val nameElement = (formElement.first() as SectionElement).field as Name
+        val nameElement = (formElement.first() as SectionElement).fields[0] as Name
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label).isEqualTo(NameConfig().label)
@@ -124,7 +140,7 @@ class TransformSpecToElementTest {
         )
 
         val emailSectionElement = formElement.first() as SectionElement
-        val emailElement = emailSectionElement.field as Email
+        val emailElement = emailSectionElement.fields[0] as Email
 
         // Verify the correct config is setup for the controller
         assertThat(emailElement.controller.label).isEqualTo(EmailConfig().label)
@@ -143,9 +159,9 @@ class TransformSpecToElementTest {
         )
 
         val nameSectionElement = formElement[0] as SectionElement
-        val nameElement = nameSectionElement.field as Name
+        val nameElement = nameSectionElement.fields[0] as Name
         val emailSectionElement = formElement[1] as SectionElement
-        val emailElement = emailSectionElement.field as Email
+        val emailElement = emailSectionElement.fields[0] as Email
 
         assertThat(nameElement.focusIndexOrder).isEqualTo(0)
         assertThat(emailElement.focusIndexOrder).isEqualTo(1)

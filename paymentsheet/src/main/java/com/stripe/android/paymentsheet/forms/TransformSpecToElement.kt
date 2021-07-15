@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -37,29 +38,34 @@ private fun transform(
     focusRequesterCount: FocusRequesterCount
 ): FormElement.SectionElement {
 
-    val fieldElement = when (spec.field) {
-        SectionFieldSpec.Email -> transform(
-            spec.field as SectionFieldSpec.Email,
-            focusRequesterCount
-        )
-        SectionFieldSpec.Name -> transform(
-            spec.field as SectionFieldSpec.Name,
-            focusRequesterCount
-        )
-        is SectionFieldSpec.Country -> transform(
-            spec.field
-        )
-        SectionFieldSpec.IdealBank -> transform(
-            spec.field as SectionFieldSpec.IdealBank
-        )
+    val fieldElements = spec.fields.map {
+        when (it) {
+            is SectionFieldSpec.Email -> transform(
+                it,
+                focusRequesterCount
+            )
+            is SectionFieldSpec.Name -> transform(
+                it,
+                focusRequesterCount
+            )
+            is SectionFieldSpec.Country -> transform(
+                it
+            )
+            is SectionFieldSpec.IdealBank -> transform(
+                it
+            )
+        }
     }
 
     // The controller of the section element will be the same as the field element
     // as there is only a single field in a section
     return FormElement.SectionElement(
         identifier = spec.identifier,
-        fieldElement,
-        fieldElement.controller
+        fieldElements,
+        SectionController(
+            spec.title,
+            fieldElements.map { it.controller }
+        )
     )
 }
 
