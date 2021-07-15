@@ -36,8 +36,7 @@
                 style="@style/StripeCardFormView.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:backgroundColorStateList="@color/card_form_view_bg_color_overriden"
-                app:shouldShowPostalCodeView="true"/>
+                app:backgroundColorStateList="@color/card_form_view_bg_color_overriden" />
 
             <Button
                 android:id="@+id/create_button"
