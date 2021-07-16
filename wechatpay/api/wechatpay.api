@@ -13,3 +13,32 @@ public final class com/stripe/android/payments/wechatpay/WeChatPayAuthenticator 
 	public fun onNewActivityResultCaller (Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
 }
 
+public final class com/stripe/android/payments/wechatpay/reflection/DefaultWeChatPayReflectionHelper : com/stripe/android/payments/wechatpay/reflection/WeChatPayReflectionHelper {
+	public fun <init> ()V
+	public fun createIWXAPIEventHandler (Ljava/lang/reflect/InvocationHandler;)Ljava/lang/Object;
+	public fun createPayReq (Lcom/stripe/android/model/WeChat;)Ljava/lang/Object;
+	public fun createWXAPI (Landroid/content/Context;)Ljava/lang/Object;
+	public fun getRespErrorCode (Ljava/lang/Object;)I
+	public fun handleIntent (Ljava/lang/Object;Landroid/content/Intent;Ljava/lang/Object;)Z
+	public fun isWeChatPayAvailable ()Z
+	public fun registerApp (Ljava/lang/Object;Ljava/lang/String;)Z
+	public fun sendReq (Ljava/lang/Object;Ljava/lang/Object;)Z
+}
+
+public abstract interface class com/stripe/android/payments/wechatpay/reflection/WeChatPayReflectionHelper {
+	public static final field Companion Lcom/stripe/android/payments/wechatpay/reflection/WeChatPayReflectionHelper$Companion;
+	public static final field WECHAT_PAY_GRADLE_DEP Ljava/lang/String;
+	public abstract fun createIWXAPIEventHandler (Ljava/lang/reflect/InvocationHandler;)Ljava/lang/Object;
+	public abstract fun createPayReq (Lcom/stripe/android/model/WeChat;)Ljava/lang/Object;
+	public abstract fun createWXAPI (Landroid/content/Context;)Ljava/lang/Object;
+	public abstract fun getRespErrorCode (Ljava/lang/Object;)I
+	public abstract fun handleIntent (Ljava/lang/Object;Landroid/content/Intent;Ljava/lang/Object;)Z
+	public abstract fun isWeChatPayAvailable ()Z
+	public abstract fun registerApp (Ljava/lang/Object;Ljava/lang/String;)Z
+	public abstract fun sendReq (Ljava/lang/Object;Ljava/lang/Object;)Z
+}
+
+public final class com/stripe/android/payments/wechatpay/reflection/WeChatPayReflectionHelper$Companion {
+	public static final field WECHAT_PAY_GRADLE_DEP Ljava/lang/String;
+}
+

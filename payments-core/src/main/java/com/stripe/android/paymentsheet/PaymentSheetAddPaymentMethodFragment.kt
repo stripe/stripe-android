@@ -5,14 +5,13 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal class PaymentSheetAddPaymentMethodFragment(
     eventReporter: EventReporter
@@ -30,6 +29,8 @@ internal class PaymentSheetAddPaymentMethodFragment(
         viewModelFactory
     }
 
+    private lateinit var viewBinding: FragmentPaymentsheetAddPaymentMethodBinding
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val config = arguments?.getParcelable<FragmentConfig>(
@@ -39,12 +40,12 @@ internal class PaymentSheetAddPaymentMethodFragment(
             config.isGooglePayReady && config.paymentMethods.isEmpty()
         } ?: false
 
-        val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
+        viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         val googlePayButton = viewBinding.googlePayButton
-        val messageView = viewBinding.message
         val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
+            sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }
 
@@ -53,6 +54,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
         addPaymentMethodHeader.isVisible = !shouldShowGooglePayButton
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
+            updateErrorMessage(null)
             if (paymentSelection == PaymentSelection.GooglePay) {
                 sheetViewModel.checkout(PaymentSheetViewModel.CheckoutIdentifier.AddFragmentTopGooglePay)
             }
@@ -60,13 +62,13 @@ internal class PaymentSheetAddPaymentMethodFragment(
 
         sheetViewModel.getButtonStateObservable(PaymentSheetViewModel.CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner) { viewState ->
-                messageView.isVisible = viewState?.errorMessage != null
-                messageView.text = viewState?.errorMessage?.message
-                googlePayButton.updateState(viewState?.convert())
-
                 if (viewState is PaymentSheetViewState.Reset) {
-                    updateSelection()
+                    // If Google Pay was cancelled or failed, re-select the form payment method
+                    sheetViewModel.updateSelection(sheetViewModel.lastSelectedPaymentMethod)
                 }
+
+                updateErrorMessage(viewState?.errorMessage)
+                googlePayButton.updateState(viewState?.convert())
             }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
@@ -74,14 +76,8 @@ internal class PaymentSheetAddPaymentMethodFragment(
         }
     }
 
-    private fun updateSelection() {
-        // TODO(brnunes-stripe): Remove when CardDataCollectionFragment is replaced
-        // This is just to support the CardDataCollectionFragment that needs this callback to update
-        // the payment selection in the ViewModel.
-        // If this happens while another fragment is visible, it should just do nothing.
-        (
-            childFragmentManager
-                .findFragmentById(R.id.payment_method_fragment_container) as? CardDataCollectionFragment<*>
-            )?.updateSelection()
+    private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
+        viewBinding.message.isVisible = userMessage != null
+        viewBinding.message.text = userMessage?.message
     }
 }

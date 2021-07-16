@@ -54,7 +54,7 @@
     <string name="address_zip_postal_invalid">您的郵區編號無效</string>
     <string name="becs_mandate_acceptance">
     透過提供您的銀行帳戶資訊並確認該筆付款，
-    表示您同意本「直接扣賬請求」及其服務條款，
+    表示您同意本「直接扣帳請求」及其服務條款，
     並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID
     number 507156 (「Stripe」) 透過批量電子清算系統 (BECS)
     代 %1$s（「商家」）向您的帳戶扣取商家單獨告知您的金額。
@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">連接我們的支付提供者時出現了問題。請檢查網路連接，然後重試。</string>
     <string name="stripe_failure_reason_authentication">我們無法驗證您的付款方式。請選擇另一付款方式並重試。</string>
     <string name="stripe_failure_reason_timed_out">驗證您的付款方式時超時 -- 請重試</string>
+    <string name="stripe_google_pay_error_internal">發生了內部錯誤。</string>
     <string name="stripe_paymentsheet_add_button_label">添加</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">銀行卡資訊</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">國家或地區</string>
     <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付資訊</string>
     <string name="stripe_paymentsheet_back">上一步</string>
     <string name="stripe_paymentsheet_close">關閉</string>
     <string name="stripe_paymentsheet_expiration_date_hint">月月/年年</string>
+    <string name="stripe_paymentsheet_or_pay_using">或用以下方式支付</string>
     <string name="stripe_paymentsheet_or_pay_with_card">或用銀行卡支付</string>
     <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
     <string name="stripe_paymentsheet_pay_button_label">支付</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">選擇您的支付方式</string>
     <string name="stripe_paymentsheet_setup_button_label">設置</string>
     <string name="stripe_paymentsheet_total_amount">總金額：%s</string>
+    <string name="stripe_verify_your_payment">驗證您的付款</string>
     <string name="title_add_a_card">添加卡片</string>
     <string name="title_add_an_address">設置地址</string>
     <string name="title_bank_account">銀行帳戶</string>

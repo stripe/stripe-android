@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Возникли проблемы с подключением к системе обработки платежей. Проверьте подключение к Интернету и попробуйте еще раз.</string>
     <string name="stripe_failure_reason_authentication">Не удалось верифицировать метод оплаты. Выберите другой метод оплаты и повторите попытку.</string>
     <string name="stripe_failure_reason_timed_out">Лимит времени для аутентификации метода оплаты истек. Попробуйте еще раз</string>
+    <string name="stripe_google_pay_error_internal">Произошла внутренняя ошибка.</string>
     <string name="stripe_paymentsheet_add_button_label">Добавить</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Добавить</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Данные платежной карты</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Страна или регион</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Укажите платежные данные</string>
     <string name="stripe_paymentsheet_back">Назад</string>
     <string name="stripe_paymentsheet_close">Закрыть</string>
     <string name="stripe_paymentsheet_expiration_date_hint">ММ / ГГ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Или оплатить с помощью</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Или оплатить картой</string>
     <string name="stripe_paymentsheet_pay_button_amount">Оплатить %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Оплатить</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Выберите способ оплаты</string>
     <string name="stripe_paymentsheet_setup_button_label">Настроить</string>
     <string name="stripe_paymentsheet_total_amount">Всего: %s</string>
+    <string name="stripe_verify_your_payment">Подтвердите платеж</string>
     <string name="title_add_a_card">Добавить карту</string>
     <string name="title_add_an_address">Задать адрес</string>
     <string name="title_bank_account">Банковский счет</string>

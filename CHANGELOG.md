@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 17.0.0 - unreleased
+## 17.0.0 - 2021-07-15
 This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
 ### What's New
@@ -9,45 +9,49 @@ Google Pay integration. See the [Google Pay integration guide](https://stripe.co
 for more details.
 
 ### Notable Changes
-* [3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10`
-* [3883](https://github.com/stripe/stripe-android/pull/3883) Remove `PaymentIntent#nextAction`
-* [3899](https://github.com/stripe/stripe-android/pull/3899) Introduce `GooglePayLauncher` and `GooglePayPaymentMethodLauncher`
+* [#3820](https://github.com/stripe/stripe-android/pull/3820) Upgrade Kotlin to `1.5.10`
+* [#3883](https://github.com/stripe/stripe-android/pull/3883) Remove `PaymentIntent#nextAction`
+* [#3899](https://github.com/stripe/stripe-android/pull/3899) Introduce `GooglePayLauncher` and `GooglePayPaymentMethodLauncher`
     * Drop-in classes that simplify integrating Google Pay
-* [3918](https://github.com/stripe/stripe-android/pull/3918) Upgrade Android Gradle plugin to `4.2.2`
-* [3942](https://github.com/stripe/stripe-android/pull/3942) Upgrade Gradle to `7.1.1`
-* [3944](https://github.com/stripe/stripe-android/pull/3944) Introduce `GooglePayLauncherContract` and `GooglePayPaymentMethodLauncherContract`
+* [#3918](https://github.com/stripe/stripe-android/pull/3918) Upgrade Android Gradle plugin to `4.2.2`
+* [#3942](https://github.com/stripe/stripe-android/pull/3942) Upgrade Gradle to `7.1.1`
+* [#3944](https://github.com/stripe/stripe-android/pull/3944) Introduce `GooglePayLauncherContract` and `GooglePayPaymentMethodLauncherContract`
     * `ActivityResultContract` classes that enable integrating `GooglePayLauncher` and `GooglePayPaymentMethodLauncher` in Jetpack Compose
-* [3951](https://github.com/stripe/stripe-android/pull/3951) Upgrade material-components to `1.4.0`
-* [3976](https://github.com/stripe/stripe-android/pull/3976) Upgrade Kotlin Coroutines to `1.5.1`
+* [#3951](https://github.com/stripe/stripe-android/pull/3951) Upgrade material-components to `1.4.0`
+* [#3976](https://github.com/stripe/stripe-android/pull/3976) Upgrade Kotlin Coroutines to `1.5.1`
+* [#4010](https://github.com/stripe/stripe-android/pull/4010) Upgrade 3DS2 SDK to `6.1.1`
+    * Migrate challenge flow to use Activity Result API
+    * Add support for Cartes Bancaires and UnionPay
+    * Upgrade `nimbus-jose-jwt` to `9.11.1`
 
 ## 16.10.2 - 2021-07-02
-* [3811](https://github.com/stripe/stripe-android/pull/3811) Fix `CountryCode` parceling
-* [3833](https://github.com/stripe/stripe-android/pull/3833) Fix coroutine usage in Stripe3DS2Authenticator
-* [3863](https://github.com/stripe/stripe-android/pull/3863) Make `PayWithGoogleUtils#getPriceString()` Locale-agnostic
-* [3892](https://github.com/stripe/stripe-android/pull/3892) Add PaymentSheet support for Jetpack Compose
-* [3905](https://github.com/stripe/stripe-android/pull/3905) Fix `StripeEditText` crash on instantiation
+* [#3811](https://github.com/stripe/stripe-android/pull/3811) Fix `CountryCode` parceling
+* [#3833](https://github.com/stripe/stripe-android/pull/3833) Fix coroutine usage in Stripe3DS2Authenticator
+* [#3863](https://github.com/stripe/stripe-android/pull/3863) Make `PayWithGoogleUtils#getPriceString()` Locale-agnostic
+* [#3892](https://github.com/stripe/stripe-android/pull/3892) Add PaymentSheet support for Jetpack Compose
+* [#3905](https://github.com/stripe/stripe-android/pull/3905) Fix `StripeEditText` crash on instantiation
 
 ## 16.10.0 - 2021-05-28
-* [3752](https://github.com/stripe/stripe-android/pull/3752) Support connected accounts when using Google Pay in PaymentSheet
-* [3761](https://github.com/stripe/stripe-android/pull/3761) Publish `CardFormView`
-* [3762](https://github.com/stripe/stripe-android/pull/3762) Add SetupIntent support in PaymentSheet
-* [3769](https://github.com/stripe/stripe-android/pull/3769) Upgrade Google Pay SDK to `18.1.3`
+* [#3752](https://github.com/stripe/stripe-android/pull/3752) Support connected accounts when using Google Pay in PaymentSheet
+* [#3761](https://github.com/stripe/stripe-android/pull/3761) Publish `CardFormView`
+* [#3762](https://github.com/stripe/stripe-android/pull/3762) Add SetupIntent support in PaymentSheet
+* [#3769](https://github.com/stripe/stripe-android/pull/3769) Upgrade Google Pay SDK to `18.1.3`
 
 ## 16.9.0 - 2021-05-21
-* [3727](https://github.com/stripe/stripe-android/pull/3727) Upgrade Gradle to `7.0.2`
-* [3734](https://github.com/stripe/stripe-android/pull/3734) Upgrade `androidx.appcompat:appcompat` to `1.3.0`
-* [3735](https://github.com/stripe/stripe-android/pull/3735) Upgrade `fragment-ktx` to `1.3.4`
-* [3737](https://github.com/stripe/stripe-android/pull/3737) Add `Stripe.createRadarSession()` API binding for `/v1/radar/session`
-* [3739](https://github.com/stripe/stripe-android/pull/3739) Downgrade Kotlin from `1.5.0` to `1.4.32`
+* [#3727](https://github.com/stripe/stripe-android/pull/3727) Upgrade Gradle to `7.0.2`
+* [#3734](https://github.com/stripe/stripe-android/pull/3734) Upgrade `androidx.appcompat:appcompat` to `1.3.0`
+* [#3735](https://github.com/stripe/stripe-android/pull/3735) Upgrade `fragment-ktx` to `1.3.4`
+* [#3737](https://github.com/stripe/stripe-android/pull/3737) Add `Stripe.createRadarSession()` API binding for `/v1/radar/session`
+* [#3739](https://github.com/stripe/stripe-android/pull/3739) Downgrade Kotlin from `1.5.0` to `1.4.32`
 
 ## 16.8.2 - 2021-05-14
-* [3709](https://github.com/stripe/stripe-android/pull/3709) Upgrade org.jetbrains.kotlin.plugin.serialization to `1.5.0`
-* [3710](https://github.com/stripe/stripe-android/pull/3710) Upgrade kotlinx-serialization-json to `1.2.0`
-* [3711](https://github.com/stripe/stripe-android/pull/3711) Upgrade Gradle to `7.0.1`
-* [3712](https://github.com/stripe/stripe-android/pull/3712) Move PaymentSheet example into its own app
-* [3717](https://github.com/stripe/stripe-android/pull/3717) Upgrade mockito-core to `3.10.0`
-* [3721](https://github.com/stripe/stripe-android/pull/3721) Fix crash on Android 8 and 9 when opening the PaymentSheet
-* [3722](https://github.com/stripe/stripe-android/pull/3722) Upgrade Android Gradle Plugin to `4.2.1`
+* [#3709](https://github.com/stripe/stripe-android/pull/3709) Upgrade org.jetbrains.kotlin.plugin.serialization to `1.5.0`
+* [#3710](https://github.com/stripe/stripe-android/pull/3710) Upgrade kotlinx-serialization-json to `1.2.0`
+* [#3711](https://github.com/stripe/stripe-android/pull/3711) Upgrade Gradle to `7.0.1`
+* [#3712](https://github.com/stripe/stripe-android/pull/3712) Move PaymentSheet example into its own app
+* [#3717](https://github.com/stripe/stripe-android/pull/3717) Upgrade mockito-core to `3.10.0`
+* [#3721](https://github.com/stripe/stripe-android/pull/3721) Fix crash on Android 8 and 9 when opening the PaymentSheet
+* [#3722](https://github.com/stripe/stripe-android/pull/3722) Upgrade Android Gradle Plugin to `4.2.1`
 
 ## 16.8.0 - 2021-05-07
 This release adds a prebuilt UI.   It combines all the steps required to pay - collecting payment details and confirming the payment - into a single sheet that displays on top of your app.  See the [guide](https://stripe.com/docs/payments/accept-a-payment?platform=android) for more details.

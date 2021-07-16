@@ -77,6 +77,10 @@
             android:name=".googlepaylauncher.GooglePayPaymentMethodLauncherActivity"
             android:theme="@style/StripeGooglePayDefaultTheme"
             android:exported="false" />
+
+        <activity android:name=".payments.paymentlauncher.PaymentLauncherConfirmationActivity"
+            android:theme="@style/StripeDefaultTheme"
+            android:exported="false"/>
     </application>
 
     <!--
