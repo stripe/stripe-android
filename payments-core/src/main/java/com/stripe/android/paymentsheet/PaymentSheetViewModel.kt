@@ -257,13 +257,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun updateSelection(selection: PaymentSelection?) {
-        super.updateSelection(selection)
-        stripeIntent.value?.let {
-            resetViewState(it)
-        }
-    }
-
     private fun resetViewState(stripeIntent: StripeIntent, @IntegerRes stringResId: Int?) {
         resetViewState(
             stripeIntent,
@@ -295,8 +288,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
-        // Clear out any previous errors before setting the new button to get updates.
-        _viewState.value = PaymentSheetViewState.Reset(null)
+        if (this.checkoutIdentifier != checkoutIdentifier) {
+            // Clear out any previous errors before setting the new button to get updates.
+            _viewState.value = PaymentSheetViewState.Reset(null)
+        }
 
         this.checkoutIdentifier = checkoutIdentifier
         _processing.value = true
