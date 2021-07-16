@@ -257,13 +257,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun updateSelection(selection: PaymentSelection?) {
-        super.updateSelection(selection)
-        stripeIntent.value?.let {
-            resetViewState(it)
-        }
-    }
-
     private fun resetViewState(stripeIntent: StripeIntent, @IntegerRes stringResId: Int?) {
         resetViewState(
             stripeIntent,
