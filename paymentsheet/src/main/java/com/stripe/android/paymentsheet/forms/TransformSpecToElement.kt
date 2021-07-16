@@ -22,120 +22,100 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  * has a controller and identifier.  With only a single field in a section the section
  * controller will be a pass through the field controller.
  */
-internal fun transform(
-    layout: LayoutSpec,
+internal fun List<FormItemSpec>.transform(
     merchantName: String,
     focusRequesterCount: FocusRequesterCount
 ): List<FormElement> =
-    layout.items.map {
+    this.map {
         when (it) {
-            is FormItemSpec.SaveForFutureUseSpec -> transform(it, merchantName)
-            is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
-            is FormItemSpec.MandateTextSpec -> transform(it, merchantName)
+            is FormItemSpec.SaveForFutureUseSpec -> it.transform(merchantName)
+            is FormItemSpec.SectionSpec -> it.transform(focusRequesterCount)
+            is FormItemSpec.MandateTextSpec -> it.transform(merchantName)
         }
     }
 
-private fun transform(
-    spec: FormItemSpec.SectionSpec,
+private fun FormItemSpec.SectionSpec.transform(
     focusRequesterCount: FocusRequesterCount
 ): FormElement.SectionElement {
 
-    val fieldElements = spec.fields.map {
+    val fieldElements = this.fields.map {
         when (it) {
-            is SectionFieldSpec.Email -> transform(
-                it,
-                focusRequesterCount
-            )
-            is SectionFieldSpec.Name -> transform(
-                it,
-                focusRequesterCount
-            )
-            is SectionFieldSpec.Country -> transform(
-                it
-            )
-            is SectionFieldSpec.IdealBank -> transform(
-                it
-            )
-            is SectionFieldSpec.GenericText -> transform(
-                it,
-                focusRequesterCount
-            )
+            is SectionFieldSpec.Email -> it.transform(focusRequesterCount)
+            is SectionFieldSpec.Name -> it.transform(focusRequesterCount)
+            is SectionFieldSpec.Country -> it.transform()
+            is SectionFieldSpec.IdealBank -> it.transform()
+            is SectionFieldSpec.GenericText -> it.transform(focusRequesterCount)
         }
     }
 
     // The controller of the section element will be the same as the field element
     // as there is only a single field in a section
     return FormElement.SectionElement(
-        identifier = spec.identifier,
+        identifier = this.identifier,
         fieldElements,
         SectionController(
-            spec.title,
+            this.title,
             fieldElements.map { it.controller }
         )
     )
 }
 
-private fun transform(
-    spec: SectionFieldSpec.GenericText,
+private fun SectionFieldSpec.GenericText.transform(
     focusRequesterCount: FocusRequesterCount
 ): SectionFieldElementType =
     SectionFieldElement.GenericText(
-        spec.identifier,
+        this.identifier,
         TextFieldController(
             GenericTextFieldConfig(
-                label = spec.label
+                label = this.label
             )
         ),
         focusRequesterCount.getAndIncrement()
     )
 
-private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
-    // It could be argued that the static text should have a controller, but
+private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
+// It could be argued that the static text should have a controller, but
     // since it doesn't provide a form field we leave it out for now
     FormElement.MandateTextElement(
-        spec.identifier,
-        spec.stringResId,
-        spec.color,
+        this.identifier,
+        this.stringResId,
+        this.color,
         merchantName
     )
 
-private fun transform(
-    spec: SectionFieldSpec.Name,
-    focusRequesterCount: FocusRequesterCount
-) =
+private fun SectionFieldSpec.Name.transform(focusRequesterCount: FocusRequesterCount) =
     SectionFieldElement.Name(
-        spec.identifier,
+        this.identifier,
         TextFieldController(NameConfig()),
         focusRequesterCount.getAndIncrement()
     )
 
-private fun transform(
-    spec: SectionFieldSpec.Email,
+private fun SectionFieldSpec.Email.transform(
     focusRequesterCount: FocusRequesterCount
 ) =
     SectionFieldElement.Email(
-        spec.identifier,
+        this.identifier,
         TextFieldController(EmailConfig()),
         focusRequesterCount.getAndIncrement()
     )
 
-private fun transform(spec: SectionFieldSpec.Country) =
+private fun SectionFieldSpec.Country.transform() =
     SectionFieldElement.Country(
-        spec.identifier,
-        DropdownFieldController(CountryConfig(spec.onlyShowCountryCodes))
+        this.identifier,
+        DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
     )
 
-private fun transform(spec: SectionFieldSpec.IdealBank) =
+private fun SectionFieldSpec.IdealBank.transform() =
     SectionFieldElement.IdealBank(
-        spec.identifier,
+        this.identifier,
         DropdownFieldController(IdealBankConfig())
     )
 
-private fun transform(spec: FormItemSpec.SaveForFutureUseSpec, merchantName: String) =
+private fun FormItemSpec.SaveForFutureUseSpec.transform(merchantName: String) =
     FormElement.SaveForFutureUseElement(
-        spec.identifier,
+        this.identifier,
         SaveForFutureUseController(
-            spec.identifierRequiredForFutureUse.map { element ->
+            this.identifierRequiredForFutureUse.map { element ->
                 element.identifier
             }
         ),

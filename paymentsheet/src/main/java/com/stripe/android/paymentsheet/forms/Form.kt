@@ -211,8 +211,7 @@ class FormViewModel(
     internal var focusIndex = FocusRequesterCount()
     internal fun getCountFocusableFields() = focusIndex.get()
 
-    internal val elements = transform(
-        layout,
+    internal val elements = layout.items.transform(
         merchantName,
         focusIndex
     )

@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -37,18 +36,15 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Section with multiple fields contains all fields in the section element`() {
-        val formElement = transform(
-            LayoutSpec(
+        val formElement = listOf(
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("multifieldSection"),
                 listOf(
-                    FormItemSpec.SectionSpec(
-                        IdentifierSpec("multifieldSection"),
-                        listOf(
-                            SectionFieldSpec.Country(),
-                            SectionFieldSpec.IdealBank
-                        )
-                    )
+                    SectionFieldSpec.Country(),
+                    SectionFieldSpec.IdealBank
                 )
-            ),
+            )
+        ).transform(
             "Example, Inc.",
             FocusRequesterCount()
         )
@@ -65,10 +61,7 @@ class TransformSpecToElementTest {
             IdentifierSpec("countrySection"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
-        val formElement = transform(
-            LayoutSpec(
-                listOf(countrySection)
-            ),
+        val formElement = listOf(countrySection).transform(
             "Example, Inc.",
             FocusRequesterCount()
         )
@@ -93,10 +86,7 @@ class TransformSpecToElementTest {
             IdentifierSpec("idealSection"),
             SectionFieldSpec.IdealBank
         )
-        val formElement = transform(
-            LayoutSpec(
-                listOf(idealSection)
-            ),
+        val formElement = listOf(idealSection).transform(
             "Example, Inc.",
             FocusRequesterCount()
         )
@@ -114,10 +104,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a name section spec sets up the name element correctly`() {
-        val formElement = transform(
-            LayoutSpec(
-                listOf(nameSection)
-            ),
+        val formElement = listOf(nameSection).transform(
             "Example, Inc.",
             FocusRequesterCount()
         )
@@ -131,10 +118,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a email section spec sets up the email element correctly`() {
-        val formElement = transform(
-            LayoutSpec(
-                listOf(emailSection)
-            ),
+        val formElement = listOf(emailSection).transform(
             "Example, Inc.",
             FocusRequesterCount()
         )
@@ -150,10 +134,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Adding to sections that get focus sets up the focus indexes correctly`() {
         val focusRequesterCount = FocusRequesterCount()
-        val formElement = transform(
-            LayoutSpec(
-                listOf(nameSection, emailSection)
-            ),
+        val formElement = listOf(nameSection, emailSection).transform(
             "Example, Inc.",
             focusRequesterCount
         )
@@ -177,10 +158,7 @@ class TransformSpecToElementTest {
             R.string.sofort_mandate,
             Color.Gray
         )
-        val formElement = transform(
-            LayoutSpec(
-                listOf(mandate)
-            ),
+        val formElement = listOf(mandate).transform(
             "Example, Inc.",
             FocusRequesterCount()
         )
@@ -203,10 +181,7 @@ class TransformSpecToElementTest {
             )
             val optionalIdentifiers = listOf(nameSection, mandate)
             val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(optionalIdentifiers)
-            val formElement = transform(
-                LayoutSpec(
-                    listOf(saveForFutureUseSpec)
-                ),
+            val formElement = listOf(saveForFutureUseSpec).transform(
                 "Example, Inc.",
                 FocusRequesterCount()
             )
