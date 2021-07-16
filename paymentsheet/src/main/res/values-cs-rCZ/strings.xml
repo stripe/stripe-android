@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">Banka iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_card">Karta</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">Debet SEPA</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Uložit pro budoucí platby</string>
+    <string name="stripe_paymentsheet_sepa_mandate">Tím, že zadáte informace o platbě a potvrdíte tuto platbu, udělujete společnosti (A) %s a Stripe, našemu poskytovateli platebních služeb, oprávnění zaslat do vaší banky pokyny k zatížení vašeho účtu a (B) vaší bance zatížit váš účet na základě těchto pokynů. V rámci svých práv máte nárok na refundaci od banky na základě smluvních podmínek vaší smlouvy s bankou. Refundaci je nutné nárokovat během 8 týdnů od data, kdy byl váš účet zatížen. Vaše práva jsou vysvětlena v prohlášení, které můžete získat od banky.</string>
+</resources>

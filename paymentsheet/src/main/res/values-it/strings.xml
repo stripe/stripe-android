@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">Banca iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_card">Carta</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">Addebito SEPA</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Salva per i pagamenti futuri</string>
+    <string name="stripe_paymentsheet_sepa_mandate">Fornendo le informazioni di pagamento e confermando questo pagamento, autorizzi (A) %s e Stripe, il nostro fornitore di servizi di pagamento, a inviare istruzioni alla tua banca per l\'addebito sul tuo conto e (B) la tua banca a procedere con tale addebito conformemente alle istruzioni fornite. Tra gli altri diritti, hai anche diritto a un rimborso dalla tua banca in base ai termini e condizioni dell\'accordo sottoscritto con l\'istituto. Un eventuale rimborso va richiesto entro otto settimane a decorrere dalla data di addebito in conto. I tuoi diritti sono consultabili in una dichiarazione che puoi richiedere alla tua banca. Accetti di ricevere una notifica per addebiti futuri fino a 2 giorni prima.</string>
+</resources>

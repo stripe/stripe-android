@@ -174,7 +174,7 @@ class TransformSpecToElementTest {
     fun `Add a mandate section spec setup of the mandate element correctly`() {
         val mandate = FormItemSpec.MandateTextSpec(
             IdentifierSpec("mandate"),
-            R.string.sofort_mandate,
+            R.string.stripe_paymentsheet_sepa_mandate,
             Color.Gray
         )
         val formElement = transform(
@@ -198,7 +198,7 @@ class TransformSpecToElementTest {
         runBlocking {
             val mandate = FormItemSpec.MandateTextSpec(
                 IdentifierSpec("mandate"),
-                R.string.sofort_mandate,
+                R.string.stripe_paymentsheet_sepa_mandate,
                 Color.Gray
             )
             val optionalIdentifiers = listOf(nameSection, mandate)

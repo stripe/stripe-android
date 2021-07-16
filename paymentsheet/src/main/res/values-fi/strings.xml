@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">iDEAL-pankki</string>
+    <string name="stripe_paymentsheet_payment_method_card">Kortti</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Tallenna tulevia maksuja varten</string>
+    <string name="stripe_paymentsheet_sepa_mandate">Antamalla maksutiedot ja vahvistamalla tämän maksun, valtuutat (A) %s ja Stripen, maksupalvelun tarjoajamme, lähettämään ohjeita pankillesi tilisi veloittamiseksi ja (B) pankkisi veloittamaan tiliäsi annettujen ohjeiden mukaisesti. Oikeuksiesi mukaisesti olet oikeutettu maksun palautukseen pankiltasi heidän kanssaan tekemäsi sopimuksen mukaisesti. Maksun palautus on lunastettava kahdeksan viikon kuluessa tilisi veloituksesta. Oikeutesi kerrotaan lausunnossa, jonka voit hankkia pankiltasi. Hyväksyt vastaanottamaan ilmoituksia tulevista veloituksista kaksi päivää ennen niiden tapahtumista.</string>
+</resources>

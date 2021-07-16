@@ -10,7 +10,7 @@ internal class IdealBankConfig : DropdownConfig {
     override val debugLabel = "idealBank"
 
     @StringRes
-    override val label = R.string.title_bank_account
+    override val label = R.string.stripe_paymentsheet_ideal_bank
     override val elementType = ElementType.IdealBank
 
     override fun getDisplayItems() = DISPLAY_TO_PARAM.map { it.displayName }

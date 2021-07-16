@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
+    <string name="stripe_paymentsheet_payment_method_card">Card</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
+    <string name="stripe_paymentsheet_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
+</resources>
