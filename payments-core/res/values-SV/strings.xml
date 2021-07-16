@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Vi har problem med anslutningen till vår leverantör av betalningstjänster. Kontrollera internetanslutningen och försök igen.</string>
     <string name="stripe_failure_reason_authentication">Vi kan inte verifiera din betalningsmetod. Välj en annan betalningsmetod och försök igen.</string>
     <string name="stripe_failure_reason_timed_out">Tidsgränsen passerades vid autentisering av betalningsmetoden – försök igen</string>
+    <string name="stripe_google_pay_error_internal">Ett internt fel uppstod.</string>
     <string name="stripe_paymentsheet_add_button_label">Lägg till</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Lägg till</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kortinformation</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land eller region</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Lägg till betalningsinformation</string>
     <string name="stripe_paymentsheet_back">Tillbaka</string>
     <string name="stripe_paymentsheet_close">Stäng</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Eller betala genom att använda</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Eller betala med ett kort</string>
     <string name="stripe_paymentsheet_pay_button_amount">Betala %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Betala</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Välj din betalningsmetod</string>
     <string name="stripe_paymentsheet_setup_button_label">Konfigurera</string>
     <string name="stripe_paymentsheet_total_amount">Totalt: %s</string>
+    <string name="stripe_verify_your_payment">Verifiera din betalning</string>
     <string name="title_add_a_card">Lägg till kort</string>
     <string name="title_add_an_address">Lägg till adress</string>
     <string name="title_bank_account">Bankkonto</string>

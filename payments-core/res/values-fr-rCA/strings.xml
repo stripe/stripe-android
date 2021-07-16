@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Nous ne parvenons pas à nous connecter à notre prestataire de services de paiement. Veuillez vérifier votre connexion Internet et réessayer.</string>
     <string name="stripe_failure_reason_authentication">Nous ne sommes pas en mesure d\'identifier votre moyen de paiement. Veuillez sélectionner un autre moyen de paiement et réessayer.</string>
     <string name="stripe_failure_reason_timed_out">Le délai d\'authentification de votre moyen de paiement est dépassé, veuillez réessayer.</string>
+    <string name="stripe_google_pay_error_internal">Une erreur interne s\'est produite.</string>
     <string name="stripe_paymentsheet_add_button_label">Ajouter</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ajouter</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Informations de la carte</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Pays ou région</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Ajoutez vos informations de paiement</string>
     <string name="stripe_paymentsheet_back">Retour</string>
     <string name="stripe_paymentsheet_close">Fermer</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/AA</string>
+    <string name="stripe_paymentsheet_or_pay_using">Ou payer avec</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Ou payez par carte</string>
     <string name="stripe_paymentsheet_pay_button_amount">Payer %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Payer</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Sélectionnez votre moyen de paiement</string>
     <string name="stripe_paymentsheet_setup_button_label">Configurer</string>
     <string name="stripe_paymentsheet_total_amount">Total : %s</string>
+    <string name="stripe_verify_your_payment">Vérifiez votre paiement</string>
     <string name="title_add_a_card">Ajouter une carte</string>
     <string name="title_add_an_address">Définir l\'adresse</string>
     <string name="title_bank_account">Compte bancaire</string>

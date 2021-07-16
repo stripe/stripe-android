@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Vi har problemer med at oprette forbindelse til vores betalingsudbyder. Kontroller din internetforbindelse, og prøv igen.</string>
     <string name="stripe_failure_reason_authentication">Vi kunne ikke bekræfte din betalingsmetode. Vælg venligst en anden betalingsmetode, og prøv igen.</string>
     <string name="stripe_failure_reason_timed_out">Bekræftelsen af din betalingsmetode udløb -- prøv igen.</string>
+    <string name="stripe_google_pay_error_internal">Der opstod en intern fejl.</string>
     <string name="stripe_paymentsheet_add_button_label">Tilføj</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Tilføj</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kortoplysninger</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land eller region</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Tilføj dine betalingsoplysninger</string>
     <string name="stripe_paymentsheet_back">Tilbage</string>
     <string name="stripe_paymentsheet_close">Luk</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/ÅÅ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Eller betal med</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Eller betal med et kort</string>
     <string name="stripe_paymentsheet_pay_button_amount">Betal %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Betal</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Vælg din betalingsmetode</string>
     <string name="stripe_paymentsheet_setup_button_label">Opsætning</string>
     <string name="stripe_paymentsheet_total_amount">I alt: %s</string>
+    <string name="stripe_verify_your_payment">Bekræft din betaling</string>
     <string name="title_add_a_card">Tilføj et kort</string>
     <string name="title_add_an_address">Tilføj en adresse</string>
     <string name="title_bank_account">Bankkonto</string>

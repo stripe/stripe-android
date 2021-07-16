@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Estamos passando por problemas de conexão com nosso provedor de pagamentos. Verifique sua conexão com a Internet e tente novamente.</string>
     <string name="stripe_failure_reason_authentication">Não é possível autenticar sua forma de pagamento. Escolha outra forma de pagamento e tente de novo.</string>
     <string name="stripe_failure_reason_timed_out">Tempo limite esgotado para autenticar sua forma de pagamento – tente novamente</string>
+    <string name="stripe_google_pay_error_internal">Ocorreu um erro interno.</string>
     <string name="stripe_paymentsheet_add_button_label">Adicionar</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adicionar</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Dados do cartão</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">País ou região</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Adicione seus dados de pagamento</string>
     <string name="stripe_paymentsheet_back">Voltar</string>
     <string name="stripe_paymentsheet_close">Fechar</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / AA</string>
+    <string name="stripe_paymentsheet_or_pay_using">Ou pague com</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Ou pagar com cartão</string>
     <string name="stripe_paymentsheet_pay_button_amount">Pagar %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Selecione sua forma de pagamento</string>
     <string name="stripe_paymentsheet_setup_button_label">Configurar</string>
     <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="stripe_verify_your_payment">Verifique seu pagamento</string>
     <string name="title_add_a_card">Adicionar um cartão</string>
     <string name="title_add_an_address">Definir endereço</string>
     <string name="title_bank_account">Conta bancária</string>

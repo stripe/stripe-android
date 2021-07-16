@@ -76,11 +76,10 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     args "-F", "src/**/*.kt"
 }
 
-// TODO(ccen) release this when WeChatPay backend API allows Android SDK sending returnUrls.
-//ext {
-//    artifactId = "stripe-wechatpay"
-//    artifactName = "stripe-wechatpay"
-//    artifactDescrption = "The wechatpay module of Stripe Payment Android SDK"
-//}
-//
-//apply from: "${rootDir}/deploy/deploy.gradle"
+ext {
+    artifactId = "stripe-wechatpay"
+    artifactName = "stripe-wechatpay"
+    artifactDescrption = "The WeChat Pay module of Stripe Android Payments SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

@@ -164,24 +164,21 @@
     signatory on the account listed above.
     </string>
 
-    <!-- Sofort form - mandate acceptance -->
-    <string name="sofort_mandate_acceptance" tools:ignore="MissingTranslation">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
-
     <!-- Payment Sheet -->
     <string name="stripe_paymentsheet_back">Back</string>
     <string name="stripe_paymentsheet_close">Close</string>
     <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
     <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-    <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
-    <string name="stripe_paymentsheet_add_payment_method_button_label" tools:ignore="MissingTranslation">+ Add</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
     <!-- Title of a section containing a card form that will collect the payment information from the user -->
     <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
     <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user -->
-    <string name="stripe_paymentsheet_or_pay_using" tools:ignore="MissingTranslation">Or pay using</string>
+    <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
 
     <!-- Label for a button that starts payment processing -->
@@ -200,7 +197,7 @@
     <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method -- try again</string>
     <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
 
-    <string name="stripe_verify_your_payment" tools:ignore="MissingTranslation">Verify your payment</string>
-    <string name="stripe_google_pay_error_internal" tools:ignore="MissingTranslation">An internal error occurred.</string>
+    <string name="stripe_verify_your_payment">Verify your payment</string>
+    <string name="stripe_google_pay_error_internal">An internal error occurred.</string>
     <string name="stripe_google_pay_error_resolution_required" tools:ignore="MissingTranslation">Completing the operation requires some form of resolution.</string>
 </resources>
