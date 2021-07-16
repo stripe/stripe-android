@@ -147,7 +147,7 @@ internal fun Form(
                                 enabled = enabled
                             )
                             Text(
-                                stringResource(controller.label, element.merchantName ?: ""),
+                                stringResource(controller.label),
                                 Modifier
                                     .padding(start = 4.dp)
                                     .align(Alignment.CenterVertically)
