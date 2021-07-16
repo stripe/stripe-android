@@ -31,10 +31,6 @@ internal class PaymentSheetAddPaymentMethodFragment(
 
     private lateinit var viewBinding: FragmentPaymentsheetAddPaymentMethodBinding
 
-    // Holds a reference to the last selected payment method while checking out with Google Pay.
-    // If Google Pay is cancelled or fails, it will be set again as the selected payment method.
-    private var lastSelectedPaymentMethod: PaymentSelection? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val config = arguments?.getParcelable<FragmentConfig>(
@@ -49,7 +45,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
         val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
-            lastSelectedPaymentMethod = sheetViewModel.selection.value
+            sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }
 
@@ -68,7 +64,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
             .observe(viewLifecycleOwner) { viewState ->
                 if (viewState is PaymentSheetViewState.Reset) {
                     // If Google Pay was cancelled or failed, re-select the form payment method
-                    sheetViewModel.updateSelection(lastSelectedPaymentMethod)
+                    sheetViewModel.updateSelection(sheetViewModel.lastSelectedPaymentMethod)
                 }
 
                 updateErrorMessage(viewState?.errorMessage)

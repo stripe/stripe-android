@@ -123,6 +123,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         return outputLiveData
     }
 
+    // Holds a reference to the last selected payment method while checking out with Google Pay.
+    // If Google Pay is cancelled or fails, it will be set again as the selected payment method.
+    internal var lastSelectedPaymentMethod: PaymentSelection? = null
+
     internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
 
@@ -290,7 +294,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
         if (this.checkoutIdentifier != checkoutIdentifier) {
             // Clear out any previous errors before setting the new button to get updates.
-            _viewState.value = PaymentSheetViewState.Reset(null)
+            _viewState.value = PaymentSheetViewState.Reset()
         }
 
         this.checkoutIdentifier = checkoutIdentifier
