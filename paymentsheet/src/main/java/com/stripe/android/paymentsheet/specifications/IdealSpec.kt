@@ -2,9 +2,10 @@ package com.stripe.android.paymentsheet.specifications
 
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.specifications.FormItemSpec.BillingSectionSpec
+import com.stripe.android.paymentsheet.specifications.FormItemSpec.MandateTextSpec
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.MandateTextSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.IdealBank
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name

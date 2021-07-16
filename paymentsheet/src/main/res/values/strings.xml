@@ -15,6 +15,16 @@
     <string name="sofort_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
     <string name="save_for_future_use">Save this card for future %s payments</string>
 
+    <string name="billing_details">Billing Details</string>
+    <string name="address_label_address_line1">Address line 1</string>
+    <string name="address_label_address_line2">Address line 2</string>
+    <string name="address_label_address_line2_optional">Address line 2 (optional)</string>
+    <string name="address_label_city">City</string>
+    <string name="address_label_state">State</string>
+    <string name="address_label_zip_code">ZIP code</string>
+    <string name="address_label_postal_code">Postal code</string>
+    <string name="iban">IBAN</string>
+
     <!-- Title for card payment method -->
     <string name="stripe_paymentsheet_payment_method_card" tools:ignore="MissingTranslation">Card</string>
     <!-- Title for Bancontact payment method -->
@@ -25,4 +35,24 @@
     <string name="stripe_paymentsheet_payment_method_sepa_debit" tools:ignore="MissingTranslation">SEPA Debit</string>
     <!-- Title for Sofort payment method -->
     <string name="stripe_paymentsheet_payment_method_sofort" tools:ignore="MissingTranslation">Sofort</string>
+    <string name="address_label_province">Province</string>
+    <string name="address_label_perfecture">Perfecture</string>
+    <string name="address_label_ae_emirate">Emirate</string>
+    <string name="address_label_hk_area">Area</string>
+    <string name="address_label_ie_county">County</string>
+    <string name="address_label_optional_field">(Optional)</string>
+    <string name="address_label_island">Island</string>
+    <string name="address_label_cedex">Cedex</string>
+    <string name="address_label_suburb">Suburb</string>
+    <string name="address_label_oblast">Oblast</string>
+    <string name="address_label_district">District</string>
+    <string name="address_label_post_town">Post or Town</string>
+    <string name="address_label_department">Department</string>
+    <string name="address_label_neighborhood">Neighborhood</string>
+    <string name="address_label_kr_do_si">Do si</string>
+    <string name="address_label_jp_prefecture">Prefecture</string>
+    <string name="address_label_bb_jm_parish">Parish</string>
+    <string name="address_label_village_township">Village or Township</string>
+    <string name="address_label_ie_townland">Townland</string>
+    <string name="address_label_au_suburb_or_city">Suburb or City</string>
 </resources>

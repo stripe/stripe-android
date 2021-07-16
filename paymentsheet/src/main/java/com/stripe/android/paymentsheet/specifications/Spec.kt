@@ -49,6 +49,11 @@ sealed class FormItemSpec {
         ) : this(identifier, listOf(field), title)
     }
 
+    data class BillingSectionSpec(
+        override val identifier: IdentifierSpec,
+        //JSON file to read and convert to a spec?
+    ) : FormItemSpec(), OptionalItemSpec
+
     /**
      * This is for elements that do not receive user input
      */
@@ -89,6 +94,7 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     data class GenericText(
         override val identifier: IdentifierSpec,
-        @StringRes val label: Int
+        @StringRes val label: Int,
+        val isRequired: Boolean
     ) : SectionFieldSpec(identifier)
 }

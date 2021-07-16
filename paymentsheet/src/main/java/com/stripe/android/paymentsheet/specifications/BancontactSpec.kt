@@ -29,6 +29,8 @@ internal val bancontact = FormSpec(
                 )
             ),
             bancontactMandate,
+            FormItemSpec.BillingSectionSpec(IdentifierSpec("billing"))
+
         )
     ),
     bancontactParamKey,

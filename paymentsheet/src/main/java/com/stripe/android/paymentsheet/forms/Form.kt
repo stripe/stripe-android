@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
+import com.stripe.android.paymentsheet.BillingSectionElement
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
@@ -82,6 +83,9 @@ internal fun Form(
                     is SaveForFutureUseElement -> {
                         SaveForFutureUseElementUI(enabled, element)
                     }
+                    is BillingSectionElement -> {
+                        BillingSectionElementUI(enabled, element, optionalIdentifiers, focusRequesters)
+                    }
                 }
             }
         }
@@ -131,6 +135,51 @@ internal fun SectionElementUI(
     }
 }
 
+
+@ExperimentalUnitApi
+@ExperimentalAnimationApi
+@Composable
+internal fun BillingSectionElementUI(
+    enabled: Boolean,
+    element: BillingSectionElement,
+    optionalIdentifiers: List<IdentifierSpec>?,
+    focusRequesters: List<FocusRequester>
+) {
+    AnimatedVisibility(
+        optionalIdentifiers?.contains(element.identifier) == false,
+        enter = EnterTransition.None,
+        exit = ExitTransition.None
+    ) {
+        val controller = element.controller
+        val fields by element.fields.asLiveData().observeAsState(emptyList())
+
+        val error by controller.error.asLiveData().observeAsState(null)
+        val sectionErrorString =
+            error?.let {
+                stringResource(
+                    it.errorMessage,
+                    stringResource(it.errorFieldLabel)
+                )
+            }
+
+        Section(controller.label, sectionErrorString) {
+            fields.forEachIndexed { index, field ->
+                SectionFieldElementUI(enabled, field, focusRequesters)
+                if (index != fields.size - 1) {
+                    val cardStyle = CardStyle(isSystemInDarkTheme())
+                    Divider(
+                        color = cardStyle.cardBorderColor,
+                        thickness = cardStyle.cardBorderWidth,
+                        modifier = Modifier.padding(
+                            horizontal = cardStyle.cardBorderWidth
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,
@@ -142,7 +191,7 @@ internal fun SectionFieldElementUI(
             val focusRequesterIndex = field.focusIndexOrder
             TextField(
                 textFieldController = field.controller,
-                myFocus = focusRequesters[focusRequesterIndex],
+                myFocus = focusRequesters[0],
                 nextFocus = focusRequesters.getOrNull(
                     focusRequesterIndex + 1
                 ),

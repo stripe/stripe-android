@@ -76,7 +76,7 @@ internal sealed class FormElement {
         val merchantName: String?
     ) : FormElement()
 
-    data class SectionElement(
+    open class SectionElement(
         override val identifier: IdentifierSpec,
         val fields: List<SectionFieldElementType>,
         override val controller: SectionController
@@ -103,6 +103,13 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
             .flatten()
             .associate { it.identifier to it.controller }
     )
+//    .plus(
+//        this
+//            .filterIsInstance<BillingSectionElement>()
+//            .map { it.fields }
+//            .flatten()
+//            .associate { it.identifier to it.controller }
+//    )
 
 /**
  * This class defines the type associated with the element or value.   See [FormFieldValues] and [InputController]
@@ -149,6 +156,6 @@ internal sealed class SectionFieldElement {
     data class GenericText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
-        override val focusIndexOrder: Int
+        override val focusIndexOrder: Int,
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 }

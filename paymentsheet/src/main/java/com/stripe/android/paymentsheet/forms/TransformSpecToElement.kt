@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.paymentsheet.BillingSectionElement
+import com.stripe.android.paymentsheet.BillingSectionFieldRepository
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
@@ -14,6 +16,7 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 
@@ -32,6 +35,10 @@ internal fun transform(
             is FormItemSpec.SaveForFutureUseSpec -> transform(it, merchantName)
             is FormItemSpec.SectionSpec -> transform(it, focusRequesterCount)
             is FormItemSpec.MandateTextSpec -> transform(it, merchantName)
+            is FormItemSpec.BillingSectionSpec -> BillingSectionElement(
+                IdentifierSpec("billing"),
+                BillingSectionFieldRepository.INSTANCE
+            )
         }
     }
 
@@ -54,7 +61,7 @@ private fun transform(
     )
 }
 
-private fun transform(
+internal fun transform(
     sectionFields: List<SectionFieldSpec>,
     focusRequesterCount: FocusRequesterCount
 ) = sectionFields.map {
@@ -88,14 +95,15 @@ private fun transform(
         spec.identifier,
         TextFieldController(
             GenericTextFieldConfig(
-                label = spec.label
-            )
+                label = spec.label,
+            ),
+            isRequired = spec.isRequired
         ),
         focusRequesterCount.getAndIncrement()
     )
 
 private fun transform(spec: FormItemSpec.MandateTextSpec, merchantName: String) =
-    // It could be argued that the static text should have a controller, but
+// It could be argued that the static text should have a controller, but
     // since it doesn't provide a form field we leave it out for now
     FormElement.MandateTextElement(
         spec.identifier,
