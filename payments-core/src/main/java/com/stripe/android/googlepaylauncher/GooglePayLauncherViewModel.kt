@@ -215,7 +215,7 @@ internal class GooglePayLauncherViewModel(
             val analyticsRequestFactory = AnalyticsRequestFactory(
                 application,
                 publishableKey,
-                setOf(PRODUCT_USAGE)
+                setOf(GooglePayLauncher.PRODUCT_USAGE)
             )
 
             val stripeRepository = StripeApiRepository(
@@ -268,9 +268,5 @@ internal class GooglePayLauncherViewModel(
                 googlePayRepository
             ) as T
         }
-    }
-
-    private companion object {
-        private const val PRODUCT_USAGE = "GooglePayLauncher"
     }
 }
