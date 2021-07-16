@@ -19,11 +19,11 @@
     <!-- Title for card payment method -->
     <string name="stripe_paymentsheet_payment_method_card">Card</string>
     <!-- Title for Bancontact payment method -->
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
+    <string name="stripe_paymentsheet_payment_method_bancontact" translatable="false">Bancontact</string>
     <!-- Title for iDEAL payment method -->
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_ideal" translatable="false">iDEAL</string>
     <!-- Title for Sepa Debit payment method -->
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
     <!-- Title for Sofort payment method -->
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
+    <string name="stripe_paymentsheet_payment_method_sofort" translatable="false">Sofort</string>
 </resources>

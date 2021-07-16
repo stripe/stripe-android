@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL bankas</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">„Bancontact“</string>
     <string name="stripe_paymentsheet_payment_method_card">Kortelė</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA debetas</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Išsaugokite vėlesniems mokėjimams</string>
     <string name="stripe_paymentsheet_sepa_mandate">Pateikdami mokėjimo duomenis ir patvirtindami šį mokėjimą, leidžiate (A) „%s“ ir „Stripe“ (mūsų mokėjimo paslaugų teikėjui) jūsų bankui siųsti nurodymus nurašyti pinigus iš jūsų sąskaitos ir (B) leidžiate savo bankui, gavus tokius nurodymus, nurašyti pinigus iš jūsų sąskaitos. Pagal jūsų su banku sudarytos sutarties sąlygas turite teisę iš banko reikalauti pinigų grąžinimo. Prašymą grąžinti pinigus turite pateikti per 8 savaites nuo pinigų iš jūsų sąskaitos nurašymo dienos. Jūsų teisės paaiškintos pareiškime, kurį galite gauti iš savo banko. Sutinkate gauti pranešimus apie būsimus nurašymus likus iki 2 dienų iki jų įvykdymo momento.</string>
 </resources>

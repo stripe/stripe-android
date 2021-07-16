@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL banka</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Karte</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA debets</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Saglabāt nākotnes maksājumiem</string>
     <string name="stripe_paymentsheet_sepa_mandate">Norādot savu maksājuma informāciju un apstiprinot šo maksājumu, jūs pilnvarojat A) %s un Stripe (mūsu maksājumu pakalpojumu sniedzēju) nosūtīt rīkojumu jūsu bankai debetēt jūsu kontu un B) jūsu banku debetēt jūsu kontu saskaņā ar šo rīkojumu. Jums ir tiesības pieprasīt naudas līdzekļu atmaksu no jūsu bankas saskaņā ar jūsu bankas konta apkalpošanas līguma noteikumiem un nosacījumiem. Naudas līdzekļu atmaksa jāpieprasa astoņu nedēļu laikā, sākot no jūsu konta debetēšanas datuma. Jūsu tiesības ir paskaidrotas paziņojumā, kuru varat saņemt savā bankā. Jūs piekrītat saņemt paziņojumus par turpmākajiem debeta darījumiem vismaz divas dienas pirms to veikšanas.</string>
 </resources>

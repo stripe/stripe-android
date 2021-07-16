@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Kort</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA-betaling</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Lagre for framtidige betalingar</string>
     <string name="stripe_paymentsheet_sepa_mandate">Ved å oppgje betalingsopplysningane dine og bekrefte denne betalinga, autoriserer du (A) %s og Stripe, betalingstenesteleverandøren vår, til å sende instruksjonar til banken din om å debitere kontoen din og (B) banken din om å debitere kontoen din i medhald av dei instruksjonane. Som ein del av rettane dine, har du krav på ein refusjon frå banken din under vilkåra i avtalen din med banken. Ein refusjon må hevdast innan 8 veker frå datoen da kontoen din vart debitert. Rettane dine vert forklart i ei erklæring som du kan få frå banken. Du godtek å take imot varsel for framtidige debetar opptil 2 dagar før dei oppstår.</string>
 </resources>

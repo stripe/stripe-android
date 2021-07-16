@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL banka</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Karta</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA inkaso</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Uložiť pre budúce platby</string>
     <string name="stripe_paymentsheet_sepa_mandate">Poskytnutím informácií o platbe a potvrdením tejto platby splnomocňujete (A) spoločnosti %s a Stripe, nášho poskytovateľa platobných služieb, na posielanie platobných príkazov do vašej banky na odpísanie finančných prostriedkov z vášho účtu a (B) vašu banku na odpísanie finančných prostriedkov z vášho účtu v súlade s pokynmi. V rámci vašich práv máte právo na refundáciu od vašej banky podľa zmluvných podmienok uvedených v zmluve s vašou bankou. Refundáciu si musíte vyžiadať do 8 týždňov odo dňa, kedy boli finančné prostriedky odpísané z vášho účtu. Vaše práva sú vysvetlené vo vyhlásení, ktoré môžete získať od svojej banky. Súhlasíte s tým, že budete dostávať oznámenia o budúcich debetných platbách až 2 dni pred ich uskutočnením.</string>
 </resources>

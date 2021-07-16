@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Kort</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Spara för framtida betalningar</string>
     <string name="stripe_paymentsheet_sepa_mandate">Genom att tillhandahålla din betalningsinformation och bekräfta denna betalning godkänner du (A) %s och Stripe, vår betaltjänstleverantör, att skicka instruktioner till din bank att debitera ditt konto och (B) din bank att debitera ditt konto i enlighet med dessa instruktioner. Som en del av dina rättigheter har du rätt till återbetalning från din bank enligt villkoren för ditt avtal med din bank. Återbetalning måste krävas inom åtta veckor från det datum då ditt konto debiterades. Dina rättigheter förklaras i ett utdrag som du kan få från din bank. Du godkänner att få aviseringar för framtida debiteringar upp till två dagar innan de inträffar.</string>
 </resources>

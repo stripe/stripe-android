@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Карта</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA дебит</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Запазване за бъдещи плащания</string>
     <string name="stripe_paymentsheet_sepa_mandate">С предоставянето на информация за плащания и с потвърждаването на това плащане Вие упълномощавате (A) %s и Stripe, нашия доставчик на платежни услуги, да изпращат инструкции до Вашата банка за дебитиране на сметката Ви и (B) Вашата банка да дебитира сметката Ви в съответствие с тези инструкции. Като част от Вашите права имате право на възстановяване на суми от Вашата банка при условията и реда на споразумението с Вашата банка. Възстановяването на сума трябва да бъде поискано в рамките на 8 седмици, считано от датата, на която сметката Ви е била дебитирана. Вашите права са обяснени в извлечение, което можете да получите от Вашата банка. Вие давате своето съгласие да получавате известия за бъдещи дебитирания до 2 дни преди изпълнението им.</string>
 </resources>

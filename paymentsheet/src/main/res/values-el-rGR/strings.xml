@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Κάρτα</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">Χρέωση SEPA</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Αποθήκευση για μελλοντικές πληρωμές</string>
     <string name="stripe_paymentsheet_sepa_mandate">Με την παροχή των στοιχείων πληρωμής σας και επιβεβαιώνοντας αυτήν την πληρωμή, εξουσιοδοτείτε (A) την %s και την Stripe, τον πάροχο υπηρεσιών πληρωμών μας, να στείλουν οδηγίες στην τράπεζά σας προκειμένου να χρεώσει τον λογαριασμό σας και (B) την τράπεζά σας προκειμένου να χρεώσει τον λογαριασμό σας, σύμφωνα με τις οδηγίες αυτές. Στο πλαίσιο των δικαιωμάτων σας, δικαιούστε επιστροφή από την τράπεζά σας με βάση τους όρους και τις προϋποθέσεις που διατυπώνονται στη σύμβαση με την τράπεζά σας. Η αξίωση για επιστροφή πρέπει να υποβληθεί εντός 8 εβδομάδων από την ημερομηνία χρέωσης του λογαριασμού σας. Τα δικαιώματά σας επεξηγούνται σε αναλυτική κατάσταση, την οποία μπορείτε να εξασφαλίσετε από την τράπεζά σας. Συμφωνείτε να λαμβάνετε ειδοποιήσεις για μελλοντικές χρεώσεις έως και 2 ημέρες προτού προκύψουν.</string>
 </resources>

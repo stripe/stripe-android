@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Kort</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Gem til fremtidige betalinger</string>
     <string name="stripe_paymentsheet_sepa_mandate">Ved at give dine betalingsoplysninger og bekræfte denne betaling giver du (A) %s og Stripe, vores betalingstjenesteudbyder, tilladelse til at sende instruktioner til din bank om at debitere din konto og (B) din bank til at debitere din konto i overensstemmelse med disse instruktioner. Som en del af dine rettigheder har du ret til en refusion fra din bank under vilkårene og betingelserne i din aftale med din bank. Der skal kræves refusion inden for 8 uger fra den dato, hvor din konto blev debiteret. Dine rettigheder forklares i en erklæring, som du kan få fra din bank. Du accepterer at modtage underretninger om fremtidig debitering op til to dage før de opstår.</string>
 </resources>

@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Număr card</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Salvați pentru plăți viitoare</string>
     <string name="stripe_paymentsheet_sepa_mandate">Prin furnizarea informațiilor dvs. privind plata și confirmarea acestei plăți, autorizați (A) %s și Stripe, furnizorul nostru de servicii de plată, să trimită instrucțiuni băncii dvs. pentru a vă debita contul și pentru ca (B) banca dvs. să facă acest lucru în conformitate cu instrucțiunile respective. Conform drepturilor dvs., aveți dreptul la o rambursare din partea băncii dvs. în conformitate cu termenii și condițiile acordului dvs. cu aceasta. O rambursare trebuie revendicată în termen de opt săptămâni de la data debitării contului. Drepturile dvs. sunt explicate într-o declarație pe care o puteți obține de la bancă. Sunteți de acord să primiți notificări pentru debitări viitoare cu până la două zile înainte de efectuarea acestora.</string>
 </resources>

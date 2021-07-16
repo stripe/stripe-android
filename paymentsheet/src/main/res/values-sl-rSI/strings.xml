@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="stripe_paymentsheet_ideal_bank">Banka iDEAL</string>
-    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_card">Kartica</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_sepa_debit">Obremenitev SEPA</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_save_for_future_payments">Shrani za prihodnja plačila</string>
     <string name="stripe_paymentsheet_sepa_mandate">Z navedbo podatkov o plačilu in potrditvijo tega plačila pooblaščate (A) podjetje %s in družbo Stripe, našega ponudnika plačilnih storitev, da posreduje navodila vaši banki za bremenitev vašega računa, in (B) vašo banko, da bremeni vaš račun v skladu s temi navodili. Vaše pravice vključujejo tudi pravico do povračila denarnih sredstev s strani vaše banke v skladu s pogoji in določili vaše pogodbe z banko. Povračilo denarnih sredstev morate zahtevati v 8 tednih od dneva bremenitve vašega računa. Vaše pravice so podrobno opisane na izpisku, ki ga lahko pridobite v banki. Strinjate se s prejemom obvestil za prihodnje bremenitve največ 2 dni pred njihovo izvedbo.</string>
 </resources>
