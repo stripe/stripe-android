@@ -223,7 +223,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             assertThat(viewBinding.message.isVisible).isTrue()
             assertThat(viewBinding.message.text).isEqualTo(errorMessage)
 
-            fragment.sheetViewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+            fragment.sheetViewModel.updateSelection(
+                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
 
             assertThat(viewBinding.message.isVisible).isFalse()
             assertThat(viewBinding.message.text.isNullOrEmpty()).isTrue()

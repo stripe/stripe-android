@@ -689,7 +689,8 @@ internal class PaymentSheetActivityTest {
                 assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
 
                 val errorMessage = "Error message"
-                viewModel._viewState.value = PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                viewModel._viewState.value =
+                    PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
                 assertThat(activity.viewBinding.message.isVisible).isTrue()
                 assertThat(activity.viewBinding.message.text).isEqualTo(errorMessage)
@@ -714,7 +715,8 @@ internal class PaymentSheetActivityTest {
                 assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
 
                 val errorMessage = "Error message"
-                viewModel._viewState.value = PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                viewModel._viewState.value =
+                    PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
                 assertThat(activity.viewBinding.message.isVisible).isTrue()
                 assertThat(activity.viewBinding.message.text).isEqualTo(errorMessage)
