@@ -26,7 +26,7 @@ internal fun transform(
     layout: LayoutSpec,
     merchantName: String,
     focusRequesterCount: FocusRequesterCount
-) =
+): List<FormElement> =
     layout.items.map {
         when (it) {
             is FormItemSpec.SaveForFutureUseSpec -> transform(it, merchantName)
