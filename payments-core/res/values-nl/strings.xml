@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Er zijn momenteel problemen met de verbinding naar onze betalingsprovider. Controleer je internetverbinding en probeer het opnieuw.</string>
     <string name="stripe_failure_reason_authentication">We kunnen de betaalmethode niet authenticeren. Kies een andere betaalmethode en probeer het nogmaals.</string>
     <string name="stripe_failure_reason_timed_out">Time-out bij authenticatie van de betaalmethode. Probeer het nogmaals</string>
+    <string name="stripe_google_pay_error_internal">Er is een interne fout opgetreden.</string>
     <string name="stripe_paymentsheet_add_button_label">Toevoegen</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Toevoegen</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kaartgegevens</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land of regio</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Je betaalgegevens toevoegen</string>
     <string name="stripe_paymentsheet_back">Terug</string>
     <string name="stripe_paymentsheet_close">Sluiten</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / JJ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Of betalen met</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Of met een kaart betalen</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s betalen</string>
     <string name="stripe_paymentsheet_pay_button_label">Betaal</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Betaalmethode selecteren</string>
     <string name="stripe_paymentsheet_setup_button_label">Instellen</string>
     <string name="stripe_paymentsheet_total_amount">Totaal: %s</string>
+    <string name="stripe_verify_your_payment">Je betaling verifiëren</string>
     <string name="title_add_a_card">Een kaart toevoegen</string>
     <string name="title_add_an_address">Voeg een adres toe</string>
     <string name="title_bank_account">Bankrekening</string>

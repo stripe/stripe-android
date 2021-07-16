@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Makseteenuse pakkujaga ei saa ühendust luua. Kontrollige Interneti-ühendust ja proovige uuesti.</string>
     <string name="stripe_failure_reason_authentication">Makseviisi ei õnnestunud autentida. Palun valige muu makseviis ja proovige uuesti.</string>
     <string name="stripe_failure_reason_timed_out">Makseviisi autentimise toiming aegus – proovige uuesti</string>
+    <string name="stripe_google_pay_error_internal">Ilmnes sisemine tõrge.</string>
     <string name="stripe_paymentsheet_add_button_label">Lisa</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ lisa</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kaardi andmed</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Riik või regioon</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Lisage makseteave</string>
     <string name="stripe_paymentsheet_back">Tagasi</string>
     <string name="stripe_paymentsheet_close">Sulge</string>
     <string name="stripe_paymentsheet_expiration_date_hint">KK / AA</string>
+    <string name="stripe_paymentsheet_or_pay_using">Või kasuta makseviisi</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Või makske kaardiga</string>
     <string name="stripe_paymentsheet_pay_button_amount">Maksa %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Maksa</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Valige makseviis</string>
     <string name="stripe_paymentsheet_setup_button_label">Seadista</string>
     <string name="stripe_paymentsheet_total_amount">Kokku: %s</string>
+    <string name="stripe_verify_your_payment">Kinnitage makse</string>
     <string name="title_add_a_card">Kaardi lisamine</string>
     <string name="title_add_an_address">Määrake aadress</string>
     <string name="title_bank_account">Pangakonto</string>

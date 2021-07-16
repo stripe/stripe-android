@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Vyskytli sa problémy s pripojením k nášmu poskytovateľovi platieb. Skontrolujte pripojenie k internetu a skúste to znova.</string>
     <string name="stripe_failure_reason_authentication">Nemôžeme overiť váš spôsob platby. Vyberte iný spôsob platby a skúste to znova.</string>
     <string name="stripe_failure_reason_timed_out">Vypršal čas autentifikácie vášho spôsobu platby -- skúste znova</string>
+    <string name="stripe_google_pay_error_internal">Vyskytla sa interná chyba.</string>
     <string name="stripe_paymentsheet_add_button_label">Pridať</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Pridať</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Informácie o karte</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Krajina alebo región</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Pridajte svoje informácie o platbe</string>
     <string name="stripe_paymentsheet_back">Späť</string>
     <string name="stripe_paymentsheet_close">Zatvoriť</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
+    <string name="stripe_paymentsheet_or_pay_using">Alebo zaplaťte pomocou</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Alebo zaplaťte kartou</string>
     <string name="stripe_paymentsheet_pay_button_amount">Zaplatiť %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Zaplatiť</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Vyberte svoj spôsob platby</string>
     <string name="stripe_paymentsheet_setup_button_label">Nastaviť</string>
     <string name="stripe_paymentsheet_total_amount">Celkovo: %s</string>
+    <string name="stripe_verify_your_payment">Overenie platby</string>
     <string name="title_add_a_card">Pridať kartu</string>
     <string name="title_add_an_address">Zadajte adresu</string>
     <string name="title_bank_account">Bankový účet</string>

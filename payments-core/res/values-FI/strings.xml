@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Yhteydessä maksun käsittelijään esiintyi ongelmia. Tarkista Internet-yhteys ja yritä uudelleen.</string>
     <string name="stripe_failure_reason_authentication">Emme pystyneet todentamaan maksutapaasi. Valitse toinen maksutapa ja yritä uudelleen.</string>
     <string name="stripe_failure_reason_timed_out">Maksutapasi todennus aikakatkaistiin – yritä uudelleen.</string>
+    <string name="stripe_google_pay_error_internal">Sisäinen virhe on tapahtunut.</string>
     <string name="stripe_paymentsheet_add_button_label">Lisää</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Lisää</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kortin tiedot</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Maa tai alue</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Lisää maksutiedot</string>
     <string name="stripe_paymentsheet_back">Takaisin</string>
     <string name="stripe_paymentsheet_close">Sulje</string>
     <string name="stripe_paymentsheet_expiration_date_hint">KK/VV</string>
+    <string name="stripe_paymentsheet_or_pay_using">Tai käytä maksutapaa</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Tai maksa kortilla</string>
     <string name="stripe_paymentsheet_pay_button_amount">Maksa %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Maksa</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Valitse maksutapa</string>
     <string name="stripe_paymentsheet_setup_button_label">Määritä</string>
     <string name="stripe_paymentsheet_total_amount">Yhteensä: %s</string>
+    <string name="stripe_verify_your_payment">Vahvista maksu</string>
     <string name="title_add_a_card">Lisää kortti</string>
     <string name="title_add_an_address">Lisää osoite</string>
     <string name="title_bank_account">Pankkitili</string>

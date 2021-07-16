@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Vyskytly se problémy s připojením k našemu poskytovateli plateb. Zkontrolujte prosím připojení k internetu a zkuste to znovu.</string>
     <string name="stripe_failure_reason_authentication">Nemůžeme ověřit Váš způsob platby. Vyberte si jiný způsob platby a zkuste to znovu.</string>
     <string name="stripe_failure_reason_timed_out">Časový limit ověření Vašeho způsobu platby uplynul -- zkuste to znovu</string>
+    <string name="stripe_google_pay_error_internal">Došlo k interní chybě.</string>
     <string name="stripe_paymentsheet_add_button_label">Přidat</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Přidat</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Informace o kartě</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Země nebo region</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Přidejte své platební údaje</string>
     <string name="stripe_paymentsheet_back">Zpět</string>
     <string name="stripe_paymentsheet_close">Zavřít</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
+    <string name="stripe_paymentsheet_or_pay_using">Nebo zaplatit pomocí</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Nebo zaplatit kartou</string>
     <string name="stripe_paymentsheet_pay_button_amount">Zaplatit %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Zaplatit</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Vyberte svou platební metodu</string>
     <string name="stripe_paymentsheet_setup_button_label">Nastavit</string>
     <string name="stripe_paymentsheet_total_amount">Celkem: %s</string>
+    <string name="stripe_verify_your_payment">Ověřte platbu</string>
     <string name="title_add_a_card">Přidat kartu</string>
     <string name="title_add_an_address">Nastavit adresu</string>
     <string name="title_bank_account">Bankovní účet</string>

@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">第 1 行地址 (可选)</string>
     <string name="address_label_address_line2_optional">地址行 2（可选）</string>
     <string name="address_label_address_optional">地址 (可选)</string>
-    <string name="address_label_apt">公寓号码</string>
+    <string name="address_label_apt">公寓</string>
     <string name="address_label_apt_optional">公寓号码 (可选)</string>
     <string name="address_label_city">城市</string>
     <string name="address_label_city_optional">城市 (可选)</string>
@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">连接我们的支付提供商时出现了问题。请检查网络连接，然后重试。</string>
     <string name="stripe_failure_reason_authentication">我们未能验证您的支付方式。请选择另一支付方式并重试。</string>
     <string name="stripe_failure_reason_timed_out">验证您的支付方式时失败——请重试</string>
+    <string name="stripe_google_pay_error_internal">发生了内部错误。</string>
     <string name="stripe_paymentsheet_add_button_label">添加</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">银行卡信息</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">国家或地区</string>
     <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付信息</string>
     <string name="stripe_paymentsheet_back">返回</string>
     <string name="stripe_paymentsheet_close">关闭</string>
     <string name="stripe_paymentsheet_expiration_date_hint">月月/年年</string>
+    <string name="stripe_paymentsheet_or_pay_using">或用以下方式支付</string>
     <string name="stripe_paymentsheet_or_pay_with_card">或用银行卡支付</string>
     <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
     <string name="stripe_paymentsheet_pay_button_label">支付</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">选择您的支付方式</string>
     <string name="stripe_paymentsheet_setup_button_label">设置</string>
     <string name="stripe_paymentsheet_total_amount">合计：%s</string>
+    <string name="stripe_verify_your_payment">验证您的付款</string>
     <string name="title_add_a_card">添加一张卡</string>
     <string name="title_add_an_address">添加一个地址</string>
     <string name="title_bank_account">银行账户</string>

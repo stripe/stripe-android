@@ -33,7 +33,7 @@
     <string name="address_label_postcode_optional">Posta kodu (isteğe bağlı)</string>
     <string name="address_label_province">İlçe</string>
     <string name="address_label_province_optional">İlçe (isteğe bağlı)</string>
-    <string name="address_label_region_generic">İl / İlçe / Bölge</string>
+    <string name="address_label_region_generic">İl /İlçe/Bölge</string>
     <string name="address_label_region_generic_optional">İl / İlçe / Bölge (isteğe bağlı)</string>
     <string name="address_label_state">Eyalet</string>
     <string name="address_label_state_optional">Eyalet (isteğe bağlı)</string>
@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Ödeme sağlayıcımıza bağlanmayla ilgili sorun yaşıyoruz. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.</string>
     <string name="stripe_failure_reason_authentication">Ödeme metodunuzu doğrulayamadık. Lütfen farklı bir ödeme metodu seçin ve tekrar deneyin.</string>
     <string name="stripe_failure_reason_timed_out">Ödeme metodunuz doğrulanırken zaman aşımına uğradı -- tekrar deneyin</string>
+    <string name="stripe_google_pay_error_internal">Dâhili bir hata oluştu.</string>
     <string name="stripe_paymentsheet_add_button_label">Ekle</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ekle</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kart bilgileri</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Ülke veya bölge</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Ödeme bilgilerinizi ekleyin</string>
     <string name="stripe_paymentsheet_back">Geri</string>
     <string name="stripe_paymentsheet_close">Kapat</string>
     <string name="stripe_paymentsheet_expiration_date_hint">AA / YY</string>
+    <string name="stripe_paymentsheet_or_pay_using">Veya şununla ödeyin:</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Ya da kartla ödeyin</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s öde</string>
     <string name="stripe_paymentsheet_pay_button_label">Öde</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Ödeme yönteminizi seçin</string>
     <string name="stripe_paymentsheet_setup_button_label">Ayarla</string>
     <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
+    <string name="stripe_verify_your_payment">Ödemenizi doğrulayın</string>
     <string name="title_add_a_card">Kart Ekle</string>
     <string name="title_add_an_address">Adresi Ayarla</string>
     <string name="title_bank_account">Banka Hesabı</string>
