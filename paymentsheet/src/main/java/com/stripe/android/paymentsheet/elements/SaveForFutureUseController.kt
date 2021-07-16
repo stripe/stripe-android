@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 internal class SaveForFutureUseController(
     identifiersRequiredForFutureUse: List<IdentifierSpec> = emptyList()
 ) : InputController {
-    override val label: Int = R.string.save_for_future_use
+    override val label: Int = R.string.stripe_paymentsheet_save_for_future_payments
     private val _saveForFutureUse = MutableStateFlow(true)
     val saveForFutureUse: Flow<Boolean> = _saveForFutureUse
     override val fieldValue: Flow<String> = saveForFutureUse.map { it.toString() }

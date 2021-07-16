@@ -25,7 +25,7 @@ internal val sofortCountrySection =
     SectionSpec(IdentifierSpec("country"), Country(setOf("AT", "BE", "DE", "ES", "IT", "NL")))
 internal val sofortMandate = MandateTextSpec(
     IdentifierSpec("mandate"),
-    R.string.sofort_mandate,
+    R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray
 )
 internal val sofort = FormSpec(
