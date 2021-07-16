@@ -112,6 +112,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存该卡，用于未来的 %s 付款</string>
     <string name="stripe_paymentsheet_select_payment_method">选择您的支付方式</string>
     <string name="stripe_paymentsheet_setup_button_label">设置</string>
+    <string name="stripe_paymentsheet_total_amount">合计：%s</string>
     <string name="stripe_verify_your_payment">验证您的付款</string>
     <string name="title_add_a_card">添加一张卡</string>
     <string name="title_add_an_address">添加一个地址</string>

@@ -112,6 +112,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Gem dette kort til fremtidige %s betalinger</string>
     <string name="stripe_paymentsheet_select_payment_method">Vælg din betalingsmetode</string>
     <string name="stripe_paymentsheet_setup_button_label">Opsætning</string>
+    <string name="stripe_paymentsheet_total_amount">I alt: %s</string>
     <string name="stripe_verify_your_payment">Bekræft din betaling</string>
     <string name="title_add_a_card">Tilføj et kort</string>
     <string name="title_add_an_address">Tilføj en adresse</string>

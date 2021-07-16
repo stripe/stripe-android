@@ -112,6 +112,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salvați acest card pentru plăți viitoare către %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Selectați metoda de plată</string>
     <string name="stripe_paymentsheet_setup_button_label">Configurare</string>
+    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
     <string name="stripe_verify_your_payment">Verificați-vă plata</string>
     <string name="title_add_a_card">Adăugare card</string>
     <string name="title_add_an_address">Adăugare adresă</string>

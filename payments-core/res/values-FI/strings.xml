@@ -112,6 +112,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Tallenna tämä kortti tulevia maksuja (%s) varten</string>
     <string name="stripe_paymentsheet_select_payment_method">Valitse maksutapa</string>
     <string name="stripe_paymentsheet_setup_button_label">Määritä</string>
+    <string name="stripe_paymentsheet_total_amount">Yhteensä: %s</string>
     <string name="stripe_verify_your_payment">Vahvista maksu</string>
     <string name="title_add_a_card">Lisää kortti</string>
     <string name="title_add_an_address">Lisää osoite</string>

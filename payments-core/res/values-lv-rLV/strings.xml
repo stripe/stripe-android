@@ -112,6 +112,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Saglabāt šo karti %s maksājumiem nākotnē</string>
     <string name="stripe_paymentsheet_select_payment_method">Izvēlēties savu maksājuma veidu</string>
     <string name="stripe_paymentsheet_setup_button_label">Iestatīt</string>
+    <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
     <string name="stripe_verify_your_payment">Verificējiet savu maksājumu</string>
     <string name="title_add_a_card">Kartes pievienošana</string>
     <string name="title_add_an_address">Iestatiet adresi</string>

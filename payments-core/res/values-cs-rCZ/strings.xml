@@ -112,6 +112,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložit tuto kartu pro budoucí platby %s</string>
     <string name="stripe_paymentsheet_select_payment_method">Vyberte svou platební metodu</string>
     <string name="stripe_paymentsheet_setup_button_label">Nastavit</string>
+    <string name="stripe_paymentsheet_total_amount">Celkem: %s</string>
     <string name="stripe_verify_your_payment">Ověřte platbu</string>
     <string name="title_add_a_card">Přidat kartu</string>
     <string name="title_add_an_address">Nastavit adresu</string>

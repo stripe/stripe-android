@@ -112,6 +112,7 @@
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
     <string name="stripe_paymentsheet_select_payment_method">Ödeme yönteminizi seçin</string>
     <string name="stripe_paymentsheet_setup_button_label">Ayarla</string>
+    <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
     <string name="stripe_verify_your_payment">Ödemenizi doğrulayın</string>
     <string name="title_add_a_card">Kart Ekle</string>
     <string name="title_add_an_address">Adresi Ayarla</string>
