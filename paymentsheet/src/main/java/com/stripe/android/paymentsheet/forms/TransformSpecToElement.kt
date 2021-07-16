@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.GenericTextFieldConfig
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
@@ -44,7 +44,7 @@ private fun FormItemSpec.SectionSpec.transform(
             is SectionFieldSpec.Name -> it.transform(focusRequesterCount)
             is SectionFieldSpec.Country -> it.transform()
             is SectionFieldSpec.IdealBank -> it.transform()
-            is SectionFieldSpec.GenericText -> it.transform(focusRequesterCount)
+            is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
         }
     }
 
@@ -60,13 +60,13 @@ private fun FormItemSpec.SectionSpec.transform(
     )
 }
 
-private fun SectionFieldSpec.GenericText.transform(
+private fun SectionFieldSpec.SimpleText.transform(
     focusRequesterCount: FocusRequesterCount
 ): SectionFieldElementType =
-    SectionFieldElement.GenericText(
+    SectionFieldElement.SimpleText(
         this.identifier,
         TextFieldController(
-            GenericTextFieldConfig(
+            SimpleTextFieldConfig(
                 label = this.label
             )
         ),
