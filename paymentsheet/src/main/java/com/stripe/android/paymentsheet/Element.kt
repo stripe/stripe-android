@@ -76,7 +76,7 @@ internal sealed class FormElement {
         val merchantName: String?
     ) : FormElement()
 
-    open class SectionElement(
+    data class SectionElement(
         override val identifier: IdentifierSpec,
         val fields: List<SectionFieldElementType>,
         override val controller: SectionController
@@ -155,6 +155,6 @@ internal sealed class SectionFieldElement {
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
-        override val focusIndexOrder: Int,
+        override val focusIndexOrder: Int
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 }

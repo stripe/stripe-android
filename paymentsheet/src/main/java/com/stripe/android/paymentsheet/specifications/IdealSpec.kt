@@ -25,7 +25,7 @@ internal val idealEmailSection = SectionSpec(IdentifierSpec("email"), Email)
 internal val idealBankSection = SectionSpec(IdentifierSpec("bank"), IdealBank)
 internal val idealMandate = MandateTextSpec(
     IdentifierSpec("mandate"),
-    R.string.sofort_mandate,
+    R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray
 )
 internal val ideal = FormSpec(

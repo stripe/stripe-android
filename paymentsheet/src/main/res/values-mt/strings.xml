@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">Il-Bank iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_card">Kard</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">Debitu SEPA</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Erfa\' għall-pagamenti fil-ġejjieni</string>
+    <string name="stripe_paymentsheet_sepa_mandate">Meta tagħti l-informazzjoni tal-pagament tiegħek u tikkonferma dan il-pagament, tkun qed tawtorizza lil (A) %s u lil Stripe, l-operatur tas-servizz tal-pagamenti tagħna, biex jibagħtu struzzjonijiet lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek u (B) lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek skont dawn l-istruzzjonijiet. Bħala parti mid-drittijiet tiegħek, inti għandek dritt għall-ħlas lura mill-bank tiegħek skont it-termini u l-kundizzjonijiet tal-ftehim tiegħek mal-bank tiegħek. Ħlas lura għandu jintalab fi żmien 8 ġimgħat, li jibdew jgħoddu mid-data li fiha l-fondi jittieħdu mill-kont tiegħek. Id-drittijiet tiegħek huma spjegati f\'dikjarazzjoni li tista\' tikseb mingħand il-bank tiegħek. Inti taqbel li, sa jumejn qabel, tirċievi notifika kull darba li l-fondi jkunu se jittieħdu mill-kont tiegħek.</string>
+</resources>

@@ -6,27 +6,7 @@ plugins {
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
-    return getValue('STRIPE_PAYMENTSHEET_EXAMPLE_BACKEND_URL')
-}
-
-private def getValue(key) {
-    // first try to get the value from Gradle properties
-    // see https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties
-    final String propValue
-    if (hasProperty(key)) {
-        propValue = property(key)
-    } else {
-        propValue = null
-    }
-
-    if (propValue?.trim()) {
-        return propValue
-    } else {
-        // Otherwise, get the value from environment variables
-        // see https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_environment_variables
-        final String envValue = System.getenv(key)
-        return envValue?.trim() ? envValue : ""
-    }
+    return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_BACKEND_URL') ?: ""
 }
 
 dependencies {

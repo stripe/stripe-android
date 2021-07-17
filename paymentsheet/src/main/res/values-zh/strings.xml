@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">iDEAL 银行</string>
+    <string name="stripe_paymentsheet_payment_method_card">银行卡</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA 借记</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">保存以用于未来的付款</string>
+    <string name="stripe_paymentsheet_sepa_mandate">提供您的支付方式并确认该付款即表示您授权 (A) %s 与我们的支付服务商 Stripe 向您的银行发送对您的账户进行借记的指令以及 (B) 您的银行按照这些指令对您的账户进行借记。根据您与您的银行协议的条款和条件，您有权从您的银行得到退款。退款必须在 8 周内提出，从您的帐户被扣款之日起算。您的权利在对账单上有解释，可从您的银行获取。您同意提前 2 天接收后续借记的通知。</string>
+</resources>

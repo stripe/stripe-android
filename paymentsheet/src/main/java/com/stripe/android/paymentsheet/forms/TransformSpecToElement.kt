@@ -38,6 +38,10 @@ internal fun List<FormItemSpec>.transform(
                 IdentifierSpec("billing"),
                 BillingSectionFieldRepository.INSTANCE
             )
+            is FormItemSpec.BillingSectionSpec -> BillingSectionElement(
+                IdentifierSpec("billing"),
+                BillingSectionFieldRepository.INSTANCE
+            )
         }
     }
 

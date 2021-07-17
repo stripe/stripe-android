@@ -15,7 +15,7 @@ internal val bancontactEmailSection =
     FormItemSpec.SectionSpec(IdentifierSpec("email"), SectionFieldSpec.Email)
 internal val bancontactMandate = FormItemSpec.MandateTextSpec(
     IdentifierSpec("mandate"),
-    R.string.sofort_mandate,
+    R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray
 )
 internal val bancontact = FormSpec(

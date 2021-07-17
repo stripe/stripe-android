@@ -127,3 +127,11 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }
+
+ext {
+    artifactId = "paymentsheet"
+    artifactName = "paymentsheet"
+    artifactDescrption = "The paymentsheet module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
