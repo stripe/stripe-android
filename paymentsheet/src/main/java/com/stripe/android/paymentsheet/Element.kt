@@ -113,6 +113,7 @@ enum class ElementType {
     SaveForFutureUse,
     Mandate,
     IdealBank,
+    GenericText
 }
 
 /**
@@ -143,4 +144,10 @@ internal sealed class SectionFieldElement {
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
     ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
+
+    data class SimpleText internal constructor(
+        override val identifier: IdentifierSpec,
+        override val controller: TextFieldController,
+        override val focusIndexOrder: Int
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 }
