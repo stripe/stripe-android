@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Pri vzpostavljanju povezave z našim ponudnikom plačil prihaja do težav. Preverite povezavo z internetom in poskusite znova.</string>
     <string name="stripe_failure_reason_authentication">Pristnosti vašega načina plačila ni mogoče preveriti. Izberite drugačen način plačila in poskusite znova.</string>
     <string name="stripe_failure_reason_timed_out">Pri preverjanju pristnosti vašega načina plačila je potekla časovna omejitev. Poskusite znova.</string>
+    <string name="stripe_google_pay_error_internal">Prišlo je do notranje napake.</string>
     <string name="stripe_paymentsheet_add_button_label">Dodaj</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Podatki o kartici</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Država ali regija</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Dodajte podatke o plačilu</string>
     <string name="stripe_paymentsheet_back">Nazaj</string>
     <string name="stripe_paymentsheet_close">Zapri</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/LL</string>
+    <string name="stripe_paymentsheet_or_pay_using">Ali pa za plačilo uporabite</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Ali pa plačajte s kartico</string>
     <string name="stripe_paymentsheet_pay_button_amount">Plačaj %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Plačaj</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Izberite način plačila</string>
     <string name="stripe_paymentsheet_setup_button_label">Nastavi</string>
     <string name="stripe_paymentsheet_total_amount">Skupaj: %s</string>
+    <string name="stripe_verify_your_payment">Preverite svoje plačilo</string>
     <string name="title_add_a_card">Dodajte kartico</string>
     <string name="title_add_an_address">Nastavite naslov</string>
     <string name="title_bank_account">Bančni račun</string>

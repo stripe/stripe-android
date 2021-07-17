@@ -24,9 +24,9 @@ import kotlinx.parcelize.Parcelize
 sealed class PaymentFlowResult {
     @Parcelize
     data class Unvalidated constructor(
-        internal val clientSecret: String? = null,
-        @StripeIntentResult.Outcome internal val flowOutcome: Int = StripeIntentResult.Outcome.UNKNOWN,
-        internal val exception: StripeException? = null,
+        val clientSecret: String? = null,
+        @StripeIntentResult.Outcome val flowOutcome: Int = StripeIntentResult.Outcome.UNKNOWN,
+        val exception: StripeException? = null,
         internal val canCancelSource: Boolean = false,
         internal val sourceId: String? = null,
         internal val source: Source? = null,

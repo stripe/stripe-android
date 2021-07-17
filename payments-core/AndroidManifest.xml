@@ -5,20 +5,25 @@
     <application>
         <activity
             android:name=".view.AddPaymentMethodActivity"
-            android:theme="@style/StripeDefaultTheme" />
+            android:theme="@style/StripeDefaultTheme"
+            android:exported="false" />
         <activity
             android:name=".view.PaymentMethodsActivity"
-            android:theme="@style/StripeDefaultTheme" />
+            android:theme="@style/StripeDefaultTheme"
+            android:exported="false" />
         <activity
             android:name=".view.PaymentFlowActivity"
-            android:theme="@style/StripeDefaultTheme" />
+            android:theme="@style/StripeDefaultTheme"
+            android:exported="false" />
         <activity
             android:name=".view.PaymentAuthWebViewActivity"
             android:theme="@style/StripeDefaultTheme"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
         <activity
             android:name=".view.PaymentRelayActivity"
-            android:theme="@style/StripeTransparentTheme" />
+            android:theme="@style/StripeTransparentTheme"
+            android:exported="false" />
 
         <!--
         Set android:launchMode="singleTop" so that the StripeBrowserLauncherActivity instance that
@@ -27,7 +32,8 @@
         <activity
             android:name=".payments.StripeBrowserLauncherActivity"
             android:theme="@style/StripeTransparentTheme"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -45,26 +51,36 @@
 
         <activity
             android:name=".payments.core.authentication.threeds2.Stripe3ds2TransactionActivity"
-            android:theme="@style/StripeDefaultTheme" />
+            android:theme="@style/StripeDefaultTheme"
+            android:exported="false" />
 
         <activity
             android:name=".paymentsheet.PaymentSheetActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme" />
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
         <activity
             android:name=".paymentsheet.PaymentOptionsActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme" />
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
 
         <activity
             android:name=".googlepaylauncher.StripeGooglePayActivity"
-            android:theme="@style/StripeGooglePayDefaultTheme" />
+            android:theme="@style/StripeGooglePayDefaultTheme"
+            android:exported="false"/>
 
         <activity
             android:name=".googlepaylauncher.GooglePayLauncherActivity"
-            android:theme="@style/StripeGooglePayDefaultTheme" />
+            android:theme="@style/StripeGooglePayDefaultTheme"
+            android:exported="false" />
 
         <activity
             android:name=".googlepaylauncher.GooglePayPaymentMethodLauncherActivity"
-            android:theme="@style/StripeGooglePayDefaultTheme" />
+            android:theme="@style/StripeGooglePayDefaultTheme"
+            android:exported="false" />
+
+        <activity android:name=".payments.paymentlauncher.PaymentLauncherConfirmationActivity"
+            android:theme="@style/StripeDefaultTheme"
+            android:exported="false"/>
     </application>
 
     <!--

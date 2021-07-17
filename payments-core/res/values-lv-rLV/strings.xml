@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Ir radušās problēmas, veidojot savienojumu ar mūsu maksājumu nodrošinātāju. Lūdzu, pārbaudiet savu interneta savienojumu un mēģiniet vēlreiz.</string>
     <string name="stripe_failure_reason_authentication">Nevaram autentificēt jūsu maksājuma metodi. Lūdzu, izvēlieties citu maksājuma metodi un mēģiniet vēlreiz.</string>
     <string name="stripe_failure_reason_timed_out">Autentificējot jūsu maksājuma metodi, iestājās noildze — mēģiniet vēlreiz</string>
+    <string name="stripe_google_pay_error_internal">Radās iekšēja kļūda.</string>
     <string name="stripe_paymentsheet_add_button_label">Pievienot</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Pievienot</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kartes informācija</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Valsts vai reģions</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Pievienot maksājuma informāciju</string>
     <string name="stripe_paymentsheet_back">Atpakaļ</string>
     <string name="stripe_paymentsheet_close">Aizvērt</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/GG</string>
+    <string name="stripe_paymentsheet_or_pay_using">Vai maksāt, izmantojot</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Vai maksāt ar karti</string>
     <string name="stripe_paymentsheet_pay_button_amount">Maksāt %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Maksāt</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Izvēlēties savu maksājuma veidu</string>
     <string name="stripe_paymentsheet_setup_button_label">Iestatīt</string>
     <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
+    <string name="stripe_verify_your_payment">Verificējiet savu maksājumu</string>
     <string name="title_add_a_card">Kartes pievienošana</string>
     <string name="title_add_an_address">Iestatiet adresi</string>
     <string name="title_bank_account">Bankas konts</string>

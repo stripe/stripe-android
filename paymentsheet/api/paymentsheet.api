@@ -204,20 +204,6 @@ public final class com/stripe/android/paymentsheet/specifications/SectionFieldSp
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Email;
 }
 
-public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$GenericText : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;I)V
-	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-	public final fun component2 ()I
-	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;I)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$GenericText;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$GenericText;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$GenericText;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-	public final fun getLabel ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$IdealBank : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$IdealBank;
@@ -226,5 +212,19 @@ public final class com/stripe/android/paymentsheet/specifications/SectionFieldSp
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Name : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Name;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;I)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun component2 ()I
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;I)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getLabel ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

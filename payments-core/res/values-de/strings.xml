@@ -33,7 +33,7 @@
     <string name="address_label_postcode_optional">Postleitzahl (optional)</string>
     <string name="address_label_province">Provinz / Kanton</string>
     <string name="address_label_province_optional">Kanton (optional)</string>
-    <string name="address_label_region_generic">Bundesland / Kanton / Region</string>
+    <string name="address_label_region_generic">Bundesland/Kanton/Region</string>
     <string name="address_label_region_generic_optional">Bundesland / Kanton / Region (optional)</string>
     <string name="address_label_state">Bundesland</string>
     <string name="address_label_state_optional">Bundesland (optional)</string>
@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Wir haben Schwierigkeiten, eine Verbindung zu unserem Zahlungsanbieter herzustellen. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es noch einmal.</string>
     <string name="stripe_failure_reason_authentication">Wir können Ihre Zahlungsmethode nicht authentifizieren. Bitte wählen Sie eine andere Zahlungsmethode und versuchen Sie es noch einmal.</string>
     <string name="stripe_failure_reason_timed_out">Zeitüberschreitung bei der Authentifizierung Ihrer Zahlungsmethode – versuchen Sie es noch einmal.</string>
+    <string name="stripe_google_pay_error_internal">Es ist ein interner Fehler aufgetreten.</string>
     <string name="stripe_paymentsheet_add_button_label">Hinzufügen</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Hinzufügen</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kartendaten</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land oder Region</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Zahlungsinformationen hinzufügen</string>
     <string name="stripe_paymentsheet_back">Zurück</string>
     <string name="stripe_paymentsheet_close">Schließen</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/JJ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Oder zahlen mit</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Oder mit Karte bezahlen</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s zahlen</string>
     <string name="stripe_paymentsheet_pay_button_label">Zahlen</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Zahlungsmethode auswählen</string>
     <string name="stripe_paymentsheet_setup_button_label">Einrichten</string>
     <string name="stripe_paymentsheet_total_amount">Gesamt: %s</string>
+    <string name="stripe_verify_your_payment">Zahlung verifizieren</string>
     <string name="title_add_a_card">Karte hinzufügen</string>
     <string name="title_add_an_address">Adresse hinzufügen</string>
     <string name="title_bank_account">Bankkonto</string>
