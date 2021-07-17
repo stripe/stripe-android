@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
     <string name="stripe_failure_reason_authentication">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
     <string name="stripe_failure_reason_timed_out">Timed out authenticating your payment method - please try again</string>
+    <string name="stripe_google_pay_error_internal">An internal error occurred.</string>
     <string name="stripe_paymentsheet_add_button_label">Add</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
     <string name="stripe_paymentsheet_back">Back</string>
     <string name="stripe_paymentsheet_close">Close</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / YY</string>
+    <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
     <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Pay</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
     <string name="stripe_paymentsheet_setup_button_label">Set up</string>
     <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="stripe_verify_your_payment">Verify your payment</string>
     <string name="title_add_a_card">Add a Card</string>
     <string name="title_add_an_address">Set Address</string>
     <string name="title_bank_account">Bank Account</string>

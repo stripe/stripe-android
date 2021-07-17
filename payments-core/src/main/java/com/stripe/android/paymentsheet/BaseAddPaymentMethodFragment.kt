@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import kotlinx.coroutines.flow.map
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
@@ -91,16 +90,15 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
             (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-                formFragment.formViewModel.completeFormValues.map { formFieldValues ->
-                    transformToPaymentSelection(
-                        formFieldValues,
-                        formFragment.formSpec.paramKey,
-                        selectedPaymentMethod
-                    )
-                }
-                    .asLiveData()
-                    .observe(viewLifecycleOwner) { paymentSelection ->
-                        sheetViewModel.updateSelection(paymentSelection)
+                formFragment.formViewModel.completeFormValues.asLiveData()
+                    .observe(viewLifecycleOwner) { formFieldValues ->
+                        sheetViewModel.updateSelection(
+                            transformToPaymentSelection(
+                                formFieldValues,
+                                formFragment.formSpec.paramKey,
+                                selectedPaymentMethod
+                            )
+                        )
                     }
             }
         }

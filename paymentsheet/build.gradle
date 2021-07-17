@@ -80,7 +80,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-core:$composeVersion"
     implementation "androidx.compose.material:material-icons-extended:$composeVersion"
     // Integration with activities
-    implementation "androidx.activity:activity-compose:1.3.0-rc01"
+    implementation "androidx.activity:activity-compose:1.3.0-rc02"
     // Integration with ViewModels
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
     // Integration with observables

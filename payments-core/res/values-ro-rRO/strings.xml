@@ -17,7 +17,7 @@
     <string name="address_label_address_line1_optional">Rândul 1 pentru adresă (opțional)</string>
     <string name="address_label_address_line2_optional">Rândul 2 pentru adresă (opțional)</string>
     <string name="address_label_address_optional">Adresă (opțional)</string>
-    <string name="address_label_apt">Apartament</string>
+    <string name="address_label_apt">Ap.</string>
     <string name="address_label_apt_optional">Apartament (opțional)</string>
     <string name="address_label_city">Oraș</string>
     <string name="address_label_city_optional">Oraș (opțional)</string>
@@ -33,7 +33,7 @@
     <string name="address_label_postcode_optional">Cod poștal (opțional)</string>
     <string name="address_label_province">Provincie</string>
     <string name="address_label_province_optional">Provincie (opțional)</string>
-    <string name="address_label_region_generic">Stat</string>
+    <string name="address_label_region_generic">Stat/Provincie/Regiune</string>
     <string name="address_label_region_generic_optional">Stat (opțional)</string>
     <string name="address_label_state">Stat</string>
     <string name="address_label_state_optional">Stat (opțional)</string>
@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Întâmpinăm probleme de conectare cu furnizorul nostru de plăți. Verificați conexiunea la internet și încercați din nou.</string>
     <string name="stripe_failure_reason_authentication">Nu vă putem autentifica metoda de plată. Alegeți o altă metodă de plată și încercați din nou.</string>
     <string name="stripe_failure_reason_timed_out">Timpul de autentificare a metodei dvs. de plată a expirat -- încercați din nou</string>
+    <string name="stripe_google_pay_error_internal">A apărut o eroare internă.</string>
     <string name="stripe_paymentsheet_add_button_label">Adăugare</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adăugare</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Informații privind cardul</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Țară sau regiune</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Adăugați informațiile dvs. privind plata</string>
     <string name="stripe_paymentsheet_back">Înapoi</string>
     <string name="stripe_paymentsheet_close">Închidere</string>
     <string name="stripe_paymentsheet_expiration_date_hint">LL/AA</string>
+    <string name="stripe_paymentsheet_or_pay_using">Sau folosiți ca metodă de plată</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Sau folosiți ca metodă de plată un card</string>
     <string name="stripe_paymentsheet_pay_button_amount">Plătiți %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Plătiți</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Selectați metoda de plată</string>
     <string name="stripe_paymentsheet_setup_button_label">Configurare</string>
     <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="stripe_verify_your_payment">Verificați-vă plata</string>
     <string name="title_add_a_card">Adăugare card</string>
     <string name="title_add_an_address">Adăugare adresă</string>
     <string name="title_bank_account">Cont bancar</string>

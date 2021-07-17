@@ -136,10 +136,10 @@ class FormViewModelTest {
             val emailController = formViewModel.elements
                 .asSequence()
                 .filterIsInstance<SectionElement>()
-                .map { it.fields }
-                .flatten()
+                .flatMap { it.fields }
                 .map { it.controller }
-                .filterIsInstance(TextFieldController::class.java).first()
+                .filterIsInstance(TextFieldController::class.java)
+                .first()
 
             // Add text to the name to make it valid
             emailController.onValueChange("email@valid.com")
@@ -180,8 +180,7 @@ class FormViewModelTest {
             val emailController = formViewModel.elements
                 .asSequence()
                 .filterIsInstance<SectionElement>()
-                .map { it.fields }
-                .flatten()
+                .flatMap { it.fields }
                 .map { it.controller }
                 .filterIsInstance(TextFieldController::class.java).first()
 

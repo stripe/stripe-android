@@ -48,7 +48,7 @@ data class ApiRequest internal constructor(
      * Data class representing options for a Stripe API request.
      */
     @Parcelize
-    data class Options internal constructor(
+    data class Options constructor(
         internal val apiKey: String,
         internal val stripeAccount: String? = null,
         internal val idempotencyKey: String? = null

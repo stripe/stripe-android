@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Det har oppstått et problem under tilkoblingen til betalingstjenesten. Kontroller Internett-forbindelsen og prøv igjen.</string>
     <string name="stripe_failure_reason_authentication">Vi kan ikke godkjenne betalingsmåten din. Vennligst velg en annen betalingsmetode og prøv igjen.</string>
     <string name="stripe_failure_reason_timed_out">Tidsavbrudd ved godkjennelse av betalingsmåten din - prøv igjen</string>
+    <string name="stripe_google_pay_error_internal">Det oppstod en intern feil.</string>
     <string name="stripe_paymentsheet_add_button_label">Legg til</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Legg til</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kortinformasjon</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land eller region</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Legg til betalingsinformasjon</string>
     <string name="stripe_paymentsheet_back">Tilbake</string>
     <string name="stripe_paymentsheet_close">Lukk</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Eller betal med</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Eller betal med et kort</string>
     <string name="stripe_paymentsheet_pay_button_amount">Betal %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Betal</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Velg betalingsmetode</string>
     <string name="stripe_paymentsheet_setup_button_label">Konfigurer</string>
     <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="stripe_verify_your_payment">Verifiser betalingen din</string>
     <string name="title_add_a_card">Legg til kort</string>
     <string name="title_add_an_address">Angi adresse</string>
     <string name="title_bank_account">Bankkonto</string>

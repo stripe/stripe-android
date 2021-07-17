@@ -236,16 +236,6 @@ class CardMultilineWidget @JvmOverloads constructor(
             )
         }
 
-    private val cvcHelperText: Int
-        @StringRes
-        get() {
-            return if (CardBrand.AmericanExpress == cardBrand) {
-                R.string.cvc_multiline_helper_amex
-            } else {
-                R.string.cvc_multiline_helper
-            }
-        }
-
     @VisibleForTesting
     internal var shouldShowErrorIcon = false
         set(value) {

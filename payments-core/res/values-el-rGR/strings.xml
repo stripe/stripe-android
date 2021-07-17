@@ -94,13 +94,16 @@
     <string name="stripe_failure_connection_error">Αντιμετωπίζουμε προβλήματα κατά τη σύνδεση με τον πάροχο υπηρεσιών πληρωμής μας. Ελέγξτε τη σύνδεσή σας στο διαδίκτυο και δοκιμάστε ξανά.</string>
     <string name="stripe_failure_reason_authentication">Δεν μπορούμε να επαληθεύσουμε τη μέθοδο πληρωμής σας. Επιλέξτε διαφορετική μέθοδο πληρωμής και προσπαθήστε ξανά.</string>
     <string name="stripe_failure_reason_timed_out">Έληξε το χρονικό όριο επαλήθευσης της μεθόδου πληρωμής σας -- δοκιμάστε ξανά</string>
+    <string name="stripe_google_pay_error_internal">Προέκυψε εσωτερικό σφάλμα.</string>
     <string name="stripe_paymentsheet_add_button_label">Προσθήκη</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Προσθήκη</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Στοιχεία κάρτας</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Χώρα ή περιοχή</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Προσθέστε τα στοιχεία πληρωμής σας</string>
     <string name="stripe_paymentsheet_back">Πίσω</string>
     <string name="stripe_paymentsheet_close">Κλείσιμο</string>
     <string name="stripe_paymentsheet_expiration_date_hint">ΜΜ / ΕΕ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Ή πληρωμή χρησιμοποιώντας</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Ή πληρωμή με κάρτα</string>
     <string name="stripe_paymentsheet_pay_button_amount">Πληρωμή %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Πληρωμή</string>
@@ -109,6 +112,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Επιλέξτε τη μέθοδο πληρωμής σας</string>
     <string name="stripe_paymentsheet_setup_button_label">Διαμόρφωση</string>
     <string name="stripe_paymentsheet_total_amount">Σύνολο: %s</string>
+    <string name="stripe_verify_your_payment">Επαληθεύστε την πληρωμή σας</string>
     <string name="title_add_a_card">Προσθήκη κάρτας</string>
     <string name="title_add_an_address">Καθορισμός διεύθυνσης</string>
     <string name="title_bank_account">Τραπεζικός λογαριασμός</string>

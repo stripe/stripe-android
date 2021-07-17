@@ -135,7 +135,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupBuyButton()
 
         viewModel.transition.observe(this) { event ->
-            updateErrorMessage(userMessage = null)
+            updateErrorMessage()
             val transitionTarget = event.getContentIfNotHandled()
             if (transitionTarget != null) {
                 onTransitionTarget(
@@ -178,12 +178,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     override fun onBackPressed() {
         if (supportFragmentManager.backStackEntryCount > 0) {
-            updateErrorMessage(null)
+            updateErrorMessage()
         }
         super.onBackPressed()
     }
 
-    private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
+    private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
         messageView.isVisible = userMessage != null
         messageView.text = userMessage?.message
     }
@@ -273,6 +273,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             .observe(this, googlePayButtonStateObserver)
 
         viewModel.selection.observe(this) { paymentSelection ->
+            updateErrorMessage()
+
             val shouldShowGooglePay =
                 paymentSelection == PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
                     fragmentContainerId
@@ -290,6 +292,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.googlePayButton.setOnClickListener {
+            updateErrorMessage()
             viewModel.checkout(CheckoutIdentifier.SheetBottomGooglePay)
         }
 
@@ -298,6 +301,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.buyButton.setOnClickListener {
+            updateErrorMessage()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }
 

@@ -54,7 +54,7 @@
     <string name="address_zip_postal_invalid">您的郵遞區號無效</string>
     <string name="becs_mandate_acceptance">
     透過提供您的銀行帳戶資訊並確認該筆付款，
-    表示您同意本「直接簽賬請求」及其服務條款，
+    表示您同意本「直接簽帳請求」及其服務條款，
     並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343
     Direct Debit User ID number 507156 (「Stripe」) 透過過批量電子清算系統 (BECS)
     代 %1$s（「商家」）向您的帳戶扣取商家單獨告知您的金額。
@@ -79,6 +79,7 @@
     <string name="expiry_date_hint">月月/年年</string>
     <string name="expiry_label_short">有效期</string>
     <string name="fpx_bank_offline">%s - 線下</string>
+    <string name="incomplete_expiry_date">您的卡的到期日期不完整。</string>
     <string name="invalid_card_number">您的卡號無效。</string>
     <string name="invalid_cvc">您的金融卡安全碼無效。</string>
     <string name="invalid_expiry_month">您的金融卡的到期月份無效。</string>
@@ -94,14 +95,25 @@
     <string name="stripe_failure_connection_error">連接我們的支付提供者時出現了問題。請檢查網路連接，然後重試。</string>
     <string name="stripe_failure_reason_authentication">我們無法驗證您的付款方式。請選擇其他付款方式，然後再試一次。</string>
     <string name="stripe_failure_reason_timed_out">驗證您的付款方式時逾時 -- 請重試</string>
+    <string name="stripe_google_pay_error_internal">發生了內部錯誤。</string>
     <string name="stripe_paymentsheet_add_button_label">添加</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">金融卡資訊</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">國家或地區</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付資訊</string>
     <string name="stripe_paymentsheet_back">上一步</string>
     <string name="stripe_paymentsheet_close">關閉</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">年年/月月</string>
+    <string name="stripe_paymentsheet_or_pay_using">或用以下方式支付</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">或用金融卡支付</string>
     <string name="stripe_paymentsheet_pay_button_amount">支付 %s</string>
     <string name="stripe_paymentsheet_pay_button_label">支付</string>
+    <string name="stripe_paymentsheet_primary_button_processing">正在處理...</string>
     <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存該卡，用於未來的 %s 付款。</string>
+    <string name="stripe_paymentsheet_select_payment_method">選擇您的支付方式</string>
     <string name="stripe_paymentsheet_setup_button_label">設定</string>
     <string name="stripe_paymentsheet_total_amount">總金額：%s</string>
+    <string name="stripe_verify_your_payment">驗證您的付款</string>
     <string name="title_add_a_card">新增一張卡</string>
     <string name="title_add_an_address">設置地址</string>
     <string name="title_bank_account">銀行帳戶</string>

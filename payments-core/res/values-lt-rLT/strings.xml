@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Kilo problemų jungiantis prie mūsų mokėjimo paslaugų teikėjo. Patikrinkite interneto ryšį ir bandykite dar kartą.</string>
     <string name="stripe_failure_reason_authentication">Nepavyko autentifikuoti mokėjimo būdo. Pasirinkite kitą mokėjimo būdą ir bandykite dar kartą.</string>
     <string name="stripe_failure_reason_timed_out">Baigėsi mokėjimo būdui autentifikuoti skirtas laikas, bandykite dar kartą</string>
+    <string name="stripe_google_pay_error_internal">Įvyko vidinė klaida.</string>
     <string name="stripe_paymentsheet_add_button_label">Pridėti</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Pridėti</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kortelės duomenys</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Šalis arba regionas</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Pridėkite mokėjimo informaciją</string>
     <string name="stripe_paymentsheet_back">Atgal</string>
     <string name="stripe_paymentsheet_close">Užverti</string>
     <string name="stripe_paymentsheet_expiration_date_hint">mm / MM</string>
+    <string name="stripe_paymentsheet_or_pay_using">Arba mokėti naudojant</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Arba mokėti kortele</string>
     <string name="stripe_paymentsheet_pay_button_amount">Mokėti %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Mokėti</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Pasirinkite mokėjimo būdą</string>
     <string name="stripe_paymentsheet_setup_button_label">Nustatyti</string>
     <string name="stripe_paymentsheet_total_amount">Bendra suma: %s</string>
+    <string name="stripe_verify_your_payment">Patvirtinkite savo mokėjimą.</string>
     <string name="title_add_a_card">Pridėti kortelę</string>
     <string name="title_add_an_address">Nustatyti adresą</string>
     <string name="title_bank_account">Banko sąskaita</string>

@@ -99,8 +99,7 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
     .plus(
         this
             .filterIsInstance<FormElement.SectionElement>()
-            .map { it.fields }
-            .flatten()
+            .flatMap { it.fields }
             .associate { it.identifier to it.controller }
     )
 //    .plus(
@@ -153,7 +152,7 @@ internal sealed class SectionFieldElement {
         override val controller: DropdownFieldController
     ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
 
-    data class GenericText internal constructor(
+    data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
         override val focusIndexOrder: Int,

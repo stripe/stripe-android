@@ -1,1 +1,1 @@
-sourceset_dependencies='{":stripe:dokkaHtml/androidTestRelease":[],":stripe:dokkaHtml/debug":[],":stripe:dokkaHtml/main":[],":stripe:dokkaHtml/release":[]}'
+sourceset_dependencies = '{":payments-core:dokkaHtmlPartial/androidTestRelease":[],":payments-core:dokkaHtmlPartial/debug":[],":payments-core:dokkaHtmlPartial/main":[],":payments-core:dokkaHtmlPartial/release":[],":paymentsheet:dokkaHtmlPartial/androidTestRelease":[],":paymentsheet:dokkaHtmlPartial/debug":[],":paymentsheet:dokkaHtmlPartial/main":[],":paymentsheet:dokkaHtmlPartial/release":[]}'

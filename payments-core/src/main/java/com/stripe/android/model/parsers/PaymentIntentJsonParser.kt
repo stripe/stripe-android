@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
@@ -7,7 +8,8 @@ import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
-internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
         val objectType = optString(json, FIELD_OBJECT)
         if (OBJECT_TYPE != objectType) {

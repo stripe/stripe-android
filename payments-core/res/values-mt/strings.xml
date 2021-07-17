@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Qed nesperjenzaw problemi fil-konnessjoni mal-fornitur tal-pagamenti tagħna. Jekk jogħġbok iċċekkja l-konnessjoni tal-internet tiegħek u erġa\' pprova.</string>
     <string name="stripe_failure_reason_authentication">Ma nistgħux nawtentikaw il-metodu tal-ħlas tiegħek. Jekk jogħġbok agħżel metodu tal-ħlas differenti u erġa\' pprova.</string>
     <string name="stripe_failure_reason_timed_out">Skada l-ħin tal-awtentikazzjoni tal-metodu tal-ħlas tiegħek -- erġa\' pprova</string>
+    <string name="stripe_google_pay_error_internal">Seħħ żball intern.</string>
     <string name="stripe_paymentsheet_add_button_label">Żid</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Żid</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">L-informazzjoni tal-kard</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Pajjiż jew reġjun</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Żid l-informazzjoni dwar il-pagament tiegħek</string>
     <string name="stripe_paymentsheet_back">Lura</string>
     <string name="stripe_paymentsheet_close">Agħlaq</string>
     <string name="stripe_paymentsheet_expiration_date_hint">XX / SS</string>
+    <string name="stripe_paymentsheet_or_pay_using">Jew ħallas bil-</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Jew ħallas bil-kard</string>
     <string name="stripe_paymentsheet_pay_button_amount">Ħallas %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Ħallas</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Agħżel il-metodu tal-ħlas tiegħek</string>
     <string name="stripe_paymentsheet_setup_button_label">Stabilixxi</string>
     <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="stripe_verify_your_payment">Ivverifika l-pagament tiegħek</string>
     <string name="title_add_a_card">Żid Kard</string>
     <string name="title_add_an_address">Issettja l-Indirizz</string>
     <string name="title_bank_account">Kont bankarju</string>
