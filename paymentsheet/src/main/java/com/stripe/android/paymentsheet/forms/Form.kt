@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.CardStyle
@@ -39,6 +40,7 @@ import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -72,102 +74,135 @@ internal fun Form(
             ) {
                 when (element) {
                     is SectionElement -> {
-                        AnimatedVisibility(
-                            optionalIdentifiers?.contains(element.identifier) == false,
-                            enter = EnterTransition.None,
-                            exit = ExitTransition.None
-                        ) {
-                            val controller = element.controller
-
-                            val error by controller.error.asLiveData()
-                                .observeAsState(null)
-                            val sectionErrorString =
-                                error?.let {
-                                    stringResource(
-                                        it.errorMessage,
-                                        stringResource(it.errorFieldLabel)
-                                    )
-                                }
-
-                            Section(controller.label, sectionErrorString) {
-                                element.fields.forEachIndexed { index, field ->
-                                    when (field) {
-                                        is TextFieldElement -> {
-                                            val focusRequesterIndex = field.focusIndexOrder
-                                            TextField(
-                                                textFieldController = field.controller,
-                                                myFocus = focusRequesters[focusRequesterIndex],
-                                                nextFocus = focusRequesters.getOrNull(
-                                                    focusRequesterIndex + 1
-                                                ),
-                                                enabled = enabled
-                                            )
-                                        }
-                                        is DropdownFieldElement -> {
-                                            DropDown(
-                                                field.controller.label,
-                                                field.controller,
-                                                enabled
-                                            )
-                                        }
-                                    }
-                                    if (index != element.fields.size - 1) {
-                                        val cardStyle = CardStyle(isSystemInDarkTheme())
-                                        Divider(
-                                            color = cardStyle.cardBorderColor,
-                                            thickness = cardStyle.cardBorderWidth,
-                                            modifier = Modifier.padding(
-                                                horizontal = cardStyle.cardBorderWidth
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        SectionElementUI(enabled, element, optionalIdentifiers, focusRequesters)
                     }
-
                     is MandateTextElement -> {
-                        Text(
-                            stringResource(element.stringResId, element.merchantName ?: ""),
-                            fontSize = 10.sp,
-                            letterSpacing = .7.sp,
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            color = element.color
-                        )
+                        MandateElementUI(element)
                     }
-
                     is SaveForFutureUseElement -> {
-                        val controller = element.controller
-                        val checked by controller.saveForFutureUse.asLiveData()
-                            .observeAsState(true)
-                        Row(modifier = Modifier.padding(vertical = 8.dp)) {
-                            Checkbox(
-                                checked = checked,
-                                onCheckedChange = { controller.onValueChange(it) },
-                                enabled = enabled
-                            )
-                            Text(
-                                stringResource(controller.label),
-                                Modifier
-                                    .padding(start = 4.dp)
-                                    .align(Alignment.CenterVertically)
-                                    .clickable(
-                                        enabled, null,
-                                        null
-                                    ) {
-                                        controller.toggleValue()
-                                    },
-                                color = if (isSystemInDarkTheme()) {
-                                    Color.LightGray
-                                } else {
-                                    Color.Black
-                                }
-                            )
-                        }
+                        SaveForFutureUseElementUI(enabled, element)
                     }
                 }
             }
         }
+    }
+}
+
+@ExperimentalUnitApi
+@ExperimentalAnimationApi
+@Composable
+internal fun SectionElementUI(
+    enabled: Boolean,
+    element: SectionElement,
+    optionalIdentifiers: List<IdentifierSpec>?,
+    focusRequesters: List<FocusRequester>
+) {
+    AnimatedVisibility(
+        optionalIdentifiers?.contains(element.identifier) == false,
+        enter = EnterTransition.None,
+        exit = ExitTransition.None
+    ) {
+        val controller = element.controller
+
+        val error by controller.error.asLiveData().observeAsState(null)
+        val sectionErrorString =
+            error?.let {
+                stringResource(
+                    it.errorMessage,
+                    stringResource(it.errorFieldLabel)
+                )
+            }
+
+        Section(controller.label, sectionErrorString) {
+            element.fields.forEachIndexed { index, field ->
+                SectionFieldElementUI(enabled, field, focusRequesters)
+                if (index != element.fields.size - 1) {
+                    val cardStyle = CardStyle(isSystemInDarkTheme())
+                    Divider(
+                        color = cardStyle.cardBorderColor,
+                        thickness = cardStyle.cardBorderWidth,
+                        modifier = Modifier.padding(
+                            horizontal = cardStyle.cardBorderWidth
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun SectionFieldElementUI(
+    enabled: Boolean,
+    field: SectionFieldElementType,
+    focusRequesters: List<FocusRequester>
+) {
+    when (field) {
+        is TextFieldElement -> {
+            val focusRequesterIndex = field.focusIndexOrder
+            TextField(
+                textFieldController = field.controller,
+                myFocus = focusRequesters[focusRequesterIndex],
+                nextFocus = focusRequesters.getOrNull(
+                    focusRequesterIndex + 1
+                ),
+                enabled = enabled
+            )
+        }
+        is DropdownFieldElement -> {
+            DropDown(
+                field.controller.label,
+                field.controller,
+                enabled
+            )
+        }
+    }
+}
+
+@Composable
+internal fun MandateElementUI(
+    element: MandateTextElement
+) {
+    Text(
+        stringResource(element.stringResId, element.merchantName ?: ""),
+        fontSize = 10.sp,
+        letterSpacing = .7.sp,
+        modifier = Modifier.padding(vertical = 8.dp),
+        color = element.color
+    )
+}
+
+@Composable
+internal fun SaveForFutureUseElementUI(
+    enabled: Boolean,
+    element: SaveForFutureUseElement
+) {
+    val controller = element.controller
+    val checked by controller.saveForFutureUse.asLiveData()
+        .observeAsState(true)
+    Row(modifier = Modifier.padding(vertical = 8.dp)) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { controller.onValueChange(it) },
+            enabled = enabled
+        )
+        Text(
+            stringResource(controller.label, element.merchantName ?: ""),
+            Modifier
+                .padding(start = 4.dp)
+                .align(Alignment.CenterVertically)
+                .clickable(
+                    enabled, null,
+                    null
+                ) {
+                    controller.toggleValue()
+                },
+            color = if (isSystemInDarkTheme()) {
+                Color.LightGray
+            } else {
+                Color.Black
+            }
+        )
     }
 }
 
