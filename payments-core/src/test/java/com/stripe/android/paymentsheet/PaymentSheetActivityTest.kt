@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -674,6 +675,58 @@ internal class PaymentSheetActivityTest {
         ).isEqualTo(
             PaymentSheetResult.Completed
         )
+    }
+
+    @Test
+    fun `when new payment method is selected then error message is cleared`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                idleLooper()
+
+                assertThat(activity.viewBinding.message.isVisible).isFalse()
+                assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+
+                val errorMessage = "Error message"
+                viewModel._viewState.value =
+                    PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+
+                assertThat(activity.viewBinding.message.isVisible).isTrue()
+                assertThat(activity.viewBinding.message.text).isEqualTo(errorMessage)
+
+                viewModel.updateSelection(PaymentSelection.GooglePay)
+
+                assertThat(activity.viewBinding.message.isVisible).isFalse()
+                assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `when checkout starts then error message is cleared`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).use {
+            it.onActivity { activity ->
+                // wait for bottom sheet to animate in
+                idleLooper()
+
+                assertThat(activity.viewBinding.message.isVisible).isFalse()
+                assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+
+                val errorMessage = "Error message"
+                viewModel._viewState.value =
+                    PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+
+                assertThat(activity.viewBinding.message.isVisible).isTrue()
+                assertThat(activity.viewBinding.message.text).isEqualTo(errorMessage)
+
+                viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+
+                assertThat(activity.viewBinding.message.isVisible).isFalse()
+                assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
+            }
+        }
     }
 
     private fun currentFragment(activity: PaymentSheetActivity) =

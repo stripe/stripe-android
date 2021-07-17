@@ -246,8 +246,7 @@ class FormViewModel(
     internal var focusIndex = FocusRequesterCount()
     internal fun getCountFocusableFields() = focusIndex.get()
 
-    internal val elements = transform(
-        layout,
+    internal val elements = layout.items.transform(
         merchantName,
         focusIndex
     )
@@ -295,10 +294,9 @@ class FormViewModel(
                 .filter { idControllerPair ->
                     optionalIdentifiers.contains(idControllerPair.key)
                 }
-                .map { sectionToSectionFieldEntry ->
+                .flatMap { sectionToSectionFieldEntry ->
                     sectionToSectionFieldEntry.value
                 }
-                .flatten()
 
             if (!showFutureUse && saveForFutureUseElement != null) {
                 optionalIdentifiers

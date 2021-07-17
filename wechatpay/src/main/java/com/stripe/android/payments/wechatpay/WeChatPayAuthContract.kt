@@ -21,7 +21,8 @@ internal class WeChatPayAuthContract :
 
     @Parcelize
     internal data class Args(
-        val weChat: WeChat
+        val weChat: WeChat,
+        val clientSecret: String
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

@@ -33,7 +33,7 @@
     <string name="address_label_postcode_optional">Пощенски код (по желание)</string>
     <string name="address_label_province">Област</string>
     <string name="address_label_province_optional">Област (по желание)</string>
-    <string name="address_label_region_generic">Щат/Област/Регион</string>
+    <string name="address_label_region_generic">Държава/Област/Регион</string>
     <string name="address_label_region_generic_optional">Щат/Област/Регион (по желание)</string>
     <string name="address_label_state">Щат</string>
     <string name="address_label_state_optional">Щат (по желание)</string>
@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Възникна проблем при свързването с нашия доставчик на платежни услуги. Моля, проверете Вашата интернет връзка и опитайте отново.</string>
     <string name="stripe_failure_reason_authentication">Не можем да удостоверим Вашия метод на плащане. Моля, изберете различен метод на плащане и опитайте отново.</string>
     <string name="stripe_failure_reason_timed_out">Времето на изчакване на удостоверяването на Вашия метод на плащане изтече -- опитайте отново</string>
+    <string name="stripe_google_pay_error_internal">Възникна вътрешна грешка.</string>
     <string name="stripe_paymentsheet_add_button_label">Добавяне</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Добавяне</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Информация за картата</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Държава или регион</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Добавете своята информация за плащането</string>
     <string name="stripe_paymentsheet_back">Назад</string>
     <string name="stripe_paymentsheet_close">Затваряне</string>
     <string name="stripe_paymentsheet_expiration_date_hint">ММ / ГГ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Или платете чрез</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Или платете с карта</string>
     <string name="stripe_paymentsheet_pay_button_amount">Плащане %s</string>
     <string name="stripe_paymentsheet_pay_button_label">Плащане</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Изберете метод на плащане</string>
     <string name="stripe_paymentsheet_setup_button_label">Създаване</string>
     <string name="stripe_paymentsheet_total_amount">Общо: %s</string>
+    <string name="stripe_verify_your_payment">Потвърдете Вашето плащане</string>
     <string name="title_add_a_card">Добавяне на карта</string>
     <string name="title_add_an_address">Задаване на адрес</string>
     <string name="title_bank_account">Банкова сметка</string>

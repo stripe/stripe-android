@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">Hibákat tapasztalunk a fizetésszolgáltatónkhoz való kapcsolódáskor. Ellenőrizze az internetkapcsolatát, és próbálja meg újból.</string>
     <string name="stripe_failure_reason_authentication">Nem tudjuk hitelesíteni a fizetési módját. Kérjük, válasszon másik fizetési módot, és próbálkozzon újból.</string>
     <string name="stripe_failure_reason_timed_out">Fizetési módjának hitelesítésénél időtúllépés történt, próbálja újra.</string>
+    <string name="stripe_google_pay_error_internal">Belső hiba történt.</string>
     <string name="stripe_paymentsheet_add_button_label">Hozzáadás</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Hozzáadás</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">Kártyaadatok</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Ország vagy régió</string>
     <string name="stripe_paymentsheet_add_payment_method_title">Fizetési adatok megadása</string>
     <string name="stripe_paymentsheet_back">Vissza</string>
     <string name="stripe_paymentsheet_close">Bezárás</string>
     <string name="stripe_paymentsheet_expiration_date_hint">HH / ÉÉ</string>
+    <string name="stripe_paymentsheet_or_pay_using">Vagy fizetés a következővel:</string>
     <string name="stripe_paymentsheet_or_pay_with_card">Vagy fizetés kártyával</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s kifizetése</string>
     <string name="stripe_paymentsheet_pay_button_label">Fizetés:</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">Fizetési mód kiválasztása</string>
     <string name="stripe_paymentsheet_setup_button_label">Beállítás</string>
     <string name="stripe_paymentsheet_total_amount">Összesen: %s</string>
+    <string name="stripe_verify_your_payment">Igazolja fizetését</string>
     <string name="title_add_a_card">Kártya hozzáadása</string>
     <string name="title_add_an_address">Cím beállítása</string>
     <string name="title_bank_account">Bankszámla</string>

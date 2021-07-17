@@ -193,6 +193,67 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
+    fun `when Google Pay is cancelled then previously selected payment method is selected again`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+            val lastPaymentMethod =
+                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            fragment.sheetViewModel.updateSelection(lastPaymentMethod)
+
+            viewBinding.googlePayButton.performClick()
+
+            fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset()
+
+            idleLooper()
+
+            assertThat(fragment.sheetViewModel.selection.value).isEqualTo(lastPaymentMethod)
+        }
+    }
+
+    @Test
+    fun `when new payment method is selected then error message is cleared`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+            viewBinding.googlePayButton.performClick()
+
+            val errorMessage = "Error message"
+            fragment.sheetViewModel._viewState.value =
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+
+            idleLooper()
+
+            assertThat(viewBinding.message.isVisible).isTrue()
+            assertThat(viewBinding.message.text).isEqualTo(errorMessage)
+
+            fragment.sheetViewModel.updateSelection(
+                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+
+            assertThat(viewBinding.message.isVisible).isFalse()
+            assertThat(viewBinding.message.text.isNullOrEmpty()).isTrue()
+        }
+    }
+
+    @Test
+    fun `when checkout starts then error message is cleared`() {
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+            viewBinding.googlePayButton.performClick()
+
+            val errorMessage = "Error message"
+            fragment.sheetViewModel._viewState.value =
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+
+            idleLooper()
+
+            assertThat(viewBinding.message.isVisible).isTrue()
+            assertThat(viewBinding.message.text).isEqualTo(errorMessage)
+
+            viewBinding.googlePayButton.performClick()
+
+            assertThat(viewBinding.message.isVisible).isFalse()
+            assertThat(viewBinding.message.text.isNullOrEmpty()).isTrue()
+        }
+    }
+
+    @Test
     fun `when PaymentIntent only supports card it should not show payment method selector`() {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card"))

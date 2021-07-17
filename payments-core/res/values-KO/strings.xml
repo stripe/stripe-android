@@ -33,7 +33,7 @@
     <string name="address_label_postcode_optional">우편번호(선택 사항)</string>
     <string name="address_label_province">도</string>
     <string name="address_label_province_optional">도(선택 사항)</string>
-    <string name="address_label_region_generic">주/ 도 / 지역</string>
+    <string name="address_label_region_generic">주/도/지역</string>
     <string name="address_label_region_generic_optional">주 / 도 / 지역(선택 사항)</string>
     <string name="address_label_state">주</string>
     <string name="address_label_state_optional">주(선택 사항)</string>
@@ -95,13 +95,16 @@
     <string name="stripe_failure_connection_error">결제 제공자에게 연결하는 과정에서 문제가 발생했습니다. 인터넷 연결을 확인하시고 다시 시도하십시오.</string>
     <string name="stripe_failure_reason_authentication">결제 수단을 인증할 수 없습니다. 다른 결제 수단을 선택하고 다시 시도하십시오.</string>
     <string name="stripe_failure_reason_timed_out">결제 수단 인증 시간이 초과되었습니다. 다시 시도하십시오.</string>
+    <string name="stripe_google_pay_error_internal">내부 오류가 발생했습니다.</string>
     <string name="stripe_paymentsheet_add_button_label">추가</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ 추가</string>
     <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">국가 또는 지역</string>
     <string name="stripe_paymentsheet_add_payment_method_title">결제 정보를 추가하세요.</string>
     <string name="stripe_paymentsheet_back">뒤로</string>
     <string name="stripe_paymentsheet_close">닫기</string>
     <string name="stripe_paymentsheet_expiration_date_hint">MM/YY</string>
+    <string name="stripe_paymentsheet_or_pay_using">또는 다음 결제 방식 사용</string>
     <string name="stripe_paymentsheet_or_pay_with_card">또는 카드 결제</string>
     <string name="stripe_paymentsheet_pay_button_amount">%s 결제</string>
     <string name="stripe_paymentsheet_pay_button_label">결제</string>
@@ -110,6 +113,7 @@
     <string name="stripe_paymentsheet_select_payment_method">결제 수단을 선택하세요.</string>
     <string name="stripe_paymentsheet_setup_button_label">설정</string>
     <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
+    <string name="stripe_verify_your_payment">결제 확인</string>
     <string name="title_add_a_card">카드 추가</string>
     <string name="title_add_an_address">주소 설정</string>
     <string name="title_bank_account">은행 계좌</string>

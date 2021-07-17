@@ -123,6 +123,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         return outputLiveData
     }
 
+    // Holds a reference to the last selected payment method while checking out with Google Pay.
+    // If Google Pay is cancelled or fails, it will be set again as the selected payment method.
+    internal var lastSelectedPaymentMethod: PaymentSelection? = null
+
     internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
 
@@ -191,7 +195,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }.fold(
                 onSuccess = {
                     updatePaymentMethods(stripeIntent)
-                    resetViewState(stripeIntent, userErrorMessage = null)
+                    resetViewState(stripeIntent)
                 },
                 onFailure = ::onFatal
             )
@@ -234,7 +238,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onSuccess = {
                     _paymentMethods.value = it
                     setStripeIntent(stripeIntent)
-                    resetViewState(stripeIntent, userErrorMessage = null)
+                    resetViewState(stripeIntent)
                 },
                 onFailure = ::onFatal
             )
@@ -264,7 +268,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    private fun resetViewState(stripeIntent: StripeIntent, userErrorMessage: String?) {
+    private fun resetViewState(stripeIntent: StripeIntent, userErrorMessage: String? = null) {
         when (stripeIntent) {
             is PaymentIntent -> {
                 val amount = stripeIntent.amount
@@ -288,8 +292,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
-        // Clear out any previous errors before setting the new button to get updates.
-        _viewState.value = PaymentSheetViewState.Reset(null)
+        if (this.checkoutIdentifier != checkoutIdentifier) {
+            // Clear out any previous errors before setting the new button to get updates.
+            _viewState.value = PaymentSheetViewState.Reset()
+        }
 
         this.checkoutIdentifier = checkoutIdentifier
         _processing.value = true
@@ -427,7 +433,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
             }
             else -> {
-                stripeIntent.value?.let { resetViewState(it, userErrorMessage = null) }
+                stripeIntent.value?.let { resetViewState(it) }
             }
         }
     }

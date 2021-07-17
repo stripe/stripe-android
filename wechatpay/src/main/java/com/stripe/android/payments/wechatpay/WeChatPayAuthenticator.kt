@@ -3,11 +3,14 @@ package com.stripe.android.payments.wechatpay
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
+import com.stripe.android.payments.wechatpay.reflection.DefaultWeChatPayReflectionHelper
+import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
 import com.stripe.android.view.AuthActivityStarterHost
 
 /**
@@ -19,7 +22,13 @@ class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent> {
      * through [onNewActivityResultCaller]
      */
     private var weChatPayAuthLauncher: ActivityResultLauncher<WeChatPayAuthContract.Args>? = null
-    private val weChatAuthLauncherFactory =
+
+    // TODO(ccen): inject reflectionHelper as a singleton
+    @VisibleForTesting
+    internal var reflectionHelper: WeChatPayReflectionHelper = DefaultWeChatPayReflectionHelper()
+
+    @VisibleForTesting
+    internal var weChatAuthLauncherFactory =
         { host: AuthActivityStarterHost, requestCode: Int ->
             weChatPayAuthLauncher?.let {
                 WeChatPayAuthStarter.Modern(it)
@@ -46,19 +55,32 @@ class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent> {
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
+        require(reflectionHelper.isWeChatPayAvailable()) {
+            "WeChatPay dependency is not found, add " +
+                "${WeChatPayReflectionHelper.WECHAT_PAY_GRADLE_DEP} in app's build.gradle"
+        }
+
         val weChatPayRedirect =
             requireNotNull(
                 authenticatable.nextActionData as? StripeIntent.NextActionData.WeChatPayRedirect
             ) {
-                "stripeIntent.nextActionData should be WeChatPayRedirect, instead it is " +
-                    "${authenticatable.nextActionData}"
+                val incorrectNextActionDataType = authenticatable.nextActionData?.let {
+                    it::class.java.simpleName
+                } ?: run {
+                    "null"
+                }
+                "stripeIntent.nextActionData should be WeChatPayRedirect, " +
+                    "instead it is $incorrectNextActionDataType"
             }
 
         weChatAuthLauncherFactory(
             host,
             authenticatable.getRequestCode()
         ).start(
-            WeChatPayAuthContract.Args(weChatPayRedirect.weChat)
+            WeChatPayAuthContract.Args(
+                weChatPayRedirect.weChat,
+                authenticatable.clientSecret.orEmpty()
+            )
         )
     }
 }
