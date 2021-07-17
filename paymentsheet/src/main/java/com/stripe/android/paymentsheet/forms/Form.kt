@@ -135,7 +135,6 @@ internal fun SectionElementUI(
     }
 }
 
-
 @ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
@@ -191,7 +190,7 @@ internal fun SectionFieldElementUI(
             val focusRequesterIndex = field.focusIndexOrder
             TextField(
                 textFieldController = field.controller,
-                myFocus = focusRequesters[0],
+                myFocus = focusRequesters[focusRequesterIndex],
                 nextFocus = focusRequesters.getOrNull(
                     focusRequesterIndex + 1
                 ),

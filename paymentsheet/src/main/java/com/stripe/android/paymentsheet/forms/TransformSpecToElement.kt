@@ -9,11 +9,11 @@ import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -38,26 +38,13 @@ internal fun List<FormItemSpec>.transform(
                 IdentifierSpec("billing"),
                 BillingSectionFieldRepository.INSTANCE
             )
-            is FormItemSpec.BillingSectionSpec -> BillingSectionElement(
-                IdentifierSpec("billing"),
-                BillingSectionFieldRepository.INSTANCE
-            )
         }
     }
 
 private fun FormItemSpec.SectionSpec.transform(
     focusRequesterCount: FocusRequesterCount
 ): FormElement.SectionElement {
-
-    val fieldElements = this.fields.map {
-        when (it) {
-            is SectionFieldSpec.Email -> it.transform(focusRequesterCount)
-            is SectionFieldSpec.Name -> it.transform(focusRequesterCount)
-            is SectionFieldSpec.Country -> it.transform()
-            is SectionFieldSpec.IdealBank -> it.transform()
-            is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
-        }
-    }
+    val fieldElements = this.fields.transform(focusRequesterCount)
 
     // The controller of the section element will be the same as the field element
     // as there is only a single field in a section
@@ -69,6 +56,18 @@ private fun FormItemSpec.SectionSpec.transform(
             fieldElements.map { it.controller }
         )
     )
+}
+
+internal fun List<SectionFieldSpec>.transform(
+    focusRequesterCount: FocusRequesterCount
+) = this.map {
+    when (it) {
+        is SectionFieldSpec.Email -> it.transform(focusRequesterCount)
+        is SectionFieldSpec.Name -> it.transform(focusRequesterCount)
+        is SectionFieldSpec.Country -> it.transform()
+        is SectionFieldSpec.IdealBank -> it.transform()
+        is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
+    }
 }
 
 private fun SectionFieldSpec.SimpleText.transform(

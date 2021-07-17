@@ -123,8 +123,7 @@ internal class BillingSectionElement(
         .map { countryCode ->
             billingSectionFieldRepository.get(countryCode)
                 ?.let {
-                    transform(
-                        it,
+                    it.transform(
                         FocusRequesterCount()
                     )
                 } ?: emptyList()
