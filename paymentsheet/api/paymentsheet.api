@@ -5,28 +5,14 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/paymentsheet/ElementType : java/lang/Enum {
-	public static final field Country Lcom/stripe/android/paymentsheet/ElementType;
-	public static final field Email Lcom/stripe/android/paymentsheet/ElementType;
-	public static final field GenericText Lcom/stripe/android/paymentsheet/ElementType;
-	public static final field IdealBank Lcom/stripe/android/paymentsheet/ElementType;
-	public static final field Mandate Lcom/stripe/android/paymentsheet/ElementType;
-	public static final field Name Lcom/stripe/android/paymentsheet/ElementType;
-	public static final field SaveForFutureUse Lcom/stripe/android/paymentsheet/ElementType;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/ElementType;
-	public static fun values ()[Lcom/stripe/android/paymentsheet/ElementType;
-}
-
 public final class com/stripe/android/paymentsheet/forms/FormFieldEntry {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;Z)V
-	public final fun component1 ()Lcom/stripe/android/paymentsheet/ElementType;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Z
-	public final fun copy (Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;Z)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;Lcom/stripe/android/paymentsheet/ElementType;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
+	public fun <init> (Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getType ()Lcom/stripe/android/paymentsheet/ElementType;
 	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun isComplete ()Z
