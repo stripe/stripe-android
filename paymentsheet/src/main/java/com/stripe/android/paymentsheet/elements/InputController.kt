@@ -8,16 +8,17 @@ internal sealed interface Controller
 
 /**
  * Any element in a section must have a controller that provides
- * an error and have a type.
+ * an error and have a type.  This is used for a single field in a section
+ * or a section field that has other fields in it.
  */
-internal sealed interface SectionFieldController : Controller {
+internal sealed interface SectionFieldErrorController : Controller {
     val error: Flow<FieldError?>
 }
 
 /**
  * This class provides the logic behind the fields.
  */
-internal sealed interface InputController : SectionFieldController {
+internal sealed interface InputController : SectionFieldErrorController {
     val label: Int
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>

@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
-import com.stripe.android.paymentsheet.elements.SectionFieldController
+import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
@@ -124,7 +124,13 @@ internal sealed class SectionFieldElement(
     open val subElements: List<SectionFieldElement> = emptyList()
 ) {
     abstract val identifier: IdentifierSpec
-    abstract val controller: SectionFieldController
+
+    /**
+     * Every item in a section must have a controller that can provide an error
+     * message, for the section controller to reduce it to a single error message.
+     */
+    abstract val controller: SectionFieldErrorController
+
     abstract fun controllerType(): SectionFieldElementType
 
     data class Name(
