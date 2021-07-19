@@ -2,14 +2,12 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.paymentsheet.ElementType
 
 internal class SimpleTextFieldConfig(
     override val label: Int,
 ) : TextFieldConfig {
     override val debugLabel: String = "generic_text"
     override val keyboard: KeyboardType = KeyboardType.Text
-    override val elementType: ElementType = ElementType.GenericText
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {

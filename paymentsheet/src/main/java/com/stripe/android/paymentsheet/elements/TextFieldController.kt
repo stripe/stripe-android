@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,16 +17,7 @@ import kotlinx.coroutines.flow.map
  */
 internal class TextFieldController @VisibleForTesting constructor(
     private val textFieldConfig: TextFieldConfig,
-    override val elementType: ElementType
 ) : InputController {
-
-    constructor(
-        textFieldConfig: TextFieldConfig
-    ) : this(
-        textFieldConfig,
-        textFieldConfig.elementType
-    )
-
     val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     val keyboardType: KeyboardType = textFieldConfig.keyboard
 

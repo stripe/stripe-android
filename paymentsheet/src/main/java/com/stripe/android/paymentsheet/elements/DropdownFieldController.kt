@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import com.stripe.android.paymentsheet.ElementType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -21,7 +20,6 @@ internal class DropdownFieldController(
     override val rawFieldValue = fieldValue.map { config.convertToRaw(it) }
     override val error: Flow<FieldError?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
-    override val elementType: ElementType = config.elementType
 
     /**
      * This is called when the value changed to is a display value.

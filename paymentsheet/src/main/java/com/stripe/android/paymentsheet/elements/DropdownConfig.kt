@@ -1,16 +1,11 @@
 package com.stripe.android.paymentsheet.elements
 
-import com.stripe.android.paymentsheet.ElementType
-
 internal sealed interface DropdownConfig {
     /** This is a label for debug logs **/
     val debugLabel: String
 
     /** This is the label to describe the field */
     val label: Int
-
-    /** This is the element type **/
-    val elementType: ElementType
 
     /** This is the list of displayable items to show in the drop down **/
     fun getDisplayItems(): List<String>
