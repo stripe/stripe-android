@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
 /**
@@ -102,19 +101,6 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
             .flatMap { it.fields }
             .associate { it.identifier to it.controller }
     )
-
-/**
- * This class defines the type associated with the element or value.   See [FormFieldValues] and [InputController]
- */
-enum class ElementType {
-    Name,
-    Email,
-    Country,
-    SaveForFutureUse,
-    Mandate,
-    IdealBank,
-    GenericText
-}
 
 /**
  * This is an element that is in a section and accepts user input.

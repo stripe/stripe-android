@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
@@ -31,7 +30,6 @@ class PopulateFormFromFormFieldValuesTest {
             val formFieldValues = FormFieldValues(
                 mapOf(
                     emailFieldElement.identifier to FormFieldEntry(
-                        ElementType.Email,
                         "valid@email.com",
                         true
                     )
@@ -53,7 +51,6 @@ class PopulateFormFromFormFieldValuesTest {
             val formFieldValues = FormFieldValues(
                 mapOf(
                     IdentifierSpec("not in list form elements") to FormFieldEntry(
-                        ElementType.Email,
                         "valid@email.com",
                         true
                     )
