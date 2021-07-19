@@ -68,7 +68,8 @@ private fun SectionFieldSpec.SimpleText.transform(
         TextFieldController(
             SimpleTextFieldConfig(
                 label = this.label
-            )
+            ),
+            showOptionalLabel = this.showOptionalLabel
         ),
         focusRequesterCount.getAndIncrement()
     )

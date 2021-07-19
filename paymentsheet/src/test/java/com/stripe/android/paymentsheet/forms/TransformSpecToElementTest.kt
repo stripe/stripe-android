@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.SectionFieldElement.IdealBank
@@ -114,6 +115,31 @@ class TransformSpecToElementTest {
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.value).isEqualTo("name")
+    }
+
+    @Test
+    fun `Add a simple text section spec sets up the text element correctly`() {
+        val formElement = listOf(
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("simple_section"),
+                SectionFieldSpec.SimpleText(
+                    IdentifierSpec("simple"),
+                    R.string.address_label_name,
+                    showOptionalLabel = true
+                )
+            )
+        ).transform(
+            "Example, Inc.",
+            FocusRequesterCount()
+        )
+
+        val nameElement = (formElement.first() as SectionElement).fields[0]
+            as SectionFieldElement.SimpleText
+
+        // Verify the correct config is setup for the controller
+        assertThat(nameElement.controller.label).isEqualTo(R.string.address_label_name)
+        assertThat(nameElement.identifier.value).isEqualTo("simple")
+        assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }
 
     @Test

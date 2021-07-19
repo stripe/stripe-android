@@ -18,14 +18,17 @@ import kotlinx.coroutines.flow.map
  */
 internal class TextFieldController @VisibleForTesting constructor(
     private val textFieldConfig: TextFieldConfig,
-    override val elementType: ElementType
+    override val elementType: ElementType,
+    val showOptionalLabel: Boolean = false
 ) : InputController {
 
     constructor(
-        textFieldConfig: TextFieldConfig
+        textFieldConfig: TextFieldConfig,
+        showOptionalLabel: Boolean = false
     ) : this(
         textFieldConfig,
-        textFieldConfig.elementType
+        textFieldConfig.elementType,
+        showOptionalLabel
     )
 
     val capitalization: KeyboardCapitalization = textFieldConfig.capitalization

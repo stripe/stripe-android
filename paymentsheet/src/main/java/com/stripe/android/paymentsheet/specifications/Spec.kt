@@ -89,6 +89,7 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     data class SimpleText(
         override val identifier: IdentifierSpec,
-        @StringRes val label: Int
+        @StringRes val label: Int,
+        val showOptionalLabel: Boolean = false
     ) : SectionFieldSpec(identifier)
 }
