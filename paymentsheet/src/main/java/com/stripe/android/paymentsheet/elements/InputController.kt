@@ -11,23 +11,25 @@ import kotlinx.coroutines.flow.map
 /** This is a generic controller */
 internal sealed interface Controller
 
-internal class AddressSectionController(
-    @StringRes val label: Int?,
-    val sectionFieldControllers: Flow<List<InputController>>
-) : Controller {
-    val error: Flow<FieldError?> = MutableStateFlow(null)
+/**
+ * Any element in a section must have a controller that provides
+ * an error and have a type.
+ */
+internal sealed interface SectionFieldController : Controller{
+    val error: Flow<FieldError?>
+    val elementType: ElementType
 }
 
 /**
  * This class provides the logic behind the fields.
  */
-internal sealed interface InputController : Controller {
+internal sealed interface InputController : SectionFieldController {
     val label: Int
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>
     val isComplete: Flow<Boolean>
-    val error: Flow<FieldError?>
-    val elementType: ElementType
+    override val error: Flow<FieldError?>
+    override val elementType: ElementType
 
     fun onRawValueChange(rawValue: String)
 }

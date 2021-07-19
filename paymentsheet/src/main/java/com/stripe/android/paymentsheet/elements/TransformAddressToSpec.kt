@@ -150,55 +150,49 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?): String? {
 }
 
 internal fun List<AddressSchema>.transformToSpecFieldList() =
-    this
-        .map {
-            when (it.type) {
-                FieldType.AddressLine1 -> {
-                    SectionFieldSpec.SimpleText(
-                        IdentifierSpec("line1"),
-                        R.string.address_label_address_line1,
-                        it.required
-                    )
-                }
-                FieldType.AddressLine2 -> {
-                    SectionFieldSpec.SimpleText(
-                        IdentifierSpec("line2"),
-                        R.string.address_label_address_line2,
-                        false,
-                    )
-                }
-                FieldType.Locality -> {
-                    SectionFieldSpec.SimpleText(
-                        IdentifierSpec("city"),
-                        R.string.address_label_city,
-                        it.required
-                    )
-                }
-                FieldType.AdministrativeArea -> {
-                    SectionFieldSpec.SimpleText(
-                        IdentifierSpec("state"),
-                        it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
-                        it.required
-                    )
-                }
-                FieldType.PostalCode -> {
-                    SectionFieldSpec.SimpleText(
-                        IdentifierSpec("postal_code"),
-                        R.string.address_label_postal_code,
-                        it.required
-                    )
-                }
-                FieldType.Name -> {
-                    SectionFieldSpec.SimpleText(
-                        IdentifierSpec("name"),
-                        R.string.address_label_name,
-                        it.required
-                    )
-                }
-                else -> null
+    this.mapNotNull {
+        when (it.type) {
+            FieldType.AddressLine1 -> {
+                SectionFieldSpec.SimpleText(
+                    IdentifierSpec("line1"),
+                    R.string.address_label_address_line1,
+                    it.required
+                )
             }
+            FieldType.AddressLine2 -> {
+                SectionFieldSpec.SimpleText(
+                    IdentifierSpec("line2"),
+                    R.string.address_label_address_line2,
+                    false,
+                )
+            }
+            FieldType.Locality -> {
+                SectionFieldSpec.SimpleText(
+                    IdentifierSpec("city"),
+                    R.string.address_label_city,
+                    it.required
+                )
+            }
+            FieldType.AdministrativeArea -> {
+                SectionFieldSpec.SimpleText(
+                    IdentifierSpec("state"),
+                    it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
+                    it.required
+                )
+            }
+            FieldType.PostalCode -> {
+                SectionFieldSpec.SimpleText(
+                    IdentifierSpec("postal_code"),
+                    R.string.address_label_postal_code,
+                    it.required
+                )
+            }
+            FieldType.Name -> {
+                SectionFieldSpec.Email
+            }
+            else -> null
         }
-        .filterNotNull()
+    }
 
 
 /**

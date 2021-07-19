@@ -6,10 +6,10 @@ import com.stripe.android.paymentsheet.elements.transformToSpecFieldList
 import com.stripe.android.paymentsheet.forms.transform
 
 
-enum class AddressSectionFieldRepository {
+enum class AddressFieldRepository {
     INSTANCE;
 
-    private val countryFieldMap = mutableMapOf<String, List<SectionFieldElementType>?>()
+    private val countryFieldMap = mutableMapOf<String, List<SectionFieldElement>?>()
 
     internal fun get(countryCode: String?) = countryCode?.let {
         countryFieldMap[it]

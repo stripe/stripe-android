@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.AddressSectionElement
-import com.stripe.android.paymentsheet.AddressSectionFieldRepository
+import com.stripe.android.paymentsheet.AddressElement
+import com.stripe.android.paymentsheet.AddressFieldRepository
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
@@ -34,10 +34,7 @@ internal fun List<FormItemSpec>.transform(
             is FormItemSpec.SaveForFutureUseSpec -> it.transform(merchantName)
             is FormItemSpec.SectionSpec -> it.transform(focusRequesterCount)
             is FormItemSpec.MandateTextSpec -> it.transform(merchantName)
-            is FormItemSpec.AddressSectionSpec -> AddressSectionElement(
-                IdentifierSpec("billing"),
-                AddressSectionFieldRepository.INSTANCE
-            )
+
         }
     }
 
@@ -67,12 +64,16 @@ internal fun List<SectionFieldSpec>.transform(
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
         is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
+        is SectionFieldSpec.AddressSpec -> AddressElement(
+            IdentifierSpec("billing"),
+            AddressFieldRepository.INSTANCE
+        )
     }
 }
 
 private fun SectionFieldSpec.SimpleText.transform(
     focusRequesterCount: FocusRequesterCount
-): SectionFieldElementType =
+): SectionFieldElement =
     SectionFieldElement.SimpleText(
         this.identifier,
         TextFieldController(

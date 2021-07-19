@@ -1,14 +1,16 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
+import com.stripe.android.paymentsheet.elements.SectionFieldController
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import kotlinx.coroutines.flow.Flow
 
 /**
  * This is used to track the number of focus requesters in a form
@@ -33,7 +35,7 @@ internal interface OptionalElement {
  */
 internal sealed interface SectionFieldElementType {
     val identifier: IdentifierSpec
-    val controller: InputController
+    val controller: Controller
 
     interface TextFieldElement : SectionFieldElementType {
         override val controller: TextFieldController
@@ -42,6 +44,11 @@ internal sealed interface SectionFieldElementType {
 
     interface DropdownFieldElement : SectionFieldElementType {
         override val controller: DropdownFieldController
+    }
+
+    interface AddressElement : SectionFieldElementType {
+        override val controller: AddressController
+        val fields: Flow<List<SectionFieldElement>>
     }
 }
 
@@ -63,7 +70,7 @@ internal sealed class FormElement {
         val stringResId: Int,
         val color: Color,
         val merchantName: String?,
-        override val controller: InputController? = null,
+        override val controller: Controller? = null,
     ) : FormElement(), OptionalElement
 
     /**
@@ -78,12 +85,12 @@ internal sealed class FormElement {
 
     data class SectionElement(
         override val identifier: IdentifierSpec,
-        val fields: List<SectionFieldElementType>,
+        val fields: List<SectionFieldElement>,
         override val controller: SectionController
     ) : FormElement(), OptionalElement {
         internal constructor(
             identifier: IdentifierSpec,
-            field: SectionFieldElementType,
+            field: SectionFieldElement,
             controller: SectionController
         ) : this(identifier, listOf(field), controller)
     }
@@ -103,17 +110,25 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
             .associate { it.identifier to it.controller }
     )
 
-/**
- * This class defines the type associated with the element or value.   See [FormFieldValues] and [InputController]
- */
-enum class ElementType {
-    Name,
-    Email,
-    Country,
-    SaveForFutureUse,
-    Mandate,
-    IdealBank,
-    GenericText
+enum class ControllerType {
+    Dropdown,
+    Address,
+    Text,
+    Other
+}
+
+enum class ElementType(
+    val controllerType: ControllerType
+) {
+    Name(ControllerType.Text),
+    Email(ControllerType.Text),
+    Country(ControllerType.Dropdown),
+    SaveForFutureUse(ControllerType.Other),
+    Mandate(ControllerType.Other),
+    IdealBank(ControllerType.Dropdown),
+    GenericText(ControllerType.Text),
+    Address(ControllerType.Address),
+    Section(ControllerType.Other)
 }
 
 /**
@@ -121,33 +136,44 @@ enum class ElementType {
  */
 internal sealed class SectionFieldElement {
     abstract val identifier: IdentifierSpec
-    abstract val controller: InputController
+    abstract val controller: SectionFieldController
+    abstract fun controllerType(): SectionFieldElementType
 
     data class Name(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
-        override val focusIndexOrder: Int
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+        override val focusIndexOrder: Int,
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
+        override fun controllerType(): SectionFieldElementType = this
+    }
 
     data class Email(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
         override val focusIndexOrder: Int
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
+        override fun controllerType(): SectionFieldElementType = this
+    }
 
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
+    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement {
+        override fun controllerType(): SectionFieldElementType = this
+    }
 
     data class IdealBank internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
+    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement {
+        override fun controllerType(): SectionFieldElementType = this
+    }
 
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
         override val focusIndexOrder: Int
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
+        override fun controllerType(): SectionFieldElementType = this
+    }
 }

@@ -29,8 +29,11 @@ internal val bancontact = FormSpec(
                 )
             ),
             bancontactMandate,
-            FormItemSpec.AddressSectionSpec(IdentifierSpec("billing"))
-
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("billing_section"),
+                SectionFieldSpec.AddressSpec(IdentifierSpec("address_element")),
+                R.string.billing_details
+            )
         )
     ),
     bancontactParamKey,

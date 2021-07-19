@@ -29,11 +29,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
-import com.stripe.android.paymentsheet.AddressSectionElement
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
@@ -41,13 +41,11 @@ import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
-import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 internal val formElementPadding = 16.dp
@@ -91,14 +89,6 @@ internal fun Form(
                     }
                     is SaveForFutureUseElement -> {
                         SaveForFutureUseElementUI(enabled, element)
-                    }
-                    is AddressSectionElement -> {
-                        BillingSectionElementUI(
-                            enabled,
-                            element,
-                            optionalIdentifiers,
-                            focusRequesters
-                        )
                     }
                 }
             }
@@ -153,53 +143,36 @@ internal fun SectionElementUI(
 @ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
-internal fun BillingSectionElementUI(
+internal fun AddressElementUI(
     enabled: Boolean,
-    addressSectionElement: AddressSectionElement,
+    addressSectionElement: SectionFieldElementType.AddressElement,
     optionalIdentifiers: List<IdentifierSpec>?,
     focusRequesters: List<FocusRequester>
 ) {
     val fields by addressSectionElement.fields.asLiveData().observeAsState(emptyList())
-    AnimatedVisibility(
-        optionalIdentifiers?.contains(addressSectionElement.identifier) == false,
-        enter = EnterTransition.None,
-        exit = ExitTransition.None
-    ) {
-        val controller = addressSectionElement.controller
-
-        val error by controller.error.asLiveData().observeAsState(null)
-        val sectionErrorString =
-            error?.let {
-                stringResource(
-                    it.errorMessage,
-                    stringResource(it.errorFieldLabel)
+    Column {
+        fields.forEachIndexed { index, field ->
+            SectionFieldElementUI(enabled, field, focusRequesters)
+            if (index != fields.size - 1) {
+                val cardStyle = CardStyle(isSystemInDarkTheme())
+                Divider(
+                    color = cardStyle.cardBorderColor,
+                    thickness = cardStyle.cardBorderWidth,
+                    modifier = Modifier.padding(
+                        horizontal = cardStyle.cardBorderWidth
+                    )
                 )
-            }
-
-        Section(controller.label, sectionErrorString) {
-            Column {
-                fields.forEachIndexed { index, field ->
-                    SectionFieldElementUI(enabled, field, focusRequesters)
-                    if (index != fields.size - 1) {
-                        val cardStyle = CardStyle(isSystemInDarkTheme())
-                        Divider(
-                            color = cardStyle.cardBorderColor,
-                            thickness = cardStyle.cardBorderWidth,
-                            modifier = Modifier.padding(
-                                horizontal = cardStyle.cardBorderWidth
-                            )
-                        )
-                    }
-                }
             }
         }
     }
 }
 
+@ExperimentalAnimationApi
+@ExperimentalUnitApi
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,
-    field: SectionFieldElementType,
+    field: SectionFieldElement,
     focusRequesters: List<FocusRequester>
 ) {
     when (field) {
@@ -221,6 +194,19 @@ internal fun SectionFieldElementUI(
                 enabled
             )
         }
+        is SectionFieldElementType.AddressElement -> {
+            AddressElementUI(
+                enabled,
+                field,
+                emptyList(),
+                focusRequesters
+            )
+        }
+        is SectionFieldElement.Country -> TODO()
+        is SectionFieldElement.Email -> TODO()
+        is SectionFieldElement.IdealBank -> TODO()
+        is SectionFieldElement.Name -> TODO()
+        is SectionFieldElement.SimpleText -> TODO()
     }
 }
 
@@ -383,26 +369,26 @@ class FormViewModel(
     }
 
     private val addressSectionFields = elements
-        .filterIsInstance<AddressSectionElement>()
+        .filterIsInstance<com.stripe.android.paymentsheet.AddressElement>()
         .firstOrNull()
         ?.fields
         ?: MutableStateFlow(null)
 
-    val completeFormValues = addressSectionFields.map { addressSectionFields ->
-        addressSectionFields?.associate { sectionFieldElement ->
-            sectionFieldElement.identifier to sectionFieldElement.controller
-        }?.plus(
-            elements.getIdInputControllerMap()
-        ) ?: elements.getIdInputControllerMap()
-    }
-        .flatMapLatest { value ->
-            TransformElementToFormFieldValueFlow(
-                value,
-                optionalIdentifiers,
-                showingMandate,
-                saveForFutureUse
-            ).transformFlow()
-        }
+//    val completeFormValues = addressSectionFields.map { addressSectionFields ->
+//        addressSectionFields?.associate { sectionFieldElement ->
+//            sectionFieldElement.identifier to sectionFieldElement.controller
+//        }?.plus(
+//            elements.getIdInputControllerMap()
+//        ) ?: elements.getIdInputControllerMap()
+//    }
+//        .flatMapLatest { value ->
+//            TransformElementToFormFieldValueFlow(
+//                value,
+//                optionalIdentifiers,
+//                showingMandate,
+//                saveForFutureUse
+//            ).transformFlow()
+//        }
 
 
     internal fun populateFormViewValues(formFieldValues: FormFieldValues) {

@@ -49,11 +49,6 @@ sealed class FormItemSpec {
         ) : this(identifier, listOf(field), title)
     }
 
-    data class AddressSectionSpec(
-        override val identifier: IdentifierSpec,
-        //JSON file to read and convert to a spec?
-    ) : FormItemSpec(), OptionalItemSpec
-
     /**
      * This is for elements that do not receive user input
      */
@@ -96,5 +91,10 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
         override val identifier: IdentifierSpec,
         @StringRes val label: Int,
         val isRequired: Boolean
+    ) : SectionFieldSpec(identifier)
+
+    data class AddressSpec(
+        override val identifier: IdentifierSpec,
+        //JSON file to read and convert to a spec?
     ) : SectionFieldSpec(identifier)
 }

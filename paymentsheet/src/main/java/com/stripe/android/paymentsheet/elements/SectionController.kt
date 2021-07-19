@@ -1,18 +1,20 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
+import com.stripe.android.paymentsheet.ElementType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 internal class SectionController(
     @StringRes val label: Int?,
-    val sectionFieldController: List<InputController>
+    val sectionFieldControllers: List<SectionFieldController>
 ) : Controller {
     val error: Flow<FieldError?> = combine(
-        sectionFieldController.map {
+        sectionFieldControllers.map {
             it.error
         }
     ) {
         it.firstOrNull()
     }
+    val elementType: ElementType = ElementType.Section
 }
