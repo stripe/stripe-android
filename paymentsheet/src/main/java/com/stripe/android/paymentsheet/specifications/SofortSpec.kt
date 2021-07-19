@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.specifications.FormItemSpec.SaveForFuture
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 
 internal val sofortParams: MutableMap<String, Any?> = mutableMapOf(
     "country" to null,
@@ -19,7 +18,10 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
     "sofort" to sofortParams
 )
 
-internal val sofortNameSection = SectionSpec(IdentifierSpec("name"), Name)
+internal val sofortNameSection = SectionSpec(
+    IdentifierSpec("name section"),
+    SectionFieldSpec.NAME
+)
 internal val sofortEmailSection = SectionSpec(IdentifierSpec("email"), Email)
 internal val sofortCountrySection =
     SectionSpec(IdentifierSpec("country"), Country(setOf("AT", "BE", "DE", "ES", "IT", "NL")))

@@ -1,16 +1,18 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.SectionFieldElement.IdealBank
-import com.stripe.android.paymentsheet.SectionFieldElement.Name
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
@@ -26,7 +28,7 @@ class TransformSpecToElementTest {
 
     private val nameSection = FormItemSpec.SectionSpec(
         IdentifierSpec("nameSection"),
-        SectionFieldSpec.Name
+        SectionFieldSpec.NAME
     )
 
     private val emailSection = FormItemSpec.SectionSpec(
@@ -109,11 +111,15 @@ class TransformSpecToElementTest {
             FocusRequesterCount()
         )
 
-        val nameElement = (formElement.first() as SectionElement).fields[0] as Name
+        val nameElement =
+            (formElement.first() as SectionElement).fields[0] as SectionFieldElement.SimpleText
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label).isEqualTo(NameConfig().label)
         assertThat(nameElement.identifier.value).isEqualTo("name")
+
+        assertThat(nameElement.controller.capitalization).isEqualTo(KeyboardCapitalization.Words)
+        assertThat(nameElement.controller.keyboardType).isEqualTo(KeyboardType.Text)
     }
 
     @Test
@@ -140,7 +146,7 @@ class TransformSpecToElementTest {
         )
 
         val nameSectionElement = formElement[0] as SectionElement
-        val nameElement = nameSectionElement.fields[0] as Name
+        val nameElement = nameSectionElement.fields[0] as SectionFieldElement.SimpleText
         val emailSectionElement = formElement[1] as SectionElement
         val emailElement = emailSectionElement.fields[0] as Email
 

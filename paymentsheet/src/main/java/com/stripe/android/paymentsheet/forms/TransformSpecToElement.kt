@@ -7,11 +7,10 @@ import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
-import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -41,7 +40,6 @@ private fun FormItemSpec.SectionSpec.transform(
     val fieldElements = this.fields.map {
         when (it) {
             is SectionFieldSpec.Email -> it.transform(focusRequesterCount)
-            is SectionFieldSpec.Name -> it.transform(focusRequesterCount)
             is SectionFieldSpec.Country -> it.transform()
             is SectionFieldSpec.IdealBank -> it.transform()
             is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
@@ -67,7 +65,9 @@ private fun SectionFieldSpec.SimpleText.transform(
         this.identifier,
         TextFieldController(
             SimpleTextFieldConfig(
-                label = this.label
+                label = this.label,
+                capitalization = this.capitalization,
+                keyboard = this.keyboardType
             )
         ),
         focusRequesterCount.getAndIncrement()
@@ -81,13 +81,6 @@ private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
         this.stringResId,
         this.color,
         merchantName
-    )
-
-private fun SectionFieldSpec.Name.transform(focusRequesterCount: FocusRequesterCount) =
-    SectionFieldElement.Name(
-        this.identifier,
-        TextFieldController(NameConfig()),
-        focusRequesterCount.getAndIncrement()
     )
 
 private fun SectionFieldSpec.Email.transform(

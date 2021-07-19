@@ -2,6 +2,9 @@ package com.stripe.android.paymentsheet.specifications
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.paymentsheet.R
 
 /**
  * This class is used to define different forms full of fields.
@@ -73,7 +76,6 @@ sealed class FormItemSpec {
  * This represents a field in a section.
  */
 sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
-    object Name : SectionFieldSpec(IdentifierSpec("name"))
 
     object Email : SectionFieldSpec(IdentifierSpec("email"))
 
@@ -89,6 +91,17 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     data class SimpleText(
         override val identifier: IdentifierSpec,
-        @StringRes val label: Int
+        @StringRes val label: Int,
+        val capitalization: KeyboardCapitalization,
+        val keyboardType: KeyboardType
     ) : SectionFieldSpec(identifier)
+
+    internal companion object {
+        val NAME = SimpleText(
+            IdentifierSpec("name"),
+            label = R.string.address_label_name,
+            capitalization = KeyboardCapitalization.Words,
+            keyboardType = KeyboardType.Text
+        )
+    }
 }
