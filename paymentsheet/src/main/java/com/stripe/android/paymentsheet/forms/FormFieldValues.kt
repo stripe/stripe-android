@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
 /**
@@ -13,7 +12,6 @@ class FormFieldValues(
 )
 
 data class FormFieldEntry(
-    val type: ElementType,
     val value: String?,
     val isComplete: Boolean
 )
