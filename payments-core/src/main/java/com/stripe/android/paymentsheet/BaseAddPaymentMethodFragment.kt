@@ -90,16 +90,16 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
             (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-//                formFragment.formViewModel.completeFormValues.asLiveData()
-//                    .observe(viewLifecycleOwner) { formFieldValues ->
-//                        sheetViewModel.updateSelection(
-//                            transformToPaymentSelection(
-//                                formFieldValues,
-//                                formFragment.formSpec.paramKey,
-//                                selectedPaymentMethod
-//                            )
-//                        )
-//                    }
+                formFragment.formViewModel.completeFormValues.asLiveData()
+                    .observe(viewLifecycleOwner) { formFieldValues ->
+                        sheetViewModel.updateSelection(
+                            transformToPaymentSelection(
+                                formFieldValues,
+                                formFragment.formSpec.paramKey,
+                                selectedPaymentMethod
+                            )
+                        )
+                    }
             }
         }
 

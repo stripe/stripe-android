@@ -72,7 +72,6 @@ internal class TransformElementToFormFieldValueFlow(
             FormFieldEntry(
                 value = rawFieldValue,
                 isComplete = isComplete,
-                type = controller.elementType
             )
         )
     }

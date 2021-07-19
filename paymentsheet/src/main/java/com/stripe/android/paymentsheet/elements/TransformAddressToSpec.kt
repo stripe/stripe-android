@@ -187,9 +187,6 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
                     it.required
                 )
             }
-            FieldType.Name -> {
-                SectionFieldSpec.Email
-            }
             else -> null
         }
     }

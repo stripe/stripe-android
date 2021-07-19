@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.AddressElement
 import com.stripe.android.paymentsheet.AddressFieldRepository
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
@@ -64,7 +63,7 @@ internal fun List<SectionFieldSpec>.transform(
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
         is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
-        is SectionFieldSpec.AddressSpec -> AddressElement(
+        is SectionFieldSpec.AddressSpec -> SectionFieldElement.AddressElement(
             IdentifierSpec("billing"),
             AddressFieldRepository.INSTANCE
         )

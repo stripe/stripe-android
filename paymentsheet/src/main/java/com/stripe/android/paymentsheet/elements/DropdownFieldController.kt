@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
 import android.util.Log
-import com.stripe.android.paymentsheet.ElementType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -28,7 +27,6 @@ internal class DropdownFieldController(
     }
     override val error: Flow<FieldError?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
-    override val elementType: ElementType = config.elementType
 
     init {
         Log.e("STRIPE", "Dropdown controller created")

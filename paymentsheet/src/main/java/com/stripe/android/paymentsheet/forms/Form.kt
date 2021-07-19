@@ -39,13 +39,16 @@ import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElem
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
+import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
+import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 internal val formElementPadding = 16.dp
@@ -369,26 +372,32 @@ class FormViewModel(
     }
 
     private val addressSectionFields = elements
-        .filterIsInstance<com.stripe.android.paymentsheet.AddressElement>()
+        .filterIsInstance<SectionElement>()
+        .flatMap{ it.fields }
+        .filterIsInstance<SectionFieldElement.AddressElement>()
         .firstOrNull()
         ?.fields
         ?: MutableStateFlow(null)
 
-//    val completeFormValues = addressSectionFields.map { addressSectionFields ->
-//        addressSectionFields?.associate { sectionFieldElement ->
-//            sectionFieldElement.identifier to sectionFieldElement.controller
-//        }?.plus(
-//            elements.getIdInputControllerMap()
-//        ) ?: elements.getIdInputControllerMap()
-//    }
-//        .flatMapLatest { value ->
-//            TransformElementToFormFieldValueFlow(
-//                value,
-//                optionalIdentifiers,
-//                showingMandate,
-//                saveForFutureUse
-//            ).transformFlow()
-//        }
+    val completeFormValues = addressSectionFields.map { addressSectionFields ->
+        val addressInputControllers = addressSectionFields
+                ?.filter { it.controller is InputController }
+                ?.associate { sectionFieldElement ->
+                    sectionFieldElement.identifier to sectionFieldElement.controller as InputController
+                }
+
+        addressInputControllers?.plus(
+            elements.getIdInputControllerMap()
+        ) ?: elements.getIdInputControllerMap()
+    }
+        .flatMapLatest { value ->
+            TransformElementToFormFieldValueFlow(
+                value,
+                optionalIdentifiers,
+                showingMandate,
+                saveForFutureUse
+            ).transformFlow()
+        }
 
 
     internal fun populateFormViewValues(formFieldValues: FormFieldValues) {

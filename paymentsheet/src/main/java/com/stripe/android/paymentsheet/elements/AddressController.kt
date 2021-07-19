@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
-import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.SectionFieldElement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -16,5 +15,4 @@ internal class AddressController(
             it.filterNotNull().firstOrNull()
         }
     }
-    override val elementType: ElementType = ElementType.Address
 }
