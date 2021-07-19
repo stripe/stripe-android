@@ -21,6 +21,14 @@ internal val bancontactMandate = FormItemSpec.MandateTextSpec(
 internal val bancontact = FormSpec(
     LayoutSpec(
         listOf(
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("shipping_section"),
+                listOf(
+                    SectionFieldSpec.Name,
+                    SectionFieldSpec.AddressSpec(IdentifierSpec("shipping_element")),
+                ),
+                R.string.shipping_details
+            ),
             bancontactNameSection,
             bancontactEmailSection,
             SaveForFutureUseSpec(

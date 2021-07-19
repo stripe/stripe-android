@@ -56,4 +56,5 @@
     <string name="address_label_village_township">Village or Township</string>
     <string name="address_label_ie_townland">Townland</string>
     <string name="address_label_au_suburb_or_city">Suburb or City</string>
+    <string name="shipping_details">Shipping Details</string>
 </resources>
