@@ -6,7 +6,7 @@ import androidx.compose.ui.text.input.KeyboardType
 internal class SimpleTextFieldConfig(
     override val label: Int,
 ) : TextFieldConfig {
-    override val debugLabel: String = "generic_text"
+    override val debugLabel: String = "simple_text"
     override val keyboard: KeyboardType = KeyboardType.Text
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
 
