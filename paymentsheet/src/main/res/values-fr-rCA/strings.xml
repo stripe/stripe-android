@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">Banque iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_card">Carte</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">Prélèvement SEPA</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Enregistrer pour les prochains achats</string>
+    <string name="stripe_paymentsheet_sepa_mandate">En fournissant vos informations de paiement et en confirmant ce paiement, vous autorisez (A) %s et Stripe, notre prestataire de services de paiement, à donner à votre institution financière l\'instruction de débiter votre compte, et (B) votre institution financièire à débiter votre compte conformément à ces instructions. Vous bénéficiez d\'un droit de remboursement par votre institution financière selon les conditions décrites dans la convention que vous avez passée avec elle. Toute demande de remboursement doit être présentée dans les 8 semaines suivant la date de débit de votre compte. Vos droits sont précisés dans une déclaration que vous pouvez obtenir auprès de votre institution financière. Vous acceptez de recevoir des notifications concernant les débits futurs jusqu\'à 2 jours avant leur réalisation.</string>
+</resources>

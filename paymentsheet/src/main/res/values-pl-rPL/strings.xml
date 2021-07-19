@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
+    <string name="stripe_paymentsheet_payment_method_card">Karta</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">Polecenie zapłaty SEPA</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Zapisz do przyszłych płatności</string>
+    <string name="stripe_paymentsheet_sepa_mandate">Podając dane płatności i potwierdzając tę płatność, upoważniasz (A) %s i Stripe, naszego dostawcę usług płatności, do wysłania instrukcji do Twojego banku w celu obciążenia Twojego konta oraz (B) Twój bank do obciążenia Twojego konta zgodnie z tymi instrukcjami. W ramach swoich praw jesteś uprawniony(-a) do otrzymania zwrotu od Twojego banku zgodnie z zasadami i warunkami umowy z bankiem. Zwrot należy odebrać w ciągu 8 tygodni, licząc od daty obciążenia konta. Twoje prawa są wyjaśnione w oświadczeniu, które możesz otrzymać z banku. Wyrażasz zgodę na otrzymywanie powiadomień w przypadku przyszłych obciążeń do 2 dni przed ich wystąpieniem.</string>
+</resources>

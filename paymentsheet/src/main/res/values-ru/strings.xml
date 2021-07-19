@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">Банк в системе iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_card">Карта</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">Списание средств SEPA</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Сохранить данные для будущих платежей</string>
+    <string name="stripe_paymentsheet_sepa_mandate">Указав свои платежные данные и подтвердив платеж, вы уполномочиваете (A) %s и Stripe, нашего поставщика платежных услуг, на отправку вашему банку инструкций на списание средств с вашего счета и (B) ваш банк на списание средств с вашего счета согласно данным инструкциям. Вы имеете право на возврат средств от вашего банка согласно положениям и условиям Вашего соглашения с банком. Подать заявку на возврат средств следует в течение 8 недель с даты списания средств с вашего счета. Ваши права объясняются в выписке, которую вы можете получить в своем банке. Вы даете согласие на получение уведомлений о будущих дебетованиях в срок до 2 дней до их поступления.</string>
+</resources>

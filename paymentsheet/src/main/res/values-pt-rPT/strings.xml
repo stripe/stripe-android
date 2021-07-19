@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_paymentsheet_ideal_bank">Banco iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_card">Cartão</string>
+    <string name="stripe_paymentsheet_payment_method_sepa_debit">Débito SEPA</string>
+    <string name="stripe_paymentsheet_save_for_future_payments">Guardar para pagamentos futuros</string>
+    <string name="stripe_paymentsheet_sepa_mandate">Quando fornecer os seus dados de pagamento e confirmar este pagamento, autoriza (A) %s e a Stripe, o nosso provedor de serviços de pagamentos, a enviar instruções ao seu banco para debitar a sua conta e (B) o seu banco a debitar a sua conta de acordo com essas instruções. Como parte dos seus direitos, tem direito a um reembolso do seu banco de acordo com os termos e condições do seu acordo com o banco. Um reembolso deve ser solicitado até 8 semanas a partir da data na qual a sua conta foi debitada. Os seus direitos são explicados numa declaração que pode obter do seu banco. Aceita receber notificações de futuros débitos até 2 dias antes de serem efetuados.</string>
+</resources>
