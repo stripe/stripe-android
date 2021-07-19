@@ -188,7 +188,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun initializeBillingRepository() {
         viewModelScope.launch {
-            BillingSectionFieldRepository.INSTANCE.init(
+            AddressSectionFieldRepository.INSTANCE.init(
                 getApplication<Application>().baseContext
             )
         }

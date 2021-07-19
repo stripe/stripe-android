@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.serialization.decodeFromString
 import org.junit.Test
 import java.io.File
@@ -89,22 +90,24 @@ class TransformAddressToSpec {
     fun `Read AddressSchema list file and output spec json`() {
         for (countryCode in supportedCountries) {
             val file = File(
-                "/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/assets/addressinfo/JP.json"
+                "/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/assets/addressinfo/US.json"
             )
 
             if (file.exists()) {
-                println(
-                    "/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/assets/addressinfo/JP.json"
-                )
+
                 val addressSchema = parseAddressesSchema(file.inputStream())
+//                addressSchema
+//                    ?.forEach {
+//                        println(it.type?.name + " " + it.required)
+//                    }
                 addressSchema?.let {
-                    it.transformToSpecFieldList()
+                    val elementList = it.transformToSpecFieldList()
+                    elementList.forEach { it ->
+                        val spec = it as? SectionFieldSpec.SimpleText
+                        println(spec?.identifier?.value + " " + spec?.isRequired)
+                    }
                 }
 
-                println(addressSchema?.get(0)?.schema?.nameType)
-                println(addressSchema?.get(1)?.schema?.nameType)
-                println(addressSchema?.get(2)?.schema?.nameType)
-                println(addressSchema?.get(3)?.schema?.nameType)
                 break
             }
         }

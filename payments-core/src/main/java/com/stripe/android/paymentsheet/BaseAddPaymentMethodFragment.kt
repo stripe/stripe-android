@@ -197,6 +197,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         ) = formFieldValues?.let {
             transformToPaymentMethodCreateParams.transform(formFieldValues, paramKey)
                 ?.run {
+                    Log.d("STRIPE", this.toParamMap().toString())
                     PaymentSelection.New.GenericPaymentMethod(
                         selectedPaymentMethodResources.displayNameResource,
                         selectedPaymentMethodResources.iconResource,

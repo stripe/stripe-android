@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.elements.InputController
-import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -13,13 +11,14 @@ import kotlinx.coroutines.flow.combine
  * the list of form elements into a [FormFieldValues].
  */
 internal class TransformElementToFormFieldValueFlow(
-    val elements: List<FormElement>,
+//    val elements: List<FormElement>,
+    val idControllerMap: Map<IdentifierSpec, InputController>,
     val optionalIdentifiers: Flow<List<IdentifierSpec>>,
     val showingMandate: Flow<Boolean>,
     val saveForFutureUse: Flow<Boolean>
 ) {
     private val currentFieldValueMap = combine(
-        getCurrentFieldValuePairs(elements.getIdInputControllerMap())
+        getCurrentFieldValuePairs(idControllerMap)
     ) {
         it.toMap()
     }

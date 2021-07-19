@@ -102,13 +102,6 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
             .flatMap { it.fields }
             .associate { it.identifier to it.controller }
     )
-//    .plus(
-//        this
-//            .filterIsInstance<BillingSectionElement>()
-//            .map { it.fields }
-//            .flatten()
-//            .associate { it.identifier to it.controller }
-//    )
 
 /**
  * This class defines the type associated with the element or value.   See [FormFieldValues] and [InputController]

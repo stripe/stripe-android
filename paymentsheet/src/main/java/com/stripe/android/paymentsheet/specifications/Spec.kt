@@ -49,7 +49,7 @@ sealed class FormItemSpec {
         ) : this(identifier, listOf(field), title)
     }
 
-    data class BillingSectionSpec(
+    data class AddressSectionSpec(
         override val identifier: IdentifierSpec,
         //JSON file to read and convert to a spec?
     ) : FormItemSpec(), OptionalItemSpec

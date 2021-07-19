@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 /** This is a generic controller */
 internal sealed interface Controller
 
-internal class BillingSectionController(
+internal class AddressSectionController(
     @StringRes val label: Int?,
     val sectionFieldControllers: Flow<List<InputController>>
 ) : Controller {

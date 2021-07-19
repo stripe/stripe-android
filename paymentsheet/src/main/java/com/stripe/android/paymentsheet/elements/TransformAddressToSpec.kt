@@ -154,42 +154,46 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
         .map {
             when (it.type) {
                 FieldType.AddressLine1 -> {
-                    SectionFieldSpec.GenericText(
+                    SectionFieldSpec.SimpleText(
                         IdentifierSpec("line1"),
                         R.string.address_label_address_line1,
                         it.required
                     )
                 }
                 FieldType.AddressLine2 -> {
-                    SectionFieldSpec.GenericText(
+                    SectionFieldSpec.SimpleText(
                         IdentifierSpec("line2"),
                         R.string.address_label_address_line2,
                         false,
                     )
                 }
                 FieldType.Locality -> {
-                    SectionFieldSpec.GenericText(
+                    SectionFieldSpec.SimpleText(
                         IdentifierSpec("city"),
                         R.string.address_label_city,
                         it.required
                     )
                 }
                 FieldType.AdministrativeArea -> {
-                    SectionFieldSpec.GenericText(
+                    SectionFieldSpec.SimpleText(
                         IdentifierSpec("state"),
                         it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
                         it.required
                     )
                 }
                 FieldType.PostalCode -> {
-                    SectionFieldSpec.GenericText(
+                    SectionFieldSpec.SimpleText(
                         IdentifierSpec("postal_code"),
                         R.string.address_label_postal_code,
                         it.required
                     )
                 }
                 FieldType.Name -> {
-                    SectionFieldSpec.Name
+                    SectionFieldSpec.SimpleText(
+                        IdentifierSpec("name"),
+                        R.string.address_label_name,
+                        it.required
+                    )
                 }
                 else -> null
             }
