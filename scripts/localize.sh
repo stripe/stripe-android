@@ -1,5 +1,15 @@
 #!/bin/bash
 
+#This script will pull down the strings for each of the modules and copies
+#them into the respective string directories.
+#
+#It will remove the android directory from which it works at the beginning
+#It will not replace the default string value.
+#It will do iso renames as needed.
+#It will not perform a commit.
+#
+#It does generate an android/$MODULE-strings.xml file for use by other scripts.
+
 #xml is for android, strings is for iOS
 FORMAT=xml
 

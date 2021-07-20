@@ -1,7 +1,8 @@
 #!/bin/bash
 
-#xml is for android, strings is for iOS
-FORMAT=xml
+#This will download all the android files, and strings that are assigned to android
+#but not to any files will be outputted.  This indicates an error.   It will cleanup
+#files created at the end.
 
 if [[ -z $(which lokalise2) ]]; then
     echo "Installing lokalise2 via homebrew..."

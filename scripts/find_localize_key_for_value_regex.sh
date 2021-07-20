@@ -1,5 +1,6 @@
 #!/bin/bash
-# This script will find a string in the ios or android projects, regardless of the translation status
+# This script will do a regular expression match to find the string value in the ios or
+# android projects, regardless of the translation status
 
 echo "Searching for string value: $1"
 

@@ -1,7 +1,8 @@
 #!/bin/bash
 
-#xml is for android, strings is for iOS
-FORMAT=xml
+#This script will go through each of the modules and verify that each string key is
+#associated with android in localize.  If it isn't the script will search for the string
+#value in the localize android and ios project.
 
 if [[ -z $(which lokalise2) ]]; then
     echo "Installing lokalise2 via homebrew..."
