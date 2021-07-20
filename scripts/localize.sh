@@ -20,8 +20,10 @@ source localization_vars.sh
 # This is the custom status ID for our project with which the localizers mark completed translations
 FINAL_STATUS_ID=587
 
+rm -rf android/*
 
 #strings.xml -- are android strings not assigned to a file.
+#          --filter-langs $LANGUAGES \
 
 for MODULE in "paymentsheet" "payments-core"
 do
@@ -31,7 +33,6 @@ do
           file download \
           --format xml \
           --filter-filenames $MODULE/strings.xml \
-          --filter-langs $LANGUAGES \
           --custom-translation-status-ids $FINAL_STATUS_ID \
           --export-sort "a_z" \
           --directory-prefix . \
@@ -40,34 +41,24 @@ do
 
 
     #There is a command line switch that might be better than this, see: --language-mapping
-    mv android/$MODULE/values-es android/$MODULE/values-b+es+419
+    mv android/$MODULE/values-es-r419 android/$MODULE/values-b+es+419
     mv android/$MODULE/values-zh-rHant android/$MODULE/values-zh-rTW
     mv android/$MODULE/values-zh-rHans android/$MODULE/values-zh
-    #mv android/$MODULE/values-id android/$MODULE/values-in
-done
+    mv android/$MODULE/values-id android/$MODULE/values-in
 
-# --language-mapping string                 List of languages to override default iso codes for this export (JSON, see https://lokalise.com/api2docs/curl/#transition-download-files-post).
+    #Don't replace the english one
+    rm -rf android/$MODULE/values
 
+    # Remove the existing strings files with the exception of the default one in case there are changes there we need to save
+    find ../$MODULE -type f \( -name "*values-*/strings.xml" ! -name "*values/strings.xml" \) | xargs rm
 
-exit
+    # Copy in the new strings files
+    cp -R  android/$MODULE/* ../$MODULE/res/
 
-for DIRECTORY in ${LOCALIZATION_DIRECTORIES[@]}
-do
-  for f in ${DIRECTORY}/Resources/Localizations/*.lproj/*.strings
-  do
-
-    # Don't modify the en.lproj strings file or it could get out of sync with
-    # genstrings and our linters won't pass
-    if [[ "$(basename "$(dirname "$f")")" == "en.lproj" ]]
-    then
-      continue
-    fi
-
-    # lokalise doesn't consistently add lines in between keys, but genstrings does
-    # so here we add an empty line every two lines (first line is comment, second is key=val)
-    TMP_FILE=$(mktemp /tmp/download_localized_strings_from_lokalise.XXXXXX)
-
-    awk 'BEGIN {last_empty = 0; last_content = 0; row = 0;}; {if (NR == last_empty + 3 && NF > 1) {print ""; last_empty = NR - 1} else if (NF <= 1) {last_empty = NR}}; {if (NF > 1) {last_content = NR}}; {row = row + 1}; 1; END {if (row == last_content) {print ""}}' $f > $TMP_FILE && mv $TMP_FILE $f
-  done
+    echo ""
+    echo "Translated strings (country codes): " 
+    echo "--------------------"
+    ls -1 android/$MODULE/ | paste -sd "," - | sed 's/values-//g'
+    
 done
 
