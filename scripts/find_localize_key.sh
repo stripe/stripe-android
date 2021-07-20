@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script will find a string in the ios or android projects, regardless of the translation status
 
-echo "Searching for string value: $1"
+echo "Searching for string key: $1"
 
 if [[ -z $(which lokalise2) ]]; then
     echo "Installing lokalise2 via homebrew..."
@@ -40,21 +40,5 @@ echo "-------------"
 # The I at the end of sed makes it case insensitive
 # gsed is used for case insensitive matching.
 # -n in combination with the /p at the end of sed makes it print only lines that were replaced
-find . -type f -name strings.xml | xargs gsed -E -n "s/<string name=\"(.*)\">($1)<\/string>/\1,\2/pI"
-
-#lokalise2 --token $API_TOKEN \
-#          --project-id $PROJECT_ID \
-#          file download \
-#          --format ios_sdk \
-#          --filter-langs en \
-#          --export-sort "a_z" \
-#          --directory-prefix . \
-#          --original-filenames=true
-
-echo ""
-echo ""
-echo "iOS matches"
-echo "key,value"
-echo "-------------"
-find . -type f -name Localizable.strings | xargs gsed -E -n "s/\"(.*)\" = \"($1)\";/\1,\2/pI"
+find . -type f -name strings.xml | xargs gsed -E -n "s/<string name=\"(.*)\".*>.*<\/string>/\1/pI"
 

@@ -37,8 +37,7 @@ do
           --export-sort "a_z" \
           --directory-prefix . \
           --original-filenames=false \
-          --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml" \
-
+          --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml"
 
     #There is a command line switch that might be better than this, see: --language-mapping
     mv android/$MODULE/values-es-r419 android/$MODULE/values-b+es+419
@@ -47,7 +46,10 @@ do
     mv android/$MODULE/values-id android/$MODULE/values-in
 
     #Don't replace the english one
-    rm -rf android/$MODULE/values
+    rm android/$MODULE/values/strings.xml 
+
+    # This is used by the correct_missing.sh script
+    cp android/$MODULE/values-en-rGB/strings.xml android/$MODULE-strings.xml
 
     # Remove the existing strings files with the exception of the default one in case there are changes there we need to save
     find ../$MODULE -type f \( -name "*values-*/strings.xml" ! -name "*values/strings.xml" \) | xargs rm
