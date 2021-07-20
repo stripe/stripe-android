@@ -9,7 +9,6 @@ import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IbanConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
-import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
@@ -57,7 +56,6 @@ private fun List<SectionFieldSpec>.transform(
 ) = this.map {
     when (it) {
         is SectionFieldSpec.Email -> it.transform(focusRequesterCount)
-        is SectionFieldSpec.Name -> it.transform(focusRequesterCount)
         is SectionFieldSpec.Iban -> it.transform(focusRequesterCount)
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
@@ -72,7 +70,9 @@ private fun SectionFieldSpec.SimpleText.transform(
         this.identifier,
         TextFieldController(
             SimpleTextFieldConfig(
-                label = this.label
+                label = this.label,
+                capitalization = this.capitalization,
+                keyboard = this.keyboardType
             )
         ),
         focusRequesterCount.getAndIncrement()
@@ -86,13 +86,6 @@ private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
         this.stringResId,
         this.color,
         merchantName
-    )
-
-private fun SectionFieldSpec.Name.transform(focusRequesterCount: FocusRequesterCount) =
-    SectionFieldElement.Name(
-        this.identifier,
-        TextFieldController(NameConfig()),
-        focusRequesterCount.getAndIncrement()
     )
 
 private fun SectionFieldSpec.Email.transform(
