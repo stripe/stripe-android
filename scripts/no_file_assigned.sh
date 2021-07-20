@@ -15,16 +15,12 @@ if [[ -z $(which recode) ]]; then
     brew install recode
 fi
 
-# Load LOCALIZATION_DIRECTORIES & LANGUAGES variables
 source localization_vars.sh
 
 # This is the custom status ID for our project with which the localizers mark completed translations
 FINAL_STATUS_ID=587
 
 rm -rf android/*
-
-#strings.xml -- are android strings not assigned to a file.
-#          --filter-langs $LANGUAGES \
 
 lokalise2 --token $API_TOKEN \
           --project-id $PROJECT_ID \

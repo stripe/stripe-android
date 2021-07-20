@@ -20,7 +20,6 @@ if [[ -z $(which gsed) ]]; then
     brew install gnu-sed
 fi
 
-# Load LOCALIZATION_DIRECTORIES & LANGUAGES variables
 source localization_vars.sh
 
 lokalise2 --token $API_TOKEN \
