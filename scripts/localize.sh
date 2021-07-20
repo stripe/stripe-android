@@ -58,8 +58,8 @@ do
     #Don't replace the english one
     rm android/$MODULE/values/strings.xml 
 
-    # This is used by the correct_missing.sh script
-    cp android/$MODULE/values-en-rGB/strings.xml android/$MODULE-strings.xml
+    # This is used by the untranslated_project_keys.sh script
+    cp android/$MODULE/values-en-rGB/strings.xml android/$MODULE-lokalize-strings.xml
 
     # Remove the existing strings files with the exception of the default one in case there are changes there we need to save
     find ../$MODULE -type f \( -name "*values-*/strings.xml" ! -name "*values/strings.xml" \) | xargs rm

@@ -52,3 +52,5 @@ echo ""
 echo "iOS matches (key,value):"
 find . -type f -name Localizable.strings | xargs gsed -E -n "s/\"(.*)\" = \"($1)\";/\1,\2/pI"
 
+echo ""
+echo ""
