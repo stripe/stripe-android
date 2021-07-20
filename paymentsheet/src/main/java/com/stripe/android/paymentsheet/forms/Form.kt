@@ -37,11 +37,15 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
+import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
+import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
+import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -108,7 +112,6 @@ internal fun SectionElementUI(
     optionalIdentifiers: List<IdentifierSpec>?,
     focusRequesters: List<FocusRequester>
 ) {
-    Log.e("STRIPE", "SectionElementUI.")
     AnimatedVisibility(
         optionalIdentifiers?.contains(element.identifier) == false,
         enter = EnterTransition.None,
@@ -148,7 +151,7 @@ internal fun SectionElementUI(
 @Composable
 internal fun AddressElementUI(
     enabled: Boolean,
-    addressSectionElement: SectionFieldElementType.AddressElement,
+    addressSectionElement: SectionFieldElement.AddressElement,
     optionalIdentifiers: List<IdentifierSpec>?,
     focusRequesters: List<FocusRequester>
 ) {
@@ -178,11 +181,11 @@ internal fun SectionFieldElementUI(
     field: SectionFieldElement,
     focusRequesters: List<FocusRequester>
 ) {
-    when (field) {
-        is TextFieldElement -> {
-            val focusRequesterIndex = field.focusIndexOrder
+    when (val controller = field.controller) {
+        is TextFieldController -> {
+            val focusRequesterIndex = (field as TextFieldElement).focusIndexOrder
             TextField(
-                textFieldController = field.controller,
+                textFieldController = controller,
                 myFocus = focusRequesters[0],
                 nextFocus = focusRequesters.getOrNull(
                     focusRequesterIndex + 1
@@ -190,26 +193,21 @@ internal fun SectionFieldElementUI(
                 enabled = enabled
             )
         }
-        is DropdownFieldElement -> {
+        is DropdownFieldController -> {
             DropDown(
-                field.controller.label,
-                field.controller,
+                controller.label,
+                controller,
                 enabled
             )
         }
-        is SectionFieldElementType.AddressElement -> {
+        is AddressController -> {
             AddressElementUI(
                 enabled,
-                field,
+                field as SectionFieldElement.AddressElement,
                 emptyList(),
                 focusRequesters
             )
         }
-        is SectionFieldElement.Country -> TODO()
-        is SectionFieldElement.Email -> TODO()
-        is SectionFieldElement.IdealBank -> TODO()
-        is SectionFieldElement.Name -> TODO()
-        is SectionFieldElement.SimpleText -> TODO()
     }
 }
 

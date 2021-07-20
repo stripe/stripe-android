@@ -18,12 +18,12 @@ internal sealed interface SectionFieldErrorController : Controller {
 /**
  * This class provides the logic behind the fields.
  */
-internal sealed interface InputController : SectionFieldErrorController {
+internal sealed interface InputController : Controller {
     val label: Int
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>
     val isComplete: Flow<Boolean>
-    override val error: Flow<FieldError?>
+    val error: Flow<FieldError?>
 
     fun onRawValueChange(rawValue: String)
 }
