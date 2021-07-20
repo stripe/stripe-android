@@ -23,7 +23,7 @@ class EmailConfigTest {
     @Test
     fun `verify if it doesn't pattern match but has an @ and period it is malformed`() {
         assertThat(emailConfig.determineState("@.")).isEqualTo(Incomplete)
-        assertThat(emailConfig.determineState("@.x")).isEqualTo(Invalid)
+        assertThat(emailConfig.determineState("@.x")).isInstanceOf(Invalid::class.java)
     }
 
     @Test

@@ -190,6 +190,11 @@ public final class com/stripe/android/paymentsheet/specifications/SectionFieldSp
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Email;
 }
 
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Iban : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Iban;
+}
+
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$IdealBank : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$IdealBank;
