@@ -24,6 +24,7 @@ internal class IbanConfig : TextFieldConfig {
     @StringRes
     override val label = R.string.stripe_paymentsheet_iban
     override val keyboard = KeyboardType.Ascii
+    // Displays the IBAN in groups of 4 characters with spaces added between them
     override val visualTransformation: VisualTransformation = VisualTransformation { text ->
         val output = StringBuilder()
         text.text.forEachIndexed { i, char ->
@@ -76,7 +77,7 @@ internal class IbanConfig : TextFieldConfig {
 
         // 1. Move the four initial characters to the end of the string
         // 2. Convert letters to numbers, where A = 10, B = 11, ..., Z = 35
-        // 3. Interpret the string as a decimal integer and compute the mod 97
+        // 3. Interpret the string as a decimal integer and check that the mod 97 is 1
         val isValid = input.takeLast(input.length - 4).plus(input.take(4)).uppercase().replace(
             Regex("[A-Z]")
         ) {
