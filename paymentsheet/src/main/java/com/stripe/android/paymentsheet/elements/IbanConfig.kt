@@ -24,6 +24,7 @@ internal class IbanConfig : TextFieldConfig {
     @StringRes
     override val label = R.string.stripe_paymentsheet_iban
     override val keyboard = KeyboardType.Ascii
+
     // Displays the IBAN in groups of 4 characters with spaces added between them
     override val visualTransformation: VisualTransformation = VisualTransformation { text ->
         val output = StringBuilder()
@@ -75,16 +76,7 @@ internal class IbanConfig : TextFieldConfig {
             return TextFieldStateConstants.Error.Incomplete
         }
 
-        // 1. Move the four initial characters to the end of the string
-        // 2. Convert letters to numbers, where A = 10, B = 11, ..., Z = 35
-        // 3. Interpret the string as a decimal integer and check that the mod 97 is 1
-        val isValid = input.takeLast(input.length - 4).plus(input.take(4)).uppercase().replace(
-            Regex("[A-Z]")
-        ) {
-            (it.value.first() - 'A' + 10).toString()
-        }.toBigInteger().mod(BigInteger("97")).equals(BigInteger.ONE)
-
-        return if (isValid) {
+        return if (isIbanValid(input)) {
             if (input.length == MAX_LENGTH) {
                 TextFieldStateConstants.Valid.Full
             } else {
@@ -96,6 +88,22 @@ internal class IbanConfig : TextFieldConfig {
             )
         }
     }
+
+    /**
+     * Verify an IBAN based on the validation algorithm:
+     * https://en.wikipedia.org/wiki/International_Bank_Account_Number#Validating_the_IBAN
+     *
+     * 1. Move the four initial characters to the end of the string
+     * 2. Convert letters to numbers, where A = 10, B = 11, ..., Z = 35
+     * 3. Interpret the string as a decimal integer and check that the mod 97 is 1
+     */
+    private fun isIbanValid(iban: String) =
+        iban.takeLast(iban.length - 4).plus(iban.take(4)).uppercase()
+            .replace(
+                Regex("[A-Z]")
+            ) {
+                (it.value.first() - 'A' + 10).toString()
+            }.toBigInteger().mod(BigInteger("97")).equals(BigInteger.ONE)
 
     private companion object {
         const val MIN_LENGTH = 8 // Length varies per country, but is at least 8
