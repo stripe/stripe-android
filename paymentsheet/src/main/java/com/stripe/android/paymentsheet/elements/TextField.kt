@@ -110,6 +110,7 @@ internal fun TextField(
                 }
                 hasFocus = it.isFocused
             },
+        visualTransformation = textFieldController.visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,

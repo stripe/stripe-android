@@ -121,6 +121,12 @@ internal sealed class SectionFieldElement {
         override val focusIndexOrder: Int
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
+    data class Iban(
+        override val identifier: IdentifierSpec,
+        override val controller: TextFieldController,
+        override val focusIndexOrder: Int
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController

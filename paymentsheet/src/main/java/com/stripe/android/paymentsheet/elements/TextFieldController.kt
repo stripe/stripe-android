@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,11 +16,12 @@ import kotlinx.coroutines.flow.map
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal class TextFieldController @VisibleForTesting constructor(
+internal class TextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
 ) : InputController {
     val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     val keyboardType: KeyboardType = textFieldConfig.keyboard
+    val visualTransformation = textFieldConfig.visualTransformation ?: VisualTransformation.None
 
     @StringRes
     override val label: Int = textFieldConfig.label

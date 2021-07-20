@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 
 internal class SimpleTextFieldConfig(
     override val label: Int,
@@ -9,6 +10,7 @@ internal class SimpleTextFieldConfig(
     override val debugLabel: String = "simple_text"
     override val keyboard: KeyboardType = KeyboardType.Text
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
+    override val visualTransformation: VisualTransformation? = null
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = false

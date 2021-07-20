@@ -77,6 +77,8 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     object Email : SectionFieldSpec(IdentifierSpec("email"))
 
+    object Iban : SectionFieldSpec(IdentifierSpec("iban"))
+
     /**
      * This is the specification for a country field.
      * @property onlyShowCountryCodes: a list of country code that should be shown.  If empty all
