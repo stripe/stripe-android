@@ -2,12 +2,10 @@ package com.stripe.android.paymentsheet.elements
 
 import android.os.Build
 import android.os.Looper.getMainLooper
-import androidx.annotation.StringRes
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.AlwaysError
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Full
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Limitless
@@ -44,7 +42,7 @@ internal class TextFieldControllerTest {
     fun `verify the error message is set when should be visible`() {
         val controller = createControllerWithState()
 
-        var fieldError: FieldError? = FieldError(5, 5)
+        var fieldError: FieldError? = FieldError(5)
         controller.error.asLiveData()
             .observeForever {
                 fieldError = it
@@ -52,8 +50,7 @@ internal class TextFieldControllerTest {
 
         controller.onValueChange("showWhenNoFocus")
         shadowOf(getMainLooper()).idle()
-        assertThat(fieldError?.errorMessage).isEqualTo(R.string.incomplete)
-        assertThat(fieldError?.errorFieldLabel).isEqualTo(R.string.address_label_name)
+        assertThat(fieldError).isEqualTo(ShowWhenNoFocus.getError())
     }
 
     @Test
@@ -215,9 +212,6 @@ internal class TextFieldControllerTest {
             on { determineState("limitless") } doReturn Limitless
             on { filter("limitless") } doReturn "limitless"
 
-            on { determineState("alwaysError") } doReturn AlwaysError
-            on { filter("alwaysError") } doReturn "alwaysError"
-
             on { determineState("blank") } doReturn Blank
             on { filter("blank") } doReturn "blank"
 
@@ -240,8 +234,7 @@ internal class TextFieldControllerTest {
             override fun isFull(): Boolean = false
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
 
-            @StringRes
-            override fun getErrorMessageResId(): Int = R.string.incomplete
+            override fun getError() = FieldError(-1)
         }
     }
 }

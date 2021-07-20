@@ -7,9 +7,7 @@ internal class TextFieldStateConstants {
     sealed class Valid : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean): Boolean = false
         override fun isValid(): Boolean = true
-
-        @StringRes
-        override fun getErrorMessageResId(): Int? = null
+        override fun getError(): FieldError? = null
 
         object Full : Valid() {
             override fun isFull(): Boolean = true
@@ -20,36 +18,29 @@ internal class TextFieldStateConstants {
         }
     }
 
-    sealed class Error : TextFieldState {
+    sealed class Error(
+        @StringRes protected open val errorMessageResId: Int,
+        protected open val formatArgs: Array<out Any>? = null
+    ) : TextFieldState {
         override fun isValid(): Boolean = false
         override fun isFull(): Boolean = false
+        override fun getError() = FieldError(errorMessageResId, formatArgs)
 
-        object AlwaysError : Error() {
-            override fun shouldShowError(hasFocus: Boolean): Boolean = true
-
-            @StringRes
-            override fun getErrorMessageResId(): Int = R.string.invalid
-        }
-
-        object Incomplete : Error() {
+        class Incomplete(
+            @StringRes override val errorMessageResId: Int
+        ) : Error(errorMessageResId) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
-
-            @StringRes
-            override fun getErrorMessageResId(): Int = R.string.incomplete
         }
 
-        class Invalid(@StringRes val errorMessage: Int? = null) : Error() {
+        class Invalid(
+            @StringRes override val errorMessageResId: Int,
+            override val formatArgs: Array<out Any>? = null
+        ) : Error(errorMessageResId, formatArgs) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = true
-
-            @StringRes
-            override fun getErrorMessageResId() = errorMessage ?: R.string.invalid
         }
 
-        object Blank : Error() {
+        object Blank : Error(R.string.blank_and_required) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
-
-            @StringRes
-            override fun getErrorMessageResId(): Int = R.string.blank_and_required
         }
     }
 }

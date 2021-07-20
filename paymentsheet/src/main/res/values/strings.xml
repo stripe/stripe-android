@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Use when a required field has not been filled in -->
-    <string name="incomplete" tools:ignore="MissingTranslation">%s is incomplete.</string>
-    <!-- Use when a required field is not valid and cannot be corrected. -->
-    <string name="malformed" tools:ignore="MissingTranslation">%s is malformed.</string>
-    <!-- Use when a required field is blank and submit is clicked. -->
-    <string name="blank_and_required" tools:ignore="MissingTranslation">%s cannot be blank.</string>
-    <!-- Use when is not valid, but the exact problem is unknown. -->
-    <string name="invalid" tools:ignore="MissingTranslation">%s is invalid.</string>
+    <!-- Used when a required field is blank and submit is clicked. -->
+    <string name="blank_and_required" tools:ignore="MissingTranslation">This field cannot be blank.</string>
+    <!-- The email entered is not valid. -->
+    <string name="email_is_invalid" tools:ignore="MissingTranslation">Your email is invalid.</string>
     <string name="email" tools:ignore="MissingTranslation">Email</string>
     <string name="address_label_name" tools:ignore="MissingTranslation">Name</string>
     <string name="address_label_country" tools:ignore="MissingTranslation">Country</string>
@@ -16,13 +12,16 @@
     <string name="stripe_paymentsheet_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
 
-    <string name="stripe_paymentsheet_iban" translatable="false">IBAN</string>
+    <string name="iban" translatable="false">IBAN</string>
+    <!-- An error message displayed when the customer's IBAN is incomplete. -->
+    <string name="iban_incomplete" tools:ignore="MissingTranslation">The IBAN you entered is incomplete.</string>
     <!-- An error message displayed when the customer's IBAN is invalid. -->
-    <string name="stripe_paymentsheet_iban_invalid" tools:ignore="MissingTranslation">The IBAN you entered is invalid.</string>
+    <string name="iban_invalid" tools:ignore="MissingTranslation">The IBAN you entered is invalid.</string>
     <!-- An error message displayed when the IBAN country code is not supported. -->
-    <string name="stripe_paymentsheet_iban_invalid_country" tools:ignore="MissingTranslation">The IBAN you entered is invalid, \"%s\" is not a supported country code.</string>
+    <string name="iban_invalid_country" tools:ignore="MissingTranslation">The IBAN you entered is invalid, \"%s\" is not a supported country code.</string>
     <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-    <string name="stripe_paymentsheet_iban_invalid_start" tools:ignore="MissingTranslation">Your IBAN should start with a two-letter country code.</string>
+    <string name="iban_invalid_start" tools:ignore="MissingTranslation">Your IBAN should start with a two-letter country code.</string>
+
 
     <!-- Title for card payment method -->
     <string name="stripe_paymentsheet_payment_method_card">Card</string>

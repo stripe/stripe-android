@@ -1,11 +1,10 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -33,7 +32,7 @@ internal class TextFieldController constructor(
 
     override val rawFieldValue: Flow<String> = _fieldValue.map { textFieldConfig.convertToRaw(it) }
 
-    private val _fieldState = MutableStateFlow<TextFieldState>(Error.AlwaysError)
+    private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
 
     private val _hasFocus = MutableStateFlow(false)
 
@@ -45,9 +44,7 @@ internal class TextFieldController constructor(
      * An error must be emitted if it is visible or not visible.
      **/
     override val error: Flow<FieldError?> = visibleError.map { visibleError ->
-        _fieldState.value.getErrorMessageResId()?.let {
-            FieldError(label, it)
-        }?.takeIf { visibleError }
+        _fieldState.value.getError()?.takeIf { visibleError }
     }
 
     val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }

@@ -22,8 +22,9 @@ internal class IbanConfig : TextFieldConfig {
     override val debugLabel = "iban"
 
     @StringRes
-    override val label = R.string.stripe_paymentsheet_iban
+    override val label = R.string.iban
     override val keyboard = KeyboardType.Ascii
+
     // Displays the IBAN in groups of 4 characters with spaces added between them
     override val visualTransformation: VisualTransformation = VisualTransformation { text ->
         val output = StringBuilder()
@@ -56,23 +57,28 @@ internal class IbanConfig : TextFieldConfig {
         // First 2 characters represent the country code. Any number means it's invalid
         if (countryCode.any { it.isDigit() }) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.stripe_paymentsheet_iban_invalid_start
+                R.string.iban_invalid_start
             )
         }
 
         if (countryCode.length < 2) {
             // User might still be entering a valid country code
-            return TextFieldStateConstants.Error.Incomplete
+            return TextFieldStateConstants.Error.Incomplete(
+                R.string.iban_incomplete
+            )
         }
 
         if (!Locale.getISOCountries().contains(countryCode)) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.stripe_paymentsheet_iban_invalid_country
+                R.string.iban_invalid_country,
+                arrayOf(countryCode)
             )
         }
 
         if (input.length < MIN_LENGTH) {
-            return TextFieldStateConstants.Error.Incomplete
+            return TextFieldStateConstants.Error.Incomplete(
+                R.string.iban_incomplete
+            )
         }
 
         // 1. Move the four initial characters to the end of the string
@@ -92,7 +98,7 @@ internal class IbanConfig : TextFieldConfig {
             }
         } else {
             TextFieldStateConstants.Error.Invalid(
-                R.string.stripe_paymentsheet_iban_invalid
+                R.string.iban_invalid
             )
         }
     }
