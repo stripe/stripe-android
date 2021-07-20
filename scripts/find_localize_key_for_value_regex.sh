@@ -22,39 +22,33 @@ fi
 # Load LOCALIZATION_DIRECTORIES & LANGUAGES variables
 source localization_vars.sh
 
-#lokalise2 --token $API_TOKEN \
-#          --project-id $PROJECT_ID \
-#          file download \
-#          --format xml \
-#          --filter-langs en \
-#          --export-sort "a_z" \
-#          --directory-prefix . \
-#          --original-filenames=true
+lokalise2 --token $API_TOKEN \
+          --project-id $PROJECT_ID \
+          file download \
+          --format xml \
+          --filter-langs en \
+          --export-sort "a_z" \
+          --directory-prefix . \
+          --original-filenames=true > /dev/null
 
 echo ""
-echo ""
-echo "Android  matches"
-echo "key,value"
-echo "-------------"
+echo "Android  matches (key,value):"
 # This will print just the key name that matches the inputted regex
 # The I at the end of sed makes it case insensitive
 # gsed is used for case insensitive matching.
 # -n in combination with the /p at the end of sed makes it print only lines that were replaced
 find . -type f -name strings.xml | xargs gsed -E -n "s/<string name=\"(.*)\">($1)<\/string>/\1,\2/pI"
 
-#lokalise2 --token $API_TOKEN \
-#          --project-id $PROJECT_ID \
-#          file download \
-#          --format ios_sdk \
-#          --filter-langs en \
-#          --export-sort "a_z" \
-#          --directory-prefix . \
-#          --original-filenames=true
+lokalise2 --token $API_TOKEN \
+          --project-id $PROJECT_ID \
+          file download \
+          --format ios_sdk \
+          --filter-langs en \
+          --export-sort "a_z" \
+          --directory-prefix . \
+          --original-filenames=true > /dev/null
 
 echo ""
-echo ""
-echo "iOS matches"
-echo "key,value"
-echo "-------------"
+echo "iOS matches (key,value):"
 find . -type f -name Localizable.strings | xargs gsed -E -n "s/\"(.*)\" = \"($1)\";/\1,\2/pI"
 
