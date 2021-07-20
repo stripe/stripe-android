@@ -104,10 +104,9 @@ internal fun TextField(
         label = {
             Text(
                 text = if (textFieldController.showOptionalLabel) {
-                    String.format(
-                        "%s %s",
-                        stringResource(textFieldController.label),
-                        stringResource(R.string.optional_field)
+                    stringResource(
+                        R.string.stripe_paymentsheet_form_label_optional,
+                        stringResource(textFieldController.label)
                     )
                 } else {
                     stringResource(textFieldController.label)
