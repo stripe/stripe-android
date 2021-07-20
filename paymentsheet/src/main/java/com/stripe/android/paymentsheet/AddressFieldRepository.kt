@@ -21,8 +21,7 @@ enum class AddressFieldRepository {
                 context,
                 "addressinfo/ZZ.json"
             )?.let {
-                it.transformToSpecFieldList()
-                    .transform(FocusRequesterCount())
+                it.transformToSpecFieldList().transform()
             }
         )
 
@@ -32,8 +31,7 @@ enum class AddressFieldRepository {
                     context,
                     "addressinfo/$countryCode.json"
                 )?.let {
-                    it.transformToSpecFieldList()
-                        .transform(FocusRequesterCount())
+                    it.transformToSpecFieldList().transform()
                 } ?: defaultCountrySections
             )
         }

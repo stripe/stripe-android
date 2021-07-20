@@ -16,17 +16,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
- * This is used to track the number of focus requesters in a form
- */
-internal class FocusRequesterCount {
-    private var value = 0
-
-    fun getAndIncrement() = value++
-
-    fun get() = value
-}
-
-/**
  * This is used to define which elements can be made optional
  */
 internal interface OptionalElement {
@@ -42,7 +31,6 @@ internal sealed interface SectionFieldElementType {
 
     interface TextFieldElement : SectionFieldElementType {
         override val controller: TextFieldController
-        val focusIndexOrder: Int
     }
 
     interface DropdownFieldElement : SectionFieldElementType {
@@ -134,16 +122,14 @@ internal sealed class SectionFieldElement(
 
     data class Name(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-        override val focusIndexOrder: Int,
+        override val controller: TextFieldController
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
         override fun controllerType(): SectionFieldElementType = this
     }
 
     data class Email(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-        override val focusIndexOrder: Int
+        override val controller: TextFieldController
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
         override fun controllerType(): SectionFieldElementType = this
     }
@@ -164,8 +150,7 @@ internal sealed class SectionFieldElement(
 
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-        override val focusIndexOrder: Int
+        override val controller: TextFieldController
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
         override fun controllerType(): SectionFieldElementType = this
     }
@@ -177,7 +162,6 @@ internal sealed class SectionFieldElement(
     ) : SectionFieldElement(), SectionFieldElementType.AddressElement {
 
         override val subElements: List<SectionFieldElement> = emptyList()
-        val focusRequesterCount = FocusRequesterCount()
 
         /**
          * Focus requester is a challenge - Must get this working from spec

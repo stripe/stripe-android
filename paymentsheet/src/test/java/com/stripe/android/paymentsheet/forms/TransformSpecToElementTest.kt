@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
@@ -46,10 +45,7 @@ class TransformSpecToElementTest {
                     SectionFieldSpec.IdealBank
                 )
             )
-        ).transform(
-            "Example, Inc.",
-            FocusRequesterCount()
-        )
+        ).transform("Example, Inc.")
 
         val sectionElement = formElement[0] as SectionElement
         assertThat(sectionElement.fields.size).isEqualTo(2)
@@ -63,10 +59,7 @@ class TransformSpecToElementTest {
             IdentifierSpec("countrySection"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
-        val formElement = listOf(countrySection).transform(
-            "Example, Inc.",
-            FocusRequesterCount()
-        )
+        val formElement = listOf(countrySection).transform("Example, Inc.")
 
         val countrySectionElement = formElement.first() as SectionElement
         val countryElement = countrySectionElement.fields[0] as Country
@@ -88,10 +81,7 @@ class TransformSpecToElementTest {
             IdentifierSpec("idealSection"),
             SectionFieldSpec.IdealBank
         )
-        val formElement = listOf(idealSection).transform(
-            "Example, Inc.",
-            FocusRequesterCount()
-        )
+        val formElement = listOf(idealSection).transform("Example, Inc.")
 
         val idealSectionElement = formElement.first() as SectionElement
         val idealElement = idealSectionElement.fields[0] as IdealBank
@@ -106,10 +96,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a name section spec sets up the name element correctly`() {
-        val formElement = listOf(nameSection).transform(
-            "Example, Inc.",
-            FocusRequesterCount()
-        )
+        val formElement = listOf(nameSection).transform("Example, Inc.")
 
         val nameElement =
             (formElement.first() as SectionElement).fields[0] as SectionFieldElement.SimpleText
@@ -124,10 +111,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a email section spec sets up the email element correctly`() {
-        val formElement = listOf(emailSection).transform(
-            "Example, Inc.",
-            FocusRequesterCount()
-        )
+        val formElement = listOf(emailSection).transform("Example, Inc.")
 
         val emailSectionElement = formElement.first() as SectionElement
         val emailElement = emailSectionElement.fields[0] as Email
@@ -138,36 +122,13 @@ class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding to sections that get focus sets up the focus indexes correctly`() {
-        val focusRequesterCount = FocusRequesterCount()
-        val formElement = listOf(nameSection, emailSection).transform(
-            "Example, Inc.",
-            focusRequesterCount
-        )
-
-        val nameSectionElement = formElement[0] as SectionElement
-        val nameElement = nameSectionElement.fields[0] as SectionFieldElement.SimpleText
-        val emailSectionElement = formElement[1] as SectionElement
-        val emailElement = emailSectionElement.fields[0] as Email
-
-        assertThat(nameElement.focusIndexOrder).isEqualTo(0)
-        assertThat(emailElement.focusIndexOrder).isEqualTo(1)
-
-        // It should equal as many text fields as are present
-        assertThat(focusRequesterCount.get()).isEqualTo(2)
-    }
-
-    @Test
     fun `Add a mandate section spec setup of the mandate element correctly`() {
         val mandate = FormItemSpec.MandateTextSpec(
             IdentifierSpec("mandate"),
             R.string.stripe_paymentsheet_sepa_mandate,
             Color.Gray
         )
-        val formElement = listOf(mandate).transform(
-            "Example, Inc.",
-            FocusRequesterCount()
-        )
+        val formElement = listOf(mandate).transform("Example, Inc.")
 
         val mandateElement = formElement.first() as MandateTextElement
 
@@ -187,10 +148,7 @@ class TransformSpecToElementTest {
             )
             val optionalIdentifiers = listOf(nameSection, mandate)
             val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(optionalIdentifiers)
-            val formElement = listOf(saveForFutureUseSpec).transform(
-                "Example, Inc.",
-                FocusRequesterCount()
-            )
+            val formElement = listOf(saveForFutureUseSpec).transform("Example, Inc.")
 
             val saveForFutureUseElement = formElement.first() as FormElement.SaveForFutureUseElement
             val saveForFutureUseController = saveForFutureUseElement.controller

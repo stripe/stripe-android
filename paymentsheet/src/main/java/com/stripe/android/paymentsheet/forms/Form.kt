@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -20,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.ExperimentalUnitApi
@@ -29,20 +27,15 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
-import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.SectionFieldElementType
-import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
-import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
@@ -63,8 +56,6 @@ internal val formElementPadding = 16.dp
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val focusRequesters =
-        List(formViewModel.getCountFocusableFields()) { FocusRequester() }
     val optionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
         null
     )
@@ -74,13 +65,7 @@ internal fun Form(
         modifier = Modifier
             .fillMaxWidth(1f)
     ) {
-        Log.e("STRIPE", "for elements size. " + formViewModel.elements.size)
-        Log.e("STRIPE", "optional elements size. " + optionalIdentifiers?.size)
-        formViewModel.elements.forEachIndexed() { index, element ->
-            Log.e(
-                "STRIPE",
-                "In for loop " + index + " element: " + element.javaClass.canonicalName
-            )
+        formViewModel.elements.forEach { element ->
 
             AnimatedVisibility(
                 optionalIdentifiers?.contains(element.identifier) == false,
@@ -89,7 +74,7 @@ internal fun Form(
             ) {
                 when (element) {
                     is SectionElement -> {
-                        SectionElementUI(enabled, element, optionalIdentifiers, focusRequesters)
+                        SectionElementUI(enabled, element, optionalIdentifiers)
                     }
                     is MandateTextElement -> {
                         MandateElementUI(element)
@@ -109,8 +94,7 @@ internal fun Form(
 internal fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    optionalIdentifiers: List<IdentifierSpec>?,
-    focusRequesters: List<FocusRequester>
+    optionalIdentifiers: List<IdentifierSpec>?
 ) {
     AnimatedVisibility(
         optionalIdentifiers?.contains(element.identifier) == false,
@@ -130,7 +114,7 @@ internal fun SectionElementUI(
 
         Section(controller.label, sectionErrorString) {
             element.fields.forEachIndexed { index, field ->
-                SectionFieldElementUI(enabled, field, focusRequesters)
+                SectionFieldElementUI(enabled, field)
                 if (index != element.fields.size - 1) {
                     val cardStyle = CardStyle(isSystemInDarkTheme())
                     Divider(
@@ -153,12 +137,11 @@ internal fun AddressElementUI(
     enabled: Boolean,
     addressSectionElement: SectionFieldElement.AddressElement,
     optionalIdentifiers: List<IdentifierSpec>?,
-    focusRequesters: List<FocusRequester>
 ) {
     val fields by addressSectionElement.fields.asLiveData().observeAsState(emptyList())
     Column {
         fields.forEachIndexed { index, field ->
-            SectionFieldElementUI(enabled, field, focusRequesters)
+            SectionFieldElementUI(enabled, field)
             if (index != fields.size - 1) {
                 val cardStyle = CardStyle(isSystemInDarkTheme())
                 Divider(
@@ -178,18 +161,12 @@ internal fun AddressElementUI(
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,
-    field: SectionFieldElement,
-    focusRequesters: List<FocusRequester>
+    field: SectionFieldElement
 ) {
     when (val controller = field.controller) {
         is TextFieldController -> {
-            val focusRequesterIndex = (field as TextFieldElement).focusIndexOrder
             TextField(
                 textFieldController = controller,
-                myFocus = focusRequesters[0],
-                nextFocus = focusRequesters.getOrNull(
-                    focusRequesterIndex + 1
-                ),
                 enabled = enabled
             )
         }
@@ -204,8 +181,7 @@ internal fun SectionFieldElementUI(
             AddressElementUI(
                 enabled,
                 field as SectionFieldElement.AddressElement,
-                emptyList(),
-                focusRequesters
+                emptyList()
             )
         }
     }
@@ -295,13 +271,7 @@ class FormViewModel(
         this.enabled.value = enabled
     }
 
-    internal var focusIndex = FocusRequesterCount()
-    internal fun getCountFocusableFields() = focusIndex.get()
-
-    internal val elements = layout.items.transform(
-        merchantName,
-        focusIndex
-    )
+    internal val elements = layout.items.transform(merchantName)
 
     private val saveForFutureUseVisible = MutableStateFlow(saveForFutureUseInitialVisibility)
 
