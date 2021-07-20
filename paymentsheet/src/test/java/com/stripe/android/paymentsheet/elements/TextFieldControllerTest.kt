@@ -6,7 +6,6 @@ import androidx.annotation.StringRes
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.ElementType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.AlwaysError
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
@@ -201,7 +200,7 @@ internal class TextFieldControllerTest {
             on { filter("1a2b3c4d") } doReturn "1234"
         }
 
-        val controller = TextFieldController(config, ElementType.Email)
+        val controller = TextFieldController(config)
 
         controller.onValueChange("1a2b3c4d")
 
@@ -232,7 +231,7 @@ internal class TextFieldControllerTest {
             on { label } doReturn R.string.address_label_name
         }
 
-        return TextFieldController(config, ElementType.Email)
+        return TextFieldController(config)
     }
 
     companion object {

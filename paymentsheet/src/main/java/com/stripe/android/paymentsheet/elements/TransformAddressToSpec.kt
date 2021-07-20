@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.elements
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
@@ -76,7 +78,7 @@ enum class NameType(@StringRes val stringResId: Int) {
 }
 
 @Serializable
-class PostalCodeRegex {}
+class PostalCodeRegex
 
 @Serializable
 class StateSchema(
@@ -93,7 +95,7 @@ class FieldSchema(
 //    val regex: String = ".*", //always null
     val isNumeric: Boolean = false,
     val examples: List<String> = emptyList(),
-    val nameType: NameType, //label,
+    val nameType: NameType, // label,
 //    val list: List<StateSchema> = emptyList()
 )
 
@@ -156,7 +158,9 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("line1"),
                     R.string.address_label_address_line1,
-                    it.required
+                    it.required,
+                    capitalization = KeyboardCapitalization.Words,
+                    keyboardType = KeyboardType.Text
                 )
             }
             FieldType.AddressLine2 -> {
@@ -164,33 +168,40 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
                     IdentifierSpec("line2"),
                     R.string.address_label_address_line2,
                     false,
+                    capitalization = KeyboardCapitalization.Words,
+                    keyboardType = KeyboardType.Text
                 )
             }
             FieldType.Locality -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("city"),
                     R.string.address_label_city,
-                    it.required
+                    it.required,
+                    capitalization = KeyboardCapitalization.Words,
+                    keyboardType = KeyboardType.Text
                 )
             }
             FieldType.AdministrativeArea -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("state"),
                     it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
-                    it.required
+                    it.required,
+                    capitalization = KeyboardCapitalization.Words,
+                    keyboardType = KeyboardType.Text
                 )
             }
             FieldType.PostalCode -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("postal_code"),
                     R.string.address_label_postal_code,
-                    it.required
+                    it.required,
+                    capitalization = KeyboardCapitalization.None,
+                    keyboardType = KeyboardType.Text
                 )
             }
             else -> null
         }
     }
-
 
 /**
  * AE.json:  "state_name_type": "emirate",
@@ -203,22 +214,22 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
  * MX.json:  "state_name_type": "state",
  * US.json:  "state_name_type": "state",
  */
-//private fun transformState(value: String?) = when (value) {
+// private fun transformState(value: String?) = when (value) {
 //    "state" -> R.string.address_label_state
 //    "perfecture" -> R.string.address_label_perfecture
 //    "emirate" -> R.string.address_label_ae_emirate
 //    "area" -> R.string.address_label_hk_area
 //    "county" -> R.string.address_label_ie_county
 //    else -> null
-//}
+// }
 //
-//internal fun parseLibAddressInput(context: Context, assetFileName: String) =
+// internal fun parseLibAddressInput(context: Context, assetFileName: String) =
 //    parseLibAddressInput(
 //        context.assets.open(assetFileName)
 //    )
 //
-//@VisibleForTesting
-//internal fun parseLibAddressInput(inputStream: InputStream?) =
+// @VisibleForTesting
+// internal fun parseLibAddressInput(inputStream: InputStream?) =
 //    try {
 //        getJsonStringFromInputStream(inputStream)?.let {
 //            format.decodeFromString<LibAddressInput>(
@@ -232,12 +243,12 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
 //
 //
 
-//private fun getFieldTypes(fmtString: String?) =
+// private fun getFieldTypes(fmtString: String?) =
 //    fmtString?.let {
 //        Regex("%([A-Z])").findAll(fmtString).map { it.groupValues[1] }
 //    }
 //
-//internal fun LibAddressInput.transformToSpecFieldList() =
+// internal fun LibAddressInput.transformToSpecFieldList() =
 //    getFieldTypes(this.fmt)
 //        ?.map {
 //            when (it) {

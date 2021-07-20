@@ -5,7 +5,6 @@ import com.stripe.android.paymentsheet.elements.parseAddressesSchema
 import com.stripe.android.paymentsheet.elements.transformToSpecFieldList
 import com.stripe.android.paymentsheet.forms.transform
 
-
 enum class AddressFieldRepository {
     INSTANCE;
 
@@ -31,7 +30,7 @@ enum class AddressFieldRepository {
             countryFieldMap[countryCode] = requireNotNull(
                 parseAddressesSchema(
                     context,
-                    "addressinfo/${countryCode}.json"
+                    "addressinfo/$countryCode.json"
                 )?.let {
                     it.transformToSpecFieldList()
                         .transform(FocusRequesterCount())

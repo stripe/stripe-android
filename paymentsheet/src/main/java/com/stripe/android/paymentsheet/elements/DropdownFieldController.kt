@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map

@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.specifications.FormItemSpec.SaveForFuture
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.IdealBank
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 
 internal val idealParams: MutableMap<String, Any?> = mutableMapOf(
     "bank" to null,
@@ -19,7 +18,10 @@ internal val idealParamKey: MutableMap<String, Any?> = mutableMapOf(
     "ideal" to idealParams
 )
 
-internal val idealNameSection = SectionSpec(IdentifierSpec("name"), Name)
+internal val idealNameSection = SectionSpec(
+    IdentifierSpec("name section"),
+    SectionFieldSpec.NAME
+)
 internal val idealEmailSection = SectionSpec(IdentifierSpec("email"), Email)
 internal val idealBankSection = SectionSpec(IdentifierSpec("bank"), IdealBank)
 internal val idealMandate = MandateTextSpec(

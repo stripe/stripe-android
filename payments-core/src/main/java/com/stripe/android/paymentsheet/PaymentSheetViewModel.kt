@@ -82,7 +82,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
     private val paymentFlowResultProcessorProvider:
-    Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
+        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val logger: Logger,

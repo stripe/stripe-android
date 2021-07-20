@@ -8,9 +8,9 @@ import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Companion.NAME
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 import com.stripe.android.paymentsheet.specifications.sofort
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -225,7 +225,7 @@ class FormViewModelTest {
 
             nameElement.onValueChange("joe")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
             ).isNull()
 
             emailElement.onValueChange("joe@gmail.com")
@@ -234,14 +234,14 @@ class FormViewModelTest {
                     ?.value
             ).isEqualTo("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
                     ?.value
             ).isEqualTo("joe")
 
             emailElement.onValueChange("invalid.email@IncompleteDomain")
 
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Name.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
             ).isNull()
         }
     }

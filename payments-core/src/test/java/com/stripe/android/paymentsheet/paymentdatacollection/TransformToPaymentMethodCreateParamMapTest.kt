@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Name
 import org.junit.Test
 
 class TransformToPaymentMethodCreateParamMapTest {
@@ -45,7 +44,7 @@ class TransformToPaymentMethodCreateParamMapTest {
             .transform(
                 FormFieldValues(
                     mapOf(
-                        Name.identifier to FormFieldEntry(
+                        IdentifierSpec("name") to FormFieldEntry(
                             "joe",
                             true
                         ),

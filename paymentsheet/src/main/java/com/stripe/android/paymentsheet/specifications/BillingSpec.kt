@@ -16,7 +16,7 @@ internal val billingParams: MutableMap<String, Any?> = mutableMapOf(
     "phone" to null,
 )
 //
-//internal val billingUSFields = listOf(
+// internal val billingUSFields = listOf(
 //    SectionFieldSpec.GenericText(
 //        IdentifierSpec("line1"),
 //        R.string.address_label_address_line1
@@ -37,9 +37,9 @@ internal val billingParams: MutableMap<String, Any?> = mutableMapOf(
 //        IdentifierSpec("postal_code"),
 //        R.string.address_label_postal_code
 //    )
-//)
+// )
 //
-//internal val billingUSSection =
+// internal val billingUSSection =
 //    FormItemSpec.SectionSpec(
 //        IdentifierSpec("billingSection"),
 //        listOf(

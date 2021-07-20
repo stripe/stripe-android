@@ -9,8 +9,10 @@ internal val bancontactParamKey: MutableMap<String, Any?> = mutableMapOf(
     "billing_details" to billingParams
 )
 
-internal val bancontactNameSection =
-    FormItemSpec.SectionSpec(IdentifierSpec("name"), SectionFieldSpec.Name)
+internal val bancontactNameSection = FormItemSpec.SectionSpec(
+    IdentifierSpec("name section"),
+    SectionFieldSpec.NAME
+)
 internal val bancontactEmailSection =
     FormItemSpec.SectionSpec(IdentifierSpec("email"), SectionFieldSpec.Email)
 internal val bancontactMandate = FormItemSpec.MandateTextSpec(
@@ -21,14 +23,6 @@ internal val bancontactMandate = FormItemSpec.MandateTextSpec(
 internal val bancontact = FormSpec(
     LayoutSpec(
         listOf(
-            FormItemSpec.SectionSpec(
-                IdentifierSpec("shipping_section"),
-                listOf(
-                    SectionFieldSpec.Name,
-                    SectionFieldSpec.AddressSpec(IdentifierSpec("shipping_element")),
-                ),
-                R.string.shipping_details
-            ),
             bancontactNameSection,
             bancontactEmailSection,
             SaveForFutureUseSpec(

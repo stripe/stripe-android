@@ -373,7 +373,7 @@ class FormViewModel(
 
     private val addressSectionFields = elements
         .filterIsInstance<SectionElement>()
-        .flatMap{ it.fields }
+        .flatMap { it.fields }
         .filterIsInstance<SectionFieldElement.AddressElement>()
         .firstOrNull()
         ?.fields
@@ -381,10 +381,10 @@ class FormViewModel(
 
     val completeFormValues = addressSectionFields.map { addressSectionFields ->
         val addressInputControllers = addressSectionFields
-                ?.filter { it.controller is InputController }
-                ?.associate { sectionFieldElement ->
-                    sectionFieldElement.identifier to sectionFieldElement.controller as InputController
-                }
+            ?.filter { it.controller is InputController }
+            ?.associate { sectionFieldElement ->
+                sectionFieldElement.identifier to sectionFieldElement.controller as InputController
+            }
 
         addressInputControllers?.plus(
             elements.getIdInputControllerMap()
@@ -398,7 +398,6 @@ class FormViewModel(
                 saveForFutureUse
             ).transformFlow()
         }
-
 
     internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
         populateWith(elements, formFieldValues)

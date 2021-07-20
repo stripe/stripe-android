@@ -116,7 +116,6 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
             .associate { it.identifier to it.controller as InputController }
     )
 
-
 /**
  * This is an element that is in a section and accepts user input.
  */

@@ -5,8 +5,7 @@ import kotlinx.serialization.decodeFromString
 import org.junit.Test
 import java.io.File
 
-
-class TransformAddressToSpec {
+class TransformAddressToSpecTest {
     private val supportedCountries = arrayOf(
         "AE", "AT", "AU", "BE", "BG", "BR", "CA", "CH", "CI", "CR", "CY", "CZ", "DE", "DK", "DO",
         "EE", "ES", "FI", "FR", "GB", "GI", "GR", "GT", "HK", "HU", "ID", "IE", "IN", "IT",
@@ -90,7 +89,8 @@ class TransformAddressToSpec {
     fun `Read AddressSchema list file and output spec json`() {
         for (countryCode in supportedCountries) {
             val file = File(
-                "/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/assets/addressinfo/US.json"
+                "/Users/michelleb/stripe/stripe-android/" +
+                    "paymentsheet/src/main/assets/addressinfo/US.json"
             )
 
             if (file.exists()) {

@@ -106,8 +106,8 @@ internal fun TextField(
                 text = if (textFieldController.isRequired) {
                     stringResource(textFieldController.label)
                 } else {
-                    Log.e("STRIPE", stringResource(textFieldController.label) + " " + stringResource(R.string.address_label_optional_field))
-                    stringResource(textFieldController.label) + " " + stringResource(R.string.address_label_optional_field)
+                    stringResource(textFieldController.label) +
+                        " " + stringResource(R.string.address_label_optional_field)
                 }
             )
         },
