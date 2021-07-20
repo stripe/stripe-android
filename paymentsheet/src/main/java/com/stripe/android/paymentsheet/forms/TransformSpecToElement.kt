@@ -57,7 +57,6 @@ private fun List<SectionFieldSpec>.transform(
     when (it) {
         is SectionFieldSpec.Email -> it.transform(focusRequesterCount)
         is SectionFieldSpec.Iban -> it.transform(focusRequesterCount)
-        is SectionFieldSpec.Iban -> it.transform(focusRequesterCount)
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
         is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
