@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElementType
@@ -22,21 +21,18 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  * controller will be a pass through the field controller.
  */
 internal fun List<FormItemSpec>.transform(
-    merchantName: String,
-    focusRequesterCount: FocusRequesterCount
+    merchantName: String
 ): List<FormElement> =
     this.map {
         when (it) {
             is FormItemSpec.SaveForFutureUseSpec -> it.transform(merchantName)
-            is FormItemSpec.SectionSpec -> it.transform(focusRequesterCount)
+            is FormItemSpec.SectionSpec -> it.transform()
             is FormItemSpec.MandateTextSpec -> it.transform(merchantName)
         }
     }
 
-private fun FormItemSpec.SectionSpec.transform(
-    focusRequesterCount: FocusRequesterCount
-): FormElement.SectionElement {
-    val fieldElements = this.fields.transform(focusRequesterCount)
+private fun FormItemSpec.SectionSpec.transform(): FormElement.SectionElement {
+    val fieldElements = this.fields.transform()
 
     // The controller of the section element will be the same as the field element
     // as there is only a single field in a section
@@ -50,20 +46,16 @@ private fun FormItemSpec.SectionSpec.transform(
     )
 }
 
-private fun List<SectionFieldSpec>.transform(
-    focusRequesterCount: FocusRequesterCount
-) = this.map {
+private fun List<SectionFieldSpec>.transform() = this.map {
     when (it) {
-        is SectionFieldSpec.Email -> it.transform(focusRequesterCount)
+        is SectionFieldSpec.Email -> it.transform()
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
-        is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
+        is SectionFieldSpec.SimpleText -> it.transform()
     }
 }
 
-private fun SectionFieldSpec.SimpleText.transform(
-    focusRequesterCount: FocusRequesterCount
-): SectionFieldElementType =
+private fun SectionFieldSpec.SimpleText.transform(): SectionFieldElementType =
     SectionFieldElement.SimpleText(
         this.identifier,
         TextFieldController(
@@ -72,8 +64,7 @@ private fun SectionFieldSpec.SimpleText.transform(
                 capitalization = this.capitalization,
                 keyboard = this.keyboardType
             )
-        ),
-        focusRequesterCount.getAndIncrement()
+        )
     )
 
 private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
@@ -86,13 +77,10 @@ private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
         merchantName
     )
 
-private fun SectionFieldSpec.Email.transform(
-    focusRequesterCount: FocusRequesterCount
-) =
+private fun SectionFieldSpec.Email.transform() =
     SectionFieldElement.Email(
         this.identifier,
         TextFieldController(EmailConfig()),
-        focusRequesterCount.getAndIncrement()
     )
 
 private fun SectionFieldSpec.Country.transform() =

@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.ExperimentalUnitApi
@@ -28,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
-import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
@@ -54,8 +52,6 @@ internal val formElementPadding = 16.dp
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val focusRequesters =
-        List(formViewModel.getCountFocusableFields()) { FocusRequester() }
     val optionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
         null
     )
@@ -74,7 +70,7 @@ internal fun Form(
             ) {
                 when (element) {
                     is SectionElement -> {
-                        SectionElementUI(enabled, element, optionalIdentifiers, focusRequesters)
+                        SectionElementUI(enabled, element, optionalIdentifiers)
                     }
                     is MandateTextElement -> {
                         MandateElementUI(element)
@@ -94,8 +90,7 @@ internal fun Form(
 internal fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    optionalIdentifiers: List<IdentifierSpec>?,
-    focusRequesters: List<FocusRequester>
+    optionalIdentifiers: List<IdentifierSpec>?
 ) {
     AnimatedVisibility(
         optionalIdentifiers?.contains(element.identifier) == false,
@@ -115,7 +110,7 @@ internal fun SectionElementUI(
 
         Section(controller.label, sectionErrorString) {
             element.fields.forEachIndexed { index, field ->
-                SectionFieldElementUI(enabled, field, focusRequesters)
+                SectionFieldElementUI(enabled, field)
                 if (index != element.fields.size - 1) {
                     val cardStyle = CardStyle(isSystemInDarkTheme())
                     Divider(
@@ -134,18 +129,12 @@ internal fun SectionElementUI(
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,
-    field: SectionFieldElementType,
-    focusRequesters: List<FocusRequester>
+    field: SectionFieldElementType
 ) {
     when (field) {
         is TextFieldElement -> {
-            val focusRequesterIndex = field.focusIndexOrder
             TextField(
                 textFieldController = field.controller,
-                myFocus = focusRequesters[focusRequesterIndex],
-                nextFocus = focusRequesters.getOrNull(
-                    focusRequesterIndex + 1
-                ),
                 enabled = enabled
             )
         }
@@ -243,13 +232,7 @@ class FormViewModel(
         this.enabled.value = enabled
     }
 
-    internal var focusIndex = FocusRequesterCount()
-    internal fun getCountFocusableFields() = focusIndex.get()
-
-    internal val elements = layout.items.transform(
-        merchantName,
-        focusIndex
-    )
+    internal val elements = layout.items.transform(merchantName)
 
     private val saveForFutureUseVisible = MutableStateFlow(saveForFutureUseInitialVisibility)
 
