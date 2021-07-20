@@ -23,8 +23,10 @@ android {
         testInstrumentationRunnerArguments clearPackageData: "true"
     }
 
-    main {
-        res.srcDirs = ['res']
+    sourceSets {
+        main {
+            res.srcDirs = ['res']
+        }
     }
 
     compileOptions {
