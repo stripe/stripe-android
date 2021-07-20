@@ -5,10 +5,10 @@ import androidx.compose.ui.text.input.KeyboardType
 
 internal class SimpleTextFieldConfig(
     override val label: Int,
-) : TextFieldConfig {
-    override val debugLabel: String = "simple_text"
+    override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Words,
     override val keyboard: KeyboardType = KeyboardType.Text
-    override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
+) : TextFieldConfig {
+    override val debugLabel: String = "generic_text"
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = false
