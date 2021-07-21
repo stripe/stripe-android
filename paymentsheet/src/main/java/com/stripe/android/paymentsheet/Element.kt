@@ -73,7 +73,7 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
             .filterIsInstance<FormElement.SectionElement>()
             .flatMap { it.fields }
             .filter { it.controller is InputController }
-            .associate { it.identifier to it.controller as InputController}
+            .associate { it.identifier to it.controller as InputController }
     )
 
 /**
