@@ -34,4 +34,5 @@
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
     <!-- Title for Sofort payment method -->
     <string name="stripe_paymentsheet_payment_method_sofort" translatable="false">Sofort</string>
+    <string name="stripe_paymentsheet_form_label_optional" tools:ignore="MissingTranslation">%s (optional)</string>
 </resources>
