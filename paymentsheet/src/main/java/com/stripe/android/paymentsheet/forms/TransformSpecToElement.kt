@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.IbanConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
@@ -57,6 +58,7 @@ internal fun List<SectionFieldSpec>.transform(
 ) = this.map {
     when (it) {
         is SectionFieldSpec.Email -> it.transform(focusRequesterCount)
+        is SectionFieldSpec.Iban -> it.transform(focusRequesterCount)
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
         is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
@@ -100,6 +102,15 @@ private fun SectionFieldSpec.Email.transform(
     SectionFieldElement.Email(
         this.identifier,
         TextFieldController(EmailConfig()),
+        focusRequesterCount.getAndIncrement()
+    )
+
+private fun SectionFieldSpec.Iban.transform(
+    focusRequesterCount: FocusRequesterCount
+) =
+    SectionFieldElement.Iban(
+        this.identifier,
+        TextFieldController(IbanConfig()),
         focusRequesterCount.getAndIncrement()
     )
 
