@@ -4,12 +4,15 @@ import androidx.annotation.StringRes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
+/**
+ * This is the controller for a section with a static number of fields.
+ */
 internal class SectionController(
     @StringRes val label: Int?,
-    val sectionFieldController: List<InputController>
+    val sectionFieldErrorControllers: List<SectionFieldErrorController>
 ) : Controller {
     val error: Flow<FieldError?> = combine(
-        sectionFieldController.map {
+        sectionFieldErrorControllers.map {
             it.error
         }
     ) {
