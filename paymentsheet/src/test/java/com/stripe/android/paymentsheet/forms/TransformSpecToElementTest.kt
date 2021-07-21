@@ -122,10 +122,7 @@ class TransformSpecToElementTest {
                     capitalization = KeyboardCapitalization.Words
                 )
             )
-        ).transform(
-            "Example, Inc.",
-            FocusRequesterCount()
-        )
+        ).transform("Example, Inc.")
 
         val nameElement = (formElement.first() as SectionElement).fields[0]
             as SectionFieldElement.SimpleText
