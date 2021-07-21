@@ -1,122 +1,192 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="acc_label_card_number">Número do cartão</string>
-    <string name="acc_label_card_number_node">%s, número do cartão</string>
-    <string name="acc_label_cvc_node">%s, CVC</string>
-    <string name="acc_label_expiry_date">Data de validade</string>
-    <string name="acc_label_expiry_date_node">%s, data de validade</string>
-    <string name="acc_label_zip">C.P.</string>
-    <string name="acc_label_zip_short">C.P.</string>
-    <string name="add_card">Adicione um novo cartão de débito ou de crédito para efetuar compras nesta aplicação.</string>
-    <string name="added">Adicionado %s</string>
-    <string name="address_city_required">Introduza a sua cidade</string>
-    <string name="address_country_invalid">O seu país é inválido</string>
-    <string name="address_county_required">Introduza o seu concelho</string>
-    <string name="address_label_address">Endereço</string>
-    <string name="address_label_address_line1">Linha de endereço 1</string>
-    <string name="address_label_address_line1_optional">Linha de endereço 1 (opcional)</string>
-    <string name="address_label_address_line2_optional">Linha de endereço 2 (opcional)</string>
-    <string name="address_label_address_optional">Endereço (opcional)</string>
-    <string name="address_label_apt">Apt.</string>
-    <string name="address_label_apt_optional">Apt. (opcional)</string>
-    <string name="address_label_city">Cidade</string>
-    <string name="address_label_city_optional">Cidade (opcional)</string>
-    <string name="address_label_country">País</string>
-    <string name="address_label_county">Concelho</string>
-    <string name="address_label_county_optional">Concelho (opcional)</string>
-    <string name="address_label_name">Nome</string>
-    <string name="address_label_phone_number">Número de telefone</string>
-    <string name="address_label_phone_number_optional">Número de telefone (opcional)</string>
-    <string name="address_label_postal_code">Código postal</string>
-    <string name="address_label_postal_code_optional">Código postal (opcional)</string>
-    <string name="address_label_postcode">Código postal</string>
-    <string name="address_label_postcode_optional">Código postal (opcional)</string>
-    <string name="address_label_province">Província</string>
-    <string name="address_label_province_optional">Província (opcional)</string>
-    <string name="address_label_region_generic">Estado/Província/Região</string>
-    <string name="address_label_region_generic_optional">Estado/Província/Região (opcional)</string>
-    <string name="address_label_state">Estado</string>
-    <string name="address_label_state_optional">Estado (opcional)</string>
-    <string name="address_label_zip_code">Código postal</string>
-    <string name="address_label_zip_code_optional">Código postal (opcional)</string>
-    <string name="address_label_zip_postal_code">Código postal</string>
-    <string name="address_label_zip_postal_code_optional">Código postal (opcional)</string>
-    <string name="address_name_required">Introduza o seu nome</string>
-    <string name="address_phone_number_required">Introduza o seu número de telefone</string>
-    <string name="address_postal_code_invalid">O seu código postal é inválido.</string>
-    <string name="address_postcode_invalid">O seu código postal é inválido</string>
-    <string name="address_province_required">Introduza a sua província</string>
-    <string name="address_region_generic_required">Introduza o seu Estado/Província/Região</string>
-    <string name="address_required">Introduza o seu endereço</string>
-    <string name="address_shipping_address">Endereço de envio</string>
-    <string name="address_state_required">Introduza o seu estado</string>
-    <string name="address_zip_invalid">O seu código postal é inválido.</string>
-    <string name="address_zip_postal_invalid">O seu código postal é inválido</string>
-    <string name="becs_mandate_acceptance">
-    Ao fornecer os seus dados de conta bancária e ao confirmar este pagamento, declara que concorda com este
-    Pedido de Débito Direto e com o contrato de serviços de Pedido de Débito Direto e autoriza a
-    Stripe Payments Australia Pty Ltd ACN 160 180 343, número de ID de Utilizador de Débito Direto 507156
-    (“Stripe”) a debitar a sua conta através do Sistema BECS (Bulk Electronic Clearing System) em
-    nome de %1$s (o \"Comerciante\") em quaisquer montantes comunicados separadamente a si
-    pelo Comerciante. Certifica ainda que é um titular da conta ou um signatário autorizado
-    da conta acima indicada.
-    </string>
-    <string name="becs_widget_account_number">Número de conta</string>
-    <string name="becs_widget_account_number_incomplete">O número da sua conta está incompleto.</string>
-    <string name="becs_widget_account_number_required">O seu número de conta é obrigatório.</string>
-    <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">O BSB que introduziu está incompleto.</string>
-    <string name="becs_widget_bsb_invalid">O BSB que introduziu é inválido.</string>
-    <string name="becs_widget_email">Endereço de email</string>
-    <string name="becs_widget_email_invalid">O seu endereço de email é inválido.</string>
-    <string name="becs_widget_email_required">O seu endereço de email é obrigatório.</string>
-    <string name="becs_widget_name">Nome</string>
-    <string name="becs_widget_name_required">O seu nome é obrigatório.</string>
-    <string name="card_ending_in">%1$s a terminar em %2$s</string>
-    <string name="close">Fechar</string>
-    <string name="delete_payment_method">Eliminar método de pagamento</string>
-    <string name="delete_payment_method_prompt_title">Eliminar método de pagamento?</string>
-    <string name="expiry_date_hint">MM/AA</string>
-    <string name="expiry_label_short">Validade</string>
-    <string name="fpx_bank_offline">%s - Offline</string>
-    <string name="incomplete_expiry_date">A data de validade do seu cartão está incompleta.</string>
-    <string name="invalid_card_number">O número do seu cartão é inválido.</string>
-    <string name="invalid_cvc">O código de segurança do seu cartão é inválido.</string>
-    <string name="invalid_expiry_month">O mês de validade do seu cartão é inválido.</string>
-    <string name="invalid_expiry_year">O ano de validade do seu cartão é inválido.</string>
-    <string name="invalid_shipping_information">Endereço de envio inválido</string>
-    <string name="invalid_zip">O seu código postal está incompleto.</string>
-    <string name="no_payment_methods">Nenhum método de pagamento.</string>
-    <string name="payment_method_add_new_card">Adicionar um novo cartão…</string>
-    <string name="payment_method_add_new_fpx">Selecionar conta bancária (FPX)…</string>
-    <string name="price_free">Gratuito</string>
-    <string name="removed">Removido %s</string>
-    <string name="secure_checkout">Finalização de compra segura</string>
-    <string name="stripe_failure_connection_error">Estamos com problemas de ligação relativamente ao nosso prestador de serviços de pagamentos. Verifique a sua ligação à Internet e tente novamente.</string>
-    <string name="stripe_failure_reason_authentication">Não conseguimos autenticar o seu método de pagamento. Selecione outro método de pagamento e tente novamente.</string>
-    <string name="stripe_failure_reason_timed_out">A autenticação do seu método de pagamento atingiu o tempo limite -- tente novamente</string>
-    <string name="stripe_google_pay_error_internal">Ocorreu um erro interno.</string>
-    <string name="stripe_paymentsheet_add_button_label">Adicionar</string>
-    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adicionar</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information">Informações do cartão</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">País ou região</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">Adicione as suas informações de pagamento</string>
-    <string name="stripe_paymentsheet_back">Voltar</string>
-    <string name="stripe_paymentsheet_close">Fechar</string>
-    <string name="stripe_paymentsheet_expiration_date_hint">MM/AA</string>
-    <string name="stripe_paymentsheet_or_pay_using">Ou pagar com</string>
-    <string name="stripe_paymentsheet_or_pay_with_card">Ou pagar com um cartão</string>
-    <string name="stripe_paymentsheet_pay_button_amount">Pagar %s</string>
-    <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
-    <string name="stripe_paymentsheet_primary_button_processing">A processar…</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Guardar este cartão para pagamentos futuros %s</string>
-    <string name="stripe_paymentsheet_select_payment_method">Selecione o seu método de pagamento</string>
-    <string name="stripe_paymentsheet_setup_button_label">Configurar</string>
-    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
-    <string name="stripe_verify_your_payment">Verifique o seu pagamento</string>
-    <string name="title_add_a_card">Adicionar um cartão</string>
-    <string name="title_add_an_address">Definir endereço</string>
-    <string name="title_bank_account">Conta bancária</string>
-    <string name="title_payment_method">Método de Pagamento</string>
-    <string name="title_select_shipping_method">Selecionar método de envio</string>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">Número do cartão</string>
+  <string name="acc_label_card_number_node">%s, número do cartão</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">Data de validade</string>
+  <string name="acc_label_expiry_date_node">%s, data de validade</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">C.P.</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">C.P.</string>
+  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
+  <string name="add_card">Adicione um novo cartão de débito ou de crédito para efetuar compras nesta aplicação.</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">Adicionado %s</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">Introduza a sua cidade</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">O seu país é inválido</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">Introduza o seu concelho</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Endereço</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Linha de endereço 1</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">Linha de endereço 1 (opcional)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">Linha de endereço 2 (opcional)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">Endereço (opcional)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">Apt. (opcional)</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">Cidade (opcional)</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">Concelho (opcional)</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">Número de telefone</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">Número de telefone (opcional)</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">Código postal (opcional)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">Código postal</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">Código postal (opcional)</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">Província (opcional)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">Estado/Província/Região</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">Estado/Província/Região (opcional)</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">Estado (opcional)</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">Código postal (opcional)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">Código postal</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">Código postal (opcional)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">Introduza o seu nome</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">Introduza o seu número de telefone</string>
+  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+  <string name="address_postal_code_invalid">O seu código postal é inválido.</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">O seu código postal é inválido</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">Introduza a sua província</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">Introduza o seu Estado/Província/Região</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">Introduza o seu endereço</string>
+  <!-- Title for shipping address entry section -->
+  <string name="address_shipping_address">Endereço de envio</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">Introduza o seu estado</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">O seu código postal é inválido.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">O seu código postal é inválido</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    Ao fornecer os seus dados de conta bancária e ao confirmar este pagamento, declara que concorda com este\n    Pedido de Débito Direto e com o contrato de serviços de Pedido de Débito Direto e autoriza a\n    Stripe Payments Australia Pty Ltd ACN 160 180 343, número de ID de Utilizador de Débito Direto 507156\n    (“Stripe”) a debitar a sua conta através do Sistema BECS (Bulk Electronic Clearing System) em\n    nome de %1$s (o \"Comerciante\") em quaisquer montantes comunicados separadamente a si\n    pelo Comerciante. Certifica ainda que é um titular da conta ou um signatário autorizado\n    da conta acima indicada.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">Número de conta</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">O número da sua conta está incompleto.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">O seu número de conta é obrigatório.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">O BSB que introduziu está incompleto.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">O BSB que introduziu é inválido.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">Endereço de email</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">O seu endereço de email é inválido.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">O seu endereço de email é obrigatório.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">Nome</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">O seu nome é obrigatório.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%1$s a terminar em %2$s</string>
+  <!-- Text for close button -->
+  <string name="close">Fechar</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">Eliminar método de pagamento</string>
+  <string name="delete_payment_method_prompt_title">Eliminar método de pagamento?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">MM/AA</string>
+  <string name="expiry_label_short">Validade</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - Offline</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">A data de validade do seu cartão está incompleta.</string>
+  <string name="invalid_card_number">O número do seu cartão é inválido.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">O código de segurança do seu cartão é inválido.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">O mês de validade do seu cartão é inválido.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">O ano de validade do seu cartão é inválido.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">Endereço de envio inválido</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">O seu código postal está incompleto.</string>
+  <!-- Text informing user there are no existing payment methods in the application -->
+  <string name="no_payment_methods">Nenhum método de pagamento.</string>
+  <string name="payment_method_add_new_card">Adicionar um novo cartão…</string>
+  <string name="payment_method_add_new_fpx">Selecionar conta bancária (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">Gratuito</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">Removido %s</string>
+  <string name="secure_checkout">Finalização de compra segura</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Estamos com problemas de ligação relativamente ao nosso prestador de serviços de pagamentos. Verifique a sua ligação à Internet e tente novamente.</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Não conseguimos autenticar o seu método de pagamento. Selecione outro método de pagamento e tente novamente.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">A autenticação do seu método de pagamento atingiu o tempo limite -- tente novamente</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">Ocorreu um erro interno.</string>
+  <string name="stripe_paymentsheet_add_button_label">Adicionar</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adicionar</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Informações do cartão</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">País ou região</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">Adicione as suas informações de pagamento</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">Voltar</string>
+  <string name="stripe_paymentsheet_close">Fechar</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">MM/AA</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">Ou pagar com</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">Ou pagar com um cartão</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">Pagar %s</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">Pagar</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">A processar…</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Guardar este cartão para pagamentos futuros %s</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">Selecione o seu método de pagamento</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">Configurar</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Verifique o seu pagamento</string>
+  <string name="title_add_a_card">Adicionar um cartão</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">Definir endereço</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">Conta bancária</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">Método de Pagamento</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">Selecionar método de envio</string>
 </resources>

@@ -57,7 +57,7 @@ internal class IbanConfig : TextFieldConfig {
         // First 2 characters represent the country code. Any number means it's invalid
         if (countryCode.any { it.isDigit() }) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.stripe_paymentsheet_iban_invalid_start
+                R.string.iban_invalid_start
             )
         }
 
@@ -68,7 +68,7 @@ internal class IbanConfig : TextFieldConfig {
 
         if (!Locale.getISOCountries().contains(countryCode)) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.stripe_paymentsheet_iban_invalid_country
+                R.string.iban_invalid_country
             )
         }
 
@@ -84,7 +84,7 @@ internal class IbanConfig : TextFieldConfig {
             }
         } else {
             TextFieldStateConstants.Error.Invalid(
-                R.string.stripe_paymentsheet_iban_invalid
+                R.string.iban_invalid
             )
         }
     }

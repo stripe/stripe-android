@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources>
-    <string name="stripe_paymentsheet_ideal_bank">Bank iDEAL</string>
-    <string name="stripe_paymentsheet_payment_method_card">Kad</string>
-    <string name="stripe_paymentsheet_payment_method_sepa_debit">Debit SEPA</string>
-    <string name="stripe_paymentsheet_save_for_future_payments">Simpan untuk pembayaran masa hadapan</string>
-    <string name="stripe_paymentsheet_sepa_mandate">Dengan memberikan maklumat pembayaran anda dan mengesahkan pembayaran ini, anda mengizinkan (A) %s dan Stripe, iaitu penyedia perkhidmatan pembayaran kami, untuk menghantar arahan kepada bank untuk mendebitkan akaun anda dan (B) bank anda untuk mendebitkan akaun anda menurut arahan tersebut. Sebagai sebahagian daripada hak anda, anda layak mendapat bayaran balik daripada bank menurut terma dan syarat perjanjian dengan bank anda. Bayaran balik mesti dituntut dalam tempoh 8 minggu mulai tarikh akaun anda didebitkan. Hak anda dijelaskan dalam pernyataan yang boleh anda dapatkan daripada bank anda. Anda bersetuju untuk menerima pemberitahuan bagi debit masa hadapan sehingga 2 hari sebelum debit tersebut dibuat.</string>
-</resources>
