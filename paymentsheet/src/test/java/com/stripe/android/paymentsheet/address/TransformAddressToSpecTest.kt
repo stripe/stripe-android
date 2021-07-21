@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.paymentsheet.address
 
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.serialization.decodeFromString

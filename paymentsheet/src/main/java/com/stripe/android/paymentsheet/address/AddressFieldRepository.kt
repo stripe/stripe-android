@@ -1,6 +1,7 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.address
 
 import android.content.Context
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.parseAddressesSchema
 import com.stripe.android.paymentsheet.elements.transformToSpecFieldList
 import com.stripe.android.paymentsheet.forms.transform

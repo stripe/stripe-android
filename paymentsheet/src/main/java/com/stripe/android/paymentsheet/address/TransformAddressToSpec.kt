@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.paymentsheet.address
 
 import android.content.Context
 import androidx.annotation.StringRes
