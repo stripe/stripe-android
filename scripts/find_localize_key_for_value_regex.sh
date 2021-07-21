@@ -2,6 +2,11 @@
 # This script will do a regular expression match to find the string value in the ios or
 # android projects, regardless of the translation status
 
+if [ -z "$API_TOKEN" ]; then
+  echo "You need to add the API_TOKEN to: localization_vars.sh"
+  exit
+fi
+
 echo "Searching for string value: $1"
 
 if [[ -z $(which lokalise2) ]]; then

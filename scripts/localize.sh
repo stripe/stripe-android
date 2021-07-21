@@ -1,17 +1,18 @@
 #!/bin/bash
-
-#This script will pull down the strings for each of the modules and copies
-#them into the respective string directories.
+# This script will pull down the strings for each of the modules and copies
+# them into the respective string directories.
 #
-#It will remove the android directory from which it works at the beginning
-#It will not replace the default string value.
-#It will do iso renames as needed.
-#It will not perform a commit.
+# It will remove the android directory from which it works at the beginning
+# It will not replace the default string value.
+# It will do iso renames as needed.
+# It will not perform a commit.
 #
-#It does generate an android/$MODULE-strings.xml file for use by other scripts.
+# It does generate an android/$MODULE-strings.xml file for use by other scripts.
 
-#xml is for android, strings is for iOS
-FORMAT=xml
+if [ -z "$API_TOKEN" ]; then
+  echo "You need to add the API_TOKEN to: localization_vars.sh"
+  exit
+fi
 
 if [[ -z $(which lokalise2) ]]; then
     echo "Installing lokalise2 via homebrew..."

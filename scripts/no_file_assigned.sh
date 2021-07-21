@@ -1,8 +1,14 @@
 #!/bin/bash
+# This will download all the android files, and strings that are assigned to android
+# but not to any files will be outputted.  This indicates an error.   It will cleanup
+# files created at the end.
+#
+# This will not replace any files in the android project
 
-#This will download all the android files, and strings that are assigned to android
-#but not to any files will be outputted.  This indicates an error.   It will cleanup
-#files created at the end.
+if [ -z "$API_TOKEN" ]; then
+  echo "You need to add the API_TOKEN to: localization_vars.sh"
+  exit
+fi
 
 if [[ -z $(which lokalise2) ]]; then
     echo "Installing lokalise2 via homebrew..."
