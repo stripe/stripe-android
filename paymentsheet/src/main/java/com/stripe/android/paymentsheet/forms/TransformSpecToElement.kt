@@ -73,7 +73,8 @@ private fun SectionFieldSpec.SimpleText.transform(
                 label = this.label,
                 capitalization = this.capitalization,
                 keyboard = this.keyboardType
-            )
+            ),
+            showOptionalLabel = this.showOptionalLabel
         ),
         focusRequesterCount.getAndIncrement()
     )

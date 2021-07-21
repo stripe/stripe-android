@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources>
-    <string name="stripe_paymentsheet_ideal_bank">ธนาคารที่รองรับ iDEAL</string>
-    <string name="stripe_paymentsheet_payment_method_card">บัตร</string>
-    <string name="stripe_paymentsheet_payment_method_sepa_debit">การหักบัญชีอัตโนมัติแบบ SEPA</string>
-    <string name="stripe_paymentsheet_save_for_future_payments">บันทึกไว้เพื่อชำระเงินในอนาคต</string>
-    <string name="stripe_paymentsheet_sepa_mandate">เมื่อให้ข้อมูลการชำระเงินและยืนยันการชำระเงินนี้ หมายความว่าคุณ (ก) อนุญาตให้ %s และ Stripe ซึ่งเป็นผู้ให้บริการชำระเงินส่งคำสั่งให้ธนาคารหักเงินจากบัญชีของคุณ และ (ข) อนุญาตให้ธนาคารหักเงินจากบัญชีตามคำสั่งดังกล่าว คุณมีสิทธิ์รับเงินคืนจากธนาคารภายใต้เงื่อนไขและข้อกำหนดซึ่งระบุไว้ในข้อตกลงที่คุณทำไว้กับธนาคาร โดยจะต้องทำการขอเงินคืนภายใน 8 สัปดาห์นับจากวันที่มีการหักเงินจากบัญชี คุณสามารถดูสิทธิ์ของตัวเองได้ในใบแจ้งยอดบัญชีที่ขอได้จากธนาคาร คุณตกลงที่จะรับการแจ้งเตือนเกี่ยวกับการหักเงินในบัญชีในอนาคตสูงสุดไม่เกิน 2 วันก่อนที่จะถึงวันหักจริง</string>
-</resources>
