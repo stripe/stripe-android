@@ -65,7 +65,8 @@ private fun SectionFieldSpec.SimpleText.transform(): SectionFieldElementType =
                 label = this.label,
                 capitalization = this.capitalization,
                 keyboard = this.keyboardType
-            )
+            ),
+            showOptionalLabel = this.showOptionalLabel
         )
     )
 

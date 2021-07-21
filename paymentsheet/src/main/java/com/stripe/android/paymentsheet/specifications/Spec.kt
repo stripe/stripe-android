@@ -95,7 +95,8 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
         override val identifier: IdentifierSpec,
         @StringRes val label: Int,
         val capitalization: KeyboardCapitalization,
-        val keyboardType: KeyboardType
+        val keyboardType: KeyboardType,
+        val showOptionalLabel: Boolean = false
     ) : SectionFieldSpec(identifier)
 
     internal companion object {
