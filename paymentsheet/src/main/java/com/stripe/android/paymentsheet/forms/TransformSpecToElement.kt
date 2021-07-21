@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  */
 internal fun List<FormItemSpec>.transform(
     merchantName: String,
-    focusRequesterCount: FocusRequesterCount
+    focusRequesterCount: FocusRequesterCount,
 ): List<FormElement> =
     this.map {
         when (it) {
@@ -64,10 +64,10 @@ internal fun List<SectionFieldSpec>.transform(
     }
 }
 
-private fun SectionFieldSpec.AddressSpec.transform() = SectionFieldElement.AddressElement(
-    IdentifierSpec("billing"),
-    AddressFieldRepository.INSTANCE
-)
+private fun SectionFieldSpec.AddressSpec.transform() =
+    SectionFieldElement.AddressElement(
+        IdentifierSpec("billing")
+    )
 
 private fun SectionFieldSpec.SimpleText.transform(
     focusRequesterCount: FocusRequesterCount

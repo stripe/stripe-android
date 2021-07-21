@@ -147,7 +147,7 @@ internal sealed class SectionFieldElement {
 
     internal class AddressElement(
         override val identifier: IdentifierSpec,
-        val addressFieldRepository: AddressFieldRepository,
+        val addressFieldRepository: AddressFieldRepository = AddressFieldRepository,
     ) : SectionFieldElement(), SectionFieldElementType.AddressElement {
 
         override val fields = MutableStateFlow(emptyList<SectionFieldElement>())

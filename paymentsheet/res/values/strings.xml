@@ -50,6 +50,7 @@
     <string name="stripe_paymentsheet_payment_method_sofort" translatable="false">Sofort</string>
 
     <string name="billing_details" tools:ignore="MissingTranslation">Billing Details</string>
+    <string name="address_label_address_line2" tools:ignore="MissingTranslation">Address line 2</string>
     <string name="address_label_ae_emirate" tools:ignore="MissingTranslation">Emirate</string>
     <string name="address_label_hk_area" tools:ignore="MissingTranslation">Area</string>
     <string name="address_label_island" tools:ignore="MissingTranslation">Island</string>

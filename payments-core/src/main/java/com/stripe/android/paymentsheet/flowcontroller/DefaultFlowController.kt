@@ -24,6 +24,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.paymentsheet.AddressFieldRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -85,7 +86,8 @@ internal class DefaultFlowController @Inject internal constructor(
      *   paymentFlowResultProcessor afterwards.
      */
     private val paymentFlowResultProcessorProvider:
-    Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
+    Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
+    private val addressFieldRepository: AddressFieldRepository = AddressFieldRepository
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
@@ -150,8 +152,6 @@ internal class DefaultFlowController @Inject internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         lifecycleScope.launch {
-            viewModel.initializeAddressRepository()
-
             val result = flowControllerInitializer.init(
                 clientSecret,
                 StripeIntentRepository.Api(
@@ -464,7 +464,7 @@ internal class DefaultFlowController @Inject internal constructor(
             authHostSupplier: () -> AuthActivityStarterHost,
             paymentOptionFactory: PaymentOptionFactory,
             paymentOptionCallback: PaymentOptionCallback,
-            paymentResultCallback: PaymentSheetResultCallback
+            paymentResultCallback: PaymentSheetResultCallback,
         ): PaymentSheet.FlowController {
             return DaggerFlowControllerComponent.builder()
                 .appContext(appContext)

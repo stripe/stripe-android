@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
-import android.content.Context
+import android.content.res.Resources
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -91,9 +91,9 @@ class AddressSchema(
 
 val format = Json { ignoreUnknownKeys = true }
 
-internal fun parseAddressesSchema(context: Context, assetFileName: String) =
+internal fun parseAddressesSchema(resources: Resources, assetFileName: String) =
     parseAddressesSchema(
-        context.assets.open(assetFileName)
+        resources.assets.open(assetFileName)
     )
 
 @VisibleForTesting
@@ -134,7 +134,7 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?): String? {
     return jsonString
 }
 
-internal fun List<AddressSchema>.transformToSpecFieldList(): List<SectionFieldSpec> =
+internal fun List<AddressSchema>.transformToSpecFieldList() =
     this.mapNotNull {
         when (it.type) {
             FieldType.AddressLine1 -> {
@@ -157,7 +157,7 @@ internal fun List<AddressSchema>.transformToSpecFieldList(): List<SectionFieldSp
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("city"),
                     R.string.address_label_city,
-                    it.required,
+//                    it.required,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = KeyboardType.Text
                 )
@@ -166,7 +166,7 @@ internal fun List<AddressSchema>.transformToSpecFieldList(): List<SectionFieldSp
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("state"),
                     it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
-                    it.required,
+//                    it.required,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = KeyboardType.Text
                 )
@@ -175,7 +175,7 @@ internal fun List<AddressSchema>.transformToSpecFieldList(): List<SectionFieldSp
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("postal_code"),
                     R.string.address_label_postal_code,
-                    it.required,
+//                    it.required,
                     capitalization = KeyboardCapitalization.None,
                     keyboardType = KeyboardType.Text
                 )
