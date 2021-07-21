@@ -1,8 +1,177 @@
+public final class com/stripe/android/paymentsheet/AddressSchema {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/AddressSchema$Companion;
+	public synthetic fun <init> (ILcom/stripe/android/paymentsheet/FieldType;ZLcom/stripe/android/paymentsheet/FieldSchema;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/FieldType;ZLcom/stripe/android/paymentsheet/FieldSchema;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/FieldType;ZLcom/stripe/android/paymentsheet/FieldSchema;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getRequired ()Z
+	public final fun getSchema ()Lcom/stripe/android/paymentsheet/FieldSchema;
+	public final fun getType ()Lcom/stripe/android/paymentsheet/FieldType;
+}
+
+public final class com/stripe/android/paymentsheet/AddressSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/AddressSchema$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/paymentsheet/AddressSchema;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/paymentsheet/AddressSchema;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/AddressSchema$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/paymentsheet/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
 	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
 	public fun <init> ()V
+}
+
+public final class com/stripe/android/paymentsheet/FieldSchema {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/FieldSchema$Companion;
+	public synthetic fun <init> (IZLjava/util/List;Lcom/stripe/android/paymentsheet/NameType;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (ZLjava/util/List;Lcom/stripe/android/paymentsheet/NameType;)V
+	public synthetic fun <init> (ZLjava/util/List;Lcom/stripe/android/paymentsheet/NameType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getExamples ()Ljava/util/List;
+	public final fun getNameType ()Lcom/stripe/android/paymentsheet/NameType;
+	public final fun isNumeric ()Z
+}
+
+public final class com/stripe/android/paymentsheet/FieldSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/FieldSchema$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/paymentsheet/FieldSchema;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/paymentsheet/FieldSchema;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/FieldSchema$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/FieldType : java/lang/Enum {
+	public static final field AddressLine1 Lcom/stripe/android/paymentsheet/FieldType;
+	public static final field AddressLine2 Lcom/stripe/android/paymentsheet/FieldType;
+	public static final field AdministrativeArea Lcom/stripe/android/paymentsheet/FieldType;
+	public static final field Companion Lcom/stripe/android/paymentsheet/FieldType$Companion;
+	public static final field Locality Lcom/stripe/android/paymentsheet/FieldType;
+	public static final field Name Lcom/stripe/android/paymentsheet/FieldType;
+	public static final field PostalCode Lcom/stripe/android/paymentsheet/FieldType;
+	public final fun getSerializedValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/FieldType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/FieldType;
+}
+
+public final class com/stripe/android/paymentsheet/FieldType$Companion {
+	public final fun from (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/FieldType;
+}
+
+public final class com/stripe/android/paymentsheet/FieldTypeAsStringSerializer : kotlinx/serialization/KSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/FieldTypeAsStringSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/paymentsheet/FieldType;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/paymentsheet/FieldType;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/paymentsheet/NameType : java/lang/Enum {
+	public static final field area Lcom/stripe/android/paymentsheet/NameType;
+	public static final field cedex Lcom/stripe/android/paymentsheet/NameType;
+	public static final field city Lcom/stripe/android/paymentsheet/NameType;
+	public static final field country Lcom/stripe/android/paymentsheet/NameType;
+	public static final field county Lcom/stripe/android/paymentsheet/NameType;
+	public static final field department Lcom/stripe/android/paymentsheet/NameType;
+	public static final field district Lcom/stripe/android/paymentsheet/NameType;
+	public static final field do_si Lcom/stripe/android/paymentsheet/NameType;
+	public static final field eircode Lcom/stripe/android/paymentsheet/NameType;
+	public static final field emirate Lcom/stripe/android/paymentsheet/NameType;
+	public static final field island Lcom/stripe/android/paymentsheet/NameType;
+	public static final field neighborhood Lcom/stripe/android/paymentsheet/NameType;
+	public static final field oblast Lcom/stripe/android/paymentsheet/NameType;
+	public static final field parish Lcom/stripe/android/paymentsheet/NameType;
+	public static final field pin Lcom/stripe/android/paymentsheet/NameType;
+	public static final field post_town Lcom/stripe/android/paymentsheet/NameType;
+	public static final field postal Lcom/stripe/android/paymentsheet/NameType;
+	public static final field prefecture Lcom/stripe/android/paymentsheet/NameType;
+	public static final field province Lcom/stripe/android/paymentsheet/NameType;
+	public static final field state Lcom/stripe/android/paymentsheet/NameType;
+	public static final field suburb Lcom/stripe/android/paymentsheet/NameType;
+	public static final field suburb_or_city Lcom/stripe/android/paymentsheet/NameType;
+	public static final field townland Lcom/stripe/android/paymentsheet/NameType;
+	public static final field village_township Lcom/stripe/android/paymentsheet/NameType;
+	public static final field zip Lcom/stripe/android/paymentsheet/NameType;
+	public final fun getStringResId ()I
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/NameType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/NameType;
+}
+
+public final class com/stripe/android/paymentsheet/PostalCodeRegex {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/PostalCodeRegex$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (ILkotlinx/serialization/internal/SerializationConstructorMarker;)V
+}
+
+public final class com/stripe/android/paymentsheet/PostalCodeRegex$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PostalCodeRegex$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/paymentsheet/PostalCodeRegex;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/paymentsheet/PostalCodeRegex;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/PostalCodeRegex$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/StateSchema {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/StateSchema$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getIsoID ()Ljava/lang/String;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/StateSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/StateSchema$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/paymentsheet/StateSchema;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/paymentsheet/StateSchema;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/StateSchema$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/TransformAddressToSpecKt {
+	public static final fun getFormat ()Lkotlinx/serialization/json/Json;
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormFieldEntry {

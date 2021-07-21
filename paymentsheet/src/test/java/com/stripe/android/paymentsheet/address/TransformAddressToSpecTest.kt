@@ -73,15 +73,14 @@ class TransformAddressToSpecTest {
     @Test
     fun `Make sure name schema is not found on fields not processed`() {
         supportedCountries.forEach { countryCode ->
-            val schemaList = readFile("src/main/assets/addressinfo/${countryCode}.json")
+            val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
             val invalidNameType = schemaList?.filter { addressSchema ->
                 addressSchema.schema?.nameType != null
             }
                 ?.filter {
-                    it.type == FieldType.AddressLine1
-                        && it.type == FieldType.AddressLine2
-                        && it.type == FieldType.Locality
-
+                    it.type == FieldType.AddressLine1 &&
+                        it.type == FieldType.AddressLine2 &&
+                        it.type == FieldType.Locality
                 }
             invalidNameType?.forEach { println(it.type?.name) }
             assertThat(invalidNameType).isEmpty()
@@ -91,15 +90,14 @@ class TransformAddressToSpecTest {
     @Test
     fun `Make sure all country code json files are serializable`() {
         supportedCountries.forEach { countryCode ->
-            val schemaList = readFile("src/main/assets/addressinfo/${countryCode}.json")
+            val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
             schemaList?.filter { addressSchema ->
                 addressSchema.schema?.nameType != null
             }
                 ?.filter {
-                    it.type == FieldType.AddressLine1
-                        && it.type == FieldType.AddressLine2
-                        && it.type == FieldType.Locality
-
+                    it.type == FieldType.AddressLine1 &&
+                        it.type == FieldType.AddressLine2 &&
+                        it.type == FieldType.Locality
                 }
                 ?.forEach { println(it.type?.name) }
         }

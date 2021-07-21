@@ -53,5 +53,4 @@ class AddressFieldElementRepositoryTest {
         assertThat(AddressFieldElementRepository.get("GG"))
             .isEqualTo(AddressFieldElementRepository.get(DEFAULT_COUNTRY_CODE))
     }
-
 }

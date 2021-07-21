@@ -20,15 +20,13 @@ internal object AddressFieldElementRepository {
         init(
             supportedCountries.associateWith { countryCode ->
                 "addressinfo/$countryCode.json"
+            }.mapValues { (_, assetFileName) ->
+                requireNotNull(
+                    parseAddressesSchema(
+                        resources.assets.open(assetFileName)
+                    ),
+                )
             }
-                .mapValues { (_, assetFileName) ->
-                    requireNotNull(
-                        parseAddressesSchema(
-                            resources,
-                            assetFileName
-                        )
-                    )
-                }
         )
     }
 
@@ -54,13 +52,10 @@ internal object AddressFieldElementRepository {
     @VisibleForTesting
     internal val supportedCountries = setOf(
         // @formatter:off
-        /* ktlint-disable */
         "AE", "AT", "AU", "BE", "BG", "BR", "CA", "CH", "CI", "CR", "CY", "CZ", "DE", "DK",
         "DO", "EE", "ES", "FI", "FR", "GB", "GI", "GR", "GT", "HK", "HU", "ID", "IE", "IN",
         "IT", "JP", "LI", "LT", "LU", "LV", "MT", "MX", "MY", "NL", "NO", "NZ", "PE", "PH",
         "PL", "PT", "RO", "SE", "SG", "SI", "SK", "SN", "TH", "TT", "US", "UY", "ZZ"
-        /* ktlint-enable */
         // @formatter:on
     )
-
 }

@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.serialization.KSerializer
@@ -94,12 +93,6 @@ class AddressSchema(
 
 val format = Json { ignoreUnknownKeys = true }
 
-internal fun parseAddressesSchema(resources: Resources, assetFileName: String) =
-    parseAddressesSchema(
-        resources.assets.open(assetFileName)
-    )
-
-@VisibleForTesting
 internal fun parseAddressesSchema(inputStream: InputStream?) =
     getJsonStringFromInputStream(inputStream)?.let {
         format.decodeFromString<List<AddressSchema>>(

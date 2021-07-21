@@ -24,7 +24,6 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
-import com.stripe.android.paymentsheet.AddressFieldRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -86,7 +85,7 @@ internal class DefaultFlowController @Inject internal constructor(
      *   paymentFlowResultProcessor afterwards.
      */
     private val paymentFlowResultProcessorProvider:
-    Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
+        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
