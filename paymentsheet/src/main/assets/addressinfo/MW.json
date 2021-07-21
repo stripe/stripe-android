@@ -1,0 +1,24 @@
+[
+  {
+    "type": "addressLine1",
+    "required": true
+  },
+  {
+    "type": "addressLine2",
+    "required": false
+  },
+  {
+    "type": "locality",
+    "required": true,
+    "schema": {
+      "nameType": "city"
+    }
+  },
+  {
+    "type": "sortingCode",
+    "required": false,
+    "schema": {
+      "nameType": "cedex"
+    }
+  }
+]

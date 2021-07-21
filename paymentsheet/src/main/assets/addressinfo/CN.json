@@ -1,0 +1,39 @@
+[
+  {
+    "type": "postalCode",
+    "required": true,
+    "schema": {
+      "isNumeric": false,
+      "nameType": "postal"
+    }
+  },
+  {
+    "type": "administrativeArea",
+    "required": true,
+    "schema": {
+      "nameType": "province"
+    }
+  },
+  {
+    "type": "locality",
+    "required": true,
+    "schema": {
+      "nameType": "city"
+    }
+  },
+  {
+    "type": "dependentLocality",
+    "required": false,
+    "schema": {
+      "nameType": "district"
+    }
+  },
+  {
+    "type": "addressLine1",
+    "required": true
+  },
+  {
+    "type": "addressLine2",
+    "required": false
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "type": "addressLine1",
+    "required": true
+  },
+  {
+    "type": "addressLine2",
+    "required": false
+  },
+  {
+    "type": "administrativeArea",
+    "required": true,
+    "schema": {
+      "nameType": "province"
+    }
+  },
+  {
+    "type": "locality",
+    "required": true,
+    "schema": {
+      "nameType": "city"
+    }
+  },
+  {
+    "type": "postalCode",
+    "required": false,
+    "schema": {
+      "isNumeric": false,
+      "nameType": "postal"
+    }
+  }
+]
