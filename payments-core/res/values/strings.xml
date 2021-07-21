@@ -191,5 +191,4 @@
   <string name="title_payment_method">Payment Method</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Select Shipping Method</string>
-  <string name="stripe_google_pay_error_resolution_required" tools:ignore="MissingTranslation">Completing the operation requires some form of resolution.</string>
 </resources>
