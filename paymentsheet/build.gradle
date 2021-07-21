@@ -3,6 +3,7 @@ plugins {
     id "kotlin-android"
     id 'org.jetbrains.dokka'
     id "org.jetbrains.kotlin.plugin.parcelize"
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.0'
 }
 
 android {
@@ -91,6 +92,8 @@ dependencies {
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
     implementation "androidx.compose.runtime:runtime-rxjava2:$composeVersion"
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-core:3.11.2"

@@ -76,4 +76,6 @@
     <string name="address_label_village_township" tools:ignore="MissingTranslation">Village or Township</string>
     <string name="address_label_ie_townland" tools:ignore="MissingTranslation">Townland</string>
     <string name="address_label_au_suburb_or_city" tools:ignore="MissingTranslation">Suburb or City</string>
+    <string name="address_label_ie_eircode" tools:ignore="MissingTranslation">eircode</string>
+    <string name="address_label_in_pin" tools:ignore="MissingTranslation">Pin</string>
 </resources>

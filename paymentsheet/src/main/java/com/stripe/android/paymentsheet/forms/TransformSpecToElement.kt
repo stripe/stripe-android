@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 
@@ -52,6 +51,9 @@ private fun FormItemSpec.SectionSpec.transform(
     )
 }
 
+/**
+ * This function will transform a list of specs into a list of elements
+ */
 internal fun List<SectionFieldSpec>.transform(
     focusRequesterCount: FocusRequesterCount
 ) = this.map {
@@ -61,9 +63,6 @@ internal fun List<SectionFieldSpec>.transform(
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
         is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
-        is SectionFieldSpec.AddressSpec -> SectionFieldElement.AddressElement(
-            IdentifierSpec("billing")
-        )
     }
 }
 

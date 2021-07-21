@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.paymentsheet
 
 import android.content.res.Resources
 import androidx.annotation.StringRes
@@ -17,7 +17,6 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
-import java.io.IOException
 import java.io.InputStream
 
 @Serializable(with = FieldTypeAsStringSerializer::class)
@@ -37,26 +36,30 @@ enum class FieldType(val serializedValue: String) {
 }
 
 enum class NameType(@StringRes val stringResId: Int) {
-    city(R.string.address_label_city),
-    island(R.string.address_label_island),
-    province(R.string.address_label_province),
-    country(R.string.address_label_country),
-    state(R.string.address_label_state),
-    postal(R.string.address_label_postal_code),
+    area(R.string.address_label_hk_area),
     cedex(R.string.address_label_cedex),
-    suburb(R.string.address_label_suburb),
-    oblast(R.string.address_label_oblast),
-    district(R.string.address_label_district),
-    post_town(R.string.address_label_post_town),
+    city(R.string.address_label_city),
+    country(R.string.address_label_country),
+    county(R.string.address_label_county),
     department(R.string.address_label_department),
-    village_township(R.string.address_label_village_township),
-    neighborhood(R.string.address_label_neighborhood),
+    district(R.string.address_label_district),
     do_si(R.string.address_label_kr_do_si),
-    prefecture(R.string.address_label_jp_prefecture),
-    parish(R.string.address_label_bb_jm_parish),
-    townland(R.string.address_label_ie_townland),
-    suburb_or_city(R.string.address_label_au_suburb_or_city),
+    eircode(R.string.address_label_ie_eircode),
     emirate(R.string.address_label_ae_emirate),
+    island(R.string.address_label_island),
+    neighborhood(R.string.address_label_neighborhood),
+    oblast(R.string.address_label_oblast),
+    parish(R.string.address_label_bb_jm_parish),
+    pin(R.string.address_label_in_pin),
+    post_town(R.string.address_label_post_town),
+    postal(R.string.address_label_postal_code),
+    prefecture(R.string.address_label_jp_prefecture),
+    province(R.string.address_label_province),
+    state(R.string.address_label_state),
+    suburb(R.string.address_label_suburb),
+    suburb_or_city(R.string.address_label_au_suburb_or_city),
+    townland(R.string.address_label_ie_townland),
+    village_township(R.string.address_label_village_township),
     zip(R.string.acc_label_zip)
 }
 
@@ -98,16 +101,10 @@ internal fun parseAddressesSchema(resources: Resources, assetFileName: String) =
 
 @VisibleForTesting
 internal fun parseAddressesSchema(inputStream: InputStream?) =
-    try {
-
-        getJsonStringFromInputStream(inputStream)?.let {
-            format.decodeFromString<List<AddressSchema>>(
-                it
-            )
-        }
-    } catch (e: Exception) {
-        println("Error parsing: " + e.localizedMessage)
-        null
+    getJsonStringFromInputStream(inputStream)?.let {
+        format.decodeFromString<List<AddressSchema>>(
+            it
+        )
     }
 
 object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
@@ -123,16 +120,8 @@ object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
     }
 }
 
-private fun getJsonStringFromInputStream(inputStream: InputStream?): String? {
-    val jsonString: String?
-    try {
-        jsonString = inputStream?.bufferedReader().use { it?.readText() }
-    } catch (ioException: IOException) {
-        ioException.printStackTrace()
-        return null
-    }
-    return jsonString
-}
+private fun getJsonStringFromInputStream(inputStream: InputStream?) =
+    inputStream?.bufferedReader().use { it?.readText() }
 
 internal fun List<AddressSchema>.transformToSpecFieldList() =
     this.mapNotNull {
@@ -140,46 +129,54 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
             FieldType.AddressLine1 -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("line1"),
-                    R.string.address_label_address_line1,
+                    it.schema?.nameType?.stringResId ?: R.string.address_label_address_line1,
                     capitalization = KeyboardCapitalization.Words,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = getKeyboard(it.schema),
+                    showOptionalLabel = !it.required
                 )
             }
             FieldType.AddressLine2 -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("line2"),
-                    R.string.address_label_address_line2,
+                    it.schema?.nameType?.stringResId ?: R.string.address_label_address_line2,
                     capitalization = KeyboardCapitalization.Words,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = getKeyboard(it.schema),
+                    showOptionalLabel = !it.required
                 )
             }
             FieldType.Locality -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("city"),
-                    R.string.address_label_city,
-//                    it.required,
+                    it.schema?.nameType?.stringResId ?: R.string.address_label_city,
                     capitalization = KeyboardCapitalization.Words,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = getKeyboard(it.schema),
+                    showOptionalLabel = !it.required
                 )
             }
             FieldType.AdministrativeArea -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("state"),
                     it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
-//                    it.required,
                     capitalization = KeyboardCapitalization.Words,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = getKeyboard(it.schema),
+                    showOptionalLabel = !it.required
                 )
             }
             FieldType.PostalCode -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("postal_code"),
-                    R.string.address_label_postal_code,
-//                    it.required,
+                    it.schema?.nameType?.stringResId ?: R.string.address_label_postal_code,
                     capitalization = KeyboardCapitalization.None,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = getKeyboard(it.schema),
+                    showOptionalLabel = !it.required
                 )
             }
             else -> null
         }
     }
+
+private fun getKeyboard(fieldSchema: FieldSchema?) = if (fieldSchema?.isNumeric == true) {
+    KeyboardType.Number
+} else {
+    KeyboardType.Text
+}

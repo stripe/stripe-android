@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
@@ -9,8 +8,6 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * This is used to track the number of focus requesters in a form
@@ -44,11 +41,6 @@ internal sealed interface SectionFieldElementType {
 
     interface DropdownFieldElement : SectionFieldElementType {
         override val controller: DropdownFieldController
-    }
-
-    interface AddressElement : SectionFieldElementType {
-        override val controller: AddressController
-        val fields: Flow<List<SectionFieldElement>>
     }
 }
 
@@ -150,16 +142,4 @@ internal sealed class SectionFieldElement {
         override val controller: TextFieldController,
         override val focusIndexOrder: Int
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
-
-    internal class AddressElement(
-        override val identifier: IdentifierSpec,
-        val addressFieldRepository: AddressFieldRepository = AddressFieldRepository,
-    ) : SectionFieldElement(), SectionFieldElementType.AddressElement {
-
-        override val fields = MutableStateFlow(emptyList<SectionFieldElement>())
-
-        // Most section element controllers are created in the transform
-        // instead of the element, where the label is created
-        override val controller = AddressController(fields)
-    }
 }
