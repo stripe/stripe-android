@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.CountryConfig
@@ -161,7 +162,7 @@ internal sealed class SectionFieldElement {
 
     internal class AddressElement(
         override val identifier: IdentifierSpec,
-        val addressFieldRepository: AddressFieldRepository,
+        val addressFieldRepository: AddressFieldElementRepository,
         val countryCodes: Set<String> = setOf("US", "JP")
     ) : SectionFieldElement(), SectionFieldElementType.AddressElement {
 

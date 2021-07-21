@@ -1,115 +1,111 @@
 package com.stripe.android.paymentsheet.address
 
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.supportedCountries
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
-import kotlinx.serialization.decodeFromString
 import org.junit.Test
 import java.io.File
+import java.security.InvalidParameterException
 
 class TransformAddressToSpecTest {
-    private val supportedCountries = arrayOf(
-        "AE", "AT", "AU", "BE", "BG", "BR", "CA", "CH", "CI", "CR", "CY", "CZ", "DE", "DK", "DO",
-        "EE", "ES", "FI", "FR", "GB", "GI", "GR", "GT", "HK", "HU", "ID", "IE", "IN", "IT",
-        "JP", "LI", "LT", "LU", "LV", "MT", "MX", "MY", "NL", "NO", "NZ", "PE", "PH", "PL",
-        "PT", "RO", "SE", "SG", "SI", "SK", "SN", "TH", "TT", "US", "UY"
-    )
 
     @Test
-    fun `Read json state schema`() {
-        val str = """
-            {
-              "isoID": "AL",
-              "key": "AL",
-              "name": "Alabama",
-              "latinName": null
-            }
-        """.trimIndent()
-        println(
-            format.decodeFromString<StateSchema>(
-                str
-            )
+    fun `Read US Json`() {
+        val addressSchema = readFile("src/main/assets/addressinfo/US.json")!!
+        val simpleTextList = addressSchema.transformToSpecFieldList()
+
+        val addressLine1 = SectionFieldSpec.SimpleText(
+            IdentifierSpec("line1"),
+            R.string.address_label_address_line1,
+            KeyboardCapitalization.Words,
+            KeyboardType.Text,
+            showOptionalLabel = false
         )
+
+        val addressLine2 = SectionFieldSpec.SimpleText(
+            IdentifierSpec("line2"),
+            R.string.address_label_address_line2,
+            KeyboardCapitalization.Words,
+            KeyboardType.Text,
+            showOptionalLabel = true
+        )
+
+        val city = SectionFieldSpec.SimpleText(
+            IdentifierSpec("city"),
+            R.string.address_label_city,
+            KeyboardCapitalization.Words,
+            KeyboardType.Text,
+            showOptionalLabel = false
+        )
+
+        val state = SectionFieldSpec.SimpleText(
+            IdentifierSpec("state"),
+            R.string.address_label_state,
+            KeyboardCapitalization.Words,
+            KeyboardType.Text,
+            showOptionalLabel = false
+        )
+
+        val zip = SectionFieldSpec.SimpleText(
+            IdentifierSpec("postal_code"),
+            R.string.acc_label_zip,
+            KeyboardCapitalization.None,
+            KeyboardType.Number,
+            showOptionalLabel = false
+        )
+
+        assertThat(simpleTextList.size).isEqualTo(5)
+        assertThat(simpleTextList[0]).isEqualTo(addressLine1)
+        assertThat(simpleTextList[1]).isEqualTo(addressLine2)
+        assertThat(simpleTextList[2]).isEqualTo(city)
+        assertThat(simpleTextList[3]).isEqualTo(zip)
+        assertThat(simpleTextList[4]).isEqualTo(state)
     }
 
     @Test
-    fun `Read json field schema`() {
-        val str = """
-            {
-                  "nameType": "state",
-                  "list": [
-                    {
-                      "isoID": "AL",
-                      "key": "AL",
-                      "name": "Alabama",
-                      "latinName": null
-                    },
-                    {
-                      "isoID": "AK",
-                      "key": "AK",
-                      "name": "Alaska",
-                      "latinName": null
-                    }
-                  ]
+    fun `Make sure name schema is not found on fields not processed`() {
+        supportedCountries.forEach { countryCode ->
+            val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
+            val invalidNameType = schemaList?.filter { addressSchema ->
+                addressSchema.schema?.nameType != null
             }
-        """.trimIndent()
-        println(
-            format.decodeFromString<FieldSchema>(
-                str
-            )
-        )
-    }
-
-    @Test
-    fun `Read address schema`() {
-        val str = """
-              {
-                "type": "administrativeArea",
-                "required": true,
-                "schema": {
-                  "nameType": "state",
-                  "list": [
-                    {
-                      "isoID": "AL",
-                      "key": "AL",
-                      "name": "Alabama",
-                      "latinName": null
-                    }
-                  ]
+                ?.filter {
+                    it.type == FieldType.AddressLine1 &&
+                        it.type == FieldType.AddressLine2 &&
+                        it.type == FieldType.Locality
                 }
-              }
-        """.trimIndent()
-
-        println(
-            format.decodeFromString<AddressSchema>(
-                str
-            )
-        )
+            invalidNameType?.forEach { println(it.type?.name) }
+            assertThat(invalidNameType).isEmpty()
+        }
     }
 
     @Test
-    fun `Read AddressSchema list file and output spec json`() {
-        for (countryCode in supportedCountries) {
-            val file = File(
-                "/Users/michelleb/stripe/stripe-android/" +
-                    "paymentsheet/src/main/assets/addressinfo/US.json"
-            )
-
-            if (file.exists()) {
-
-                val addressSchema = parseAddressesSchema(file.inputStream())
-//                addressSchema
-//                    ?.forEach {
-//                        println(it.type?.name + " " + it.required)
-//                    }
-                addressSchema?.let {
-                    val elementList = it.transformToSpecFieldList()
-                    elementList.forEach { it ->
-                        val spec = it as? SectionFieldSpec.SimpleText
-                        println(spec?.identifier?.value + " " + spec?.showOptionalLabel)
-                    }
-                }
-
-                break
+    fun `Make sure all country code json files are serializable`() {
+        supportedCountries.forEach { countryCode ->
+            val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
+            schemaList?.filter { addressSchema ->
+                addressSchema.schema?.nameType != null
             }
+                ?.filter {
+                    it.type == FieldType.AddressLine1 &&
+                        it.type == FieldType.AddressLine2 &&
+                        it.type == FieldType.Locality
+                }
+                ?.forEach { println(it.type?.name) }
+        }
+    }
+
+    private fun readFile(filename: String): List<AddressSchema>? {
+        val file = File(filename)
+
+        if (file.exists()) {
+            return parseAddressesSchema(file.inputStream())
+        } else {
+            throw InvalidParameterException("Error could not find the test files.")
         }
     }
 }

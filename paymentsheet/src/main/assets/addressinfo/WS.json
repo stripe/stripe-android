@@ -1,0 +1,17 @@
+[
+  {
+    "type": "addressLine1",
+    "required": true
+  },
+  {
+    "type": "addressLine2",
+    "required": false
+  },
+  {
+    "type": "locality",
+    "required": true,
+    "schema": {
+      "nameType": "city"
+    }
+  }
+]

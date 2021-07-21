@@ -1,0 +1,25 @@
+[
+  {
+    "type": "locality",
+    "required": true,
+    "schema": {
+      "nameType": "city"
+    }
+  },
+  {
+    "type": "addressLine1",
+    "required": true
+  },
+  {
+    "type": "addressLine2",
+    "required": false
+  },
+  {
+    "type": "postalCode",
+    "required": true,
+    "schema": {
+      "isNumeric": false,
+      "nameType": "postal"
+    }
+  }
+]
