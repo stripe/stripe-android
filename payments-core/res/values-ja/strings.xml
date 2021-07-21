@@ -1,122 +1,192 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="acc_label_card_number">カード番号</string>
-    <string name="acc_label_card_number_node">%s、カード番号</string>
-    <string name="acc_label_cvc_node">%s、セキュリティコード</string>
-    <string name="acc_label_expiry_date">有効期限</string>
-    <string name="acc_label_expiry_date_node">%s、有効期限</string>
-    <string name="acc_label_zip">郵便番号</string>
-    <string name="acc_label_zip_short">郵便番号</string>
-    <string name="add_card">このアプリで購入するには、別のデビットカードまたはクレジットカードの登録が必要です。</string>
-    <string name="added">%s が追加されました</string>
-    <string name="address_city_required">市区町村を入力してください</string>
-    <string name="address_country_invalid">国が無効です</string>
-    <string name="address_county_required">国を入力してください</string>
-    <string name="address_label_address">住所</string>
-    <string name="address_label_address_line1">住所 (1 行目)</string>
-    <string name="address_label_address_line1_optional">住所 (1 行目、省略可)</string>
-    <string name="address_label_address_line2_optional">住所 (2 行目、省略可)</string>
-    <string name="address_label_address_optional">住所 (省略可)</string>
-    <string name="address_label_apt">建物名</string>
-    <string name="address_label_apt_optional">アパート / マンション名など (省略可)</string>
-    <string name="address_label_city">市</string>
-    <string name="address_label_city_optional">市区町村 (省略可)</string>
-    <string name="address_label_country">国</string>
-    <string name="address_label_county">群</string>
-    <string name="address_label_county_optional">群 (省略可)</string>
-    <string name="address_label_name">名前</string>
-    <string name="address_label_phone_number">電話番号</string>
-    <string name="address_label_phone_number_optional">電話番号 (省略可)</string>
-    <string name="address_label_postal_code">郵便番号</string>
-    <string name="address_label_postal_code_optional">郵便番号 (省略可)</string>
-    <string name="address_label_postcode">郵便番号</string>
-    <string name="address_label_postcode_optional">郵便番号 (省略可)</string>
-    <string name="address_label_province">都道府県</string>
-    <string name="address_label_province_optional">都道府県 (省略可)</string>
-    <string name="address_label_region_generic">州 / 省 / 地域</string>
-    <string name="address_label_region_generic_optional">都道府県 (省略可)</string>
-    <string name="address_label_state">都道府県</string>
-    <string name="address_label_state_optional">都道府県 (省略可)</string>
-    <string name="address_label_zip_code">郵便番号</string>
-    <string name="address_label_zip_code_optional">郵便番号 (省略可)</string>
-    <string name="address_label_zip_postal_code">郵便番号</string>
-    <string name="address_label_zip_postal_code_optional">郵便番号 (省略可)</string>
-    <string name="address_name_required">名前を入力してください</string>
-    <string name="address_phone_number_required">電話番号を入力してください</string>
-    <string name="address_postal_code_invalid">郵便番号が無効です</string>
-    <string name="address_postcode_invalid">郵便番号が無効です</string>
-    <string name="address_province_required">都道府県を入力してください</string>
-    <string name="address_region_generic_required">都道府県を入力してください</string>
-    <string name="address_required">住所を入力してください</string>
-    <string name="address_shipping_address">配送先住所</string>
-    <string name="address_state_required">都道府県を入力してください</string>
-    <string name="address_zip_invalid">郵便番号が無効です。</string>
-    <string name="address_zip_postal_invalid">郵便番号が無効です</string>
-    <string name="becs_mandate_acceptance">
-    お客様の銀行情報を提供し、この支払いを確認することで、お客様はこの口座引き落とし依頼およびダイレクトデビットリクエスト利用規約 
-    に同意し、
-    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156
-    (「Stripe」) が、%1$s (「加盟店」) の代理として、加盟店から別途連絡された金額について、Bulk 
-    Electronic Clearing System (BECS 振替) を通して口座引き落としを行うことを承認するものとします。お客様が上
-    記の口座の口座名義人または承認された署名者であることを、
-    お客様は証明するものとします。
-    </string>
-    <string name="becs_widget_account_number">アカウント番号</string>
-    <string name="becs_widget_account_number_incomplete">口座番号に不備があります。</string>
-    <string name="becs_widget_account_number_required">アカウント番号を入力してください。</string>
-    <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">入力した BSB コードに不備があります。</string>
-    <string name="becs_widget_bsb_invalid">入力した BSB コードが無効です。</string>
-    <string name="becs_widget_email">メールアドレス</string>
-    <string name="becs_widget_email_invalid">メールアドレスが無効です。</string>
-    <string name="becs_widget_email_required">メールアドレスを入力してください。</string>
-    <string name="becs_widget_name">名前</string>
-    <string name="becs_widget_name_required">名前を入力してください。</string>
-    <string name="card_ending_in">末尾が %2$s の %1$s</string>
-    <string name="close">閉じる</string>
-    <string name="delete_payment_method">支払い方法を削除する</string>
-    <string name="delete_payment_method_prompt_title">支払い方法を削除しますか？</string>
-    <string name="expiry_date_hint">MM/YY</string>
-    <string name="expiry_label_short">有効期限</string>
-    <string name="fpx_bank_offline">%s - オフライン</string>
-    <string name="incomplete_expiry_date">カードの有効期限の日付に不備があります。</string>
-    <string name="invalid_card_number">カードの番号が無効です。</string>
-    <string name="invalid_cvc">カードのセキュリティコードが無効です。</string>
-    <string name="invalid_expiry_month">カードの有効期限の月が無効です。</string>
-    <string name="invalid_expiry_year">カードの有効期限の年が無効です。</string>
-    <string name="invalid_shipping_information">配送先住所が無効です</string>
-    <string name="invalid_zip">郵便番号の入力に不備があります。</string>
-    <string name="no_payment_methods">支払い方法が指定されていません。</string>
-    <string name="payment_method_add_new_card">新しいカードを追加...</string>
-    <string name="payment_method_add_new_fpx">銀行口座を選択 (FPX)...</string>
-    <string name="price_free">無料</string>
-    <string name="removed">%s が削除されました</string>
-    <string name="secure_checkout">安全なチェックアウト</string>
-    <string name="stripe_failure_connection_error">決済代行会社への接続中に問題が発生しました。インターネット接続をご確認の上、もう一度お試しください。</string>
-    <string name="stripe_failure_reason_authentication">お客様の支払い方法を認証できませんでした。別の支払い方法を選択してもう一度お試しください。</string>
-    <string name="stripe_failure_reason_timed_out">支払い方法の認証がタイムアウトしました。もう一度お試しください</string>
-    <string name="stripe_google_pay_error_internal">内部エラーが発生しました。</string>
-    <string name="stripe_paymentsheet_add_button_label">追加する</string>
-    <string name="stripe_paymentsheet_add_payment_method_button_label">+ 追加</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information">カード情報</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">国または地域</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">支払い情報を追加</string>
-    <string name="stripe_paymentsheet_back">戻る</string>
-    <string name="stripe_paymentsheet_close">閉じる</string>
-    <string name="stripe_paymentsheet_expiration_date_hint">月 / 年</string>
-    <string name="stripe_paymentsheet_or_pay_using">または別の方法で支払う</string>
-    <string name="stripe_paymentsheet_or_pay_with_card">または、カードで支払う</string>
-    <string name="stripe_paymentsheet_pay_button_amount">%s を支払う</string>
-    <string name="stripe_paymentsheet_pay_button_label">支払う: </string>
-    <string name="stripe_paymentsheet_primary_button_processing">処理中...</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">今後の %s の支払いのためにこのカードを保存する</string>
-    <string name="stripe_paymentsheet_select_payment_method">支払い方法を選択してください</string>
-    <string name="stripe_paymentsheet_setup_button_label">設定</string>
-    <string name="stripe_paymentsheet_total_amount">合計: %s</string>
-    <string name="stripe_verify_your_payment">支払いの確認</string>
-    <string name="title_add_a_card">カードを追加</string>
-    <string name="title_add_an_address">住所を設定してください</string>
-    <string name="title_bank_account">銀行口座</string>
-    <string name="title_payment_method">お支払い方法</string>
-    <string name="title_select_shipping_method">配送方法を選択してください</string>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">カード番号</string>
+  <string name="acc_label_card_number_node">%s、カード番号</string>
+  <string name="acc_label_cvc_node">%s、セキュリティコード</string>
+  <string name="acc_label_expiry_date">有効期限</string>
+  <string name="acc_label_expiry_date_node">%s、有効期限</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">郵便番号</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">郵便番号</string>
+  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
+  <string name="add_card">このアプリで購入するには、別のデビットカードまたはクレジットカードの登録が必要です。</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">%s が追加されました</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">市区町村を入力してください</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">国が無効です</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">国を入力してください</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">住所</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">住所 (1 行目)</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">住所 (1 行目、省略可)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">住所 (2 行目、省略可)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">住所 (省略可)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">アパート / マンション名など (省略可)</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">市区町村 (省略可)</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">群 (省略可)</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">電話番号</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">電話番号 (省略可)</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">郵便番号 (省略可)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">郵便番号</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">郵便番号 (省略可)</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">都道府県 (省略可)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">州 / 省 / 地域</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">都道府県 (省略可)</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">都道府県 (省略可)</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">郵便番号 (省略可)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">郵便番号</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">郵便番号 (省略可)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">名前を入力してください</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">電話番号を入力してください</string>
+  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+  <string name="address_postal_code_invalid">郵便番号が無効です</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">郵便番号が無効です</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">都道府県を入力してください</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">都道府県を入力してください</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">住所を入力してください</string>
+  <!-- Title for shipping address entry section -->
+  <string name="address_shipping_address">配送先住所</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">都道府県を入力してください</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">郵便番号が無効です。</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">郵便番号が無効です</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    お客様の銀行情報を提供し、この支払いを確認することで、お客様はこの口座引き落とし依頼およびダイレクトデビットリクエスト利用規約 \n    に同意し、\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (「Stripe」) が、%1$s (「加盟店」) の代理として、加盟店から別途連絡された金額について、Bulk \n    Electronic Clearing System (BECS 振替) を通して口座引き落としを行うことを承認するものとします。お客様が上\n    記の口座の口座名義人または承認された署名者であることを、\n    お客様は証明するものとします。\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">アカウント番号</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">口座番号に不備があります。</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">アカウント番号を入力してください。</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">入力した BSB コードに不備があります。</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">入力した BSB コードが無効です。</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">メールアドレス</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">メールアドレスが無効です。</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">メールアドレスを入力してください。</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">名前</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">名前を入力してください。</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">末尾が %2$s の %1$s</string>
+  <!-- Text for close button -->
+  <string name="close">閉じる</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">支払い方法を削除する</string>
+  <string name="delete_payment_method_prompt_title">支払い方法を削除しますか？</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">MM/YY</string>
+  <string name="expiry_label_short">有効期限</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - オフライン</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">カードの有効期限の日付に不備があります。</string>
+  <string name="invalid_card_number">カードの番号が無効です。</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">カードのセキュリティコードが無効です。</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">カードの有効期限の月が無効です。</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">カードの有効期限の年が無効です。</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">配送先住所が無効です</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">郵便番号の入力に不備があります。</string>
+  <!-- Text informing user there are no existing payment methods in the application -->
+  <string name="no_payment_methods">支払い方法が指定されていません。</string>
+  <string name="payment_method_add_new_card">新しいカードを追加...</string>
+  <string name="payment_method_add_new_fpx">銀行口座を選択 (FPX)...</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">無料</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">%s が削除されました</string>
+  <string name="secure_checkout">安全なチェックアウト</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">決済代行会社への接続中に問題が発生しました。インターネット接続をご確認の上、もう一度お試しください。</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">お客様の支払い方法を認証できませんでした。別の支払い方法を選択してもう一度お試しください。</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">支払い方法の認証がタイムアウトしました。もう一度お試しください</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">内部エラーが発生しました。</string>
+  <string name="stripe_paymentsheet_add_button_label">追加する</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ 追加</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">カード情報</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">国または地域</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">支払い情報を追加</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">戻る</string>
+  <string name="stripe_paymentsheet_close">閉じる</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">月 / 年</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">または別の方法で支払う</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">または、カードで支払う</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">%s を支払う</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">支払う: </string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">処理中...</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">今後の %s の支払いのためにこのカードを保存する</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">支払い方法を選択してください</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">設定</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">支払いの確認</string>
+  <string name="title_add_a_card">カードを追加</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">住所を設定してください</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">銀行口座</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">お支払い方法</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">配送方法を選択してください</string>
 </resources>

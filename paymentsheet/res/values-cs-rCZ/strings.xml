@@ -1,8 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="stripe_paymentsheet_ideal_bank">Banka iDEAL</string>
-    <string name="stripe_paymentsheet_payment_method_card">Karta</string>
-    <string name="stripe_paymentsheet_payment_method_sepa_debit">Debet SEPA</string>
-    <string name="stripe_paymentsheet_save_for_future_payments">Uložit pro budoucí platby</string>
-    <string name="stripe_paymentsheet_sepa_mandate">Tím, že zadáte informace o platbě a potvrdíte tuto platbu, udělujete společnosti (A) %s a Stripe, našemu poskytovateli platebních služeb, oprávnění zaslat do vaší banky pokyny k zatížení vašeho účtu a (B) vaší bance zatížit váš účet na základě těchto pokynů. V rámci svých práv máte nárok na refundaci od banky na základě smluvních podmínek vaší smlouvy s bankou. Refundaci je nutné nárokovat během 8 týdnů od data, kdy byl váš účet zatížen. Vaše práva jsou vysvětlena v prohlášení, které můžete získat od banky.</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adresa</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Město</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Země</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Okres</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Jméno</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Poštovní směrovací číslo</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provincie</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Stát</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">PSČ</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">Váš e-mail je neplatný.</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">Číslo IBAN, které jste zadali, je neúplné.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">Číslo IBAN, které jste zadali, je neplatné.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">Zadané číslo IBAN je neplatné, \"%s\" není podporovaný kód země.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">Číslo IBAN by mělo začínat dvěma písmeny kódu země.</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_paymentsheet_form_label_optional">%s (volitelné)</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_paymentsheet_ideal_bank">Banka iDEAL</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Karta</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">Debet SEPA</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Uložit pro budoucí platby</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_paymentsheet_sepa_mandate">Tím, že zadáte informace o platbě a potvrdíte tuto platbu, udělujete společnosti (A) %s a Stripe, našemu poskytovateli platebních služeb, oprávnění zaslat do vaší banky pokyny k zatížení vašeho účtu a (B) vaší bance zatížit váš účet na základě těchto pokynů. V rámci svých práv máte nárok na refundaci od banky na základě smluvních podmínek vaší smlouvy s bankou. Refundaci je nutné nárokovat během 8 týdnů od data, kdy byl váš účet zatížen. Vaše práva jsou vysvětlena v prohlášení, které můžete získat od banky.</string>
 </resources>

@@ -106,7 +106,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         fetchSavedSelection()
     }
 
-    fun fetchFragmentConfig() = MediatorLiveData<FragmentConfig?>().also { configLiveData ->
+    val fragmentConfig = MediatorLiveData<FragmentConfig?>().also { configLiveData ->
         listOf(
             savedSelection,
             stripeIntent,

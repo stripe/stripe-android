@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_paymentsheet_payment_method_sofort" translatable="false">Sofort</string>
+    <string name="stripe_paymentsheet_payment_method_ideal" translatable="false">iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_bancontact" translatable="false">Bancontact</string>
+    <string name="stripe_paymentsheet_iban" translatable="false">IBAN</string>
+</resources>
