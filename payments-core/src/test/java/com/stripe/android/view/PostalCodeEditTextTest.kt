@@ -62,7 +62,7 @@ class PostalCodeEditTextTest {
 
             postalCodeEditText.config = PostalCodeEditText.Config.US
             assertThat(textInputLayout.hint)
-                .isEqualTo("ZIP code")
+                .isEqualTo("ZIP Code")
         }
     }
 
@@ -77,7 +77,7 @@ class PostalCodeEditTextTest {
             assertThat(textInputLayout.hint)
                 .isNull()
             assertThat(postalCodeEditText.hint)
-                .isEqualTo("ZIP code")
+                .isEqualTo("ZIP Code")
         }
     }
 
