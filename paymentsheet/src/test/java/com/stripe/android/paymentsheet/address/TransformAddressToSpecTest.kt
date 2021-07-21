@@ -24,7 +24,7 @@ class TransformAddressToSpecTest {
 
         val addressLine1 = SectionFieldSpec.SimpleText(
             IdentifierSpec("line1"),
-            R.string.address_label_address_line1,
+            R.string.address_label_address,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
             showOptionalLabel = false
@@ -56,7 +56,7 @@ class TransformAddressToSpecTest {
 
         val zip = SectionFieldSpec.SimpleText(
             IdentifierSpec("postal_code"),
-            R.string.acc_label_zip,
+            R.string.address_label_zip_code,
             KeyboardCapitalization.None,
             KeyboardType.Number,
             showOptionalLabel = false

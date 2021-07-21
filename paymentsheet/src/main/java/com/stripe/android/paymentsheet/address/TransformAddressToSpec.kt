@@ -57,7 +57,7 @@ enum class NameType(@StringRes val stringResId: Int) {
     suburb_or_city(R.string.address_label_au_suburb_or_city),
     townland(R.string.address_label_ie_townland),
     village_township(R.string.address_label_village_township),
-    zip(R.string.acc_label_zip)
+    zip(R.string.address_label_zip_code)
 }
 
 @Serializable
@@ -120,7 +120,7 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
             FieldType.AddressLine1 -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("line1"),
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_address_line1,
+                    it.schema?.nameType?.stringResId ?: R.string.address_label_address,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
                     showOptionalLabel = !it.required
