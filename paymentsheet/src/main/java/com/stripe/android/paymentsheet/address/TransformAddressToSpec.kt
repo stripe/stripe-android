@@ -1,8 +1,9 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.address
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.serialization.KSerializer
@@ -17,7 +18,7 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 
 @Serializable(with = FieldTypeAsStringSerializer::class)
-enum class FieldType(val serializedValue: String) {
+internal enum class FieldType(val serializedValue: String) {
     AddressLine1("addressLine1"),
     AddressLine2("addressLine2"),
     Locality("locality"),
@@ -32,7 +33,7 @@ enum class FieldType(val serializedValue: String) {
     }
 }
 
-enum class NameType(@StringRes val stringResId: Int) {
+internal enum class NameType(@StringRes val stringResId: Int) {
     area(R.string.address_label_hk_area),
     cedex(R.string.address_label_cedex),
     city(R.string.address_label_city),
@@ -61,35 +62,27 @@ enum class NameType(@StringRes val stringResId: Int) {
 }
 
 @Serializable
-class PostalCodeRegex
-
-@Serializable
-class StateSchema(
+internal class StateSchema(
     val isoID: String, // sometimes empty string (i.e. Armed Forces (AP))
     val key: String, // abbreviation: TODO: How is it used?
     val name: String, // display name
-//    val latinName: String? = null,// value when not english
-//    val postalCodeRegex: PostalCodeRegex? = null,//  Always an empty object
-//    val postalCodeExamples: List<String> = emptyList()
 )
 
 @Serializable
-class FieldSchema(
-//    val regex: String = ".*", //always null
+internal class FieldSchema(
     val isNumeric: Boolean = false,
     val examples: List<String> = emptyList(),
     val nameType: NameType, // label,
-//    val list: List<StateSchema> = emptyList()
 )
 
 @Serializable
-class AddressSchema(
+internal class AddressSchema(
     val type: FieldType?,
     val required: Boolean,
     val schema: FieldSchema? = null
 )
 
-val format = Json { ignoreUnknownKeys = true }
+private val format = Json { ignoreUnknownKeys = true }
 
 internal fun parseAddressesSchema(inputStream: InputStream?) =
     getJsonStringFromInputStream(inputStream)?.let {
@@ -98,7 +91,7 @@ internal fun parseAddressesSchema(inputStream: InputStream?) =
         )
     }
 
-object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
+private object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("FieldType", PrimitiveKind.STRING)
 

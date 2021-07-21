@@ -4,13 +4,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.supportedCountries
-import com.stripe.android.paymentsheet.AddressSchema
-import com.stripe.android.paymentsheet.FieldType
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.parseAddressesSchema
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
-import com.stripe.android.paymentsheet.transformToSpecFieldList
 import org.junit.Test
 import java.io.File
 import java.security.InvalidParameterException

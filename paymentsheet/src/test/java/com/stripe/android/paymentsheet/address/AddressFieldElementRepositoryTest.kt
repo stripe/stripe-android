@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.address
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.DEFAULT_COUNTRY_CODE
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.supportedCountries
-import com.stripe.android.paymentsheet.parseAddressesSchema
 import org.junit.Test
 import java.io.File
 
