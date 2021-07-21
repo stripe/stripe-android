@@ -171,7 +171,7 @@
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Pay</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">Processing...</string>
+  <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -192,6 +192,4 @@
   <!-- Screen title telling users they should select a shipping address -->
   <string name="title_select_shipping_method">Select Shipping Method</string>
   <string name="stripe_google_pay_error_resolution_required" tools:ignore="MissingTranslation">Completing the operation requires some form of resolution.</string>
-
 </resources>
-
