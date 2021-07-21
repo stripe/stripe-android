@@ -1,6 +1,10 @@
 #!/bin/bash
+
 # This script will do a regular expression match to find the string value in the ios or
 # android projects, regardless of the translation status
+#
+# The script can be run as ./find_localize_key_for_value_regex.sh <regular expression>
+# For instance: ./find_localize_key_for_value_regex.sh ".*optional.*"
 
 if [ -z "$API_TOKEN" ]; then
   echo "You need to add the API_TOKEN to: localization_vars.sh"

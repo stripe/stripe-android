@@ -8,6 +8,9 @@
 # It will not perform a commit.
 #
 # It does generate an android/$MODULE-strings.xml file for use by other scripts.
+#
+# This script can be run with no arguments:
+#  ./localize.sh
 
 if [ -z "$API_TOKEN" ]; then
   echo "You need to add the API_TOKEN to: localization_vars.sh"

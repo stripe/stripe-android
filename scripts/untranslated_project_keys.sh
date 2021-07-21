@@ -4,6 +4,10 @@
 # associated with android in localize.  If it isn't the script will search for the string
 # value in the localize android and ios project.
 #
+# This script requires that localize.sh is run first, if it is not it will exit with an error.
+#
+# This script can be run with no arguments:
+#  ./untranslated_project_key.sh
 
 if [ -z "$API_TOKEN" ]; then
   echo "You need to add the API_TOKEN to: localization_vars.sh"

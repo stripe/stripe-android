@@ -3,7 +3,10 @@
 # but not to any files will be outputted.  This indicates an error.   It will cleanup
 # files created at the end.
 #
-# This will not replace any files in the android project
+# This will not replace any files in the android project.
+#
+# This script can be run with no arguments:
+#  ./no_file_assigned.sh
 
 if [ -z "$API_TOKEN" ]; then
   echo "You need to add the API_TOKEN to: localization_vars.sh"
