@@ -1,122 +1,192 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="acc_label_card_number">카드 번호</string>
-    <string name="acc_label_card_number_node">%s, 카드 번호</string>
-    <string name="acc_label_cvc_node">%s, CVC</string>
-    <string name="acc_label_expiry_date">만료 날짜</string>
-    <string name="acc_label_expiry_date_node">%s, 만료 날짜</string>
-    <string name="acc_label_zip">우편번호</string>
-    <string name="acc_label_zip_short">우편번호</string>
-    <string name="add_card">이 앱에서 구입하려면 새 직불 카드 또는 신용 카드를 추가하십시오.</string>
-    <string name="added">%s 추가됨</string>
-    <string name="address_city_required">도시를 입력하십시오</string>
-    <string name="address_country_invalid">국가가 유효하지 않습니다</string>
-    <string name="address_county_required">국가를 입력하십시오</string>
-    <string name="address_label_address">주소</string>
-    <string name="address_label_address_line1">주소란 1</string>
-    <string name="address_label_address_line1_optional">주소란 1(선택 사항)</string>
-    <string name="address_label_address_line2_optional">주소란 2(선택 사항)</string>
-    <string name="address_label_address_optional">주소(선택 사항)</string>
-    <string name="address_label_apt">아파트</string>
-    <string name="address_label_apt_optional">아파트(선택 사항)</string>
-    <string name="address_label_city">시</string>
-    <string name="address_label_city_optional">도시(선택 사항)</string>
-    <string name="address_label_country">국가</string>
-    <string name="address_label_county">구/군</string>
-    <string name="address_label_county_optional">구/군(선택 사항)</string>
-    <string name="address_label_name">이름</string>
-    <string name="address_label_phone_number">전화번호</string>
-    <string name="address_label_phone_number_optional">전화번호(선택 사항)</string>
-    <string name="address_label_postal_code">우편번호</string>
-    <string name="address_label_postal_code_optional">우편번호(선택 사항)</string>
-    <string name="address_label_postcode">우편번호</string>
-    <string name="address_label_postcode_optional">우편번호(선택 사항)</string>
-    <string name="address_label_province">도</string>
-    <string name="address_label_province_optional">도(선택 사항)</string>
-    <string name="address_label_region_generic">주/도/지역</string>
-    <string name="address_label_region_generic_optional">주 / 도 / 지역(선택 사항)</string>
-    <string name="address_label_state">주</string>
-    <string name="address_label_state_optional">주(선택 사항)</string>
-    <string name="address_label_zip_code">우편번호</string>
-    <string name="address_label_zip_code_optional">우편번호(선택 사항)</string>
-    <string name="address_label_zip_postal_code">우편번호</string>
-    <string name="address_label_zip_postal_code_optional">우편번호(선택 사항)</string>
-    <string name="address_name_required">이름을 입력하십시오</string>
-    <string name="address_phone_number_required">전화번호를 입력하십시오</string>
-    <string name="address_postal_code_invalid">우편번호가 유효하지 않습니다</string>
-    <string name="address_postcode_invalid">우편번호가 유효하지 않습니다</string>
-    <string name="address_province_required">도를 입력하십시오</string>
-    <string name="address_region_generic_required">주/지방/지역을 입력하십시오</string>
-    <string name="address_required">주소를 입력하십시오</string>
-    <string name="address_shipping_address">배송 주소</string>
-    <string name="address_state_required">주를 입력하십시오</string>
-    <string name="address_zip_invalid">우편번호가 유효하지 않습니다.</string>
-    <string name="address_zip_postal_invalid">우편번호가 유효하지 않습니다</string>
-    <string name="becs_mandate_acceptance">
-    은행 계좌 세부 정보를 제공하고 이 결제를 확인하면 다음 자동 이체 요청 및
-    자동 이체 요청 서비스 계약에 동의하는 것이며, 또한
-    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID 번호 507156
-    (“Stripe”)에서 BECS(Bulk Electronic Clearing System)를
-    통해 %1$s(이하 \"판매자\")의 대리로 
-    판매자가 별도로 귀하에게 전달한 금액에 대해 결제하는 것을 승인하게 됩니다.
-    본인은 위에 나열된 계정의 계정 보유자 또는 승인된 서명자임을 증명합니다.
-    </string>
-    <string name="becs_widget_account_number">계좌 번호</string>
-    <string name="becs_widget_account_number_incomplete">계좌 번호가 불완전합니다.</string>
-    <string name="becs_widget_account_number_required">계좌 번호가 필요합니다.</string>
-    <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">입력하신 BSB가 완료되지 않았습니다.</string>
-    <string name="becs_widget_bsb_invalid">입력하신 BSB가 유효하지 않습니다.</string>
-    <string name="becs_widget_email">이메일 주소</string>
-    <string name="becs_widget_email_invalid">이메일 주소가 유효하지 않습니다.</string>
-    <string name="becs_widget_email_required">이메일 주소가 필요합니다.</string>
-    <string name="becs_widget_name">이름</string>
-    <string name="becs_widget_name_required">이름이 필요합니다.</string>
-    <string name="card_ending_in">%2$s(으)로 끝나는 %1$s</string>
-    <string name="close">닫기</string>
-    <string name="delete_payment_method">결제 수단 삭제</string>
-    <string name="delete_payment_method_prompt_title">결제 수단을 삭제하시겠습니까?</string>
-    <string name="expiry_date_hint">MM/YY</string>
-    <string name="expiry_label_short">만료</string>
-    <string name="fpx_bank_offline">%s - 오프라인</string>
-    <string name="incomplete_expiry_date">카드의 만료 날짜가 불완전합니다.</string>
-    <string name="invalid_card_number">카드 번호가 잘못되었습니다.</string>
-    <string name="invalid_cvc">카드의 보안 코드가 유효하지 않습니다.</string>
-    <string name="invalid_expiry_month">카드의 만료 월이 유효하지 않습니다.</string>
-    <string name="invalid_expiry_year">카드의 만료 연도가 유효하지 않습니다.</string>
-    <string name="invalid_shipping_information">잘못된 배송 주소</string>
-    <string name="invalid_zip">우편번호가 불완전합니다.</string>
-    <string name="no_payment_methods">결제 방법이 없습니다.</string>
-    <string name="payment_method_add_new_card">새 카드 추가…</string>
-    <string name="payment_method_add_new_fpx">은행 계좌 선택(FPX)…</string>
-    <string name="price_free">무료</string>
-    <string name="removed">%s 제거됨</string>
-    <string name="secure_checkout">보안 체크 아웃</string>
-    <string name="stripe_failure_connection_error">결제 제공자에게 연결하는 과정에서 문제가 발생했습니다. 인터넷 연결을 확인하시고 다시 시도하십시오.</string>
-    <string name="stripe_failure_reason_authentication">결제 수단을 인증할 수 없습니다. 다른 결제 수단을 선택하고 다시 시도하십시오.</string>
-    <string name="stripe_failure_reason_timed_out">결제 수단 인증 시간이 초과되었습니다. 다시 시도하십시오.</string>
-    <string name="stripe_google_pay_error_internal">내부 오류가 발생했습니다.</string>
-    <string name="stripe_paymentsheet_add_button_label">추가</string>
-    <string name="stripe_paymentsheet_add_payment_method_button_label">+ 추가</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">국가 또는 지역</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">결제 정보를 추가하세요.</string>
-    <string name="stripe_paymentsheet_back">뒤로</string>
-    <string name="stripe_paymentsheet_close">닫기</string>
-    <string name="stripe_paymentsheet_expiration_date_hint">MM/YY</string>
-    <string name="stripe_paymentsheet_or_pay_using">또는 다음 결제 방식 사용</string>
-    <string name="stripe_paymentsheet_or_pay_with_card">또는 카드 결제</string>
-    <string name="stripe_paymentsheet_pay_button_amount">%s 결제</string>
-    <string name="stripe_paymentsheet_pay_button_label">결제</string>
-    <string name="stripe_paymentsheet_primary_button_processing">처리 중...</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 %s 결제에 사용하도록 저장</string>
-    <string name="stripe_paymentsheet_select_payment_method">결제 수단을 선택하세요.</string>
-    <string name="stripe_paymentsheet_setup_button_label">설정</string>
-    <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
-    <string name="stripe_verify_your_payment">결제 확인</string>
-    <string name="title_add_a_card">카드 추가</string>
-    <string name="title_add_an_address">주소 설정</string>
-    <string name="title_bank_account">은행 계좌</string>
-    <string name="title_payment_method">결제 수단</string>
-    <string name="title_select_shipping_method">배송 방법 선택</string>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">카드 번호</string>
+  <string name="acc_label_card_number_node">%s, 카드 번호</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">만료 날짜</string>
+  <string name="acc_label_expiry_date_node">%s, 만료 날짜</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">우편번호</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">우편번호</string>
+  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
+  <string name="add_card">이 앱에서 구입하려면 새 직불 카드 또는 신용 카드를 추가하십시오.</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">%s 추가됨</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">도시를 입력하십시오</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">국가가 유효하지 않습니다</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">국가를 입력하십시오</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">주소</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">주소란 1</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">주소란 1(선택 사항)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">주소란 2(선택 사항)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">주소(선택 사항)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">아파트(선택 사항)</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">도시(선택 사항)</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">구/군(선택 사항)</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">전화번호</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">전화번호(선택 사항)</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">우편번호(선택 사항)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">우편번호</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">우편번호(선택 사항)</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">도(선택 사항)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">주/도/지역</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">주 / 도 / 지역(선택 사항)</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">주(선택 사항)</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">우편번호(선택 사항)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">우편번호</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">우편번호(선택 사항)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">이름을 입력하십시오</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">전화번호를 입력하십시오</string>
+  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+  <string name="address_postal_code_invalid">우편번호가 유효하지 않습니다</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">우편번호가 유효하지 않습니다</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">도를 입력하십시오</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">주/지방/지역을 입력하십시오</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">주소를 입력하십시오</string>
+  <!-- Title for shipping address entry section -->
+  <string name="address_shipping_address">배송 주소</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">주를 입력하십시오</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">우편번호가 유효하지 않습니다.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">우편번호가 유효하지 않습니다</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    은행 계좌 세부 정보를 제공하고 이 결제를 확인하면 다음 자동 이체 요청 및\n    자동 이체 요청 서비스 계약에 동의하는 것이며, 또한\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID 번호 507156\n    (“Stripe”)에서 BECS(Bulk Electronic Clearing System)를\n    통해 %1$s(이하 \"판매자\")의 대리로 \n    판매자가 별도로 귀하에게 전달한 금액에 대해 결제하는 것을 승인하게 됩니다.\n    본인은 위에 나열된 계정의 계정 보유자 또는 승인된 서명자임을 증명합니다.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">계좌 번호</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">계좌 번호가 불완전합니다.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">계좌 번호가 필요합니다.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">입력하신 BSB가 완료되지 않았습니다.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">입력하신 BSB가 유효하지 않습니다.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">이메일 주소</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">이메일 주소가 유효하지 않습니다.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">이메일 주소가 필요합니다.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">이름</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">이름이 필요합니다.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%2$s(으)로 끝나는 %1$s</string>
+  <!-- Text for close button -->
+  <string name="close">닫기</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">결제 수단 삭제</string>
+  <string name="delete_payment_method_prompt_title">결제 수단을 삭제하시겠습니까?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">MM/YY</string>
+  <string name="expiry_label_short">만료</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - 오프라인</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">카드의 만료 날짜가 불완전합니다.</string>
+  <string name="invalid_card_number">카드 번호가 잘못되었습니다.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">카드의 보안 코드가 유효하지 않습니다.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">카드의 만료 월이 유효하지 않습니다.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">카드의 만료 연도가 유효하지 않습니다.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">잘못된 배송 주소</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">우편번호가 불완전합니다.</string>
+  <!-- Text informing user there are no existing payment methods in the application -->
+  <string name="no_payment_methods">결제 방법이 없습니다.</string>
+  <string name="payment_method_add_new_card">새 카드 추가…</string>
+  <string name="payment_method_add_new_fpx">은행 계좌 선택(FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">무료</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">%s 제거됨</string>
+  <string name="secure_checkout">보안 체크 아웃</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">결제 제공자에게 연결하는 과정에서 문제가 발생했습니다. 인터넷 연결을 확인하시고 다시 시도하십시오.</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">결제 수단을 인증할 수 없습니다. 다른 결제 수단을 선택하고 다시 시도하십시오.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">결제 수단 인증 시간이 초과되었습니다. 다시 시도하십시오.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">내부 오류가 발생했습니다.</string>
+  <string name="stripe_paymentsheet_add_button_label">추가</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ 추가</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">카드 정보</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">국가 또는 지역</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">결제 정보를 추가하세요.</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">뒤로</string>
+  <string name="stripe_paymentsheet_close">닫기</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">MM/YY</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">또는 다음 결제 방식 사용</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">또는 카드 결제</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">%s 결제</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">결제</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">처리 중...</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 %s 결제에 사용하도록 저장</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">결제 수단을 선택하세요.</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">설정</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">결제 확인</string>
+  <string name="title_add_a_card">카드 추가</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">주소 설정</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">은행 계좌</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">결제 수단</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">배송 방법 선택</string>
 </resources>

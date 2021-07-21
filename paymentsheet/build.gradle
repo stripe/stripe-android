@@ -91,7 +91,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
-    implementation "androidx.compose.runtime:runtime-rxjava2:$composeVersion"
 
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2'
 

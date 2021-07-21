@@ -147,10 +147,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        if (savedInstanceState == null) {
-            // Only fetch initial state if the activity is being created for the first time.
-            // Otherwise the FragmentManager will correctly restore the previous state.
-            fetchConfig()
+        viewModel.fragmentConfig.observe(this) { config ->
+            if (config != null) {
+                val target = if (config.paymentMethods.isEmpty()) {
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
+                } else {
+                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+                }
+                viewModel.transitionTo(target)
+            }
         }
 
         viewModel.startConfirm.observe(this) { event ->
@@ -185,19 +190,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
         messageView.isVisible = userMessage != null
         messageView.text = userMessage?.message
-    }
-
-    private fun fetchConfig() {
-        viewModel.fetchFragmentConfig().observe(this) { config ->
-            if (config != null) {
-                val target = if (config.paymentMethods.isEmpty()) {
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                } else {
-                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
-                }
-                viewModel.transitionTo(target)
-            }
-        }
     }
 
     private fun onTransitionTarget(
