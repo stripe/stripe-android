@@ -186,6 +186,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    fun initializeBillingRepository() {
+        viewModelScope.launch {
+            AddressFieldRepository.INSTANCE.init(
+                getApplication<Application>().baseContext
+            )
+        }
+    }
+
     private fun onStripeIntentFetchResponse(stripeIntent: StripeIntent) {
         if (stripeIntent.isConfirmed) {
             onConfirmedStripeIntent(stripeIntent)

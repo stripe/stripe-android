@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.paymentsheet.AddressFieldRepository
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
@@ -13,6 +14,7 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 
@@ -50,7 +52,7 @@ private fun FormItemSpec.SectionSpec.transform(
     )
 }
 
-private fun List<SectionFieldSpec>.transform(
+internal fun List<SectionFieldSpec>.transform(
     focusRequesterCount: FocusRequesterCount
 ) = this.map {
     when (it) {
@@ -58,8 +60,14 @@ private fun List<SectionFieldSpec>.transform(
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
         is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
+        is SectionFieldSpec.AddressSpec -> it.transform()
     }
 }
+
+private fun SectionFieldSpec.AddressSpec.transform() = SectionFieldElement.AddressElement(
+    IdentifierSpec("billing"),
+    AddressFieldRepository.INSTANCE
+)
 
 private fun SectionFieldSpec.SimpleText.transform(
     focusRequesterCount: FocusRequesterCount

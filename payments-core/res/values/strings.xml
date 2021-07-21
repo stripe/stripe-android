@@ -2,19 +2,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="acc_label_card_number">Card number</string>
     <string name="acc_label_expiry_date">Expiration date</string>
-    <string name="acc_label_zip">ZIP Code</string>
     <string name="acc_label_zip_short">ZIP</string>
     <string name="acc_label_card_number_node">%s, Card number</string>
     <string name="acc_label_expiry_date_node">%s, Expiration date</string>
     <string name="acc_label_cvc_node">%s, CVC</string>
-    <!--Label for input requesting the name of a customer-->
-    <string name="address_label_name">Name</string>
-    <!--Label for input requesting the first line of an address, used for US and Canadian addresses-->
-    <string name="address_label_address">Address</string>
     <!--Label for input requesting the first line of an address where input is optional, used for US and Canadian addresses-->
     <string name="address_label_address_optional">Address (optional) </string>
-    <!--Label for input requesting the first line of an address, used for international addresses-->
-    <string name="address_label_address_line1">Address line 1</string>
     <!--Label for input requesting the first line of an address where , used for international addresses-->
     <string name="address_label_address_line1_optional">Address line 1 (optional)</string>
     <!--Label for input requesting apartment number (address line 2) where input is optional, used for US addresses-->
@@ -23,30 +16,21 @@
     <string name="address_label_address_line2_optional">Address line 2 (optional)</string>
     <!-- Label for input requesting apartment number (address line 2), used for US and Canada based addresses -->
     <string name="address_label_apt">Apt.</string>
-    <!--Label for input requesting city, used for all locations-->
-    <string name="address_label_city">City</string>
     <!--Label for input requesting city where input is optional, used for all locations-->
     <string name="address_label_city_optional">City (optional)</string>
-    <!--Label for input requesting county, used for UK based addresses-->
-    <string name="address_label_county">County</string>
     <!--Label for input requesting county where input is optional , used for UK based addresses-->
     <string name="address_label_county_optional">County (optional)</string>
-    <!--Label for input requesting country, used for all locations-->
-    <string name="address_label_country">Country</string>
+
     <!--Label for input requesting phone number, used for all locations-->
     <string name="address_label_phone_number">Phone number</string>
     <!--Label for input requesting phone number where input is optional, used for all locations-->
     <string name="address_label_phone_number_optional">Phone number (optional)</string>
-    <!--Label for input requesting state, used for US addreses-->
-    <string name="address_label_state">State</string>
+
     <!--Label for input requesting state where input is optional, used for US addresses-->
     <string name="address_label_state_optional">State (optional)</string>
-    <!--Label for input requesting zip code, used for US addreses-->
-    <string name="address_label_zip_code">ZIP code</string>
     <!--Label for input requesting zip code where input is optional, used for US addresses-->
     <string name="address_label_zip_code_optional">ZIP code (optional)</string>
-    <!--Label for input requesting postal code, used for Canadian addresses-->
-    <string name="address_label_postal_code">Postal code</string>
+
     <!--Label for input requesting postal code where input is optional, used for Canadian addresses-->
     <string name="address_label_postal_code_optional">Postal code (optional)</string>
     <!--Label for input requesting postcode, used for UK based addresses-->
@@ -69,8 +53,6 @@
     <string name="address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
     <!--Error text indicating country is invalid-->
     <string name="address_country_invalid">Your country is invalid</string>
-    <!--Label for input requesting province, used for canadian addresses-->
-    <string name="address_label_province">Province</string>
     <!--Label for input requesting province where province is optional, used for canadian addresses-->
     <string name="address_label_province_optional">Province (optional)</string>
     <!--Label for input requesting the region, used for international addresses-->

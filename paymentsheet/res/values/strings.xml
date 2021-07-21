@@ -9,8 +9,30 @@
     <!-- Use when is not valid, but the exact problem is unknown. -->
     <string name="invalid" tools:ignore="MissingTranslation">%s is invalid.</string>
     <string name="email" tools:ignore="MissingTranslation">Email</string>
-    <string name="address_label_name" tools:ignore="MissingTranslation">Name</string>
+
+    <!-- Move from core -->
+    <string name="acc_label_zip" tools:ignore="MissingTranslation">ZIP Code</string>
+    <!--Label for input requesting country, used for all locations-->
     <string name="address_label_country" tools:ignore="MissingTranslation">Country</string>
+    <!--Label for input requesting the name of a customer-->
+    <string name="address_label_name" tools:ignore="MissingTranslation">Name</string>
+    <!--Label for input requesting the first line of an address, used for US and Canadian addresses-->
+    <string name="address_label_address" tools:ignore="MissingTranslation">Address</string>
+    <!--Label for input requesting the first line of an address, used for international addresses-->
+    <string name="address_label_address_line1" tools:ignore="MissingTranslation">Address line 1</string>
+    <!--Label for input requesting city, used for all locations-->
+    <string name="address_label_city" tools:ignore="MissingTranslation">City</string>
+    <!--Label for input requesting state, used for US addreses-->
+    <string name="address_label_state" tools:ignore="MissingTranslation">State</string>
+    <!--Label for input requesting postal code, used for Canadian addresses-->
+    <string name="address_label_postal_code" tools:ignore="MissingTranslation">Postal code</string>
+    <!--Label for input requesting zip code, used for US addreses-->
+    <string name="address_label_zip_code" tools:ignore="MissingTranslation">ZIP code</string>
+    <!--Label for input requesting province, used for canadian addresses-->
+    <string name="address_label_province" tools:ignore="MissingTranslation">Province</string>
+    <!--Label for input requesting county, used for UK based addresses-->
+    <string name="address_label_county" tools:ignore="MissingTranslation">County</string>
+    <!-- end move from core -->
 
     <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
     <string name="stripe_paymentsheet_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
@@ -26,4 +48,22 @@
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
     <!-- Title for Sofort payment method -->
     <string name="stripe_paymentsheet_payment_method_sofort" translatable="false">Sofort</string>
+
+    <string name="billing_details" tools:ignore="MissingTranslation">Billing Details</string>
+    <string name="address_label_ae_emirate" tools:ignore="MissingTranslation">Emirate</string>
+    <string name="address_label_hk_area" tools:ignore="MissingTranslation">Area</string>
+    <string name="address_label_island" tools:ignore="MissingTranslation">Island</string>
+    <string name="address_label_cedex" tools:ignore="MissingTranslation">Cedex</string>
+    <string name="address_label_suburb" tools:ignore="MissingTranslation">Suburb</string>
+    <string name="address_label_oblast" tools:ignore="MissingTranslation">Oblast</string>
+    <string name="address_label_district" tools:ignore="MissingTranslation">District</string>
+    <string name="address_label_post_town" tools:ignore="MissingTranslation">Post or Town</string>
+    <string name="address_label_department" tools:ignore="MissingTranslation">Department</string>
+    <string name="address_label_neighborhood" tools:ignore="MissingTranslation">Neighborhood</string>
+    <string name="address_label_kr_do_si" tools:ignore="MissingTranslation">Do si</string>
+    <string name="address_label_jp_prefecture" tools:ignore="MissingTranslation">Prefecture</string>
+    <string name="address_label_bb_jm_parish" tools:ignore="MissingTranslation">Parish</string>
+    <string name="address_label_village_township" tools:ignore="MissingTranslation">Village or Township</string>
+    <string name="address_label_ie_townland" tools:ignore="MissingTranslation">Townland</string>
+    <string name="address_label_au_suburb_or_city" tools:ignore="MissingTranslation">Suburb or City</string>
 </resources>

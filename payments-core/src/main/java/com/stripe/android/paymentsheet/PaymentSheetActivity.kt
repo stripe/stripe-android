@@ -120,6 +120,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.fetchStripeIntent()
+        viewModel.initializeBillingRepository()
 
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
