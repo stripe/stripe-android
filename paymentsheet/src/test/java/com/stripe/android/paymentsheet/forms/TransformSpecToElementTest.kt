@@ -123,8 +123,7 @@ class TransformSpecToElementTest {
                 )
             )
         ).transform(
-            "Example, Inc.",
-            FocusRequesterCount()
+            "Example, Inc."
         )
 
         val nameElement = (formElement.first() as SectionElement).fields[0]

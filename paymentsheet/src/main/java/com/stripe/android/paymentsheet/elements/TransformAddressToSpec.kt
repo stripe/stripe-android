@@ -20,23 +20,6 @@ import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.io.InputStream
 
-@Serializable
-class LibAddressInput(
-    val id: String,
-    val key: String,
-    val name: String,
-    val lang: String? = null,
-    val languages: String? = null,
-    val fmt: String? = null,
-    val require: String? = null,
-    val zip: String? = null,
-    val sub_keys: String? = null,
-    val sub_names: String? = null,
-    val sub_zips: String? = null,
-    val sub_isoids: String? = null,
-    val state_name_type: String? = null
-)
-
 @Serializable(with = FieldTypeAsStringSerializer::class)
 enum class FieldType(val serializedValue: String) {
     AddressLine1("addressLine1"),
@@ -92,10 +75,10 @@ class StateSchema(
 
 @Serializable
 class FieldSchema(
-//    val regex: String = ".*", //always null
     val isNumeric: Boolean = false,
     val examples: List<String> = emptyList(),
     val nameType: NameType, // label,
+//    val regex: String = ".*", //always null
 //    val list: List<StateSchema> = emptyList()
 )
 
@@ -158,7 +141,7 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("line1"),
                     R.string.address_label_address_line1,
-                    it.required,
+                    showOptionalLabel = !it.required,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = KeyboardType.Text
                 )
@@ -167,16 +150,20 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("line2"),
                     R.string.address_label_address_line2,
-                    false,
+                    showOptionalLabel = !it.required,
                     capitalization = KeyboardCapitalization.Words,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = if (it.schema?.isNumeric == true) {
+                        KeyboardType.Number
+                    } else {
+                        KeyboardType.Text
+                    }
                 )
             }
             FieldType.Locality -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("city"),
                     R.string.address_label_city,
-                    it.required,
+                    showOptionalLabel = !it.required,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = KeyboardType.Text
                 )
@@ -185,7 +172,7 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("state"),
                     it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
-                    it.required,
+                    showOptionalLabel = !it.required,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = KeyboardType.Text
                 )
@@ -194,7 +181,7 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("postal_code"),
                     R.string.address_label_postal_code,
-                    it.required,
+                    showOptionalLabel = !it.required,
                     capitalization = KeyboardCapitalization.None,
                     keyboardType = KeyboardType.Text
                 )
@@ -202,104 +189,3 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
             else -> null
         }
     }
-
-/**
- * AE.json:  "state_name_type": "emirate",
- * AU.json:  "state_name_type": "state",
- * BR.json:  "state_name_type": "state",
- * HK.json:  "state_name_type": "area",
- * IE.json:  "state_name_type": "county",
- * IN.json:  "state_name_type": "state",
- * JP.json:  "state_name_type": "prefecture",
- * MX.json:  "state_name_type": "state",
- * US.json:  "state_name_type": "state",
- */
-// private fun transformState(value: String?) = when (value) {
-//    "state" -> R.string.address_label_state
-//    "perfecture" -> R.string.address_label_perfecture
-//    "emirate" -> R.string.address_label_ae_emirate
-//    "area" -> R.string.address_label_hk_area
-//    "county" -> R.string.address_label_ie_county
-//    else -> null
-// }
-//
-// internal fun parseLibAddressInput(context: Context, assetFileName: String) =
-//    parseLibAddressInput(
-//        context.assets.open(assetFileName)
-//    )
-//
-// @VisibleForTesting
-// internal fun parseLibAddressInput(inputStream: InputStream?) =
-//    try {
-//        getJsonStringFromInputStream(inputStream)?.let {
-//            format.decodeFromString<LibAddressInput>(
-//                it
-//            )
-//        }
-//    } catch (e: Exception) {
-//        println("Error parsing: " + e.localizedMessage)
-//        null
-//    }
-//
-//
-
-// private fun getFieldTypes(fmtString: String?) =
-//    fmtString?.let {
-//        Regex("%([A-Z])").findAll(fmtString).map { it.groupValues[1] }
-//    }
-//
-// internal fun LibAddressInput.transformToSpecFieldList() =
-//    getFieldTypes(this.fmt)
-//        ?.map {
-//            when (it) {
-//                "A" -> {
-//                    listOf(
-//                        SectionFieldSpec.GenericText(
-//                            IdentifierSpec("line1"),
-//                            R.string.address_label_address_line1,
-//                            this.require?.contains("A") == true
-//                        ),
-//
-//                        SectionFieldSpec.GenericText(
-//                            IdentifierSpec("line2"),
-//                            R.string.address_label_address_line2,
-//                            false,
-//                        )
-//                    )
-//                }
-//                "C" -> {
-//                    listOf(
-//                        SectionFieldSpec.GenericText(
-//                            IdentifierSpec("city"),
-//                            R.string.address_label_city,
-//                            this.require?.contains("C") == true
-//                        )
-//                    )
-//                }
-//                "S" -> {
-//                    listOf(
-//                        SectionFieldSpec.GenericText(
-//                            IdentifierSpec("state"),
-//                            // TODO: Allow a default string
-//                            transformState(this.state_name_type)
-//                                ?: R.string.address_label_state,
-//                            this.require?.contains("S") == true
-//                        )
-//                    )
-//                }
-//                "Z" -> {
-//                    listOf(
-//                        SectionFieldSpec.GenericText(
-//                            IdentifierSpec("postal_code"),
-//                            R.string.address_label_postal_code,
-//                            this.require?.contains("Z") == true
-//                        )
-//                    )
-//                }
-//                "D" -> emptyList()
-//                "X" -> emptyList()
-//                "O" -> emptyList()
-//                else -> emptyList()
-//            }
-//        }
-//        ?.flatten()

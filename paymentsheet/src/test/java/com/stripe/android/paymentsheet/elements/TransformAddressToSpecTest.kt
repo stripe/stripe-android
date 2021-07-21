@@ -104,7 +104,7 @@ class TransformAddressToSpecTest {
                     val elementList = it.transformToSpecFieldList()
                     elementList.forEach { it ->
                         val spec = it as? SectionFieldSpec.SimpleText
-                        println(spec?.identifier?.value + " " + spec?.isRequired)
+                        println(spec?.identifier?.value + " " + spec?.showOptionalLabel)
                     }
                 }
 

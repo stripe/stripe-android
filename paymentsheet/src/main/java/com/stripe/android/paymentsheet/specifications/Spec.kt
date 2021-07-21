@@ -94,7 +94,6 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     data class SimpleText(
         override val identifier: IdentifierSpec,
         @StringRes val label: Int,
-        val isRequired: Boolean,
         val capitalization: KeyboardCapitalization,
         val keyboardType: KeyboardType,
         val showOptionalLabel: Boolean = false
@@ -111,7 +110,6 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
             label = R.string.address_label_name,
             capitalization = KeyboardCapitalization.Words,
             keyboardType = KeyboardType.Text,
-            isRequired = true
         )
     }
 }

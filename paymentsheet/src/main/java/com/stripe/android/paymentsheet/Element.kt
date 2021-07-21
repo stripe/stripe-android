@@ -26,7 +26,6 @@ internal interface OptionalElement {
  * This interface is used to define the types of elements allowed in a section
  */
 internal sealed interface SectionFieldElementType {
-    val identifier: IdentifierSpec
     val controller: Controller
 
     interface TextFieldElement : SectionFieldElementType {
@@ -107,9 +106,7 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
 /**
  * This is an element that is in a section and accepts user input.
  */
-internal sealed class SectionFieldElement(
-    open val subElements: List<SectionFieldElement> = emptyList()
-) {
+internal sealed class SectionFieldElement {
     abstract val identifier: IdentifierSpec
 
     /**
@@ -167,8 +164,6 @@ internal sealed class SectionFieldElement(
         val addressFieldRepository: AddressFieldRepository,
         val countryCodes: Set<String> = setOf("US", "JP")
     ) : SectionFieldElement(), SectionFieldElementType.AddressElement {
-
-        override val subElements: List<SectionFieldElement> = emptyList()
 
         /**
          * Focus requester is a challenge - Must get this working from spec
