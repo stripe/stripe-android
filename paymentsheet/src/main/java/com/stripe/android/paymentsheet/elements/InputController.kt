@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import android.content.Context
 import androidx.annotation.StringRes
 import kotlinx.coroutines.flow.Flow
 
@@ -24,8 +23,6 @@ internal sealed interface InputController : Controller {
  * Encapsulates an error message including the string resource and the variable arguments
  */
 internal class FieldError(
-    @StringRes private val errorMessage: Int,
-    private val formatArgs: Array<out Any>? = null
-) {
-    fun getMessage(context: Context) = context.getString(errorMessage, formatArgs)
-}
+    @StringRes val errorMessage: Int,
+    val formatArgs: Array<out Any>? = null
+)
