@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
@@ -107,7 +106,12 @@ internal fun SectionElementUI(
 
         val error by controller.error.asLiveData().observeAsState(null)
         val sectionErrorString = error?.let {
-            LocalContext.current.resources.getString(it.errorMessage, it.formatArgs)
+            it.formatArgs?.let { args ->
+                stringResource(
+                    it.errorMessage,
+                    *args
+                )
+            } ?: stringResource(it.errorMessage)
         }
 
         Section(controller.label, sectionErrorString) {
