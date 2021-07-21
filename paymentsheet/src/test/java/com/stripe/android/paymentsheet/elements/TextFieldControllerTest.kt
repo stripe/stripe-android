@@ -7,6 +7,7 @@ import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
+import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Full
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid.Limitless
 import org.junit.Rule
@@ -93,7 +94,7 @@ internal class TextFieldControllerTest {
             }
 
         assertThat(isComplete).isEqualTo(true)
-        controller.onValueChange("alwaysError")
+        controller.onValueChange("invalid")
         assertThat(isComplete).isEqualTo(false)
     }
 
@@ -107,7 +108,7 @@ internal class TextFieldControllerTest {
                 isComplete = it
             }
 
-        controller.onValueChange("alwaysError")
+        controller.onValueChange("invalid")
         assertThat(isComplete).isEqualTo(false)
 
         controller.onValueChange("limitless")
@@ -126,7 +127,7 @@ internal class TextFieldControllerTest {
         assertThat(visibleError).isEqualTo(false)
 
         createControllerWithState()
-        controller.onValueChange("alwaysError")
+        controller.onValueChange("invalid")
         shadowOf(getMainLooper()).idle()
         assertThat(visibleError).isEqualTo(true)
     }
@@ -154,7 +155,7 @@ internal class TextFieldControllerTest {
         assertThat(error.size).isEqualTo(1)
         assertThat(error[0]).isNull()
 
-        controller.onValueChange("alwaysError")
+        controller.onValueChange("invalid")
         shadowOf(getMainLooper()).idle()
 
         assertThat(visibleError).isEqualTo(true)
@@ -212,6 +213,9 @@ internal class TextFieldControllerTest {
             on { determineState("limitless") } doReturn Limitless
             on { filter("limitless") } doReturn "limitless"
 
+            on { determineState("invalid") } doReturn Invalid(-1)
+            on { filter("invalid") } doReturn "invalid"
+
             on { determineState("blank") } doReturn Blank
             on { filter("blank") } doReturn "blank"
 
@@ -229,12 +233,13 @@ internal class TextFieldControllerTest {
     }
 
     companion object {
+        val fieldError = FieldError(-1)
+
         object ShowWhenNoFocus : TextFieldState {
             override fun isValid(): Boolean = false
             override fun isFull(): Boolean = false
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
-
-            override fun getError() = FieldError(-1)
+            override fun getError() = fieldError
         }
     }
 }
