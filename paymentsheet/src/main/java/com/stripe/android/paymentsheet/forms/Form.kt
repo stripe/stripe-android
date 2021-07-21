@@ -135,7 +135,7 @@ internal fun SectionElementUI(
 @Composable
 internal fun AddressElementUI(
     enabled: Boolean,
-    addressSectionElement: SectionFieldElement.AddressElement,
+    addressSectionElement: SectionFieldElement.AddressElement, // TODO: See if this can be a controller
     optionalIdentifiers: List<IdentifierSpec>?,
 ) {
     val fields by addressSectionElement.fields.asLiveData().observeAsState(emptyList())
