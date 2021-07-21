@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.elements
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
@@ -13,6 +14,7 @@ internal class NameConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Words
     override val debugLabel = "name"
     override val keyboard = KeyboardType.Text
+    override val visualTransformation: VisualTransformation? = null
 
     override fun determineState(input: String): TextFieldState {
         return when {

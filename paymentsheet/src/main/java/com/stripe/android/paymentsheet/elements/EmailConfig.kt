@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.elements
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
@@ -15,6 +16,7 @@ internal class EmailConfig : TextFieldConfig {
     @StringRes
     override val label = R.string.email
     override val keyboard = KeyboardType.Email
+    override val visualTransformation: VisualTransformation? = null
 
     /**
      * This will allow all characters, but will show as invalid if it doesn't match
@@ -30,7 +32,7 @@ internal class EmailConfig : TextFieldConfig {
         return when {
             input.isEmpty() -> Error.Blank
             PATTERN.matcher(input).matches() -> Valid.Limitless
-            containsNameAndDomain(input) -> Error.Invalid
+            containsNameAndDomain(input) -> Error.Invalid()
             else -> Error.Incomplete
         }
     }
@@ -40,8 +42,8 @@ internal class EmailConfig : TextFieldConfig {
     )
 
     companion object {
-        // This is copied from Paterns.EMAIL_ADDRESS because it is not defined for unit tests unless
-        // using Robolectric which is quite slow.
+        // This is copied from Patterns.EMAIL_ADDRESS because it is not defined for unit tests
+        // unless using Robolectric which is quite slow.
         val PATTERN: Pattern = Pattern.compile(
             "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
                 "\\@" +

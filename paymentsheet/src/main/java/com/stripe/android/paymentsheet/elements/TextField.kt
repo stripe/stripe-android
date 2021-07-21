@@ -103,6 +103,7 @@ internal fun TextField(
                 }
             }
         ),
+        visualTransformation = textFieldController.visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,

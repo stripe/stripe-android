@@ -107,6 +107,11 @@ internal sealed class SectionFieldElement {
         override val controller: TextFieldController
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
+    data class Iban(
+        override val identifier: IdentifierSpec,
+        override val controller: TextFieldController
+    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
