@@ -85,7 +85,7 @@ internal class DefaultFlowController @Inject internal constructor(
      *   paymentFlowResultProcessor afterwards.
      */
     private val paymentFlowResultProcessorProvider:
-        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
+        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
@@ -462,7 +462,7 @@ internal class DefaultFlowController @Inject internal constructor(
             authHostSupplier: () -> AuthActivityStarterHost,
             paymentOptionFactory: PaymentOptionFactory,
             paymentOptionCallback: PaymentOptionCallback,
-            paymentResultCallback: PaymentSheetResultCallback,
+            paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
             return DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
