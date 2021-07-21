@@ -1,122 +1,192 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="acc_label_card_number">Kortelės numeris</string>
-    <string name="acc_label_card_number_node">%s, kortelės numeris</string>
-    <string name="acc_label_cvc_node">%s, CVC</string>
-    <string name="acc_label_expiry_date">Galiojimo pabaigos data</string>
-    <string name="acc_label_expiry_date_node">%s, galiojimo pabaigos data</string>
-    <string name="acc_label_zip">Pašto kodas</string>
-    <string name="acc_label_zip_short">Pašto kodas</string>
-    <string name="add_card">Pridėti naują debeto ar kredito kortelę pirkimams atlikti šioje programėlėje.</string>
-    <string name="added">%s pridėtas</string>
-    <string name="address_city_required">Įveskite savo miestą</string>
-    <string name="address_country_invalid">Jūsų šalis neteisinga</string>
-    <string name="address_county_required">Įveskite savo apygardą</string>
-    <string name="address_label_address">Adresas</string>
-    <string name="address_label_address_line1">1 adreso eilutė</string>
-    <string name="address_label_address_line1_optional">1 adreso eilutė (pasirenkama)</string>
-    <string name="address_label_address_line2_optional">2 adreso eilutė (pasirenkama)</string>
-    <string name="address_label_address_optional">Adresas (pasirenkamas)</string>
-    <string name="address_label_apt">But.</string>
-    <string name="address_label_apt_optional">But. (pasirenkamas)</string>
-    <string name="address_label_city">Miestas</string>
-    <string name="address_label_city_optional">Miestas (pasirenkamas)</string>
-    <string name="address_label_country">Šalis</string>
-    <string name="address_label_county">Apygarda</string>
-    <string name="address_label_county_optional">Apygarda (pasirenkama)</string>
-    <string name="address_label_name">Vardas, pavardė</string>
-    <string name="address_label_phone_number">Telefono numeris</string>
-    <string name="address_label_phone_number_optional">Telefono numeris (pasirenkamas)</string>
-    <string name="address_label_postal_code">Pašto kodas</string>
-    <string name="address_label_postal_code_optional">Pašto kodas (pasirenkamas)</string>
-    <string name="address_label_postcode">Pašto kodas</string>
-    <string name="address_label_postcode_optional">Pašto kodas (pasirenkamas)</string>
-    <string name="address_label_province">Provincija</string>
-    <string name="address_label_province_optional">Provincija (pasirenkama)</string>
-    <string name="address_label_region_generic">Valstija / provincija / regionas</string>
-    <string name="address_label_region_generic_optional">Valstija / provincija / regionas (pasirenkami)</string>
-    <string name="address_label_state">Valstija</string>
-    <string name="address_label_state_optional">Valstija (pasirenkama)</string>
-    <string name="address_label_zip_code">Pašto kodas</string>
-    <string name="address_label_zip_code_optional">Pašto kodas (pasirenkamas)</string>
-    <string name="address_label_zip_postal_code">Pašto kodas</string>
-    <string name="address_label_zip_postal_code_optional">Pašto kodas (pasirenkamas)</string>
-    <string name="address_name_required">Įveskite savo vardą, pavardę</string>
-    <string name="address_phone_number_required">Įveskite savo telefono numerį</string>
-    <string name="address_postal_code_invalid">Jūsų pašto kodas yra netinkamas</string>
-    <string name="address_postcode_invalid">Jūsų pašto kodas yra netinkamas</string>
-    <string name="address_province_required">Įveskite savo provinciją</string>
-    <string name="address_region_generic_required">Įveskite savo valstiją / provinciją / regioną</string>
-    <string name="address_required">Įveskite savo adresą</string>
-    <string name="address_shipping_address">Siuntimo adresas</string>
-    <string name="address_state_required">Įveskite savo valstiją</string>
-    <string name="address_zip_invalid">Jūsų pašto kodas yra netinkamas.</string>
-    <string name="address_zip_postal_invalid">Jūsų pašto kodas yra netinkamas</string>
-    <string name="becs_mandate_acceptance">
-    Pateikdami banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šia
-    tiesioginio debeto užklausa ir tiesioginio debeto užklausos paslaugų sutartimi bei įgaliojate
-    „Stripe Payments Australia Pty Ltd“, ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156,
-    (toliau – „Stripe“) nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS)
-    %1$s vardu (toliau – „Pardavėjas“) bet kokias sumas, atskirai jums nurodytas
-    Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas
-    pasirašyti minėtą sąskaitą asmuo.
-    </string>
-    <string name="becs_widget_account_number">Sąskaitos numeris</string>
-    <string name="becs_widget_account_number_incomplete">Netikslus sąskaitos numeris.</string>
-    <string name="becs_widget_account_number_required">Privaloma nurodyti sąskaitos numerį.</string>
-    <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">Įvestas neišsamus BSB numeris.</string>
-    <string name="becs_widget_bsb_invalid">Įvestas netinkamas BSB numeris.</string>
-    <string name="becs_widget_email">El. pašto adresas</string>
-    <string name="becs_widget_email_invalid">Jūsų el. pašto adresas yra netinkamas.</string>
-    <string name="becs_widget_email_required">Privaloma nurodyti el. pašto adresą.</string>
-    <string name="becs_widget_name">Vardas, pavardė</string>
-    <string name="becs_widget_name_required">Privaloma nurodyti vardą, pavardę.</string>
-    <string name="card_ending_in">%1$s, kuri baigiasi %2$s</string>
-    <string name="close">Užverti</string>
-    <string name="delete_payment_method">Pašalinti mokėjimo būdą?</string>
-    <string name="delete_payment_method_prompt_title">Pašalinti mokėjimo būdą?</string>
-    <string name="expiry_date_hint">mm / MM</string>
-    <string name="expiry_label_short">Galiojimo pabaigos data</string>
-    <string name="fpx_bank_offline">%s – neprisijungęs</string>
-    <string name="incomplete_expiry_date">Neišsami kortelės galiojimo pabaigos data.</string>
-    <string name="invalid_card_number">Negaliojantis kortelės numeris.</string>
-    <string name="invalid_cvc">Kortelės saugos kodas negalioja.</string>
-    <string name="invalid_expiry_month">Negaliojantis kortelės galiojimo pabaigos mėnuo.</string>
-    <string name="invalid_expiry_year">Kortelės galiojimo pabaigos metai neteisingi.</string>
-    <string name="invalid_shipping_information">Netinkamas siuntimo adresas</string>
-    <string name="invalid_zip">Pašto kodas neišsamus.</string>
-    <string name="no_payment_methods">Nėra mokėjimo būdų.</string>
-    <string name="payment_method_add_new_card">Pridėti naują kortelę...</string>
-    <string name="payment_method_add_new_fpx">Pasirinkti banko sąskaitą (FPX)...</string>
-    <string name="price_free">Nemokamai</string>
-    <string name="removed">%s pašalintas</string>
-    <string name="secure_checkout">Saugus pirkimo užbaigimas</string>
-    <string name="stripe_failure_connection_error">Kilo problemų jungiantis prie mūsų mokėjimo paslaugų teikėjo. Patikrinkite interneto ryšį ir bandykite dar kartą.</string>
-    <string name="stripe_failure_reason_authentication">Nepavyko autentifikuoti mokėjimo būdo. Pasirinkite kitą mokėjimo būdą ir bandykite dar kartą.</string>
-    <string name="stripe_failure_reason_timed_out">Baigėsi mokėjimo būdui autentifikuoti skirtas laikas, bandykite dar kartą</string>
-    <string name="stripe_google_pay_error_internal">Įvyko vidinė klaida.</string>
-    <string name="stripe_paymentsheet_add_button_label">Pridėti</string>
-    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Pridėti</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information">Kortelės duomenys</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Šalis arba regionas</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">Pridėkite mokėjimo informaciją</string>
-    <string name="stripe_paymentsheet_back">Atgal</string>
-    <string name="stripe_paymentsheet_close">Užverti</string>
-    <string name="stripe_paymentsheet_expiration_date_hint">mm / MM</string>
-    <string name="stripe_paymentsheet_or_pay_using">Arba mokėti naudojant</string>
-    <string name="stripe_paymentsheet_or_pay_with_card">Arba mokėti kortele</string>
-    <string name="stripe_paymentsheet_pay_button_amount">Mokėti %s</string>
-    <string name="stripe_paymentsheet_pay_button_label">Mokėti</string>
-    <string name="stripe_paymentsheet_primary_button_processing">Apdorojama...</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Išsaugoti kortelę vėlesniems %s mokėjimams</string>
-    <string name="stripe_paymentsheet_select_payment_method">Pasirinkite mokėjimo būdą</string>
-    <string name="stripe_paymentsheet_setup_button_label">Nustatyti</string>
-    <string name="stripe_paymentsheet_total_amount">Bendra suma: %s</string>
-    <string name="stripe_verify_your_payment">Patvirtinkite savo mokėjimą.</string>
-    <string name="title_add_a_card">Pridėti kortelę</string>
-    <string name="title_add_an_address">Nustatyti adresą</string>
-    <string name="title_bank_account">Banko sąskaita</string>
-    <string name="title_payment_method">Mokėjimo būdas</string>
-    <string name="title_select_shipping_method">Pasirinkti siuntimo būdą</string>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">Kortelės numeris</string>
+  <string name="acc_label_card_number_node">%s, kortelės numeris</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">Galiojimo pabaigos data</string>
+  <string name="acc_label_expiry_date_node">%s, galiojimo pabaigos data</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">Pašto kodas</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">Pašto kodas</string>
+  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
+  <string name="add_card">Pridėti naują debeto ar kredito kortelę pirkimams atlikti šioje programėlėje.</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">%s pridėtas</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">Įveskite savo miestą</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">Jūsų šalis neteisinga</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">Įveskite savo apygardą</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adresas</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">1 adreso eilutė</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">1 adreso eilutė (pasirenkama)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">2 adreso eilutė (pasirenkama)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">Adresas (pasirenkamas)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">But. (pasirenkamas)</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">Miestas (pasirenkamas)</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">Apygarda (pasirenkama)</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">Telefono numeris</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">Telefono numeris (pasirenkamas)</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">Pašto kodas (pasirenkamas)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">Pašto kodas</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">Pašto kodas (pasirenkamas)</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">Provincija (pasirenkama)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">Valstija / provincija / regionas</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">Valstija / provincija / regionas (pasirenkami)</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">Valstija (pasirenkama)</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">Pašto kodas (pasirenkamas)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">Pašto kodas</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">Pašto kodas (pasirenkamas)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">Įveskite savo vardą, pavardę</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">Įveskite savo telefono numerį</string>
+  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+  <string name="address_postal_code_invalid">Jūsų pašto kodas yra netinkamas</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">Jūsų pašto kodas yra netinkamas</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">Įveskite savo provinciją</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">Įveskite savo valstiją / provinciją / regioną</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">Įveskite savo adresą</string>
+  <!-- Title for shipping address entry section -->
+  <string name="address_shipping_address">Siuntimo adresas</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">Įveskite savo valstiją</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">Jūsų pašto kodas yra netinkamas.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">Jūsų pašto kodas yra netinkamas</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    Pateikdami banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šia\n    tiesioginio debeto užklausa ir tiesioginio debeto užklausos paslaugų sutartimi bei įgaliojate\n    „Stripe Payments Australia Pty Ltd“, ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156,\n    (toliau – „Stripe“) nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS)\n    %1$s vardu (toliau – „Pardavėjas“) bet kokias sumas, atskirai jums nurodytas\n    Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas\n    pasirašyti minėtą sąskaitą asmuo.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">Sąskaitos numeris</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">Netikslus sąskaitos numeris.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">Privaloma nurodyti sąskaitos numerį.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">Įvestas neišsamus BSB numeris.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">Įvestas netinkamas BSB numeris.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">El. pašto adresas</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">Jūsų el. pašto adresas yra netinkamas.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">Privaloma nurodyti el. pašto adresą.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">Vardas, pavardė</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">Privaloma nurodyti vardą, pavardę.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%1$s, kuri baigiasi %2$s</string>
+  <!-- Text for close button -->
+  <string name="close">Užverti</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">Pašalinti mokėjimo būdą?</string>
+  <string name="delete_payment_method_prompt_title">Pašalinti mokėjimo būdą?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">mm / MM</string>
+  <string name="expiry_label_short">Galiojimo pabaigos data</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s – neprisijungęs</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Neišsami kortelės galiojimo pabaigos data.</string>
+  <string name="invalid_card_number">Negaliojantis kortelės numeris.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">Kortelės saugos kodas negalioja.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Negaliojantis kortelės galiojimo pabaigos mėnuo.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Kortelės galiojimo pabaigos metai neteisingi.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">Netinkamas siuntimo adresas</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">Pašto kodas neišsamus.</string>
+  <!-- Text informing user there are no existing payment methods in the application -->
+  <string name="no_payment_methods">Nėra mokėjimo būdų.</string>
+  <string name="payment_method_add_new_card">Pridėti naują kortelę...</string>
+  <string name="payment_method_add_new_fpx">Pasirinkti banko sąskaitą (FPX)...</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">Nemokamai</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">%s pašalintas</string>
+  <string name="secure_checkout">Saugus pirkimo užbaigimas</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Kilo problemų jungiantis prie mūsų mokėjimo paslaugų teikėjo. Patikrinkite interneto ryšį ir bandykite dar kartą.</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Nepavyko autentifikuoti mokėjimo būdo. Pasirinkite kitą mokėjimo būdą ir bandykite dar kartą.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">Baigėsi mokėjimo būdui autentifikuoti skirtas laikas, bandykite dar kartą</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">Įvyko vidinė klaida.</string>
+  <string name="stripe_paymentsheet_add_button_label">Pridėti</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Pridėti</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kortelės duomenys</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Šalis arba regionas</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">Pridėkite mokėjimo informaciją</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">Atgal</string>
+  <string name="stripe_paymentsheet_close">Užverti</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">mm / MM</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">Arba mokėti naudojant</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">Arba mokėti kortele</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">Mokėti %s</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">Mokėti</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">Apdorojama...</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Išsaugoti kortelę vėlesniems %s mokėjimams</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">Pasirinkite mokėjimo būdą</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">Nustatyti</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Patvirtinkite savo mokėjimą.</string>
+  <string name="title_add_a_card">Pridėti kortelę</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">Nustatyti adresą</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">Banko sąskaita</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">Mokėjimo būdas</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">Pasirinkti siuntimo būdą</string>
 </resources>

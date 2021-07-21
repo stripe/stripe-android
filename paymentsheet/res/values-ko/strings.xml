@@ -1,8 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="stripe_paymentsheet_ideal_bank">iDEAL 은행</string>
-    <string name="stripe_paymentsheet_payment_method_card">카드</string>
-    <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-    <string name="stripe_paymentsheet_save_for_future_payments">향후 결제에 사용하도록 저장</string>
-    <string name="stripe_paymentsheet_sepa_mandate">결제 정보를 제공하고 이 결제를 확인하면 (A) %s 및 결제 서비스 공급업체 Stripe가 은행에 계좌 출금에 관련한 지침을 전송하고 (B) 은행이 해당 지침에 따라 출금하도록 승인하는 것입니다. 귀하의 권리 중 일부로, 은행에 대한 이용 약관 동의 하에 은행에서 환불을 받을 자격을 부여받게 됩니다. 환불은 계좌에서 출금이 이루어진 날짜로부터 8주 이내에 요청해야 합니다. 귀하의 권리는 은행에서 받으시는 명세서에 설명되어 있습니다. 귀하는 향후 출금 시 최대 2일 전에 알림을 받겠다고 동의하는 것입니다.</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">주소</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">시</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">국가</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">구/군</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">이름</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">우편번호</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">도</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">주</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">우편번호</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">이메일이 잘못되었습니다.</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">입력한 IBAN이 불완전합니다.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">입력한 IBAN이 잘못되었습니다.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">입력한 IBAN이 잘못되었습니다. \"%s\"은(는) 지원되는 국가 코드가 아닙니다.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_paymentsheet_form_label_optional">%s(선택 사항)</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_paymentsheet_ideal_bank">iDEAL 은행</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">카드</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">향후 결제에 사용하도록 저장</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_paymentsheet_sepa_mandate">결제 정보를 제공하고 이 결제를 확인하면 (A) %s 및 결제 서비스 공급업체 Stripe가 은행에 계좌 출금에 관련한 지침을 전송하고 (B) 은행이 해당 지침에 따라 출금하도록 승인하는 것입니다. 귀하의 권리 중 일부로, 은행에 대한 이용 약관 동의 하에 은행에서 환불을 받을 자격을 부여받게 됩니다. 환불은 계좌에서 출금이 이루어진 날짜로부터 8주 이내에 요청해야 합니다. 귀하의 권리는 은행에서 받으시는 명세서에 설명되어 있습니다. 귀하는 향후 출금 시 최대 2일 전에 알림을 받겠다고 동의하는 것입니다.</string>
 </resources>
