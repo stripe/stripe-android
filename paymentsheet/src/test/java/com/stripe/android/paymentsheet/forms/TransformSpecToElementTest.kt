@@ -130,7 +130,9 @@ class TransformSpecToElementTest {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("simple"),
                     R.string.address_label_name,
-                    showOptionalLabel = true
+                    showOptionalLabel = true,
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Words
                 )
             )
         ).transform(
