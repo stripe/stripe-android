@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <!-- Use when a required field has not been filled in -->
-  <string name="incomplete" tools:ignore="MissingTranslation">%s is incomplete.</string>
-  <!-- Use when a required field is not valid and cannot be corrected. -->
-  <string name="malformed" tools:ignore="MissingTranslation">%s is malformed.</string>
   <!-- Use when a required field is blank and submit is clicked. -->
   <string name="blank_and_required" tools:ignore="MissingTranslation">This field cannot be blank.</string>
   <!-- Use when is not valid, but the exact problem is unknown. -->
