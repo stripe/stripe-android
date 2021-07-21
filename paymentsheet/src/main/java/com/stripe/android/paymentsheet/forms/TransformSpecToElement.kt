@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.AddressFieldRepository
 import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
@@ -26,7 +25,7 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  */
 internal fun List<FormItemSpec>.transform(
     merchantName: String,
-    focusRequesterCount: FocusRequesterCount,
+    focusRequesterCount: FocusRequesterCount
 ): List<FormElement> =
     this.map {
         when (it) {

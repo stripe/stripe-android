@@ -225,7 +225,7 @@ class FormViewModel(
         private val layout: LayoutSpec,
         private val saveForFutureUseValue: Boolean,
         private val saveForFutureUseVisibility: Boolean,
-        private val merchantName: String,
+        private val merchantName: String
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -233,7 +233,7 @@ class FormViewModel(
                 layout,
                 saveForFutureUseValue,
                 saveForFutureUseVisibility,
-                merchantName,
+                merchantName
             ) as T
         }
     }
