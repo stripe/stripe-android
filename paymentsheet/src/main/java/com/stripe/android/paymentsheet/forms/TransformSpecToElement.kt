@@ -61,14 +61,11 @@ internal fun List<SectionFieldSpec>.transform(
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
         is SectionFieldSpec.SimpleText -> it.transform(focusRequesterCount)
-        is SectionFieldSpec.AddressSpec -> it.transform()
+        is SectionFieldSpec.AddressSpec -> SectionFieldElement.AddressElement(
+            IdentifierSpec("billing")
+        )
     }
 }
-
-private fun SectionFieldSpec.AddressSpec.transform() =
-    SectionFieldElement.AddressElement(
-        IdentifierSpec("billing")
-    )
 
 private fun SectionFieldSpec.SimpleText.transform(
     focusRequesterCount: FocusRequesterCount
@@ -80,7 +77,8 @@ private fun SectionFieldSpec.SimpleText.transform(
                 label = this.label,
                 capitalization = this.capitalization,
                 keyboard = this.keyboardType
-            )
+            ),
+            showOptionalLabel = this.showOptionalLabel
         ),
         focusRequesterCount.getAndIncrement()
     )

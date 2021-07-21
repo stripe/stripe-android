@@ -56,6 +56,7 @@
     <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
     <!-- Title for Sofort payment method -->
     <string name="stripe_paymentsheet_payment_method_sofort" translatable="false">Sofort</string>
+    <string name="stripe_paymentsheet_form_label_optional" tools:ignore="MissingTranslation">%s (optional)</string>
 
     <string name="billing_details" tools:ignore="MissingTranslation">Billing Details</string>
     <string name="address_label_address_line2" tools:ignore="MissingTranslation">Address line 2</string>
