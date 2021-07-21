@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -21,26 +20,6 @@ import kotlinx.coroutines.flow.map
  */
 internal interface OptionalElement {
     val identifier: IdentifierSpec
-}
-
-/**
- * This interface is used to define the types of elements allowed in a section
- */
-internal sealed interface SectionFieldElementType {
-    val controller: Controller
-
-    interface TextFieldElement : SectionFieldElementType {
-        override val controller: TextFieldController
-    }
-
-    interface DropdownFieldElement : SectionFieldElementType {
-        override val controller: DropdownFieldController
-    }
-
-    interface AddressElement : SectionFieldElementType {
-        override val controller: AddressController
-        val fields: Flow<List<SectionFieldElement>>
-    }
 }
 
 /**
@@ -116,55 +95,48 @@ internal sealed class SectionFieldElement {
      */
     abstract val controller: SectionFieldErrorController
 
-    abstract fun controllerType(): SectionFieldElementType
-
-    data class Name(
-        override val identifier: IdentifierSpec,
-        override val controller: TextFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
-        override fun controllerType(): SectionFieldElementType = this
-    }
+    abstract fun controllerType(): SectionFieldErrorController
 
     data class Email(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
-        override fun controllerType(): SectionFieldElementType = this
+    ) : SectionFieldElement() {
+        override fun controllerType(): SectionFieldErrorController = controller
     }
 
     data class Iban(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
-        override fun controllerType(): SectionFieldElementType = this
+    ) : SectionFieldElement() {
+        override fun controllerType(): SectionFieldErrorController = controller
     }
 
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement {
-        override fun controllerType(): SectionFieldElementType = this
+    ) : SectionFieldElement() {
+        override fun controllerType(): SectionFieldErrorController = controller
     }
 
     data class IdealBank internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement {
-        override fun controllerType(): SectionFieldElementType = this
+    ) : SectionFieldElement() {
+        override fun controllerType(): SectionFieldErrorController = controller
     }
 
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement {
-        override fun controllerType(): SectionFieldElementType = this
+    ) : SectionFieldElement() {
+        override fun controllerType(): SectionFieldErrorController = controller
     }
 
     internal class AddressElement(
         override val identifier: IdentifierSpec,
         val addressFieldRepository: AddressFieldElementRepository,
         val countryCodes: Set<String> = setOf("US", "JP")
-    ) : SectionFieldElement(), SectionFieldElementType.AddressElement {
+    ) : SectionFieldElement() {
 
         /**
          * Focus requester is a challenge - Must get this working from spec
@@ -182,12 +154,12 @@ internal sealed class SectionFieldElement {
                     ?: emptyList()
             }
 
-        override val fields = otherFields.map { listOf(countryElement).plus(it) }
+        val fields = otherFields.map { listOf(countryElement).plus(it) }
 
         // Most section element controllers are created in the transform
         // instead of the element, where the label is created
         override val controller = AddressController(fields)
 
-        override fun controllerType(): SectionFieldElementType = this
+        override fun controllerType(): SectionFieldErrorController = controller
     }
 }

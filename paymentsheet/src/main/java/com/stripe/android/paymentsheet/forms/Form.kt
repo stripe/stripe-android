@@ -31,12 +31,14 @@ import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.SectionFieldElementType
+import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
+import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
+import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -133,9 +135,9 @@ internal fun SectionElementUI(
 @Composable
 internal fun AddressElementUI(
     enabled: Boolean,
-    addressSectionElement: SectionFieldElementType.AddressElement
+    controller: AddressController
 ) {
-    val fields by addressSectionElement.fields.asLiveData().observeAsState(emptyList())
+    val fields by controller.fieldsFlowable.asLiveData().observeAsState(emptyList())
     Column {
         fields.forEachIndexed { index, field ->
             SectionFieldElementUI(enabled, field)
@@ -160,24 +162,24 @@ internal fun SectionFieldElementUI(
     enabled: Boolean,
     field: SectionFieldElement
 ) {
-    when (val fieldType = field.controllerType()) {
-        is SectionFieldElementType.TextFieldElement -> {
+    when (val controller = field.controllerType()) {
+        is TextFieldController -> {
             TextField(
-                textFieldController = fieldType.controller,
+                textFieldController = controller,
                 enabled = enabled
             )
         }
-        is SectionFieldElementType.DropdownFieldElement -> {
+        is DropdownFieldController -> {
             DropDown(
-                fieldType.controller.label,
-                fieldType.controller,
+                controller.label,
+                controller,
                 enabled
             )
         }
-        is SectionFieldElementType.AddressElement -> {
+        is AddressController -> {
             AddressElementUI(
                 enabled,
-                fieldType
+                controller
             )
         }
     }
