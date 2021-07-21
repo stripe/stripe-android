@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.Resources
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
