@@ -16,6 +16,14 @@
     <string name="stripe_paymentsheet_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
     <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
 
+    <string name="stripe_paymentsheet_iban" translatable="false">IBAN</string>
+    <!-- An error message displayed when the customer's IBAN is invalid. -->
+    <string name="stripe_paymentsheet_iban_invalid" tools:ignore="MissingTranslation">The IBAN you entered is invalid.</string>
+    <!-- An error message displayed when the IBAN country code is not supported. -->
+    <string name="stripe_paymentsheet_iban_invalid_country" tools:ignore="MissingTranslation">The IBAN you entered is invalid, \"%s\" is not a supported country code.</string>
+    <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+    <string name="stripe_paymentsheet_iban_invalid_start" tools:ignore="MissingTranslation">Your IBAN should start with a two-letter country code.</string>
+
     <string name="billing_details">Billing Details</string>
     <string name="address_label_address_line1">Address line 1</string>
     <string name="address_label_address_line2">Address line 2</string>
@@ -57,4 +65,5 @@
     <string name="address_label_ie_townland">Townland</string>
     <string name="address_label_au_suburb_or_city">Suburb or City</string>
     <string name="shipping_details">Shipping Details</string>
+    <string name="stripe_paymentsheet_form_label_optional" tools:ignore="MissingTranslation">%s (optional)</string>
 </resources>

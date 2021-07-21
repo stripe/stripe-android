@@ -90,11 +90,13 @@ internal fun TextField(
         isError = shouldShowError,
         label = {
             Text(
-                text = if (textFieldController.isRequired) {
-                    stringResource(textFieldController.label)
+                text = if (textFieldController.showOptionalLabel) {
+                    stringResource(
+                        R.string.stripe_paymentsheet_form_label_optional,
+                        stringResource(textFieldController.label)
+                    )
                 } else {
-                    stringResource(textFieldController.label) +
-                        " " + stringResource(R.string.address_label_optional_field)
+                    stringResource(textFieldController.label)
                 }
             )
         },
@@ -106,6 +108,7 @@ internal fun TextField(
                 }
                 hasFocus = it.isFocused
             },
+        visualTransformation = textFieldController.visualTransformation,
         keyboardActions = KeyboardActions(
             onNext = {
                 if(!focusManager.moveFocus(FocusDirection.Down) ){

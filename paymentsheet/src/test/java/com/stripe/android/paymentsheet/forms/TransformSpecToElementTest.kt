@@ -110,6 +110,33 @@ class TransformSpecToElementTest {
     }
 
     @Test
+    fun `Add a simple text section spec sets up the text element correctly`() {
+        val formElement = listOf(
+            FormItemSpec.SectionSpec(
+                IdentifierSpec("simple_section"),
+                SectionFieldSpec.SimpleText(
+                    IdentifierSpec("simple"),
+                    R.string.address_label_name,
+                    showOptionalLabel = true,
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Words
+                )
+            )
+        ).transform(
+            "Example, Inc.",
+            FocusRequesterCount()
+        )
+
+        val nameElement = (formElement.first() as SectionElement).fields[0]
+            as SectionFieldElement.SimpleText
+
+        // Verify the correct config is setup for the controller
+        assertThat(nameElement.controller.label).isEqualTo(R.string.address_label_name)
+        assertThat(nameElement.identifier.value).isEqualTo("simple")
+        assertThat(nameElement.controller.showOptionalLabel).isTrue()
+    }
+
+    @Test
     fun `Add a email section spec sets up the email element correctly`() {
         val formElement = listOf(emailSection).transform("Example, Inc.")
 

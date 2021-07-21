@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.IbanConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
@@ -50,6 +51,7 @@ private fun FormItemSpec.SectionSpec.transform(): FormElement.SectionElement {
 internal fun List<SectionFieldSpec>.transform() = this.map {
     when (it) {
         is SectionFieldSpec.Email -> it.transform()
+        is SectionFieldSpec.Iban -> it.transform()
         is SectionFieldSpec.Country -> it.transform()
         is SectionFieldSpec.IdealBank -> it.transform()
         is SectionFieldSpec.SimpleText -> it.transform()
@@ -69,7 +71,7 @@ private fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
                 capitalization = this.capitalization,
                 keyboard = this.keyboardType
             ),
-            isRequired = this.isRequired
+            showOptionalLabel = this.showOptionalLabel
         )
     )
 
@@ -87,6 +89,12 @@ private fun SectionFieldSpec.Email.transform() =
     SectionFieldElement.Email(
         this.identifier,
         TextFieldController(EmailConfig()),
+    )
+
+private fun SectionFieldSpec.Iban.transform() =
+    SectionFieldElement.Iban(
+        this.identifier,
+        TextFieldController(IbanConfig())
     )
 
 private fun SectionFieldSpec.Country.transform() =

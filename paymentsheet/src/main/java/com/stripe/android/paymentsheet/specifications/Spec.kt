@@ -79,6 +79,8 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     object Email : SectionFieldSpec(IdentifierSpec("email"))
 
+    object Iban : SectionFieldSpec(IdentifierSpec("iban"))
+
     /**
      * This is the specification for a country field.
      * @property onlyShowCountryCodes: a list of country code that should be shown.  If empty all
@@ -94,7 +96,8 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
         @StringRes val label: Int,
         val isRequired: Boolean,
         val capitalization: KeyboardCapitalization,
-        val keyboardType: KeyboardType
+        val keyboardType: KeyboardType,
+        val showOptionalLabel: Boolean = false
     ) : SectionFieldSpec(identifier)
 
     data class AddressSpec(
