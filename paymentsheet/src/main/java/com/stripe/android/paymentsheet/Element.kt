@@ -21,13 +21,6 @@ internal class FocusRequesterCount {
 }
 
 /**
- * This is used to define which elements can be made hidden
- */
-internal interface HiddenElement {
-    val identifier: IdentifierSpec
-}
-
-/**
  * This interface is used to define the types of elements allowed in a section
  */
 internal sealed interface SectionFieldElementType {
@@ -63,7 +56,7 @@ internal sealed class FormElement {
         val color: Color,
         val merchantName: String?,
         override val controller: InputController? = null,
-    ) : FormElement(), HiddenElement
+    ) : FormElement()
 
     /**
      * This is an element that will make elements (as specified by identifier) hidden
@@ -79,7 +72,7 @@ internal sealed class FormElement {
         override val identifier: IdentifierSpec,
         val fields: List<SectionFieldElementType>,
         override val controller: SectionController
-    ) : FormElement(), HiddenElement {
+    ) : FormElement() {
         internal constructor(
             identifier: IdentifierSpec,
             field: SectionFieldElementType,

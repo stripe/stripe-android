@@ -27,7 +27,7 @@ data class IdentifierSpec(val value: String)
 /**
  * Identifies a field that can be made hidden.
  */
-interface HiddenItemSpec {
+interface RequiredItemSpec {
     val identifier: IdentifierSpec
 }
 
@@ -42,7 +42,7 @@ sealed class FormItemSpec {
         override val identifier: IdentifierSpec,
         val fields: List<SectionFieldSpec>,
         @StringRes val title: Int? = null,
-    ) : FormItemSpec(), HiddenItemSpec {
+    ) : FormItemSpec(), RequiredItemSpec {
         constructor(
             identifier: IdentifierSpec,
             field: SectionFieldSpec,
@@ -57,15 +57,15 @@ sealed class FormItemSpec {
         override val identifier: IdentifierSpec,
         @StringRes val stringResId: Int,
         val color: Color
-    ) : FormItemSpec(), HiddenItemSpec
+    ) : FormItemSpec(), RequiredItemSpec
 
     /**
      * This is an element that will make elements (as specified by identifier hidden
      * when save for future use is unchecked)
      */
     data class SaveForFutureUseSpec(
-        val identifierRequiredForFutureUse: List<HiddenItemSpec>
-    ) : FormItemSpec(), HiddenItemSpec {
+        val identifierRequiredForFutureUse: List<RequiredItemSpec>
+    ) : FormItemSpec(), RequiredItemSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
 }
