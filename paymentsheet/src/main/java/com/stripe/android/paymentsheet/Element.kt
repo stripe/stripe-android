@@ -91,40 +91,30 @@ internal sealed class SectionFieldElement {
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.
      */
-    abstract fun sectionFieldErrorController(): SectionFieldErrorController
+    fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
     data class Email(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement() {
-        override fun sectionFieldErrorController(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     data class Iban(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
-    ) : SectionFieldElement() {
-        override fun sectionFieldErrorController(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement() {
-        override fun sectionFieldErrorController(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     data class IdealBank internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement() {
-        override fun sectionFieldErrorController(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement() {
-        override fun sectionFieldErrorController(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 }
