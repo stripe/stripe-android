@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <!-- Use when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required" tools:ignore="MissingTranslation">This field cannot be blank.</string>
-  <!-- Use when is not valid, but the exact problem is unknown. -->
-  <string name="invalid" tools:ignore="MissingTranslation">%s is invalid.</string>
-  <string name="email" tools:ignore="MissingTranslation">Email</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Address</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
@@ -61,6 +56,10 @@
   <string name="address_label_village_township" tools:ignore="MissingTranslation">Village or Township</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">ZIP Code</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required" tools:ignore="MissingTranslation">This field cannot be blank.</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">Email</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">Your email is invalid.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
