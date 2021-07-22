@@ -21,9 +21,9 @@ internal class FocusRequesterCount {
 }
 
 /**
- * This is used to define which elements can be made optional
+ * This is used to define which elements can be made hidden
  */
-internal interface OptionalElement {
+internal interface HiddenElement {
     val identifier: IdentifierSpec
 }
 
@@ -63,7 +63,7 @@ internal sealed class FormElement {
         val color: Color,
         val merchantName: String?,
         override val controller: InputController? = null,
-    ) : FormElement(), OptionalElement
+    ) : FormElement(), HiddenElement
 
     /**
      * This is an element that will make elements (as specified by identifier) hidden
@@ -79,7 +79,7 @@ internal sealed class FormElement {
         override val identifier: IdentifierSpec,
         val fields: List<SectionFieldElementType>,
         override val controller: SectionController
-    ) : FormElement(), OptionalElement {
+    ) : FormElement(), HiddenElement {
         internal constructor(
             identifier: IdentifierSpec,
             field: SectionFieldElementType,

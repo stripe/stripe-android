@@ -25,18 +25,16 @@ data class LayoutSpec(val items: List<FormItemSpec>)
 data class IdentifierSpec(val value: String)
 
 /**
- * Identifies a field that can be made optional.
+ * Identifies a field that can be made hidden.
  */
-interface OptionalItemSpec {
+interface HiddenItemSpec {
     val identifier: IdentifierSpec
 }
 
 /**
  * This is used to define each section in the visual form layout specification
  */
-
 sealed class FormItemSpec {
-
     /**
      * This represents a section in a form that contains other elements
      */
@@ -44,7 +42,7 @@ sealed class FormItemSpec {
         override val identifier: IdentifierSpec,
         val fields: List<SectionFieldSpec>,
         @StringRes val title: Int? = null,
-    ) : FormItemSpec(), OptionalItemSpec {
+    ) : FormItemSpec(), HiddenItemSpec {
         constructor(
             identifier: IdentifierSpec,
             field: SectionFieldSpec,
@@ -59,15 +57,15 @@ sealed class FormItemSpec {
         override val identifier: IdentifierSpec,
         @StringRes val stringResId: Int,
         val color: Color
-    ) : FormItemSpec(), OptionalItemSpec
+    ) : FormItemSpec(), HiddenItemSpec
 
     /**
      * This is an element that will make elements (as specified by identifier hidden
      * when save for future use is unchecked)
      */
     data class SaveForFutureUseSpec(
-        val identifierRequiredForFutureUse: List<OptionalItemSpec>
-    ) : FormItemSpec(), OptionalItemSpec {
+        val identifierRequiredForFutureUse: List<HiddenItemSpec>
+    ) : FormItemSpec(), HiddenItemSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
 }
