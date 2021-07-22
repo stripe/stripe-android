@@ -93,7 +93,7 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     data class SimpleDropdown(
         override val identifier: IdentifierSpec,
         @StringRes val label: Int,
-        val items: List<DropdownItem>
+        val bankType: SupportedBankType
     ) : SectionFieldSpec(identifier)
 
     data class SimpleText(
@@ -114,7 +114,7 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     }
 }
 
-internal enum class SupportedBankType(val assetFileName: String) {
+enum class SupportedBankType(val assetFileName: String) {
     Eps("epsBanks.json"),
     Ideal("idealBanks.json"),
     P24("p24Banks.json")

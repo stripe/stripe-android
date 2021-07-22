@@ -16,10 +16,12 @@ import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.specifications.DropdownItem
+import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
+import com.stripe.android.paymentsheet.specifications.SupportedBankType
+import com.stripe.android.paymentsheet.specifications.getBankInitializationValue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -38,6 +40,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Section with multiple fields contains all fields in the section element`() {
+        BankRepository.init(getBankInitializationValue())
         val formElement = listOf(
             FormItemSpec.SectionSpec(
                 IdentifierSpec("multifieldSection"),
@@ -78,6 +81,7 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() {
+        BankRepository.init(getBankInitializationValue())
         val idealSection = FormItemSpec.SectionSpec(
             IdentifierSpec("idealSection"),
             IDEAL_BANK_CONFIG
@@ -194,20 +198,7 @@ class TransformSpecToElementTest {
         val IDEAL_BANK_CONFIG = SectionFieldSpec.SimpleDropdown(
             IdentifierSpec("bank"),
             R.string.stripe_paymentsheet_ideal_bank,
-            listOf(
-                DropdownItem("ABN AMRO", "abn_amro"),
-                DropdownItem("ASN Bank", "asn_bank"),
-                DropdownItem("Bunq", "bunq"),
-                DropdownItem("Handelsbanken", "handelsbanken"),
-                DropdownItem("ING", "ing"),
-                DropdownItem("Knab", "knab"),
-                DropdownItem("Rabobank", "rabobank"),
-                DropdownItem("Revolut", "revolut"),
-                DropdownItem("RegioBank", "regiobank"),
-                DropdownItem("SNS Bank (De Volksbank)", "sns_bank"),
-                DropdownItem("Triodos Bank", "triodos_bank"),
-                DropdownItem("Van Lanschot", "van_lanschot"),
-            )
+            SupportedBankType.Ideal
         )
     }
 }

@@ -43,7 +43,6 @@ class CardDataCollectionFragmentTest {
 
     @Before
     fun setup() {
-        BankRepository.init(RuntimeEnvironment.getApplication().resources)
         PaymentConfiguration.init(
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY

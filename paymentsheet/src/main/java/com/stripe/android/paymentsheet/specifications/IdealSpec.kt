@@ -27,7 +27,7 @@ internal val idealBankSection = SectionSpec(
     SectionFieldSpec.SimpleDropdown(
         IdentifierSpec("bank"),
         R.string.stripe_paymentsheet_ideal_bank,
-        BankRepository.get(SupportedBankType.Ideal)
+        SupportedBankType.Ideal
     )
 )
 internal val idealMandate = MandateTextSpec(

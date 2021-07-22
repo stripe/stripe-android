@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
@@ -104,7 +105,7 @@ private fun SectionFieldSpec.SimpleDropdown.transform() =
         DropdownFieldController(
             SimpleDropdownConfig(
                 label,
-                this.items
+                BankRepository.get(this.bankType)
             )
         )
     )
