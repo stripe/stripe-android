@@ -37,12 +37,17 @@ import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
+import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VALUE
+import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
 internal val formElementPadding = 16.dp
 
@@ -205,10 +210,11 @@ internal fun SaveForFutureUseElementUI(
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FormViewModel(
+@Singleton
+class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
-    saveForFutureUseInitialValue: Boolean,
-    saveForFutureUseInitialVisibility: Boolean,
+    @Named(SAVE_FOR_FUTURE_USE_INITIAL_VALUE)  saveForFutureUseInitialValue: Boolean,
+    @Named(SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY) saveForFutureUseInitialVisibility: Boolean,
     merchantName: String,
 ) : ViewModel() {
     internal class Factory(
@@ -219,12 +225,15 @@ class FormViewModel(
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(
-                layout,
-                saveForFutureUseValue,
-                saveForFutureUseVisibility,
-                merchantName
-            ) as T
+
+            // This is where we will call Dagger:
+            return DaggerFormViewModelComponent.builder()
+                .layout(layout)
+                .saveForFutureUseValue(saveForFutureUseValue)
+                .saveForFutureUseVisibility(saveForFutureUseVisibility)
+                .merchantName(merchantName)
+                .build()
+                .viewModel
         }
     }
 

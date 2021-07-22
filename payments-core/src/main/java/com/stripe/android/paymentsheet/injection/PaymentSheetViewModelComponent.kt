@@ -13,6 +13,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentCommonModule::class,
+        ResourceRepositoryModule::class,
         PaymentSheetViewModelModule::class
     ]
 )

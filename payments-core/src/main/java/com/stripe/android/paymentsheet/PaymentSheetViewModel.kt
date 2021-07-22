@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.specifications.BankRepositoryInstance
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
@@ -87,7 +88,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository: PrefsRepository,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext,
-    private val paymentController: PaymentController
+    private val paymentController: PaymentController,
+    private val bankRepository: BankRepositoryInstance
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -174,6 +176,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      */
     fun fetchStripeIntent() {
         viewModelScope.launch {
+            bankRepository.init()
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)
             }.fold(
