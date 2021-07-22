@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.map
  */
 internal class TextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
+    val showOptionalLabel: Boolean = false
 ) : InputController {
     val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     val keyboardType: KeyboardType = textFieldConfig.keyboard

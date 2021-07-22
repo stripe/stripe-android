@@ -203,18 +203,21 @@ public final class com/stripe/android/paymentsheet/specifications/SectionFieldSp
 
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
-	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
 	public final fun component2 ()I
 	public final fun component3-IUNYP9k ()I
 	public final fun component4-PjHm6EE ()I
-	public final fun copy-MwhgLSg (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;III)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;
-	public static synthetic fun copy-MwhgLSg$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;
+	public final fun component5 ()Z
+	public final fun copy-25FCGzQ (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIZ)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;
+	public static synthetic fun copy-25FCGzQ$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCapitalization-IUNYP9k ()I
 	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
 	public final fun getKeyboardType-PjHm6EE ()I
 	public final fun getLabel ()I
+	public final fun getShowOptionalLabel ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

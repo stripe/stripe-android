@@ -1,8 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-    <string name="stripe_paymentsheet_payment_method_card">Kort</string>
-    <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-    <string name="stripe_paymentsheet_save_for_future_payments">Lagre for framtidige betalingar</string>
-    <string name="stripe_paymentsheet_sepa_mandate">Ved å oppgje betalingsopplysningane dine og bekrefte denne betalinga, autoriserer du (A) %s og Stripe, betalingstenesteleverandøren vår, til å sende instruksjonar til banken din om å debitere kontoen din og (B) banken din om å debitere kontoen din i medhald av dei instruksjonane. Som ein del av rettane dine, har du krav på ein refusjon frå banken din under vilkåra i avtalen din med banken. Ein refusjon må hevdast innan 8 veker frå datoen da kontoen din vart debitert. Rettane dine vert forklart i ei erklæring som du kan få frå banken. Du godtek å take imot varsel for framtidige debetar opptil 2 dagar før dei oppstår.</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adresse</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Sted</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Land</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Fylke</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Namn</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Postnummer</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provins</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Stat</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Postnummer</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">E-postadressa di er ugyldig.</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">Du skreiv inn eit ufullstendig IBAN-nummer.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">Du skreiv inn eit ugyldig IBAN-nummer.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">Du skreiv inn eit ugyldig IBAN-nummer, \"%s\" er ikkje ei støtta landskode.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">IBAN-nummeret bør starte med ei landskode med to bokstavar.</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_paymentsheet_form_label_optional">%s (valfritt)</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Kort</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Lagre for framtidige betalingar</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_paymentsheet_sepa_mandate">Ved å oppgje betalingsopplysningane dine og bekrefte denne betalinga, autoriserer du (A) %s og Stripe, betalingstenesteleverandøren vår, til å sende instruksjonar til banken din om å debitere kontoen din og (B) banken din om å debitere kontoen din i medhald av dei instruksjonane. Som ein del av rettane dine, har du krav på ein refusjon frå banken din under vilkåra i avtalen din med banken. Ein refusjon må hevdast innan 8 veker frå datoen da kontoen din vart debitert. Rettane dine vert forklart i ei erklæring som du kan få frå banken. Du godtek å take imot varsel for framtidige debetar opptil 2 dagar før dei oppstår.</string>
 </resources>

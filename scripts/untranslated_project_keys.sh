@@ -1,10 +1,18 @@
 #!/bin/bash
 
-#This script will go through each of the modules and verify that each string key is
-#associated with android in localize.  If it isn't the script will search for the string
-#value in the localize android and ios project.
+# This script will go through each of the modules and verify that each string key is
+# associated with android in localize.  If it isn't the script will search for the string
+# value in the localize android and ios project.
 #
-# It will ignore strings in the project that have the translateable=false
+# This script requires that localize.sh is run first, if it is not it will exit with an error.
+#
+# This script can be run with no arguments:
+#  ./untranslated_project_key.sh
+
+if [ -z "$API_TOKEN" ]; then
+  echo "You need to add the API_TOKEN to: localization_vars.sh"
+  exit
+fi
 
 if [[ -z $(which lokalise2) ]]; then
     echo "Installing lokalise2 via homebrew..."
@@ -34,7 +42,7 @@ do
    sort -o android/$MODULE-localize_android_keys-sorted.txt android/$MODULE-localize_android_keys.txt
 
    # List all the keys in the android project.
-   cat ../$MODULE/res/values/strings.xml | grep -v "translatable=\"false\"" | gsed -E -n "s/\s*<string name=\"([^ ]*)\".*>(.*)<\/string>/\1/pI" > android/$MODULE-project_keys.txt
+   cat ../$MODULE/res/values/strings.xml | gsed -E -n "s/\s*<string name=\"([^ ]*)\".*>(.*)<\/string>/\1/pI" > android/$MODULE-project_keys.txt
    sort -o android/$MODULE-project_keys-sorted.txt android/$MODULE-project_keys.txt
 
    diff -u android/$MODULE-localize_android_keys-sorted.txt android/$MODULE-project_keys-sorted.txt  | grep -E "^[\+][a-z]" | sed 's/^+//g' > android/diff_keys-$MODULE.txt

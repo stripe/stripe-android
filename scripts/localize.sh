@@ -1,17 +1,21 @@
 #!/bin/bash
-
-#This script will pull down the strings for each of the modules and copies
-#them into the respective string directories.
+# This script will pull down the strings for each of the modules and copies
+# them into the respective string directories.
 #
-#It will remove the android directory from which it works at the beginning
-#It will not replace the default string value.
-#It will do iso renames as needed.
-#It will not perform a commit.
+# It will remove the android directory from which it works at the beginning
+# It will not replace the default string value.
+# It will do iso renames as needed.
+# It will not perform a commit.
 #
-#It does generate an android/$MODULE-strings.xml file for use by other scripts.
+# It does generate an android/$MODULE-strings.xml file for use by other scripts.
+#
+# This script can be run with no arguments:
+#  ./localize.sh
 
-#xml is for android, strings is for iOS
-FORMAT=xml
+if [ -z "$API_TOKEN" ]; then
+  echo "You need to add the API_TOKEN to: localization_vars.sh"
+  exit
+fi
 
 if [[ -z $(which lokalise2) ]]; then
     echo "Installing lokalise2 via homebrew..."
@@ -32,18 +36,38 @@ FINAL_STATUS_ID=587
 
 rm -rf android/*
 
-#strings.xml -- are android strings not assigned to a file.
-#          --filter-langs $LANGUAGES \
+echo "AVAILABLE LANGUAGES: "
+lokalise2 --token $API_TOKEN --project-id $PROJECT_ID language list | grep iso
+
+echo "DOWNLOADING LANGUAGES: ${LANGUAGES}"
 
 for MODULE in "paymentsheet" "payments-core"
 do
-    echo "Downloading strings in $MODULE module: $MODULE/strings.xml"
+    echo ""
+    echo ""
+    echo "----------------------------------------------------------"
+    echo "DOWNLOADING STRINGS in $MODULE MODULE: $MODULE/strings.xml"
+    echo "----------------------------------------------------------"
+    lokalise2 --token $API_TOKEN \
+          --project-id $PROJECT_ID \
+          file download \
+          --format xml \
+          --filter-langs $LANGUAGES \
+          --filter-filenames $MODULE/strings.xml \
+          --custom-translation-status-ids $FINAL_STATUS_ID \
+          --export-sort "a_z" \
+          --directory-prefix . \
+          --original-filenames=false \
+          --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml"
+
+    # Need to download english separately because their strings are not marked final (this is what we uploaded)
+    # This must be done after the first one.
     lokalise2 --token $API_TOKEN \
           --project-id $PROJECT_ID \
           file download \
           --format xml \
           --filter-filenames $MODULE/strings.xml \
-          --custom-translation-status-ids $FINAL_STATUS_ID \
+          --filter-langs "en" \
           --export-sort "a_z" \
           --directory-prefix . \
           --original-filenames=false \
@@ -53,24 +77,19 @@ do
     mv android/$MODULE/values-es-r419 android/$MODULE/values-b+es+419
     mv android/$MODULE/values-zh-rHant android/$MODULE/values-zh-rTW
     mv android/$MODULE/values-zh-rHans android/$MODULE/values-zh
-    mv android/$MODULE/values-id android/$MODULE/values-in
-
-    #Don't replace the english one
-    rm android/$MODULE/values/strings.xml 
 
     # This is used by the untranslated_project_keys.sh script
     cp android/$MODULE/values-en-rGB/strings.xml android/$MODULE-lokalize-strings.xml
 
-    # Remove the existing strings files with the exception of the default one in case there are changes there we need to save
-    find ../$MODULE -type f \( -name "*values-*/strings.xml" ! -name "*values/strings.xml" \) | xargs rm
+    # Remove the existing strings files
+    find ../$MODULE/res -type f -name strings.xml | xargs rm
 
     # Copy in the new strings files
     cp -R  android/$MODULE/* ../$MODULE/res/
 
     echo ""
-    echo "Translated strings (country codes): " 
-    echo "--------------------"
-    ls -1 android/$MODULE/ | paste -sd "," - | sed 's/values-//g'
-    
+    echo "TRANSLATED STRINGS (country codes): "
+    echo "----------------------------------------------------------"
+    ls -1 android/$MODULE/ | paste -sd "," - | sed 's/[,]*values[-]*//g'
 done
 

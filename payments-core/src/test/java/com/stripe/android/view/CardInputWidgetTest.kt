@@ -1428,7 +1428,7 @@ internal class CardInputWidgetTest {
     fun usZipCodeRequired_whenTrue_withInvalidZipCode_shouldReturnNullCard() {
         cardInputWidget.usZipCodeRequired = true
         assertThat(cardInputWidget.postalCodeEditText.hint)
-            .isEqualTo("ZIP code")
+            .isEqualTo("ZIP Code")
 
         cardInputWidget.setCardNumber(VISA_WITH_SPACES)
         cardInputWidget.expiryDateEditText.append("12")
@@ -1445,7 +1445,7 @@ internal class CardInputWidgetTest {
     fun usZipCodeRequired_whenTrue_withValidZipCode_shouldReturnNotNullCard() {
         cardInputWidget.usZipCodeRequired = true
         assertThat(cardInputWidget.postalCodeEditText.hint)
-            .isEqualTo("ZIP code")
+            .isEqualTo("ZIP Code")
 
         cardInputWidget.setCardNumber(VISA_WITH_SPACES)
         cardInputWidget.expiryDateEditText.append("12")

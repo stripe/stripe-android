@@ -674,12 +674,12 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `fetchFragmentConfig() when all data is ready should emit value`() {
+    fun `fragmentConfig when all data is ready should emit value`() {
         viewModel.fetchStripeIntent()
         viewModel.fetchIsGooglePayReady()
 
         val configs = mutableListOf<FragmentConfig>()
-        viewModel.fetchFragmentConfig().observeForever { config ->
+        viewModel.fragmentConfig.observeForever { config ->
             if (config != null) {
                 configs.add(config)
             }

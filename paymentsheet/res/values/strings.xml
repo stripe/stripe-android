@@ -1,36 +1,86 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Used when a required field is blank and submit is clicked. -->
-    <string name="blank_and_required" tools:ignore="MissingTranslation">This field cannot be blank.</string>
-    <!-- The email entered is not valid. -->
-    <string name="email_is_invalid" tools:ignore="MissingTranslation">Your email is invalid.</string>
-    <string name="email" tools:ignore="MissingTranslation">Email</string>
-    <string name="address_label_name" tools:ignore="MissingTranslation">Name</string>
-    <string name="address_label_country" tools:ignore="MissingTranslation">Country</string>
-
-    <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
-    <string name="stripe_paymentsheet_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
-    <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-
-    <string name="iban" translatable="false">IBAN</string>
-    <!-- An error message displayed when the customer's IBAN is incomplete. -->
-    <string name="iban_incomplete" tools:ignore="MissingTranslation">The IBAN you entered is incomplete.</string>
-    <!-- An error message displayed when the customer's IBAN is invalid. -->
-    <string name="iban_invalid" tools:ignore="MissingTranslation">The IBAN you entered is invalid.</string>
-    <!-- An error message displayed when the IBAN country code is not supported. -->
-    <string name="iban_invalid_country" tools:ignore="MissingTranslation">The IBAN you entered is invalid, \"%s\" is not a supported country code.</string>
-    <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-    <string name="iban_invalid_start" tools:ignore="MissingTranslation">Your IBAN should start with a two-letter country code.</string>
-
-
-    <!-- Title for card payment method -->
-    <string name="stripe_paymentsheet_payment_method_card">Card</string>
-    <!-- Title for Bancontact payment method -->
-    <string name="stripe_paymentsheet_payment_method_bancontact" translatable="false">Bancontact</string>
-    <!-- Title for iDEAL payment method -->
-    <string name="stripe_paymentsheet_payment_method_ideal" translatable="false">iDEAL</string>
-    <!-- Title for Sepa Debit payment method -->
-    <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-    <!-- Title for Sofort payment method -->
-    <string name="stripe_paymentsheet_payment_method_sofort" translatable="false">Sofort</string>
+  <!-- Use when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required" tools:ignore="MissingTranslation">This field cannot be blank.</string>
+  <!-- Use when is not valid, but the exact problem is unknown. -->
+  <string name="invalid" tools:ignore="MissingTranslation">%s is invalid.</string>
+  <string name="email" tools:ignore="MissingTranslation">Email</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Address</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2" tools:ignore="MissingTranslation">Address line 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate" tools:ignore="MissingTranslation">Emirate</string>
+  <!-- Used to describe an address field in Australia -->
+  <string name="address_label_au_suburb_or_city" tools:ignore="MissingTranslation">Suburb or City</string>
+  <!-- Used to describe a field of an addres in Jamaica and Barbados -->
+  <string name="address_label_bb_jm_parish" tools:ignore="MissingTranslation">Parish</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex" tools:ignore="MissingTranslation">Cedex</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">City</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Country</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">County</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_department" tools:ignore="MissingTranslation">Department</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_district" tools:ignore="MissingTranslation">District</string>
+  <!-- Used to describe an address field in HK -->
+  <string name="address_label_hk_area" tools:ignore="MissingTranslation">Area</string>
+  <!-- Used to decribe a field in an address in Ireland -->
+  <string name="address_label_ie_eircode" tools:ignore="MissingTranslation">Eircode</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland" tools:ignore="MissingTranslation">Townland</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin" tools:ignore="MissingTranslation">Pin</string>
+  <!-- Used to describe a field in an address. -->
+  <string name="address_label_island" tools:ignore="MissingTranslation">Island</string>
+  <!-- Used to describe a field of an address in Japan -->
+  <string name="address_label_jp_prefecture" tools:ignore="MissingTranslation">Prefecture</string>
+  <!-- Used to describe a field of an address in South Korea -->
+  <string name="address_label_kr_do_si" tools:ignore="MissingTranslation">Do si</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Name</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood" tools:ignore="MissingTranslation">Neighborhood</string>
+  <!-- Used to describe a field of an address. -->
+  <string name="address_label_oblast" tools:ignore="MissingTranslation">Oblast</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town" tools:ignore="MissingTranslation">Post or Town</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Postal code</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Province</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">State</string>
+  <!-- Used to describe a field of an address. -->
+  <string name="address_label_suburb" tools:ignore="MissingTranslation">Suburb</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township" tools:ignore="MissingTranslation">Village or Township</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">ZIP Code</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">Your email is invalid.</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">The IBAN you entered is incomplete.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">The IBAN you entered is invalid.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">The IBAN you entered is invalid, \"%s\" is not a supported country code.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">Your IBAN should start with a two-letter country code.</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_paymentsheet_form_label_optional">%s (optional)</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Card</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_paymentsheet_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
 </resources>
