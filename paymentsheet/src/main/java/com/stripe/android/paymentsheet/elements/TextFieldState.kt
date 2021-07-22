@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import androidx.annotation.StringRes
-
 /**
  * This represents the different states a field can be in,
  * in each of these cases there might be a reason to show the
@@ -26,12 +24,10 @@ internal interface TextFieldState {
     fun isValid(): Boolean
 
     /**
-     * If in a state where isValid() returns false it indicates the field cannot be
-     * used for extraction.  This function should return the error message.
-     * It is up to calling shouldSHowError to determine if it should be displayed on screen.
+     * If in a state where isValid() returns false, this function returns the error message.
+     * It is up to calling shouldShowError to determine if it should be displayed on screen.
      */
-    @StringRes
-    fun getErrorMessageResId(): Int?
+    fun getError(): FieldError?
 
     /**
      * This is used to indicate the field contains the maximum number of characters.

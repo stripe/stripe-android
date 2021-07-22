@@ -18,6 +18,8 @@
   <string name="address_label_state">Osavaltio</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">Postinumero</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">Sähköposti</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">Sähköposti on virheellinen.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
