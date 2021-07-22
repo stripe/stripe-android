@@ -18,7 +18,7 @@ internal class SimpleTextFieldConfig(
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getErrorMessageResId(): Int? = null
+        override fun getError(): FieldError? = null
 
         override fun isFull(): Boolean = false
     }

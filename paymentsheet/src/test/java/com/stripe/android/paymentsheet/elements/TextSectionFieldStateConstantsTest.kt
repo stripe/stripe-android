@@ -10,12 +10,12 @@ class TextSectionFieldStateConstantsTest {
     @Test
     fun `verify incomplete errors are shown when don't have focus`() {
         assertThat(
-            Error.Incomplete.shouldShowError(
+            Error.Incomplete(-1).shouldShowError(
                 true
             )
         ).isFalse()
         assertThat(
-            Error.Incomplete.shouldShowError(
+            Error.Incomplete(-1).shouldShowError(
                 false
             )
         ).isTrue()
@@ -24,12 +24,12 @@ class TextSectionFieldStateConstantsTest {
     @Test
     fun `verify malformed are shown when you do and don't have focus`() {
         assertThat(
-            Error.Invalid().shouldShowError(
+            Error.Invalid(-1).shouldShowError(
                 true
             )
         ).isTrue()
         assertThat(
-            Error.Invalid().shouldShowError(
+            Error.Invalid(-1).shouldShowError(
                 false
             )
         ).isTrue()
