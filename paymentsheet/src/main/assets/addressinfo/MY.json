@@ -1,0 +1,39 @@
+[
+  {
+    "type": "addressLine1",
+    "required": true
+  },
+  {
+    "type": "addressLine2",
+    "required": false
+  },
+  {
+    "type": "dependentLocality",
+    "required": false,
+    "schema": {
+      "nameType": "village_township"
+    }
+  },
+  {
+    "type": "postalCode",
+    "required": true,
+    "schema": {
+      "isNumeric": false,
+      "nameType": "postal"
+    }
+  },
+  {
+    "type": "locality",
+    "required": true,
+    "schema": {
+      "nameType": "city"
+    }
+  },
+  {
+    "type": "administrativeArea",
+    "required": false,
+    "schema": {
+      "nameType": "state"
+    }
+  }
+]

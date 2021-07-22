@@ -1,0 +1,24 @@
+[
+  {
+    "type": "administrativeArea",
+    "required": true,
+    "schema": {
+      "nameType": "area"
+    }
+  },
+  {
+    "type": "locality",
+    "required": false,
+    "schema": {
+      "nameType": "district"
+    }
+  },
+  {
+    "type": "addressLine1",
+    "required": true
+  },
+  {
+    "type": "addressLine2",
+    "required": false
+  }
+]
