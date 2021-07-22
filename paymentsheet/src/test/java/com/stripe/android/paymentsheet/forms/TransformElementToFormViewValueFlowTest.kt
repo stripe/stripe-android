@@ -21,8 +21,7 @@ class TransformElementToFormViewValueFlowTest {
         identifier = IdentifierSpec("emailSection"),
         SectionFieldElement.Email(
             IdentifierSpec("email"),
-            emailController,
-            0
+            emailController
         ),
         SectionController(emailController.label, listOf(emailController))
     )

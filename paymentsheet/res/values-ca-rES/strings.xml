@@ -18,6 +18,8 @@
   <string name="address_label_state">País</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">Codi ZIP</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">Correu electrònic</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">L\'adreça electrònica no és vàlida.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

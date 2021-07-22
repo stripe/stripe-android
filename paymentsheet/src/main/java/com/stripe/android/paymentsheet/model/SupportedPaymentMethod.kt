@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.FormSpec
 import com.stripe.android.paymentsheet.specifications.bancontact
 import com.stripe.android.paymentsheet.specifications.ideal
+import com.stripe.android.paymentsheet.specifications.sepaDebit
 import com.stripe.android.paymentsheet.specifications.sofort
 
 /**
@@ -42,6 +43,12 @@ enum class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_ideal,
         R.drawable.stripe_ic_paymentsheet_pm_ideal,
         ideal
+    ),
+    SepaDebit(
+        "sepa_debit",
+        R.string.stripe_paymentsheet_payment_method_sepa_debit,
+        R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
+        sepaDebit
     );
 
     override fun toString(): String {

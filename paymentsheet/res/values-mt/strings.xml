@@ -18,6 +18,8 @@
   <string name="address_label_state">Stat</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">Kodiċi postali</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">Email</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">L-indirizz tal-email li daħħalt mhux tajjeb.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

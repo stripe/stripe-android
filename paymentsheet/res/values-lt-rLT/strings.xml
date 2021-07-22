@@ -18,6 +18,8 @@
   <string name="address_label_state">Valstija</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">Pašto kodas</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">El. paštas</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">Jūsų el. paštas yra neteisingas.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
