@@ -32,8 +32,8 @@ internal class EmailConfig : TextFieldConfig {
         return when {
             input.isEmpty() -> Error.Blank
             PATTERN.matcher(input).matches() -> Valid.Limitless
-            containsNameAndDomain(input) -> Error.Invalid()
-            else -> Error.Incomplete
+            containsNameAndDomain(input) -> Error.Invalid(R.string.email_is_invalid)
+            else -> Error.Incomplete(R.string.email_is_invalid)
         }
     }
 

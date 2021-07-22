@@ -100,13 +100,14 @@ internal fun SectionElementUI(
         val controller = element.controller
 
         val error by controller.error.asLiveData().observeAsState(null)
-        val sectionErrorString =
-            error?.let {
+        val sectionErrorString = error?.let {
+            it.formatArgs?.let { args ->
                 stringResource(
                     it.errorMessage,
-                    stringResource(it.errorFieldLabel)
+                    *args
                 )
-            }
+            } ?: stringResource(it.errorMessage)
+        }
 
         Section(controller.label, sectionErrorString) {
             element.fields.forEachIndexed { index, field ->
