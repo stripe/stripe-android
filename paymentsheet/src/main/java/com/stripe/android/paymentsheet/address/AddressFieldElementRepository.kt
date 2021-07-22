@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.address
 
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.FocusRequesterCount
 import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.forms.transform
 
@@ -33,9 +32,7 @@ internal object AddressFieldElementRepository {
             countryCode to requireNotNull(
                 schemaList
                     .transformToSpecFieldList()
-                    .transform(
-                        FocusRequesterCount()
-                    )
+                    .transform()
             )
         }.forEach { (countryCode, listElements) ->
             countryFieldMap[countryCode] = listElements
