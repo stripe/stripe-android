@@ -12,14 +12,15 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
-import com.stripe.android.paymentsheet.SectionFieldElement.IdealBank
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
+import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
+import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Item
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -43,7 +44,7 @@ class TransformSpecToElementTest {
                 IdentifierSpec("multifieldSection"),
                 listOf(
                     SectionFieldSpec.Country(),
-                    SectionFieldSpec.IdealBank
+                    IDEAL_BANK_CONFIG
                 )
             )
         ).transform(
@@ -54,7 +55,7 @@ class TransformSpecToElementTest {
         val sectionElement = formElement[0] as SectionElement
         assertThat(sectionElement.fields.size).isEqualTo(2)
         assertThat(sectionElement.fields[0]).isInstanceOf(Country::class.java)
-        assertThat(sectionElement.fields[1]).isInstanceOf(IdealBank::class.java)
+        assertThat(sectionElement.fields[1]).isInstanceOf(SimpleDropdownConfig::class.java)
     }
 
     @Test
@@ -86,7 +87,7 @@ class TransformSpecToElementTest {
     fun `Adding a ideal bank section sets up the section and country elements correctly`() {
         val idealSection = FormItemSpec.SectionSpec(
             IdentifierSpec("idealSection"),
-            SectionFieldSpec.IdealBank
+            IDEAL_BANK_CONFIG
         )
         val formElement = listOf(idealSection).transform(
             "Example, Inc.",
@@ -94,7 +95,7 @@ class TransformSpecToElementTest {
         )
 
         val idealSectionElement = formElement.first() as SectionElement
-        val idealElement = idealSectionElement.fields[0] as IdealBank
+        val idealElement = idealSectionElement.fields[0] as SectionFieldElement.SimpleDropdown
 
         // Verify the correct config is setup for the controller
         assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
@@ -233,4 +234,25 @@ class TransformSpecToElementTest {
                     optionalIdentifiers.map { it.identifier }
                 )
         }
+
+    companion object {
+        val IDEAL_BANK_CONFIG = SectionFieldSpec.SimpleDropdown(
+            IdentifierSpec("bank"),
+            R.string.stripe_paymentsheet_ideal_bank,
+            listOf(
+                Item("ABN AMRO", "abn_amro"),
+                Item("ASN Bank", "asn_bank"),
+                Item("Bunq", "bunq"),
+                Item("Handelsbanken", "handelsbanken"),
+                Item("ING", "ing"),
+                Item("Knab", "knab"),
+                Item("Rabobank", "rabobank"),
+                Item("Revolut", "revolut"),
+                Item("RegioBank", "regiobank"),
+                Item("SNS Bank (De Volksbank)", "sns_bank"),
+                Item("Triodos Bank", "triodos_bank"),
+                Item("Van Lanschot", "van_lanschot"),
+            )
+        )
+    }
 }

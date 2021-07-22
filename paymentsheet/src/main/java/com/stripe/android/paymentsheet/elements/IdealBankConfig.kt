@@ -14,7 +14,7 @@ internal class IdealBankConfig : DropdownConfig {
     override fun getDisplayItems() = DISPLAY_TO_PARAM.map { it.displayName }
     override fun convertFromRaw(rawValue: String) = DISPLAY_TO_PARAM
         .firstOrNull { it.paymentMethodParamFieldValue == rawValue }
-        ?.paymentMethodParamFieldValue ?: DISPLAY_TO_PARAM[0].displayName
+        ?.displayName ?: DISPLAY_TO_PARAM[0].displayName
 
     override fun convertToRaw(displayName: String) = DISPLAY_TO_PARAM
         .firstOrNull { it.displayName == displayName }

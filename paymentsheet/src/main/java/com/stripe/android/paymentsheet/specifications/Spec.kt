@@ -89,7 +89,16 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     data class Country(val onlyShowCountryCodes: Set<String> = emptySet()) :
         SectionFieldSpec(IdentifierSpec("country"))
 
-    object IdealBank : SectionFieldSpec(IdentifierSpec("bank"))
+    data class Item(
+        val displayString: String,
+        val rawString: String,
+    )
+
+    data class SimpleDropdown(
+        override val identifier: IdentifierSpec,
+        @StringRes val label: Int,
+        val items: List<Item>
+    ) : SectionFieldSpec(identifier)
 
     data class SimpleText(
         override val identifier: IdentifierSpec,

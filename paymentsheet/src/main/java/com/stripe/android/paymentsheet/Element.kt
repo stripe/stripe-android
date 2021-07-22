@@ -132,14 +132,14 @@ internal sealed class SectionFieldElement {
         override val controller: DropdownFieldController
     ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
 
-    data class IdealBank internal constructor(
-        override val identifier: IdentifierSpec,
-        override val controller: DropdownFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
-
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
         override val focusIndexOrder: Int
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+
+    data class SimpleDropdown(
+        override val identifier: IdentifierSpec,
+        override val controller: DropdownFieldController,
+    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
 }

@@ -1,0 +1,51 @@
+{
+  "comment:": "Source from stripe: ideal_bank/banks.js value=parameter key value bunq requires the LTR character, because otherwise the name becomes \".bunq B.V\" in RTL mode.",
+  "abn_amro": {
+    "value": "abn_amro",
+    "text": "ABN Amro"
+  },
+  "asn_bank": {
+    "value": "asn_bank",
+    "text": "ASN Bank"
+  },
+  "bunq": {
+    "value": "bunq",
+    "text": "bunq B.V.${LTR_CHAR}"
+  },
+  "handelsbanken": {
+    "value": "handelsbanken",
+    "text": "Handelsbanken"
+  },
+  "ing": {
+    "value": "ing",
+    "text": "ING Bank"
+  },
+  "knab": {
+    "value": "knab",
+    "text": "Knab"
+  },
+  "rabobank": {
+    "value": "rabobank",
+    "text": "Rabobank"
+  },
+  "regiobank": {
+    "value": "regiobank",
+    "text": "RegioBank"
+  },
+  "revolut": {
+    "value": "revolut",
+    "text": "Revolut"
+  },
+  "sns_bank": {
+    "value": "sns_bank",
+    "text": "SNS Bank"
+  },
+  "triodos_bank": {
+    "value": "triodos_bank",
+    "text": "Triodos Bank"
+  },
+  "van_lanschot": {
+    "value": "van_lanschot",
+    "text": "Van Lanschot"
+  }
+}
