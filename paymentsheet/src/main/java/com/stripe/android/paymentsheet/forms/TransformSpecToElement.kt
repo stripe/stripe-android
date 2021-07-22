@@ -47,7 +47,10 @@ private fun FormItemSpec.SectionSpec.transform(): FormElement.SectionElement {
     )
 }
 
-private fun List<SectionFieldSpec>.transform() = this.map {
+/**
+ * This function will transform a list of specs into a list of elements
+ */
+internal fun List<SectionFieldSpec>.transform() = this.map {
     when (it) {
         is SectionFieldSpec.Email -> it.transform()
         is SectionFieldSpec.Iban -> it.transform()
