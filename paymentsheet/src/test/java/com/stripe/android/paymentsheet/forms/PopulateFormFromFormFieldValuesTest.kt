@@ -15,8 +15,7 @@ class PopulateFormFromFormFieldValuesTest {
     private val emailController = TextFieldController(EmailConfig())
     private val emailFieldElement = SectionFieldElement.Email(
         IdentifierSpec("email"),
-        emailController,
-        0
+        emailController
     )
     private val emailSection = FormElement.SectionElement(
         identifier = IdentifierSpec("emailSection"),
