@@ -10,6 +10,8 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
+import com.stripe.android.paymentsheet.PaymentSheetApiRepository
+import com.stripe.android.paymentsheet.PaymentSheetPaymentController
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
@@ -66,6 +68,30 @@ internal class PaymentCommonModule {
             enableLogging = true
         )
     }
+
+    // TODO: This is kinda incorrectly going to have a different repository from the one below.
+    @Provides
+    @Singleton
+    fun providePaymentSheetApiRepository(
+        appContext: Context,
+        lazyPaymentConfiguration: Lazy<PaymentConfiguration>
+    ) = StripeApiRepository(
+        appContext,
+        { lazyPaymentConfiguration.get().publishableKey }
+    ) as PaymentSheetApiRepository
+
+    @Provides
+    @Singleton
+    fun providePaymentSheetPaymentController(
+        appContext: Context,
+        stripeApiRepository: StripeApiRepository,
+        lazyPaymentConfiguration: Lazy<PaymentConfiguration>
+    ) = StripePaymentController(
+        appContext,
+        { lazyPaymentConfiguration.get().publishableKey },
+        stripeApiRepository,
+        enableLogging = true
+    ) as PaymentSheetPaymentController
 
     @Provides
     @Singleton

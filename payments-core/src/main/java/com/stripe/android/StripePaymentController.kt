@@ -30,10 +30,15 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.paymentsheet.PaymentSheetPaymentController
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.StartAndConfirmResult
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -58,7 +63,7 @@ internal class StripePaymentController internal constructor(
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     workContext: CoroutineContext = Dispatchers.IO,
     private val uiContext: CoroutineContext = Dispatchers.Main
-) : PaymentController {
+) : PaymentController, PaymentSheetPaymentController {
 
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
@@ -546,6 +551,97 @@ internal class StripePaymentController internal constructor(
             )
         }
     }
+
+
+    override suspend fun onPaymentFlowResultDefaultFlowController(
+        paymentFlowResult: PaymentFlowResult.Unvalidated,
+        paymentFlowResultProcessor: PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>,
+    ) = runCatching {
+        paymentFlowResultProcessor.processResult(
+            paymentFlowResult
+        )
+    }.fold(
+        onSuccess = {
+            createPaymentSheetResult(it)
+        },
+        onFailure = {
+            PaymentSheetResult.Failed(it)
+        }
+    )
+
+    private fun createPaymentSheetResult(
+        stripeIntentResult: StripeIntentResult<StripeIntent>
+    ) = when (stripeIntentResult.outcome) {
+        StripeIntentResult.Outcome.SUCCEEDED -> {
+            PaymentSheetResult.Completed
+        }
+        StripeIntentResult.Outcome.CANCELED -> {
+            PaymentSheetResult.Canceled
+        }
+        else -> {
+            PaymentSheetResult.Failed(
+                error = stripeIntentResult.intent.lastErrorMessage?.let {
+                    IllegalArgumentException(
+                        "Failed to confirm ${stripeIntentResult.intent.javaClass.simpleName}: $it"
+                    )
+                } ?: RuntimeException("Failed to complete payment.")
+            )
+        }
+    }
+
+    override suspend fun startConfirmAndAuth(
+        host: AuthActivityStarterHost,
+        confirmStripeIntentParams: ConfirmStripeIntentParams,
+        publishableKey: String,
+        stripeAccountId: String?
+    ) {
+        startConfirmAndAuth(
+            host,
+            confirmStripeIntentParams,
+            ApiRequest.Options(
+                publishableKey,
+                stripeAccountId
+            )
+        )
+    }
+
+    override suspend fun onPaymentFlowResultPaymentSheetViewModel(
+        paymentFlowResult: PaymentFlowResult.Unvalidated,
+        paymentFlowResultProcessor: PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>,
+        workContext: CoroutineContext,
+        stripeIntentValidator: StripeIntentValidator
+    ) = runCatching {
+        withContext(workContext) {
+            paymentFlowResultProcessor.processResult(
+                paymentFlowResult
+            )
+        }
+    }.fold(
+        onSuccess = {
+            onStripeIntentResult(it, stripeIntentValidator)
+        },
+        onFailure = { error ->
+            StartAndConfirmResult.StripeResultError(error)
+        }
+    )
+
+    private fun onStripeIntentResult(
+        stripeIntentResult: StripeIntentResult<StripeIntent>,
+        stripeIntentValidator: StripeIntentValidator,
+    ) = when (stripeIntentResult.outcome) {
+        StripeIntentResult.Outcome.SUCCEEDED -> {
+            StartAndConfirmResult.Success(stripeIntentResult)
+        }
+        else -> {
+            runCatching {
+                stripeIntentValidator.requireValid(stripeIntentResult.intent)
+            }.fold(
+                onSuccess = { StartAndConfirmResult.ErrorStripeIntentReady(stripeIntentResult) },
+                onFailure = { StartAndConfirmResult.Fatal(it) }
+            )
+        }
+    }
+
 
     internal companion object {
         internal const val PAYMENT_REQUEST_CODE = 50000

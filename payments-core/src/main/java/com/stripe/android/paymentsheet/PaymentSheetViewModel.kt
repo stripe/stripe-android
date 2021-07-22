@@ -87,7 +87,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository: PrefsRepository,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext,
-    private val paymentController: PaymentController
+    private val paymentController: PaymentSheetPaymentController
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -342,7 +342,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentController.startConfirmAndAuth(
             authActivityStarterHost,
             confirmStripeIntentParams,
-            apiRequestOptions
+            apiRequestOptions.apiKey,
+            apiRequestOptions.stripeAccount
         )
     }
 
@@ -440,24 +441,51 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun onPaymentFlowResult(paymentFlowResult: PaymentFlowResult.Unvalidated) {
         viewModelScope.launch {
-            runCatching {
-                withContext(workContext) {
-                    paymentFlowResultProcessorProvider.get().processResult(
-                        paymentFlowResult
+            val result = paymentController.onPaymentFlowResultPaymentSheetViewModel(
+                paymentFlowResult,
+                paymentFlowResultProcessorProvider.get(),
+                workContext,
+                stripeIntentValidator
+            )
+
+            when (result) {
+                is StartAndConfirmResult.Success -> {
+                    eventReporter.onPaymentSuccess(selection.value)
+
+                    // SavedSelection needs to happen after new cards have been saved.
+                    when (selection.value) {
+                        is PaymentSelection.New -> result.stripeIntentResult.intent.paymentMethod?.let {
+                            PaymentSelection.Saved(it)
+                        }
+                        PaymentSelection.GooglePay -> selection.value
+                        is PaymentSelection.Saved -> selection.value
+                        null -> null
+                    }?.let {
+                        prefsRepository.savePaymentSelection(it)
+                    }
+
+                    _viewState.value = PaymentSheetViewState.FinishProcessing {
+                        _paymentSheetResult.value = PaymentSheetResult.Completed
+                    }
+                }
+                is StartAndConfirmResult.ErrorStripeIntentReady -> {
+                eventReporter.onPaymentFailure(selection.value)
+                    resetViewState(
+                        result.stripeIntentResult.intent,
+                        result.stripeIntentResult.failureMessage
                     )
                 }
-            }.fold(
-                onSuccess = {
-                    onStripeIntentResult(it)
-                },
-                onFailure = { error ->
+                is StartAndConfirmResult.StripeResultError -> {
                     selection.value?.let {
                         eventReporter.onPaymentFailure(it)
                     }
-
-                    stripeIntent.value?.let { resetViewState(it, apiThrowableToString(error)) }
+                    stripeIntent.value?.let { resetViewState(it, apiThrowableToString(result.throwable)) }
                 }
-            )
+                is StartAndConfirmResult.Fatal -> {
+                    eventReporter.onPaymentFailure(selection.value)
+                    onFatal(result.throwable)
+                }
+            }
         }
     }
 

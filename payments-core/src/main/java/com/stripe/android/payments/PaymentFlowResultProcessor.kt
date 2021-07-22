@@ -19,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Class responsible for processing the result of a [PaymentController] confirm operation.
  */
-internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
+sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
     private val publishableKeyProvider: Provider<String>,
     protected val stripeRepository: StripeRepository,

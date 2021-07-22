@@ -7,7 +7,7 @@ import com.stripe.android.model.StripeIntent
 /**
  * Validator for [PaymentIntent] or [SetupIntent] instances used in PaymentSheet.
  */
-internal class StripeIntentValidator {
+class StripeIntentValidator {
     @JvmSynthetic
     fun requireValid(
         stripeIntent: StripeIntent

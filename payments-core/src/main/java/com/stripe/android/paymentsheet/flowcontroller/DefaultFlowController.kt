@@ -12,7 +12,6 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.gms.common.api.Status
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayConfig
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -28,6 +27,7 @@ import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetPaymentController
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -70,7 +70,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val stripeApiRepository: StripeApiRepository,
-    private val paymentController: PaymentController,
+    private val paymentController: PaymentSheetPaymentController,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
@@ -85,7 +85,7 @@ internal class DefaultFlowController @Inject internal constructor(
      *   paymentFlowResultProcessor afterwards.
      */
     private val paymentFlowResultProcessorProvider:
-        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
+    Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
@@ -267,10 +267,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 paymentController.startConfirmAndAuth(
                     authHostSupplier(),
                     confirmParams,
-                    ApiRequest.Options(
-                        apiKey = lazyPaymentConfiguration.get().publishableKey,
-                        stripeAccount = lazyPaymentConfiguration.get().stripeAccountId
-                    )
+                    lazyPaymentConfiguration.get().publishableKey,
+                    lazyPaymentConfiguration.get().stripeAccountId
                 )
             }
         }
@@ -397,46 +395,14 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentFlowResult: PaymentFlowResult.Unvalidated
     ) {
         lifecycleScope.launch {
-            runCatching {
-                paymentFlowResultProcessorProvider.get().processResult(
-                    paymentFlowResult
-                )
-            }.fold(
-                onSuccess = {
-                    withContext(Dispatchers.Main) {
-                        paymentResultCallback.onPaymentSheetResult(
-                            createPaymentSheetResult(it)
-                        )
-                    }
-                },
-                onFailure = {
-                    withContext(Dispatchers.Main) {
-                        paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(it)
-                        )
-                    }
+            paymentController.onPaymentFlowResultDefaultFlowController(
+                paymentFlowResult,
+                paymentFlowResultProcessorProvider.get()
+            ).let {
+                withContext(Dispatchers.Main) {
+                    paymentResultCallback.onPaymentSheetResult(it)
                 }
-            )
-        }
-    }
-
-    private fun createPaymentSheetResult(
-        stripeIntentResult: StripeIntentResult<StripeIntent>
-    ) = when (stripeIntentResult.outcome) {
-        StripeIntentResult.Outcome.SUCCEEDED -> {
-            PaymentSheetResult.Completed
-        }
-        StripeIntentResult.Outcome.CANCELED -> {
-            PaymentSheetResult.Canceled
-        }
-        else -> {
-            PaymentSheetResult.Failed(
-                error = stripeIntentResult.intent.lastErrorMessage?.let {
-                    IllegalArgumentException(
-                        "Failed to confirm ${stripeIntentResult.intent.javaClass.simpleName}: $it"
-                    )
-                } ?: RuntimeException("Failed to complete payment.")
-            )
+            }
         }
     }
 
