@@ -71,6 +71,26 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion {
 }
 
+public final class com/stripe/android/paymentsheet/specifications/BankRepository {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/BankRepository;
+	public final fun init (Landroid/content/res/Resources;)V
+}
+
+public final class com/stripe/android/paymentsheet/specifications/DropdownItem {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/specifications/DropdownItem;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/DropdownItem;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/DropdownItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class com/stripe/android/paymentsheet/specifications/FormItemSpec {
 	public static final field $stable I
 }
@@ -195,9 +215,20 @@ public final class com/stripe/android/paymentsheet/specifications/SectionFieldSp
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Iban;
 }
 
-public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$IdealBank : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleDropdown : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$IdealBank;
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILjava/util/List;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILjava/util/List;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleDropdown;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleDropdown;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleDropdown;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getItems ()Ljava/util/List;
+	public final fun getLabel ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
