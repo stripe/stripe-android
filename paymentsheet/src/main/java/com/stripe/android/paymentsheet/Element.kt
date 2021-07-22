@@ -10,17 +10,6 @@ import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 
 /**
- * This is used to track the number of focus requesters in a form
- */
-internal class FocusRequesterCount {
-    private var value = 0
-
-    fun getAndIncrement() = value++
-
-    fun get() = value
-}
-
-/**
  * This interface is used to define the types of elements allowed in a section
  */
 internal sealed interface SectionFieldElementType {
@@ -29,7 +18,6 @@ internal sealed interface SectionFieldElementType {
 
     interface TextFieldElement : SectionFieldElementType {
         override val controller: TextFieldController
-        val focusIndexOrder: Int
     }
 
     interface DropdownFieldElement : SectionFieldElementType {
@@ -104,20 +92,17 @@ internal sealed class SectionFieldElement {
 
     data class Name(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-        override val focusIndexOrder: Int
+        override val controller: TextFieldController
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
     data class Email(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-        override val focusIndexOrder: Int
+        override val controller: TextFieldController
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
     data class Iban(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-        override val focusIndexOrder: Int
+        override val controller: TextFieldController
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 
     data class Country(
@@ -132,7 +117,6 @@ internal sealed class SectionFieldElement {
 
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-        override val focusIndexOrder: Int
+        override val controller: TextFieldController
     ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
 }
