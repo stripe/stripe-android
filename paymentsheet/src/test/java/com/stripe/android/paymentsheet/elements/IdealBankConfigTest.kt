@@ -2,25 +2,25 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
+import com.stripe.android.paymentsheet.specifications.DropdownItem
 import org.junit.Test
 
 class IdealBankConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
         R.string.stripe_paymentsheet_ideal_bank,
         listOf(
-            SectionFieldSpec.Item("ABN AMRO", "abn_amro"),
-            SectionFieldSpec.Item("ASN Bank", "asn_bank"),
-            SectionFieldSpec.Item("Bunq", "bunq"),
-            SectionFieldSpec.Item("Handelsbanken", "handelsbanken"),
-            SectionFieldSpec.Item("ING", "ing"),
-            SectionFieldSpec.Item("Knab", "knab"),
-            SectionFieldSpec.Item("Rabobank", "rabobank"),
-            SectionFieldSpec.Item("Revolut", "revolut"),
-            SectionFieldSpec.Item("RegioBank", "regiobank"),
-            SectionFieldSpec.Item("SNS Bank (De Volksbank)", "sns_bank"),
-            SectionFieldSpec.Item("Triodos Bank", "triodos_bank"),
-            SectionFieldSpec.Item("Van Lanschot", "van_lanschot"),
+            DropdownItem(text = "ABN AMRO", value = "abn_amro"),
+            DropdownItem(text = "ASN Bank", value = "asn_bank"),
+            DropdownItem(text = "Bunq", value = "bunq"),
+            DropdownItem(text = "Handelsbanken", value = "handelsbanken"),
+            DropdownItem(text = "ING", value = "ing"),
+            DropdownItem(text = "Knab", value = "knab"),
+            DropdownItem(text = "Rabobank", value = "rabobank"),
+            DropdownItem(text = "Revolut", value = "revolut"),
+            DropdownItem(text = "RegioBank", value = "regiobank"),
+            DropdownItem(text = "SNS Bank (De Volksbank)", value = "sns_bank"),
+            DropdownItem(text = "Triodos Bank", value = "triodos_bank"),
+            DropdownItem(text = "Van Lanschot", value = "van_lanschot"),
         )
     )
 

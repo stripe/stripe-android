@@ -12,15 +12,15 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
+import com.stripe.android.paymentsheet.SectionFieldElement.SimpleDropdown
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
+import com.stripe.android.paymentsheet.specifications.DropdownItem
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Item
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -55,7 +55,7 @@ class TransformSpecToElementTest {
         val sectionElement = formElement[0] as SectionElement
         assertThat(sectionElement.fields.size).isEqualTo(2)
         assertThat(sectionElement.fields[0]).isInstanceOf(Country::class.java)
-        assertThat(sectionElement.fields[1]).isInstanceOf(SimpleDropdownConfig::class.java)
+        assertThat(sectionElement.fields[1]).isInstanceOf(SimpleDropdown::class.java)
     }
 
     @Test
@@ -95,7 +95,7 @@ class TransformSpecToElementTest {
         )
 
         val idealSectionElement = formElement.first() as SectionElement
-        val idealElement = idealSectionElement.fields[0] as SectionFieldElement.SimpleDropdown
+        val idealElement = idealSectionElement.fields[0] as SimpleDropdown
 
         // Verify the correct config is setup for the controller
         assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
@@ -240,18 +240,18 @@ class TransformSpecToElementTest {
             IdentifierSpec("bank"),
             R.string.stripe_paymentsheet_ideal_bank,
             listOf(
-                Item("ABN AMRO", "abn_amro"),
-                Item("ASN Bank", "asn_bank"),
-                Item("Bunq", "bunq"),
-                Item("Handelsbanken", "handelsbanken"),
-                Item("ING", "ing"),
-                Item("Knab", "knab"),
-                Item("Rabobank", "rabobank"),
-                Item("Revolut", "revolut"),
-                Item("RegioBank", "regiobank"),
-                Item("SNS Bank (De Volksbank)", "sns_bank"),
-                Item("Triodos Bank", "triodos_bank"),
-                Item("Van Lanschot", "van_lanschot"),
+                DropdownItem("ABN AMRO", "abn_amro"),
+                DropdownItem("ASN Bank", "asn_bank"),
+                DropdownItem("Bunq", "bunq"),
+                DropdownItem("Handelsbanken", "handelsbanken"),
+                DropdownItem("ING", "ing"),
+                DropdownItem("Knab", "knab"),
+                DropdownItem("Rabobank", "rabobank"),
+                DropdownItem("Revolut", "revolut"),
+                DropdownItem("RegioBank", "regiobank"),
+                DropdownItem("SNS Bank (De Volksbank)", "sns_bank"),
+                DropdownItem("Triodos Bank", "triodos_bank"),
+                DropdownItem("Van Lanschot", "van_lanschot"),
             )
         )
     }

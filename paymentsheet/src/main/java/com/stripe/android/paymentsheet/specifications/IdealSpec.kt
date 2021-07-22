@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.specifications.FormItemSpec.MandateTextSp
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Item
 
 internal val idealParams: MutableMap<String, Any?> = mutableMapOf(
     "bank" to null,
@@ -28,20 +27,7 @@ internal val idealBankSection = SectionSpec(
     SectionFieldSpec.SimpleDropdown(
         IdentifierSpec("bank"),
         R.string.stripe_paymentsheet_ideal_bank,
-        listOf(
-            Item("ABN AMRO", "abn_amro"),
-            Item("ASN Bank", "asn_bank"),
-            Item("Bunq", "bunq"),
-            Item("Handelsbanken", "handelsbanken"),
-            Item("ING", "ing"),
-            Item("Knab", "knab"),
-            Item("Rabobank", "rabobank"),
-            Item("Revolut", "revolut"),
-            Item("RegioBank", "regiobank"),
-            Item("SNS Bank (De Volksbank)", "sns_bank"),
-            Item("Triodos Bank", "triodos_bank"),
-            Item("Van Lanschot", "van_lanschot"),
-        )
+        BankRepository.get(SupportedBankType.Ideal)
     )
 )
 internal val idealMandate = MandateTextSpec(

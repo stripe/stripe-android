@@ -1,27 +1,26 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
-
+import com.stripe.android.paymentsheet.specifications.DropdownItem
 
 internal class SimpleDropdownConfig(
     @StringRes override val label: Int,
-    private val items: List<SectionFieldSpec.Item>
+    private val items: List<DropdownItem>
 ) : DropdownConfig {
     override val debugLabel = "simple_dropdown"
 
     override fun getDisplayItems(): List<String> =
-        items.map { it.displayString }
+        items.map { it.text }
 
     override fun convertFromRaw(rawValue: String) =
         items
-            .firstOrNull { it.rawString == rawValue }
-            ?.displayString
-            ?: items[0].displayString
+            .firstOrNull { it.value == rawValue }
+            ?.text
+            ?: items[0].text
 
     override fun convertToRaw(displayName: String) =
         items
-            .filter { it.displayString == displayName }
-            .map { it.rawString }
+            .filter { it.text == displayName }
+            .map { it.value }
             .firstOrNull()
 }

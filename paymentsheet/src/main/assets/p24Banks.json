@@ -1,103 +1,127 @@
-{
-  "comment:": "Source from stripe: p24_bank/banks.js",
-  "alior_bank": {
+[
+  {
     "value": "alior_bank",
+    "icon": "alior_bank",
     "text": "Alior Bank"
   },
-  "bank_millennium": {
+  {
     "value": "bank_millennium",
+    "icon": "bank_millennium",
     "text": "Bank Millenium"
   },
-  "bank_nowy_bfg_sa": {
+  {
     "value": "bank_nowy_bfg_sa",
+    "icon": "bank_nowy_bfg_sa",
     "text": "Bank Nowy BFG S.A."
   },
-  "bank_pekao_sa": {
+  {
     "value": "bank_pekao_sa",
+    "icon": "bank_pekao_sa",
     "text": "Bank PEKAO S.A"
   },
-  "banki_spbdzielcze": {
+  {
     "value": "banki_spbdzielcze",
+    "icon": "banki_spbdzielcze",
     "text": "Bank spółdzielczy"
   },
-  "blik": {
+  {
     "value": "blik",
+    "icon": "blik",
     "text": "BLIK"
   },
-  "bnp_paribas": {
+  {
     "value": "bnp_paribas",
+    "icon": "bnp_paribas",
     "text": "BNP Paribas"
   },
-  "boz": {
+  {
     "value": "boz",
+    "icon": "boz",
     "text": "BOZ"
   },
-  "citi_handlowy": {
+  {
     "value": "citi_handlowy",
+    "icon": "citi_handlowy",
     "text": "CitiHandlowy"
   },
-  "credit_agricole": {
+  {
     "value": "credit_agricole",
+    "icon": "credit_agricole",
     "text": "Credit Agricole"
   },
-  "envelobank": {
+  {
     "value": "envelobank",
+    "icon": "envelobank",
     "text": "EnveloBank"
   },
-  "etransfer_pocztowy24": {
+  {
     "value": "etransfer_pocztowy24",
+    "icon": "etransfer_pocztowy24",
     "text": "e-Transfer Pocztowy24"
   },
-  "getin_bank": {
+  {
     "value": "getin_bank",
+    "icon": "getin_bank",
     "text": "Getin Bank"
   },
-  "ideabank": {
+  {
     "value": "ideabank",
+    "icon": "ideabank",
     "text": "IdeaBank"
   },
-  "ing": {
+  {
     "value": "ing",
+    "icon": "ing",
     "text": "ING"
   },
-  "inteligo": {
+  {
     "value": "inteligo",
+    "icon": "inteligo",
     "text": "inteligo"
   },
-  "mbank_mtransfer": {
+  {
     "value": "mbank_mtransfer",
+    "icon": "mbank_mtransfer",
     "text": "mBank"
   },
-  "nest_przelew": {
+  {
     "value": "nest_przelew",
+    "icon": "nest_przelew",
     "text": "Nest Przelew"
   },
-  "noble_pay": {
+  {
     "value": "noble_pay",
+    "icon": "noble_pay",
     "text": "Noble Pay"
   },
-  "pbac_z_ipko": {
+  {
     "value": "pbac_z_ipko",
-    "text": "PBac z iPKO (PKO+BP)"
+    "icon": "pbac_z_ipko",
+    "text": "PBac z iPKO (PKO+BP"
   },
-  "plus_bank": {
+  {
     "value": "plus_bank",
+    "icon": "plus_bank",
     "text": "Plus Bank"
   },
-  "santander_przelew24": {
+  {
     "value": "santander_przelew24",
+    "icon": "santander_przelew24",
     "text": "Santander"
   },
-  "tmobile_usbugi_bankowe": {
+  {
     "value": "tmobile_usbugi_bankowe",
+    "icon": "tmobile_usbugi_bankowe",
     "text": "T-Mobile Usługi Bankowe"
   },
-  "toyota_bank": {
+  {
     "value": "toyota_bank",
+    "icon": "toyota_bank",
     "text": "Toyota Bank"
   },
-  "volkswagen_bank": {
+  {
     "value": "volkswagen_bank",
+    "icon": "volkswagen_bank",
     "text": "Volkswagen Bank"
   }
-}
+]

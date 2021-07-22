@@ -1,51 +1,62 @@
-{
-  "comment:": "Source from stripe: ideal_bank/banks.js value=parameter key value bunq requires the LTR character, because otherwise the name becomes \".bunq B.V\" in RTL mode.",
-  "abn_amro": {
+[
+  {
     "value": "abn_amro",
+    "icon": "abn_amro",
     "text": "ABN Amro"
   },
-  "asn_bank": {
+  {
     "value": "asn_bank",
+    "icon": "asn_bank",
     "text": "ASN Bank"
   },
-  "bunq": {
+  {
     "value": "bunq",
-    "text": "bunq B.V.${LTR_CHAR}"
+    "icon": "bunq",
+    "text": "bunq B.V.‎"
   },
-  "handelsbanken": {
+  {
     "value": "handelsbanken",
+    "icon": "handelsbanken",
     "text": "Handelsbanken"
   },
-  "ing": {
+  {
     "value": "ing",
+    "icon": "ing",
     "text": "ING Bank"
   },
-  "knab": {
+  {
     "value": "knab",
+    "icon": "knab",
     "text": "Knab"
   },
-  "rabobank": {
+  {
     "value": "rabobank",
+    "icon": "rabobank",
     "text": "Rabobank"
   },
-  "regiobank": {
+  {
     "value": "regiobank",
+    "icon": "regiobank",
     "text": "RegioBank"
   },
-  "revolut": {
+  {
     "value": "revolut",
+    "icon": "revolut",
     "text": "Revolut"
   },
-  "sns_bank": {
+  {
     "value": "sns_bank",
+    "icon": "sns_bank",
     "text": "SNS Bank"
   },
-  "triodos_bank": {
+  {
     "value": "triodos_bank",
+    "icon": "triodos_bank",
     "text": "Triodos Bank"
   },
-  "van_lanschot": {
+  {
     "value": "van_lanschot",
+    "icon": "van_lanschot",
     "text": "Van Lanschot"
   }
-}
+]
