@@ -52,7 +52,7 @@ internal val formElementPadding = 16.dp
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val optionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
+    val hiddenIdentifiers by formViewModel.hiddenIdentifiers.asLiveData().observeAsState(
         null
     )
     val enabled by formViewModel.enabled.asLiveData().observeAsState(true)
@@ -64,13 +64,13 @@ internal fun Form(
         formViewModel.elements.forEach { element ->
 
             AnimatedVisibility(
-                optionalIdentifiers?.contains(element.identifier) == false,
+                hiddenIdentifiers?.contains(element.identifier) == false,
                 enter = EnterTransition.None,
                 exit = ExitTransition.None
             ) {
                 when (element) {
                     is SectionElement -> {
-                        SectionElementUI(enabled, element, optionalIdentifiers)
+                        SectionElementUI(enabled, element, hiddenIdentifiers)
                     }
                     is MandateTextElement -> {
                         MandateElementUI(element)
@@ -90,10 +90,10 @@ internal fun Form(
 internal fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    optionalIdentifiers: List<IdentifierSpec>?
+    hiddenIdentifiers: List<IdentifierSpec>?,
 ) {
     AnimatedVisibility(
-        optionalIdentifiers?.contains(element.identifier) == false,
+        hiddenIdentifiers?.contains(element.identifier) == false,
         enter = EnterTransition.None,
         exit = ExitTransition.None
     ) {
@@ -266,34 +266,34 @@ class FormViewModel(
             }
         }
 
-    internal val optionalIdentifiers =
+    internal val hiddenIdentifiers =
         combine(
             saveForFutureUseVisible,
-            saveForFutureUseElement?.controller?.optionalIdentifiers
+            saveForFutureUseElement?.controller?.hiddenIdentifiers
                 ?: MutableStateFlow(emptyList())
-        ) { showFutureUse, optionalIdentifiers ->
+        ) { showFutureUse, hiddenIdentifiers ->
 
-            // For optional *section* identifiers, list of identifiers of elements in the section
+            // For hidden *section* identifiers, list of identifiers of elements in the section
             val identifiers = sectionToFieldIdentifierMap
                 .filter { idControllerPair ->
-                    optionalIdentifiers.contains(idControllerPair.key)
+                    hiddenIdentifiers.contains(idControllerPair.key)
                 }
                 .flatMap { sectionToSectionFieldEntry ->
                     sectionToSectionFieldEntry.value
                 }
 
             if (!showFutureUse && saveForFutureUseElement != null) {
-                optionalIdentifiers
+                hiddenIdentifiers
                     .plus(identifiers)
                     .plus(saveForFutureUseElement.identifier)
             } else {
-                optionalIdentifiers
+                hiddenIdentifiers
                     .plus(identifiers)
             }
         }
 
-    // Mandate is showing if it is an element of the form and it isn't optional
-    internal val showingMandate = optionalIdentifiers.map {
+    // Mandate is showing if it is an element of the form and it isn't hidden
+    internal val showingMandate = hiddenIdentifiers.map {
         elements
             .filterIsInstance<MandateTextElement>()
             .firstOrNull()?.let { mandate ->
@@ -302,7 +302,7 @@ class FormViewModel(
     }
 
     val completeFormValues = TransformElementToFormFieldValueFlow(
-        elements, optionalIdentifiers, showingMandate, saveForFutureUse
+        elements, hiddenIdentifiers, showingMandate, saveForFutureUse
     ).transformFlow()
 
     internal fun populateFormViewValues(formFieldValues: FormFieldValues) {

@@ -18,7 +18,7 @@ internal class SaveForFutureUseController(
     override val error: Flow<FieldError?> = MutableStateFlow(null)
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
 
-    val optionalIdentifiers: Flow<List<IdentifierSpec>> =
+    val hiddenIdentifiers: Flow<List<IdentifierSpec>> =
         saveForFutureUse.map { saveFutureUseInstance ->
             identifiersRequiredForFutureUse.takeUnless { saveFutureUseInstance } ?: emptyList()
         }
