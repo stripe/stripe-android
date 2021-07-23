@@ -552,7 +552,6 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-
     override suspend fun onPaymentFlowResultDefaultFlowController(
         paymentFlowResult: PaymentFlowResult.Unvalidated,
         paymentFlowResultProcessor: PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>,
@@ -641,7 +640,6 @@ internal class StripePaymentController internal constructor(
             )
         }
     }
-
 
     internal companion object {
         internal const val PAYMENT_REQUEST_CODE = 50000

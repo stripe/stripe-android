@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
-import com.stripe.android.PaymentController
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
@@ -469,7 +468,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                 }
                 is StartAndConfirmResult.ErrorStripeIntentReady -> {
-                eventReporter.onPaymentFailure(selection.value)
+                    eventReporter.onPaymentFailure(selection.value)
                     resetViewState(
                         result.stripeIntentResult.intent,
                         result.stripeIntentResult.failureMessage

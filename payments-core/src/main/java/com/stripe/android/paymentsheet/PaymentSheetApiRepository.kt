@@ -56,5 +56,4 @@ interface PaymentSheetApiRepository {
         options: ApiRequest.Options,
         expandFields: List<String>
     ): PaymentIntent?
-
 }
