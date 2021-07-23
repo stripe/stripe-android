@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 internal sealed class StripeIntentRepository {
@@ -31,8 +32,8 @@ internal sealed class StripeIntentRepository {
         private val stripeRepository: StripeRepository,
         private val requestOptions: ApiRequest.Options,
         private val workContext: CoroutineContext,
-        private val locale: String? =
-            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)?.toLanguageTag()
+        private val locale: Locale? =
+            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
     ) : StripeIntentRepository() {
         /**
          * Tries to retrieve the StripeIntent with ordered Payment Methods, falling back to

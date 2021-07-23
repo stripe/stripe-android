@@ -29,6 +29,7 @@ import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.Locale
 
 /**
  * An interface for data operations on Stripe API objects.
@@ -74,7 +75,7 @@ internal interface StripeRepository {
     suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: String
+        locale: Locale
     ): PaymentIntent?
 
     @Throws(
@@ -122,7 +123,7 @@ internal interface StripeRepository {
     suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: String
+        locale: Locale
     ): SetupIntent?
 
     @Throws(

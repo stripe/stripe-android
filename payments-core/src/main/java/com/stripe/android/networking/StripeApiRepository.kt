@@ -231,7 +231,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: String
+        locale: Locale
     ): PaymentIntent? {
         fireFraudDetectionDataRequest()
 
@@ -241,7 +241,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         ).plus(
             mapOf(
                 "type" to "payment_intent",
-                "locale" to locale
+                "locale" to locale.toLanguageTag()
             )
         )
 
@@ -386,7 +386,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: String
+        locale: Locale
     ): SetupIntent? {
         fireFraudDetectionDataRequest()
 
@@ -396,7 +396,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         ).plus(
             mapOf(
                 "type" to "setup_intent",
-                "locale" to locale
+                "locale" to locale.toLanguageTag()
             )
         )
 

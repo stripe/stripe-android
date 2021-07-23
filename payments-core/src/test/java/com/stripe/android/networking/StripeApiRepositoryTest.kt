@@ -1076,7 +1076,7 @@ internal class StripeApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             val clientSecret = "test_locale"
-            val locale = "test_locale"
+            val locale = Locale.GERMANY
             create().retrievePaymentIntentWithOrderedPaymentMethods(
                 clientSecret,
                 DEFAULT_OPTIONS,
@@ -1087,7 +1087,7 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
             assertTrue(paymentMethodDataParams.contains("payment_intent"))
-            assertEquals(apiRequest.params?.get("locale"), locale)
+            assertEquals(apiRequest.params?.get("locale"), locale.toLanguageTag())
             assertEquals(apiRequest.params?.get("type"), "payment_intent")
             assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
 
@@ -1105,8 +1105,8 @@ internal class StripeApiRepositoryTest {
             whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val clientSecret = "test_locale"
-            val locale = "test_locale"
+            val clientSecret = "test_client_secret"
+            val locale = Locale.FRANCE
             create().retrieveSetupIntentWithOrderedPaymentMethods(
                 clientSecret,
                 DEFAULT_OPTIONS,
@@ -1117,7 +1117,7 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
             assertTrue(paymentMethodDataParams.contains("setup_intent"))
-            assertEquals(apiRequest.params?.get("locale"), locale)
+            assertEquals(apiRequest.params?.get("locale"), locale.toLanguageTag())
             assertEquals(apiRequest.params?.get("type"), "setup_intent")
             assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
 

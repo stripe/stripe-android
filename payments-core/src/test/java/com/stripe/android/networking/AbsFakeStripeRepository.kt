@@ -25,6 +25,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONObject
+import java.util.Locale
 
 internal abstract class AbsFakeStripeRepository : StripeRepository {
 
@@ -55,7 +56,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: String
+        locale: Locale
     ): PaymentIntent? {
         return null
     }
@@ -87,7 +88,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
-        locale: String
+        locale: Locale
     ): SetupIntent? {
         return null
     }
