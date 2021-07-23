@@ -237,7 +237,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret,
         options,
         locale,
-        type = "payment_intent",
         parser = PaymentMethodPreferenceForPaymentIntentJsonParser(),
         analyticsEvent = AnalyticsEvent.PaymentIntentRetrieve
     )
@@ -374,7 +373,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret,
         options,
         locale,
-        type = "setup_intent",
         parser = PaymentMethodPreferenceForSetupIntentJsonParser(),
         analyticsEvent = AnalyticsEvent.SetupIntentRetrieve
     )
@@ -1060,7 +1058,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale,
-        type: String,
         parser: PaymentMethodPreferenceJsonParser<T>,
         analyticsEvent: AnalyticsEvent
     ): T? {
@@ -1068,10 +1065,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         val params = createClientSecretParam(
             clientSecret,
-            listOf(type)
+            listOf(parser.stripeIntentFieldName)
         ).plus(
             mapOf(
-                "type" to type,
+                "type" to parser.stripeIntentFieldName,
                 "locale" to locale.toLanguageTag()
             )
         )
@@ -1084,9 +1081,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             ),
             parser
         ) {
-            fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(analyticsEvent)
-            )
+            fireAnalyticsRequest(analyticsRequestFactory.createRequest(analyticsEvent))
         }
     }
 
