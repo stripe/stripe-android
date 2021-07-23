@@ -71,6 +71,18 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
+    suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        locale: String
+    ): PaymentIntent?
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
     suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
@@ -99,6 +111,18 @@ internal interface StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
+    ): SetupIntent?
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        locale: String
     ): SetupIntent?
 
     @Throws(
