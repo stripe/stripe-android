@@ -76,7 +76,7 @@ public abstract class com/stripe/android/paymentsheet/specifications/FormItemSpe
 	public static final field $stable I
 }
 
-public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$MandateTextSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/OptionalItemSpec {
+public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$MandateTextSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
 	public static final field $stable I
 	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
@@ -92,7 +92,7 @@ public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$M
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$SaveForFutureUseSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/OptionalItemSpec {
+public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$SaveForFutureUseSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
 	public static final field $stable I
 	public fun <init> (Ljava/util/List;)V
 	public final fun component1 ()Ljava/util/List;
@@ -105,7 +105,7 @@ public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$S
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/OptionalItemSpec {
+public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;Ljava/lang/Integer;)V
 	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -162,7 +162,7 @@ public final class com/stripe/android/paymentsheet/specifications/LayoutSpec {
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract interface class com/stripe/android/paymentsheet/specifications/OptionalItemSpec {
+public abstract interface class com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
 	public abstract fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
 }
 
