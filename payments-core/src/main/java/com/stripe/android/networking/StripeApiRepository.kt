@@ -50,6 +50,7 @@ import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForSetupIntentJsonParser
+import com.stripe.android.model.parsers.PaymentMethodPreferenceJsonParser
 import com.stripe.android.model.parsers.PaymentMethodsListJsonParser
 import com.stripe.android.model.parsers.RadarSessionJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
@@ -232,32 +233,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): PaymentIntent? {
-        fireFraudDetectionDataRequest()
-
-        val params = createClientSecretParam(
-            clientSecret,
-            listOf("payment_intent")
-        ).plus(
-            mapOf(
-                "type" to "payment_intent",
-                "locale" to locale.toLanguageTag()
-            )
-        )
-
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getApiUrl("payment_method_preferences"),
-                options,
-                params
-            ),
-            PaymentMethodPreferenceForPaymentIntentJsonParser()
-        ) {
-            fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(AnalyticsEvent.PaymentIntentRetrieve)
-            )
-        }
-    }
+    ): PaymentIntent? = retrieveStripeIntentWithOrderedPaymentMethods(
+        clientSecret,
+        options,
+        locale,
+        type = "payment_intent",
+        parser = PaymentMethodPreferenceForPaymentIntentJsonParser(),
+        analyticsEvent = AnalyticsEvent.PaymentIntentRetrieve
+    )
 
     /**
      * Analytics event: [AnalyticsEvent.PaymentIntentCancelSource]
@@ -387,32 +370,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
-    ): SetupIntent? {
-        fireFraudDetectionDataRequest()
-
-        val params = createClientSecretParam(
-            clientSecret,
-            listOf("setup_intent")
-        ).plus(
-            mapOf(
-                "type" to "setup_intent",
-                "locale" to locale.toLanguageTag()
-            )
-        )
-
-        return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getApiUrl("payment_method_preferences"),
-                options,
-                params
-            ),
-            PaymentMethodPreferenceForSetupIntentJsonParser()
-        ) {
-            fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(AnalyticsEvent.SetupIntentRetrieve)
-            )
-        }
-    }
+    ): SetupIntent? = retrieveStripeIntentWithOrderedPaymentMethods(
+        clientSecret,
+        options,
+        locale,
+        type = "setup_intent",
+        parser = PaymentMethodPreferenceForSetupIntentJsonParser(),
+        analyticsEvent = AnalyticsEvent.SetupIntentRetrieve
+    )
 
     /**
      * Analytics event: [AnalyticsEvent.SetupIntentCancelSource]
@@ -1089,6 +1054,40 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     internal fun getDetachPaymentMethodUrl(paymentMethodId: String): String {
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
+    }
+
+    private suspend fun <T : StripeIntent> retrieveStripeIntentWithOrderedPaymentMethods(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        locale: Locale,
+        type: String,
+        parser: PaymentMethodPreferenceJsonParser<T>,
+        analyticsEvent: AnalyticsEvent
+    ): T? {
+        fireFraudDetectionDataRequest()
+
+        val params = createClientSecretParam(
+            clientSecret,
+            listOf(type)
+        ).plus(
+            mapOf(
+                "type" to type,
+                "locale" to locale.toLanguageTag()
+            )
+        )
+
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getApiUrl("payment_method_preferences"),
+                options,
+                params
+            ),
+            parser
+        ) {
+            fireAnalyticsRequest(
+                analyticsRequestFactory.createRequest(analyticsEvent)
+            )
+        }
     }
 
     @Throws(
