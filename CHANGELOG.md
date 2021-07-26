@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 17.0.1 - unassigned
+* [3978](https://github.com/stripe/stripe-android/pull/3978) Fix bug when cancelling Payment Sheet payment with Google Pay
+* [4014](https://github.com/stripe/stripe-android/pull/4014) Added support for WeChatPay
+* [4026](https://github.com/stripe/stripe-android/pull/4026) Bump daggerVersion from 2.37 to 2.38
+* [4034](https://github.com/stripe/stripe-android/pull/4034) Fix PaymentSheetActivity getting stuck in loading state during recreation
+* [4035](https://github.com/stripe/stripe-android/pull/4035) Remove dependency from PaymentSheet on RxJava
+* [4049](https://github.com/stripe/stripe-android/pull/4026) Fix bug where 3DS2 completion did not close the PaymentSheet
+
 ## 17.0.0 - 2021-07-15
 This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
