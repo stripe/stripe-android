@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodPreferenceFixtures
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
@@ -1061,6 +1062,66 @@ internal class StripeApiRepositoryTest {
             }
             assertThat(error.message)
                 .isEqualTo("Invalid client secret.")
+        }
+
+    @Test
+    fun `retrievePaymentIntentWithOrderedPaymentMethods() sends all parameters`() =
+        testDispatcher.runBlockingTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "test_locale"
+            val locale = Locale.GERMANY
+            create().retrievePaymentIntentWithOrderedPaymentMethods(
+                clientSecret,
+                DEFAULT_OPTIONS,
+                locale
+            )
+
+            verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
+            assertTrue(paymentMethodDataParams.contains("payment_intent"))
+            assertEquals(apiRequest.params?.get("locale"), locale.toLanguageTag())
+            assertEquals(apiRequest.params?.get("type"), "payment_intent")
+            assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
+
+            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.PaymentIntentRetrieve)
+        }
+
+    @Test
+    fun `retrieveSetupIntentWithOrderedPaymentMethods() sends all parameters`() =
+        testDispatcher.runBlockingTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "test_client_secret"
+            val locale = Locale.FRANCE
+            create().retrieveSetupIntentWithOrderedPaymentMethods(
+                clientSecret,
+                DEFAULT_OPTIONS,
+                locale
+            )
+
+            verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
+            assertTrue(paymentMethodDataParams.contains("setup_intent"))
+            assertEquals(apiRequest.params?.get("locale"), locale.toLanguageTag())
+            assertEquals(apiRequest.params?.get("type"), "setup_intent")
+            assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
+
+            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.SetupIntentRetrieve)
         }
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(

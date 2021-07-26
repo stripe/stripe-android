@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import androidx.core.os.LocaleListCompat
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
@@ -7,6 +8,7 @@ import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 internal sealed class StripeIntentRepository {
@@ -29,27 +31,47 @@ internal sealed class StripeIntentRepository {
     class Api(
         private val stripeRepository: StripeRepository,
         private val requestOptions: ApiRequest.Options,
-        private val workContext: CoroutineContext
+        private val workContext: CoroutineContext,
+        private val locale: Locale? =
+            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
     ) : StripeIntentRepository() {
+        /**
+         * Tries to retrieve the StripeIntent with ordered Payment Methods, falling back to
+         * traditional GET if we don't have a locale or the call fails for any reason.
+         */
         override suspend fun get(clientSecret: ClientSecret) = withContext(workContext) {
             when (clientSecret) {
                 is PaymentIntentClientSecret -> {
-                    val paymentIntent = stripeRepository.retrievePaymentIntent(
-                        clientSecret.value,
-                        requestOptions,
-                        expandFields = listOf("payment_method")
-                    )
-                    requireNotNull(paymentIntent) {
+                    requireNotNull(
+                        locale?.let {
+                            stripeRepository.retrievePaymentIntentWithOrderedPaymentMethods(
+                                clientSecret.value,
+                                requestOptions,
+                                it
+                            )
+                        } ?: stripeRepository.retrievePaymentIntent(
+                            clientSecret.value,
+                            requestOptions,
+                            expandFields = listOf("payment_method")
+                        )
+                    ) {
                         "Could not parse PaymentIntent."
                     }
                 }
                 is SetupIntentClientSecret -> {
-                    val setupIntent = stripeRepository.retrieveSetupIntent(
-                        clientSecret.value,
-                        requestOptions,
-                        expandFields = listOf("payment_method")
-                    )
-                    requireNotNull(setupIntent) {
+                    requireNotNull(
+                        locale?.let {
+                            stripeRepository.retrieveSetupIntentWithOrderedPaymentMethods(
+                                clientSecret.value,
+                                requestOptions,
+                                locale
+                            )
+                        } ?: stripeRepository.retrieveSetupIntent(
+                            clientSecret.value,
+                            requestOptions,
+                            expandFields = listOf("payment_method")
+                        )
+                    ) {
                         "Could not parse SetupIntent."
                     }
                 }
