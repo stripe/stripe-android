@@ -147,7 +147,7 @@ class Stripe internal constructor(
      * be used:
      * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
      *   are supported on the device.
-     * - Otherwise, use a WebView.
+     * - Otherwise, use the device browser.
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the

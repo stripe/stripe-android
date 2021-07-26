@@ -59,8 +59,8 @@
     - `CardUtils` is now `internal`
     - `StripeTextUtils` has been removed
     - `Stripe.confirmPayment` and `Stripe.confirmSetupIntent` will now use Custom Tabs by default
-      when performing 3DS1 Authentication.  If Custom tabs are not available on the phone the SDK
-      will use a WebView.
+      when performing 3DS1 Authentication.  If [Custom tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) are not available the sdk will launch
+      the device browser to perform authentication.
 
 ## Migrating from versions < 16.0.0
 - Changes to `CardInputWidget` and `CardMultilineWidget`
