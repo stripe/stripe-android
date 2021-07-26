@@ -8,8 +8,7 @@
     - `createCardToken()` now requires `CardParams` instead of `Card`
 - Changes to `ConfirmPaymentIntentParams`
     - `returnUrl` has been removed as a parameter on `ConfirmPaymentIntentParams` static creation
-       methods. The SDK manages setting this value internally.  It will use an installed browser
-       with Custom Chrome Tab support, or, if not available, a WebView.
+      methods. The SDK manages setting this value internally.
     - `extraParams` property has been removed. Static creation methods that accept this parameter
       have been removed.
 - Changes to `ConfirmSetupIntentParams`
@@ -59,6 +58,9 @@
     - `GooglePayConfig` now requires instantiated `PaymentConfiguration`
     - `CardUtils` is now `internal`
     - `StripeTextUtils` has been removed
+    - `Stripe.confirmPayment` and `Stripe.confirmSetupIntent` will now use Custom Tabs by default
+      when performing 3DS1 Authentication.  If Custom tabs are not available on the phone the SDK
+      will use a WebView.
 
 ## Migrating from versions < 16.0.0
 - Changes to `CardInputWidget` and `CardMultilineWidget`

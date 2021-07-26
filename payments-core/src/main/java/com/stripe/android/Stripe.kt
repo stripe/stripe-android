@@ -143,21 +143,11 @@ class Stripe internal constructor(
      * Confirm and, if necessary, authenticate a [PaymentIntent].
      * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
      *
-     * For confirmation attempts that require 3DS1 authentication, if the
-     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
+     * For confirmation attempts that require 3DS1 authentication, the following logic will
      * be used:
      * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
      *   are supported on the device.
-     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
      * - Otherwise, use a WebView.
-     *
-     * If a custom `return_url` value is set, a WebView will always be used.
-     *
-     * |                   | Custom Tabs available? | Chrome available? | Fallback |
-     * |-------------------|------------------------|-------------------|----------|
-     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
-     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
