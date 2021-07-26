@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -39,7 +40,7 @@ class TransformElementToFormViewValueFlowTest {
     private val hiddenIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())
 
     private val transformElementToFormFieldValueFlow = TransformElementToFormFieldValueFlow(
-        listOf(countrySection, emailSection),
+        listOf(countrySection, emailSection).getIdInputControllerMap(),
         hiddenIdentifersFlow,
         showingMandate = MutableStateFlow(true),
         saveForFutureUse = MutableStateFlow(false)

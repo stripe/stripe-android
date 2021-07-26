@@ -30,13 +30,14 @@ import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
-import com.stripe.android.paymentsheet.SectionFieldElementType
-import com.stripe.android.paymentsheet.SectionFieldElementType.DropdownFieldElement
-import com.stripe.android.paymentsheet.SectionFieldElementType.TextFieldElement
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
+import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
+import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -130,19 +131,19 @@ internal fun SectionElementUI(
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,
-    field: SectionFieldElementType
+    field: SectionFieldElement
 ) {
-    when (field) {
-        is TextFieldElement -> {
+    when (val controller = field.sectionFieldErrorController()) {
+        is TextFieldController -> {
             TextField(
-                textFieldController = field.controller,
+                textFieldController = controller,
                 enabled = enabled
             )
         }
-        is DropdownFieldElement -> {
+        is DropdownFieldController -> {
             DropDown(
-                field.controller.label,
-                field.controller,
+                controller.label,
+                controller,
                 enabled
             )
         }
@@ -302,7 +303,7 @@ class FormViewModel(
     }
 
     val completeFormValues = TransformElementToFormFieldValueFlow(
-        elements, hiddenIdentifiers, showingMandate, saveForFutureUse
+        elements.getIdInputControllerMap(), hiddenIdentifiers, showingMandate, saveForFutureUse
     ).transformFlow()
 
     internal fun populateFormViewValues(formFieldValues: FormFieldValues) {

@@ -2,11 +2,11 @@ package com.stripe.android.paymentsheet.address
 
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.SectionFieldElementType
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.forms.transform
 
 internal object AddressFieldElementRepository {
-    private val countryFieldMap = mutableMapOf<String, List<SectionFieldElementType>?>()
+    private val countryFieldMap = mutableMapOf<String, List<SectionFieldElement>?>()
 
     internal fun get(countryCode: String?) = countryCode?.let {
         countryFieldMap[it]
