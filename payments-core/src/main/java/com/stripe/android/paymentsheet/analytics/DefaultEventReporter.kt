@@ -101,8 +101,8 @@ internal class DefaultEventReporter internal constructor(
             val deviceId = deviceIdRepository.get()
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
-                    event,
-                    deviceId
+                    event.toString(),
+                    deviceId.value
                 )
             )
         }

@@ -1,6 +1,6 @@
 package com.stripe.android.networking
 
-internal data class AnalyticsRequest(
+data class AnalyticsRequest(
     override val params: Map<String, *>
 ) : StripeRequest() {
     override val method: Method = Method.GET

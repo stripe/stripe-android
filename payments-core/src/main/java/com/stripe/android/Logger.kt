@@ -2,7 +2,7 @@ package com.stripe.android
 
 import android.util.Log
 
-internal interface Logger {
+interface Logger {
     fun error(msg: String, t: Throwable? = null)
 
     fun info(msg: String)
