@@ -8,7 +8,8 @@
     - `createCardToken()` now requires `CardParams` instead of `Card`
 - Changes to `ConfirmPaymentIntentParams`
     - `returnUrl` has been removed as a parameter on `ConfirmPaymentIntentParams` static creation
-       methods. The SDK manages setting this value internally.
+       methods. The SDK manages setting this value internally.  It will use an installed browser
+       with Custom Chrome Tab support, or, if not available, a WebView.
     - `extraParams` property has been removed. Static creation methods that accept this parameter
       have been removed.
 - Changes to `ConfirmSetupIntentParams`
