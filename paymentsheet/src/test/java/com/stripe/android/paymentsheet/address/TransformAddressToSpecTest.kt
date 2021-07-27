@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.address
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.supportedCountries
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.Companion.supportedCountries
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import org.junit.Test
