@@ -176,7 +176,6 @@ class GooglePayLauncherViewModelTest {
                 .isInstanceOf(ConfirmPaymentIntentParams::class.java)
         }
 
-
     @Test
     fun `confirmStripeIntent() using SetupIntent should confirm Setup Intent`() =
         testDispatcher.runBlockingTest {
