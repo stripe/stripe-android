@@ -24,11 +24,11 @@ Module to provide support for `PaymentIntent` with `wechat_pay` as its payment m
         private fun startCheckout() {
             payButton.setOnClickListener {
                 // create paymentMethod with WeChat Pay type
-                val paymentMethodCreateParams = createWeChatPayParams()
+                val weChatPaymentMethodCreateParams = createWeChatPayParams()
                 // confirm the intent with the param
                 cardInputWidget.paymentMethodCreateParams?.let { params ->
                     val confirmParams = ConfirmPaymentIntentParams
-                        .createWithPaymentMethodCreateParams(params, paymentIntentClientSecret)
+                        .createWithPaymentMethodCreateParams(params, weChatPaymentMethodCreateParams)
                     stripe.confirmPayment(this, confirmParams)
                 }
             }
@@ -50,6 +50,6 @@ Module to provide support for `PaymentIntent` with `wechat_pay` as its payment m
 # Notice
 1. Make sure your Android app is registered in [WeChat Open Platform](https://open.weixin.qq.com/) and its package name(应用包名) from `AndroidManifest.xml` and signature(应用签名) correctly uploaded.
     > Note: Use the __GenSignature__ tool provided by WeChat [here](https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5) to generate a signature, note the signature will differ from debug build to release build.
-2. Make sure the WeChat app installed on your test phone has a WeChat account with WeChat Pay enabled.
+2. Make sure the WeChat app installed on your test phone is logged in with an account with WeChat Pay enabled.
 3. Make sure to create a Stripe `PaymentIntent` with a Stripe _live_ key - the `PaymentIntent` created by a _test_ key will have dummy WeChat Pay parameters that won't be recognized by WeChat.
-4. Apart from adding the dependencies, you __don't__ need to write any additional code with WeChat Pay SDK(E.g the `WXPayEntryActivity` or any callbacks from the WeChat Pay [doc](https://pay.weixin.qq.com/wechatpay_guide/help_docs.shtml)), the module will configure those for you.
+4. Apart from adding the dependencies, you __don't__ need to write any additional code with WeChat Pay SDK(E.g the `WXPayEntryActivity` or any callbacks from the WeChat Pay [doc](https://pay.weixin.qq.com/wechatpay_guide/help_docs.shtml)), the module will do those for you.
