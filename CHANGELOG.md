@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## 17.0.1 - unassigned
+This release includes several bug fixes and introduces [WeChat Pay module](https://github.com/stripe/stripe-android/blob/master/wechatpay/README.md)
+
 * [3978](https://github.com/stripe/stripe-android/pull/3978) Fix bug when cancelling Payment Sheet payment with Google Pay
 * [4014](https://github.com/stripe/stripe-android/pull/4014) Added support for WeChatPay
 * [4026](https://github.com/stripe/stripe-android/pull/4026) Bump daggerVersion from 2.37 to 2.38
