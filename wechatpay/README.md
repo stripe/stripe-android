@@ -48,7 +48,7 @@ This module provides support for `PaymentIntent` with `wechat_pay` as its paymen
     ```
 
 # Notice
-1. Make sure your Android app is registered in [WeChat Open Platform](https://open.weixin.qq.com/) and its package name(应用包名) from `AndroidManifest.xml` and signature(应用签名) correctly uploaded.
+1. Make sure your Android app is registered in [WeChat Open Platform](https://open.weixin.qq.com/) and its package name (应用包名) from `AndroidManifest.xml` and signature (应用签名) correctly uploaded.
     > Note: Use the __GenSignature__ tool provided by WeChat [here](https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5) to generate a signature, note the signature will differ from debug build to release build.
 2. Make sure the WeChat app installed on your test phone is logged in with an account with WeChat Pay enabled.
 3. Make sure to create a Stripe `PaymentIntent` with a Stripe _live_ key - the `PaymentIntent` created by a _test_ key will have dummy WeChat Pay parameters that won't be recognized by WeChat.
