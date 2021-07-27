@@ -34,8 +34,12 @@ internal class FormViewModelTest {
 
     private val resourceRepository =
         ResourceRepository(
-            BankRepository(ApplicationProvider.getApplicationContext<Context>().resources),
-            AddressFieldElementRepository(ApplicationProvider.getApplicationContext<Context>().resources)
+            BankRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            ),
+            AddressFieldElementRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            )
         )
 
     @Test
