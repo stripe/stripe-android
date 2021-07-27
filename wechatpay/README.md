@@ -18,7 +18,7 @@ This module provides support for `PaymentIntent` with `wechat_pay` as its paymen
     }
     ```
 
-* Then in your app, just confirm and capture the result of the `PaymentIntent` with WeChat Pay like others(see an complete example [here](https://stripe.com/docs/payments/integration-builder)), WeChat app on the phone will be opened to confirm the payment.
+* Then in your app, just confirm and capture the result of the `PaymentIntent` with WeChat Pay like others (see a complete example [here](https://stripe.com/docs/payments/integration-builder)), the WeChat app on the phone will be opened to confirm the payment.
     ```kotlin
     class CheckoutActivity : AppCompatActivity() {
         private fun startCheckout() {
