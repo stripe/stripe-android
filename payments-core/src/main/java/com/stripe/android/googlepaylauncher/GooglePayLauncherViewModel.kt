@@ -19,6 +19,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
@@ -151,16 +152,26 @@ internal class GooglePayLauncherViewModel(
         )
     }
 
-    suspend fun confirmPaymentIntent(
+    suspend fun confirmStripeIntent(
         host: AuthActivityStarterHost,
         params: PaymentMethodCreateParams
     ) {
+        val confirmStripeIntentParams = when (args) {
+            is GooglePayLauncherContract.PaymentIntentArgs ->
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    paymentMethodCreateParams = params,
+                    clientSecret = args.clientSecret
+                )
+            is GooglePayLauncherContract.SetupIntentArgs ->
+                ConfirmSetupIntentParams.create(
+                    paymentMethodCreateParams = params,
+                    clientSecret = args.clientSecret
+                )
+        }
+
         paymentController.startConfirmAndAuth(
             host,
-            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                paymentMethodCreateParams = params,
-                clientSecret = args.clientSecret
-            ),
+            confirmStripeIntentParams,
             requestOptions
         )
     }

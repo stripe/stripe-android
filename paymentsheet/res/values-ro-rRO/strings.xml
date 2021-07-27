@@ -18,6 +18,8 @@
   <string name="address_label_state">Stat</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">Cod poștal</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">E-mail</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">E-mailul dvs. nu este valid.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

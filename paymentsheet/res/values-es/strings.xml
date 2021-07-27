@@ -18,6 +18,8 @@
   <string name="address_label_state">Estado</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">Código postal</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">Correo electrónico</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">El correo electrónico no es válido.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
  */
 internal class DropdownFieldController(
     private val config: DropdownConfig,
-) : InputController {
+) : InputController, SectionFieldErrorController {
     val displayItems: List<String> = config.getDisplayItems()
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: Flow<Int> = _selectedIndex

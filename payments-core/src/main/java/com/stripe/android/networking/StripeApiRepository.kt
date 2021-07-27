@@ -48,6 +48,9 @@ import com.stripe.android.model.parsers.IssuingCardPinJsonParser
 import com.stripe.android.model.parsers.ModelJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
+import com.stripe.android.model.parsers.PaymentMethodPreferenceForSetupIntentJsonParser
+import com.stripe.android.model.parsers.PaymentMethodPreferenceJsonParser
 import com.stripe.android.model.parsers.PaymentMethodsListJsonParser
 import com.stripe.android.model.parsers.RadarSessionJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
@@ -212,6 +215,33 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Retrieve a [PaymentIntent] using its client_secret, with the accepted payment method types
+     * ordered according to the [locale] provided.
+     *
+     * Analytics event: [AnalyticsEvent.PaymentIntentRetrieve]
+     *
+     * @param clientSecret client_secret of the PaymentIntent to retrieve
+     * @param locale locale used to determine the order of the payment method types
+     */
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        locale: Locale
+    ): PaymentIntent? = retrieveStripeIntentWithOrderedPaymentMethods(
+        clientSecret,
+        options,
+        locale,
+        parser = PaymentMethodPreferenceForPaymentIntentJsonParser(),
+        analyticsEvent = AnalyticsEvent.PaymentIntentRetrieve
+    )
+
+    /**
      * Analytics event: [AnalyticsEvent.PaymentIntentCancelSource]
      */
     @Throws(
@@ -319,6 +349,33 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
         }
     }
+
+    /**
+     * Retrieve a [SetupIntent] using its client_secret, with the accepted payment method types
+     * ordered according to the [locale] provided.
+     *
+     * Analytics event: [AnalyticsEvent.SetupIntentRetrieve]
+     *
+     * @param clientSecret client_secret of the SetupIntent to retrieve
+     * @param locale locale used to determine the order of the payment method types
+     */
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        locale: Locale
+    ): SetupIntent? = retrieveStripeIntentWithOrderedPaymentMethods(
+        clientSecret,
+        options,
+        locale,
+        parser = PaymentMethodPreferenceForSetupIntentJsonParser(),
+        analyticsEvent = AnalyticsEvent.SetupIntentRetrieve
+    )
 
     /**
      * Analytics event: [AnalyticsEvent.SetupIntentCancelSource]
@@ -995,6 +1052,37 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     internal fun getDetachPaymentMethodUrl(paymentMethodId: String): String {
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
+    }
+
+    private suspend fun <T : StripeIntent> retrieveStripeIntentWithOrderedPaymentMethods(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        locale: Locale,
+        parser: PaymentMethodPreferenceJsonParser<T>,
+        analyticsEvent: AnalyticsEvent
+    ): T? {
+        fireFraudDetectionDataRequest()
+
+        val params = createClientSecretParam(
+            clientSecret,
+            listOf(parser.stripeIntentFieldName)
+        ).plus(
+            mapOf(
+                "type" to parser.stripeIntentFieldName,
+                "locale" to locale.toLanguageTag()
+            )
+        )
+
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getApiUrl("payment_method_preferences"),
+                options,
+                params
+            ),
+            parser
+        ) {
+            fireAnalyticsRequest(analyticsRequestFactory.createRequest(analyticsEvent))
+        }
     }
 
     @Throws(

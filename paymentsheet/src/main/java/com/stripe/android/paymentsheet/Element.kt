@@ -6,31 +6,9 @@ import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
+import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-
-/**
- * This is used to define which elements can be made optional
- */
-internal interface OptionalElement {
-    val identifier: IdentifierSpec
-}
-
-/**
- * This interface is used to define the types of elements allowed in a section
- */
-internal sealed interface SectionFieldElementType {
-    val identifier: IdentifierSpec
-    val controller: InputController
-
-    interface TextFieldElement : SectionFieldElementType {
-        override val controller: TextFieldController
-    }
-
-    interface DropdownFieldElement : SectionFieldElementType {
-        override val controller: DropdownFieldController
-    }
-}
 
 /**
  * This is used to define each section in the visual form layout.
@@ -51,7 +29,7 @@ internal sealed class FormElement {
         val color: Color,
         val merchantName: String?,
         override val controller: InputController? = null,
-    ) : FormElement(), OptionalElement
+    ) : FormElement()
 
     /**
      * This is an element that will make elements (as specified by identifier) hidden
@@ -65,12 +43,12 @@ internal sealed class FormElement {
 
     data class SectionElement(
         override val identifier: IdentifierSpec,
-        val fields: List<SectionFieldElementType>,
+        val fields: List<SectionFieldElement>,
         override val controller: SectionController
-    ) : FormElement(), OptionalElement {
+    ) : FormElement() {
         internal constructor(
             identifier: IdentifierSpec,
-            field: SectionFieldElementType,
+            field: SectionFieldElement,
             controller: SectionController
         ) : this(identifier, listOf(field), controller)
     }
@@ -87,7 +65,8 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
         this
             .filterIsInstance<FormElement.SectionElement>()
             .flatMap { it.fields }
-            .associate { it.identifier to it.controller }
+            .filter { it.controller is InputController }
+            .associate { it.identifier to it.controller as InputController }
     )
 
 /**
@@ -95,35 +74,40 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
  */
 internal sealed class SectionFieldElement {
     abstract val identifier: IdentifierSpec
-    abstract val controller: InputController
 
-    data class Name(
-        override val identifier: IdentifierSpec,
-        override val controller: TextFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    /**
+     * Every item in a section must have a controller that can provide an error
+     * message, for the section controller to reduce it to a single error message.
+     */
+    abstract val controller: SectionFieldErrorController
+
+    /**
+     * This will return a controller that abides by the SectionFieldErrorController interface.
+     */
+    fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
     data class Email(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    ) : SectionFieldElement()
 
     data class Iban(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+        override val controller: TextFieldController,
+    ) : SectionFieldElement()
 
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
+    ) : SectionFieldElement()
 
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement(), SectionFieldElementType.TextFieldElement
+    ) : SectionFieldElement()
 
     data class SimpleDropdown(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController,
-    ) : SectionFieldElement(), SectionFieldElementType.DropdownFieldElement
+    ) : SectionFieldElement()
 }

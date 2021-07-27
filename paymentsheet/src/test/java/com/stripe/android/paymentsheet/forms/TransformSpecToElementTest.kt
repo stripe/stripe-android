@@ -175,8 +175,8 @@ class TransformSpecToElementTest {
                 R.string.stripe_paymentsheet_sepa_mandate,
                 Color.Gray
             )
-            val optionalIdentifiers = listOf(nameSection, mandate)
-            val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(optionalIdentifiers)
+            val hiddenIdentifiers = listOf(nameSection, mandate)
+            val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(hiddenIdentifiers)
             val formElement = listOf(saveForFutureUseSpec).transform("Example, Inc.")
 
             val saveForFutureUseElement = formElement.first() as FormElement.SaveForFutureUseElement
@@ -185,12 +185,12 @@ class TransformSpecToElementTest {
             assertThat(saveForFutureUseElement.identifier)
                 .isEqualTo(saveForFutureUseSpec.identifier)
 
-            assertThat(saveForFutureUseController.optionalIdentifiers.first()).isEmpty()
+            assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
 
             saveForFutureUseController.onValueChange(false)
-            assertThat(saveForFutureUseController.optionalIdentifiers.first())
+            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
                 .isEqualTo(
-                    optionalIdentifiers.map { it.identifier }
+                    hiddenIdentifiers.map { it.identifier }
                 )
         }
 

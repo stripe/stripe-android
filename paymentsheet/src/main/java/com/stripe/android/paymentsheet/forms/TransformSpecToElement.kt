@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.SectionFieldElementType
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
@@ -48,7 +47,10 @@ private fun FormItemSpec.SectionSpec.transform(): FormElement.SectionElement {
     )
 }
 
-private fun List<SectionFieldSpec>.transform() = this.map {
+/**
+ * This function will transform a list of specs into a list of elements
+ */
+internal fun List<SectionFieldSpec>.transform() = this.map {
     when (it) {
         is SectionFieldSpec.Email -> it.transform()
         is SectionFieldSpec.Iban -> it.transform()
@@ -58,7 +60,7 @@ private fun List<SectionFieldSpec>.transform() = this.map {
     }
 }
 
-private fun SectionFieldSpec.SimpleText.transform(): SectionFieldElementType =
+private fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
     SectionFieldElement.SimpleText(
         this.identifier,
         TextFieldController(

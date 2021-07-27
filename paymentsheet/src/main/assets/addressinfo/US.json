@@ -1,0 +1,32 @@
+[
+  {
+    "type": "addressLine1",
+    "required": true
+  },
+  {
+    "type": "addressLine2",
+    "required": false
+  },
+  {
+    "type": "locality",
+    "required": true,
+    "schema": {
+      "nameType": "city"
+    }
+  },
+  {
+    "type": "postalCode",
+    "required": true,
+    "schema": {
+      "isNumeric": true,
+      "nameType": "zip"
+    }
+  },
+  {
+    "type": "administrativeArea",
+    "required": true,
+    "schema": {
+      "nameType": "state"
+    }
+  }
+]

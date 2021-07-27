@@ -18,6 +18,8 @@
   <string name="address_label_state">都道府県</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">郵便番号</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">メールアドレス</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">メールアドレスが無効です。</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->

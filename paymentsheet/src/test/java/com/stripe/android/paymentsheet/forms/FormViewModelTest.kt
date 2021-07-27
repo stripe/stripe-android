@@ -70,7 +70,7 @@ class FormViewModelTest {
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
-        formViewModel.optionalIdentifiers.asLiveData()
+        formViewModel.hiddenIdentifiers.asLiveData()
             .observeForever {
                 values.add(it)
             }
@@ -84,7 +84,7 @@ class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting section as optional sets sub-fields as optional as well`() {
+    fun `Verify setting section as hidden sets sub-fields as hidden as well`() {
         val formViewModel = FormViewModel(
             LayoutSpec(
                 listOf(
@@ -99,7 +99,7 @@ class FormViewModelTest {
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
-        formViewModel.optionalIdentifiers.asLiveData()
+        formViewModel.hiddenIdentifiers.asLiveData()
             .observeForever {
                 values.add(it)
             }
@@ -114,9 +114,9 @@ class FormViewModelTest {
     }
 
     @Test
-    fun `Verify if a field is optional and valid it is not in the formViewValueResult`() =
+    fun `Verify if a field is hidden and valid it is not in the formViewValueResult`() =
         runBlocking {
-            // Here we have one optional and one required field, country will always be in the result,
+            // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
             val formViewModel = FormViewModel(
                 LayoutSpec(
@@ -158,9 +158,9 @@ class FormViewModelTest {
         }
 
     @Test
-    fun `Optional invalid fields arent in the formViewValue and has no effect on complete state`() {
+    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() {
         runBlocking {
-            // Here we have one optional and one required field, country will always be in the result,
+            // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
             val formViewModel = FormViewModel(
                 LayoutSpec(

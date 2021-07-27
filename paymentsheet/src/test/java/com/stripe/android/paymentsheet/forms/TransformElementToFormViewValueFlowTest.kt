@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -36,24 +37,24 @@ class TransformElementToFormViewValueFlowTest {
         SectionController(countryController.label, listOf(countryController))
     )
 
-    private val optionalIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())
+    private val hiddenIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())
 
     private val transformElementToFormFieldValueFlow = TransformElementToFormFieldValueFlow(
-        listOf(countrySection, emailSection),
-        optionalIdentifersFlow,
+        listOf(countrySection, emailSection).getIdInputControllerMap(),
+        hiddenIdentifersFlow,
         showingMandate = MutableStateFlow(true),
         saveForFutureUse = MutableStateFlow(false)
     )
 
     @Test
-    fun `With only some complete controllers and no optional values the flow value is null`() {
+    fun `With only some complete controllers and no hidden values the flow value is null`() {
         runBlocking {
             assertThat(transformElementToFormFieldValueFlow.transformFlow().first()).isNull()
         }
     }
 
     @Test
-    fun `If all controllers are complete and no optional values the flow value has all values`() {
+    fun `If all controllers are complete and no hidden values the flow value has all values`() {
         runBlocking {
             emailController.onValueChange("email@valid.com")
 
@@ -68,10 +69,10 @@ class TransformElementToFormViewValueFlowTest {
     }
 
     @Test
-    fun `If an optional field is incomplete field pairs have the non-optional values`() {
+    fun `If an hidden field is incomplete field pairs have the non-hidden values`() {
         runBlocking {
             emailController.onValueChange("email is invalid")
-            optionalIdentifersFlow.value = listOf(IdentifierSpec("email"))
+            hiddenIdentifersFlow.value = listOf(IdentifierSpec("email"))
 
             val formFieldValues = transformElementToFormFieldValueFlow.transformFlow()
 
@@ -85,10 +86,10 @@ class TransformElementToFormViewValueFlowTest {
     }
 
     @Test
-    fun `If an optional field is complete field pairs contain only the non-optional values`() {
+    fun `If an hidden field is complete field pairs contain only the non-hidden values`() {
         runBlocking {
             emailController.onValueChange("email@valid.com")
-            optionalIdentifersFlow.value = listOf(emailSection.fields[0].identifier)
+            hiddenIdentifersFlow.value = listOf(emailSection.fields[0].identifier)
 
             val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
 
