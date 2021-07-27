@@ -7,6 +7,7 @@
 * [4034](https://github.com/stripe/stripe-android/pull/4034) Fix PaymentSheetActivity getting stuck in loading state during recreation
 * [4035](https://github.com/stripe/stripe-android/pull/4035) Remove dependency from PaymentSheet on RxJava
 * [4049](https://github.com/stripe/stripe-android/pull/4026) Fix bug where 3DS2 completion did not close the PaymentSheet
+* [4051](https://github.com/stripe/stripe-android/pull/4051) Fix Setup Intent confirmation when using GooglePayLauncher
 
 ## 17.0.0 - 2021-07-15
 This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
