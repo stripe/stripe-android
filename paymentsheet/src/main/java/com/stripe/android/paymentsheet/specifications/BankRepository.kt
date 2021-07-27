@@ -6,7 +6,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 
-data class BankRepository(
+internal data class BankRepository(
     val resources: Resources
 ) {
     private val bankItemMap = mutableMapOf<SupportedBankType, List<DropdownItem>?>()
