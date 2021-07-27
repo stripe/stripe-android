@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 17.0.1 - unassigned
+## 17.1.0 - 2020-07-27
 This release includes several bug fixes and introduces [WeChat Pay module](https://github.com/stripe/stripe-android/blob/master/wechatpay/README.md)
 
 * [3978](https://github.com/stripe/stripe-android/pull/3978) Fix bug when cancelling Payment Sheet payment with Google Pay
