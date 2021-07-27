@@ -69,7 +69,6 @@ internal class PaymentCommonModule {
         )
     }
 
-    // TODO: This is kinda incorrectly going to have a different repository from the one below.
     @Provides
     @Singleton
     fun providePaymentSheetApiRepository(
