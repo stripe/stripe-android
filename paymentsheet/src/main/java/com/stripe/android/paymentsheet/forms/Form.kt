@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -27,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
@@ -38,14 +41,18 @@ import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
+import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VALUE
 import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY
+import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -214,11 +221,13 @@ internal fun SaveForFutureUseElementUI(
 @Singleton
 class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
-    @Named(SAVE_FOR_FUTURE_USE_INITIAL_VALUE)  saveForFutureUseInitialValue: Boolean,
+    @Named(SAVE_FOR_FUTURE_USE_INITIAL_VALUE) saveForFutureUseInitialValue: Boolean,
     @Named(SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY) saveForFutureUseInitialVisibility: Boolean,
     merchantName: String,
+    resourceRepository: ResourceRepository
 ) : ViewModel() {
     internal class Factory(
+        private val resources: Resources,
         private val layout: LayoutSpec,
         private val saveForFutureUseValue: Boolean,
         private val saveForFutureUseVisibility: Boolean,
@@ -229,12 +238,20 @@ class FormViewModel @Inject internal constructor(
 
             // This is where we will call Dagger:
             return DaggerFormViewModelComponent.builder()
+                .resources(resources)
                 .layout(layout)
                 .saveForFutureUseValue(saveForFutureUseValue)
                 .saveForFutureUseVisibility(saveForFutureUseVisibility)
                 .merchantName(merchantName)
                 .build()
-                .viewModel
+                .viewModel as T
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            resourceRepository.init()
+            elements = layout.items.transform(merchantName, resourceRepository.bankRepository)
         }
     }
 
@@ -243,7 +260,8 @@ class FormViewModel @Inject internal constructor(
         this.enabled.value = enabled
     }
 
-    internal val elements = layout.items.transform(merchantName)
+    internal lateinit var elements: List<FormElement>
+
 
     private val saveForFutureUseVisible = MutableStateFlow(saveForFutureUseInitialVisibility)
 

@@ -22,18 +22,19 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  * controller will be a pass through the field controller.
  */
 internal fun List<FormItemSpec>.transform(
-    merchantName: String
+    merchantName: String,
+    bankRepository: BankRepository
 ): List<FormElement> =
     this.map {
         when (it) {
             is FormItemSpec.SaveForFutureUseSpec -> it.transform(merchantName)
-            is FormItemSpec.SectionSpec -> it.transform()
+            is FormItemSpec.SectionSpec -> it.transform(bankRepository)
             is FormItemSpec.MandateTextSpec -> it.transform(merchantName)
         }
     }
 
-private fun FormItemSpec.SectionSpec.transform(): FormElement.SectionElement {
-    val fieldElements = this.fields.transform()
+private fun FormItemSpec.SectionSpec.transform(bankRepository: BankRepository): FormElement.SectionElement {
+    val fieldElements = this.fields.transform(bankRepository)
 
     // The controller of the section element will be the same as the field element
     // as there is only a single field in a section
@@ -50,12 +51,12 @@ private fun FormItemSpec.SectionSpec.transform(): FormElement.SectionElement {
 /**
  * This function will transform a list of specs into a list of elements
  */
-internal fun List<SectionFieldSpec>.transform() = this.map {
+internal fun List<SectionFieldSpec>.transform(bankRepository: BankRepository? = null) = this.map {
     when (it) {
         is SectionFieldSpec.Email -> it.transform()
         is SectionFieldSpec.Iban -> it.transform()
         is SectionFieldSpec.Country -> it.transform()
-        is SectionFieldSpec.SimpleDropdown -> it.transform()
+        is SectionFieldSpec.SimpleDropdown -> it.transform(bankRepository)
         is SectionFieldSpec.SimpleText -> it.transform()
     }
 }
@@ -101,13 +102,13 @@ private fun SectionFieldSpec.Country.transform() =
         DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
     )
 
-private fun SectionFieldSpec.SimpleDropdown.transform() =
+private fun SectionFieldSpec.SimpleDropdown.transform(bankRepository: BankRepository?) =
     SectionFieldElement.SimpleDropdown(
         this.identifier,
         DropdownFieldController(
             SimpleDropdownConfig(
                 label,
-                BankRepository.get(this.bankType)
+                bankRepository?.get(this.bankType)!!
             )
         )
     )

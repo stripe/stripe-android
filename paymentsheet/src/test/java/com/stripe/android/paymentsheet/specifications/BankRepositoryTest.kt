@@ -2,12 +2,14 @@ package com.stripe.android.paymentsheet.specifications
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.mockito.kotlin.mock
 import java.io.File
 
 class BankRepositoryTest {
+    private val bankRepository = BankRepository(mock())
     @Test
     fun `Correct supported bank is returned`() {
-        BankRepository.init(
+        bankRepository.init(
             mapOf(
                 SupportedBankType.Eps to
                     """
@@ -23,7 +25,7 @@ class BankRepositoryTest {
             )
         )
 
-        val listOfBanks = BankRepository.get(SupportedBankType.Eps)
+        val listOfBanks = bankRepository.get(SupportedBankType.Eps)
         assertThat(listOfBanks.size).isEqualTo(1)
 
         assertThat(listOfBanks[0])
@@ -37,7 +39,7 @@ class BankRepositoryTest {
 
     @Test
     fun `Verify all supported banks are successfully read`() {
-        BankRepository.init(
+        bankRepository.init(
             SupportedBankType.values().associateWith { bankType ->
                 getInputStream(bankType)
             }
@@ -46,7 +48,7 @@ class BankRepositoryTest {
         // If any exceptions are thrown we know something went awry
         SupportedBankType.values()
             .forEach {
-                println(BankRepository.get(it))
+                println(bankRepository.get(it))
             }
     }
 

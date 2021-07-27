@@ -45,6 +45,15 @@ android {
         viewBinding true
     }
 
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+    }
     composeOptions {
         kotlinCompilerVersion = "$kotlinVersion"
         kotlinCompilerExtensionVersion "$composeVersion"

@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.specifications.getBankInitializationValue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class TransformSpecToElementTest {
 
@@ -40,7 +41,8 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Section with multiple fields contains all fields in the section element`() {
-        BankRepository.init(getBankInitializationValue())
+        val bankRepository = BankRepository(mock())
+        bankRepository.init(getBankInitializationValue())
         val formElement = listOf(
             FormItemSpec.SectionSpec(
                 IdentifierSpec("multifieldSection"),
@@ -49,7 +51,7 @@ class TransformSpecToElementTest {
                     IDEAL_BANK_CONFIG
                 )
             )
-        ).transform("Example, Inc.")
+        ).transform("Example, Inc.", bankRepository)
 
         val sectionElement = formElement[0] as SectionElement
         assertThat(sectionElement.fields.size).isEqualTo(2)
@@ -59,11 +61,13 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
+        val bankRepository = BankRepository(mock())
+        bankRepository.init(getBankInitializationValue())
         val countrySection = FormItemSpec.SectionSpec(
             IdentifierSpec("countrySection"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
-        val formElement = listOf(countrySection).transform("Example, Inc.")
+        val formElement = listOf(countrySection).transform("Example, Inc.", bankRepository)
 
         val countrySectionElement = formElement.first() as SectionElement
         val countryElement = countrySectionElement.fields[0] as Country
@@ -81,12 +85,13 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() {
-        BankRepository.init(getBankInitializationValue())
+        val bankRepository = BankRepository(mock())
+        bankRepository.init(getBankInitializationValue())
         val idealSection = FormItemSpec.SectionSpec(
             IdentifierSpec("idealSection"),
             IDEAL_BANK_CONFIG
         )
-        val formElement = listOf(idealSection).transform("Example, Inc.")
+        val formElement = listOf(idealSection).transform("Example, Inc.", bankRepository)
 
         val idealSectionElement = formElement.first() as SectionElement
         val idealElement = idealSectionElement.fields[0] as SimpleDropdown
@@ -101,7 +106,9 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a name section spec sets up the name element correctly`() {
-        val formElement = listOf(nameSection).transform("Example, Inc.")
+        val bankRepository = BankRepository(mock())
+        bankRepository.init(getBankInitializationValue())
+        val formElement = listOf(nameSection).transform("Example, Inc.", bankRepository)
 
         val nameElement =
             (formElement.first() as SectionElement).fields[0] as SectionFieldElement.SimpleText
@@ -116,6 +123,8 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a simple text section spec sets up the text element correctly`() {
+        val bankRepository = BankRepository(mock())
+        bankRepository.init(getBankInitializationValue())
         val formElement = listOf(
             FormItemSpec.SectionSpec(
                 IdentifierSpec("simple_section"),
@@ -127,7 +136,7 @@ class TransformSpecToElementTest {
                     capitalization = KeyboardCapitalization.Words
                 )
             )
-        ).transform("Example, Inc.")
+        ).transform("Example, Inc.", bankRepository)
 
         val nameElement = (formElement.first() as SectionElement).fields[0]
             as SectionFieldElement.SimpleText
@@ -140,7 +149,9 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a email section spec sets up the email element correctly`() {
-        val formElement = listOf(emailSection).transform("Example, Inc.")
+        val bankRepository = BankRepository(mock())
+        bankRepository.init(getBankInitializationValue())
+        val formElement = listOf(emailSection).transform("Example, Inc.", bankRepository)
 
         val emailSectionElement = formElement.first() as SectionElement
         val emailElement = emailSectionElement.fields[0] as Email
@@ -152,12 +163,15 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a mandate section spec setup of the mandate element correctly`() {
+        val bankRepository = BankRepository(mock())
+        bankRepository.init(getBankInitializationValue())
+
         val mandate = FormItemSpec.MandateTextSpec(
             IdentifierSpec("mandate"),
             R.string.stripe_paymentsheet_sepa_mandate,
             Color.Gray
         )
-        val formElement = listOf(mandate).transform("Example, Inc.")
+        val formElement = listOf(mandate).transform("Example, Inc.", bankRepository)
 
         val mandateElement = formElement.first() as MandateTextElement
 
@@ -170,6 +184,8 @@ class TransformSpecToElementTest {
     @Test
     fun `Add a save for future use section spec sets the mandate element correctly`() =
         runBlocking {
+            val bankRepository = BankRepository(mock())
+            bankRepository.init(getBankInitializationValue())
             val mandate = FormItemSpec.MandateTextSpec(
                 IdentifierSpec("mandate"),
                 R.string.stripe_paymentsheet_sepa_mandate,
@@ -177,7 +193,10 @@ class TransformSpecToElementTest {
             )
             val hiddenIdentifiers = listOf(nameSection, mandate)
             val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(hiddenIdentifiers)
-            val formElement = listOf(saveForFutureUseSpec).transform("Example, Inc.")
+            val formElement = listOf(saveForFutureUseSpec).transform(
+                "Example, Inc.",
+                bankRepository
+            )
 
             val saveForFutureUseElement = formElement.first() as FormElement.SaveForFutureUseElement
             val saveForFutureUseController = saveForFutureUseElement.controller

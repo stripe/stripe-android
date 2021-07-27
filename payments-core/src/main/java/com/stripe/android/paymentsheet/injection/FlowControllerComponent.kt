@@ -19,7 +19,6 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentCommonModule::class,
-        ResourceRepositoryModule::class,
         FlowControllerModule::class
     ]
 )
