@@ -16,13 +16,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
- * This is used to define which elements can be made optional
- */
-internal interface OptionalElement {
-    val identifier: IdentifierSpec
-}
-
-/**
  * This is used to define each section in the visual form layout.
  * Each item in the layout has an identifier and a controller associated with it.
  */
@@ -42,8 +35,8 @@ internal sealed class FormElement(
         val stringResId: Int,
         val color: Color,
         val merchantName: String?,
-        override val controller: Controller? = null,
-    ) : FormElement(), OptionalElement
+        override val controller: InputController? = null,
+    ) : FormElement()
 
     /**
      * This is an element that will make elements (as specified by identifier) hidden
@@ -59,7 +52,7 @@ internal sealed class FormElement(
         override val identifier: IdentifierSpec,
         val fields: List<SectionFieldElement>,
         override val controller: SectionController
-    ) : FormElement(subElements = fields), OptionalElement {
+    ) : FormElement() {
         internal constructor(
             identifier: IdentifierSpec,
             field: SectionFieldElement,
@@ -95,42 +88,35 @@ internal sealed class SectionFieldElement {
      */
     abstract val controller: SectionFieldErrorController
 
-    abstract fun controllerType(): SectionFieldErrorController
+    /**
+     * This will return a controller that abides by the SectionFieldErrorController interface.
+     */
+    fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
     data class Email(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement() {
-        override fun controllerType(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     data class Iban(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
-    ) : SectionFieldElement() {
-        override fun controllerType(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement() {
-        override fun controllerType(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     data class IdealBank internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement() {
-        override fun controllerType(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     data class SimpleText internal constructor(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement() {
-        override fun controllerType(): SectionFieldErrorController = controller
-    }
+    ) : SectionFieldElement()
 
     internal class AddressElement(
         override val identifier: IdentifierSpec,
@@ -159,7 +145,5 @@ internal sealed class SectionFieldElement {
         // Most section element controllers are created in the transform
         // instead of the element, where the label is created
         override val controller = AddressController(fields)
-
-        override fun controllerType(): SectionFieldErrorController = controller
     }
 }

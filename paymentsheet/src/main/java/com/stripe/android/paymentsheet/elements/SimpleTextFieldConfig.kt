@@ -1,11 +1,12 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 
 internal class SimpleTextFieldConfig(
-    override val label: Int,
+    @StringRes override val label: Int,
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Words,
     override val keyboard: KeyboardType = KeyboardType.Text
 ) : TextFieldConfig {
@@ -17,7 +18,7 @@ internal class SimpleTextFieldConfig(
 
         override fun isValid(): Boolean = input.isNotBlank()
 
-        override fun getErrorMessageResId(): Int? = null
+        override fun getError(): FieldError? = null
 
         override fun isFull(): Boolean = false
     }

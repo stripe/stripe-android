@@ -165,7 +165,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
         val host = AuthActivityStarterHost.create(this)
         lifecycleScope.launch {
-            viewModel.confirmPaymentIntent(host, params)
+            viewModel.confirmStripeIntent(host, params)
         }
     }
 

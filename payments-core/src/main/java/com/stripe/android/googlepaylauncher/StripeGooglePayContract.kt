@@ -63,8 +63,8 @@ internal fun GooglePayLauncherResult.Error.getErrorResourceID(): Int? {
                 CommonStatusCodes.SERVICE_DISABLED, // -> "This constant is deprecated. This case handled during connection, not during API requests. No results should be returned with this status code."
                 CommonStatusCodes.SERVICE_VERSION_UPDATE_REQUIRED, // -> " This constant is deprecated.This case handled during connection, not during API requests . No results should be returned with this status code."
                 CommonStatusCodes.SUCCESS, // -> "The operation was successful.SUCCESS_CACHE The operation was successful, but was used the device's cache."
+                CommonStatusCodes.RESOLUTION_REQUIRED, // -> "Completing the operation requires some form of resolution."
                 CommonStatusCodes.INTERNAL_ERROR -> R.string.stripe_google_pay_error_internal
-                CommonStatusCodes.RESOLUTION_REQUIRED -> R.string.stripe_google_pay_error_resolution_required
                 CommonStatusCodes.NETWORK_ERROR -> R.string.stripe_failure_connection_error
                 CommonStatusCodes.SIGN_IN_REQUIRED -> R.string.stripe_failure_reason_authentication
                 CommonStatusCodes.TIMEOUT -> R.string.stripe_failure_reason_timed_out

@@ -17,12 +17,12 @@ class EmailConfigTest {
 
     @Test
     fun `verify the if email doesn't match the pattern it returns incomplete`() {
-        assertThat(emailConfig.determineState("sdf")).isEqualTo(Incomplete)
+        assertThat(emailConfig.determineState("sdf")).isInstanceOf(Incomplete::class.java)
     }
 
     @Test
     fun `verify if it doesn't pattern match but has an @ and period it is malformed`() {
-        assertThat(emailConfig.determineState("@.")).isEqualTo(Incomplete)
+        assertThat(emailConfig.determineState("@.")).isInstanceOf(Incomplete::class.java)
         assertThat(emailConfig.determineState("@.x")).isInstanceOf(Invalid::class.java)
     }
 

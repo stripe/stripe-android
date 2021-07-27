@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.address
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.supportedCountries
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.Companion.supportedCountries
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import org.junit.Test
@@ -20,7 +20,7 @@ class TransformAddressToSpecTest {
 
         val addressLine1 = SectionFieldSpec.SimpleText(
             IdentifierSpec("line1"),
-            R.string.address_label_address_line1,
+            R.string.address_label_address,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
             showOptionalLabel = false
@@ -52,7 +52,7 @@ class TransformAddressToSpecTest {
 
         val zip = SectionFieldSpec.SimpleText(
             IdentifierSpec("postal_code"),
-            R.string.acc_label_zip,
+            R.string.address_label_zip_code,
             KeyboardCapitalization.None,
             KeyboardType.Number,
             showOptionalLabel = false

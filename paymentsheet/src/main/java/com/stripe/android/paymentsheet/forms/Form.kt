@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -27,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
@@ -40,13 +43,21 @@ import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
+import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
+import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VALUE
+import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
 internal val formElementPadding = 16.dp
 
@@ -56,7 +67,7 @@ internal val formElementPadding = 16.dp
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val optionalIdentifiers by formViewModel.optionalIdentifiers.asLiveData().observeAsState(
+    val hiddenIdentifiers by formViewModel.hiddenIdentifiers.asLiveData().observeAsState(
         null
     )
     val enabled by formViewModel.enabled.asLiveData().observeAsState(true)
@@ -68,13 +79,13 @@ internal fun Form(
         formViewModel.elements.forEach { element ->
 
             AnimatedVisibility(
-                optionalIdentifiers?.contains(element.identifier) == false,
+                hiddenIdentifiers?.contains(element.identifier) == false,
                 enter = EnterTransition.None,
                 exit = ExitTransition.None
             ) {
                 when (element) {
                     is SectionElement -> {
-                        SectionElementUI(enabled, element, optionalIdentifiers)
+                        SectionElementUI(enabled, element, hiddenIdentifiers)
                     }
                     is MandateTextElement -> {
                         MandateElementUI(element)
@@ -94,23 +105,24 @@ internal fun Form(
 internal fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    optionalIdentifiers: List<IdentifierSpec>?
+    hiddenIdentifiers: List<IdentifierSpec>?,
 ) {
     AnimatedVisibility(
-        optionalIdentifiers?.contains(element.identifier) == false,
+        hiddenIdentifiers?.contains(element.identifier) == false,
         enter = EnterTransition.None,
         exit = ExitTransition.None
     ) {
         val controller = element.controller
 
         val error by controller.error.asLiveData().observeAsState(null)
-        val sectionErrorString =
-            error?.let {
+        val sectionErrorString = error?.let {
+            it.formatArgs?.let { args ->
                 stringResource(
                     it.errorMessage,
-                    stringResource(it.errorFieldLabel)
+                    *args
                 )
-            }
+            } ?: stringResource(it.errorMessage)
+        }
 
         Section(controller.label, sectionErrorString) {
             element.fields.forEachIndexed { index, field ->
@@ -162,7 +174,7 @@ internal fun SectionFieldElementUI(
     enabled: Boolean,
     field: SectionFieldElement
 ) {
-    when (val controller = field.controllerType()) {
+    when (val controller = field.sectionFieldErrorController()) {
         is TextFieldController -> {
             TextField(
                 textFieldController = controller,
@@ -241,26 +253,45 @@ internal fun SaveForFutureUseElementUI(
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FormViewModel(
+@Singleton
+class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
-    saveForFutureUseInitialValue: Boolean,
-    saveForFutureUseInitialVisibility: Boolean,
+    @Named(SAVE_FOR_FUTURE_USE_INITIAL_VALUE) saveForFutureUseInitialValue: Boolean,
+    @Named(SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY) saveForFutureUseInitialVisibility: Boolean,
     merchantName: String,
+    private val resourceRepository: ResourceRepository
 ) : ViewModel() {
     internal class Factory(
+        private val resources: Resources,
         private val layout: LayoutSpec,
         private val saveForFutureUseValue: Boolean,
         private val saveForFutureUseVisibility: Boolean,
         private val merchantName: String
     ) : ViewModelProvider.Factory {
+
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return FormViewModel(
-                layout,
-                saveForFutureUseValue,
-                saveForFutureUseVisibility,
-                merchantName
-            ) as T
+
+            // This is where we will call Dagger:
+            return DaggerFormViewModelComponent.builder()
+                .resources(resources)
+                .layout(layout)
+                .saveForFutureUseValue(saveForFutureUseValue)
+                .saveForFutureUseVisibility(saveForFutureUseVisibility)
+                .merchantName(merchantName)
+                .build()
+                .viewModel as T
+        }
+    }
+
+    private val transformSpecToElement = TransformSpecToElement(
+        resourceRepository.addressRepository
+    )
+
+    init {
+        viewModelScope.launch {
+            resourceRepository.init()
+            elements = transformSpecToElement.transform(layout.items, merchantName)
         }
     }
 
@@ -269,7 +300,7 @@ class FormViewModel(
         this.enabled.value = enabled
     }
 
-    internal val elements = layout.items.transform(merchantName)
+    internal lateinit var elements: List<FormElement>
 
     private val saveForFutureUseVisible = MutableStateFlow(saveForFutureUseInitialVisibility)
 
@@ -302,34 +333,34 @@ class FormViewModel(
             }
         }
 
-    internal val optionalIdentifiers =
+    internal val hiddenIdentifiers =
         combine(
             saveForFutureUseVisible,
-            saveForFutureUseElement?.controller?.optionalIdentifiers
+            saveForFutureUseElement?.controller?.hiddenIdentifiers
                 ?: MutableStateFlow(emptyList())
-        ) { showFutureUse, optionalIdentifiers ->
+        ) { showFutureUse, hiddenIdentifiers ->
 
-            // For optional *section* identifiers, list of identifiers of elements in the section
+            // For hidden *section* identifiers, list of identifiers of elements in the section
             val identifiers = sectionToFieldIdentifierMap
                 .filter { idControllerPair ->
-                    optionalIdentifiers.contains(idControllerPair.key)
+                    hiddenIdentifiers.contains(idControllerPair.key)
                 }
                 .flatMap { sectionToSectionFieldEntry ->
                     sectionToSectionFieldEntry.value
                 }
 
             if (!showFutureUse && saveForFutureUseElement != null) {
-                optionalIdentifiers
+                hiddenIdentifiers
                     .plus(identifiers)
                     .plus(saveForFutureUseElement.identifier)
             } else {
-                optionalIdentifiers
+                hiddenIdentifiers
                     .plus(identifiers)
             }
         }
 
-    // Mandate is showing if it is an element of the form and it isn't optional
-    internal val showingMandate = optionalIdentifiers.map {
+    // Mandate is showing if it is an element of the form and it isn't hidden
+    internal val showingMandate = hiddenIdentifiers.map {
         elements
             .filterIsInstance<MandateTextElement>()
             .firstOrNull()?.let { mandate ->
@@ -359,7 +390,7 @@ class FormViewModel(
         .flatMapLatest { value ->
             TransformElementToFormFieldValueFlow(
                 value,
-                optionalIdentifiers,
+                hiddenIdentifiers,
                 showingMandate,
                 saveForFutureUse
             ).transformFlow()

@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class TransformSpecToElementTest {
 
@@ -35,17 +36,22 @@ class TransformSpecToElementTest {
         SectionFieldSpec.Email
     )
 
+    private val transformSpecToElement = TransformSpecToElement(mock())
+
     @Test
     fun `Section with multiple fields contains all fields in the section element`() {
-        val formElement = listOf(
-            FormItemSpec.SectionSpec(
-                IdentifierSpec("multifieldSection"),
-                listOf(
-                    SectionFieldSpec.Country(),
-                    SectionFieldSpec.IdealBank
+        val formElement = transformSpecToElement.transform(
+            listOf(
+                FormItemSpec.SectionSpec(
+                    IdentifierSpec("multifieldSection"),
+                    listOf(
+                        SectionFieldSpec.Country(),
+                        SectionFieldSpec.IdealBank
+                    )
                 )
-            )
-        ).transform("Example, Inc.")
+            ),
+            "Example, Inc."
+        )
 
         val sectionElement = formElement[0] as SectionElement
         assertThat(sectionElement.fields.size).isEqualTo(2)
@@ -59,7 +65,10 @@ class TransformSpecToElementTest {
             IdentifierSpec("countrySection"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
-        val formElement = listOf(countrySection).transform("Example, Inc.")
+        val formElement = transformSpecToElement.transform(
+            listOf(countrySection),
+            "Example, Inc."
+        )
 
         val countrySectionElement = formElement.first() as SectionElement
         val countryElement = countrySectionElement.fields[0] as Country
@@ -81,7 +90,10 @@ class TransformSpecToElementTest {
             IdentifierSpec("idealSection"),
             SectionFieldSpec.IdealBank
         )
-        val formElement = listOf(idealSection).transform("Example, Inc.")
+        val formElement = transformSpecToElement.transform(
+            listOf(idealSection),
+            "Example, Inc."
+        )
 
         val idealSectionElement = formElement.first() as SectionElement
         val idealElement = idealSectionElement.fields[0] as IdealBank
@@ -96,7 +108,10 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a name section spec sets up the name element correctly`() {
-        val formElement = listOf(nameSection).transform("Example, Inc.")
+        val formElement = transformSpecToElement.transform(
+            listOf(nameSection),
+            "Example, Inc."
+        )
 
         val nameElement =
             (formElement.first() as SectionElement).fields[0] as SectionFieldElement.SimpleText
@@ -111,18 +126,19 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a simple text section spec sets up the text element correctly`() {
-        val formElement = listOf(
-            FormItemSpec.SectionSpec(
-                IdentifierSpec("simple_section"),
-                SectionFieldSpec.SimpleText(
-                    IdentifierSpec("simple"),
-                    R.string.address_label_name,
-                    showOptionalLabel = true,
-                    keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Words
+        val formElement = transformSpecToElement.transform(
+            listOf(
+                FormItemSpec.SectionSpec(
+                    IdentifierSpec("simple_section"),
+                    SectionFieldSpec.SimpleText(
+                        IdentifierSpec("simple"),
+                        R.string.address_label_name,
+                        showOptionalLabel = true,
+                        keyboardType = KeyboardType.Text,
+                        capitalization = KeyboardCapitalization.Words
+                    )
                 )
-            )
-        ).transform(
+            ),
             "Example, Inc."
         )
 
@@ -137,7 +153,10 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a email section spec sets up the email element correctly`() {
-        val formElement = listOf(emailSection).transform("Example, Inc.")
+        val formElement = transformSpecToElement.transform(
+            listOf(emailSection),
+            "Example, Inc."
+        )
 
         val emailSectionElement = formElement.first() as SectionElement
         val emailElement = emailSectionElement.fields[0] as Email
@@ -154,7 +173,10 @@ class TransformSpecToElementTest {
             R.string.stripe_paymentsheet_sepa_mandate,
             Color.Gray
         )
-        val formElement = listOf(mandate).transform("Example, Inc.")
+        val formElement = transformSpecToElement.transform(
+            listOf(mandate),
+            "Example, Inc."
+        )
 
         val mandateElement = formElement.first() as MandateTextElement
 
@@ -172,9 +194,12 @@ class TransformSpecToElementTest {
                 R.string.stripe_paymentsheet_sepa_mandate,
                 Color.Gray
             )
-            val optionalIdentifiers = listOf(nameSection, mandate)
-            val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(optionalIdentifiers)
-            val formElement = listOf(saveForFutureUseSpec).transform("Example, Inc.")
+            val hiddenIdentifiers = listOf(nameSection, mandate)
+            val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(hiddenIdentifiers)
+            val formElement = transformSpecToElement.transform(
+                listOf(saveForFutureUseSpec),
+                "Example, Inc."
+            )
 
             val saveForFutureUseElement = formElement.first() as FormElement.SaveForFutureUseElement
             val saveForFutureUseController = saveForFutureUseElement.controller
@@ -182,12 +207,12 @@ class TransformSpecToElementTest {
             assertThat(saveForFutureUseElement.identifier)
                 .isEqualTo(saveForFutureUseSpec.identifier)
 
-            assertThat(saveForFutureUseController.optionalIdentifiers.first()).isEmpty()
+            assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
 
             saveForFutureUseController.onValueChange(false)
-            assertThat(saveForFutureUseController.optionalIdentifiers.first())
+            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
                 .isEqualTo(
-                    optionalIdentifiers.map { it.identifier }
+                    hiddenIdentifiers.map { it.identifier }
                 )
         }
 }

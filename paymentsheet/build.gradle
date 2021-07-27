@@ -1,6 +1,7 @@
 plugins {
     id "com.android.library"
     id "kotlin-android"
+    id 'kotlin-kapt'
     id 'org.jetbrains.dokka'
     id "org.jetbrains.kotlin.plugin.parcelize"
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.0'
@@ -42,6 +43,16 @@ android {
     buildFeatures {
         compose = true
         viewBinding true
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
     }
 
     composeOptions {
@@ -92,6 +103,11 @@ dependencies {
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
 
+    // dagger
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+
+    // resource deserialization
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2'
 
     testImplementation 'junit:junit:4.13.2'

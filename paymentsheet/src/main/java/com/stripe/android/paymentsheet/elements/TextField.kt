@@ -108,6 +108,13 @@ internal fun TextField(
                 }
                 hasFocus = it.isFocused
             },
+        keyboardActions = KeyboardActions(
+            onNext = {
+                if (!focusManager.moveFocus(FocusDirection.Down)) {
+                    focusManager.clearFocus(true)
+                }
+            }
+        ),
         visualTransformation = textFieldController.visualTransformation,
         keyboardActions = KeyboardActions(
             onNext = {

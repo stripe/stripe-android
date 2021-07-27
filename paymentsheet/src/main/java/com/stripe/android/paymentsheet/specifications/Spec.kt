@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
+import kotlinx.serialization.Serializable
 
 /**
  * This class is used to define different forms full of fields.
@@ -25,18 +26,16 @@ data class LayoutSpec(val items: List<FormItemSpec>)
 data class IdentifierSpec(val value: String)
 
 /**
- * Identifies a field that can be made optional.
+ * Identifies a field that can be made hidden.
  */
-interface OptionalItemSpec {
+interface RequiredItemSpec {
     val identifier: IdentifierSpec
 }
 
 /**
  * This is used to define each section in the visual form layout specification
  */
-
 sealed class FormItemSpec {
-
     /**
      * This represents a section in a form that contains other elements
      */
@@ -44,7 +43,7 @@ sealed class FormItemSpec {
         override val identifier: IdentifierSpec,
         val fields: List<SectionFieldSpec>,
         @StringRes val title: Int? = null,
-    ) : FormItemSpec(), OptionalItemSpec {
+    ) : FormItemSpec(), RequiredItemSpec {
         constructor(
             identifier: IdentifierSpec,
             field: SectionFieldSpec,
@@ -59,15 +58,15 @@ sealed class FormItemSpec {
         override val identifier: IdentifierSpec,
         @StringRes val stringResId: Int,
         val color: Color
-    ) : FormItemSpec(), OptionalItemSpec
+    ) : FormItemSpec(), RequiredItemSpec
 
     /**
      * This is an element that will make elements (as specified by identifier hidden
      * when save for future use is unchecked)
      */
     data class SaveForFutureUseSpec(
-        val identifierRequiredForFutureUse: List<OptionalItemSpec>
-    ) : FormItemSpec(), OptionalItemSpec {
+        val identifierRequiredForFutureUse: List<RequiredItemSpec>
+    ) : FormItemSpec(), RequiredItemSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
 }
@@ -113,3 +112,15 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
         )
     }
 }
+
+enum class SupportedBankType(val assetFileName: String) {
+    Eps("epsBanks.json"),
+    Ideal("idealBanks.json"),
+    P24("p24Banks.json")
+}
+
+@Serializable
+data class DropdownItem(
+    val value: String,
+    val text: String
+)

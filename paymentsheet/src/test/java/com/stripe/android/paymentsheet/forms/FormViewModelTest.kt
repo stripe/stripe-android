@@ -1,13 +1,18 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.content.Context
 import androidx.lifecycle.asLiveData
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Companion.NAME
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
@@ -20,12 +25,22 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
-class FormViewModelTest {
+internal class FormViewModelTest {
     private val emailSection = FormItemSpec.SectionSpec(IdentifierSpec("emailSection"), Email)
     private val countrySection = FormItemSpec.SectionSpec(
         IdentifierSpec("countrySection"),
         Country()
     )
+
+    private val resourceRepository =
+        ResourceRepository(
+            BankRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            ),
+            AddressFieldElementRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            )
+        )
 
     @Test
     fun `Verify setting save for future use`() {
@@ -39,7 +54,8 @@ class FormViewModelTest {
             ),
             true,
             true,
-            "Example, Inc."
+            "Example, Inc.",
+            resourceRepository
         )
 
         val values = mutableListOf<Boolean>()
@@ -66,11 +82,12 @@ class FormViewModelTest {
             ),
             true,
             true,
-            "Example, Inc."
+            "Example, Inc.",
+            resourceRepository
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
-        formViewModel.optionalIdentifiers.asLiveData()
+        formViewModel.hiddenIdentifiers.asLiveData()
             .observeForever {
                 values.add(it)
             }
@@ -84,7 +101,7 @@ class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting section as optional sets sub-fields as optional as well`() {
+    fun `Verify setting section as hidden sets sub-fields as hidden as well`() {
         val formViewModel = FormViewModel(
             LayoutSpec(
                 listOf(
@@ -95,11 +112,12 @@ class FormViewModelTest {
             ),
             true,
             true,
-            "Example, Inc."
+            "Example, Inc.",
+            resourceRepository
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
-        formViewModel.optionalIdentifiers.asLiveData()
+        formViewModel.hiddenIdentifiers.asLiveData()
             .observeForever {
                 values.add(it)
             }
@@ -114,9 +132,9 @@ class FormViewModelTest {
     }
 
     @Test
-    fun `Verify if a field is optional and valid it is not in the formViewValueResult`() =
+    fun `Verify if a field is hidden and valid it is not in the formViewValueResult`() =
         runBlocking {
-            // Here we have one optional and one required field, country will always be in the result,
+            // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
             val formViewModel = FormViewModel(
                 LayoutSpec(
@@ -128,7 +146,8 @@ class FormViewModelTest {
                 ),
                 true,
                 true,
-                "Example, Inc."
+                "Example, Inc.",
+                resourceRepository
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -158,9 +177,9 @@ class FormViewModelTest {
         }
 
     @Test
-    fun `Optional invalid fields arent in the formViewValue and has no effect on complete state`() {
+    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() {
         runBlocking {
-            // Here we have one optional and one required field, country will always be in the result,
+            // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
             val formViewModel = FormViewModel(
                 LayoutSpec(
@@ -172,7 +191,8 @@ class FormViewModelTest {
                 ),
                 true,
                 true,
-                "Example, Inc."
+                "Example, Inc.",
+                resourceRepository
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -215,7 +235,8 @@ class FormViewModelTest {
                 sofort.layout,
                 true,
                 true,
-                "Example, Inc."
+                "Example, Inc.",
+                resourceRepository
             )
 
             val nameElement = (formViewModel.elements[0] as SectionElement)
