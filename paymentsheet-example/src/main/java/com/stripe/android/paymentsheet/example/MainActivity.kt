@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.example
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.example.activity.LaunchPaymentSheetCompleteActivity
 import com.stripe.android.paymentsheet.example.activity.LaunchPaymentSheetCustomActivity
 import com.stripe.android.paymentsheet.example.activity.PaymentSheetPlaygroundActivity
@@ -18,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
         setSupportActionBar(findViewById(R.id.toolbar))
 
+        ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(PaymentMethodCreateParams.createWeChatPay(), "mlgb")
         viewBinding.launchCompleteButton.setOnClickListener {
             startActivity(Intent(this, LaunchPaymentSheetCompleteActivity::class.java))
         }

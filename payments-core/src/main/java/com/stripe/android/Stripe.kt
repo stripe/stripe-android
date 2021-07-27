@@ -222,8 +222,12 @@ class Stripe internal constructor(
      * [APIConnectionException] failure to connect to Stripe's API
      * [APIException] any other type of problem (for instance, a temporary issue with Stripe's servers)
      * [InvalidRequestException] if the payment intent's next action data is not for WeChat Pay
+     *
+     * To avoid interacting with WeChat Pay SDK directly, use WeChatPay module.
+     * @see <a href="https://github.com/stripe/stripe-android/tree/master/wechatpay">WeChatPay module</a>
      */
     @JvmOverloads
+    @Deprecated("Use the WeChat Pay module instead.")
     fun confirmWeChatPayPayment(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         stripeAccountId: String? = this.stripeAccountId,
