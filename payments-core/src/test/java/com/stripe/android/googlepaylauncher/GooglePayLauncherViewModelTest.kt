@@ -8,9 +8,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripePaymentController
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
@@ -23,8 +27,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
@@ -35,8 +42,6 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherViewModelTest {
     private val testDispatcher = TestCoroutineDispatcher()
-
-    private val paymentController = FakePaymentController()
     private val stripeRepository = FakeStripeRepository()
     private val googlePayJsonFactory = GooglePayJsonFactory(
         googlePayConfig = GooglePayConfig(
@@ -53,15 +58,7 @@ class GooglePayLauncherViewModelTest {
             .thenReturn(task)
     }
 
-    private val viewModel = GooglePayLauncherViewModel(
-        paymentsClient,
-        REQUEST_OPTIONS,
-        ARGS,
-        stripeRepository,
-        paymentController,
-        googlePayJsonFactory,
-        googlePayRepository
-    )
+    private val viewModel = createViewModel()
 
     @AfterTest
     fun cleanup() {
@@ -165,6 +162,54 @@ class GooglePayLauncherViewModelTest {
                 .isEqualTo(GooglePayLauncher.Result.Completed)
         }
 
+    @Test
+    fun `confirmStripeIntent() using PaymentIntent should confirm Payment Intent`() =
+        testDispatcher.runBlockingTest {
+            val mockPaymentController: PaymentController = mock()
+            createViewModel(paymentController = mockPaymentController)
+                .confirmStripeIntent(mock(), mock())
+
+            val argumentCaptor: KArgumentCaptor<ConfirmStripeIntentParams> = argumentCaptor()
+            verify(mockPaymentController)
+                .startConfirmAndAuth(any(), argumentCaptor.capture(), any())
+            assertThat(argumentCaptor.firstValue)
+                .isInstanceOf(ConfirmPaymentIntentParams::class.java)
+        }
+
+
+    @Test
+    fun `confirmStripeIntent() using SetupIntent should confirm Setup Intent`() =
+        testDispatcher.runBlockingTest {
+            val mockPaymentController: PaymentController = mock()
+            createViewModel(
+                args = GooglePayLauncherContract.SetupIntentArgs(
+                    "pi_123_secret_456",
+                    GOOGLE_PAY_CONFIG,
+                    "USD"
+                ),
+                paymentController = mockPaymentController
+            ).confirmStripeIntent(mock(), mock())
+
+            val argumentCaptor: KArgumentCaptor<ConfirmStripeIntentParams> = argumentCaptor()
+            verify(mockPaymentController)
+                .startConfirmAndAuth(any(), argumentCaptor.capture(), any())
+            assertThat(argumentCaptor.firstValue)
+                .isInstanceOf(ConfirmSetupIntentParams::class.java)
+        }
+
+    private fun createViewModel(
+        args: GooglePayLauncherContract.Args = ARGS,
+        paymentController: PaymentController = FakePaymentController()
+    ) = GooglePayLauncherViewModel(
+        paymentsClient,
+        REQUEST_OPTIONS,
+        args,
+        stripeRepository,
+        paymentController,
+        googlePayJsonFactory,
+        googlePayRepository
+    )
+
     private class FakePaymentController : AbsPaymentController() {
         override fun shouldHandlePaymentResult(
             requestCode: Int,
@@ -218,13 +263,14 @@ class GooglePayLauncherViewModelTest {
     }
 
     private companion object {
+        val GOOGLE_PAY_CONFIG = GooglePayLauncher.Config(
+            GooglePayEnvironment.Test,
+            merchantCountryCode = "us",
+            merchantName = "Widget, Inc."
+        )
         val ARGS = GooglePayLauncherContract.PaymentIntentArgs(
             "pi_123_secret_456",
-            GooglePayLauncher.Config(
-                GooglePayEnvironment.Test,
-                merchantCountryCode = "us",
-                merchantName = "Widget, Inc."
-            )
+            GOOGLE_PAY_CONFIG
         )
         val REQUEST_OPTIONS = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
