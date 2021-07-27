@@ -2,7 +2,7 @@
 This module provides support for `PaymentIntent` with `wechat_pay` as its payment method.
  
 # Overview
-* This module will provide a `PaymentAuthenticator` implementation to authenticate a [PaymentIntent](https://stripe.com/docs/api/payment_intents) with [next_action.wechat_pay_redirect_to_android_app](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-wechat_pay_redirect_to_android_app) by invoking the WeChat Pay SDK and pass the required parameters from that hash.
+* This module will provide a `PaymentAuthenticator` implementation to authenticate a [PaymentIntent](https://stripe.com/docs/api/payment_intents) with [next_action.wechat_pay_redirect_to_android_app](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-wechat_pay_redirect_to_android_app) by invoking the WeChat Pay SDK and passing the required parameters from that hash.
 
 * No extra code is needed when using this module, however you will need to declare dependency on the actual WeChat Pay SDK, as this module uses reflection to invoke it.
 
