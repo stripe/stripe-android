@@ -1,8 +1,8 @@
 # Stripe Android SDK WeChatPay module
-Module to provide support for `PaymentIntent` with `wechat_pay` as its payment method.
+This module provides support for `PaymentIntent` with `wechat_pay` as its payment method.
  
 # Overview
-* This module will provide a `PaymentAuthenticator` implementation to authenticate a [PaymentIntent](https://stripe.com/docs/api/payment_intents) with [next_action.wechat_pay_redirect_to_android_app](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-wechat_pay_redirect_to_android_app) by invoking the WeChat Pay SDK and pass the required parameters from that hash.
+* This module will provide a `PaymentAuthenticator` implementation to authenticate a [PaymentIntent](https://stripe.com/docs/api/payment_intents) with [next_action.wechat_pay_redirect_to_android_app](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-wechat_pay_redirect_to_android_app) by invoking the WeChat Pay SDK and passing the required parameters from that hash.
 
 * No extra code is needed when using this module, however you will need to declare dependency on the actual WeChat Pay SDK, as this module uses reflection to invoke it.
 
@@ -18,7 +18,7 @@ Module to provide support for `PaymentIntent` with `wechat_pay` as its payment m
     }
     ```
 
-* Then in your app, just confirm and capture the result of the `PaymentIntent` with WeChat Pay like others(see an complete example [here](https://stripe.com/docs/payments/integration-builder)), WeChat app on the phone will be opened to confirm the payment.
+* Then in your app, just confirm and capture the result of the `PaymentIntent` with WeChat Pay like others (see a complete example [here](https://stripe.com/docs/payments/integration-builder)), the WeChat app on the phone will be opened to confirm the payment.
     ```kotlin
     class CheckoutActivity : AppCompatActivity() {
         private fun startCheckout() {
@@ -44,7 +44,7 @@ Module to provide support for `PaymentIntent` with `wechat_pay` as its payment m
     ```
 
 # Notice
-1. Make sure your Android app is registered in [WeChat Open Platform](https://open.weixin.qq.com/) and its package name(应用包名) from `AndroidManifest.xml` and signature(应用签名) correctly uploaded.
+1. Make sure your Android app is registered in [WeChat Open Platform](https://open.weixin.qq.com/) and its package name (应用包名) from `AndroidManifest.xml` and signature (应用签名) correctly uploaded.
     > Note: Use the __GenSignature__ tool provided by WeChat [here](https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5) to generate a signature, note the signature will differ from debug build to release build.
 2. Make sure the WeChat app installed on your test phone is logged in with an account with WeChat Pay enabled.
 3. Make sure to create a Stripe `PaymentIntent` with a Stripe _live_ key - the `PaymentIntent` created by a _test_ key will have dummy WeChat Pay parameters that won't be recognized by WeChat.
