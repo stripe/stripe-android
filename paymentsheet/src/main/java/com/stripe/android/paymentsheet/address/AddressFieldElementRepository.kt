@@ -30,13 +30,12 @@ internal class AddressFieldElementRepository @Inject internal constructor(
 
     @VisibleForTesting
     internal fun init(
-        countryAddressSchemaPair: Map<String, List<AddressSchema>>
+        countryAddressSchemaPair: Map<String, List<CountryAddressSchema>>
     ) {
         countryAddressSchemaPair.map { (countryCode, schemaList) ->
             countryCode to requireNotNull(
                 schemaList
-                    .transformToSpecFieldList()
-                    .transform()
+                    .transformToElementList()
             )
         }.forEach { (countryCode, listElements) ->
             countryFieldMap[countryCode] = listElements

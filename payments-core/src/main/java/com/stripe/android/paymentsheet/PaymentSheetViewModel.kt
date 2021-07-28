@@ -31,7 +31,6 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.IOContext
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
@@ -183,14 +182,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     setStripeIntent(null)
                     onFatal(it)
                 }
-            )
-        }
-    }
-
-    fun initializeAddressRepository() {
-        viewModelScope.launch {
-            AddressFieldElementRepository.init(
-                getApplication<Application>().baseContext.resources
             )
         }
     }

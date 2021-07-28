@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.Companion.supportedCountries
+import com.stripe.android.paymentsheet.forms.transform
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import org.junit.Test
@@ -16,7 +17,7 @@ class TransformAddressToSpecTest {
     @Test
     fun `Read US Json`() {
         val addressSchema = readFile("src/main/assets/addressinfo/US.json")!!
-        val simpleTextList = addressSchema.transformToSpecFieldList()
+        val simpleTextList = addressSchema.transformToElementList()
 
         val addressLine1 = SectionFieldSpec.SimpleText(
             IdentifierSpec("line1"),
@@ -59,11 +60,11 @@ class TransformAddressToSpecTest {
         )
 
         assertThat(simpleTextList.size).isEqualTo(5)
-        assertThat(simpleTextList[0]).isEqualTo(addressLine1)
-        assertThat(simpleTextList[1]).isEqualTo(addressLine2)
-        assertThat(simpleTextList[2]).isEqualTo(city)
-        assertThat(simpleTextList[3]).isEqualTo(zip)
-        assertThat(simpleTextList[4]).isEqualTo(state)
+        assertThat(simpleTextList[0]).isEqualTo(addressLine1.transform())
+        assertThat(simpleTextList[1]).isEqualTo(addressLine2.transform())
+        assertThat(simpleTextList[2]).isEqualTo(city.transform())
+        assertThat(simpleTextList[3]).isEqualTo(zip.transform())
+        assertThat(simpleTextList[4]).isEqualTo(state.transform())
     }
 
     @Test
@@ -99,7 +100,7 @@ class TransformAddressToSpecTest {
         }
     }
 
-    private fun readFile(filename: String): List<AddressSchema>? {
+    private fun readFile(filename: String): List<CountryAddressSchema>? {
         val file = File(filename)
 
         if (file.exists()) {

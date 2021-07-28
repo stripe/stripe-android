@@ -116,13 +116,6 @@ internal fun TextField(
             }
         ),
         visualTransformation = textFieldController.visualTransformation,
-        keyboardActions = KeyboardActions(
-            onNext = {
-                if(!focusManager.moveFocus(FocusDirection.Down) ){
-                    focusManager.clearFocus(true)
-                }
-            }
-        ),
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,

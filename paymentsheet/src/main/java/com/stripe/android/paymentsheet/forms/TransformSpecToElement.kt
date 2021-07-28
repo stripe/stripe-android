@@ -62,68 +62,71 @@ internal class TransformSpecToElement(
             is SectionFieldSpec.Country -> it.transform()
             is SectionFieldSpec.IdealBank -> it.transform()
             is SectionFieldSpec.SimpleText -> it.transform()
-            is SectionFieldSpec.AddressSpec -> SectionFieldElement.AddressElement(
-                IdentifierSpec("billing"),
-                addressFieldElementRepository
-            )
+            is SectionFieldSpec.AddressSpec -> transformAddress()
         }
     }
 
-    private fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
-        SectionFieldElement.SimpleText(
-            this.identifier,
-            TextFieldController(
-                SimpleTextFieldConfig(
-                    label = this.label,
-                    capitalization = this.capitalization,
-                    keyboard = this.keyboardType
-                ),
-                showOptionalLabel = this.showOptionalLabel
-            )
-        )
-
-    private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
-    // It could be argued that the static text should have a controller, but
-        // since it doesn't provide a form field we leave it out for now
-        FormElement.MandateTextElement(
-            this.identifier,
-            this.stringResId,
-            this.color,
-            merchantName
-        )
-
-    private fun SectionFieldSpec.Email.transform() =
-        SectionFieldElement.Email(
-            this.identifier,
-            TextFieldController(EmailConfig()),
-        )
-
-    private fun SectionFieldSpec.Iban.transform() =
-        SectionFieldElement.Iban(
-            this.identifier,
-            TextFieldController(IbanConfig())
-        )
-
-    private fun SectionFieldSpec.Country.transform() =
-        SectionFieldElement.Country(
-            this.identifier,
-            DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
-        )
-
-    private fun SectionFieldSpec.IdealBank.transform() =
-        SectionFieldElement.IdealBank(
-            this.identifier,
-            DropdownFieldController(IdealBankConfig())
-        )
-
-    private fun FormItemSpec.SaveForFutureUseSpec.transform(merchantName: String) =
-        FormElement.SaveForFutureUseElement(
-            this.identifier,
-            SaveForFutureUseController(
-                this.identifierRequiredForFutureUse.map { element ->
-                    element.identifier
-                }
-            ),
-            merchantName
-        )
+    internal fun transformAddress() = SectionFieldElement.AddressElement(
+        IdentifierSpec("billing"),
+        addressFieldElementRepository
+    )
 }
+
+internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
+    SectionFieldElement.SimpleText(
+        this.identifier,
+        TextFieldController(
+            SimpleTextFieldConfig(
+                label = this.label,
+                capitalization = this.capitalization,
+                keyboard = this.keyboardType
+            ),
+            showOptionalLabel = this.showOptionalLabel
+        )
+    )
+
+
+private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
+// It could be argued that the static text should have a controller, but
+    // since it doesn't provide a form field we leave it out for now
+    FormElement.MandateTextElement(
+        this.identifier,
+        this.stringResId,
+        this.color,
+        merchantName
+    )
+
+private fun SectionFieldSpec.Email.transform() =
+    SectionFieldElement.Email(
+        this.identifier,
+        TextFieldController(EmailConfig()),
+    )
+
+private fun SectionFieldSpec.Iban.transform() =
+    SectionFieldElement.Iban(
+        this.identifier,
+        TextFieldController(IbanConfig())
+    )
+
+private fun SectionFieldSpec.Country.transform() =
+    SectionFieldElement.Country(
+        this.identifier,
+        DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
+    )
+
+private fun SectionFieldSpec.IdealBank.transform() =
+    SectionFieldElement.IdealBank(
+        this.identifier,
+        DropdownFieldController(IdealBankConfig())
+    )
+
+private fun FormItemSpec.SaveForFutureUseSpec.transform(merchantName: String) =
+    FormElement.SaveForFutureUseElement(
+        this.identifier,
+        SaveForFutureUseController(
+            this.identifierRequiredForFutureUse.map { element ->
+                element.identifier
+            }
+        ),
+        merchantName
+    )
