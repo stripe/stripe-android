@@ -54,10 +54,6 @@ public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModel
 	public fun getViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 }
 
-public final class com/stripe/android/paymentsheet/injection/NamedConstantsKt {
-	public static final field SAVE_FOR_FUTURE_USE_INITIAL_VALUE Ljava/lang/String;
-}
-
 public final class com/stripe/android/paymentsheet/injection/ResourceRepositoryModule_ProvideAddressFieldRepositoryFactory : dagger/internal/Factory {
 	public fun <init> (Lcom/stripe/android/paymentsheet/injection/ResourceRepositoryModule;Ljavax/inject/Provider;)V
 	public static fun create (Lcom/stripe/android/paymentsheet/injection/ResourceRepositoryModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/ResourceRepositoryModule_ProvideAddressFieldRepositoryFactory;
