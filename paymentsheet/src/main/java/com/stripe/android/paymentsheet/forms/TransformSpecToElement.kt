@@ -55,7 +55,7 @@ internal class TransformSpecToElement(
     /**
      * This function will transform a list of specs into a list of elements
      */
-    internal fun List<SectionFieldSpec>.transform() = this.map {
+    private fun List<SectionFieldSpec>.transform() = this.map {
         when (it) {
             is SectionFieldSpec.Email -> it.transform()
             is SectionFieldSpec.Iban -> it.transform()
@@ -70,6 +70,52 @@ internal class TransformSpecToElement(
         IdentifierSpec("billing"),
         addressFieldElementRepository
     )
+
+    private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
+// It could be argued that the static text should have a controller, but
+        // since it doesn't provide a form field we leave it out for now
+        FormElement.MandateTextElement(
+            this.identifier,
+            this.stringResId,
+            this.color,
+            merchantName
+        )
+
+    private fun SectionFieldSpec.Email.transform() =
+        SectionFieldElement.Email(
+            this.identifier,
+            TextFieldController(EmailConfig()),
+        )
+
+    private fun SectionFieldSpec.Iban.transform() =
+        SectionFieldElement.Iban(
+            this.identifier,
+            TextFieldController(IbanConfig())
+        )
+
+    private fun SectionFieldSpec.Country.transform() =
+        SectionFieldElement.Country(
+            this.identifier,
+            DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
+        )
+
+    private fun SectionFieldSpec.IdealBank.transform() =
+        SectionFieldElement.IdealBank(
+            this.identifier,
+            DropdownFieldController(IdealBankConfig())
+        )
+
+    private fun FormItemSpec.SaveForFutureUseSpec.transform(merchantName: String) =
+        FormElement.SaveForFutureUseElement(
+            this.identifier,
+            SaveForFutureUseController(
+                this.identifierRequiredForFutureUse.map { element ->
+                    element.identifier
+                }
+            ),
+            merchantName
+        )
+
 }
 
 internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
@@ -83,50 +129,4 @@ internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
             ),
             showOptionalLabel = this.showOptionalLabel
         )
-    )
-
-
-private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
-// It could be argued that the static text should have a controller, but
-    // since it doesn't provide a form field we leave it out for now
-    FormElement.MandateTextElement(
-        this.identifier,
-        this.stringResId,
-        this.color,
-        merchantName
-    )
-
-private fun SectionFieldSpec.Email.transform() =
-    SectionFieldElement.Email(
-        this.identifier,
-        TextFieldController(EmailConfig()),
-    )
-
-private fun SectionFieldSpec.Iban.transform() =
-    SectionFieldElement.Iban(
-        this.identifier,
-        TextFieldController(IbanConfig())
-    )
-
-private fun SectionFieldSpec.Country.transform() =
-    SectionFieldElement.Country(
-        this.identifier,
-        DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
-    )
-
-private fun SectionFieldSpec.IdealBank.transform() =
-    SectionFieldElement.IdealBank(
-        this.identifier,
-        DropdownFieldController(IdealBankConfig())
-    )
-
-private fun FormItemSpec.SaveForFutureUseSpec.transform(merchantName: String) =
-    FormElement.SaveForFutureUseElement(
-        this.identifier,
-        SaveForFutureUseController(
-            this.identifierRequiredForFutureUse.map { element ->
-                element.identifier
-            }
-        ),
-        merchantName
     )

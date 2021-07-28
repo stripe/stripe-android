@@ -108,7 +108,7 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
             IdentifierSpec("name"),
             label = R.string.address_label_name,
             capitalization = KeyboardCapitalization.Words,
-            keyboardType = KeyboardType.Text,
+            keyboardType = KeyboardType.Text
         )
     }
 }

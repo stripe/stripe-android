@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.SectionFieldElement.IdealBank
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
@@ -36,7 +37,7 @@ class TransformSpecToElementTest {
         SectionFieldSpec.Email
     )
 
-    private val transformSpecToElement = TransformSpecToElement(mock())
+    private val transformSpecToElement = TransformSpecToElement(AddressFieldElementRepository(mock()))
 
     @Test
     fun `Section with multiple fields contains all fields in the section element`() {
