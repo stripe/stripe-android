@@ -250,7 +250,10 @@ class FormViewModel @Inject internal constructor(
     init {
         viewModelScope.launch {
             resourceRepository.init()
-            elements = layout.items.transform(merchantName, resourceRepository.bankRepository)
+            elements = layout.items.transform(
+                merchantName,
+                resourceRepository.bankRepository
+            )
         }
     }
 
