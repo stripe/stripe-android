@@ -48,7 +48,7 @@ internal class AddressFieldElementRepository @Inject internal constructor(
         @VisibleForTesting
         internal const val DEFAULT_COUNTRY_CODE = "ZZ"
 
-        // Matches the Stripe-js-v3 code: https://git.corp.stripe.com/stripe-internal/stripe-js-v3/blob/e4ae99302dde74ccc6fcabdd1a58193f74e21ebf/src/lib/shared/checkoutSupportedCountries.js
+        // Matches the Stripe-js-v3 code: https://git.corp.stripe.com/stripe-internal/stripe-js-v3/blob/master/src/elements/inner/shared/address/supportedCountries.js
         @VisibleForTesting
         internal val supportedCountries = setOf(
             // @formatter:off

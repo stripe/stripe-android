@@ -52,7 +52,4 @@ internal abstract class FormViewModelModule {
 
     @Binds
     abstract fun bindsApplicationForContext(application: Application): Context
-
-    companion object {
-    }
 }
