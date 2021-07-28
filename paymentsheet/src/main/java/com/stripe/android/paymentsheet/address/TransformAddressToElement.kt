@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.forms.transform
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.serialization.KSerializer
@@ -76,7 +77,7 @@ internal class FieldSchema(
 )
 
 @Serializable
-internal class AddressSchema(
+internal class CountryAddressSchema(
     val type: FieldType?,
     val required: Boolean,
     val schema: FieldSchema? = null
@@ -86,7 +87,7 @@ private val format = Json { ignoreUnknownKeys = true }
 
 internal fun parseAddressesSchema(inputStream: InputStream?) =
     getJsonStringFromInputStream(inputStream)?.let {
-        format.decodeFromString<List<AddressSchema>>(
+        format.decodeFromString<List<CountryAddressSchema>>(
             it
         )
     }
@@ -107,7 +108,7 @@ private object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
 private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
-internal fun List<AddressSchema>.transformToSpecFieldList() =
+internal fun List<CountryAddressSchema>.transformToElementList() =
     this.mapNotNull {
         when (it.type) {
             FieldType.AddressLine1 -> {
@@ -157,6 +158,8 @@ internal fun List<AddressSchema>.transformToSpecFieldList() =
             }
             else -> null
         }
+    }.map {
+        it.transform()
     }
 
 private fun getKeyboard(fieldSchema: FieldSchema?) = if (fieldSchema?.isNumeric == true) {
