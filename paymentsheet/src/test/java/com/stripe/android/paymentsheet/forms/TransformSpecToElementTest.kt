@@ -17,8 +17,10 @@ import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
+import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -37,7 +39,13 @@ class TransformSpecToElementTest {
         SectionFieldSpec.Email
     )
 
-    private val transformSpecToElement = TransformSpecToElement(AddressFieldElementRepository(mock()))
+    private val transformSpecToElement =
+        TransformSpecToElement(
+            ResourceRepository(
+                BankRepository(mock()),
+                AddressFieldElementRepository(mock())
+            )
+        )
 
     @Test
     fun `Section with multiple fields contains all fields in the section element`() {
@@ -202,7 +210,8 @@ class TransformSpecToElementTest {
                 "Example, Inc."
             )
 
-            val saveForFutureUseElement = formElement.first() as FormElement.SaveForFutureUseElement
+            val saveForFutureUseElement =
+                formElement.first() as FormElement.SaveForFutureUseElement
             val saveForFutureUseController = saveForFutureUseElement.controller
 
             assertThat(saveForFutureUseElement.identifier)

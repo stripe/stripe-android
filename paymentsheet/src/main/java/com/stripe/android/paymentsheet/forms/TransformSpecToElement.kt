@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
+import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 
 /**
@@ -23,7 +24,7 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  * controller will be a pass through the field controller.
  */
 internal class TransformSpecToElement(
-    private val addressFieldElementRepository: AddressFieldElementRepository
+    private val resourceRepository: ResourceRepository
 ) {
     internal fun transform(
         list: List<FormItemSpec>,
@@ -68,7 +69,7 @@ internal class TransformSpecToElement(
 
     internal fun transformAddress() = SectionFieldElement.AddressElement(
         IdentifierSpec("billing"),
-        addressFieldElementRepository
+        resourceRepository.addressRepository
     )
 
     private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
@@ -115,7 +116,6 @@ internal class TransformSpecToElement(
             ),
             merchantName
         )
-
 }
 
 internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =

@@ -284,9 +284,7 @@ class FormViewModel @Inject internal constructor(
         }
     }
 
-    private val transformSpecToElement = TransformSpecToElement(
-        resourceRepository.addressRepository
-    )
+    private val transformSpecToElement = TransformSpecToElement(resourceRepository)
 
     init {
         viewModelScope.launch {
