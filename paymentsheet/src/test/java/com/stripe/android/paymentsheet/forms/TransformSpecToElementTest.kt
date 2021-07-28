@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.SectionFieldElement.SimpleDropdown
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IdealBankConfig
@@ -19,11 +20,13 @@ import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import com.stripe.android.paymentsheet.specifications.SupportedBankType
 import com.stripe.android.paymentsheet.specifications.getBankInitializationValue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.mock
 
@@ -39,19 +42,38 @@ class TransformSpecToElementTest {
         SectionFieldSpec.Email
     )
 
-    @Test
-    fun `Section with multiple fields contains all fields in the section element`() {
+    private lateinit var transformSpecToElement: TransformSpecToElement
+
+    @Before
+    fun beforeTest() {
         val bankRepository = BankRepository(mock())
-        bankRepository.init(getBankInitializationValue())
-        val formElement = listOf(
-            FormItemSpec.SectionSpec(
-                IdentifierSpec("multifieldSection"),
-                listOf(
-                    SectionFieldSpec.Country(),
-                    IDEAL_BANK_CONFIG
+        bankRepository.init(
+            mapOf(SupportedBankType.Ideal to IDEAL_BANKS_JSON.byteInputStream())
+        )
+
+        transformSpecToElement =
+            TransformSpecToElement(
+                ResourceRepository(
+                    bankRepository,
+                    AddressFieldElementRepository(mock())
                 )
             )
-        ).transform("Example, Inc.", bankRepository)
+    }
+
+    @Test
+    fun `Section with multiple fields contains all fields in the section element`() {
+        val formElement = transformSpecToElement.transform(
+            listOf(
+                FormItemSpec.SectionSpec(
+                    IdentifierSpec("multifieldSection"),
+                    listOf(
+                        SectionFieldSpec.Country(),
+                        IDEAL_BANK_CONFIG
+                    )
+                )
+            ),
+            "Example, Inc."
+        )
 
         val sectionElement = formElement[0] as SectionElement
         assertThat(sectionElement.fields.size).isEqualTo(2)
@@ -67,7 +89,10 @@ class TransformSpecToElementTest {
             IdentifierSpec("countrySection"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
-        val formElement = listOf(countrySection).transform("Example, Inc.", bankRepository)
+        val formElement = transformSpecToElement.transform(
+            listOf(countrySection),
+            "Example, Inc."
+        )
 
         val countrySectionElement = formElement.first() as SectionElement
         val countryElement = countrySectionElement.fields[0] as Country
@@ -91,7 +116,10 @@ class TransformSpecToElementTest {
             IdentifierSpec("idealSection"),
             IDEAL_BANK_CONFIG
         )
-        val formElement = listOf(idealSection).transform("Example, Inc.", bankRepository)
+        val formElement = transformSpecToElement.transform(
+            listOf(idealSection),
+            "Example, Inc."
+        )
 
         val idealSectionElement = formElement.first() as SectionElement
         val idealElement = idealSectionElement.fields[0] as SimpleDropdown
@@ -106,9 +134,10 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a name section spec sets up the name element correctly`() {
-        val bankRepository = BankRepository(mock())
-        bankRepository.init(getBankInitializationValue())
-        val formElement = listOf(nameSection).transform("Example, Inc.", bankRepository)
+        val formElement = transformSpecToElement.transform(
+            listOf(nameSection),
+            "Example, Inc."
+        )
 
         val nameElement =
             (formElement.first() as SectionElement).fields[0] as SectionFieldElement.SimpleText
@@ -123,20 +152,21 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a simple text section spec sets up the text element correctly`() {
-        val bankRepository = BankRepository(mock())
-        bankRepository.init(getBankInitializationValue())
-        val formElement = listOf(
-            FormItemSpec.SectionSpec(
-                IdentifierSpec("simple_section"),
-                SectionFieldSpec.SimpleText(
-                    IdentifierSpec("simple"),
-                    R.string.address_label_name,
-                    showOptionalLabel = true,
-                    keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Words
+        val formElement = transformSpecToElement.transform(
+            listOf(
+                FormItemSpec.SectionSpec(
+                    IdentifierSpec("simple_section"),
+                    SectionFieldSpec.SimpleText(
+                        IdentifierSpec("simple"),
+                        R.string.address_label_name,
+                        showOptionalLabel = true,
+                        keyboardType = KeyboardType.Text,
+                        capitalization = KeyboardCapitalization.Words
+                    )
                 )
-            )
-        ).transform("Example, Inc.", bankRepository)
+            ),
+            "Example, Inc."
+        )
 
         val nameElement = (formElement.first() as SectionElement).fields[0]
             as SectionFieldElement.SimpleText
@@ -149,9 +179,10 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a email section spec sets up the email element correctly`() {
-        val bankRepository = BankRepository(mock())
-        bankRepository.init(getBankInitializationValue())
-        val formElement = listOf(emailSection).transform("Example, Inc.", bankRepository)
+        val formElement = transformSpecToElement.transform(
+            listOf(emailSection),
+            "Example, Inc."
+        )
 
         val emailSectionElement = formElement.first() as SectionElement
         val emailElement = emailSectionElement.fields[0] as Email
@@ -171,7 +202,10 @@ class TransformSpecToElementTest {
             R.string.stripe_paymentsheet_sepa_mandate,
             Color.Gray
         )
-        val formElement = listOf(mandate).transform("Example, Inc.", bankRepository)
+        val formElement = transformSpecToElement.transform(
+            listOf(mandate),
+            "Example, Inc."
+        )
 
         val mandateElement = formElement.first() as MandateTextElement
 
@@ -193,12 +227,13 @@ class TransformSpecToElementTest {
             )
             val hiddenIdentifiers = listOf(nameSection, mandate)
             val saveForFutureUseSpec = FormItemSpec.SaveForFutureUseSpec(hiddenIdentifiers)
-            val formElement = listOf(saveForFutureUseSpec).transform(
-                "Example, Inc.",
-                bankRepository
+            val formElement = transformSpecToElement.transform(
+                listOf(saveForFutureUseSpec),
+                "Example, Inc."
             )
 
-            val saveForFutureUseElement = formElement.first() as FormElement.SaveForFutureUseElement
+            val saveForFutureUseElement =
+                formElement.first() as FormElement.SaveForFutureUseElement
             val saveForFutureUseController = saveForFutureUseElement.controller
 
             assertThat(saveForFutureUseElement.identifier)
@@ -219,5 +254,70 @@ class TransformSpecToElementTest {
             R.string.stripe_paymentsheet_ideal_bank,
             SupportedBankType.Ideal
         )
+
+        val IDEAL_BANKS_JSON = """
+                    [
+                      {
+                        "value": "abn_amro",
+                        "icon": "abn_amro",
+                        "text": "ABN Amro"
+                      },
+                      {
+                        "value": "asn_bank",
+                        "icon": "asn_bank",
+                        "text": "ASN Bank"
+                      },
+                      {
+                        "value": "bunq",
+                        "icon": "bunq",
+                        "text": "bunq B.V.‎"
+                      },
+                      {
+                        "value": "handelsbanken",
+                        "icon": "handelsbanken",
+                        "text": "Handelsbanken"
+                      },
+                      {
+                        "value": "ing",
+                        "icon": "ing",
+                        "text": "ING Bank"
+                      },
+                      {
+                        "value": "knab",
+                        "icon": "knab",
+                        "text": "Knab"
+                      },
+                      {
+                        "value": "rabobank",
+                        "icon": "rabobank",
+                        "text": "Rabobank"
+                      },
+                      {
+                        "value": "regiobank",
+                        "icon": "regiobank",
+                        "text": "RegioBank"
+                      },
+                      {
+                        "value": "revolut",
+                        "icon": "revolut",
+                        "text": "Revolut"
+                      },
+                      {
+                        "value": "sns_bank",
+                        "icon": "sns_bank",
+                        "text": "SNS Bank"
+                      },
+                      {
+                        "value": "triodos_bank",
+                        "icon": "triodos_bank",
+                        "text": "Triodos Bank"
+                      },
+                      {
+                        "value": "van_lanschot",
+                        "icon": "van_lanschot",
+                        "text": "Van Lanschot"
+                      }
+                    ]
+        """.trimIndent()
     }
 }
