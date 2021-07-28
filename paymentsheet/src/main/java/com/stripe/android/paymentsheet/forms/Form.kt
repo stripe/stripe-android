@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -374,16 +375,16 @@ class FormViewModel @Inject internal constructor(
         ?.fields
         ?: MutableStateFlow(null)
 
+    @ExperimentalCoroutinesApi
     val completeFormValues = addressSectionFields.map { addressSectionFields ->
-        val addressInputControllers = addressSectionFields
+        addressSectionFields
             ?.filter { it.controller is InputController }
             ?.associate { sectionFieldElement ->
                 sectionFieldElement.identifier to sectionFieldElement.controller as InputController
             }
-
-        addressInputControllers?.plus(
-            elements.getIdInputControllerMap()
-        ) ?: elements.getIdInputControllerMap()
+            ?.plus(
+                elements.getIdInputControllerMap()
+            ) ?: elements.getIdInputControllerMap()
     }
         .flatMapLatest { value ->
             TransformElementToFormFieldValueFlow(

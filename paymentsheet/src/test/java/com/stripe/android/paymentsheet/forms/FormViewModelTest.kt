@@ -43,6 +43,12 @@ internal class FormViewModelTest {
         )
 
     @Test
+    fun `Verify address fields present in the form field values`() {
+        // make sure hidden identifiers are honored
+        // make sure to ignore address fields that are optional and not-complete
+    }
+
+    @Test
     fun `Verify setting save for future use`() {
         val formViewModel = FormViewModel(
             LayoutSpec(
