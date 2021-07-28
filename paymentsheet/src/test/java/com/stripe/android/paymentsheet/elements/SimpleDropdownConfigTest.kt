@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.DropdownItem
 import org.junit.Test
 
-class IdealBankConfigTest {
+class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
         R.string.stripe_paymentsheet_ideal_bank,
         listOf(

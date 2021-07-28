@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.SectionFieldElement.SimpleDropdown
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -23,12 +22,12 @@ import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import com.stripe.android.paymentsheet.specifications.SupportedBankType
-import com.stripe.android.paymentsheet.specifications.getBankInitializationValue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.mock
+import java.io.File
 
 class TransformSpecToElementTest {
 
@@ -83,8 +82,6 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
-        val bankRepository = BankRepository(mock())
-        bankRepository.init(getBankInitializationValue())
         val countrySection = FormItemSpec.SectionSpec(
             IdentifierSpec("countrySection"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
@@ -110,8 +107,6 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() {
-        val bankRepository = BankRepository(mock())
-        bankRepository.init(getBankInitializationValue())
         val idealSection = FormItemSpec.SectionSpec(
             IdentifierSpec("idealSection"),
             IDEAL_BANK_CONFIG
@@ -125,7 +120,7 @@ class TransformSpecToElementTest {
         val idealElement = idealSectionElement.fields[0] as SimpleDropdown
 
         // Verify the correct config is setup for the controller
-        assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
+        assertThat(idealElement.controller.label).isEqualTo(R.string.stripe_paymentsheet_ideal_bank)
 
         assertThat(idealSectionElement.identifier.value).isEqualTo("idealSection")
 
@@ -194,9 +189,6 @@ class TransformSpecToElementTest {
 
     @Test
     fun `Add a mandate section spec setup of the mandate element correctly`() {
-        val bankRepository = BankRepository(mock())
-        bankRepository.init(getBankInitializationValue())
-
         val mandate = FormItemSpec.MandateTextSpec(
             IdentifierSpec("mandate"),
             R.string.stripe_paymentsheet_sepa_mandate,
@@ -218,8 +210,6 @@ class TransformSpecToElementTest {
     @Test
     fun `Add a save for future use section spec sets the mandate element correctly`() =
         runBlocking {
-            val bankRepository = BankRepository(mock())
-            bankRepository.init(getBankInitializationValue())
             val mandate = FormItemSpec.MandateTextSpec(
                 IdentifierSpec("mandate"),
                 R.string.stripe_paymentsheet_sepa_mandate,
@@ -255,69 +245,10 @@ class TransformSpecToElementTest {
             SupportedBankType.Ideal
         )
 
-        val IDEAL_BANKS_JSON = """
-                    [
-                      {
-                        "value": "abn_amro",
-                        "icon": "abn_amro",
-                        "text": "ABN Amro"
-                      },
-                      {
-                        "value": "asn_bank",
-                        "icon": "asn_bank",
-                        "text": "ASN Bank"
-                      },
-                      {
-                        "value": "bunq",
-                        "icon": "bunq",
-                        "text": "bunq B.V.‎"
-                      },
-                      {
-                        "value": "handelsbanken",
-                        "icon": "handelsbanken",
-                        "text": "Handelsbanken"
-                      },
-                      {
-                        "value": "ing",
-                        "icon": "ing",
-                        "text": "ING Bank"
-                      },
-                      {
-                        "value": "knab",
-                        "icon": "knab",
-                        "text": "Knab"
-                      },
-                      {
-                        "value": "rabobank",
-                        "icon": "rabobank",
-                        "text": "Rabobank"
-                      },
-                      {
-                        "value": "regiobank",
-                        "icon": "regiobank",
-                        "text": "RegioBank"
-                      },
-                      {
-                        "value": "revolut",
-                        "icon": "revolut",
-                        "text": "Revolut"
-                      },
-                      {
-                        "value": "sns_bank",
-                        "icon": "sns_bank",
-                        "text": "SNS Bank"
-                      },
-                      {
-                        "value": "triodos_bank",
-                        "icon": "triodos_bank",
-                        "text": "Triodos Bank"
-                      },
-                      {
-                        "value": "van_lanschot",
-                        "icon": "van_lanschot",
-                        "text": "Van Lanschot"
-                      }
-                    ]
-        """.trimIndent()
+        val IDEAL_BANKS_JSON =
+            File("src/main/assets/idealBanks.json")
+                .inputStream()
+                .bufferedReader()
+                .use { it.readText() }
     }
 }
