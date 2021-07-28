@@ -51,7 +51,7 @@ ext {
     compileSdkVersion = 30
 
     kotlinCoroutinesVersion = '1.5.1'
-    composeVersion = '1.0.0-rc02'
+    composeVersion = '1.0.0'
     espressoVersion = '3.4.0'
     ktlintVersion = '0.41.0'
     materialVersion = '1.4.0'
