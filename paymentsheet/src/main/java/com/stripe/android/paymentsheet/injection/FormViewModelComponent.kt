@@ -28,10 +28,14 @@ internal interface FormViewModelComponent {
         fun layout(layoutSpec: LayoutSpec): Builder
 
         @BindsInstance
-        fun saveForFutureUseValue(@Named(SAVE_FOR_FUTURE_USE_INITIAL_VALUE) saveForFutureUseValue: Boolean): Builder
+        fun saveForFutureUseValue(
+            @Named(SAVE_FOR_FUTURE_USE_INITIAL_VALUE) saveForFutureUseValue: Boolean
+        ): Builder
 
         @BindsInstance
-        fun saveForFutureUseVisibility(@Named(SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY) saveForFutureUseVisibility: Boolean): Builder
+        fun saveForFutureUseVisibility(
+            @Named(SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY) saveForFutureUseVisibility: Boolean
+        ): Builder
 
         @BindsInstance
         fun merchantName(merchantName: String): Builder
@@ -41,7 +45,6 @@ internal interface FormViewModelComponent {
 
         fun build(): FormViewModelComponent
     }
-
 }
 
 @Module
@@ -51,6 +54,5 @@ internal abstract class FormViewModelModule {
     abstract fun bindsApplicationForContext(application: Application): Context
 
     companion object {
-
     }
 }

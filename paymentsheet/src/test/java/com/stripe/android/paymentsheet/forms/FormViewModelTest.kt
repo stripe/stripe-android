@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 
@@ -35,8 +34,12 @@ internal class FormViewModelTest {
 
     private val resourceRepository =
         ResourceRepository(
-            BankRepository(ApplicationProvider.getApplicationContext<Context>().resources),
-            AddressFieldElementRepository(ApplicationProvider.getApplicationContext<Context>().resources)
+            BankRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            ),
+            AddressFieldElementRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            )
         )
 
     @Test

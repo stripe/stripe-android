@@ -44,7 +44,6 @@ internal class AddressFieldElementRepository @Inject internal constructor(
         }
     }
 
-
     companion object {
         @VisibleForTesting
         internal const val DEFAULT_COUNTRY_CODE = "ZZ"

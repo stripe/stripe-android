@@ -10,7 +10,7 @@ fun getBankInitializationValue() = mapOf(
                         "icon": "arzte_und_apotheker_bank"
                       }
                     ]
-                    """.trimIndent().byteInputStream(),
+        """.trimIndent().byteInputStream(),
     SupportedBankType.Ideal to
         """
                     [
@@ -20,7 +20,7 @@ fun getBankInitializationValue() = mapOf(
                         "text": "ABN Amro"
                       }
                     ]
-                    """.trimIndent().byteInputStream(),
+        """.trimIndent().byteInputStream(),
     SupportedBankType.P24 to
         """
                     [
@@ -30,5 +30,5 @@ fun getBankInitializationValue() = mapOf(
                         "text": "Bank Millenium"
                       }
                     ]
-                    """.trimIndent().byteInputStream()
+        """.trimIndent().byteInputStream()
 )

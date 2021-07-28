@@ -33,7 +33,9 @@ internal fun List<FormItemSpec>.transform(
         }
     }
 
-private fun FormItemSpec.SectionSpec.transform(bankRepository: BankRepository): FormElement.SectionElement {
+private fun FormItemSpec.SectionSpec.transform(
+    bankRepository: BankRepository
+): FormElement.SectionElement {
     val fieldElements = this.fields.transform(bankRepository)
 
     // The controller of the section element will be the same as the field element
