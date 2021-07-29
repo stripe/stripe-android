@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.content.Context
+import androidx.annotation.StringRes
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.TextFieldController
@@ -16,6 +19,7 @@ import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Companion.NAME
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.specifications.sepaDebit
 import com.stripe.android.paymentsheet.specifications.sofort
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -166,8 +170,9 @@ internal class FormViewModelTest {
             emailController.onValueChange("email@valid.com")
 
             // Verify formFieldValues contains email
-            assertThat(formViewModel.
-            completeFormValues.first()?.fieldValuePairs).containsKey(
+            assertThat(
+                formViewModel.completeFormValues.first()?.fieldValuePairs
+            ).containsKey(
                 emailSection.fields[0].identifier
             )
 
@@ -218,8 +223,9 @@ internal class FormViewModelTest {
 
             // Verify formFieldValues is not null even though the email is invalid
             // (because it is not required)
-            assertThat(formViewModel.
-            completeFormValues.first()).isNotNull()
+            assertThat(
+                formViewModel.completeFormValues.first()
+            ).isNotNull()
             assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
                 emailSection.identifier
             )
@@ -271,5 +277,149 @@ internal class FormViewModelTest {
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
             ).isNull()
         }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `Verify params are set when element address fields are complete`() {
+        runBlocking {
+            /**
+             * Using sepa debit as a complex enough example to test the address portion.
+             */
+            val formViewModel = FormViewModel(
+                sepaDebit.layout,
+                saveForFutureUseInitialValue = true,
+                saveForFutureUseInitialVisibility = true,
+                merchantName = "Example, Inc.",
+                resourceRepository = resourceRepository
+            )
+
+            getSectionFieldTextControllerWithLabel(
+                formViewModel,
+                R.string.address_label_name
+            )?.onValueChange("joe")
+            assertThat(
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                    ?.value
+            ).isNull()
+
+            getSectionFieldTextControllerWithLabel(
+                formViewModel,
+                R.string.email
+            )?.onValueChange("joe@gmail.com")
+            assertThat(
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                    ?.value
+            ).isNull()
+
+            getSectionFieldTextControllerWithLabel(
+                formViewModel,
+                R.string.iban
+            )?.onValueChange("DE89370400440532013000")
+            assertThat(
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                    ?.value
+            ).isNull()
+
+            val addressControllers = AddressControllers.create(formViewModel)
+            addressControllers.controllers.forEachIndexed { index, textFieldController ->
+                textFieldController.onValueChange("1234")
+                if (index == addressControllers.controllers.size - 1) {
+                    assertThat(
+                        formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                            ?.value
+                    ).isNotNull()
+                } else {
+                    assertThat(
+                        formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                            ?.value
+                    ).isNull()
+                }
+            }
+        }
+    }
+
+    private fun getSectionFieldTextControllerWithLabel(
+        formViewModel: FormViewModel,
+        @StringRes label: Int
+    ) =
+        formViewModel.elements.map {
+            ((it as? SectionElement)
+                ?.fields
+                ?.get(0)
+                ?.controller as? TextFieldController)
+        }.firstOrNull {
+            it?.label == label
+        }
+
+
+    private data class AddressControllers(
+        val controllers: List<TextFieldController>
+    ) {
+        companion object {
+            suspend fun create(formViewModel: FormViewModel) =
+                AddressControllers(
+                    listOfNotNull(
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_address
+                        ),
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_address_line2
+                        ),
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_city
+                        ),
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_state
+                        ),
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_zip_code
+                        ),
+                    )
+                )
+
+            suspend fun createWithoutLine2(formViewModel: FormViewModel) =
+                AddressControllers(
+                    listOfNotNull(
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_address
+                        ),
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_city
+                        ),
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_state
+                        ),
+                        getAddressSectionTextControllerWithLabel(
+                            formViewModel,
+                            R.string.address_label_zip_code
+                        ),
+                    )
+                )
+        }
+    }
+
+    companion object {
+        private suspend fun getAddressSectionTextControllerWithLabel(
+            formViewModel: FormViewModel,
+            @StringRes label: Int
+        ) =
+            formViewModel.elements
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<SectionFieldElement.AddressElement>()
+                .firstOrNull()
+                ?.fields
+                ?.first()
+                ?.map { (it.controller as? TextFieldController) }
+                ?.firstOrNull { it?.label == label }
     }
 }
