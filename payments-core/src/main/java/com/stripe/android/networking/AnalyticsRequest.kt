@@ -1,5 +1,8 @@
 package com.stripe.android.networking
 
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AnalyticsRequest(
     override val params: Map<String, *>
 ) : StripeRequest() {

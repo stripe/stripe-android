@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Logger
 import com.stripe.android.exception.APIConnectionException
@@ -9,6 +10,7 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface AnalyticsRequestExecutor {
     /**
      * Execute the fire-and-forget request asynchronously.

@@ -1,7 +1,9 @@
 package com.stripe.android
 
 import android.util.Log
+import androidx.annotation.RestrictTo
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface Logger {
     fun error(msg: String, t: Throwable? = null)
 

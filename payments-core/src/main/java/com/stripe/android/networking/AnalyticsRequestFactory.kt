@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
@@ -15,6 +16,7 @@ import javax.inject.Provider
 /**
  * Factory for [AnalyticsRequest] objects.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
     private val packageInfo: PackageInfo?,
