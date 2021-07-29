@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Companion
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.sofort
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -43,12 +44,6 @@ internal class FormViewModelTest {
         )
 
     @Test
-    fun `Verify address fields present in the form field values`() {
-        // make sure hidden identifiers are honored
-        // make sure to ignore address fields that are optional and not-complete
-    }
-
-    @Test
     fun `Verify setting save for future use`() {
         val formViewModel = FormViewModel(
             LayoutSpec(
@@ -58,10 +53,10 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            true,
-            true,
-            "Example, Inc.",
-            resourceRepository
+            saveForFutureUseInitialValue = true,
+            saveForFutureUseInitialVisibility = true,
+            merchantName = "Example, Inc.",
+            resourceRepository = resourceRepository
         )
 
         val values = mutableListOf<Boolean>()
@@ -86,10 +81,10 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            true,
-            true,
-            "Example, Inc.",
-            resourceRepository
+            saveForFutureUseInitialValue = true,
+            saveForFutureUseInitialVisibility = true,
+            merchantName = "Example, Inc.",
+            resourceRepository = resourceRepository
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -116,10 +111,10 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            true,
-            true,
-            "Example, Inc.",
-            resourceRepository
+            saveForFutureUseInitialValue = true,
+            saveForFutureUseInitialVisibility = true,
+            merchantName = "Example, Inc.",
+            resourceRepository = resourceRepository
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -137,8 +132,9 @@ internal class FormViewModelTest {
         assertThat(values[1][1]).isEqualTo(IdentifierSpec("email"))
     }
 
+    @ExperimentalCoroutinesApi
     @Test
-    fun `Verify if a field is hidden and valid it is not in the formViewValueResult`() =
+    fun `Verify if a field is hidden and valid it is not in the completeFormValues`() =
         runBlocking {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
@@ -150,10 +146,10 @@ internal class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
-                true,
-                true,
-                "Example, Inc.",
-                resourceRepository
+                saveForFutureUseInitialValue = true,
+                saveForFutureUseInitialVisibility = true,
+                merchantName = "Example, Inc.",
+                resourceRepository = resourceRepository
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -170,7 +166,8 @@ internal class FormViewModelTest {
             emailController.onValueChange("email@valid.com")
 
             // Verify formFieldValues contains email
-            assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).containsKey(
+            assertThat(formViewModel.
+            completeFormValues.first()?.fieldValuePairs).containsKey(
                 emailSection.fields[0].identifier
             )
 
@@ -182,6 +179,7 @@ internal class FormViewModelTest {
             )
         }
 
+    @ExperimentalCoroutinesApi
     @Test
     fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() {
         runBlocking {
@@ -195,10 +193,10 @@ internal class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
-                true,
-                true,
-                "Example, Inc.",
-                resourceRepository
+                saveForFutureUseInitialValue = true,
+                saveForFutureUseInitialVisibility = true,
+                merchantName = "Example, Inc.",
+                resourceRepository = resourceRepository
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -220,7 +218,8 @@ internal class FormViewModelTest {
 
             // Verify formFieldValues is not null even though the email is invalid
             // (because it is not required)
-            assertThat(formViewModel.completeFormValues.first()).isNotNull()
+            assertThat(formViewModel.
+            completeFormValues.first()).isNotNull()
             assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
                 emailSection.identifier
             )
@@ -231,6 +230,7 @@ internal class FormViewModelTest {
      * This is serving as more of an integration test of forms from
      * spec to FormFieldValues.
      */
+    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element flows are complete`() {
         runBlocking {
@@ -239,10 +239,10 @@ internal class FormViewModelTest {
              */
             val formViewModel = FormViewModel(
                 sofort.layout,
-                true,
-                true,
-                "Example, Inc.",
-                resourceRepository
+                saveForFutureUseInitialValue = true,
+                saveForFutureUseInitialVisibility = true,
+                merchantName = "Example, Inc.",
+                resourceRepository = resourceRepository
             )
 
             val nameElement = (formViewModel.elements[0] as SectionElement)

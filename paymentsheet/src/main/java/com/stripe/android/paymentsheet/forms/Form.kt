@@ -60,8 +60,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-internal val formElementPadding = 16.dp
-
 @ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
@@ -324,7 +322,7 @@ class FormViewModel @Inject internal constructor(
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
         ?: MutableStateFlow(saveForFutureUseInitialValue)
 
-    internal val sectionToFieldIdentifierMap = layout.items
+    private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<FormItemSpec.SectionSpec>()
         .associate { sectionSpec ->
             sectionSpec.identifier to sectionSpec.fields.map {
