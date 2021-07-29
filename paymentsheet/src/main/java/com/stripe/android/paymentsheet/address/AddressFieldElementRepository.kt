@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.address
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.forms.transform
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,13 +32,12 @@ internal class AddressFieldElementRepository @Inject internal constructor(
 
     @VisibleForTesting
     internal fun init(
-        countryAddressSchemaPair: Map<String, List<AddressSchema>>
+        countryAddressSchemaPair: Map<String, List<CountryAddressSchema>>
     ) {
         countryAddressSchemaPair.map { (countryCode, schemaList) ->
             countryCode to requireNotNull(
                 schemaList
-                    .transformToSpecFieldList()
-                    .transform()
+                    .transformToElementList()
             )
         }.forEach { (countryCode, listElements) ->
             countryFieldMap[countryCode] = listElements

@@ -5,18 +5,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.Companion.supportedCountries
+import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import org.junit.Test
 import java.io.File
 import java.security.InvalidParameterException
 
-class TransformAddressToSpecTest {
+class TransformAddressToElementTest {
 
     @Test
     fun `Read US Json`() {
         val addressSchema = readFile("src/main/assets/addressinfo/US.json")!!
-        val simpleTextList = addressSchema.transformToSpecFieldList()
+        val simpleTextList = addressSchema.transformToElementList()
 
         val addressLine1 = SectionFieldSpec.SimpleText(
             IdentifierSpec("line1"),
@@ -59,11 +61,27 @@ class TransformAddressToSpecTest {
         )
 
         assertThat(simpleTextList.size).isEqualTo(5)
-        assertThat(simpleTextList[0]).isEqualTo(addressLine1)
-        assertThat(simpleTextList[1]).isEqualTo(addressLine2)
-        assertThat(simpleTextList[2]).isEqualTo(city)
-        assertThat(simpleTextList[3]).isEqualTo(zip)
-        assertThat(simpleTextList[4]).isEqualTo(state)
+        verifySimpleTextSpecInTextFieldController(simpleTextList[0], addressLine1)
+        verifySimpleTextSpecInTextFieldController(simpleTextList[1], addressLine2)
+        verifySimpleTextSpecInTextFieldController(simpleTextList[2], city)
+        verifySimpleTextSpecInTextFieldController(simpleTextList[3], zip)
+        verifySimpleTextSpecInTextFieldController(simpleTextList[4], state)
+    }
+
+    private fun verifySimpleTextSpecInTextFieldController(
+        textElement: SectionFieldElement,
+        simpleTextSpec: SectionFieldSpec.SimpleText
+    ) {
+        val actualController = textElement.controller as TextFieldController
+        assertThat(actualController.capitalization).isEqualTo(
+            simpleTextSpec.capitalization
+        )
+        assertThat(actualController.keyboardType).isEqualTo(
+            simpleTextSpec.keyboardType
+        )
+        assertThat(actualController.label).isEqualTo(
+            simpleTextSpec.label
+        )
     }
 
     @Test
@@ -99,7 +117,7 @@ class TransformAddressToSpecTest {
         }
     }
 
-    private fun readFile(filename: String): List<AddressSchema>? {
+    private fun readFile(filename: String): List<CountryAddressSchema>? {
         val file = File(filename)
 
         if (file.exists()) {

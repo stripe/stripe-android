@@ -220,7 +220,7 @@ class FormViewModel @Inject internal constructor(
     @Named(SAVE_FOR_FUTURE_USE_INITIAL_VALUE) saveForFutureUseInitialValue: Boolean,
     @Named(SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY) saveForFutureUseInitialVisibility: Boolean,
     merchantName: String,
-    resourceRepository: ResourceRepository
+    private val resourceRepository: ResourceRepository
 ) : ViewModel() {
     internal class Factory(
         private val resources: Resources,
@@ -244,10 +244,12 @@ class FormViewModel @Inject internal constructor(
         }
     }
 
+    private val transformSpecToElement = TransformSpecToElement(resourceRepository)
+
     init {
         viewModelScope.launch {
             resourceRepository.init()
-            elements = layout.items.transform(merchantName)
+            elements = transformSpecToElement.transform(layout.items, merchantName)
             setSaveForFutureUse(saveForFutureUseInitialValue)
         }
     }
