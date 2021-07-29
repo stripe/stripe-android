@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -47,7 +46,6 @@ import kotlinx.coroutines.flow.map
 
 internal val formElementPadding = 16.dp
 
-@ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
 internal fun Form(
@@ -85,7 +83,6 @@ internal fun Form(
     }
 }
 
-@ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
 internal fun SectionElementUI(
