@@ -16,10 +16,10 @@
   },
   {
     "type": "postalCode",
-    "required": true,
+    "required": false,
     "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
+      "isNumeric": false,
+      "nameType": "postal"
     }
   },
   {

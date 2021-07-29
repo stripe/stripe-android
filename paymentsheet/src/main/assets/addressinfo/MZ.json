@@ -8,6 +8,14 @@
     "required": false
   },
   {
+    "type": "postalCode",
+    "required": false,
+    "schema": {
+      "isNumeric": false,
+      "nameType": "postal"
+    }
+  },
+  {
     "type": "locality",
     "required": true,
     "schema": {
@@ -15,18 +23,10 @@
     }
   },
   {
-    "type": "postalCode",
-    "required": true,
-    "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
-    }
-  },
-  {
     "type": "administrativeArea",
-    "required": true,
+    "required": false,
     "schema": {
-      "nameType": "state"
+      "nameType": "province"
     }
   }
 ]

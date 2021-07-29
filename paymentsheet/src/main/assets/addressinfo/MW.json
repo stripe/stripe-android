@@ -15,18 +15,10 @@
     }
   },
   {
-    "type": "postalCode",
-    "required": true,
+    "type": "sortingCode",
+    "required": false,
     "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
-    }
-  },
-  {
-    "type": "administrativeArea",
-    "required": true,
-    "schema": {
-      "nameType": "state"
+      "nameType": "cedex"
     }
   }
 ]

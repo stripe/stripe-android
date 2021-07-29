@@ -15,18 +15,17 @@
     }
   },
   {
-    "type": "postalCode",
-    "required": true,
-    "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
-    }
-  },
-  {
     "type": "administrativeArea",
     "required": true,
     "schema": {
-      "nameType": "state"
+      "nameType": "parish"
+    }
+  },
+  {
+    "type": "sortingCode",
+    "required": false,
+    "schema": {
+      "nameType": "cedex"
     }
   }
 ]

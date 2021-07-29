@@ -15,18 +15,10 @@
     }
   },
   {
-    "type": "postalCode",
-    "required": true,
-    "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
-    }
-  },
-  {
     "type": "administrativeArea",
-    "required": true,
+    "required": false,
     "schema": {
-      "nameType": "state"
+      "nameType": "island"
     }
   }
 ]

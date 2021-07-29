@@ -15,18 +15,18 @@
     }
   },
   {
-    "type": "postalCode",
-    "required": true,
+    "type": "administrativeArea",
+    "required": false,
     "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
+      "nameType": "province"
     }
   },
   {
-    "type": "administrativeArea",
-    "required": true,
+    "type": "postalCode",
+    "required": false,
     "schema": {
-      "nameType": "state"
+      "isNumeric": false,
+      "nameType": "postal"
     }
   }
 ]

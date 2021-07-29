@@ -8,6 +8,13 @@
     "required": false
   },
   {
+    "type": "dependentLocality",
+    "required": false,
+    "schema": {
+      "nameType": "suburb"
+    }
+  },
+  {
     "type": "locality",
     "required": true,
     "schema": {
@@ -16,15 +23,15 @@
   },
   {
     "type": "postalCode",
-    "required": true,
+    "required": false,
     "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
+      "isNumeric": false,
+      "nameType": "postal"
     }
   },
   {
     "type": "administrativeArea",
-    "required": true,
+    "required": false,
     "schema": {
       "nameType": "state"
     }

@@ -18,15 +18,8 @@
     "type": "postalCode",
     "required": true,
     "schema": {
-      "isNumeric": true,
+      "isNumeric": false,
       "nameType": "zip"
-    }
-  },
-  {
-    "type": "administrativeArea",
-    "required": true,
-    "schema": {
-      "nameType": "state"
     }
   }
 ]

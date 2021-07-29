@@ -15,18 +15,18 @@
     }
   },
   {
-    "type": "postalCode",
-    "required": true,
+    "type": "administrativeArea",
+    "required": false,
     "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
+      "nameType": "oblast"
     }
   },
   {
-    "type": "administrativeArea",
+    "type": "postalCode",
     "required": true,
     "schema": {
-      "nameType": "state"
+      "isNumeric": false,
+      "nameType": "postal"
     }
   }
 ]

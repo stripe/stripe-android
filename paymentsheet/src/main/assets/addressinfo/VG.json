@@ -9,24 +9,17 @@
   },
   {
     "type": "locality",
-    "required": true,
+    "required": false,
     "schema": {
       "nameType": "city"
     }
   },
   {
     "type": "postalCode",
-    "required": true,
+    "required": false,
     "schema": {
-      "isNumeric": true,
-      "nameType": "zip"
-    }
-  },
-  {
-    "type": "administrativeArea",
-    "required": true,
-    "schema": {
-      "nameType": "state"
+      "isNumeric": false,
+      "nameType": "postal"
     }
   }
 ]
