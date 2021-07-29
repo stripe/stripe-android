@@ -267,7 +267,6 @@ class FormViewModel @Inject internal constructor(
         private val saveForFutureUseVisibility: Boolean,
         private val merchantName: String
     ) : ViewModelProvider.Factory {
-
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
