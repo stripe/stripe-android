@@ -4,20 +4,20 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
-import com.stripe.android.paymentsheet.analytics.DeviceId
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.utils.ContextUtils.packageInfo
 import javax.inject.Provider
 
 /**
  * Factory for [AnalyticsRequest] objects.
  */
-internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
     private val packageInfo: PackageInfo?,
     private val packageName: String,
@@ -156,15 +156,15 @@ internal class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     }
 
     @JvmSynthetic
-    internal fun createRequest(
-        event: PaymentSheetEvent,
-        deviceId: DeviceId
+    fun createRequest(
+        event: String,
+        deviceId: String
     ): AnalyticsRequest {
         return AnalyticsRequest(
             createParams(
-                event.toString()
+                event
             ).plus(
-                FIELD_DEVICE_ID to deviceId.value
+                FIELD_DEVICE_ID to deviceId
             )
         )
     }

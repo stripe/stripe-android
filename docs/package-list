@@ -6,6 +6,7 @@ com.stripe.android
 com.stripe.android.exception
 com.stripe.android.googlepaylauncher
 com.stripe.android.model
+com.stripe.android.model.parsers
 com.stripe.android.model.wallets
 com.stripe.android.networking
 com.stripe.android.payments
@@ -17,7 +18,6 @@ com.stripe.android.paymentsheet.model
 com.stripe.android.view
 com.stripe.android.view.i18n
 module:paymentsheet
-com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.forms
 com.stripe.android.paymentsheet.model
 com.stripe.android.paymentsheet.paymentdatacollection
