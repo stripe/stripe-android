@@ -5,8 +5,11 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.InputStream
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal data class BankRepository(
+@Singleton
+internal data class BankRepository @Inject internal constructor(
     val resources: Resources
 ) {
     private val bankItemMap = mutableMapOf<SupportedBankType, List<DropdownItem>?>()
@@ -16,8 +19,7 @@ internal data class BankRepository(
     fun init() {
         init(
             SupportedBankType.values().associateWith { bank ->
-                val assets = resources.assets
-                assets.open(bank.assetFileName)
+                resources.assets.open(bank.assetFileName)
             }
         )
     }

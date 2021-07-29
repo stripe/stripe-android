@@ -1,11 +1,8 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.app.Application
-import android.content.Context
 import android.content.res.Resources
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
@@ -13,12 +10,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
-@Component(
-    modules = [
-        ResourceRepositoryModule::class,
-        FormViewModelModule::class
-    ]
-)
+@Component
 internal interface FormViewModelComponent {
     val viewModel: FormViewModel
 
@@ -47,9 +39,3 @@ internal interface FormViewModelComponent {
     }
 }
 
-@Module
-internal abstract class FormViewModelModule {
-
-    @Binds
-    abstract fun bindsApplicationForContext(application: Application): Context
-}

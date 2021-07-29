@@ -251,6 +251,7 @@ class FormViewModel @Inject internal constructor(
         viewModelScope.launch {
             resourceRepository.init()
             elements = layout.items.transform(merchantName)
+            setSaveForFutureUse(saveForFutureUseInitialValue)
         }
     }
 
@@ -271,10 +272,6 @@ class FormViewModel @Inject internal constructor(
         elements
             .filterIsInstance<SaveForFutureUseElement>()
             .firstOrNull()?.controller?.onValueChange(value)
-    }
-
-    init {
-        setSaveForFutureUse(saveForFutureUseInitialValue)
     }
 
     private val saveForFutureUseElement = elements

@@ -5,7 +5,9 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.forms.transform
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 internal class AddressFieldElementRepository @Inject internal constructor(
     val resources: Resources
 ) {
