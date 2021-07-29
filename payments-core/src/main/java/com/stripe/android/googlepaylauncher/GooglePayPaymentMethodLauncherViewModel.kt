@@ -75,6 +75,7 @@ internal class GooglePayPaymentMethodLauncherViewModel(
             currencyCode = args.currencyCode,
             totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
             countryCode = args.config.merchantCountryCode,
+            transactionId = args.transactionId,
             totalPrice = args.amount,
             checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
         )

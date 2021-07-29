@@ -121,7 +121,8 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                         GooglePayPaymentMethodLauncher.Result.Failed(
                             RuntimeException(
                                 "Google Pay failed with error: $statusMessage"
-                            )
+                            ),
+                            status?.statusCode
                         )
                     )
                 }

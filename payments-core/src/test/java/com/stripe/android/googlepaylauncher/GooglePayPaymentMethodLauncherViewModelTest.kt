@@ -106,6 +106,24 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             )
     }
 
+    @Test
+    fun `createTransactionInfo() with transactionId should create expected TransactionInfo`() {
+        val transactionId = "test_id"
+        val transactionInfo =
+            viewModel.createTransactionInfo(ARGS.copy(transactionId = transactionId))
+        assertThat(transactionInfo)
+            .isEqualTo(
+                GooglePayJsonFactory.TransactionInfo(
+                    currencyCode = "usd",
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                    countryCode = "us",
+                    transactionId = transactionId,
+                    totalPrice = 1000,
+                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                )
+            )
+    }
+
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
