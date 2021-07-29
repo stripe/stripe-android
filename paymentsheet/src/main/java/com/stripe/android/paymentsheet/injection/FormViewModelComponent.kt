@@ -5,7 +5,6 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import dagger.BindsInstance
 import dagger.Component
-import dagger.Module
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -38,4 +37,3 @@ internal interface FormViewModelComponent {
         fun build(): FormViewModelComponent
     }
 }
-
