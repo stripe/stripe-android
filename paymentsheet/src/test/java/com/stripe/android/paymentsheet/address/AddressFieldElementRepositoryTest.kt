@@ -52,7 +52,7 @@ class AddressFieldElementRepositoryTest {
 
         assertThat(supportedCountries).doesNotContain("NB")
 
-        assertThat(addressFieldElementRepository.get("GG"))
+        assertThat(addressFieldElementRepository.get("NB"))
             .isEqualTo(addressFieldElementRepository.get(DEFAULT_COUNTRY_CODE))
     }
 
