@@ -6,9 +6,9 @@ import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IbanConfig
-import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
+import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -59,7 +59,7 @@ internal class TransformSpecToElement(
             is SectionFieldSpec.Email -> it.transform()
             is SectionFieldSpec.Iban -> it.transform()
             is SectionFieldSpec.Country -> it.transform()
-            is SectionFieldSpec.IdealBank -> it.transform()
+            is SectionFieldSpec.BankDropdown -> it.transform()
             is SectionFieldSpec.SimpleText -> it.transform()
         }
     }
@@ -92,10 +92,15 @@ internal class TransformSpecToElement(
             DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
         )
 
-    private fun SectionFieldSpec.IdealBank.transform() =
-        SectionFieldElement.IdealBank(
+    private fun SectionFieldSpec.BankDropdown.transform() =
+        SectionFieldElement.SimpleDropdown(
             this.identifier,
-            DropdownFieldController(IdealBankConfig())
+            DropdownFieldController(
+                SimpleDropdownConfig(
+                    label,
+                    resourceRepository.bankRepository.get(this.bankType)
+                )
+            )
         )
 
     private fun FormItemSpec.SaveForFutureUseSpec.transform(merchantName: String) =

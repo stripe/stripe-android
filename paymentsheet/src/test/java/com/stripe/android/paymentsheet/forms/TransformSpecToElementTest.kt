@@ -12,20 +12,22 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.SectionFieldElement.IdealBank
+import com.stripe.android.paymentsheet.SectionFieldElement.SimpleDropdown
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.IdealBankConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
+import com.stripe.android.paymentsheet.specifications.SupportedBankType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.mock
+import java.io.File
 
 class TransformSpecToElementTest {
 
@@ -39,13 +41,23 @@ class TransformSpecToElementTest {
         SectionFieldSpec.Email
     )
 
-    private val transformSpecToElement =
-        TransformSpecToElement(
-            ResourceRepository(
-                BankRepository(mock()),
-                AddressFieldElementRepository(mock())
-            )
+    private lateinit var transformSpecToElement: TransformSpecToElement
+
+    @Before
+    fun beforeTest() {
+        val bankRepository = BankRepository(mock())
+        bankRepository.init(
+            mapOf(SupportedBankType.Ideal to IDEAL_BANKS_JSON.byteInputStream())
         )
+
+        transformSpecToElement =
+            TransformSpecToElement(
+                ResourceRepository(
+                    bankRepository,
+                    AddressFieldElementRepository(mock())
+                )
+            )
+    }
 
     @Test
     fun `Section with multiple fields contains all fields in the section element`() {
@@ -55,7 +67,7 @@ class TransformSpecToElementTest {
                     IdentifierSpec("multifieldSection"),
                     listOf(
                         SectionFieldSpec.Country(),
-                        SectionFieldSpec.IdealBank
+                        IDEAL_BANK_CONFIG
                     )
                 )
             ),
@@ -65,7 +77,7 @@ class TransformSpecToElementTest {
         val sectionElement = formElement[0] as SectionElement
         assertThat(sectionElement.fields.size).isEqualTo(2)
         assertThat(sectionElement.fields[0]).isInstanceOf(Country::class.java)
-        assertThat(sectionElement.fields[1]).isInstanceOf(IdealBank::class.java)
+        assertThat(sectionElement.fields[1]).isInstanceOf(SimpleDropdown::class.java)
     }
 
     @Test
@@ -97,7 +109,7 @@ class TransformSpecToElementTest {
     fun `Adding a ideal bank section sets up the section and country elements correctly`() {
         val idealSection = FormItemSpec.SectionSpec(
             IdentifierSpec("idealSection"),
-            SectionFieldSpec.IdealBank
+            IDEAL_BANK_CONFIG
         )
         val formElement = transformSpecToElement.transform(
             listOf(idealSection),
@@ -105,10 +117,10 @@ class TransformSpecToElementTest {
         )
 
         val idealSectionElement = formElement.first() as SectionElement
-        val idealElement = idealSectionElement.fields[0] as IdealBank
+        val idealElement = idealSectionElement.fields[0] as SimpleDropdown
 
         // Verify the correct config is setup for the controller
-        assertThat(idealElement.controller.label).isEqualTo(IdealBankConfig().label)
+        assertThat(idealElement.controller.label).isEqualTo(R.string.stripe_paymentsheet_ideal_bank)
 
         assertThat(idealSectionElement.identifier.value).isEqualTo("idealSection")
 
@@ -225,4 +237,18 @@ class TransformSpecToElementTest {
                     hiddenIdentifiers.map { it.identifier }
                 )
         }
+
+    companion object {
+        val IDEAL_BANK_CONFIG = SectionFieldSpec.BankDropdown(
+            IdentifierSpec("bank"),
+            R.string.stripe_paymentsheet_ideal_bank,
+            SupportedBankType.Ideal
+        )
+
+        val IDEAL_BANKS_JSON =
+            File("src/main/assets/idealBanks.json")
+                .inputStream()
+                .bufferedReader()
+                .use { it.readText() }
+    }
 }
