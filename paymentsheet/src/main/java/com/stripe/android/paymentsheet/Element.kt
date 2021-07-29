@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.AddressController
@@ -19,9 +20,7 @@ import kotlinx.coroutines.flow.map
  * This is used to define each section in the visual form layout.
  * Each item in the layout has an identifier and a controller associated with it.
  */
-internal sealed class FormElement(
-    val subElements: List<SectionFieldElement> = emptyList()
-) {
+internal sealed class FormElement {
     abstract val identifier: IdentifierSpec
     abstract val controller: Controller?
 
@@ -118,19 +117,30 @@ internal sealed class SectionFieldElement {
         override val controller: DropdownFieldController,
     ) : SectionFieldElement()
 
-    internal class AddressElement(
+    internal class AddressElement @VisibleForTesting constructor(
         override val identifier: IdentifierSpec,
-        val addressFieldRepository: AddressFieldElementRepository,
-        val countryCodes: Set<String> = setOf("US", "JP")
+        private val addressFieldRepository: AddressFieldElementRepository,
+        countryDropdownFieldController: DropdownFieldController
     ) : SectionFieldElement() {
+
+        constructor(
+            identifier: IdentifierSpec,
+            addressFieldRepository: AddressFieldElementRepository,
+            countryCodes: Set<String> = emptySet(),
+        ) : this(
+            identifier,
+            addressFieldRepository,
+            DropdownFieldController(CountryConfig(countryCodes))
+        )
 
         /**
          * Focus requester is a challenge - Must get this working from spec
          * other fields need to flow
          */
+        @VisibleForTesting
         val countryElement = Country(
             IdentifierSpec("country"),
-            DropdownFieldController(CountryConfig(countryCodes))
+            countryDropdownFieldController
         )
 
         private val otherFields = countryElement.controller.rawFieldValue

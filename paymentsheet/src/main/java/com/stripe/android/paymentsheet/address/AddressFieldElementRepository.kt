@@ -37,9 +37,12 @@ internal class AddressFieldElementRepository @Inject internal constructor(
                 schemaList
                     .transformToElementList()
             )
-        }.forEach { (countryCode, listElements) ->
-            countryFieldMap[countryCode] = listElements
-        }
+        }.forEach { add(it.first, it.second) }
+    }
+
+    @VisibleForTesting
+    internal fun add(countryCode: String, listElements: List<SectionFieldElement>) {
+        countryFieldMap[countryCode] = listElements
     }
 
     companion object {

@@ -326,12 +326,20 @@ internal class FormViewModelTest {
                 textFieldController.onValueChange("1234")
                 if (index == addressControllers.controllers.size - 1) {
                     assertThat(
-                        formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                        formViewModel
+                            .completeFormValues
+                            .first()
+                            ?.fieldValuePairs
+                            ?.get(Email.identifier)
                             ?.value
                     ).isNotNull()
                 } else {
                     assertThat(
-                        formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                        formViewModel
+                            .completeFormValues
+                            .first()
+                            ?.fieldValuePairs
+                            ?.get(Email.identifier)
                             ?.value
                     ).isNull()
                 }
@@ -344,14 +352,15 @@ internal class FormViewModelTest {
         @StringRes label: Int
     ) =
         formViewModel.elements.map {
-            ((it as? SectionElement)
-                ?.fields
-                ?.get(0)
-                ?.controller as? TextFieldController)
+            (
+                (it as? SectionElement)
+                    ?.fields
+                    ?.get(0)
+                    ?.controller as? TextFieldController
+                )
         }.firstOrNull {
             it?.label == label
         }
-
 
     private data class AddressControllers(
         val controllers: List<TextFieldController>
@@ -367,28 +376,6 @@ internal class FormViewModelTest {
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
                             R.string.address_label_address_line2
-                        ),
-                        getAddressSectionTextControllerWithLabel(
-                            formViewModel,
-                            R.string.address_label_city
-                        ),
-                        getAddressSectionTextControllerWithLabel(
-                            formViewModel,
-                            R.string.address_label_state
-                        ),
-                        getAddressSectionTextControllerWithLabel(
-                            formViewModel,
-                            R.string.address_label_zip_code
-                        ),
-                    )
-                )
-
-            suspend fun createWithoutLine2(formViewModel: FormViewModel) =
-                AddressControllers(
-                    listOfNotNull(
-                        getAddressSectionTextControllerWithLabel(
-                            formViewModel,
-                            R.string.address_label_address
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
