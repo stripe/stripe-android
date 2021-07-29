@@ -16,9 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -42,12 +40,12 @@ internal data class CardStyle(
  *
  * Once credit card is converted use one of the default material theme styles.
  */
-internal data class SectionTitle @ExperimentalUnitApi constructor(
+internal data class SectionTitle constructor(
     val light: Color = Color.DarkGray,
     val dark: Color = Color.White,
     val fontWeight: FontWeight = FontWeight.Bold,
     val paddingBottom: Dp = 4.dp,
-    val letterSpacing: TextUnit = TextUnit(-0.01f, TextUnitType.Sp),
+    val letterSpacing: TextUnit = (-0.01f).sp,
     val fontSize: TextUnit = 13.sp
 )
 
@@ -55,7 +53,6 @@ internal data class SectionTitle @ExperimentalUnitApi constructor(
  * This is a simple section that holds content in a card view.  It has a label, content specified
  * by the caller, and an error string.
  */
-@ExperimentalUnitApi // section title letter spacing can change without warning.
 @ExperimentalAnimationApi
 @Composable
 internal fun Section(
@@ -75,7 +72,6 @@ internal fun Section(
 /**
  * This is the layout for the section title
  */
-@ExperimentalUnitApi
 @Composable
 internal fun SectionTitle(@StringRes titleText: Int?) {
     val sectionTitle = SectionTitle()
