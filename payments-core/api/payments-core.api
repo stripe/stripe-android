@@ -262,6 +262,20 @@ public abstract interface class com/stripe/android/IssuingCardPinService$Listene
 	public abstract fun onError (Lcom/stripe/android/IssuingCardPinService$CardPinActionError;Ljava/lang/String;Ljava/lang/Throwable;)V
 }
 
+public abstract interface class com/stripe/android/Logger {
+	public static final field Companion Lcom/stripe/android/Logger$Companion;
+	public abstract fun debug (Ljava/lang/String;)V
+	public abstract fun error (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public abstract fun info (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/Logger$Companion {
+}
+
+public final class com/stripe/android/Logger$DefaultImpls {
+	public static synthetic fun error$default (Lcom/stripe/android/Logger;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+}
+
 public final class com/stripe/android/PayWithGoogleUtils {
 	public static final field INSTANCE Lcom/stripe/android/PayWithGoogleUtils;
 	public static final fun getPriceString (ILjava/util/Currency;)Ljava/lang/String;
@@ -4562,6 +4576,33 @@ public final class com/stripe/android/model/wallets/Wallet$VisaCheckoutWallet : 
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/networking/AnalyticsRequest : com/stripe/android/networking/StripeRequest {
+	public fun <init> (Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lcom/stripe/android/networking/AnalyticsRequest;
+	public static synthetic fun copy$default (Lcom/stripe/android/networking/AnalyticsRequest;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/networking/AnalyticsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getBaseUrl ()Ljava/lang/String;
+	public fun getParams ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/networking/AnalyticsRequestExecutor {
+	public abstract fun executeAsync (Lcom/stripe/android/networking/AnalyticsRequest;)V
+}
+
+public final class com/stripe/android/networking/AnalyticsRequestExecutor$Default : com/stripe/android/networking/AnalyticsRequestExecutor {
+	public fun <init> ()V
+	public fun <init> (Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)V
+	public synthetic fun <init> (Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun executeAsync (Lcom/stripe/android/networking/AnalyticsRequest;)V
+}
+
+public final class com/stripe/android/networking/AnalyticsRequestFactory {
+	public final synthetic fun createRequest (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/AnalyticsRequest;
 }
 
 public final class com/stripe/android/networking/ApiRequest : com/stripe/android/networking/StripeRequest {

@@ -1,6 +1,9 @@
 package com.stripe.android.networking
 
-internal data class AnalyticsRequest(
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class AnalyticsRequest(
     override val params: Map<String, *>
 ) : StripeRequest() {
     override val method: Method = Method.GET
