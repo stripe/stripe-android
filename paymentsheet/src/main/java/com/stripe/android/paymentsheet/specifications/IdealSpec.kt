@@ -24,7 +24,7 @@ internal val idealNameSection = SectionSpec(
 internal val idealEmailSection = SectionSpec(IdentifierSpec("email"), Email)
 internal val idealBankSection = SectionSpec(
     IdentifierSpec("bank"),
-    SectionFieldSpec.SimpleDropdown(
+    SectionFieldSpec.BankDropdown(
         IdentifierSpec("bank"),
         R.string.stripe_paymentsheet_ideal_bank,
         SupportedBankType.Ideal

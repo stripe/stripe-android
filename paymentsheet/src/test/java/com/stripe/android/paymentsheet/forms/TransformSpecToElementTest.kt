@@ -239,7 +239,7 @@ class TransformSpecToElementTest {
         }
 
     companion object {
-        val IDEAL_BANK_CONFIG = SectionFieldSpec.SimpleDropdown(
+        val IDEAL_BANK_CONFIG = SectionFieldSpec.BankDropdown(
             IdentifierSpec("bank"),
             R.string.stripe_paymentsheet_ideal_bank,
             SupportedBankType.Ideal

@@ -59,7 +59,7 @@ internal class TransformSpecToElement(
             is SectionFieldSpec.Email -> it.transform()
             is SectionFieldSpec.Iban -> it.transform()
             is SectionFieldSpec.Country -> it.transform()
-            is SectionFieldSpec.SimpleDropdown -> it.transform()
+            is SectionFieldSpec.BankDropdown -> it.transform()
             is SectionFieldSpec.SimpleText -> it.transform()
         }
     }
@@ -92,7 +92,7 @@ internal class TransformSpecToElement(
             DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
         )
 
-    private fun SectionFieldSpec.SimpleDropdown.transform() =
+    private fun SectionFieldSpec.BankDropdown.transform() =
         SectionFieldElement.SimpleDropdown(
             this.identifier,
             DropdownFieldController(
