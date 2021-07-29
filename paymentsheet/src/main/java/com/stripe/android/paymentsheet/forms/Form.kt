@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -98,7 +97,6 @@ internal fun Form(
     }
 }
 
-@ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
 internal fun SectionElementUI(
@@ -289,6 +287,7 @@ class FormViewModel @Inject internal constructor(
         viewModelScope.launch {
             resourceRepository.init()
             elements = transformSpecToElement.transform(layout.items, merchantName)
+            setSaveForFutureUse(saveForFutureUseInitialValue)
         }
     }
 
@@ -309,10 +308,6 @@ class FormViewModel @Inject internal constructor(
         elements
             .filterIsInstance<SaveForFutureUseElement>()
             .firstOrNull()?.controller?.onValueChange(value)
-    }
-
-    init {
-        setSaveForFutureUse(saveForFutureUseInitialValue)
     }
 
     private val saveForFutureUseElement = elements
