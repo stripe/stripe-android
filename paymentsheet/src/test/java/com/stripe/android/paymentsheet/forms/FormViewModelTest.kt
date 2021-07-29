@@ -371,7 +371,7 @@ internal class FormViewModelTest {
                     listOfNotNull(
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,
-                            R.string.address_label_address
+                            R.string.address_label_address_line1
                         ),
                         getAddressSectionTextControllerWithLabel(
                             formViewModel,

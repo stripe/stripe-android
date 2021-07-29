@@ -114,7 +114,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             FieldType.AddressLine1 -> {
                 SectionFieldSpec.SimpleText(
                     IdentifierSpec("line1"),
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_address,
+                    it.schema?.nameType?.stringResId ?: R.string.address_label_address_line1,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
                     showOptionalLabel = !it.required

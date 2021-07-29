@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="billing_details">Billing Details</string>
+    <!-- Address line 1 placeholder for billing address form. -->
+    <string name="address_label_address_line1">Address line 1</string>
 </resources>
