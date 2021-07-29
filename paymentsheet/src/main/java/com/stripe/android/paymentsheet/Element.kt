@@ -101,7 +101,7 @@ internal sealed class SectionFieldElement {
         override val controller: DropdownFieldController
     ) : SectionFieldElement()
 
-    data class SimpleText internal constructor(
+    data class SimpleText(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
     ) : SectionFieldElement()

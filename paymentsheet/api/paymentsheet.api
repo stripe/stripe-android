@@ -241,6 +241,22 @@ public abstract class com/stripe/android/paymentsheet/specifications/SectionFiel
 	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
 }
 
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun component2 ()I
+	public final fun component3 ()Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBankType ()Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getLabel ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
 	public fun <init> ()V
@@ -263,22 +279,6 @@ public final class com/stripe/android/paymentsheet/specifications/SectionFieldSp
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Iban : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Iban;
-}
-
-public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleDropdown : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;)V
-	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-	public final fun component2 ()I
-	public final fun component3 ()Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
-	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleDropdown;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleDropdown;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleDropdown;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBankType ()Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
-	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
-	public final fun getLabel ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {

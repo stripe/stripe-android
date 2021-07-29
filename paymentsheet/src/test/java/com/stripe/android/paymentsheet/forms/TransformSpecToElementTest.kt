@@ -11,8 +11,8 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
 import com.stripe.android.paymentsheet.SectionFieldElement.Email
-import com.stripe.android.paymentsheet.SectionFieldElement.SimpleDropdown
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
+import com.stripe.android.paymentsheet.SectionFieldElement.SimpleDropdown
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
