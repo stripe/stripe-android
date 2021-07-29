@@ -104,7 +104,6 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     data class AddressSpec(
         override val identifier: IdentifierSpec,
-        // JSON file to read and convert to a spec?
     ) : SectionFieldSpec(identifier)
 
     internal companion object {
