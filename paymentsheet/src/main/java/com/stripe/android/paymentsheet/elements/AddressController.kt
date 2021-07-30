@@ -7,6 +7,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 
+/**
+ * This is the controller for a section with a changing number and set of fields.
+ * This is in contrast to the [SectionController] which is a section in which the fields
+ * in it do not change.
+ */
 internal class AddressController(
     val fieldsFlowable: Flow<List<SectionFieldElement>>
 ) : Controller, SectionFieldErrorController {

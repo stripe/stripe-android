@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -60,7 +59,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-@ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
 internal fun Form(
@@ -98,7 +96,6 @@ internal fun Form(
     }
 }
 
-@ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
 internal fun SectionElementUI(
@@ -141,7 +138,6 @@ internal fun SectionElementUI(
     }
 }
 
-@ExperimentalUnitApi
 @ExperimentalAnimationApi
 @Composable
 internal fun AddressElementUI(
@@ -167,7 +163,6 @@ internal fun AddressElementUI(
 }
 
 @ExperimentalAnimationApi
-@ExperimentalUnitApi
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,

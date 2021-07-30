@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +26,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
@@ -62,6 +62,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         )
     }
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -197,7 +198,6 @@ internal abstract class BaseAddPaymentMethodFragment(
         ) = formFieldValues?.let {
             transformToPaymentMethodCreateParams.transform(formFieldValues, paramKey)
                 ?.run {
-                    Log.d("STRIPE", this.toParamMap().toString())
                     PaymentSelection.New.GenericPaymentMethod(
                         selectedPaymentMethodResources.displayNameResource,
                         selectedPaymentMethodResources.iconResource,

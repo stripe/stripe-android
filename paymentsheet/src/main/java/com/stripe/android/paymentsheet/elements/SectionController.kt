@@ -6,8 +6,6 @@ import kotlinx.coroutines.flow.combine
 
 /**
  * This is the controller for a section with a static number of fields.
- * This is in contrast to the [AddressController] which is a section in which the fields
- * in it change.
  */
 internal class SectionController(
     @StringRes val label: Int?,

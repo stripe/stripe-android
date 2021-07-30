@@ -120,18 +120,11 @@ internal sealed class SectionFieldElement {
     internal class AddressElement @VisibleForTesting constructor(
         override val identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
-        countryDropdownFieldController: DropdownFieldController
+        countryCodes: Set<String> = emptySet(),
+        countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
+            CountryConfig(countryCodes)
+        ),
     ) : SectionFieldElement() {
-
-        constructor(
-            identifier: IdentifierSpec,
-            addressFieldRepository: AddressFieldElementRepository,
-            countryCodes: Set<String> = emptySet(),
-        ) : this(
-            identifier,
-            addressFieldRepository,
-            DropdownFieldController(CountryConfig(countryCodes))
-        )
 
         /**
          * Focus requester is a challenge - Must get this working from spec
