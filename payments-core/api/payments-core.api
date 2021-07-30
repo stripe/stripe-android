@@ -4962,6 +4962,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$R
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration : android/os/Parcelable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;)V
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration$Environment;

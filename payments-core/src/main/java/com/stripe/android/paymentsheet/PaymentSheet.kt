@@ -137,6 +137,11 @@ class PaymentSheet internal constructor(
          */
         val currencyCode: String? = null
     ) : Parcelable {
+        constructor(
+            environment: Environment,
+            countryCode: String
+        ) : this(environment, countryCode, null)
+
         enum class Environment {
             Production,
             Test
