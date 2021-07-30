@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Indirizzo</string>
   <!-- Caption for City field on address form -->
   <string name="address_label_city">Città</string>
   <!-- Caption for Country field on address form -->
