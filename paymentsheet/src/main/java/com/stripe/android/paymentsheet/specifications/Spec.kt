@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
+import kotlinx.serialization.Serializable
 
 /**
  * This class is used to define different forms full of fields.
@@ -87,7 +88,11 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     data class Country(val onlyShowCountryCodes: Set<String> = emptySet()) :
         SectionFieldSpec(IdentifierSpec("country"))
 
-    object IdealBank : SectionFieldSpec(IdentifierSpec("bank"))
+    data class BankDropdown(
+        override val identifier: IdentifierSpec,
+        @StringRes val label: Int,
+        val bankType: SupportedBankType
+    ) : SectionFieldSpec(identifier)
 
     data class SimpleText(
         override val identifier: IdentifierSpec,
@@ -106,3 +111,15 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
         )
     }
 }
+
+enum class SupportedBankType(val assetFileName: String) {
+    Eps("epsBanks.json"),
+    Ideal("idealBanks.json"),
+    P24("p24Banks.json")
+}
+
+@Serializable
+data class DropdownItem(
+    val value: String,
+    val text: String
+)

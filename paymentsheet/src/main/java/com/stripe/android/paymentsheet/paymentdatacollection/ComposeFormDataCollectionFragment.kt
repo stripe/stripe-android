@@ -33,6 +33,7 @@ class ComposeFormDataCollectionFragment : Fragment() {
 
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
+            resources,
             formSpec.layout,
             requireArguments().getBoolean(
                 EXTRA_SAVE_FOR_FUTURE_USE_VALUE

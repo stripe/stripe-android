@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import org.junit.Test
 
@@ -15,7 +14,7 @@ class TransformToPaymentMethodCreateParamMapTest {
             .transform(
                 FormFieldValues(
                     mapOf(
-                        SectionFieldSpec.IdealBank.identifier to FormFieldEntry(
+                        IdentifierSpec("bank") to FormFieldEntry(
                             "abn_amro",
                             true
                         )
