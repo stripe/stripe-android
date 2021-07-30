@@ -42,8 +42,6 @@ class PaymentSheetContract :
         @ColorInt internal val statusBarColor: Int? = null,
     ) : ActivityStarter.Args {
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
-        val isGooglePayEnabled: Boolean
-            get() = googlePayConfig != null && clientSecret is PaymentIntentClientSecret
 
         companion object {
             internal fun fromIntent(intent: Intent): Args? {

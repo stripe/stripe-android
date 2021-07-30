@@ -17,8 +17,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
-import com.stripe.android.googlepaylauncher.FakeGooglePayRepository
-import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -69,7 +68,6 @@ internal class PaymentSheetActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val googlePayRepository = FakeGooglePayRepository(true)
     private val eventReporter = mock<EventReporter>()
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
@@ -135,25 +133,27 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `updates buy button state on payment methods list`() {
         val scenario = activityScenario()
-        scenario.launch(intent).use {
-            it.onActivity { activity ->
-                // Google Pay initially selected as there's no saved selection
-                assertThat(activity.viewBinding.buyButton.isVisible).isFalse()
-                assertThat(activity.viewBinding.googlePayButton.isVisible).isTrue()
-                assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
+        scenario.launch(intent).onActivity { activity ->
+            viewModel.updateSelection(null)
+            viewModel._isGooglePayReady.value = true
+            idleLooper()
 
-                viewModel.updateSelection(
-                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                )
-                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
-                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-                assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
+            // Google Pay initially selected as there's no saved selection
+            assertThat(activity.viewBinding.buyButton.isVisible).isFalse()
+            assertThat(activity.viewBinding.googlePayButton.isVisible).isTrue()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
 
-                viewModel.updateSelection(null)
-                assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
-                assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-                assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
-            }
+            viewModel.updateSelection(
+                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+            assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+            assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
+
+            viewModel.updateSelection(null)
+            assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
+            assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
         }
     }
 
@@ -168,6 +168,8 @@ internal class PaymentSheetActivityTest {
                     )
                 )
                 idleLooper()
+                // Need to set to null otherwise the real one gets called and results in failure
+                viewModel.googlePayPaymentMethodLauncher = null
 
                 // Initially empty card
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
@@ -179,7 +181,7 @@ internal class PaymentSheetActivityTest {
                 assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
                 assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
-                viewModel.onGooglePayResult(GooglePayLauncherResult.Canceled)
+                viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
                 // Update to saved card
                 viewModel.updateSelection(
@@ -761,7 +763,6 @@ internal class PaymentSheetActivityTest {
             StripeIntentRepository.Static(paymentIntent),
             FakePaymentMethodsRepository(paymentMethods),
             { paymentFlowResultProcessor },
-            googlePayRepository,
             FakePrefsRepository(),
             Logger.noop(),
             testDispatcher,

@@ -9,8 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepaylauncher.FakeGooglePayRepository
-import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -43,7 +42,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -67,7 +65,6 @@ internal class PaymentSheetViewModelTest {
 
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val googlePayRepository = FakeGooglePayRepository(true)
     private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
@@ -271,7 +268,7 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(PaymentSheetViewState.StartProcessing)
         assertThat(processing[0]).isTrue()
 
-        viewModel.onGooglePayResult(GooglePayLauncherResult.Canceled)
+        viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
@@ -331,9 +328,9 @@ internal class PaymentSheetViewModelTest {
         assertThat(processing[0]).isTrue()
 
         viewModel.onGooglePayResult(
-            GooglePayLauncherResult.Error(
+            GooglePayPaymentMethodLauncher.Result.Failed(
                 Exception("Test exception"),
-                Status.RESULT_INTERNAL_ERROR
+                Status.RESULT_INTERNAL_ERROR.statusCode
             )
         )
 
@@ -639,44 +636,46 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `isGooglePayReady when googlePayConfig is not null should emit expected value`() {
-        Dispatchers.setMain(testDispatcher)
-        var isReady: Boolean? = null
-        viewModel.isGooglePayReady.observeForever {
-            isReady = it
-        }
-        assertThat(isReady)
-            .isTrue()
-    }
-
-    @Test
     fun `isGooglePayReady without google pay config should emit false`() {
         val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY)
         var isReady: Boolean? = null
         viewModel.isGooglePayReady.observeForever {
             isReady = it
         }
-        viewModel.fetchIsGooglePayReady()
         assertThat(isReady)
             .isFalse()
     }
 
     @Test
-    fun `isGooglePayReady for SetupIntent should emit false`() {
-        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP)
+    fun `isGooglePayReady for SetupIntent missing currencyCode should emit false`() {
+        val viewModel = createViewModel(
+            ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                    googlePay = ConfigFixtures.GOOGLE_PAY.copy(
+                        currencyCode = null
+                    )
+                )
+            )
+        )
         var isReady: Boolean? = null
         viewModel.isGooglePayReady.observeForever {
             isReady = it
         }
-        viewModel.fetchIsGooglePayReady()
         assertThat(isReady)
             .isFalse()
+    }
+
+    @Test
+    fun `googlePayLauncherConfig for SetupIntent with currencyCode should be valid`() {
+        val viewModel = createViewModel(ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP)
+        assertThat(viewModel.googlePayLauncherConfig)
+            .isNotNull()
     }
 
     @Test
     fun `fragmentConfig when all data is ready should emit value`() {
         viewModel.fetchStripeIntent()
-        viewModel.fetchIsGooglePayReady()
+        viewModel._isGooglePayReady.value = true
 
         val configs = mutableListOf<FragmentConfig>()
         viewModel.fragmentConfig.observeForever { config ->
@@ -797,7 +796,6 @@ internal class PaymentSheetViewModelTest {
             stripeIntentRepository,
             paymentMethodsRepository,
             { paymentFlowResultProcessor },
-            googlePayRepository,
             prefsRepository,
             Logger.noop(),
             testDispatcher,

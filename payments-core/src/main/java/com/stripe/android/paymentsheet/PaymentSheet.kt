@@ -127,10 +127,15 @@ class PaymentSheet internal constructor(
          */
         val environment: Environment,
         /**
-         * The two-letter ISO 3166 code of the country of your business, e.g. "US"
+         * The two-letter ISO 3166 code of the country of your business, e.g. "US".
          * See your account's country value [here](https://dashboard.stripe.com/settings/account).
          */
-        val countryCode: String
+        val countryCode: String,
+        /**
+         * The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
+         * Required in order to support Google Pay when processing a Setup Intent.
+         */
+        val currencyCode: String? = null
     ) : Parcelable {
         enum class Environment {
             Production,

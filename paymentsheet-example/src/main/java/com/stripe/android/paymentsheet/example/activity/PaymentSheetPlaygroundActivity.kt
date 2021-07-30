@@ -42,7 +42,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             R.id.google_pay_on_button -> {
                 PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "US"
+                    countryCode = "US",
+                    currencyCode = currency.value
                 )
             }
             else -> null
