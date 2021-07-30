@@ -3,6 +3,7 @@ package com.stripe.android.googlepaylauncher
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.IntDef
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
@@ -236,13 +237,12 @@ class GooglePayPaymentMethodLauncher internal constructor(
          * Represents a failed transaction.
          *
          * @param error The failure reason.
-         * @param googlePayStatusCode If this was a failure in Google Pay, the corresponding
-         * [status code](https://developers.google.com/android/reference/com/google/android/gms/common/api/CommonStatusCodes).
+         * @param errorCode The failure [ErrorCode].
          */
         @Parcelize
         data class Failed(
             val error: Throwable,
-            val googlePayStatusCode: Int? = null
+            @ErrorCode val errorCode: Int
         ) : Result()
 
         /**
@@ -260,7 +260,24 @@ class GooglePayPaymentMethodLauncher internal constructor(
         fun onResult(result: Result)
     }
 
+    /**
+     * Error codes representing the possible error types for [Result.Failed].
+     * See the corresponding [Result.Failed.error] message for more details.
+     */
+    @Target(AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.TYPE)
+    @IntDef(INTERNAL_ERROR, DEVELOPER_ERROR, NETWORK_ERROR)
+    annotation class ErrorCode
+
     internal companion object {
         internal const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
+
+        // Generic internal error
+        const val INTERNAL_ERROR = 1
+
+        // The application is misconfigured
+        const val DEVELOPER_ERROR = 2
+
+        // Error executing a network call
+        const val NETWORK_ERROR = 3
     }
 }

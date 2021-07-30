@@ -14,6 +14,8 @@ import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
@@ -106,7 +108,14 @@ internal class GooglePayPaymentMethodLauncherViewModel(
                 GooglePayPaymentMethodLauncher.Result.Completed(it)
             },
             onFailure = {
-                GooglePayPaymentMethodLauncher.Result.Failed(it)
+                GooglePayPaymentMethodLauncher.Result.Failed(
+                    it,
+                    when (it) {
+                        is APIConnectionException -> GooglePayPaymentMethodLauncher.NETWORK_ERROR
+                        is InvalidRequestException -> GooglePayPaymentMethodLauncher.DEVELOPER_ERROR
+                        else -> GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+                    }
+                )
             }
         )
     }

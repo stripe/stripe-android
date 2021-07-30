@@ -34,7 +34,8 @@ class GooglePayPaymentMethodLauncherContract :
     ): GooglePayPaymentMethodLauncher.Result {
         return intent?.getParcelableExtra(EXTRA_RESULT)
             ?: GooglePayPaymentMethodLauncher.Result.Failed(
-                IllegalArgumentException("Could not parse a valid result.")
+                IllegalArgumentException("Could not parse a valid result."),
+                GooglePayPaymentMethodLauncher.INTERNAL_ERROR
             )
     }
 
@@ -55,6 +56,11 @@ class GooglePayPaymentMethodLauncherContract :
         internal val amount: Int,
         internal val transactionId: String? = null,
     ) : Parcelable {
+        constructor(
+            config: GooglePayPaymentMethodLauncher.Config,
+            currencyCode: String,
+            amount: Int
+        ) : this(config, currencyCode, amount, null)
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
