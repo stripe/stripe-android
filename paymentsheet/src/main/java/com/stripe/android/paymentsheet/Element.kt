@@ -126,10 +126,6 @@ internal sealed class SectionFieldElement {
         ),
     ) : SectionFieldElement() {
 
-        /**
-         * Focus requester is a challenge - Must get this working from spec
-         * other fields need to flow
-         */
         @VisibleForTesting
         val countryElement = Country(
             IdentifierSpec("country"),
@@ -145,8 +141,6 @@ internal sealed class SectionFieldElement {
 
         val fields = otherFields.map { listOf(countryElement).plus(it) }
 
-        // Most section element controllers are created in the transform
-        // instead of the element, where the label is created
         override val controller = AddressController(fields)
     }
 }
