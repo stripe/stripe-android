@@ -56,6 +56,11 @@ class GooglePayPaymentMethodLauncherContract :
         internal val amount: Int,
         internal val transactionId: String? = null,
     ) : Parcelable {
+        constructor(
+            config: GooglePayPaymentMethodLauncher.Config,
+            currencyCode: String,
+            amount: Int
+        ) : this(config, currencyCode, amount, null)
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
