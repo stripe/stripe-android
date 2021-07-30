@@ -58,7 +58,10 @@ public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod 
 	public static final field Bancontact Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Card Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Companion Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion;
+	public static final field Eps Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field Giropay Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Ideal Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field P24 Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field SepaDebit Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Sofort Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public final fun getCode ()Ljava/lang/String;
