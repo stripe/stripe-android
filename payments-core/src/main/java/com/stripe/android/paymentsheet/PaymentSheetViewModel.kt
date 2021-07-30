@@ -19,7 +19,6 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.getErrorResourceID
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -132,6 +131,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     @VisibleForTesting
     internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
+
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
         args.googlePayConfig?.let { config ->
@@ -425,7 +425,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 stripeIntent.value?.let { it ->
                     resetViewState(
                         it,
-                        result.getErrorResourceID()
+                        when (result.errorCode) {
+                            GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
+                                R.string.stripe_failure_connection_error
+                            else -> R.string.stripe_google_pay_error_internal
+                        }
                     )
                 }
             }
