@@ -126,10 +126,6 @@ internal sealed class SectionFieldElement {
         ),
     ) : SectionFieldElement() {
 
-        /**
-         * Focus requester is a challenge - Must get this working from spec
-         * other fields need to flow
-         */
         @VisibleForTesting
         val countryElement = Country(
             IdentifierSpec("country"),
