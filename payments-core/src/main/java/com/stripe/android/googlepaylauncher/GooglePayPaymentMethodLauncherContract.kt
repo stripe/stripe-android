@@ -34,7 +34,8 @@ class GooglePayPaymentMethodLauncherContract :
     ): GooglePayPaymentMethodLauncher.Result {
         return intent?.getParcelableExtra(EXTRA_RESULT)
             ?: GooglePayPaymentMethodLauncher.Result.Failed(
-                IllegalArgumentException("Could not parse a valid result.")
+                IllegalArgumentException("Could not parse a valid result."),
+                GooglePayPaymentMethodLauncher.INTERNAL_ERROR
             )
     }
 

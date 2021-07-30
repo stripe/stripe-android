@@ -72,7 +72,7 @@ class GooglePayPaymentMethodLauncherIntegrationActivity : AppCompatActivity() {
                 "Customer cancelled Google Pay."
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
-                "Google Pay failed. ${result.error.message}"
+                "Google Pay failed: ${result.errorCode}: ${result.error.message}"
             }
         }.let {
             snackbarController.show(it)

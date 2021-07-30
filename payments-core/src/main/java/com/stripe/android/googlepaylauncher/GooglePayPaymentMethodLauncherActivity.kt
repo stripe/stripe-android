@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
@@ -54,7 +55,8 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                 GooglePayPaymentMethodLauncher.Result.Failed(
                     RuntimeException(
                         "GooglePayPaymentMethodLauncherActivity was started without arguments."
-                    )
+                    ),
+                    GooglePayPaymentMethodLauncher.DEVELOPER_ERROR
                 )
             )
             return
@@ -77,7 +79,10 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                     },
                     onFailure = {
                         updateResult(
-                            GooglePayPaymentMethodLauncher.Result.Failed(it)
+                            GooglePayPaymentMethodLauncher.Result.Failed(
+                                it,
+                                GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+                            )
                         )
                     }
                 )
@@ -120,18 +125,19 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                     updateResult(
                         GooglePayPaymentMethodLauncher.Result.Failed(
                             RuntimeException(
-                                "Google Pay failed with error: $statusMessage"
+                                "Google Pay failed with error ${status?.statusCode}: $statusMessage"
                             ),
-                            status?.statusCode
+                            status?.statusCode?.let {
+                                googlePayStatusCodeToErrorCode(it)
+                            } ?: GooglePayPaymentMethodLauncher.INTERNAL_ERROR
                         )
                     )
                 }
                 else -> {
                     updateResult(
                         GooglePayPaymentMethodLauncher.Result.Failed(
-                            RuntimeException(
-                                "Google Pay returned an expected result code."
-                            )
+                            RuntimeException("Google Pay returned an expected result code."),
+                            GooglePayPaymentMethodLauncher.INTERNAL_ERROR
                         )
                     )
                 }
@@ -148,7 +154,8 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             }
         } ?: updateResult(
             GooglePayPaymentMethodLauncher.Result.Failed(
-                IllegalArgumentException("Google Pay data was not available")
+                IllegalArgumentException("Google Pay data was not available"),
+                GooglePayPaymentMethodLauncher.INTERNAL_ERROR
             )
         )
     }
@@ -171,6 +178,15 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private fun disableAnimations() {
         // this is a transparent Activity so we want to disable animations
         overridePendingTransition(0, 0)
+    }
+
+    private fun googlePayStatusCodeToErrorCode(googlePayStatusCode: Int):
+        @GooglePayPaymentMethodLauncher.ErrorCode Int {
+        return when (googlePayStatusCode) {
+            CommonStatusCodes.NETWORK_ERROR -> GooglePayPaymentMethodLauncher.NETWORK_ERROR
+            CommonStatusCodes.DEVELOPER_ERROR -> GooglePayPaymentMethodLauncher.DEVELOPER_ERROR
+            else -> GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+        }
     }
 
     private companion object {
