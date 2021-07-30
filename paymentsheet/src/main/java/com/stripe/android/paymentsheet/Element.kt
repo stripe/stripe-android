@@ -141,8 +141,6 @@ internal sealed class SectionFieldElement {
 
         val fields = otherFields.map { listOf(countryElement).plus(it) }
 
-        // Most section element controllers are created in the transform
-        // instead of the element, where the label is created
         override val controller = AddressController(fields)
     }
 }
