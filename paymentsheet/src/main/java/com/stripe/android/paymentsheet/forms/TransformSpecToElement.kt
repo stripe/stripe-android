@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
@@ -61,8 +62,14 @@ internal class TransformSpecToElement(
             is SectionFieldSpec.Country -> it.transform()
             is SectionFieldSpec.BankDropdown -> it.transform()
             is SectionFieldSpec.SimpleText -> it.transform()
+            is SectionFieldSpec.AddressSpec -> transformAddress()
         }
     }
+
+    internal fun transformAddress() = SectionFieldElement.AddressElement(
+        IdentifierSpec("billing"),
+        resourceRepository.addressRepository
+    )
 
     private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
 // It could be argued that the static text should have a controller, but

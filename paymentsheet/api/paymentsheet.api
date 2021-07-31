@@ -241,6 +241,18 @@ public abstract class com/stripe/android/paymentsheet/specifications/SectionFiel
 	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
 }
 
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;)V

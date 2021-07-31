@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
   <!-- Label for card number entry text field -->
   <string name="acc_label_card_number">Card number</string>
