@@ -57,6 +57,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val mode: Repository.CheckoutMode
         get() = when (viewBinding.modeRadioGroup.checkedRadioButtonId) {
             R.id.mode_payment_button -> Repository.CheckoutMode.Payment
+            R.id.mode_payment_with_setup_button -> Repository.CheckoutMode.Payment_With_Setup
             else -> Repository.CheckoutMode.Setup
         }
 

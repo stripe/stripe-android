@@ -15,7 +15,9 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -160,7 +162,9 @@ internal abstract class BaseAddPaymentMethodFragment(
         addSaveForFutureUseArguments(
             args,
             isCustomer = sheetViewModel.customerConfig != null,
-            isSetupIntent = sheetViewModel.stripeIntent.value is SetupIntent
+            isSetupIntent = (sheetViewModel.stripeIntent.value is SetupIntent
+                || ((sheetViewModel.stripeIntent.value as? PaymentIntent)
+                ?.setupFutureUsage == StripeIntent.Usage.OffSession))
         )
 
         childFragmentManager.commit {
