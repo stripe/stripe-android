@@ -386,7 +386,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-
     @Test
     fun `payment method selection has the fields from formFieldValues`() {
         val formFieldValues = FormFieldValues(
