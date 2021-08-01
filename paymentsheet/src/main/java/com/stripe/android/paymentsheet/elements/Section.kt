@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -62,7 +60,7 @@ internal fun Section(
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         SectionTitle(title)
         SectionCard(content)
-        if(error != null) {
+        if (error != null) {
             SectionError(error)
         }
     }

@@ -117,7 +117,7 @@ internal sealed class SectionFieldElement {
         override val controller: DropdownFieldController,
     ) : SectionFieldElement()
 
-    internal class AddressElement @VisibleForTesting constructor(
+    internal class AddressElement constructor(
         override val identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
         countryCodes: Set<String> = emptySet(),
