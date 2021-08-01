@@ -1,9 +1,5 @@
 [
   {
-    "value": "",
-    "text": "Other"
-  },
-  {
     "value": "arzte_und_apotheker_bank",
     "text": "Ärzte- und Apothekerbank",
     "icon": "arzte_und_apotheker_bank"
@@ -137,5 +133,9 @@
     "value": "vr_bank_braunau",
     "text": "VR-Bank Braunau",
     "icon": "vr_bank_braunau"
+  },
+  {
+    "value": "",
+    "text": "Other"
   }
 ]
