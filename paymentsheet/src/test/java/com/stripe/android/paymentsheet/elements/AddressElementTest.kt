@@ -51,7 +51,7 @@ class AddressElementTest {
             val addressElement = SectionFieldElement.AddressElement(
                 IdentifierSpec("address"),
                 addressFieldElementRepository,
-                countryDropdownFieldController
+                countryDropdownFieldController = countryDropdownFieldController
             )
 
             countryDropdownFieldController.onValueChange(0)
