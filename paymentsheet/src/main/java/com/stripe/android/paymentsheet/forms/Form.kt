@@ -2,10 +2,6 @@ package com.stripe.android.paymentsheet.forms
 
 import android.content.res.Resources
 import androidx.annotation.RestrictTo
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -47,6 +43,8 @@ import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -55,29 +53,34 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-internal val formElementPadding = 16.dp
-
-@ExperimentalAnimationApi
 @Composable
 internal fun Form(
     formViewModel: FormViewModel,
 ) {
-    val hiddenIdentifiers by formViewModel.hiddenIdentifiers.asLiveData().observeAsState(
-        null
+    FormInternal(
+        formViewModel.hiddenIdentifiers,
+        formViewModel.enabled,
+        formViewModel.elements
     )
-    val enabled by formViewModel.enabled.asLiveData().observeAsState(true)
+}
+
+@Composable
+internal fun FormInternal(
+    hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
+    enabledFlow: Flow<Boolean>,
+    elements: List<FormElement>
+) {
+    val hiddenIdentifiers by hiddenIdentifiersFlow.asLiveData().observeAsState(
+        emptyList()
+    )
+    val enabled by enabledFlow.asLiveData().observeAsState(true)
 
     Column(
         modifier = Modifier
             .fillMaxWidth(1f)
     ) {
-        formViewModel.elements.forEach { element ->
-
-            AnimatedVisibility(
-                hiddenIdentifiers?.contains(element.identifier) == false,
-                enter = EnterTransition.None,
-                exit = ExitTransition.None
-            ) {
+        elements.forEach { element ->
+            if (!hiddenIdentifiers.contains(element.identifier)) {
                 when (element) {
                     is SectionElement -> {
                         SectionElementUI(enabled, element, hiddenIdentifiers)
@@ -94,18 +97,13 @@ internal fun Form(
     }
 }
 
-@ExperimentalAnimationApi
 @Composable
 internal fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
     hiddenIdentifiers: List<IdentifierSpec>?,
 ) {
-    AnimatedVisibility(
-        hiddenIdentifiers?.contains(element.identifier) == false,
-        enter = EnterTransition.None,
-        exit = ExitTransition.None
-    ) {
+    if (hiddenIdentifiers?.contains(element.identifier) == false) {
         val controller = element.controller
 
         val error by controller.error.asLiveData().observeAsState(null)
@@ -131,6 +129,29 @@ internal fun SectionElementUI(
                         )
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun AddressElementUI(
+    enabled: Boolean,
+    controller: AddressController
+) {
+    val fields by controller.fieldsFlowable.asLiveData().observeAsState(emptyList())
+    Column {
+        fields.forEachIndexed { index, field ->
+            SectionFieldElementUI(enabled, field)
+            if (index != fields.size - 1) {
+                val cardStyle = CardStyle(isSystemInDarkTheme())
+                Divider(
+                    color = cardStyle.cardBorderColor,
+                    thickness = cardStyle.cardBorderWidth,
+                    modifier = Modifier.padding(
+                        horizontal = cardStyle.cardBorderWidth
+                    )
+                )
             }
         }
     }

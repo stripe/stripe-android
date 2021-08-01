@@ -86,8 +86,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
 
     implementation "androidx.compose.ui:ui:$composeVersion"
-    // Tooling support (Previews, etc.)
-    implementation "androidx.compose.ui:ui-tooling:$composeVersion"
+//     Tooling support (Previews, etc.)
+//    implementation "androidx.compose.ui:ui-tooling-preview:$composeVersion"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation "androidx.compose.foundation:foundation:$composeVersion"
     // Material Design
@@ -101,6 +101,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    debugImplementation "androidx.compose.ui:ui-tooling:$composeVersion"
 
     // dagger
     implementation "com.google.dagger:dagger:$daggerVersion"
