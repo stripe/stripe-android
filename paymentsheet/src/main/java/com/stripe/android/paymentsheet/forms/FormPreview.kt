@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 // @Preview AGP: 7.0.0 will not cause a lint error, until then it is commented out
 @SuppressLint("VisibleForTests")
 @Composable
-fun FormInternalPreview() {
+internal fun FormInternalPreview() {
     val formElements = sofort.layout.items
     val addressFieldElementRepository = AddressFieldElementRepository()
     val bankRepository = BankRepository()
