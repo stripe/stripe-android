@@ -21,7 +21,7 @@ enum class SupportedPaymentMethod(
     val code: String,
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
-    val formSpec: FormSpec?,
+    val formSpec: FormSpec?
 ) {
     Card(
         "card",
