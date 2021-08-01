@@ -713,6 +713,12 @@ internal object PaymentIntentFixtures {
     )
     val PI_WITH_SHIPPING = PARSER.parse(PI_WITH_SHIPPING_JSON)!!
 
+    val PI_OFF_SESSION = PARSER.parse(
+        PI_WITH_SHIPPING_JSON
+    )!!.copy(
+        setupFutureUsage = StripeIntent.Usage.OffSession
+    )
+
     val OXXO_REQUIRES_ACTION_JSON = JSONObject(
         """
         {

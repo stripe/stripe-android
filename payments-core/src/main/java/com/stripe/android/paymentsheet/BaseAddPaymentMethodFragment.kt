@@ -162,9 +162,13 @@ internal abstract class BaseAddPaymentMethodFragment(
         addSaveForFutureUseArguments(
             args,
             isCustomer = sheetViewModel.customerConfig != null,
-            isSetupIntent = (sheetViewModel.stripeIntent.value is SetupIntent
-                || ((sheetViewModel.stripeIntent.value as? PaymentIntent)
-                ?.setupFutureUsage == StripeIntent.Usage.OffSession))
+            isSetupIntent = (
+                sheetViewModel.stripeIntent.value is SetupIntent ||
+                    (
+                        (sheetViewModel.stripeIntent.value as? PaymentIntent)
+                            ?.setupFutureUsage == StripeIntent.Usage.OffSession
+                        )
+                )
         )
 
         childFragmentManager.commit {
