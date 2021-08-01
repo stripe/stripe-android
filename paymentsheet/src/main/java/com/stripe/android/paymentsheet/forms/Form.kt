@@ -29,9 +29,11 @@ import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
@@ -43,10 +45,11 @@ import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -54,9 +57,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Composable
-internal fun Form(
-    formViewModel: FormViewModel,
-) {
+internal fun Form(formViewModel: FormViewModel) {
     FormInternal(
         formViewModel.hiddenIdentifiers,
         formViewModel.enabled,
@@ -174,6 +175,12 @@ internal fun SectionFieldElementUI(
                 controller.label,
                 controller,
                 enabled
+            )
+        }
+        is AddressController -> {
+            AddressElementUI(
+                enabled,
+                controller
             )
         }
     }
@@ -301,7 +308,7 @@ class FormViewModel @Inject internal constructor(
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
         ?: MutableStateFlow(saveForFutureUseInitialValue)
 
-    internal val sectionToFieldIdentifierMap = layout.items
+    private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<FormItemSpec.SectionSpec>()
         .associate { sectionSpec ->
             sectionSpec.identifier to sectionSpec.fields.map {
@@ -344,9 +351,33 @@ class FormViewModel @Inject internal constructor(
             } ?: false
     }
 
-    val completeFormValues = TransformElementToFormFieldValueFlow(
-        elements.getIdInputControllerMap(), hiddenIdentifiers, showingMandate, saveForFutureUse
-    ).transformFlow()
+    private val addressSectionFields = elements
+        .filterIsInstance<SectionElement>()
+        .flatMap { it.fields }
+        .filterIsInstance<SectionFieldElement.AddressElement>()
+        .firstOrNull()
+        ?.fields
+        ?: MutableStateFlow(null)
+
+    @ExperimentalCoroutinesApi
+    val completeFormValues = addressSectionFields.map { addressSectionFields ->
+        addressSectionFields
+            ?.filter { it.controller is InputController }
+            ?.associate { sectionFieldElement ->
+                sectionFieldElement.identifier to sectionFieldElement.controller as InputController
+            }
+            ?.plus(
+                elements.getIdInputControllerMap()
+            ) ?: elements.getIdInputControllerMap()
+    }
+        .flatMapLatest { value ->
+            TransformElementToFormFieldValueFlow(
+                value,
+                hiddenIdentifiers,
+                showingMandate,
+                saveForFutureUse
+            ).transformFlow()
+        }
 
     internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
         populateWith(elements, formFieldValues)

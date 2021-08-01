@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.combine
  * the list of form elements into a [FormFieldValues].
  */
 internal class TransformElementToFormFieldValueFlow(
-    val idControllerMap: Map<IdentifierSpec, InputController>,
+    idControllerMap: Map<IdentifierSpec, InputController>,
     private val hiddenIdentifiers: Flow<List<IdentifierSpec>>,
     val showingMandate: Flow<Boolean>,
     val saveForFutureUse: Flow<Boolean>

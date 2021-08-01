@@ -102,6 +102,10 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
         val showOptionalLabel: Boolean = false
     ) : SectionFieldSpec(identifier)
 
+    data class AddressSpec(
+        override val identifier: IdentifierSpec,
+    ) : SectionFieldSpec(identifier)
+
     internal companion object {
         val NAME = SimpleText(
             IdentifierSpec("name"),
