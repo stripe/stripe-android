@@ -45,7 +45,6 @@ fun FormInternalPreview() {
     )
 }
 
-
 private val EPS_Banks = """
     [
   {
@@ -65,7 +64,6 @@ private val EPS_Banks = """
   ]
    
 """.trimIndent().byteInputStream()
-
 
 private val IDEAL_BANKS = """
     [
@@ -96,7 +94,6 @@ private val P24_BANKS = """
   }
   ]
 """.trimIndent().byteInputStream()
-
 
 private val ZZ_ADDRESS = """
     [
