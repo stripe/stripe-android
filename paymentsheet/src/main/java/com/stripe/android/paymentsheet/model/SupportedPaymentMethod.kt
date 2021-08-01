@@ -21,55 +21,55 @@ enum class SupportedPaymentMethod(
     val code: String,
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
-    val formSpec: FormSpec?,
+    val formSpec: FormSpec?
 ) {
     Card(
         "card",
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
-        null,
+        null
     ),
     Bancontact(
         "bancontact",
         R.string.stripe_paymentsheet_payment_method_bancontact,
         R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-        bancontact,
+        bancontact
     ),
     Sofort(
         "sofort",
         R.string.stripe_paymentsheet_payment_method_sofort,
         R.drawable.stripe_ic_paymentsheet_pm_sofort,
-        sofort,
+        sofort
     ),
     Ideal(
         "ideal",
         R.string.stripe_paymentsheet_payment_method_ideal,
         R.drawable.stripe_ic_paymentsheet_pm_ideal,
-        ideal,
+        ideal
     ),
     SepaDebit(
         "sepa_debit",
         R.string.stripe_paymentsheet_payment_method_sepa_debit,
         R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
-        sepaDebit,
+        sepaDebit
     ),
     Eps(
         "eps",
         R.string.stripe_paymentsheet_payment_method_eps,
         R.drawable.stripe_ic_paymentsheet_pm_eps,
-        eps,
+        eps
     ),
     P24(
         "p24",
         R.string.stripe_paymentsheet_payment_method_p24,
         R.drawable.stripe_ic_paymentsheet_pm_p24,
-        p24,
+        p24
     ),
     Giropay(
         "giropay",
         R.string.stripe_paymentsheet_payment_method_giropay,
         R.drawable.stripe_ic_paymentsheet_pm_giropay,
-        giropay,
+        giropay
     );
 
     override fun toString(): String {
