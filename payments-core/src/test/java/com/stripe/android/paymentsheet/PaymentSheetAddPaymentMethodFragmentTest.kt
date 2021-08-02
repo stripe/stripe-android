@@ -368,7 +368,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_sofort
         )
         assertThat(selection?.iconResource).isEqualTo(
-            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_pm_sofort
+            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_pm_klarna
         )
     }
 
