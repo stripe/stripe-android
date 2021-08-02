@@ -24,7 +24,6 @@ import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
