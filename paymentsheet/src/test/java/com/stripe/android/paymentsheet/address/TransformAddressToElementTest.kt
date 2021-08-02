@@ -22,7 +22,7 @@ class TransformAddressToElementTest {
 
         val addressLine1 = SectionFieldSpec.SimpleText(
             IdentifierSpec("line1"),
-            R.string.address_label_address,
+            R.string.address_label_address_line1,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
             showOptionalLabel = false

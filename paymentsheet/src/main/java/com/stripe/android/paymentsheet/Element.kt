@@ -1,7 +1,11 @@
 package com.stripe.android.paymentsheet
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
+import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
+import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
@@ -9,6 +13,8 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /**
  * This is used to define each section in the visual form layout.
@@ -110,4 +116,31 @@ internal sealed class SectionFieldElement {
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController,
     ) : SectionFieldElement()
+
+    internal class AddressElement @VisibleForTesting constructor(
+        override val identifier: IdentifierSpec,
+        private val addressFieldRepository: AddressFieldElementRepository,
+        countryCodes: Set<String> = emptySet(),
+        countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
+            CountryConfig(countryCodes)
+        ),
+    ) : SectionFieldElement() {
+
+        @VisibleForTesting
+        val countryElement = Country(
+            IdentifierSpec("country"),
+            countryDropdownFieldController
+        )
+
+        private val otherFields = countryElement.controller.rawFieldValue
+            .distinctUntilChanged()
+            .map { countryCode ->
+                addressFieldRepository.get(countryCode)
+                    ?: emptyList()
+            }
+
+        val fields = otherFields.map { listOf(countryElement).plus(it) }
+
+        override val controller = AddressController(fields)
+    }
 }
