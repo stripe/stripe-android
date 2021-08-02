@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Caption for Country field on address form -->
+    <string name="address_label_country" tools:ignore="MissingTranslation">Country</string>
+    <!-- Short string for postal code (text used in non-US countries) -->
+    <string name="address_label_postal_code">Postal code</string>
+    <!-- Caption for City field on address form -->
+    <string name="address_label_city">City</string>
+    <!-- Caption for State field on address form (only countries that use state , like United States) -->
+    <string name="address_label_state">State</string>
+    <!-- Label for input requesting zip code, used for US based addreses -->
+    <string name="address_label_zip_code">ZIP Code</string>
+    <!-- Caption for Name field on address form -->
+    <string name="address_label_name">Name</string>
+    <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+    <string name="address_label_province">Province</string>
+    <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+    <string name="address_label_county">County</string>
+</resources>

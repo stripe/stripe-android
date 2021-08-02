@@ -16,7 +16,6 @@ configurations {
 }
 
 dependencies {
-    implementation project(":paymentsheet")
     implementation libraries.androidx.annotation
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.browser

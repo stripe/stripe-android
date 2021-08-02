@@ -77,6 +77,7 @@ configurations {
 }
 
 dependencies {
+    implementation project(":payments-core")
     implementation libraries.androidx.fragment.ktx
     implementation libraries.androidx.lifecycle.livedata.ktx
     implementation libraries.androidx.lifecycle.viewmodel.ktx
@@ -104,6 +105,8 @@ dependencies {
 
     // dagger
     implementation "com.google.dagger:dagger:$daggerVersion"
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'com.google.android.material:material:1.4.0'
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
     // resource deserialization

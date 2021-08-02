@@ -12,12 +12,7 @@
   <string name="address_label_bb_jm_parish" tools:ignore="MissingTranslation">Parish</string>
   <!-- Used to describe a field of an address -->
   <string name="address_label_cedex" tools:ignore="MissingTranslation">Cedex</string>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">City</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Country</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">County</string>
+
   <!-- Used to describe a field of an address -->
   <string name="address_label_department" tools:ignore="MissingTranslation">Department</string>
   <!-- Used to describe a field of an address -->
@@ -36,8 +31,7 @@
   <string name="address_label_jp_prefecture" tools:ignore="MissingTranslation">Prefecture</string>
   <!-- Used to describe a field of an address in South Korea -->
   <string name="address_label_kr_do_si" tools:ignore="MissingTranslation">Do si</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Name</string>
+
   <!-- Used to describe a field of an address -->
   <string name="address_label_neighborhood" tools:ignore="MissingTranslation">Neighborhood</string>
   <!-- Used to describe a field of an address. -->
@@ -46,16 +40,10 @@
   <string name="address_label_post_town" tools:ignore="MissingTranslation">Post or Town</string>
   <!-- Short string for postal code (text used in non-US countries) -->
   <string name="address_label_postal_code">Postal code</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">Province</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">State</string>
   <!-- Used to describe a field of an address. -->
   <string name="address_label_suburb" tools:ignore="MissingTranslation">Suburb</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township" tools:ignore="MissingTranslation">Village or Township</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">ZIP Code</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="blank_and_required" tools:ignore="MissingTranslation">This field cannot be blank.</string>
   <!-- Caption for Email field on address form -->
