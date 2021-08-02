@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
@@ -24,6 +25,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
@@ -179,7 +181,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private fun fetchSavedSelection() {
         viewModelScope.launch {
             val savedSelection = withContext(workContext) {
-                prefsRepository.getSavedSelection()
+                prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
             }
             _savedSelection.value = savedSelection
         }

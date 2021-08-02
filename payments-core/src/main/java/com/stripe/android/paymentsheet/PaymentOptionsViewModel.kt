@@ -126,7 +126,6 @@ internal class PaymentOptionsViewModel(
                 DefaultPrefsRepository(
                     application,
                     customerId = id,
-                    isGooglePayReady = { starterArgs.isGooglePayReady },
                     workContext = Dispatchers.IO
                 )
             } ?: PrefsRepository.Noop()

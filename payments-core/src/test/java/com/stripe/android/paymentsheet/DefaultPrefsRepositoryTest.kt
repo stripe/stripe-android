@@ -22,7 +22,6 @@ internal class DefaultPrefsRepositoryTest {
     private val prefsRepository = DefaultPrefsRepository(
         ApplicationProvider.getApplicationContext(),
         "cus_123",
-        { isGooglePayReady },
         testDispatcher
     )
 
@@ -37,7 +36,7 @@ internal class DefaultPrefsRepositoryTest {
             PaymentSelection.GooglePay
         )
         assertThat(
-            prefsRepository.getSavedSelection()
+            prefsRepository.getSavedSelection(isGooglePayReady)
         ).isEqualTo(
             SavedSelection.GooglePay
         )
@@ -52,7 +51,7 @@ internal class DefaultPrefsRepositoryTest {
                 PaymentSelection.GooglePay
             )
             assertThat(
-                prefsRepository.getSavedSelection()
+                prefsRepository.getSavedSelection(isGooglePayReady)
             ).isEqualTo(
                 SavedSelection.None
             )
@@ -66,7 +65,7 @@ internal class DefaultPrefsRepositoryTest {
             )
         )
         assertThat(
-            prefsRepository.getSavedSelection()
+            prefsRepository.getSavedSelection(isGooglePayReady)
         ).isEqualTo(
             SavedSelection.PaymentMethod(
                 id = "pm_123456789"
