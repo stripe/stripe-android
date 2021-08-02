@@ -97,7 +97,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
 
-            assertThat(prefsRepository.getSavedSelection())
+            assertThat(prefsRepository.getSavedSelection(true))
                 .isEqualTo(SavedSelection.None)
         }
 
