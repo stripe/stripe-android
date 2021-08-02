@@ -5,7 +5,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -16,7 +15,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultFlowControllerInitializer(
-    private val prefsRepositoryFactory: (String, Boolean) -> PrefsRepository,
+    private val prefsRepositoryFactory: (String) -> PrefsRepository,
     private val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean,
     private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
@@ -34,10 +33,9 @@ internal class DefaultFlowControllerInitializer(
         this@DefaultFlowControllerInitializer.stripeIntentRepository = stripeIntentRepository
         this@DefaultFlowControllerInitializer.paymentMethodsRepository = paymentMethodsRepository
 
-        val isGooglePayReady =
-            clientSecret is PaymentIntentClientSecret && paymentSheetConfiguration?.let {
-                isGooglePayReadySupplier(it.googlePay?.environment)
-            } ?: false
+        val isGooglePayReady = paymentSheetConfiguration?.let {
+            isGooglePayReadySupplier(it.googlePay?.environment)
+        } ?: false
         paymentSheetConfiguration?.customer?.let { customerConfig ->
             createWithCustomer(
                 clientSecret,
@@ -59,8 +57,7 @@ internal class DefaultFlowControllerInitializer(
         isGooglePayReady: Boolean
     ): FlowControllerInitializer.InitResult {
         val prefsRepository = prefsRepositoryFactory(
-            customerConfig.id,
-            isGooglePayReady
+            customerConfig.id
         )
 
         return runCatching {
