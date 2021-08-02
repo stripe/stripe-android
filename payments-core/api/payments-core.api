@@ -5162,11 +5162,11 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewMod
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvidePrefsRepositoryFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvidePrefsRepositoryFactory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvidePrefsRepositoryFactory;
 	public fun get ()Lcom/stripe/android/paymentsheet/PrefsRepository;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePrefsRepository (Landroid/content/Context;Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;Lcom/stripe/android/googlepaylauncher/GooglePayRepository;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/PrefsRepository;
+	public static fun providePrefsRepository (Landroid/content/Context;Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/PrefsRepository;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvideStripeIntentRepositoryFactory : dagger/internal/Factory {
