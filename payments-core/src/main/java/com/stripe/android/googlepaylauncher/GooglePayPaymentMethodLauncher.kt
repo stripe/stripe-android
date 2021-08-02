@@ -3,6 +3,7 @@ package com.stripe.android.googlepaylauncher
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.IntDef
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
@@ -128,39 +129,23 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     /**
-     * Present the Google Pay UI when the amount of the transaction is not yet known.
-     *
-     * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
-     *
-     * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
-     */
-    fun present(currencyCode: String) {
-        check(isReady) {
-            "present() may only be called when Google Pay is available on this device."
-        }
-
-        activityResultLauncher.launch(
-            GooglePayPaymentMethodLauncherContract.Args(
-                config = config,
-                currencyCode = currencyCode,
-                amount = 0
-            )
-        )
-    }
-
-    /**
-     * Present the Google Pay UI when the amount of the transaction is known.
+     * Present the Google Pay UI.
      *
      * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
      *
      * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
      * @param amount Amount intended to be collected. A positive integer representing how much to
      * charge in the smallest currency unit (e.g., 100 cents to charge $1.00 or 100 to charge ¥100,
-     * a zero-decimal currency).
+     * a zero-decimal currency). If the amount is not yet known, use 0.
+     * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
+     * existing ID or generate a specific one for Google Pay transaction attempts.
+     * This field is required when you send callbacks to the Google Transaction Events API.
      */
+    @JvmOverloads
     fun present(
         currencyCode: String,
-        amount: Int
+        amount: Int = 0,
+        transactionId: String? = null
     ) {
         check(isReady) {
             "present() may only be called when Google Pay is available on this device."
@@ -170,7 +155,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
             GooglePayPaymentMethodLauncherContract.Args(
                 config = config,
                 currencyCode = currencyCode,
-                amount = amount
+                amount = amount,
+                transactionId = transactionId
             )
         )
     }
@@ -237,16 +223,31 @@ class GooglePayPaymentMethodLauncher internal constructor(
     }
 
     sealed class Result : Parcelable {
+        /**
+         * Represents a successful transaction.
+         *
+         * @param paymentMethod The resulting payment method.
+         */
         @Parcelize
         data class Completed(
             val paymentMethod: PaymentMethod
         ) : Result()
 
+        /**
+         * Represents a failed transaction.
+         *
+         * @param error The failure reason.
+         * @param errorCode The failure [ErrorCode].
+         */
         @Parcelize
         data class Failed(
-            val error: Throwable
+            val error: Throwable,
+            @ErrorCode val errorCode: Int
         ) : Result()
 
+        /**
+         * Represents a transaction that was canceled by the user.
+         */
         @Parcelize
         object Canceled : Result()
     }
@@ -259,7 +260,24 @@ class GooglePayPaymentMethodLauncher internal constructor(
         fun onResult(result: Result)
     }
 
+    /**
+     * Error codes representing the possible error types for [Result.Failed].
+     * See the corresponding [Result.Failed.error] message for more details.
+     */
+    @Target(AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.TYPE)
+    @IntDef(INTERNAL_ERROR, DEVELOPER_ERROR, NETWORK_ERROR)
+    annotation class ErrorCode
+
     internal companion object {
         internal const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
+
+        // Generic internal error
+        const val INTERNAL_ERROR = 1
+
+        // The application is misconfigured
+        const val DEVELOPER_ERROR = 2
+
+        // Error executing a network call
+        const val NETWORK_ERROR = 3
     }
 }
