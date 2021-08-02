@@ -116,6 +116,22 @@ internal class TextFieldControllerTest {
     }
 
     @Test
+    fun `Verify is blank optional fields are considered complete`() {
+        val controller = createControllerWithState(showOptionalLabel = true)
+        controller.onValueChange("invalid")
+
+        var isComplete = true
+        controller.isComplete.asLiveData()
+            .observeForever {
+                isComplete = it
+            }
+
+        assertThat(isComplete).isEqualTo(false)
+        controller.onValueChange("")
+        assertThat(isComplete).isEqualTo(true)
+    }
+
+    @Test
     fun `Verify is visible error is true when onValueChange and shouldShowError returns true`() {
         val controller = createControllerWithState()
         var visibleError = false
@@ -205,7 +221,9 @@ internal class TextFieldControllerTest {
         verify(config).filter("1a2b3c4d")
     }
 
-    private fun createControllerWithState(): TextFieldController {
+    private fun createControllerWithState(
+        showOptionalLabel: Boolean = false
+    ): TextFieldController {
         val config: TextFieldConfig = mock {
             on { determineState("full") } doReturn Full
             on { filter("full") } doReturn "full"
@@ -229,7 +247,7 @@ internal class TextFieldControllerTest {
             on { label } doReturn R.string.address_label_name
         }
 
-        return TextFieldController(config)
+        return TextFieldController(config, showOptionalLabel)
     }
 
     companion object {
@@ -238,6 +256,8 @@ internal class TextFieldControllerTest {
         object ShowWhenNoFocus : TextFieldState {
             override fun isValid(): Boolean = false
             override fun isFull(): Boolean = false
+            override fun isBlank(): Boolean = false
+
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
             override fun getError() = fieldError
         }
