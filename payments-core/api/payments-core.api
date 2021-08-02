@@ -4606,13 +4606,6 @@ public abstract interface class com/stripe/android/networking/AnalyticsRequestEx
 	public abstract fun executeAsync (Lcom/stripe/android/networking/AnalyticsRequest;)V
 }
 
-public final class com/stripe/android/networking/AnalyticsRequestExecutor$Default : com/stripe/android/networking/AnalyticsRequestExecutor {
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)V
-	public synthetic fun <init> (Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun executeAsync (Lcom/stripe/android/networking/AnalyticsRequest;)V
-}
-
 public final class com/stripe/android/networking/AnalyticsRequestFactory {
 	public final synthetic fun createRequest (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/AnalyticsRequest;
 }

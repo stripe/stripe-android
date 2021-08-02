@@ -26,6 +26,7 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
@@ -52,7 +53,7 @@ internal class StripePaymentController internal constructor(
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
-        AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
+        DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging)),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
         AnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
