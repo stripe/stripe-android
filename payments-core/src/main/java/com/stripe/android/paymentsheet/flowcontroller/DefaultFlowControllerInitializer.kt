@@ -88,7 +88,7 @@ internal class DefaultFlowControllerInitializer(
                             stripeIntent = stripeIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
-                            savedSelection = prefsRepository.getSavedSelection(),
+                            savedSelection = prefsRepository.getSavedSelection(isGooglePayReady),
                             isGooglePayReady = isGooglePayReady
                         )
                     )
@@ -143,7 +143,7 @@ internal class DefaultFlowControllerInitializer(
         isGooglePayReady: Boolean,
         paymentMethods: List<PaymentMethod>
     ) {
-        if (prefsRepository.getSavedSelection() == SavedSelection.None) {
+        if (prefsRepository.getSavedSelection(isGooglePayReady) == SavedSelection.None) {
             when {
                 paymentMethods.isNotEmpty() -> {
                     PaymentSelection.Saved(paymentMethods.first())

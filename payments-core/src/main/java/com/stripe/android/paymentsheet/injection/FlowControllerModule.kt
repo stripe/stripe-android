@@ -57,7 +57,6 @@ internal class FlowControllerModule {
                 DefaultPrefsRepository(
                     appContext,
                     customerId,
-                    { isGooglePayReady },
                     Dispatchers.IO
                 )
             },
