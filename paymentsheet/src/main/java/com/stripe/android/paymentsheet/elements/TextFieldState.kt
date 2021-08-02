@@ -34,4 +34,10 @@ internal interface TextFieldState {
      * This is needed to know when to advance to the next field.
      */
     fun isFull(): Boolean
+
+    /**
+     * This is used to indicate the field is blank which can be helpful when ignoring optional
+     * fields.
+     */
+    fun isBlank(): Boolean
 }

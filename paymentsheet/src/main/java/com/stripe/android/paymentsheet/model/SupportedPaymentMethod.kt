@@ -5,7 +5,10 @@ import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.FormSpec
 import com.stripe.android.paymentsheet.specifications.bancontact
+import com.stripe.android.paymentsheet.specifications.eps
+import com.stripe.android.paymentsheet.specifications.giropay
 import com.stripe.android.paymentsheet.specifications.ideal
+import com.stripe.android.paymentsheet.specifications.p24
 import com.stripe.android.paymentsheet.specifications.sepaDebit
 import com.stripe.android.paymentsheet.specifications.sofort
 
@@ -49,6 +52,24 @@ enum class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_sepa_debit,
         R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
         sepaDebit
+    ),
+    Eps(
+        "eps",
+        R.string.stripe_paymentsheet_payment_method_eps,
+        R.drawable.stripe_ic_paymentsheet_pm_eps,
+        eps
+    ),
+    P24(
+        "p24",
+        R.string.stripe_paymentsheet_payment_method_p24,
+        R.drawable.stripe_ic_paymentsheet_pm_p24,
+        p24
+    ),
+    Giropay(
+        "giropay",
+        R.string.stripe_paymentsheet_payment_method_giropay,
+        R.drawable.stripe_ic_paymentsheet_pm_giropay,
+        giropay
     );
 
     override fun toString(): String {
