@@ -18,6 +18,7 @@ import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -300,7 +301,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
     ): T {
         val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
         val stripeRepository = StripeApiRepository(application, { publishableKey })
-        val analyticsRequestExecutor = AnalyticsRequestExecutor.Default(
+        val analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
             Logger.getInstance(args.enableLogging),
             workContext
         )

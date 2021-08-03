@@ -83,7 +83,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger
     ),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
-        AnalyticsRequestExecutor.Default(logger, workContext),
+        DefaultAnalyticsRequestExecutor(logger, workContext),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
     private val analyticsRequestFactory: AnalyticsRequestFactory =

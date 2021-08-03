@@ -11,6 +11,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ class GooglePayLauncher internal constructor(
     private val readyCallback: ReadyCallback,
     private val activityResultLauncher: ActivityResultLauncher<GooglePayLauncherContract.Args>,
     analyticsRequestFactory: AnalyticsRequestFactory,
-    analyticsRequestExecutor: AnalyticsRequestExecutor = AnalyticsRequestExecutor.Default()
+    analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor()
 ) {
     private var isReady = false
 
