@@ -5,6 +5,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -33,9 +34,10 @@ internal class DefaultFlowControllerInitializer(
         this@DefaultFlowControllerInitializer.stripeIntentRepository = stripeIntentRepository
         this@DefaultFlowControllerInitializer.paymentMethodsRepository = paymentMethodsRepository
 
-        val isGooglePayReady = paymentSheetConfiguration?.let {
-            isGooglePayReadySupplier(it.googlePay?.environment)
-        } ?: false
+        val isGooglePayReady =
+            clientSecret is PaymentIntentClientSecret && paymentSheetConfiguration?.let {
+                isGooglePayReadySupplier(it.googlePay?.environment)
+            } ?: false
         paymentSheetConfiguration?.customer?.let { customerConfig ->
             createWithCustomer(
                 clientSecret,
