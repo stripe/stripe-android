@@ -10,28 +10,27 @@ import kotlin.coroutines.CoroutineContext
 internal class DefaultPrefsRepository(
     private val context: Context,
     private val customerId: String,
-    private val isGooglePayReady: suspend () -> Boolean,
     private val workContext: CoroutineContext
 ) : PrefsRepository {
     private val prefs: SharedPreferences by lazy {
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
     }
 
-    override suspend fun getSavedSelection(): SavedSelection = withContext(workContext) {
-        val prefData = prefs.getString(getKey(), null).orEmpty().split(":")
-        val key = prefData.firstOrNull()
-        when (key) {
-            "google_pay" -> {
-                SavedSelection.GooglePay.takeIf { isGooglePayReady() }
-            }
-            "payment_method" -> {
-                prefData.getOrNull(1)?.let {
-                    SavedSelection.PaymentMethod(id = it)
+    override suspend fun getSavedSelection(isGooglePayAvailable: Boolean): SavedSelection =
+        withContext(workContext) {
+            val prefData = prefs.getString(getKey(), null).orEmpty().split(":")
+            when (prefData.firstOrNull()) {
+                "google_pay" -> {
+                    SavedSelection.GooglePay.takeIf { isGooglePayAvailable }
                 }
-            }
-            else -> null
-        } ?: SavedSelection.None
-    }
+                "payment_method" -> {
+                    prefData.getOrNull(1)?.let {
+                        SavedSelection.PaymentMethod(id = it)
+                    }
+                }
+                else -> null
+            } ?: SavedSelection.None
+        }
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {

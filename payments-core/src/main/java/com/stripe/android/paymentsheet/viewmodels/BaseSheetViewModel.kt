@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
@@ -24,6 +25,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
@@ -103,7 +105,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         get() = customerConfig != null && stripeIntent.value is PaymentIntent
 
     init {
-        fetchSavedSelection()
+        viewModelScope.launch {
+            val savedSelection = withContext(workContext) {
+                prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
+            }
+            _savedSelection.value = savedSelection
+        }
     }
 
     val fragmentConfig = MediatorLiveData<FragmentConfig?>().also { configLiveData ->
@@ -174,15 +181,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun updateSelection(selection: PaymentSelection?) {
         _selection.value = selection
-    }
-
-    private fun fetchSavedSelection() {
-        viewModelScope.launch {
-            val savedSelection = withContext(workContext) {
-                prefsRepository.getSavedSelection()
-            }
-            _savedSelection.value = savedSelection
-        }
     }
 
     abstract fun onUserCancel()

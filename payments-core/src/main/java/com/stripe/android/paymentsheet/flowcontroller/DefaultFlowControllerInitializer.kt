@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultFlowControllerInitializer(
-    private val prefsRepositoryFactory: (String, Boolean) -> PrefsRepository,
+    private val prefsRepositoryFactory: (String) -> PrefsRepository,
     private val isGooglePayReadySupplier: suspend (PaymentSheet.GooglePayConfiguration.Environment?) -> Boolean,
     private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
@@ -59,8 +59,7 @@ internal class DefaultFlowControllerInitializer(
         isGooglePayReady: Boolean
     ): FlowControllerInitializer.InitResult {
         val prefsRepository = prefsRepositoryFactory(
-            customerConfig.id,
-            isGooglePayReady
+            customerConfig.id
         )
 
         return runCatching {
@@ -88,7 +87,7 @@ internal class DefaultFlowControllerInitializer(
                             stripeIntent = stripeIntent,
                             paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
-                            savedSelection = prefsRepository.getSavedSelection(),
+                            savedSelection = prefsRepository.getSavedSelection(isGooglePayReady),
                             isGooglePayReady = isGooglePayReady
                         )
                     )
@@ -143,7 +142,7 @@ internal class DefaultFlowControllerInitializer(
         isGooglePayReady: Boolean,
         paymentMethods: List<PaymentMethod>
     ) {
-        if (prefsRepository.getSavedSelection() == SavedSelection.None) {
+        if (prefsRepository.getSavedSelection(isGooglePayReady) == SavedSelection.None) {
             when {
                 paymentMethods.isNotEmpty() -> {
                     PaymentSelection.Saved(paymentMethods.first())

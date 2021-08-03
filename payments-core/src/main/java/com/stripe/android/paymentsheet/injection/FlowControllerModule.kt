@@ -53,11 +53,10 @@ internal class FlowControllerModule {
     fun provideFlowControllerInitializer(appContext: Context): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
             prefsRepositoryFactory =
-            { customerId: String, isGooglePayReady: Boolean ->
+            { customerId: String ->
                 DefaultPrefsRepository(
                     appContext,
                     customerId,
-                    { isGooglePayReady },
                     Dispatchers.IO
                 )
             },

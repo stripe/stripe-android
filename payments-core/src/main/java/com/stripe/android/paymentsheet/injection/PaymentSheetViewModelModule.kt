@@ -24,7 +24,6 @@ import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -117,14 +116,12 @@ internal abstract class PaymentSheetViewModelModule {
         fun providePrefsRepository(
             appContext: Context,
             starterArgs: PaymentSheetContract.Args,
-            googlePayRepository: GooglePayRepository,
             @IOContext workContext: CoroutineContext
         ): PrefsRepository {
             return starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
                     appContext,
                     customerId = id,
-                    isGooglePayReady = { googlePayRepository.isReady().first() },
                     workContext = workContext
                 )
             } ?: PrefsRepository.Noop()
