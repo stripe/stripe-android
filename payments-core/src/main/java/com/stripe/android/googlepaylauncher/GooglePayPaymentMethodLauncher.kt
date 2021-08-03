@@ -12,6 +12,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -26,12 +28,13 @@ import java.util.Locale
  *
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
-class GooglePayPaymentMethodLauncher internal constructor(
-    lifecycleScope: CoroutineScope,
-    private val config: Config,
+@JvmSuppressWildcards
+class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
+    @Assisted lifecycleScope: CoroutineScope,
+    @Assisted private val config: Config,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-    private val readyCallback: ReadyCallback,
-    private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+    @Assisted private val readyCallback: ReadyCallback,
+    @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
     analyticsRequestFactory: AnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor = AnalyticsRequestExecutor.Default()
 ) {

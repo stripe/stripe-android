@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.PaymentController
@@ -19,6 +20,8 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -82,7 +85,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository: PrefsRepository,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext,
-    private val paymentController: PaymentController
+    private val paymentController: PaymentController,
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -176,15 +180,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun setupGooglePay(activity: ComponentActivity) {
-        googlePayLauncherConfig?.let {
+        googlePayLauncherConfig?.let { config ->
             googlePayPaymentMethodLauncher =
-                GooglePayPaymentMethodLauncher(
-                    activity = activity,
-                    config = it,
+                googlePayPaymentMethodLauncherFactory.create(
+                    lifecycleScope = activity.lifecycleScope,
+                    config = config,
                     readyCallback = { isReady ->
                         _isGooglePayReady.value = isReady
                     },
-                    resultCallback = ::onGooglePayResult
+                    activityResultLauncher = activity.registerForActivityResult(
+                        GooglePayPaymentMethodLauncherContract()
+                    ) { result ->
+                        onGooglePayResult(result)
+                    }
                 )
         }
     }

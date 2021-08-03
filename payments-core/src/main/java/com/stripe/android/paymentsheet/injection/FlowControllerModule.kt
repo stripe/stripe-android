@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networking.AnalyticsRequestExecutor
@@ -16,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowControllerInitializer
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerInitializer
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
@@ -50,7 +50,11 @@ internal class FlowControllerModule {
 
     @Provides
     @Singleton
-    fun provideFlowControllerInitializer(appContext: Context): FlowControllerInitializer {
+    @JvmSuppressWildcards
+    fun provideFlowControllerInitializer(
+        appContext: Context,
+        googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository
+    ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
             prefsRepositoryFactory =
             { customerId: String ->
@@ -63,8 +67,7 @@ internal class FlowControllerModule {
             isGooglePayReadySupplier =
             { environment ->
                 val googlePayRepository = environment?.let {
-                    DefaultGooglePayRepository(
-                        appContext,
+                    googlePayRepositoryFactory(
                         when (environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
                                 GooglePayEnvironment.Production
@@ -81,18 +84,26 @@ internal class FlowControllerModule {
 
     @Provides
     @Singleton
-    fun provideEventReporter(
+    fun provideAnalyticsRequestFactory(
         appContext: Context,
         lazyPaymentConfiguration: Lazy<PaymentConfiguration>
+    ) = AnalyticsRequestFactory(
+        appContext,
+        { lazyPaymentConfiguration.get().publishableKey },
+        setOf(PaymentSheetEvent.PRODUCT_USAGE)
+    )
+
+    @Provides
+    @Singleton
+    fun provideEventReporter(
+        appContext: Context,
+        analyticsRequestFactory: AnalyticsRequestFactory
     ): EventReporter {
         return DefaultEventReporter(
             mode = EventReporter.Mode.Custom,
             DefaultDeviceIdRepository(appContext, Dispatchers.IO),
             AnalyticsRequestExecutor.Default(),
-            AnalyticsRequestFactory(
-                appContext,
-                { lazyPaymentConfiguration.get().publishableKey }
-            ),
+            analyticsRequestFactory,
             Dispatchers.IO
         )
     }
