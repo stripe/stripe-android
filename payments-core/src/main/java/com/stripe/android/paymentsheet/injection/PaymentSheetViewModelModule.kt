@@ -7,7 +7,10 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
@@ -15,6 +18,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
@@ -131,5 +135,21 @@ internal abstract class PaymentSheetViewModelModule {
         @Singleton
         fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
             Logger.getInstance(enableLogging)
+
+        @Provides
+        @Singleton
+        fun provideAnalyticsRequestFactory(
+            appContext: Context,
+            lazyPaymentConfiguration: Lazy<PaymentConfiguration>
+        ) = AnalyticsRequestFactory(
+            appContext,
+            { lazyPaymentConfiguration.get().publishableKey },
+            setOf(PaymentSheetEvent.PRODUCT_USAGE)
+        )
+
+        @Provides
+        @Singleton
+        fun provideAnalyticsRequestExecutor(): AnalyticsRequestExecutor =
+            DefaultAnalyticsRequestExecutor()
     }
 }
