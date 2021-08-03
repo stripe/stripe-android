@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -102,7 +102,7 @@ internal class FlowControllerModule {
         return DefaultEventReporter(
             mode = EventReporter.Mode.Custom,
             DefaultDeviceIdRepository(appContext, Dispatchers.IO),
-            AnalyticsRequestExecutor.Default(),
+            DefaultAnalyticsRequestExecutor(),
             analyticsRequestFactory,
             Dispatchers.IO
         )

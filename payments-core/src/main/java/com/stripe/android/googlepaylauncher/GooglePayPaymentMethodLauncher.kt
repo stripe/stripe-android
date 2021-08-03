@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +37,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted private val readyCallback: ReadyCallback,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
     analyticsRequestFactory: AnalyticsRequestFactory,
-    analyticsRequestExecutor: AnalyticsRequestExecutor = AnalyticsRequestExecutor.Default()
+    analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor()
 ) {
     private var isReady = false
 

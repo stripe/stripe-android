@@ -20,6 +20,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -71,7 +72,7 @@ class CardNumberEditText internal constructor(
         workContext,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         DefaultStaticCardAccountRanges(),
-        AnalyticsRequestExecutor.Default(),
+        DefaultAnalyticsRequestExecutor(),
         AnalyticsRequestFactory(
             context,
             publishableKeyProvider = publishableKeySupplier

@@ -38,7 +38,7 @@ enum class SupportedPaymentMethod(
     Sofort(
         "sofort",
         R.string.stripe_paymentsheet_payment_method_sofort,
-        R.drawable.stripe_ic_paymentsheet_pm_sofort,
+        R.drawable.stripe_ic_paymentsheet_pm_klarna,
         sofort
     ),
     Ideal(
