@@ -102,7 +102,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         get() = customerConfig != null && stripeIntent.value is PaymentIntent
 
     init {
-        fetchSavedSelection()
+        viewModelScope.launch {
+            val savedSelection = withContext(workContext) {
+                prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
+            }
+            _savedSelection.value = savedSelection
+        }
     }
 
     val fragmentConfig = MediatorLiveData<FragmentConfig?>().also { configLiveData ->
@@ -173,15 +178,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun updateSelection(selection: PaymentSelection?) {
         _selection.value = selection
-    }
-
-    private fun fetchSavedSelection() {
-        viewModelScope.launch {
-            val savedSelection = withContext(workContext) {
-                prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
-            }
-            _savedSelection.value = savedSelection
-        }
     }
 
     abstract fun onUserCancel()
