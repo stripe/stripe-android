@@ -7,6 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
@@ -126,6 +127,6 @@ internal abstract class PaymentSheetViewModelModule {
         @Provides
         @Singleton
         fun provideAnalyticsRequestExecutor(): AnalyticsRequestExecutor =
-            AnalyticsRequestExecutor.Default()
+            DefaultAnalyticsRequestExecutor()
     }
 }
