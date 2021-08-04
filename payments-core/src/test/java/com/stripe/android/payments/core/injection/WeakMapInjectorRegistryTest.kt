@@ -37,7 +37,6 @@ class WeakMapInjectorRegistryTest {
             WeakMapInjectorRegistry.retrieve(keyForInjector1),
             WeakMapInjectorRegistry.retrieve(keyForInjector2)
         )
-
     }
 
     @Suppress("UNUSED_VALUE")

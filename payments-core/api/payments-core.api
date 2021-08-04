@@ -4816,6 +4816,18 @@ public final class com/stripe/android/payments/core/injection/DaggerAuthenticati
 public abstract interface annotation class com/stripe/android/payments/core/injection/IOContext : java/lang/annotation/Annotation {
 }
 
+public abstract interface class com/stripe/android/payments/core/injection/Injector {
+}
+
+public abstract interface annotation class com/stripe/android/payments/core/injection/InjectorKey : java/lang/annotation/Annotation {
+}
+
+public abstract interface class com/stripe/android/payments/core/injection/InjectorRegistry {
+	public abstract fun nextKey ()I
+	public abstract fun register (Lcom/stripe/android/payments/core/injection/Injector;I)V
+	public abstract fun retrieve (I)Lcom/stripe/android/payments/core/injection/Injector;
+}
+
 public abstract interface annotation class com/stripe/android/payments/core/injection/IntentAuthenticatorKey : java/lang/annotation/Annotation {
 	public abstract fun value ()Ljava/lang/Class;
 }
@@ -4892,6 +4904,13 @@ public final class com/stripe/android/payments/core/injection/WeChatPayAuthentic
 	public fun get ()Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideWeChatAuthenticator$payments_core_release (Lcom/stripe/android/payments/core/injection/WeChatPayAuthenticatorModule;Lcom/stripe/android/payments/core/authentication/UnsupportedAuthenticator;)Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
+}
+
+public final class com/stripe/android/payments/core/injection/WeakMapInjectorRegistry : com/stripe/android/payments/core/injection/InjectorRegistry {
+	public static final field INSTANCE Lcom/stripe/android/payments/core/injection/WeakMapInjectorRegistry;
+	public fun nextKey ()I
+	public fun register (Lcom/stripe/android/payments/core/injection/Injector;I)V
+	public fun retrieve (I)Lcom/stripe/android/payments/core/injection/Injector;
 }
 
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
