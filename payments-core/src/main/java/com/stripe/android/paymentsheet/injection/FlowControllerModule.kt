@@ -3,12 +3,14 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
-import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
+import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.FlowController
@@ -28,12 +30,18 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Module
 internal class FlowControllerModule {
     @Provides
     @Named(ENABLE_LOGGING)
     fun provideEnabledLogging(): Boolean = false
+
+    @Provides
+    @Singleton
+    fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
+        Logger.getInstance(enableLogging)
 
     /**
      * [FlowController]'s clientSecret might be updated multiple times through
@@ -94,15 +102,20 @@ internal class FlowControllerModule {
     )
 
     @Provides
+    @IOContext
+    fun provideWorkContext(): CoroutineContext = Dispatchers.IO
+
+    @Provides
     @Singleton
     fun provideEventReporter(
         appContext: Context,
-        analyticsRequestFactory: AnalyticsRequestFactory
+        analyticsRequestFactory: AnalyticsRequestFactory,
+        analyticsRequestExecutor: AnalyticsRequestExecutor
     ): EventReporter {
         return DefaultEventReporter(
             mode = EventReporter.Mode.Custom,
             DefaultDeviceIdRepository(appContext, Dispatchers.IO),
-            DefaultAnalyticsRequestExecutor(),
+            analyticsRequestExecutor,
             analyticsRequestFactory,
             Dispatchers.IO
         )
