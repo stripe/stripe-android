@@ -4636,19 +4636,6 @@ public abstract interface class com/stripe/android/networking/AnalyticsRequestEx
 	public abstract fun executeAsync (Lcom/stripe/android/networking/AnalyticsRequest;)V
 }
 
-public final class com/stripe/android/networking/AnalyticsRequestExecutor$DaggerModule {
-	public fun <init> ()V
-	public final fun provideAnalyticsRequestExecutor (Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/networking/AnalyticsRequestExecutor;
-}
-
-public final class com/stripe/android/networking/AnalyticsRequestExecutor_DaggerModule_ProvideAnalyticsRequestExecutorFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/networking/AnalyticsRequestExecutor$DaggerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/networking/AnalyticsRequestExecutor$DaggerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/networking/AnalyticsRequestExecutor_DaggerModule_ProvideAnalyticsRequestExecutorFactory;
-	public fun get ()Lcom/stripe/android/networking/AnalyticsRequestExecutor;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideAnalyticsRequestExecutor (Lcom/stripe/android/networking/AnalyticsRequestExecutor$DaggerModule;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/networking/AnalyticsRequestExecutor;
-}
-
 public final class com/stripe/android/networking/AnalyticsRequestFactory {
 	public final synthetic fun createRequest (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/AnalyticsRequest;
 }
@@ -4693,6 +4680,14 @@ public final class com/stripe/android/networking/ApiRequest$Options : android/os
 }
 
 public final class com/stripe/android/networking/ApiRequest$Options$Companion {
+}
+
+public final class com/stripe/android/networking/DefaultAnalyticsRequestExecutor_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/networking/DefaultAnalyticsRequestExecutor_Factory;
+	public fun get ()Lcom/stripe/android/networking/DefaultAnalyticsRequestExecutor;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/networking/DefaultAnalyticsRequestExecutor;
 }
 
 public final class com/stripe/android/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
@@ -4830,6 +4825,14 @@ public abstract interface annotation class com/stripe/android/payments/core/inje
 
 public final class com/stripe/android/payments/core/injection/NamedConstantsKt {
 	public static final field ENABLE_LOGGING Ljava/lang/String;
+}
+
+public final class com/stripe/android/payments/core/injection/PaymentCommonModule_ProvideAnalyticsRequestExecutorFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/payments/core/injection/PaymentCommonModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/payments/core/injection/PaymentCommonModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentCommonModule_ProvideAnalyticsRequestExecutorFactory;
+	public fun get ()Lcom/stripe/android/networking/AnalyticsRequestExecutor;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideAnalyticsRequestExecutor (Lcom/stripe/android/payments/core/injection/PaymentCommonModule;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/networking/AnalyticsRequestExecutor;
 }
 
 public final class com/stripe/android/payments/core/injection/PaymentCommonModule_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
