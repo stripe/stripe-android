@@ -3,16 +3,23 @@ package com.stripe.android.networking
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Logger
 import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.payments.core.injection.IOContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class DefaultAnalyticsRequestExecutor(
-    private val logger: Logger = Logger.noop(),
-    private val workContext: CoroutineContext = Dispatchers.IO
+internal class DefaultAnalyticsRequestExecutor @Inject constructor(
+    private val logger: Logger,
+    @IOContext private val workContext: CoroutineContext
 ) : AnalyticsRequestExecutor {
+    internal constructor() : this(
+        Logger.noop(),
+        Dispatchers.IO
+    )
+
     private val connectionFactory = ConnectionFactory.Default()
 
     /**

@@ -227,10 +227,10 @@ internal class StripePaymentControllerTest {
             { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
             stripeRepository,
             false,
-            analyticsRequestExecutor,
-            analyticsRequestFactory,
-            alipayRepository,
             workContext = testDispatcher,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory,
+            alipayRepository = alipayRepository,
             uiContext = testDispatcher
         )
     }
