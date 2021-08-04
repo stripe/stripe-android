@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
@@ -95,14 +96,20 @@ internal class FlowControllerModule {
 
     @Provides
     @Singleton
+    fun provideAnalyticsRequestExecutor(): AnalyticsRequestExecutor =
+        DefaultAnalyticsRequestExecutor()
+
+    @Provides
+    @Singleton
     fun provideEventReporter(
         appContext: Context,
-        analyticsRequestFactory: AnalyticsRequestFactory
+        analyticsRequestFactory: AnalyticsRequestFactory,
+        analyticsRequestExecutor: AnalyticsRequestExecutor
     ): EventReporter {
         return DefaultEventReporter(
             mode = EventReporter.Mode.Custom,
             DefaultDeviceIdRepository(appContext, Dispatchers.IO),
-            DefaultAnalyticsRequestExecutor(),
+            analyticsRequestExecutor,
             analyticsRequestFactory,
             Dispatchers.IO
         )
