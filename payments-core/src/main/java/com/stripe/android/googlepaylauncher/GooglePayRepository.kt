@@ -7,8 +7,6 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Logger
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -42,10 +40,9 @@ internal class DefaultGooglePayRepository(
         Wallet.getPaymentsClient(context, options)
     }
 
-    @AssistedInject
     internal constructor(
         context: Context,
-        @Assisted environment: GooglePayEnvironment,
+        environment: GooglePayEnvironment,
         logger: Logger = Logger.noop()
     ) : this(
         context,
