@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * A [InjectorRegistry] implemented with a weak map. An entry from the map will be  will be garbage
  * collected once the [Injector] instance is no longer held elsewhere.
  */
-object WeakMapInjectorRegistry : InjectorRegistry {
+internal object WeakMapInjectorRegistry : InjectorRegistry {
 
     @VisibleForTesting
     internal val staticCache = WeakHashMap<Injector, @InjectorKey Int>()

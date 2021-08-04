@@ -11,7 +11,7 @@ import dagger.Component
  * This registry is needed for dagger injection because the SDK can't access [Application], and
  * thus [Activity]s can't get required [Component] from by downcasting  [Activity.getApplication].
  */
-interface InjectorRegistry {
+internal interface InjectorRegistry {
     /**
      * Registers an [Injector] instance with corresponding [InjectorKey]
      */
