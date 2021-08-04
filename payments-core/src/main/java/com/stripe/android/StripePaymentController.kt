@@ -52,12 +52,12 @@ internal class StripePaymentController internal constructor(
     private val publishableKeyProvider: Provider<String>,
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
+    workContext: CoroutineContext = Dispatchers.IO,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
-        DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging)),
+        DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging), workContext),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
         AnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
-    workContext: CoroutineContext = Dispatchers.IO,
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
 

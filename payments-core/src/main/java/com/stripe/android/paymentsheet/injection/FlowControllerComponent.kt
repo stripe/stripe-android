@@ -22,7 +22,6 @@ import javax.inject.Singleton
     modules = [
         PaymentCommonModule::class,
         FlowControllerModule::class,
-        AnalyticsRequestExecutor.DaggerModule::class,
         GooglePayLauncherModule::class
     ]
 )

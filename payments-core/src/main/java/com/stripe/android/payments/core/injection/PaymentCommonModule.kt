@@ -1,11 +1,14 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
@@ -20,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Common module providing payment related dependencies.
@@ -117,4 +121,11 @@ internal class PaymentCommonModule {
             is SetupIntentClientSecret -> setupIntentFlowResultProcessor
         }
     }
+
+    @Provides
+    @Singleton
+    fun provideAnalyticsRequestExecutor(
+        logger: Logger,
+        @IOContext workContext: CoroutineContext
+    ): AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(logger, workContext)
 }

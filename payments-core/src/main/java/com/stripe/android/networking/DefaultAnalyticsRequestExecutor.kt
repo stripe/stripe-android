@@ -7,12 +7,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class DefaultAnalyticsRequestExecutor(
-    private val logger: Logger = Logger.noop(),
-    private val workContext: CoroutineContext = Dispatchers.IO
+internal class DefaultAnalyticsRequestExecutor @Inject constructor(
+    private val logger: Logger,
+    private val workContext: CoroutineContext
 ) : AnalyticsRequestExecutor {
+    internal constructor() : this(
+        Logger.noop(),
+        Dispatchers.IO
+    )
     private val connectionFactory = ConnectionFactory.Default()
 
     /**
