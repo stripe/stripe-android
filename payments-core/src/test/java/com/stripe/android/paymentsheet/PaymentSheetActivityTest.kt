@@ -742,16 +742,12 @@ internal class PaymentSheetActivityTest {
                 config: GooglePayPaymentMethodLauncher.Config,
                 readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
                 activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
-            ): GooglePayPaymentMethodLauncher = createGooglePayPaymentMethodLauncher(readyCallback)
+            ): GooglePayPaymentMethodLauncher {
+                val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
+                readyCallback.onReady(true)
+                return googlePayPaymentMethodLauncher
+            }
         }
-
-    private fun createGooglePayPaymentMethodLauncher(
-        readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback
-    ): GooglePayPaymentMethodLauncher {
-        val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
-        readyCallback.onReady(true)
-        return googlePayPaymentMethodLauncher
-    }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
