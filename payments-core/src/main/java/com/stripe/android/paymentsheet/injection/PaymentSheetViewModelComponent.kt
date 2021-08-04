@@ -14,8 +14,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentCommonModule::class,
-        PaymentSheetViewModelModule::class,
-        AnalyticsRequestExecutor.DaggerModule::class
+        PaymentSheetViewModelModule::class
     ]
 )
 internal interface PaymentSheetViewModelComponent {
