@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
@@ -11,7 +11,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.PaymentController
@@ -46,6 +45,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -179,20 +179,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun setupGooglePay(activity: ComponentActivity) {
+    fun setupGooglePay(
+        lifecycleScope: CoroutineScope,
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+    ) {
         googlePayLauncherConfig?.let { config ->
             googlePayPaymentMethodLauncher =
                 googlePayPaymentMethodLauncherFactory.create(
-                    lifecycleScope = activity.lifecycleScope,
+                    lifecycleScope = lifecycleScope,
                     config = config,
                     readyCallback = { isReady ->
                         _isGooglePayReady.value = isReady
                     },
-                    activityResultLauncher = activity.registerForActivityResult(
-                        GooglePayPaymentMethodLauncherContract()
-                    ) { result ->
-                        onGooglePayResult(result)
-                    }
+                    activityResultLauncher = activityResultLauncher
                 )
         }
     }
