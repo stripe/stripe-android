@@ -13,6 +13,15 @@ annotation class InjectorKey
  * Mark a class that can inject into [Injectable]s. This interface is usually implemented by
  * dagger [Component] classes.
  */
-internal interface Injector {
-    fun inject(injectable: Injectable)
+internal abstract class Injector {
+    /**
+     * Injects into a [Injectable] instance.
+     */
+    abstract fun inject(injectable: Injectable)
+
+    /**
+     * A key to uniquely identify this [Injector] instance.
+     */
+    @InjectorKey
+    var injectorKey: Int? = null
 }
