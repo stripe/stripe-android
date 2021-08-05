@@ -18,12 +18,12 @@ internal object WeakSetInjectorRegistry : InjectorRegistry {
 
     override fun register(injector: Injector, @InjectorKey key: Int) {
         staticCacheSet.add(injector)
-        injector.injectorKey = key
+        injector.setInjectorKey(key)
     }
 
     override fun retrieve(@InjectorKey injectorKey: Int): Injector? {
         return staticCacheSet.firstOrNull {
-            it.injectorKey == injectorKey
+            it.getInjectorKey() == injectorKey
         }
     }
 

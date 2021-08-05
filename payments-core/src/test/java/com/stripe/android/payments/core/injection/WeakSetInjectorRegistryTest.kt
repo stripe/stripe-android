@@ -64,9 +64,18 @@ class WeakSetInjectorRegistryTest {
 
     // calling whenever() on a mock will end up holding the mock instance, therefore a real
     // Injector instance is needed to ensure System.gc() works correctly.
-    internal class TestInjector : Injector() {
+    internal class TestInjector : Injector {
+
+        var key: Int? = null
+
         override fun inject(injectable: Injectable) {
             // no - op
+        }
+
+        override fun getInjectorKey(): Int? = key
+
+        override fun setInjectorKey(injectorKey: Int) {
+            key = injectorKey
         }
 
     }

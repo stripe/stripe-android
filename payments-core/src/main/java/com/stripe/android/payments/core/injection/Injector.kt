@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.injection
 
-import dagger.Component
 import javax.inject.Qualifier
 
 /**
@@ -10,18 +9,23 @@ import javax.inject.Qualifier
 annotation class InjectorKey
 
 /**
- * Mark a class that can inject into [Injectable]s. This interface is usually implemented by
- * dagger [Component] classes.
+ * Mark a class that can inject into [Injectable]s. A [Injector] is responsible for saving a
+ * unique identifier [InjectorKey] assigned to it.
  */
-internal abstract class Injector {
+internal interface Injector {
     /**
      * Injects into a [Injectable] instance.
      */
-    abstract fun inject(injectable: Injectable)
+    fun inject(injectable: Injectable)
 
     /**
-     * A key to uniquely identify this [Injector] instance.
+     * Returns the [InjectorKey] that uniquely identifies this [Injector].
      */
     @InjectorKey
-    var injectorKey: Int? = null
+    fun getInjectorKey(): Int?
+
+    /**
+     * Sets unique [InjectorKey] to this [Injector].
+     */
+    fun setInjectorKey(@InjectorKey injectorKey: Int)
 }
