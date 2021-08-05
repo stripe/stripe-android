@@ -4,16 +4,12 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -92,25 +88,6 @@ internal abstract class PaymentSheetViewModelModule {
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                 workContext = workContext
             )
-        }
-
-        @Provides
-        @Singleton
-        fun provideGooglePayRepository(
-            appContext: Context,
-            starterArgs: PaymentSheetContract.Args
-        ): GooglePayRepository {
-            return starterArgs.config?.googlePay?.environment?.let { environment ->
-                DefaultGooglePayRepository(
-                    appContext,
-                    when (environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                            GooglePayEnvironment.Production
-                        PaymentSheet.GooglePayConfiguration.Environment.Test ->
-                            GooglePayEnvironment.Test
-                    }
-                )
-            } ?: GooglePayRepository.Disabled
         }
 
         @Provides

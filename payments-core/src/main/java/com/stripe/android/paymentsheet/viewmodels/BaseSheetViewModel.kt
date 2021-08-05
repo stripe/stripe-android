@@ -10,7 +10,6 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -47,11 +46,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     // a fatal error
     protected val _fatal = MutableLiveData<Throwable>()
 
-    protected val _isGooglePayReady = MutableLiveData<Boolean>()
+    @VisibleForTesting
+    internal val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
-
-    protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
-    internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
 
     private val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent

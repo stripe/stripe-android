@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
+import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.PaymentCommonModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -13,7 +14,8 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentCommonModule::class,
-        PaymentSheetViewModelModule::class
+        PaymentSheetViewModelModule::class,
+        GooglePayLauncherModule::class
     ]
 )
 internal interface PaymentSheetViewModelComponent {
