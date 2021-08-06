@@ -58,7 +58,7 @@ class WeakSetInjectorRegistryTest {
         if (retry == 0) {
             assertNull(WeakSetInjectorRegistry.retrieve(keyForInjector1))
         }
-        // otherwise WeakMapInjectorRegistry.retrieve(keyForInjector1) == null,
+        // otherwise WeakSetInjectorRegistry.retrieve(keyForInjector1) == null,
         // indicating the entry is already cleared
     }
 
