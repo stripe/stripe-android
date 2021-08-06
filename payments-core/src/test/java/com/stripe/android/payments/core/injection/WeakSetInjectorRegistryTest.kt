@@ -77,6 +77,5 @@ class WeakSetInjectorRegistryTest {
         override fun setInjectorKey(injectorKey: Int) {
             key = injectorKey
         }
-
     }
 }
