@@ -5092,6 +5092,14 @@ public final class com/stripe/android/paymentsheet/PaymentSheetViewModel_Factory
 	public static fun newInstance (Landroid/app/Application;Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository;Lcom/stripe/android/paymentsheet/repositories/PaymentMethodsRepository;Ljavax/inject/Provider;Lcom/stripe/android/paymentsheet/PrefsRepository;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/PaymentController;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherFactory;)Lcom/stripe/android/paymentsheet/PaymentSheetViewModel;
 }
 
+public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory;
+	public fun get ()Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer;
+}
+
 public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowController_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController_Factory;
@@ -5110,68 +5118,68 @@ public final class com/stripe/android/paymentsheet/injection/DaggerPaymentSheetV
 	public fun getViewModel ()Lcom/stripe/android/paymentsheet/PaymentSheetViewModel;
 }
 
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideAnalyticsRequestFactoryFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideAnalyticsRequestFactoryFactory;
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideAnalyticsRequestFactoryFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideAnalyticsRequestFactoryFactory;
 	public fun get ()Lcom/stripe/android/networking/AnalyticsRequestFactory;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideAnalyticsRequestFactory (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Landroid/content/Context;Ldagger/Lazy;)Lcom/stripe/android/networking/AnalyticsRequestFactory;
+	public static fun provideAnalyticsRequestFactory (Landroid/content/Context;Ldagger/Lazy;)Lcom/stripe/android/networking/AnalyticsRequestFactory;
 }
 
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideClientSecretFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideClientSecretFactory;
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideClientSecretFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideClientSecretFactory;
 	public fun get ()Lcom/stripe/android/paymentsheet/model/ClientSecret;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideClientSecret (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;)Lcom/stripe/android/paymentsheet/model/ClientSecret;
+	public static fun provideClientSecret (Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;)Lcom/stripe/android/paymentsheet/model/ClientSecret;
 }
 
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideEnabledLoggingFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideEnabledLoggingFactory;
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEnabledLoggingFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEnabledLoggingFactory;
 	public fun get ()Ljava/lang/Boolean;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEnabledLogging (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;)Z
+	public static fun provideEnabledLogging ()Z
 }
 
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideEventReporterFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideEventReporterFactory;
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEventReporterFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEventReporterFactory;
 	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEventReporter (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Landroid/content/Context;Lcom/stripe/android/networking/AnalyticsRequestFactory;Lcom/stripe/android/networking/AnalyticsRequestExecutor;)Lcom/stripe/android/paymentsheet/analytics/EventReporter;
+	public static fun provideEventReporter (Landroid/content/Context;Lcom/stripe/android/networking/AnalyticsRequestFactory;Lcom/stripe/android/networking/AnalyticsRequestExecutor;)Lcom/stripe/android/paymentsheet/analytics/EventReporter;
 }
 
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideFlowControllerInitializerFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideFlowControllerInitializerFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerInitializer;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideFlowControllerInitializer (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Landroid/content/Context;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerInitializer;
-}
-
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideLoggerFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideLoggerFactory;
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideLoggerFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideLoggerFactory;
 	public fun get ()Lcom/stripe/android/Logger;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideLogger (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Z)Lcom/stripe/android/Logger;
+	public static fun provideLogger (Z)Lcom/stripe/android/Logger;
 }
 
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideViewModelFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideViewModelFactory;
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvidePrefsRepositoryFactoryFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvidePrefsRepositoryFactoryFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/jvm/functions/Function1;
+	public static fun providePrefsRepositoryFactory (Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;)Lkotlin/jvm/functions/Function1;
+}
+
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideViewModelFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideViewModelFactory;
 	public fun get ()Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideViewModel (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;Landroidx/lifecycle/ViewModelStoreOwner;)Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
+	public static fun provideViewModel (Landroidx/lifecycle/ViewModelStoreOwner;)Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
 }
 
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideWorkContextFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_ProvideWorkContextFactory;
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideWorkContextFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideWorkContextFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/coroutines/CoroutineContext;
-	public static fun provideWorkContext (Lcom/stripe/android/paymentsheet/injection/FlowControllerModule;)Lkotlin/coroutines/CoroutineContext;
+	public static fun provideWorkContext ()Lkotlin/coroutines/CoroutineContext;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvideAnalyticsRequestFactoryFactory : dagger/internal/Factory {
