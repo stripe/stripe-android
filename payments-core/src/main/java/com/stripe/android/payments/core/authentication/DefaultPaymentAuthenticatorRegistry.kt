@@ -13,7 +13,7 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModel
+import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
 import com.stripe.android.payments.core.injection.AuthenticationComponent
 import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
 import com.stripe.android.payments.core.injection.Injectable
@@ -91,7 +91,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
 
     override fun inject(injectable: Injectable) {
         when (injectable) {
-            is Stripe3ds2TransactionViewModel -> authenticationComponent.inject(injectable)
+            is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(injectable)
         }
     }
 

@@ -16,12 +16,14 @@ import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
+import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import com.stripe.android.stripe3ds2.transaction.InitChallengeArgs
@@ -30,7 +32,6 @@ import com.stripe.android.stripe3ds2.transaction.InitChallengeRepositoryFactory
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.Transaction
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -38,40 +39,16 @@ import kotlin.coroutines.CoroutineContext
 
 internal class Stripe3ds2TransactionViewModel(
     private val args: Stripe3ds2TransactionContract.Args,
+    private val stripeRepository: StripeRepository,
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val threeDs2Service: StripeThreeDs2Service,
+    private val messageVersionRegistry: MessageVersionRegistry,
+    private val challengeResultProcessor: Stripe3ds2ChallengeResultProcessor,
     private val initChallengeRepository: InitChallengeRepository,
+    private val workContext: CoroutineContext,
     private val savedStateHandle: SavedStateHandle
-) : ViewModel(), Injectable {
-
-    @Inject
-    lateinit var stripeRepository: StripeRepository
-
-    @Inject
-    lateinit var analyticsRequestExecutor: AnalyticsRequestExecutor
-
-    @Inject
-    lateinit var analyticsRequestFactory: AnalyticsRequestFactory
-
-    @Inject
-    lateinit var messageVersionRegistry: MessageVersionRegistry
-
-    @Inject
-    lateinit var threeDs2Service: StripeThreeDs2Service
-
-    @Inject
-    lateinit var challengeResultProcessor: Stripe3ds2ChallengeResultProcessor
-
-    @Inject
-    @IOContext
-    lateinit var workContext: CoroutineContext
-
-    init {
-        WeakSetInjectorRegistry.retrieve(args.injectorKey)?.inject(this) ?: run {
-            throw IllegalArgumentException(
-                "Failed to initialize Stripe3ds2TransactionViewModel instance."
-            )
-        }
-    }
-
+) : ViewModel() {
     var hasCompleted: Boolean = savedStateHandle.contains(KEY_HAS_COMPLETED)
 
     suspend fun processChallengeResult(
@@ -313,8 +290,29 @@ internal class Stripe3ds2TransactionViewModelFactory(
     private val applicationSupplier: () -> Application,
     owner: SavedStateRegistryOwner,
     private val argsSupplier: () -> Stripe3ds2TransactionContract.Args,
-    private val workContext: CoroutineContext = Dispatchers.IO
-) : AbstractSavedStateViewModelFactory(owner, null) {
+) : AbstractSavedStateViewModelFactory(owner, null), Injectable {
+
+    @Inject
+    lateinit var stripeRepository: StripeRepository
+
+    @Inject
+    lateinit var analyticsRequestExecutor: AnalyticsRequestExecutor
+
+    @Inject
+    lateinit var analyticsRequestFactory: AnalyticsRequestFactory
+
+    @Inject
+    lateinit var messageVersionRegistry: MessageVersionRegistry
+
+    @Inject
+    lateinit var threeDs2Service: StripeThreeDs2Service
+
+    @Inject
+    lateinit var challengeResultProcessor: Stripe3ds2ChallengeResultProcessor
+
+    @Inject
+    @IOContext
+    lateinit var workContext: CoroutineContext
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(
@@ -323,10 +321,30 @@ internal class Stripe3ds2TransactionViewModelFactory(
         handle: SavedStateHandle
     ): T {
         val args = argsSupplier()
+        WeakSetInjectorRegistry.retrieve(args.injectorKey)?.inject(this) ?: run {
+            throw IllegalArgumentException(
+                "Failed to initialize Stripe3ds2TransactionViewModelFactory"
+            )
+        }
+
+        val application = applicationSupplier()
         return Stripe3ds2TransactionViewModel(
             args,
+            stripeRepository,
+            analyticsRequestExecutor,
+            analyticsRequestFactory,
+            StripeThreeDs2ServiceImpl(application, args.enableLogging, workContext),
+            MessageVersionRegistry(),
+            DefaultStripe3ds2ChallengeResultProcessor(
+                stripeRepository,
+                analyticsRequestExecutor,
+                analyticsRequestFactory,
+                RetryDelaySupplier(),
+                args.enableLogging,
+                workContext
+            ),
             InitChallengeRepositoryFactory(
-                applicationSupplier(),
+                application,
                 args.stripeIntent.isLiveMode,
                 args.sdkTransactionId,
                 args.config.uiCustomization.uiCustomization,
@@ -334,6 +352,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
                 args.enableLogging,
                 workContext
             ).create(),
+            workContext,
             handle
         ) as T
     }
