@@ -10,6 +10,7 @@ import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import kotlinx.parcelize.Parcelize
 
@@ -36,10 +37,10 @@ internal class Stripe3ds2TransactionContract :
         val config: PaymentAuthConfig.Stripe3ds2Config,
         val stripeIntent: StripeIntent,
         val nextActionData: StripeIntent.NextActionData.SdkData.Use3DS2,
-        val threeDs1ReturnUrl: String?,
         val requestOptions: ApiRequest.Options,
         val enableLogging: Boolean,
-        val statusBarColor: Int?
+        val statusBarColor: Int?,
+        @InjectorKey val injectorKey: Int
     ) : Parcelable {
         val fingerprint: Stripe3ds2Fingerprint get() = Stripe3ds2Fingerprint(nextActionData)
 
