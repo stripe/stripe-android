@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -14,6 +15,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
@@ -45,9 +47,24 @@ internal class DefaultFlowControllerInitializerTest {
     @Captor
     private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<PaymentMethod.Type>
 
+    private val readyGooglePayRepository = mock<GooglePayRepository>()
+    private val unreadyGooglePayRepository = mock<GooglePayRepository>()
+
     @BeforeTest
     fun setup() {
         MockitoAnnotations.openMocks(this)
+
+        whenever(readyGooglePayRepository.isReady()).thenReturn(
+            flow {
+                emit(true)
+            }
+        )
+
+        whenever(unreadyGooglePayRepository.isReady()).thenReturn(
+            flow {
+                emit(false)
+            }
+        )
     }
 
     @AfterTest
@@ -350,8 +367,8 @@ internal class DefaultFlowControllerInitializerTest {
         isGooglePayReady: Boolean = true
     ): FlowControllerInitializer {
         return DefaultFlowControllerInitializer(
-            { _ -> prefsRepository },
-            { isGooglePayReady },
+            { prefsRepository },
+            { if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository },
             testDispatcher
         )
     }
