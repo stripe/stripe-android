@@ -302,7 +302,8 @@ class PaymentOptionsActivityTest {
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
             newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+            injectorKey = 0
         )
     }
 }

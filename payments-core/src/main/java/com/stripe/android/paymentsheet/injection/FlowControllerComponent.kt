@@ -5,8 +5,10 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.PaymentCommonModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -26,6 +28,8 @@ import javax.inject.Singleton
 )
 internal interface FlowControllerComponent {
     val flowController: DefaultFlowController
+
+    fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
 
     @Component.Builder
     interface Builder {
@@ -58,6 +62,9 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun paymentResultCallback(paymentResultCallback: PaymentSheetResultCallback): Builder
+
+        @BindsInstance
+        fun injectorKey(@InjectorKey injectorKey: Int): Builder
 
         fun build(): FlowControllerComponent
     }
