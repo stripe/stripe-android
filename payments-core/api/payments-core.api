@@ -4816,6 +4816,9 @@ public final class com/stripe/android/payments/core/injection/DaggerAuthenticati
 public abstract interface annotation class com/stripe/android/payments/core/injection/IOContext : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class com/stripe/android/payments/core/injection/InjectorKey : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/stripe/android/payments/core/injection/IntentAuthenticatorKey : java/lang/annotation/Annotation {
 	public abstract fun value ()Ljava/lang/Class;
 }
