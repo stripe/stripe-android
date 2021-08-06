@@ -117,6 +117,7 @@ public final class com/stripe/android/paymentsheet/specifications/DropdownItem {
 	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/paymentsheet/specifications/DropdownItem;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/paymentsheet/specifications/DropdownItem$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
