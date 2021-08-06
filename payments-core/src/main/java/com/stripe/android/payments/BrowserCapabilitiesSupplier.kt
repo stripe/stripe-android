@@ -17,6 +17,7 @@ internal class BrowserCapabilitiesSupplier(
     fun get(): BrowserCapabilities {
         return when {
             isCustomTabsSupported() -> BrowserCapabilities.CustomTabs
+            isChromeInstalled() -> BrowserCapabilities.Chrome
             else -> BrowserCapabilities.Unknown
         }
     }
@@ -28,6 +29,13 @@ internal class BrowserCapabilitiesSupplier(
                 CHROME_PACKAGE,
                 NoopCustomTabsServiceConnection()
             )
+        }.getOrDefault(false)
+    }
+
+    private fun isChromeInstalled(): Boolean {
+        return runCatching {
+            context.packageManager.getPackageInfo(CHROME_PACKAGE, 0)
+            true
         }.getOrDefault(false)
     }
 

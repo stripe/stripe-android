@@ -19,7 +19,7 @@ import kotlin.test.Test
 class PaymentBrowserAuthContractTest {
 
     private val defaultReturnUrl = DefaultReturnUrl(
-        "com.stripe.android.test"
+        "com.example.app"
     )
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -39,7 +39,10 @@ class PaymentBrowserAuthContractTest {
 
     @Test
     fun `createIntent() when has compatible browser and custom return_url should use PaymentAuthWebViewActivity`() {
-        val intent = PaymentBrowserAuthContract().createIntent(
+        val intent = PaymentBrowserAuthContract(
+            defaultReturnUrl,
+            hasCompatibleBrowser = { true }
+        ).createIntent(
             activity,
             ARGS.copy(
                 returnUrl = "myapp://custom"
@@ -52,7 +55,10 @@ class PaymentBrowserAuthContractTest {
 
     @Test
     fun `createIntent() when has compatible browser and default return_url should use StripeBrowserLauncherActivity`() {
-        val intent = PaymentBrowserAuthContract().createIntent(
+        val intent = PaymentBrowserAuthContract(
+            defaultReturnUrl,
+            hasCompatibleBrowser = { true }
+        ).createIntent(
             activity,
             ARGS.copy(
                 returnUrl = defaultReturnUrl.value
@@ -65,7 +71,10 @@ class PaymentBrowserAuthContractTest {
 
     @Test
     fun `createIntent() when no compatible browser and default return_url should use StripeBrowserLauncherActivity`() {
-        val intent = PaymentBrowserAuthContract().createIntent(
+        val intent = PaymentBrowserAuthContract(
+            defaultReturnUrl,
+            hasCompatibleBrowser = { false }
+        ).createIntent(
             activity,
             ARGS.copy(
                 returnUrl = defaultReturnUrl.value
@@ -73,12 +82,15 @@ class PaymentBrowserAuthContractTest {
         )
 
         assertThat(intent.component?.className)
-            .isEqualTo(StripeBrowserLauncherActivity::class.java.name)
+            .isEqualTo(PaymentAuthWebViewActivity::class.java.name)
     }
 
     @Test
     fun `createIntent() should set statusBarColor from activity`() {
-        val intent = PaymentBrowserAuthContract().createIntent(
+        val intent = PaymentBrowserAuthContract(
+            defaultReturnUrl,
+            hasCompatibleBrowser = { false }
+        ).createIntent(
             activity,
             ARGS
         )

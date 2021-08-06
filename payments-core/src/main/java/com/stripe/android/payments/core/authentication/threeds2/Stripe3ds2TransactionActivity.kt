@@ -11,6 +11,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.databinding.Stripe3ds2TransactionLayoutBinding
 import com.stripe.android.exception.StripeException
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.ChallengeContract
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
@@ -92,7 +93,7 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
         }
 
         val browserLauncher = registerForActivityResult(
-            PaymentBrowserAuthContract()
+            PaymentBrowserAuthContract(DefaultReturnUrl.create(applicationContext))
         ) {
             finishWithResult(it)
         }

@@ -11,6 +11,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.StripeException
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -24,7 +25,10 @@ internal class PaymentAuthWebViewActivityTest {
     val rule = InstantTaskExecutorRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val contract = PaymentBrowserAuthContract()
+    private val contract = PaymentBrowserAuthContract(
+        DefaultReturnUrl.create(context),
+        hasCompatibleBrowser = { true }
+    )
 
     @BeforeTest
     fun before() {

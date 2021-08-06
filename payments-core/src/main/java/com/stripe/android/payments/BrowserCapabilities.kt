@@ -6,5 +6,6 @@ package com.stripe.android.payments
  */
 internal enum class BrowserCapabilities {
     CustomTabs,
+    Chrome,
     Unknown
 }
