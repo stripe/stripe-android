@@ -67,7 +67,7 @@ internal class Stripe3ds2TransactionViewModel(
     init {
         WeakSetInjectorRegistry.retrieve(args.injectorKey)?.inject(this) ?: run {
             throw IllegalArgumentException(
-                "Failed to retrieve DefaultPaymentAuthenticatorRegistry instance"
+                "Failed to initialize Stripe3ds2TransactionViewModel instance."
             )
         }
     }
