@@ -415,7 +415,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
             isCustomer = false,
-            isSetupIntent = true
+            saveForFutureUse = true
         )
 
         assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
@@ -430,7 +430,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
             isCustomer = false,
-            isSetupIntent = false
+            saveForFutureUse = false
         )
 
         assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
@@ -445,7 +445,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
             isCustomer = true,
-            isSetupIntent = true
+            saveForFutureUse = true
         )
 
         assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
@@ -460,7 +460,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
             isCustomer = true,
-            isSetupIntent = false
+            saveForFutureUse = false
         )
 
         assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))

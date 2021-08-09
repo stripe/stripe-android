@@ -162,7 +162,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         addSaveForFutureUseArguments(
             args,
             isCustomer = sheetViewModel.customerConfig != null,
-            isSetupIntent = (
+            saveForFutureUse = (
                 sheetViewModel.stripeIntent.value is SetupIntent ||
                     (
                         (sheetViewModel.stripeIntent.value as? PaymentIntent)
@@ -219,7 +219,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         internal fun addSaveForFutureUseArguments(
             args: Bundle,
             isCustomer: Boolean,
-            isSetupIntent: Boolean
+            saveForFutureUse: Boolean
         ) {
             var saveForFutureUseValue = true
             var saveForFutureUseVisible = true
@@ -230,7 +230,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
             // The order is important here, even if there is a customer the save for future
             // use value should be true to collect all the details
-            if (isSetupIntent) {
+            if (saveForFutureUse) {
                 saveForFutureUseVisible = false
                 saveForFutureUseValue = true
             }
