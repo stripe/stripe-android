@@ -10,8 +10,11 @@ import javax.inject.Singleton
 
 @Singleton
 internal data class BankRepository @Inject internal constructor(
-    val resources: Resources
+    val resources: Resources?
 ) {
+    // This is needed for @Preview and inject does not support a constructor with default parameters.
+    internal constructor() : this(null)
+
     private val bankItemMap = mutableMapOf<SupportedBankType, List<DropdownItem>?>()
 
     internal fun get(bankType: SupportedBankType) = requireNotNull(bankItemMap[bankType])
@@ -19,13 +22,13 @@ internal data class BankRepository @Inject internal constructor(
     fun init() {
         init(
             SupportedBankType.values().associateWith { bank ->
-                resources.assets.open(bank.assetFileName)
+                resources?.assets?.open(bank.assetFileName)
             }
         )
     }
 
     @VisibleForTesting
-    internal fun init(supportedBankTypeInputStreamMap: Map<SupportedBankType, InputStream>) {
+    internal fun init(supportedBankTypeInputStreamMap: Map<SupportedBankType, InputStream?>) {
         supportedBankTypeInputStreamMap.forEach { (bankType, banksOfType) ->
             bankItemMap[bankType] = parseBank(banksOfType)
         }

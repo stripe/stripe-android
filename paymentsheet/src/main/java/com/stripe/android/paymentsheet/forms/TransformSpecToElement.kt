@@ -66,7 +66,7 @@ internal class TransformSpecToElement(
         }
     }
 
-    internal fun transformAddress() = SectionFieldElement.AddressElement(
+    private fun transformAddress() = SectionFieldElement.AddressElement(
         IdentifierSpec("billing"),
         resourceRepository.addressRepository
     )
