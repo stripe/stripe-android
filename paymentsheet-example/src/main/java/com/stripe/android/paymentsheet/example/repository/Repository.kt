@@ -18,7 +18,7 @@ internal interface Repository {
     enum class CheckoutMode(val value: String) {
         Setup("setup"),
         Payment("payment"),
-        Payment_With_Setup("payment_with_setup")
+        PaymentWithSetup("payment_with_setup")
     }
 
     suspend fun checkout(
