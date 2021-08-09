@@ -100,6 +100,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$composeVersion"
 
     // dagger
