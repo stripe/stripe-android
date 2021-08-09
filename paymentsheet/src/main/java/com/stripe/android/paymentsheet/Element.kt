@@ -6,6 +6,9 @@ import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.CountryConfig
+import com.stripe.android.paymentsheet.elements.CreditController
+import com.stripe.android.paymentsheet.elements.CreditNumberTextFieldController
+import com.stripe.android.paymentsheet.elements.CvcTextFieldController
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
@@ -115,6 +118,21 @@ internal sealed class SectionFieldElement {
     data class SimpleDropdown(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController,
+    ) : SectionFieldElement()
+
+    data class CvcText(
+        override val identifier: IdentifierSpec,
+        override val controller: CvcTextFieldController,
+    ) : SectionFieldElement()
+
+    data class CardNumberText(
+        override val identifier: IdentifierSpec,
+        override val controller: CreditNumberTextFieldController,
+    ) : SectionFieldElement()
+
+    internal class CreditElement(
+        override val identifier: IdentifierSpec,
+        override val controller: CreditController = CreditController(),
     ) : SectionFieldElement()
 
     internal class AddressElement @VisibleForTesting constructor(

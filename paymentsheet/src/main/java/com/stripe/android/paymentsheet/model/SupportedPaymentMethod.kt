@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.FormSpec
 import com.stripe.android.paymentsheet.specifications.bancontact
+import com.stripe.android.paymentsheet.specifications.card
 import com.stripe.android.paymentsheet.specifications.ideal
 import com.stripe.android.paymentsheet.specifications.sepaDebit
 import com.stripe.android.paymentsheet.specifications.sofort
@@ -24,7 +25,7 @@ enum class SupportedPaymentMethod(
         "card",
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
-        null
+        card
     ),
     Bancontact(
         "bancontact",

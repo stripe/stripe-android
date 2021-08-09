@@ -183,10 +183,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     companion object {
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-            when (paymentMethod) {
-                SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
-                else -> ComposeFormDataCollectionFragment::class.java
-            }
+            ComposeFormDataCollectionFragment::class.java
 
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
 

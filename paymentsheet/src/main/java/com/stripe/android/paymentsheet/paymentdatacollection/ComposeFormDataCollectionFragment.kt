@@ -23,7 +23,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
  * received in the arguments bundle.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ComposeFormDataCollectionFragment : Fragment() {
+class  ComposeFormDataCollectionFragment : Fragment() {
     val formSpec by lazy {
         requireNotNull(
             requireArguments().getString(EXTRA_PAYMENT_METHOD)?.let {

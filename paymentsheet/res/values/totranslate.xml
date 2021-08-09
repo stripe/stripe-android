@@ -3,4 +3,16 @@
     <string name="billing_details">Billing Details</string>
     <!-- Address line 1 placeholder for billing address form. -->
     <string name="address_label_address_line1">Address line 1</string>
+
+    <string name="card_number_label">Card number</string>
+    <string name="card_number_invalid_brand">The card number brand is invalid.</string>
+    <string name="card_number_incomplete">The card number is incomplete.</string>
+    <string name="card_number_too_long">The card number is too long.</string>
+    <string name="card_number_invalid_luhn">The card number luhn is invalid.</string>
+    <string name="card_number_invalid">The card number is invalid.</string>
+    <string name="credit_cvc_label">CVC</string>
+    <string name="credit_cvc_incomplete">CVC is incomplete</string>
+    <string name="credit_cvc_invalid">CVC is invalid</string>
+
+
 </resources>

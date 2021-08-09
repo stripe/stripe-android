@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.CountryConfig
+import com.stripe.android.paymentsheet.elements.CreditController
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IbanConfig
@@ -63,12 +64,17 @@ internal class TransformSpecToElement(
             is SectionFieldSpec.BankDropdown -> it.transform()
             is SectionFieldSpec.SimpleText -> it.transform()
             is SectionFieldSpec.AddressSpec -> transformAddress()
+            is SectionFieldSpec.CreditSpec -> transformCredit()
         }
     }
 
-    internal fun transformAddress() = SectionFieldElement.AddressElement(
+    private fun transformAddress() = SectionFieldElement.AddressElement(
         IdentifierSpec("billing"),
         resourceRepository.addressRepository
+    )
+
+    private fun transformCredit() = SectionFieldElement.CreditElement(
+        IdentifierSpec("credit element")
     )
 
     private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =

@@ -35,6 +35,8 @@ import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
+import com.stripe.android.paymentsheet.elements.CreditController
+import com.stripe.android.paymentsheet.elements.CreditNumberTextFieldController
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
@@ -140,6 +142,29 @@ internal fun SectionElementUI(
 
 @ExperimentalAnimationApi
 @Composable
+internal fun CreditElementUI(
+    enabled: Boolean,
+    controller: CreditController
+) {
+    Column {
+        controller.fields.forEachIndexed { index, field ->
+            SectionFieldElementUI(enabled, field)
+            if (index != controller.fields.size - 1) {
+                val cardStyle = CardStyle(isSystemInDarkTheme())
+                Divider(
+                    color = cardStyle.cardBorderColor,
+                    thickness = cardStyle.cardBorderWidth,
+                    modifier = Modifier.padding(
+                        horizontal = cardStyle.cardBorderWidth
+                    )
+                )
+            }
+        }
+    }
+}
+
+@ExperimentalAnimationApi
+@Composable
 internal fun AddressElementUI(
     enabled: Boolean,
     controller: AddressController
@@ -184,6 +209,24 @@ internal fun SectionFieldElementUI(
         }
         is AddressController -> {
             AddressElementUI(
+                enabled,
+                controller
+            )
+        }
+        is CreditController -> {
+            CreditElementUI(
+                enabled,
+                controller
+            )
+        }
+        is CreditNumberTextFieldController -> {
+            CreditNumberElementUI(
+                enabled,
+                controller
+            )
+        }
+        is CvcNumberTextFieldController -> {
+            CvcNumberElementUI(
                 enabled,
                 controller
             )
