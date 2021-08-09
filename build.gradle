@@ -53,7 +53,7 @@ ext {
     kotlinCoroutinesVersion = '1.5.1'
     composeVersion = '1.0.1'
     espressoVersion = '3.4.0'
-    ktlintVersion = '0.41.0'
+    ktlintVersion = '0.42.1'
     materialVersion = '1.4.0'
     daggerVersion = '2.38.1'
 
