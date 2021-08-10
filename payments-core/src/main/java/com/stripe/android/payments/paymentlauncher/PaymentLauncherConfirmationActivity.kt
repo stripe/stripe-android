@@ -5,38 +5,58 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.launch
 
 /**
- * WIP - host activity to perform actions for PaymentLauncher.
+ * Host activity to perform actions for [PaymentLauncher].
  * This activity starts activities to handle next actions, capture their result
  * and convert them to [PaymentResult] and return back to client.
  */
 internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
+    private lateinit var args: PaymentLauncherContract.Args
+
     private val viewModel: PaymentLauncherViewModel by viewModels {
-        PaymentLauncherViewModel.Factory()
+        PaymentLauncherViewModel.Factory(
+            { applicationContext },
+            { AuthActivityStarterHost.create(this) },
+            { args }
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val args = kotlin.runCatching {
+        args = kotlin.runCatching {
             requireNotNull(PaymentLauncherContract.Args.fromIntent(intent))
         }.getOrElse {
             finishWithResult(PaymentResult.Failed(it))
             return
         }
 
-        when (args) {
-            is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
-                viewModel.confirmStripeIntent(args.confirmStripeIntentParams)
-            }
-            is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> {
-                viewModel.handleNextActionForPaymentIntent(args.paymentIntentClientSecret)
-            }
-            is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
-                viewModel.handleNextActionForSetupIntent(args.setupIntentClientSecret)
+        viewModel.registerFromActivity(this)
+
+        viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
+
+        lifecycleScope.launch {
+            when (args) {
+                is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
+                    viewModel.confirmStripeIntent((args as PaymentLauncherContract.Args.IntentConfirmationArgs).confirmStripeIntentParams)
+                }
+                is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> {
+                    viewModel.handleNextActionForStripeIntent((args as PaymentLauncherContract.Args.PaymentIntentNextActionArgs).paymentIntentClientSecret)
+                }
+                is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
+                    viewModel.handleNextActionForStripeIntent((args as PaymentLauncherContract.Args.SetupIntentNextActionArgs).setupIntentClientSecret)
+                }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unregisterFromActivity()
     }
 
     /**

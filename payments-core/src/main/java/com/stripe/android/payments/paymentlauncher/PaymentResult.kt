@@ -18,6 +18,9 @@ internal sealed class PaymentResult : Parcelable {
     @Parcelize
     object Canceled : PaymentResult()
 
+    @Parcelize
+    object TimedOut : PaymentResult()
+
     @JvmSynthetic
     fun toBundle() = bundleOf(EXTRA to this)
 

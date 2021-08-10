@@ -13,11 +13,11 @@ internal class PaymentLauncherFactory(
 
     constructor(
         activity: ComponentActivity,
-        callback: PaymentLauncher.PaymentResultCallback
+        callback: PaymentLauncher.PaymentResultCallback,
     ) : this(
         activity.registerForActivityResult(
             PaymentLauncherContract(),
-            callback::onPaymentResult
+            callback::onPaymentResult,
         )
     )
 
@@ -31,5 +31,8 @@ internal class PaymentLauncherFactory(
         )
     )
 
-    fun create(): PaymentLauncher = StripePaymentLauncher(hostActivityLauncher)
+    fun create(
+        publishableKey: String,
+        stripeAccountId: String? = null
+    ): PaymentLauncher = StripePaymentLauncher(hostActivityLauncher, publishableKey, stripeAccountId)
 }
