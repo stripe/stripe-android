@@ -10,11 +10,14 @@ import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// need relay
+
 /**
  * [PaymentAuthenticator] to return if there is no available authenticators. Informs the correct
  * dependency to include for that authenticator.
  */
 @Singleton
+@JvmSuppressWildcards
 internal class UnsupportedAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
 ) : PaymentAuthenticator<StripeIntent> {

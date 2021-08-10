@@ -18,10 +18,13 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+// need relay and browser
+
 /**
  * [PaymentAuthenticator] implementation to authenticate [Source].
  */
 @Singleton
+@JvmSuppressWildcards
 internal class SourceAuthenticator @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,

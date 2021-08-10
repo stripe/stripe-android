@@ -1,16 +1,27 @@
 package com.stripe.android.payments.core.authentication
 
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentRelayContract
+import com.stripe.android.PaymentRelayStarter
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
+import com.stripe.android.payments.PaymentFlowResult
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isA
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultPaymentAuthenticatorRegistryTest {
@@ -32,6 +43,16 @@ class DefaultPaymentAuthenticatorRegistryTest {
             NextActionData.AlipayRedirect::class.java to alipayRedirectAuthenticator,
             NextActionData.DisplayOxxoDetails::class.java to dispayOxxoDetailsAuthenticator
         )
+    )
+
+    private val allAuthenticators = setOf(
+        noOpIntentAuthenticator,
+        sourceAuthenticator,
+        threeDs1lAuthenticator,
+        threeDs2lAuthenticator,
+        redirectToUrlAuthenticator,
+        alipayRedirectAuthenticator,
+        dispayOxxoDetailsAuthenticator
     )
 
     @Test
@@ -106,5 +127,53 @@ class DefaultPaymentAuthenticatorRegistryTest {
         ) {
             registry.getAuthenticator(incompatibleType)
         }
+    }
+
+    @Test
+    fun `verify Launchers updated with new ActivityResultCaller and invalided correctly`() {
+        assertNull(registry.paymentRelayLauncher)
+        assertNull(registry.paymentBrowserAuthLauncher)
+
+        val mockActivityResultCaller = mock<ActivityResultCaller>()
+        val mockActivityResultCallback =
+            mock<ActivityResultCallback<PaymentFlowResult.Unvalidated>>()
+        val mockPaymentRelayLauncher = mock<ActivityResultLauncher<PaymentRelayStarter.Args>>()
+        val mockPaymentBrowserAuthLauncher =
+            mock<ActivityResultLauncher<PaymentBrowserAuthContract.Args>>()
+
+        whenever(
+            mockActivityResultCaller.registerForActivityResult(
+                isA<PaymentRelayContract>(),
+                eq(mockActivityResultCallback)
+            )
+        ).thenReturn(mockPaymentRelayLauncher)
+
+        whenever(
+            mockActivityResultCaller.registerForActivityResult(
+                isA<PaymentBrowserAuthContract>(),
+                eq(mockActivityResultCallback)
+            )
+        ).thenReturn(mockPaymentBrowserAuthLauncher)
+
+        registry.onNewActivityResultCaller(mockActivityResultCaller, mockActivityResultCallback)
+
+        allAuthenticators.forEach {
+            verify(it).onNewActivityResultCaller(
+                mockActivityResultCaller,
+                mockActivityResultCallback
+            )
+        }
+        assertThat(registry.paymentRelayLauncher).isEqualTo(mockPaymentRelayLauncher)
+        assertThat(registry.paymentBrowserAuthLauncher).isEqualTo(mockPaymentBrowserAuthLauncher)
+
+        registry.onLauncherInvalidated()
+        allAuthenticators.forEach {
+            verify(it).onLauncherInvalidated()
+        }
+
+        verify(mockPaymentRelayLauncher).unregister()
+        verify(mockPaymentBrowserAuthLauncher).unregister()
+        assertNull(registry.paymentRelayLauncher)
+        assertNull(registry.paymentBrowserAuthLauncher)
     }
 }

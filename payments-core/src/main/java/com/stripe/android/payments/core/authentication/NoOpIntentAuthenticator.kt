@@ -7,10 +7,12 @@ import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// Need relayLauncher
 /**
  * [PaymentAuthenticator] implementation to perform no-op, just return to client's host.
  */
 @Singleton
+@JvmSuppressWildcards
 internal class NoOpIntentAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
 ) : PaymentAuthenticator<StripeIntent> {

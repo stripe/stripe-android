@@ -22,6 +22,7 @@ import kotlin.coroutines.CoroutineContext
  * [PaymentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
  */
 @Singleton
+@JvmSuppressWildcards
 internal class WebIntentAuthenticator @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
