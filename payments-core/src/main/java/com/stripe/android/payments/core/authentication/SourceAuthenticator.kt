@@ -18,8 +18,6 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-// need relay and browser
-
 /**
  * [PaymentAuthenticator] implementation to authenticate [Source].
  */
