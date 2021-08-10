@@ -65,7 +65,9 @@ internal class PaymentLauncherViewModel : ViewModel() {
                 paymentLauncherResult.postValue(PaymentResult.Canceled)
             }
             StripeIntentResult.Outcome.TIMEDOUT -> {
-                paymentLauncherResult.postValue(PaymentResult.TimedOut)
+                PaymentResult.Failed(
+                    APIException(message = TIMEDOUT_ERROR + stripeIntentResult.failureMessage)
+                )
             }
         }
     }
@@ -79,5 +81,9 @@ internal class PaymentLauncherViewModel : ViewModel() {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return PaymentLauncherViewModel() as T
         }
+    }
+
+    companion object {
+        const val TIMEDOUT_ERROR = "Payment fails due to time out. \n"
     }
 }
