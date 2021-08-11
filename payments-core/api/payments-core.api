@@ -5149,6 +5149,22 @@ public final class com/stripe/android/paymentsheet/PaymentSheetViewModel_Factory
 	public static fun newInstance (Landroid/app/Application;Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository;Lcom/stripe/android/paymentsheet/repositories/PaymentMethodsRepository;Ljavax/inject/Provider;Lcom/stripe/android/paymentsheet/PrefsRepository;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/PaymentController;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherFactory;)Lcom/stripe/android/paymentsheet/PaymentSheetViewModel;
 }
 
+public final class com/stripe/android/paymentsheet/analytics/DefaultDeviceIdRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/analytics/DefaultDeviceIdRepository_Factory;
+	public fun get ()Lcom/stripe/android/paymentsheet/analytics/DefaultDeviceIdRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/analytics/DefaultDeviceIdRepository;
+}
+
+public final class com/stripe/android/paymentsheet/analytics/DefaultEventReporter_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/analytics/DefaultEventReporter_Factory;
+	public fun get ()Lcom/stripe/android/paymentsheet/analytics/DefaultEventReporter;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;Lcom/stripe/android/paymentsheet/analytics/DeviceIdRepository;Lcom/stripe/android/networking/AnalyticsRequestExecutor;Lcom/stripe/android/networking/AnalyticsRequestFactory;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/analytics/DefaultEventReporter;
+}
+
 public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory;
@@ -5200,12 +5216,12 @@ public final class com/stripe/android/paymentsheet/injection/FlowControllerModul
 	public static fun provideEnabledLogging ()Z
 }
 
-public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEventReporterFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEventReporterFactory;
-	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter;
+public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEventReporterModeFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideEventReporterModeFactory;
+	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideEventReporter (Landroid/content/Context;Lcom/stripe/android/networking/AnalyticsRequestFactory;Lcom/stripe/android/networking/AnalyticsRequestExecutor;)Lcom/stripe/android/paymentsheet/analytics/EventReporter;
+	public static fun provideEventReporterMode ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
 }
 
 public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideLoggerFactory : dagger/internal/Factory {
@@ -5270,6 +5286,14 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewMod
 	public fun get ()Ljava/lang/Boolean;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideEnabledLogging ()Z
+}
+
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvideEventReporterModeFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvideEventReporterModeFactory;
+	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideEventReporterMode ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvideLoggerFactory : dagger/internal/Factory {

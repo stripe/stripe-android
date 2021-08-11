@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -36,6 +37,7 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class BaseSheetViewModel<TransitionTargetType>(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
+    internal val eventReporter: EventReporter,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {

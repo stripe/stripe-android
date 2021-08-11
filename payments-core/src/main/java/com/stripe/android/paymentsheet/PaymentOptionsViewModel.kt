@@ -19,12 +19,13 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
     prefsRepository: PrefsRepository,
-    private val eventReporter: EventReporter,
+    eventReporter: EventReporter,
     workContext: CoroutineContext,
     application: Application
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepository,
+    eventReporter = eventReporter,
     workContext = workContext,
     application = application
 ) {

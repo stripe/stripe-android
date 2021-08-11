@@ -12,6 +12,10 @@ import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.DeviceIdRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
@@ -31,6 +35,12 @@ internal abstract class PaymentSheetViewModelModule {
 
     @Binds
     abstract fun bindsApplicationForContext(application: Application): Context
+
+    @Binds
+    abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
+
+    @Binds
+    abstract fun bindsDeviceIdRepository(repository: DefaultDeviceIdRepository): DeviceIdRepository
 
     companion object {
         @Provides
@@ -112,6 +122,10 @@ internal abstract class PaymentSheetViewModelModule {
         @Singleton
         fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
             Logger.getInstance(enableLogging)
+
+        @Provides
+        @Singleton
+        fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Complete
 
         @Provides
         @Singleton

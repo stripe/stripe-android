@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
@@ -15,6 +14,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.DeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowControllerInitializer
@@ -37,6 +37,12 @@ internal abstract class FlowControllerModule {
     abstract fun bindsFlowControllerInitializer(
         defaultFlowControllerInitializer: DefaultFlowControllerInitializer
     ): FlowControllerInitializer
+
+    @Binds
+    abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
+
+    @Binds
+    abstract fun bindsDeviceIdRepository(repository: DefaultDeviceIdRepository): DeviceIdRepository
 
     companion object {
         @Provides
@@ -93,19 +99,7 @@ internal abstract class FlowControllerModule {
 
         @Provides
         @Singleton
-        fun provideEventReporter(
-            appContext: Context,
-            analyticsRequestFactory: AnalyticsRequestFactory,
-            analyticsRequestExecutor: AnalyticsRequestExecutor
-        ): EventReporter {
-            return DefaultEventReporter(
-                mode = EventReporter.Mode.Custom,
-                DefaultDeviceIdRepository(appContext, Dispatchers.IO),
-                analyticsRequestExecutor,
-                analyticsRequestFactory,
-                Dispatchers.IO
-            )
-        }
+        fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
 
         @Provides
         @Singleton

@@ -15,7 +15,9 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -160,7 +162,13 @@ internal abstract class BaseAddPaymentMethodFragment(
         addSaveForFutureUseArguments(
             args,
             isCustomer = sheetViewModel.customerConfig != null,
-            isSetupIntent = sheetViewModel.stripeIntent.value is SetupIntent
+            saveForFutureUse = (
+                sheetViewModel.stripeIntent.value is SetupIntent ||
+                    (
+                        (sheetViewModel.stripeIntent.value as? PaymentIntent)
+                            ?.setupFutureUsage == StripeIntent.Usage.OffSession
+                        )
+                )
         )
 
         childFragmentManager.commit {
@@ -211,7 +219,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         internal fun addSaveForFutureUseArguments(
             args: Bundle,
             isCustomer: Boolean,
-            isSetupIntent: Boolean
+            saveForFutureUse: Boolean
         ) {
             var saveForFutureUseValue = true
             var saveForFutureUseVisible = true
@@ -222,7 +230,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
             // The order is important here, even if there is a customer the save for future
             // use value should be true to collect all the details
-            if (isSetupIntent) {
+            if (saveForFutureUse) {
                 saveForFutureUseVisible = false
                 saveForFutureUseValue = true
             }

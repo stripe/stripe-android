@@ -117,7 +117,7 @@ data class PaymentIntent internal constructor(
      */
     override val status: StripeIntent.Status? = null,
 
-    private val setupFutureUsage: StripeIntent.Usage? = null,
+    internal val setupFutureUsage: StripeIntent.Usage? = null,
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
