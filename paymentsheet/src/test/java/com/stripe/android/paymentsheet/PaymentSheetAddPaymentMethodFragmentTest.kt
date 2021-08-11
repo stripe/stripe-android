@@ -3,12 +3,14 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
@@ -363,10 +365,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         )
         assertThat(selection?.shouldSavePaymentMethod).isTrue()
         assertThat(selection?.labelResource).isEqualTo(
-            R.string.stripe_paymentsheet_payment_method_sofort
+            com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_sofort
         )
         assertThat(selection?.iconResource).isEqualTo(
-            R.drawable.stripe_ic_paymentsheet_pm_sofort
+            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_pm_klarna
         )
     }
 

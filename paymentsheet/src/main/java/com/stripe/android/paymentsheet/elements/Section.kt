@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -53,7 +51,6 @@ internal data class SectionTitle constructor(
  * This is a simple section that holds content in a card view.  It has a label, content specified
  * by the caller, and an error string.
  */
-@ExperimentalAnimationApi
 @Composable
 internal fun Section(
     @StringRes title: Int?,
@@ -63,8 +60,8 @@ internal fun Section(
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         SectionTitle(title)
         SectionCard(content)
-        AnimatedVisibility(error != null) {
-            SectionError(error ?: "")
+        if (error != null) {
+            SectionError(error)
         }
     }
 }
@@ -119,6 +116,6 @@ internal fun SectionCard(
 internal fun SectionError(error: String) {
     Text(
         text = error,
-        color = MaterialTheme.colors.error
+        color = MaterialTheme.colors.error,
     )
 }

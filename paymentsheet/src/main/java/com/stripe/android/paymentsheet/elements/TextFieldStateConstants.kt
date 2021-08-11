@@ -8,6 +8,7 @@ internal class TextFieldStateConstants {
         override fun shouldShowError(hasFocus: Boolean): Boolean = false
         override fun isValid(): Boolean = true
         override fun getError(): FieldError? = null
+        override fun isBlank(): Boolean = false
 
         object Full : Valid() {
             override fun isFull(): Boolean = true
@@ -30,6 +31,7 @@ internal class TextFieldStateConstants {
             @StringRes override val errorMessageResId: Int
         ) : Error(errorMessageResId) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+            override fun isBlank(): Boolean = false
         }
 
         class Invalid(
@@ -37,10 +39,12 @@ internal class TextFieldStateConstants {
             override val formatArgs: Array<out Any>? = null
         ) : Error(errorMessageResId, formatArgs) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = true
+            override fun isBlank(): Boolean = false
         }
 
         object Blank : Error(R.string.blank_and_required) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
+            override fun isBlank(): Boolean = true
         }
     }
 }

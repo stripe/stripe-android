@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Ort</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Land</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Landskap</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Namn</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Postnummer</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provins</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Delstat</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Postnummer</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">E-post</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">Din e-postadress är ogiltig.</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">Angivet IBAN är ofullständigt.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">Angivet IBAN är ogiltigt.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">Angivet IBAN är ogiltigt, \"%s\" är inte en giltig landskod.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">Ditt IBAN ska börja med en landskod (två bokstäver).</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_paymentsheet_form_label_optional">%s (valfritt)</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Kort</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Spara för framtida betalningar</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_paymentsheet_sepa_mandate">Genom att tillhandahålla din betalningsinformation och bekräfta denna betalning godkänner du (A) %s och Stripe, vår betaltjänstleverantör, att skicka instruktioner till din bank att debitera ditt konto och (B) din bank att debitera ditt konto i enlighet med dessa instruktioner. Som en del av dina rättigheter har du rätt till återbetalning från din bank enligt villkoren för ditt avtal med din bank. Återbetalning måste krävas inom åtta veckor från det datum då ditt konto debiterades. Dina rättigheter förklaras i ett utdrag som du kan få från din bank. Du godkänner att få aviseringar för framtida debiteringar upp till två dagar innan de inträffar.</string>
+</resources>

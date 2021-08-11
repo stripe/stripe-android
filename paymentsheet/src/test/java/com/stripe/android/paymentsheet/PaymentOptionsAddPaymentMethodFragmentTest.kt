@@ -8,19 +8,43 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentOptionsAddPaymentMethodFragmentTest {
     private val eventReporter = mock<EventReporter>()
+
+    private val testInjector: Injector = object : Injector {
+        private var injectorKey: Int? = null
+
+        override fun inject(injectable: Injectable) {
+            val factory = (injectable as PaymentOptionsViewModel.Factory)
+            factory.eventReporter = eventReporter
+            factory.workContext = TestCoroutineDispatcher()
+            factory.prefsRepositoryFactory = { mock() }
+        }
+
+        override fun getInjectorKey() = injectorKey
+
+        override fun setInjectorKey(injectorKey: Int) {
+            this.injectorKey = injectorKey
+        }
+    }
 
     @Before
     fun setup() {
@@ -28,6 +52,12 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+        WeakSetInjectorRegistry.register(testInjector, MOCK_INJECTOR_KEY)
+    }
+
+    @After
+    fun cleanUp() {
+        WeakSetInjectorRegistry.staticCacheSet.clear()
     }
 
     @Test
@@ -45,7 +75,8 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
             config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
             newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+            injectorKey = MOCK_INJECTOR_KEY
         ),
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         onReady: (PaymentOptionsAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit
@@ -65,5 +96,9 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
                 )
             )
         }
+    }
+
+    companion object {
+        private const val MOCK_INJECTOR_KEY = 0
     }
 }

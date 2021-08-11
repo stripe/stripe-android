@@ -264,7 +264,8 @@ internal class DefaultFlowControllerTest {
                     statusBarColor = ContextCompat.getColor(
                         activity,
                         R.color.stripe_toolbar_color_default_dark
-                    )
+                    ),
+                    injectorKey = INJECTOR_KEY
                 )
             }
 
@@ -775,7 +776,9 @@ internal class DefaultFlowControllerTest {
         paymentController,
         { PaymentConfiguration.getInstance(activity) },
         { flowResultProcessor }
-    )
+    ).also {
+        it.setInjectorKey(0)
+    }
 
     private class FakeFlowControllerInitializer(
         var paymentMethods: List<PaymentMethod>,
@@ -843,5 +846,7 @@ internal class DefaultFlowControllerTest {
         )
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
+
+        private val INJECTOR_KEY = 0
     }
 }

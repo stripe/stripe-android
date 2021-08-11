@@ -16,7 +16,10 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.views.ChallengeProgressFragmentFactory
+import com.stripe.android.utils.TestUtils
+import com.stripe.android.utils.injectableActivityScenario
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -51,7 +54,12 @@ class Stripe3ds2TransactionActivityTest {
 
     @Test
     fun `fragmentFactory should be a ChallengeProgressFragmentFactory`() {
-        ActivityScenario.launch<Stripe3ds2TransactionActivity>(
+        injectableActivityScenario<Stripe3ds2TransactionActivity> {
+            injectActivity {
+                viewModelFactory =
+                    TestUtils.viewModelFactoryFor(mock<Stripe3ds2TransactionViewModel>())
+            }
+        }.launch(
             Intent(
                 ApplicationProvider.getApplicationContext(),
                 Stripe3ds2TransactionActivity::class.java
@@ -86,10 +94,10 @@ class Stripe3ds2TransactionActivityTest {
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
                 as StripeIntent.NextActionData.SdkData.Use3DS2,
-            threeDs1ReturnUrl = null,
             ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
             enableLogging = false,
-            statusBarColor = null
+            statusBarColor = null,
+            injectorKey = 1
         )
     }
 }

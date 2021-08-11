@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.map
  */
 internal class TextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
-    val showOptionalLabel: Boolean = false
+    override val showOptionalLabel: Boolean = false
 ) : InputController, SectionFieldErrorController {
     val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     val keyboardType: KeyboardType = textFieldConfig.keyboard
@@ -50,7 +50,9 @@ internal class TextFieldController constructor(
 
     val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
-    override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
+    override val isComplete: Flow<Boolean> = _fieldState.map {
+        it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
+    }
 
     init {
         onValueChange("")

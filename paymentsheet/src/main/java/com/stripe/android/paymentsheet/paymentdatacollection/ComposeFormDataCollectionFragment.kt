@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.stripe.android.paymentsheet.StripeTheme
@@ -45,6 +46,7 @@ class ComposeFormDataCollectionFragment : Fragment() {
         )
     }
 
+    @ExperimentalUnitApi
     @ExperimentalAnimationApi
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -10,17 +10,14 @@ import com.stripe.android.view.ShippingInfoWidget
 
 internal object PaymentSessionFixtures {
     internal val CONFIG = PaymentSessionConfig.Builder()
-
         // hide the phone field on the shipping information form
         .setHiddenShippingInfoFields(
             ShippingInfoWidget.CustomizableShippingField.Line2
         )
-
         // make the address line 2 field optional
         .setOptionalShippingInfoFields(
             ShippingInfoWidget.CustomizableShippingField.Phone
         )
-
         // specify an address to pre-populate the shipping information form
         .setPrepopulatedShippingInfo(
             ShippingInformation(
@@ -35,30 +32,24 @@ internal object PaymentSessionFixtures {
                 "4158675309"
             )
         )
-
         // collect shipping information
         .setShippingInfoRequired(true)
-
         // collect shipping method
         .setShippingMethodsRequired(true)
-
         // specify the payment method types that the customer can use;
         // defaults to PaymentMethod.Type.Card
         .setPaymentMethodTypes(
             listOf(PaymentMethod.Type.Card)
         )
-
         // only allowed US and Canada shipping addresses
         .setAllowedShippingCountryCodes(
             setOf("US", "CA")
         )
         .setBillingAddressFields(BillingAddressFields.Full)
         .setShouldPrefetchCustomer(true)
-
         // Enable PaymentMethod Deletion from PaymentMethodActivity
         // This is default behavior
         .setCanDeletePaymentMethods(true)
-
         .setShippingInformationValidator(FakeShippingInformationValidator())
         .setShippingMethodsFactory(FakeShippingMethodsFactory())
         .build()

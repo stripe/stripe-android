@@ -20,7 +20,7 @@ class AnalyticsRequestExecutorTest {
     private val logger: Logger = mock()
 
     private val testDispatcher = TestCoroutineDispatcher()
-    private val analyticsRequestExecutor = AnalyticsRequestExecutor.Default(
+    private val analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
         logger = logger,
         workContext = testDispatcher
     )

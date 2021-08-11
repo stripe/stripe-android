@@ -123,5 +123,9 @@
     "value": "volkswagen_bank",
     "icon": "volkswagen_bank",
     "text": "Volkswagen Bank"
+  },
+  {
+    "value": "",
+    "text": "Other"
   }
 ]

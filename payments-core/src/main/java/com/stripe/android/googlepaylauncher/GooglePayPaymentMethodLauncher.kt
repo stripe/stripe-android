@@ -12,6 +12,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -26,14 +29,15 @@ import java.util.Locale
  *
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
-class GooglePayPaymentMethodLauncher internal constructor(
-    lifecycleScope: CoroutineScope,
-    private val config: Config,
+@JvmSuppressWildcards
+class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
+    @Assisted lifecycleScope: CoroutineScope,
+    @Assisted private val config: Config,
+    @Assisted private val readyCallback: ReadyCallback,
+    @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-    private val readyCallback: ReadyCallback,
-    private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
     analyticsRequestFactory: AnalyticsRequestFactory,
-    analyticsRequestExecutor: AnalyticsRequestExecutor = AnalyticsRequestExecutor.Default()
+    analyticsRequestExecutor: AnalyticsRequestExecutor
 ) {
     private var isReady = false
 
@@ -56,23 +60,24 @@ class GooglePayPaymentMethodLauncher internal constructor(
     ) : this(
         activity.lifecycleScope,
         config,
-        googlePayRepositoryFactory = {
-            DefaultGooglePayRepository(
-                activity.application,
-                it
-            )
-        },
         readyCallback,
         activity.registerForActivityResult(
             GooglePayPaymentMethodLauncherContract()
         ) {
             resultCallback.onResult(it)
         },
+        googlePayRepositoryFactory = {
+            DefaultGooglePayRepository(
+                activity.application,
+                it
+            )
+        },
         AnalyticsRequestFactory(
             activity,
             PaymentConfiguration.getInstance(activity).publishableKey,
             setOf(PRODUCT_USAGE)
-        )
+        ),
+        DefaultAnalyticsRequestExecutor()
     )
 
     /**
@@ -94,23 +99,24 @@ class GooglePayPaymentMethodLauncher internal constructor(
     ) : this(
         fragment.viewLifecycleOwner.lifecycleScope,
         config,
-        googlePayRepositoryFactory = {
-            DefaultGooglePayRepository(
-                fragment.requireActivity().application,
-                it
-            )
-        },
         readyCallback,
         fragment.registerForActivityResult(
             GooglePayPaymentMethodLauncherContract()
         ) {
             resultCallback.onResult(it)
         },
+        googlePayRepositoryFactory = {
+            DefaultGooglePayRepository(
+                fragment.requireActivity().application,
+                it
+            )
+        },
         AnalyticsRequestFactory(
             fragment.requireContext(),
             PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
             setOf(PRODUCT_USAGE)
-        )
+        ),
+        DefaultAnalyticsRequestExecutor()
     )
 
     init {

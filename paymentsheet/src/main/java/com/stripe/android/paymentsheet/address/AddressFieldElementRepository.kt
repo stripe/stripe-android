@@ -8,8 +8,11 @@ import javax.inject.Singleton
 
 @Singleton
 internal class AddressFieldElementRepository @Inject internal constructor(
-    val resources: Resources
+    val resources: Resources?
 ) {
+    // This is needed for @Preview and inject does not support a constructor with default parameters.
+    internal constructor() : this(null)
+
     private val countryFieldMap = mutableMapOf<String, List<SectionFieldElement>?>()
 
     internal fun get(countryCode: String?) = countryCode?.let {
@@ -23,7 +26,7 @@ internal class AddressFieldElementRepository @Inject internal constructor(
             }.mapValues { (_, assetFileName) ->
                 requireNotNull(
                     parseAddressesSchema(
-                        resources.assets.open(assetFileName)
+                        resources?.assets?.open(assetFileName)
                     ),
                 )
             }
@@ -39,9 +42,12 @@ internal class AddressFieldElementRepository @Inject internal constructor(
                 schemaList
                     .transformToElementList()
             )
-        }.forEach { (countryCode, listElements) ->
-            countryFieldMap[countryCode] = listElements
-        }
+        }.forEach { add(it.first, it.second) }
+    }
+
+    @VisibleForTesting
+    internal fun add(countryCode: String, listElements: List<SectionFieldElement>) {
+        countryFieldMap[countryCode] = listElements
     }
 
     companion object {

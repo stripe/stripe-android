@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +27,7 @@ internal class DefaultEventReporter internal constructor(
     ) : this(
         mode,
         DefaultDeviceIdRepository(context, workContext),
-        AnalyticsRequestExecutor.Default(),
+        DefaultAnalyticsRequestExecutor(),
         AnalyticsRequestFactory(
             context,
             publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey }

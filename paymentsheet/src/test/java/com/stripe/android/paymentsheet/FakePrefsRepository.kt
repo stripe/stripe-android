@@ -8,7 +8,8 @@ internal class FakePrefsRepository : PrefsRepository {
 
     private var savedSelection: SavedSelection = SavedSelection.None
 
-    override suspend fun getSavedSelection(): SavedSelection = savedSelection
+    override suspend fun getSavedSelection(isGooglePayAvailable: Boolean): SavedSelection =
+        savedSelection
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {
         paymentSelectionArgs.add(paymentSelection)

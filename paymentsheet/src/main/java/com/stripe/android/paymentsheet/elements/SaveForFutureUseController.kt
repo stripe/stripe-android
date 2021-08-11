@@ -16,6 +16,7 @@ internal class SaveForFutureUseController(
     override val rawFieldValue: Flow<String?> = fieldValue
 
     override val error: Flow<FieldError?> = MutableStateFlow(null)
+    override val showOptionalLabel: Boolean = false
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
 
     val hiddenIdentifiers: Flow<List<IdentifierSpec>> =

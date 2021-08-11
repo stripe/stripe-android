@@ -20,6 +20,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.R
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.Amount
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -105,7 +106,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.registerFromActivity(this)
-        viewModel.setupGooglePay(this)
+        viewModel.setupGooglePay(
+            lifecycleScope,
+            registerForActivityResult(
+                GooglePayPaymentMethodLauncherContract(),
+                viewModel::onGooglePayResult
+            )
+        )
         viewModel.fetchStripeIntent()
 
         starterArgs.statusBarColor?.let {

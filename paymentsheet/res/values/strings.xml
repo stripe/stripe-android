@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Address</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
   <string name="address_label_address_line2" tools:ignore="MissingTranslation">Address line 2</string>
   <!-- Used to describe address in United Arab Emirates -->

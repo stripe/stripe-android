@@ -7,6 +7,7 @@ import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -24,7 +25,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
 
     constructor(context: Context) : this(
         context,
-        AnalyticsRequestExecutor.Default()
+        DefaultAnalyticsRequestExecutor()
     )
 
     @Throws(IllegalStateException::class)
@@ -64,7 +65,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
                         publishableKey
                     ),
                     DefaultCardAccountRangeStore(appContext),
-                    AnalyticsRequestExecutor.Default(),
+                    DefaultAnalyticsRequestExecutor(),
                     AnalyticsRequestFactory(appContext, publishableKey)
                 )
             },

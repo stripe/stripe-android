@@ -28,7 +28,11 @@ internal val sepaDebitMandate = MandateTextSpec(
     R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray
 )
-
+internal val sepaBillingSection = SectionSpec(
+    IdentifierSpec("billing_section"),
+    SectionFieldSpec.AddressSpec(IdentifierSpec("address_element")),
+    R.string.billing_details
+)
 internal val sepaDebit = FormSpec(
     LayoutSpec(
         listOf(
@@ -36,7 +40,8 @@ internal val sepaDebit = FormSpec(
             sepaDebitEmailSection,
             sepaDebitIbanSection,
             FormItemSpec.SaveForFutureUseSpec(listOf(sepaDebitMandate)),
-            sepaDebitMandate
+            sepaDebitMandate,
+            sepaBillingSection
         )
     ),
     sepaDebitParamKey

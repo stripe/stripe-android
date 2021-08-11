@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
@@ -19,6 +19,8 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -43,6 +45,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -82,7 +85,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository: PrefsRepository,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext,
-    private val paymentController: PaymentController
+    private val paymentController: PaymentController,
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -175,16 +179,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun setupGooglePay(activity: ComponentActivity) {
-        googlePayLauncherConfig?.let {
+    fun setupGooglePay(
+        lifecycleScope: CoroutineScope,
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+    ) {
+        googlePayLauncherConfig?.let { config ->
             googlePayPaymentMethodLauncher =
-                GooglePayPaymentMethodLauncher(
-                    activity = activity,
-                    config = it,
+                googlePayPaymentMethodLauncherFactory.create(
+                    lifecycleScope = lifecycleScope,
+                    config = config,
                     readyCallback = { isReady ->
                         _isGooglePayReady.value = isReady
                     },
-                    resultCallback = ::onGooglePayResult
+                    activityResultLauncher = activityResultLauncher
                 )
         }
     }

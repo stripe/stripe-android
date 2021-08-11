@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Plaats</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Land</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Graafschap</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Naam</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Postcode</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provincie</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Staat</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Postcode</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">E-mailadres</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">Je e-mailadres is ongeldig.</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">Het opgegeven IBAN-nummer is onvolledig.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">Het opgegeven IBAN-nummer is ongeldig.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">Het opgegeven IBAN-nummer is ongeldig: \"%s\" is geen ondersteunde landcode.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">Het IBAN-nummer moet beginnen met een landcode van twee letters.</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_paymentsheet_form_label_optional">%s (optioneel)</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_paymentsheet_ideal_bank">iDEAL-bank</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Kaart</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA-incasso</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Opslaan voor toekomstige betalingen</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_paymentsheet_sepa_mandate">Door je betaalgegevens op te geven en deze betaling te bevestigen geef je toestemming aan (A) %s en Stripe, onze betaaldienstverlener, een opdracht te sturen aan je bank om je rekening te debiteren en aan (B) je bank om je rekening te debiteren conform deze opdracht. Je hebt het recht op terugbetaling door je bank conform de met je bank overeengekomen voorwaarden. Een verzoek tot terugbetaling moet worden ingediend binnen 8 weken vanaf de datum waarop je rekening is gedebiteerd. Je rechten worden uitgelegd in een verklaring die je kunt opvragen bij je bank. Je stemt ermee in dat je minstens 2 dagen voor de uitvoering van toekomstige debiteringen hierover op de hoogte wordt gesteld.</string>
+</resources>

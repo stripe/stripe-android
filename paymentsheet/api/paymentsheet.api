@@ -58,7 +58,10 @@ public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod 
 	public static final field Bancontact Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Card Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Companion Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion;
+	public static final field Eps Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field Giropay Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Ideal Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field P24 Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field SepaDebit Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public static final field Sofort Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
 	public final fun getCode ()Ljava/lang/String;
@@ -114,6 +117,7 @@ public final class com/stripe/android/paymentsheet/specifications/DropdownItem {
 	public final fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/paymentsheet/specifications/DropdownItem;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
 public final class com/stripe/android/paymentsheet/specifications/DropdownItem$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -239,6 +243,18 @@ public abstract class com/stripe/android/paymentsheet/specifications/SectionFiel
 	public static final field $stable I
 	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {

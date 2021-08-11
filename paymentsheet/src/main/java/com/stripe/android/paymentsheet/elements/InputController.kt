@@ -24,6 +24,7 @@ internal sealed interface InputController : Controller {
     val rawFieldValue: Flow<String?>
     val isComplete: Flow<Boolean>
     val error: Flow<FieldError?>
+    val showOptionalLabel: Boolean
 
     fun onRawValueChange(rawValue: String)
 }

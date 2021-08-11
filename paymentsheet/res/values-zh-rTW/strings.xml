@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">城市</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">國家</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">縣</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">姓名</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">郵遞區號</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">省</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">州</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">郵遞區號</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">電郵地址</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">您的電郵地址無效。</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">您輸入的 IBAN 不完整。</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">您輸入的 IBAN 無效。</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">您輸入的 IBAN 無效，\"%s\" 是不支援的國家代碼。</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">您的 IBAN 應以一個兩字母國家代碼開頭。</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_paymentsheet_form_label_optional">%s（可選）</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_paymentsheet_ideal_bank">iDEAL 銀行</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">卡</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">保存以用於未來的付款</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_paymentsheet_sepa_mandate">提供您的支付方式並確認該付款即表示您授權 (A) %s 與我們的支付服務商 Stripe 向您的銀行發送對您的帳戶進行借記的指令以及 (B) 您的銀行按照這些指令對您的帳戶進行借記。根據您與您的銀行協議的條款和條件，您有權從您的銀行得到退款。退款必須在 8 周內提出，從您的帳戶被扣款之日起算。您的權利在結單上有解釋，可從您的銀行獲取。您同意提前 2 天接收後續借記的通知。</string>
+</resources>
