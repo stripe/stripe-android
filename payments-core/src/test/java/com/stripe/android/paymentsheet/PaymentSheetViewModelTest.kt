@@ -126,31 +126,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `updatePaymentMethods() with partially failing requests should emit list with successful results`() {
-        val viewModel = createViewModel(
-            customerRepository = CustomerApiRepository(
-                stripeRepository = FailsOnceStripeRepository(),
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = null,
-                logger = Logger.getInstance(false),
-                workContext = testDispatcher
-            )
-        )
-        var paymentMethods: List<PaymentMethod>? = null
-        viewModel.paymentMethods.observeForever {
-            paymentMethods = it
-        }
-        viewModel.updatePaymentMethods(
-            PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf("card", "card")
-            )
-        )
-        idleLooper()
-        assertThat(requireNotNull(paymentMethods))
-            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-    }
-
-    @Test
     fun `updatePaymentMethods() without customer config should emit empty list`() {
         val viewModelWithoutCustomer = createViewModel(ARGS_WITHOUT_CUSTOMER)
         var paymentMethods: List<PaymentMethod>? = null
@@ -842,21 +817,6 @@ internal class PaymentSheetViewModelTest {
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options
         ): List<PaymentMethod> = error("Request failed.")
-    }
-
-    private class FailsOnceStripeRepository : AbsFakeStripeRepository() {
-        var firstCall = true
-        override suspend fun getPaymentMethods(
-            listPaymentMethodsParams: ListPaymentMethodsParams,
-            publishableKey: String,
-            productUsageTokens: Set<String>,
-            requestOptions: ApiRequest.Options
-        ): List<PaymentMethod> = if (firstCall) {
-            firstCall = false
-            error("Request failed.")
-        } else {
-            listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        }
     }
 
     private companion object {
