@@ -41,16 +41,16 @@ internal interface PaymentLauncher {
     companion object {
         fun create(
             activity: ComponentActivity,
-            callback: PaymentResultCallback,
             publishableKey: String,
-            stripeAccountId: String? = null
+            stripeAccountId: String? = null,
+            callback: PaymentResultCallback
         ) = PaymentLauncherFactory(activity, callback).create(publishableKey, stripeAccountId)
 
         fun create(
             fragment: Fragment,
-            callback: PaymentResultCallback,
             publishableKey: String,
-            stripeAccountId: String? = null
+            stripeAccountId: String? = null,
+            callback: PaymentResultCallback
         ) = PaymentLauncherFactory(fragment, callback).create(publishableKey, stripeAccountId)
     }
 }

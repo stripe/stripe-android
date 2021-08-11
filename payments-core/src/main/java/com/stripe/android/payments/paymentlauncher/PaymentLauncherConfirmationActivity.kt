@@ -16,24 +16,26 @@ import kotlinx.coroutines.launch
  */
 internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
-    private lateinit var args: PaymentLauncherContract.Args
+    private lateinit var launcherArgs: PaymentLauncherContract.Args
 
     private val viewModel: PaymentLauncherViewModel by viewModels {
         PaymentLauncherViewModel.Factory(
             { applicationContext },
             { AuthActivityStarterHost.create(this) },
-            { args }
+            { launcherArgs }
         )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        args = kotlin.runCatching {
+        val args = kotlin.runCatching {
             requireNotNull(PaymentLauncherContract.Args.fromIntent(intent))
         }.getOrElse {
             finishWithResult(PaymentResult.Failed(it))
             return
         }
+
+        launcherArgs = args
 
         viewModel.registerFromActivity(this)
 
@@ -42,13 +44,13 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         lifecycleScope.launch {
             when (args) {
                 is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
-                    viewModel.confirmStripeIntent((args as PaymentLauncherContract.Args.IntentConfirmationArgs).confirmStripeIntentParams)
+                    viewModel.confirmStripeIntent(args.confirmStripeIntentParams)
                 }
                 is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> {
-                    viewModel.handleNextActionForStripeIntent((args as PaymentLauncherContract.Args.PaymentIntentNextActionArgs).paymentIntentClientSecret)
+                    viewModel.handleNextActionForStripeIntent(args.paymentIntentClientSecret)
                 }
                 is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
-                    viewModel.handleNextActionForStripeIntent((args as PaymentLauncherContract.Args.SetupIntentNextActionArgs).setupIntentClientSecret)
+                    viewModel.handleNextActionForStripeIntent(args.setupIntentClientSecret)
                 }
             }
         }

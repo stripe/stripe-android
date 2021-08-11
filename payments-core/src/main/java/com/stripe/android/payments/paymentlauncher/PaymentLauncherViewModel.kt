@@ -2,12 +2,10 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
@@ -18,9 +16,6 @@ import com.stripe.android.view.AuthActivityStarterHost
  */
 
 internal class PaymentLauncherViewModel : ViewModel() {
-    internal lateinit var paymentBrowserAuthLauncher:
-        ActivityResultLauncher<PaymentBrowserAuthContract.Args>
-
     /**
      * [PaymentResult] live data to be observed.
      */
