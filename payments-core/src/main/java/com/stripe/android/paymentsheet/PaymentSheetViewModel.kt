@@ -75,7 +75,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
     internal val args: PaymentSheetContract.Args,
-    private val eventReporter: EventReporter,
+    eventReporter: EventReporter,
     // Properties provided through injection
     private val apiRequestOptions: ApiRequest.Options,
     private val stripeIntentRepository: StripeIntentRepository,
@@ -90,6 +90,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
+    eventReporter = eventReporter,
     prefsRepository = prefsRepository,
     workContext = workContext
 ) {
@@ -498,23 +499,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentSheetContract.Args,
-        private val eventReporterSupplier: (() -> EventReporter)? = null
+        private val starterArgsSupplier: () -> PaymentSheetContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return DaggerPaymentSheetViewModelComponent.builder()
                 .application(applicationSupplier())
                 .starterArgs(starterArgsSupplier())
-                .eventReporter(
-                    eventReporterSupplier?.let {
-                        it()
-                    } ?: run {
-                        DefaultEventReporter(
-                            mode = EventReporter.Mode.Complete,
-                            applicationSupplier()
-                        )
-                    }
-                )
                 .build()
                 .viewModel as T
         }

@@ -29,9 +29,6 @@ internal interface PaymentSheetViewModelComponent {
         @BindsInstance
         fun starterArgs(starterArgs: PaymentSheetContract.Args): Builder
 
-        @BindsInstance
-        fun eventReporter(eventReporter: EventReporter): Builder
-
         fun build(): PaymentSheetViewModelComponent
     }
 }
