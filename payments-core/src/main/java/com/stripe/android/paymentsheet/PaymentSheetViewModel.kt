@@ -30,7 +30,6 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.IOContext
-import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory

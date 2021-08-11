@@ -23,8 +23,6 @@ import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.Amount
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
-import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
