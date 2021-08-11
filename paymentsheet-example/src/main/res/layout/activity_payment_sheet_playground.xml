@@ -175,6 +175,13 @@
                 android:checked="true" />
 
             <RadioButton
+                android:id="@+id/mode_payment_with_setup_button"
+                android:text="@string/payment_with_setup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="false" />
+
+            <RadioButton
                 android:id="@+id/mode_setup_button"
                 android:text="@string/setup"
                 android:layout_width="match_parent"

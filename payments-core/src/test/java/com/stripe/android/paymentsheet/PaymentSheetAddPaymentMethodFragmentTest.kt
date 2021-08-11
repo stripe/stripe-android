@@ -16,6 +16,7 @@ import com.stripe.android.databinding.PrimaryButtonBinding
 import com.stripe.android.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -350,6 +351,42 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
+    fun `when payment intent off session fragment parameters set correctly`() {
+        createFragment(stripeIntent = PI_OFF_SESSION) { fragment, viewBinding ->
+            assertThat(
+                fragment.childFragmentManager.findFragmentById(
+                    viewBinding.paymentMethodFragmentContainer.id
+                )
+            ).isInstanceOf(CardDataCollectionFragment::class.java)
+
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+
+            idleLooper()
+
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                viewBinding.paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(
+                addedFragment?.arguments?.getString(
+                    ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD
+                )
+            ).isEqualTo(SupportedPaymentMethod.Bancontact.name)
+            assertThat(
+                addedFragment?.arguments?.getBoolean(
+                    ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE
+                )
+            ).isEqualTo(true)
+            assertThat(
+                addedFragment?.arguments?.getBoolean(
+                    ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY
+                )
+            ).isEqualTo(false)
+        }
+    }
+
+    @Test
     fun `payment method selection has the fields from formFieldValues`() {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = emptyMap(),
@@ -378,7 +415,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
             isCustomer = false,
-            isSetupIntent = true
+            saveForFutureUse = true
         )
 
         assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
@@ -393,7 +430,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
             isCustomer = false,
-            isSetupIntent = false
+            saveForFutureUse = false
         )
 
         assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
@@ -408,7 +445,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
             isCustomer = true,
-            isSetupIntent = true
+            saveForFutureUse = true
         )
 
         assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
@@ -423,7 +460,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
             args,
             isCustomer = true,
-            isSetupIntent = false
+            saveForFutureUse = false
         )
 
         assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
