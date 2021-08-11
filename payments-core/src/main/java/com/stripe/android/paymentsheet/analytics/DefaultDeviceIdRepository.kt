@@ -3,14 +3,18 @@ package com.stripe.android.paymentsheet.analytics
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.stripe.android.payments.core.injection.IOContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-internal class DefaultDeviceIdRepository(
+@Singleton
+internal class DefaultDeviceIdRepository @Inject internal constructor(
     private val context: Context,
-    private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext
 ) : DeviceIdRepository {
     private val prefs: SharedPreferences by lazy {
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
