@@ -7,7 +7,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -22,14 +22,14 @@ internal class CustomerApiRepository(
     private val workContext: CoroutineContext
 ) : CustomerRepository {
     /**
-     * Retrieve a Customer's payment methods. Silently handle failures by returning an
-     * empty list.
+     * Retrieve a Customer's payment methods of all types requested.
+     * Silently handle failures by returning an empty list for the payment method types that failed.
      */
     override suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,
         types: List<PaymentMethod.Type>
     ): List<PaymentMethod> = withContext(workContext) {
-        runCatching {
+        supervisorScope {
             types.map { paymentMethodType ->
                 async {
                     stripeRepository.getPaymentMethods(
@@ -45,10 +45,14 @@ internal class CustomerApiRepository(
                         )
                     )
                 }
-            }.awaitAll().flatten()
-        }.onFailure {
-            logger.error("Failed to retrieve ${customerConfig.id}'s payment methods.", it)
-        }.getOrDefault(emptyList())
+            }.map {
+                runCatching {
+                    it.await()
+                }.onFailure {
+                    logger.error("Failed to retrieve payment methods.", it)
+                }.getOrDefault(emptyList())
+            }.flatten()
+        }
     }
 
     /**
