@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.Logger
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -18,13 +19,14 @@ import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-internal class PaymentMethodsRepositoryTest {
+internal class CustomerRepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val stripeRepository = FakeStripeRepository()
-    private val repository = PaymentMethodsApiRepository(
+    private val repository = CustomerApiRepository(
         stripeRepository,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         "acct_123",
+        Logger.getInstance(false),
         workContext = testDispatcher
     )
 
@@ -35,12 +37,12 @@ internal class PaymentMethodsRepositoryTest {
 
     @Test
     fun `get() should create expected ListPaymentMethodsParams`() = testDispatcher.runBlockingTest {
-        repository.get(
+        repository.getPaymentMethods(
             PaymentSheet.CustomerConfiguration(
                 "customer_id",
                 "ephemeral_key"
             ),
-            PaymentMethod.Type.Card
+            listOf(PaymentMethod.Type.Card)
         )
 
         assertThat(stripeRepository.paramArgs)

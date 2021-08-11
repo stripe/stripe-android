@@ -13,7 +13,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -30,16 +30,16 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val stripeIntentValidator = StripeIntentValidator()
 
     private lateinit var stripeIntentRepository: StripeIntentRepository
-    private lateinit var paymentMethodsRepository: PaymentMethodsRepository
+    private lateinit var customerRepository: CustomerRepository
 
     override suspend fun init(
         clientSecret: ClientSecret,
         stripeIntentRepository: StripeIntentRepository,
-        paymentMethodsRepository: PaymentMethodsRepository,
+        customerRepository: CustomerRepository,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
         this@DefaultFlowControllerInitializer.stripeIntentRepository = stripeIntentRepository
-        this@DefaultFlowControllerInitializer.paymentMethodsRepository = paymentMethodsRepository
+        this@DefaultFlowControllerInitializer.customerRepository = customerRepository
 
         val isGooglePayReady = isGooglePayReady(clientSecret, paymentSheetConfiguration)
         paymentSheetConfiguration?.customer?.let { customerConfig ->
@@ -90,9 +90,9 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                 }.filter {
                     SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
                 }
-                retrieveAllPaymentMethods(
-                    types = paymentMethodTypes,
-                    customerConfig
+                customerRepository.getPaymentMethods(
+                    customerConfig,
+                    paymentMethodTypes
                 ).filter { paymentMethod ->
                     paymentMethod.hasExpectedDetails()
                 }.let { paymentMethods ->
@@ -175,15 +175,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             }?.let {
                 prefsRepository.savePaymentSelection(it)
             }
-        }
-    }
-
-    private suspend fun retrieveAllPaymentMethods(
-        types: List<PaymentMethod.Type>,
-        customerConfig: PaymentSheet.CustomerConfiguration
-    ): List<PaymentMethod> {
-        return types.flatMap { type ->
-            paymentMethodsRepository.get(customerConfig, type)
         }
     }
 

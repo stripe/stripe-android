@@ -40,14 +40,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -79,7 +77,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through injection
     private val apiRequestOptions: ApiRequest.Options,
     private val stripeIntentRepository: StripeIntentRepository,
-    private val paymentMethodsRepository: PaymentMethodsRepository,
+    private val customerRepository: CustomerRepository,
     private val paymentFlowResultProcessorProvider:
         Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     prefsRepository: PrefsRepository,
@@ -245,14 +243,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         PaymentMethod.Type.fromCode(it)
                     }.filter {
                         SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
-                    }.map {
-                        async {
-                            paymentMethodsRepository.get(
-                                customerConfig,
-                                it
-                            )
-                        }
-                    }.awaitAll().flatten().filter { paymentMethod ->
+                    }.let {
+                        customerRepository.getPaymentMethods(
+                            customerConfig,
+                            it
+                        )
+                    }.filter { paymentMethod ->
                         paymentMethod.hasExpectedDetails().also { valid ->
                             if (!valid) {
                                 logger.error(
