@@ -8,8 +8,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@Singleton
 internal class DefaultDeviceIdRepository @Inject internal constructor(
     private val context: Context,
     @IOContext private val workContext: CoroutineContext
