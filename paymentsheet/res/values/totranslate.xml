@@ -7,7 +7,7 @@
     <string name="card_number_label">Card number</string>
     <string name="card_number_invalid_brand">The card number brand is invalid.</string>
     <string name="card_number_incomplete">The card number is incomplete.</string>
-    <string name="card_number_too_long">The card number is too long.</string>
+    <string name="card_number_longer_than_expected">The card number is longer than expected, but you can still submit it.</string>
     <string name="card_number_invalid_luhn">The card number luhn is invalid.</string>
     <string name="card_number_invalid">The card number is invalid.</string>
     <string name="credit_cvc_label">CVC</string>

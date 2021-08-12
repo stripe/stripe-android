@@ -15,7 +15,7 @@ internal class CardNumberConfig : CreditTextFieldConfig {
     override fun determineState(brand: CardBrand, number: String): TextFieldState {
         val luhnValid = isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
-        val numberAllowedDigits = brand.getMaxLengthForCardNumber(number)
+        val numberAllowedDigits = brand.getMaxLengthForCardNumber(number) // Accounts for variant max length
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
@@ -24,7 +24,15 @@ internal class CardNumberConfig : CreditTextFieldConfig {
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(R.string.card_number_incomplete)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_too_long)
+            object : TextFieldState {
+                override fun shouldShowError(hasFocus: Boolean) = true
+                override fun isValid() = true
+                override fun isFull() = true
+                override fun isBlank() = false
+                override fun getError() = FieldError(
+                    R.string.card_number_longer_than_expected
+                )
+            }
         } else if (!luhnValid) {
             TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid_luhn)
         } else if (isDigitLimit && number.length == numberAllowedDigits) {

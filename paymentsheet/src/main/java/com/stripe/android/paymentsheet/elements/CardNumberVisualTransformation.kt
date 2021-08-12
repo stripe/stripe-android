@@ -8,8 +8,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 class CardNumberVisualTransformation(val separator: Char) : VisualTransformation {
 
+    // TODO: Spacing will be based on pan length
+
+
     // Will remove any "bad" characters  similar to the inputFilter
     override fun filter(text: AnnotatedString): TransformedText {
+
+        val cardBrand = CardBrand.fromCardNumber(text.text)
+        cardBrand.getMaxLengthForCardNumber(text.text)
 
         var out = ""
         for (i in text.indices) {
