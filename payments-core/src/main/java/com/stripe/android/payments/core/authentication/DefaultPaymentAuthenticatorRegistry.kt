@@ -4,9 +4,12 @@ import android.app.Activity
 import android.content.Context
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
-import com.stripe.android.PaymentBrowserAuthStarter
+import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
+import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AnalyticsRequestExecutor
@@ -21,14 +24,15 @@ import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
-import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Default registry to provide look ups for [PaymentAuthenticator].
  * Should be only accessed through [DefaultPaymentAuthenticatorRegistry.createInstance].
  */
+@Singleton
 internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
     private val sourceAuthenticator: SourceAuthenticator,
@@ -37,12 +41,29 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         Map<Class<out StripeIntent.NextActionData>,
             @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
 ) : PaymentAuthenticatorRegistry, Injector {
+    @VisibleForTesting
+    internal val allAuthenticators = setOf(
+        listOf(noOpIntentAuthenticator, sourceAuthenticator),
+        paymentAuthenticatorMap.values
+    ).flatten()
 
     /**
      * [AuthenticationComponent] instance is hold to inject into [Activity]s and [ViewModel]s
      * started by the [PaymentAuthenticator]s.
      */
     lateinit var authenticationComponent: AuthenticationComponent
+
+    /**
+     * [paymentRelayLauncher] is mutable and might be updated through [onNewActivityResultCaller]
+     */
+    internal var paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null
+
+    /**
+     * [paymentBrowserAuthLauncher] is mutable and might be updated through
+     * [onNewActivityResultCaller]
+     */
+    internal var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
+        null
 
     @InjectorKey
     private var injectorKey: Int? = null
@@ -78,15 +99,27 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
-        paymentAuthenticatorMap.values.forEach {
+        allAuthenticators.forEach {
             it.onNewActivityResultCaller(activityResultCaller, activityResultCallback)
         }
+        paymentRelayLauncher = activityResultCaller.registerForActivityResult(
+            PaymentRelayContract(),
+            activityResultCallback
+        )
+        paymentBrowserAuthLauncher = activityResultCaller.registerForActivityResult(
+            PaymentBrowserAuthContract(),
+            activityResultCallback
+        )
     }
 
     override fun onLauncherInvalidated() {
-        paymentAuthenticatorMap.values.forEach {
+        allAuthenticators.forEach {
             it.onLauncherInvalidated()
         }
+        paymentRelayLauncher?.unregister()
+        paymentBrowserAuthLauncher?.unregister()
+        paymentRelayLauncher = null
+        paymentBrowserAuthLauncher = null
     }
 
     override fun inject(injectable: Injectable) {
@@ -102,7 +135,6 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     }
 
     companion object {
-
         /**
          * Create an instance of [PaymentAuthenticatorRegistry] with dagger and register it in the
          * static cache.
@@ -113,8 +145,6 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         fun createInstance(
             context: Context,
             stripeRepository: StripeRepository,
-            paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
-            paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
             analyticsRequestExecutor: AnalyticsRequestExecutor,
             analyticsRequestFactory: AnalyticsRequestFactory,
             enableLogging: Boolean,
@@ -126,8 +156,6 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             val component = DaggerAuthenticationComponent.builder()
                 .context(context)
                 .stripeRepository(stripeRepository)
-                .paymentRelayStarterFactory(paymentRelayStarterFactory)
-                .paymentBrowserAuthStarterFactory(paymentBrowserAuthStarterFactory)
                 .analyticsRequestExecutor(analyticsRequestExecutor)
                 .analyticsRequestFactory(analyticsRequestFactory)
                 .enableLogging(enableLogging)
