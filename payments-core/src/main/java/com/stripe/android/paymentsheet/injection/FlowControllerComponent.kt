@@ -22,6 +22,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentCommonModule::class,
+        PaymentSheetCommonModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class
     ]

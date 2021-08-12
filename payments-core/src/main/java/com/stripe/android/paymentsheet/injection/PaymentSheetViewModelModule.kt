@@ -2,19 +2,14 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
-import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
-import com.stripe.android.paymentsheet.analytics.DeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -25,8 +20,6 @@ import dagger.Binds
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.Dispatchers
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -36,17 +29,7 @@ internal abstract class PaymentSheetViewModelModule {
     @Binds
     abstract fun bindsApplicationForContext(application: Application): Context
 
-    @Binds
-    abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
-
-    @Binds
-    abstract fun bindsDeviceIdRepository(repository: DefaultDeviceIdRepository): DeviceIdRepository
-
     companion object {
-        @Provides
-        @Named(ENABLE_LOGGING)
-        fun provideEnabledLogging(): Boolean = true
-
         @Provides
         @Singleton
         fun provideClientSecret(
@@ -54,10 +37,6 @@ internal abstract class PaymentSheetViewModelModule {
         ): ClientSecret {
             return starterArgs.clientSecret
         }
-
-        @Provides
-        @IOContext
-        fun provideWorkContext(): CoroutineContext = Dispatchers.IO
 
         @Provides
         @Singleton
@@ -115,11 +94,6 @@ internal abstract class PaymentSheetViewModelModule {
                 )
             } ?: PrefsRepository.Noop()
         }
-
-        @Provides
-        @Singleton
-        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-            Logger.getInstance(enableLogging)
 
         @Provides
         @Singleton
