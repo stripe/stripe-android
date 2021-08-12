@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -15,15 +16,23 @@ internal interface TextFieldController : InputController {
     fun onFocusChange(newHasFocus: Boolean)
 
     val debugLabel: String
+    override val label: Int
+    val trailingIcon: Flow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
-    override val label: Int
     val visualTransformation: VisualTransformation
     val showOptionalLabel: Boolean
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
 }
 
+
+data class TextFieldIcon(
+    @DrawableRes
+    val idRes: Int,
+    @StringRes
+    val contentDescription: Int
+)
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the field's
  * composable.  These functions will update the observables as needed.  It is responsible for
@@ -33,6 +42,7 @@ internal class SimpleTextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
+    override val trailingIcon: Flow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     override val keyboardType: KeyboardType = textFieldConfig.keyboard
     override val visualTransformation =
@@ -66,7 +76,9 @@ internal class SimpleTextFieldController constructor(
 
     val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
-    override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
+    override val isComplete: Flow<Boolean> = _fieldState.map {
+        it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
+    }
 
     init {
         onValueChange("")

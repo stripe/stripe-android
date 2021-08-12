@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
@@ -23,6 +24,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.asLiveData
@@ -64,6 +66,7 @@ internal fun TextField(
 
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.asLiveData().observeAsState("")
+    val trailingIcon by textFieldController.trailingIcon.asLiveData().observeAsState(null)
     val shouldShowError by textFieldController.visibleError.asLiveData().observeAsState(false)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
@@ -124,6 +127,19 @@ internal fun TextField(
         colors = colors,
         maxLines = 1,
         singleLine = true,
-        enabled = enabled
+        enabled = enabled,
+        trailingIcon = {
+            TrailingIcon(trailingIcon)
+        }
     )
+}
+
+@Composable
+fun TrailingIcon(trailingIcon: TextFieldIcon?) {
+    trailingIcon?.let {
+        Icon(
+            painter = painterResource(id = trailingIcon.idRes),
+            stringResource(trailingIcon.contentDescription)
+        )
+    }
 }

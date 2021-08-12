@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.regex.Pattern
 
 internal class EmailConfig : TextFieldConfig {
@@ -17,6 +18,7 @@ internal class EmailConfig : TextFieldConfig {
     override val label = R.string.email
     override val keyboard = KeyboardType.Email
     override val visualTransformation: VisualTransformation? = null
+    override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
 
     /**
      * This will allow all characters, but will show as invalid if it doesn't match

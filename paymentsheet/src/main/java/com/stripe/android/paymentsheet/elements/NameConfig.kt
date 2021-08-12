@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
+import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class NameConfig : TextFieldConfig {
     @StringRes
@@ -15,6 +16,7 @@ internal class NameConfig : TextFieldConfig {
     override val debugLabel = "name"
     override val keyboard = KeyboardType.Text
     override val visualTransformation: VisualTransformation? = null
+    override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
 
     override fun determineState(input: String): TextFieldState {
         return when {

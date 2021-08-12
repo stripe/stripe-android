@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class SimpleTextFieldConfig(
     @StringRes override val label: Int,
@@ -12,6 +13,7 @@ internal class SimpleTextFieldConfig(
 ) : TextFieldConfig {
     override val debugLabel: String = "generic_text"
     override val visualTransformation: VisualTransformation? = null
+    override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = false

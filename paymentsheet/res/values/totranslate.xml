@@ -15,4 +15,7 @@
     <string name="credit_cvc_invalid">CVC is invalid</string>
 
 
+    <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
+    <string name="stripe_paymentsheet_p24_bank">P24 Bank</string>
+    <string name="bank_icon_content_description">Bank icon</string>
 </resources>
