@@ -21,10 +21,7 @@ internal class CustomerApiRepository(
     private val logger: Logger,
     private val workContext: CoroutineContext
 ) : CustomerRepository {
-    /**
-     * Retrieve a Customer's payment methods of all types requested.
-     * Silently handle failures by returning an empty list for the payment method types that failed.
-     */
+
     override suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,
         types: List<PaymentMethod.Type>
@@ -55,10 +52,6 @@ internal class CustomerApiRepository(
         }
     }
 
-    /**
-     * Detach a payment method from the Customer and return the modified [PaymentMethod].
-     * Silently handle failures by returning null.
-     */
     override suspend fun detachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
         paymentMethodId: String
