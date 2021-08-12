@@ -10,6 +10,7 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
@@ -38,6 +39,9 @@ internal abstract class PaymentCommonModule {
     abstract fun bindsAnalyticsRequestExecutor(
         executor: DefaultAnalyticsRequestExecutor
     ): AnalyticsRequestExecutor
+
+    @Binds
+    abstract fun bindsStripeRepository(repository: StripeApiRepository): StripeRepository
 
     companion object {
         /**

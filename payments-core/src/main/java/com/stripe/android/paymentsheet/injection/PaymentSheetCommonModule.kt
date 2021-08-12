@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet.injection
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
 import com.stripe.android.Logger
-import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
@@ -33,9 +31,6 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
-
-    @Binds
-    abstract fun bindsStripeRepository(repository: StripeApiRepository): StripeRepository
 
     @Binds
     abstract fun bindsStripeIntentRepository(
