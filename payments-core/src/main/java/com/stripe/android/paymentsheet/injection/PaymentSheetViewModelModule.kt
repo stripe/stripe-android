@@ -2,19 +2,14 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -45,40 +40,6 @@ internal abstract class PaymentSheetViewModelModule {
             apiKey = lazyPaymentConfiguration.get().publishableKey,
             stripeAccount = lazyPaymentConfiguration.get().stripeAccountId
         )
-
-        @Provides
-        @Singleton
-        fun provideStripeIntentRepository(
-            stripeApiRepository: StripeApiRepository,
-            lazyPaymentConfig: Lazy<PaymentConfiguration>,
-            @IOContext workContext: CoroutineContext
-        ): StripeIntentRepository {
-            return StripeIntentRepository.Api(
-                stripeRepository = stripeApiRepository,
-                requestOptions = ApiRequest.Options(
-                    lazyPaymentConfig.get().publishableKey,
-                    lazyPaymentConfig.get().stripeAccountId
-                ),
-                workContext = workContext
-            )
-        }
-
-        @Provides
-        @Singleton
-        fun provideCustomerRepository(
-            stripeApiRepository: StripeApiRepository,
-            lazyPaymentConfig: Lazy<PaymentConfiguration>,
-            logger: Logger,
-            @IOContext workContext: CoroutineContext
-        ): CustomerRepository {
-            return CustomerApiRepository(
-                stripeRepository = stripeApiRepository,
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                logger = logger,
-                workContext = workContext
-            )
-        }
 
         @Provides
         @Singleton

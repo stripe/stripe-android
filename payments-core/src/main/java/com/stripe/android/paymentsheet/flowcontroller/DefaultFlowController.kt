@@ -187,16 +187,12 @@ internal class DefaultFlowController @Inject internal constructor(
                 clientSecret,
                 StripeIntentRepository.Api(
                     stripeRepository = stripeApiRepository,
-                    requestOptions = ApiRequest.Options(
-                        lazyPaymentConfiguration.get().publishableKey,
-                        lazyPaymentConfiguration.get().stripeAccountId
-                    ),
+                    lazyPaymentConfig = lazyPaymentConfiguration,
                     workContext = Dispatchers.IO
                 ),
                 CustomerApiRepository(
                     stripeRepository = stripeApiRepository,
-                    lazyPaymentConfiguration.get().publishableKey,
-                    lazyPaymentConfiguration.get().stripeAccountId,
+                    lazyPaymentConfiguration,
                     Logger.getInstance(false),
                     workContext = Dispatchers.IO
                 ),

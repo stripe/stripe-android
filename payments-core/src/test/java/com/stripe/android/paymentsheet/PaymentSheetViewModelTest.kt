@@ -7,6 +7,7 @@ import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -109,8 +110,11 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             customerRepository = CustomerApiRepository(
                 stripeRepository = FailingStripeRepository(),
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = null,
+                lazyPaymentConfig = {
+                    PaymentConfiguration(
+                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null
+                    )
+                },
                 logger = Logger.getInstance(false),
                 workContext = testDispatcher
             )
@@ -565,9 +569,11 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             stripeIntentRepository = StripeIntentRepository.Api(
                 stripeRepository = FailingStripeRepository(),
-                requestOptions = ApiRequest.Options(
-                    apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-                ),
+                lazyPaymentConfig = {
+                    PaymentConfiguration(
+                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null
+                    )
+                },
                 workContext = testDispatcher
             )
         )
