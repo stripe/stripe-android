@@ -75,7 +75,7 @@ internal class CustomerApiRepository(
                     )
                 )
             }.onFailure {
-                logger.error("Failed to detach payment method ${paymentMethodId}.", it)
+                logger.error("Failed to detach payment method $paymentMethodId.", it)
             }.getOrNull()
         }
 
