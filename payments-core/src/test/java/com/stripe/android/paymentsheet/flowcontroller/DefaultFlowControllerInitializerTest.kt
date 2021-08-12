@@ -307,7 +307,7 @@ internal class DefaultFlowControllerInitializerTest {
             )
 
             verify(paymentMethodsRepository).getPaymentMethods(any(), capture(paymentMethodTypeCaptor))
-            assertThat(paymentMethodTypeCaptor.allValues)
+            assertThat(paymentMethodTypeCaptor.allValues.flatten())
                 .containsExactly(PaymentMethod.Type.Card)
         }
 
