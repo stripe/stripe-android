@@ -717,9 +717,7 @@ internal class PaymentSheetActivityTest {
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
             eventReporter,
-            ApiRequest.Options(
-                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-            ),
+            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(paymentIntent),
             FakeCustomerRepository(paymentMethods),
             { paymentFlowResultProcessor },

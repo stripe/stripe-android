@@ -2,8 +2,6 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
@@ -11,7 +9,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ClientSecret
 import dagger.Binds
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -31,15 +28,6 @@ internal abstract class PaymentSheetViewModelModule {
         ): ClientSecret {
             return starterArgs.clientSecret
         }
-
-        @Provides
-        @Singleton
-        fun provideApiRequestOptions(
-            lazyPaymentConfiguration: Lazy<PaymentConfiguration>
-        ) = ApiRequest.Options(
-            apiKey = lazyPaymentConfiguration.get().publishableKey,
-            stripeAccount = lazyPaymentConfiguration.get().stripeAccountId
-        )
 
         @Provides
         @Singleton

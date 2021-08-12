@@ -110,11 +110,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             customerRepository = CustomerApiRepository(
                 stripeRepository = FailingStripeRepository(),
-                lazyPaymentConfig = {
-                    PaymentConfiguration(
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null
-                    )
-                },
+                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 logger = Logger.getInstance(false),
                 workContext = testDispatcher
             )
@@ -569,11 +565,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             stripeIntentRepository = StripeIntentRepository.Api(
                 stripeRepository = FailingStripeRepository(),
-                lazyPaymentConfig = {
-                    PaymentConfiguration(
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null
-                    )
-                },
+                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 workContext = testDispatcher
             )
         )
@@ -802,9 +794,7 @@ internal class PaymentSheetViewModelTest {
             application,
             args,
             eventReporter,
-            ApiRequest.Options(
-                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-            ),
+            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             stripeIntentRepository,
             customerRepository,
             { paymentFlowResultProcessor },

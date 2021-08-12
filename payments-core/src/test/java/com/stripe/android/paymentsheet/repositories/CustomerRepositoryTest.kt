@@ -26,11 +26,7 @@ internal class CustomerRepositoryTest {
     private val stripeRepository = FakeStripeRepository()
     private val repository = CustomerApiRepository(
         stripeRepository,
-        lazyPaymentConfig = {
-            PaymentConfiguration(
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"
-            )
-        },
+        { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
         Logger.getInstance(false),
         workContext = testDispatcher
     )
@@ -65,11 +61,7 @@ internal class CustomerRepositoryTest {
         testDispatcher.runBlockingTest {
             val repository = CustomerApiRepository(
                 FailsOnceStripeRepository(),
-                lazyPaymentConfig = {
-                    PaymentConfiguration(
-                        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"
-                    )
-                },
+                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 Logger.getInstance(false),
                 workContext = testDispatcher
             )
