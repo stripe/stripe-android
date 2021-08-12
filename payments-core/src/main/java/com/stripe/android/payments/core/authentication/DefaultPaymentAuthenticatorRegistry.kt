@@ -25,12 +25,14 @@ import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
 import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Default registry to provide look ups for [PaymentAuthenticator].
  * Should be only accessed through [DefaultPaymentAuthenticatorRegistry.createInstance].
  */
+@Singleton
 internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
     private val sourceAuthenticator: SourceAuthenticator,
