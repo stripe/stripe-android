@@ -11,8 +11,6 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 internal interface FlowControllerInitializer {
     suspend fun init(
         clientSecret: ClientSecret,
-        stripeIntentRepository: StripeIntentRepository,
-        customerRepository: CustomerRepository,
         paymentSheetConfiguration: PaymentSheet.Configuration? = null
     ): InitResult
 

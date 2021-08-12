@@ -25,22 +25,16 @@ import kotlin.coroutines.CoroutineContext
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    private val stripeIntentRepository: StripeIntentRepository,
+    private val customerRepository: CustomerRepository,
     @IOContext private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
     private val stripeIntentValidator = StripeIntentValidator()
 
-    private lateinit var stripeIntentRepository: StripeIntentRepository
-    private lateinit var customerRepository: CustomerRepository
-
     override suspend fun init(
         clientSecret: ClientSecret,
-        stripeIntentRepository: StripeIntentRepository,
-        customerRepository: CustomerRepository,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
-        this@DefaultFlowControllerInitializer.stripeIntentRepository = stripeIntentRepository
-        this@DefaultFlowControllerInitializer.customerRepository = customerRepository
-
         val isGooglePayReady = isGooglePayReady(clientSecret, paymentSheetConfiguration)
         paymentSheetConfiguration?.customer?.let { customerConfig ->
             createWithCustomer(

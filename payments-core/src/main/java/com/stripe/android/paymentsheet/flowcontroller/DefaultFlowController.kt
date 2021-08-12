@@ -185,17 +185,6 @@ internal class DefaultFlowController @Inject internal constructor(
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
                 clientSecret,
-                StripeIntentRepository.Api(
-                    stripeRepository = stripeApiRepository,
-                    lazyPaymentConfig = lazyPaymentConfiguration,
-                    workContext = Dispatchers.IO
-                ),
-                CustomerApiRepository(
-                    stripeRepository = stripeApiRepository,
-                    lazyPaymentConfiguration,
-                    Logger.getInstance(false),
-                    workContext = Dispatchers.IO
-                ),
                 configuration
             )
 
