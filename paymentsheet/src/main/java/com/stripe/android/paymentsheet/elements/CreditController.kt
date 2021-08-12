@@ -20,7 +20,7 @@ internal class CreditController(
     )
 
     // TODO: add expiration date
-    val fields = listOf(cvcElement, numberElement)
+    val fields = listOf(numberElement, cvcElement)
 
     @ExperimentalCoroutinesApi
     override val error = combine(fields

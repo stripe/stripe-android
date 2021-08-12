@@ -81,6 +81,7 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     object Iban : SectionFieldSpec(IdentifierSpec("iban"))
 
     object CreditSpec : SectionFieldSpec(IdentifierSpec("credit"))
+    object CreditBillingSpec : SectionFieldSpec(IdentifierSpec("credit_billing"))
 
     /**
      * This is the specification for a country field.

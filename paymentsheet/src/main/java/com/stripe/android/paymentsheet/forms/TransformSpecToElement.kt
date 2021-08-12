@@ -64,6 +64,7 @@ internal class TransformSpecToElement(
             is SectionFieldSpec.SimpleText -> it.transform()
             is SectionFieldSpec.AddressSpec -> transformAddress()
             is SectionFieldSpec.CreditSpec -> transformCredit()
+            is SectionFieldSpec.CreditBillingSpec -> transformCreditBilling()
         }
     }
 
@@ -74,6 +75,11 @@ internal class TransformSpecToElement(
 
     private fun transformCredit() = SectionFieldElement.CreditElement(
         IdentifierSpec("credit element")
+    )
+
+    private fun transformCreditBilling() = SectionFieldElement.CreditBillingElement(
+        IdentifierSpec("credit element billing"),
+        resourceRepository.addressRepository
     )
 
     private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
+import com.stripe.android.paymentsheet.address.FieldType
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.CountryConfig
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -135,7 +137,38 @@ internal sealed class SectionFieldElement {
         override val controller: CreditController = CreditController(),
     ) : SectionFieldElement()
 
-    internal class AddressElement @VisibleForTesting constructor(
+    internal class CreditBillingElement(
+        identifier: IdentifierSpec,
+        addressFieldRepository: AddressFieldElementRepository,
+        countryCodes: Set<String> = emptySet(),
+        countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
+            CountryConfig(countryCodes)
+        ),
+    ) : AddressElement(
+        identifier,
+        addressFieldRepository,
+        countryCodes,
+        countryDropdownFieldController
+    ) {
+        // Save for future use puts this in the controller rather than element
+        val hiddenIdentifiers: Flow<List<IdentifierSpec>> =
+            countryDropdownFieldController.rawFieldValue.map { countryCode ->
+                when (countryCode) {
+                    "US", "GB", "CA" -> {
+                        FieldType.values()
+                            .filterNot { it == FieldType.Name }
+                            .map { IdentifierSpec(it.serializedValue) }
+                    }
+                    else -> {
+                        FieldType.values()
+                            .map { IdentifierSpec(it.serializedValue) }
+                    }
+                }
+            }
+
+    }
+
+    internal open class AddressElement @VisibleForTesting constructor(
         override val identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
         countryCodes: Set<String> = emptySet(),

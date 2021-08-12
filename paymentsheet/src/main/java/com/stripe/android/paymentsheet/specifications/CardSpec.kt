@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.specifications
 
+import com.stripe.android.paymentsheet.R
+
 internal val cardParams: MutableMap<String, Any?> = mutableMapOf(
     "number" to null,
     "expiryMonth" to null,
@@ -19,10 +21,17 @@ internal val cardSection = FormItemSpec.SectionSpec(
     SectionFieldSpec.CreditSpec
 )
 
+internal val creditBillingSection = FormItemSpec.SectionSpec(
+    IdentifierSpec("credit"),
+    SectionFieldSpec.CreditBillingSpec,
+    R.string.billing_details
+)
+
 internal val card = FormSpec(
     LayoutSpec(
         listOf(
-            cardSection
+            cardSection,
+            creditBillingSection
         )
     ),
     cardParamKey,

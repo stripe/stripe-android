@@ -342,6 +342,12 @@ class FormViewModel @Inject internal constructor(
         .filterIsInstance<SaveForFutureUseElement>()
         .firstOrNull()
 
+    private val creditBillingElement = elements
+        .filterIsInstance<SectionElement>()
+        .flatMap { it.fields }
+        .filterIsInstance<SectionFieldElement.CreditBillingElement>()
+        .firstOrNull()
+
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
         ?: MutableStateFlow(saveForFutureUseInitialValue)
 
@@ -357,9 +363,11 @@ class FormViewModel @Inject internal constructor(
         combine(
             saveForFutureUseVisible,
             saveForFutureUseElement?.controller?.hiddenIdentifiers
-                ?: MutableStateFlow(emptyList())
-        ) { showFutureUse, hiddenIdentifiers ->
+                ?: MutableStateFlow(emptyList()),
+            creditBillingElement?.hiddenIdentifiers ?: MutableStateFlow(emptyList())
+        ) { showFutureUse, saveFutureUseIdentifiers, creditBillingIdentifiers ->
 
+            val hiddenIdentifiers = saveFutureUseIdentifiers.plus(creditBillingIdentifiers)
             // For hidden *section* identifiers, list of identifiers of elements in the section
             val identifiers = sectionToFieldIdentifierMap
                 .filter { idControllerPair ->
