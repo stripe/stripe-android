@@ -54,14 +54,13 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     lateinit var authenticationComponent: AuthenticationComponent
 
     /**
-     * [paymentRelayLauncher] is mutable and might be updated during
-     * through [onNewActivityResultCaller]
+     * [paymentRelayLauncher] is mutable and might be updated through [onNewActivityResultCaller]
      */
     internal var paymentRelayLauncher: ActivityResultLauncher<PaymentRelayStarter.Args>? = null
 
     /**
-     * [paymentBrowserAuthLauncher] is mutable and might be updated during
-     * through [onNewActivityResultCaller]
+     * [paymentBrowserAuthLauncher] is mutable and might be updated through
+     * [onNewActivityResultCaller]
      */
     internal var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
         null
