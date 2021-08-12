@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
@@ -66,7 +67,7 @@ internal abstract class PaymentSheetViewModelModule {
 
         @Provides
         @Singleton
-        fun providePaymentMethodsApiRepository(
+        fun provideCustomerRepository(
             stripeApiRepository: StripeApiRepository,
             lazyPaymentConfig: Lazy<PaymentConfiguration>,
             logger: Logger,
