@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 
 /**
@@ -12,7 +12,7 @@ internal interface FlowControllerInitializer {
     suspend fun init(
         clientSecret: ClientSecret,
         stripeIntentRepository: StripeIntentRepository,
-        paymentMethodsRepository: PaymentMethodsRepository,
+        customerRepository: CustomerRepository,
         paymentSheetConfiguration: PaymentSheet.Configuration? = null
     ): InitResult
 

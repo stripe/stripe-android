@@ -32,11 +32,12 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -72,7 +73,7 @@ internal class PaymentSheetViewModelTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     @Captor
-    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<PaymentMethod.Type>
+    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
 
     @BeforeTest
     fun setup() {
@@ -106,10 +107,11 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() {
         val viewModel = createViewModel(
-            paymentMethodsRepository = PaymentMethodsApiRepository(
+            customerRepository = CustomerApiRepository(
                 stripeRepository = FailingStripeRepository(),
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = null,
+                logger = Logger.getInstance(false),
                 workContext = testDispatcher
             )
         )
@@ -118,6 +120,7 @@ internal class PaymentSheetViewModelTest {
             paymentMethods = it
         }
         viewModel.updatePaymentMethods(PAYMENT_INTENT)
+        idleLooper()
         assertThat(requireNotNull(paymentMethods))
             .isEmpty()
     }
@@ -137,9 +140,9 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `updatePaymentMethods() should fetch only supported payment method types`() =
         testDispatcher.runBlockingTest {
-            val paymentMethodsRepository = mock<PaymentMethodsRepository>()
+            val paymentMethodsRepository = mock<CustomerRepository>()
             val viewModel = createViewModel(
-                paymentMethodsRepository = paymentMethodsRepository
+                customerRepository = paymentMethodsRepository
             )
             val stripeIntent = PAYMENT_INTENT.copy(
                 paymentMethodTypes = listOf(
@@ -150,15 +153,18 @@ internal class PaymentSheetViewModelTest {
             )
 
             viewModel.updatePaymentMethods(stripeIntent)
-            verify(paymentMethodsRepository).get(any(), capture(paymentMethodTypeCaptor))
-            assertThat(paymentMethodTypeCaptor.allValues)
+            verify(paymentMethodsRepository).getPaymentMethods(
+                any(),
+                capture(paymentMethodTypeCaptor)
+            )
+            assertThat(paymentMethodTypeCaptor.value)
                 .containsExactly(PaymentMethod.Type.Card)
         }
 
     @Test
     fun `updatePaymentMethods() should filter out invalid payment method types`() {
         val viewModel = createViewModel(
-            paymentMethodsRepository = FakePaymentMethodsRepository(
+            customerRepository = FakeCustomerRepository(
                 listOf(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(card = null), // invalid
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -782,7 +788,7 @@ internal class PaymentSheetViewModelTest {
         stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(
             PAYMENT_INTENT
         ),
-        paymentMethodsRepository: PaymentMethodsRepository = FakePaymentMethodsRepository(
+        customerRepository: CustomerRepository = FakeCustomerRepository(
             PAYMENT_METHODS
         )
     ): PaymentSheetViewModel {
@@ -794,7 +800,7 @@ internal class PaymentSheetViewModelTest {
                 apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
             ),
             stripeIntentRepository,
-            paymentMethodsRepository,
+            customerRepository,
             { paymentFlowResultProcessor },
             prefsRepository,
             Logger.noop(),

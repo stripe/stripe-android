@@ -44,7 +44,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.AuthActivityStarterHost
@@ -789,7 +789,7 @@ internal class DefaultFlowControllerTest {
         override suspend fun init(
             clientSecret: ClientSecret,
             stripeIntentRepository: StripeIntentRepository,
-            paymentMethodsRepository: PaymentMethodsRepository,
+            customerRepository: CustomerRepository,
             paymentSheetConfiguration: PaymentSheet.Configuration?
         ): FlowControllerInitializer.InitResult {
             delay(delayMillis)
@@ -811,7 +811,7 @@ internal class DefaultFlowControllerTest {
         override suspend fun init(
             clientSecret: ClientSecret,
             stripeIntentRepository: StripeIntentRepository,
-            paymentMethodsRepository: PaymentMethodsRepository,
+            customerRepository: CustomerRepository,
             paymentSheetConfiguration: PaymentSheet.Configuration?
         ): FlowControllerInitializer.InitResult {
             return FlowControllerInitializer.InitResult.Failure(

@@ -721,7 +721,7 @@ internal class PaymentSheetActivityTest {
                 apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
             ),
             StripeIntentRepository.Static(paymentIntent),
-            FakePaymentMethodsRepository(paymentMethods),
+            FakeCustomerRepository(paymentMethods),
             { paymentFlowResultProcessor },
             FakePrefsRepository(),
             Logger.noop(),
