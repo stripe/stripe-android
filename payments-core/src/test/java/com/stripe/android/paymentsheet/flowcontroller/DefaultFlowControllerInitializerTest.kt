@@ -7,12 +7,12 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.FakePaymentMethodsRepository
+import com.stripe.android.paymentsheet.FakeCustomerRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
@@ -42,10 +42,10 @@ internal class DefaultFlowControllerInitializerTest {
 
     private val stripeIntentRepository =
         StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-    private val paymentMethodsRepository = FakePaymentMethodsRepository(PAYMENT_METHODS)
+    private val paymentMethodsRepository = FakeCustomerRepository(PAYMENT_METHODS)
 
     @Captor
-    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<PaymentMethod.Type>
+    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
 
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
@@ -229,7 +229,7 @@ internal class DefaultFlowControllerInitializerTest {
                 initializer.init(
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntentRepository,
-                    FakePaymentMethodsRepository(emptyList()),
+                    FakeCustomerRepository(emptyList()),
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
@@ -260,7 +260,7 @@ internal class DefaultFlowControllerInitializerTest {
                 initializer.init(
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntentRepository,
-                    FakePaymentMethodsRepository(emptyList()),
+                    FakeCustomerRepository(emptyList()),
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
@@ -284,8 +284,8 @@ internal class DefaultFlowControllerInitializerTest {
     @Test
     fun `init() with customer should fetch only supported payment method types`() =
         testDispatcher.runBlockingTest {
-            val paymentMethodsRepository = mock<PaymentMethodsRepository> {
-                whenever(it.get(any(), any())).thenReturn(emptyList())
+            val paymentMethodsRepository = mock<CustomerRepository> {
+                whenever(it.getPaymentMethods(any(), any())).thenReturn(emptyList())
             }
 
             val initializer = createInitializer()
@@ -306,8 +306,8 @@ internal class DefaultFlowControllerInitializerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            verify(paymentMethodsRepository).get(any(), capture(paymentMethodTypeCaptor))
-            assertThat(paymentMethodTypeCaptor.allValues)
+            verify(paymentMethodsRepository).getPaymentMethods(any(), capture(paymentMethodTypeCaptor))
+            assertThat(paymentMethodTypeCaptor.allValues.flatten())
                 .containsExactly(PaymentMethod.Type.Card)
         }
 
@@ -317,7 +317,7 @@ internal class DefaultFlowControllerInitializerTest {
             val initResult = createInitializer().init(
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD),
-                FakePaymentMethodsRepository(
+                FakeCustomerRepository(
                     listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(card = null), // invalid
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD

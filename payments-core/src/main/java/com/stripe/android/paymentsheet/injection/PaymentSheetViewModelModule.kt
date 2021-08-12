@@ -13,8 +13,8 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import dagger.Binds
 import dagger.Lazy
@@ -69,12 +69,14 @@ internal abstract class PaymentSheetViewModelModule {
         fun providePaymentMethodsApiRepository(
             stripeApiRepository: StripeApiRepository,
             lazyPaymentConfig: Lazy<PaymentConfiguration>,
+            logger: Logger,
             @IOContext workContext: CoroutineContext
-        ): PaymentMethodsRepository {
-            return PaymentMethodsApiRepository(
+        ): CustomerRepository {
+            return CustomerApiRepository(
                 stripeRepository = stripeApiRepository,
                 publishableKey = lazyPaymentConfig.get().publishableKey,
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                logger = logger,
                 workContext = workContext
             )
         }

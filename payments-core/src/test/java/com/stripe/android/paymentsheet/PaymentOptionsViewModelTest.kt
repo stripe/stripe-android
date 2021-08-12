@@ -39,7 +39,7 @@ internal class PaymentOptionsViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val prefsRepository = FakePrefsRepository()
     private val paymentMethodRepository =
-        FakePaymentMethodsRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
+        FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
 
     private val viewModel = PaymentOptionsViewModel(
         args = PAYMENT_OPTION_CONTRACT_ARGS,
