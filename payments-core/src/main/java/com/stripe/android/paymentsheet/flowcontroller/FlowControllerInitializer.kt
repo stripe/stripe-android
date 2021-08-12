@@ -2,8 +2,6 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 
 /**
  * An interface for a class that can initialize a [PaymentSheet.FlowController].
