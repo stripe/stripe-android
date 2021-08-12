@@ -6,7 +6,6 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -91,21 +90,6 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * [paymentBrowserAuthLauncher] is mutable and might be updated during
-     * through [registerLaunchersWithActivityResultCaller]
-     */
-    private var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
-        null
-    private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarterHost ->
-        paymentBrowserAuthLauncher?.let {
-            PaymentBrowserAuthStarter.Modern(it)
-        } ?: PaymentBrowserAuthStarter.Legacy(
-            host,
-            defaultReturnUrl
-        )
-    }
-
-    /**
      * A map between 3ds1 [StripeIntent] ids to its corresponding returnUrl.
      * An entry will be removed once the [StripeIntent] is confirmed.
      */
@@ -115,8 +99,6 @@ internal class StripePaymentController internal constructor(
         DefaultPaymentAuthenticatorRegistry.createInstance(
             context,
             stripeRepository,
-            paymentRelayStarterFactory,
-            paymentBrowserAuthStarterFactory,
             analyticsRequestExecutor,
             analyticsRequestFactory,
             enableLogging,
@@ -133,10 +115,6 @@ internal class StripePaymentController internal constructor(
             PaymentRelayContract(),
             activityResultCallback
         )
-        paymentBrowserAuthLauncher = activityResultCaller.registerForActivityResult(
-            PaymentBrowserAuthContract(),
-            activityResultCallback
-        )
         authenticatorRegistry.onNewActivityResultCaller(
             activityResultCaller,
             activityResultCallback
@@ -145,9 +123,7 @@ internal class StripePaymentController internal constructor(
 
     override fun unregisterLaunchers() {
         paymentRelayLauncher?.unregister()
-        paymentBrowserAuthLauncher?.unregister()
         paymentRelayLauncher = null
-        paymentBrowserAuthLauncher = null
         authenticatorRegistry.onLauncherInvalidated()
     }
 

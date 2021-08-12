@@ -15,6 +15,7 @@ import javax.inject.Singleton
  * dependency to include for that authenticator.
  */
 @Singleton
+@JvmSuppressWildcards
 internal class UnsupportedAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
 ) : PaymentAuthenticator<StripeIntent> {

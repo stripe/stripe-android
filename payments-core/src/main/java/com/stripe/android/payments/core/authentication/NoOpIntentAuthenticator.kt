@@ -11,6 +11,7 @@ import javax.inject.Singleton
  * [PaymentAuthenticator] implementation to perform no-op, just return to client's host.
  */
 @Singleton
+@JvmSuppressWildcards
 internal class NoOpIntentAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
 ) : PaymentAuthenticator<StripeIntent> {
