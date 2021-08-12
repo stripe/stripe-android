@@ -134,11 +134,11 @@ internal abstract class PaymentCommonModule {
         fun provideAnalyticsRequestFactory(
             context: Context,
             lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
-            defaultProductUsageTokens: Set<String>,
+            @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
         ) = AnalyticsRequestFactory(
             context,
             { lazyPaymentConfiguration.get().publishableKey },
-            defaultProductUsageTokens,
+            productUsageTokens,
         )
     }
 }

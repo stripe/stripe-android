@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.app.Application
 import android.content.Context
 import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -11,6 +12,7 @@ import com.stripe.android.paymentsheet.model.ClientSecret
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -51,6 +53,7 @@ internal abstract class PaymentSheetViewModelModule {
 
         @Provides
         @Singleton
+        @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("PaymentSheet")
     }
 }

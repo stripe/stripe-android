@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.FlowController
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.model.ClientSecret
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -62,6 +64,7 @@ internal abstract class FlowControllerModule {
 
         @Provides
         @Singleton
+        @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("PaymentSheet.FlowController")
 
         @Provides

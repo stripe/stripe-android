@@ -7,12 +7,14 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentSheet
 import dagger.Lazy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -25,7 +27,7 @@ internal class CustomerApiRepository @Inject constructor(
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val logger: Logger,
     @IOContext private val workContext: CoroutineContext,
-    private val productUsageTokens: Set<String> = emptySet()
+    @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String> = emptySet()
 ) : CustomerRepository {
 
     override suspend fun getPaymentMethods(
