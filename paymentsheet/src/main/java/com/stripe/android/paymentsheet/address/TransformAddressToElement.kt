@@ -19,13 +19,16 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 
 @Serializable(with = FieldTypeAsStringSerializer::class)
-internal enum class FieldType(val serializedValue: String) {
-    AddressLine1("addressLine1"),
-    AddressLine2("addressLine2"),
-    Locality("locality"),
-    PostalCode("postalCode"),
-    AdministrativeArea("administrativeArea"),
-    Name("name");
+internal enum class FieldType(
+    val serializedValue: String,
+    val identifierSpec: IdentifierSpec
+) {
+    AddressLine1("addressLine1", IdentifierSpec("line1")),
+    AddressLine2("addressLine2", IdentifierSpec("line2")),
+    Locality("locality", IdentifierSpec("city")),
+    PostalCode("postalCode", IdentifierSpec("postal_code")),
+    AdministrativeArea("administrativeArea", IdentifierSpec("state")),
+    Name("name", IdentifierSpec("name"));
 
     companion object {
         fun from(value: String) = values().firstOrNull {
@@ -111,9 +114,10 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?) =
 internal fun List<CountryAddressSchema>.transformToElementList() =
     this.mapNotNull {
         when (it.type) {
+            // TODO: Add label to the FieldType and this switch goes away!
             FieldType.AddressLine1 -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("line1"),
+                    it.type.identifierSpec,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_address_line1,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -122,7 +126,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.AddressLine2 -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("line2"),
+                    it.type.identifierSpec,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_address_line2,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -131,7 +135,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.Locality -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("city"),
+                    it.type.identifierSpec,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_city,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -140,7 +144,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.AdministrativeArea -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("state"),
+                    it.type.identifierSpec,
                     it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -149,7 +153,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.PostalCode -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("postal_code"),
+                    it.type.identifierSpec,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_postal_code,
                     capitalization = KeyboardCapitalization.None,
                     keyboardType = getKeyboard(it.schema),

@@ -169,7 +169,9 @@ internal fun AddressElementUI(
     Column {
         fields.forEachIndexed { index, field ->
             SectionFieldElementUI(enabled, field, hiddenIdentifiers)
-            if (index != fields.size - 1) {
+            if ((hiddenIdentifiers?.contains(field.identifier) == false) &&
+                (index != fields.size - 1)
+            ) {
                 val cardStyle = CardStyle(isSystemInDarkTheme())
                 Divider(
                     color = cardStyle.cardBorderColor,

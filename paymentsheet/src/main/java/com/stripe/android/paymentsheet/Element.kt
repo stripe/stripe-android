@@ -156,17 +156,18 @@ internal sealed class SectionFieldElement {
                 when (countryCode) {
                     "US", "GB", "CA" -> {
                         FieldType.values()
-                            .filterNot { it == FieldType.Name }
-                            .map { IdentifierSpec(it.serializedValue) }
+                            .filterNot { it == FieldType.PostalCode }
+                            .map { it.identifierSpec }
                     }
                     else -> {
                         FieldType.values()
-                            .map { IdentifierSpec(it.serializedValue) }
+                            .map { it.identifierSpec }
                     }
                 }
             }
 
     }
+
     internal open class AddressElement constructor(
         override val identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
