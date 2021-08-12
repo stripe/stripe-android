@@ -62,7 +62,6 @@ assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
 
 configurations {
-    javadocDeps
     ktlint
 }
 
