@@ -14,7 +14,7 @@ import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
-import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -97,12 +97,12 @@ internal sealed class SectionFieldElement {
 
     data class Email(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController
+        override val controller: SimpleTextFieldController
     ) : SectionFieldElement()
 
     data class Iban(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
+        override val controller: SimpleTextFieldController,
     ) : SectionFieldElement()
 
     data class Country(
@@ -112,7 +112,7 @@ internal sealed class SectionFieldElement {
 
     data class SimpleText(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController
+        override val controller: SimpleTextFieldController
     ) : SectionFieldElement()
 
     data class SimpleDropdown(

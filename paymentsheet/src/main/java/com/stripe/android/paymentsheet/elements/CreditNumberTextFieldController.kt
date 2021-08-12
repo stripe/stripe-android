@@ -9,18 +9,18 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 internal class CreditNumberTextFieldController constructor(
-    private val creditTextFieldConfig: CreditTextFieldConfig,
-    val showOptionalLabel: Boolean = false
-) : InputController, SectionFieldErrorController {
-    val capitalization: KeyboardCapitalization = creditTextFieldConfig.capitalization
-    val keyboardType: KeyboardType = creditTextFieldConfig.keyboard
-    val visualTransformation = creditTextFieldConfig.visualTransformation
+    private val creditTextFieldConfig: CardNumberConfig,
+    override val showOptionalLabel: Boolean = false
+) : TextFieldController, SectionFieldErrorController {
+    override val capitalization: KeyboardCapitalization = creditTextFieldConfig.capitalization
+    override val keyboardType: KeyboardType = creditTextFieldConfig.keyboard
+    override val visualTransformation = creditTextFieldConfig.visualTransformation
 
     @StringRes
     // TODO: THis should change to a flow and be based in the card brand
     override val label: Int = creditTextFieldConfig.label
 
-    val debugLabel = creditTextFieldConfig.debugLabel
+    override val debugLabel = creditTextFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")
@@ -30,7 +30,7 @@ internal class CreditNumberTextFieldController constructor(
         _fieldValue.map { creditTextFieldConfig.convertToRaw(it) }
 
     internal val cardBrandFlow = _fieldValue.map {
-        CardBrand.fromText(it)
+        CardBrand.getCardBrands(it).firstOrNull() ?: CardBrand.Unknown
     }
 
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
@@ -40,7 +40,7 @@ internal class CreditNumberTextFieldController constructor(
 
     private val _hasFocus = MutableStateFlow(false)
 
-    val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
+    override val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
         fieldState.shouldShowError(hasFocus)
     }
 
@@ -63,7 +63,7 @@ internal class CreditNumberTextFieldController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    fun onValueChange(displayFormatted: String) {
+    override fun onValueChange(displayFormatted: String) {
         _fieldValue.value = creditTextFieldConfig.filter(displayFormatted)
     }
 
@@ -74,7 +74,7 @@ internal class CreditNumberTextFieldController constructor(
         onValueChange(creditTextFieldConfig.convertFromRaw(rawValue))
     }
 
-    fun onFocusChange(newHasFocus: Boolean) {
+    override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
     }
 }

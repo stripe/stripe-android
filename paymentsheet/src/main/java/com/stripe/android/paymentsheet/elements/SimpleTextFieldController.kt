@@ -10,22 +10,37 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
+internal interface TextFieldController : InputController {
+    fun onValueChange(displayFormatted: String)
+    fun onFocusChange(newHasFocus: Boolean)
+
+    val debugLabel: String
+    val capitalization: KeyboardCapitalization
+    val keyboardType: KeyboardType
+    override val label: Int
+    val visualTransformation: VisualTransformation
+    val showOptionalLabel: Boolean
+    override val fieldValue: Flow<String>
+    val visibleError: Flow<Boolean>
+}
+
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the field's
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal class TextFieldController constructor(
+internal class SimpleTextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
-    val showOptionalLabel: Boolean = false
-) : InputController, SectionFieldErrorController {
-    val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
-    val keyboardType: KeyboardType = textFieldConfig.keyboard
-    val visualTransformation = textFieldConfig.visualTransformation ?: VisualTransformation.None
+    override val showOptionalLabel: Boolean = false
+) : TextFieldController, SectionFieldErrorController {
+    override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
+    override val keyboardType: KeyboardType = textFieldConfig.keyboard
+    override val visualTransformation =
+        textFieldConfig.visualTransformation ?: VisualTransformation.None
 
     @StringRes
     override val label: Int = textFieldConfig.label
-    val debugLabel = textFieldConfig.debugLabel
+    override val debugLabel = textFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")
@@ -37,9 +52,10 @@ internal class TextFieldController constructor(
 
     private val _hasFocus = MutableStateFlow(false)
 
-    val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
-        fieldState.shouldShowError(hasFocus)
-    }
+    override val visibleError: Flow<Boolean> =
+        combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
+            fieldState.shouldShowError(hasFocus)
+        }
 
     /**
      * An error must be emitted if it is visible or not visible.
@@ -59,7 +75,7 @@ internal class TextFieldController constructor(
     /**
      * This is called when the value changed to is a display value.
      */
-    fun onValueChange(displayFormatted: String) {
+    override fun onValueChange(displayFormatted: String) {
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
 
         // Should be filtered value
@@ -73,7 +89,7 @@ internal class TextFieldController constructor(
         onValueChange(textFieldConfig.convertFromRaw(rawValue))
     }
 
-    fun onFocusChange(newHasFocus: Boolean) {
+    override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
     }
 }

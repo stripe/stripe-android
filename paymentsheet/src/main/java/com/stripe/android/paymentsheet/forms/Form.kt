@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
@@ -215,18 +216,6 @@ internal fun SectionFieldElementUI(
         }
         is CreditController -> {
             CreditElementUI(
-                enabled,
-                controller
-            )
-        }
-        is CreditNumberTextFieldController -> {
-            CreditNumberElementUI(
-                enabled,
-                controller
-            )
-        }
-        is CvcNumberTextFieldController -> {
-            CvcNumberElementUI(
                 enabled,
                 controller
             )

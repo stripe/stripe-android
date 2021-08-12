@@ -28,7 +28,7 @@ class AddressElementTest {
             listOf(
                 SectionFieldElement.Email(
                     IdentifierSpec("email"),
-                    TextFieldController(EmailConfig())
+                    SimpleTextFieldController(EmailConfig())
                 )
             )
         )
@@ -37,7 +37,7 @@ class AddressElementTest {
             listOf(
                 SectionFieldElement.Iban(
                     IdentifierSpec("iban"),
-                    TextFieldController(IbanConfig())
+                    SimpleTextFieldController(IbanConfig())
                 )
             )
         )
@@ -57,7 +57,7 @@ class AddressElementTest {
             countryDropdownFieldController.onValueChange(0)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            (addressElement.fields.first()[1].controller as TextFieldController)
+            (addressElement.fields.first()[1].controller as SimpleTextFieldController)
                 .onValueChange(";;invalidchars@email.com")
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -69,7 +69,7 @@ class AddressElementTest {
             countryDropdownFieldController.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            ((addressElement.fields.first())[1].controller as TextFieldController)
+            ((addressElement.fields.first())[1].controller as SimpleTextFieldController)
                 .onValueChange("12invalidiban")
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 

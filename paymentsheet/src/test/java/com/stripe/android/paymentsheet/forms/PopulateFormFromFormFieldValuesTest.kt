@@ -5,14 +5,14 @@ import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
-import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class PopulateFormFromFormFieldValuesTest {
-    private val emailController = TextFieldController(EmailConfig())
+    private val emailController = SimpleTextFieldController(EmailConfig())
     private val emailFieldElement = SectionFieldElement.Email(
         IdentifierSpec("email"),
         emailController

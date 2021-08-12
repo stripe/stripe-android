@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
-import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +17,7 @@ import org.junit.Test
 
 class TransformElementToFormViewValueFlowTest {
 
-    private val emailController = TextFieldController(EmailConfig())
+    private val emailController = SimpleTextFieldController(EmailConfig())
     private val emailSection = FormElement.SectionElement(
         identifier = IdentifierSpec("emailSection"),
         SectionFieldElement.Email(

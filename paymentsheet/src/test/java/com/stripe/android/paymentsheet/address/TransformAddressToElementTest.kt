@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.Companion.supportedCountries
-import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import org.junit.Test
@@ -72,7 +72,7 @@ class TransformAddressToElementTest {
         textElement: SectionFieldElement,
         simpleTextSpec: SectionFieldSpec.SimpleText
     ) {
-        val actualController = textElement.controller as TextFieldController
+        val actualController = textElement.controller as SimpleTextFieldController
         assertThat(actualController.capitalization).isEqualTo(
             simpleTextSpec.capitalization
         )

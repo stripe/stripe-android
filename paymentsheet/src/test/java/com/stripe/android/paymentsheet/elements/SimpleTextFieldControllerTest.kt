@@ -22,7 +22,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-internal class TextFieldControllerTest {
+internal class SimpleTextFieldControllerTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
@@ -198,14 +198,14 @@ internal class TextFieldControllerTest {
             on { filter("1a2b3c4d") } doReturn "1234"
         }
 
-        val controller = TextFieldController(config)
+        val controller = SimpleTextFieldController(config)
 
         controller.onValueChange("1a2b3c4d")
 
         verify(config).filter("1a2b3c4d")
     }
 
-    private fun createControllerWithState(): TextFieldController {
+    private fun createControllerWithState(): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
             on { determineState("full") } doReturn Full
             on { filter("full") } doReturn "full"
@@ -229,7 +229,7 @@ internal class TextFieldControllerTest {
             on { label } doReturn R.string.address_label_name
         }
 
-        return TextFieldController(config)
+        return SimpleTextFieldController(config)
     }
 
     companion object {

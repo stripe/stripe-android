@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.forms
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.CountryConfig
-import com.stripe.android.paymentsheet.elements.CreditController
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.IbanConfig
@@ -11,7 +10,7 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
-import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -90,13 +89,13 @@ internal class TransformSpecToElement(
     private fun SectionFieldSpec.Email.transform() =
         SectionFieldElement.Email(
             this.identifier,
-            TextFieldController(EmailConfig()),
+            SimpleTextFieldController(EmailConfig()),
         )
 
     private fun SectionFieldSpec.Iban.transform() =
         SectionFieldElement.Iban(
             this.identifier,
-            TextFieldController(IbanConfig())
+            SimpleTextFieldController(IbanConfig())
         )
 
     private fun SectionFieldSpec.Country.transform() =
@@ -131,7 +130,7 @@ internal class TransformSpecToElement(
 internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
     SectionFieldElement.SimpleText(
         this.identifier,
-        TextFieldController(
+        SimpleTextFieldController(
             SimpleTextFieldConfig(
                 label = this.label,
                 capitalization = this.capitalization,

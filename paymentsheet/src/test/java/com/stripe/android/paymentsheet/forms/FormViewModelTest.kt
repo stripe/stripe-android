@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -163,7 +163,7 @@ internal class FormViewModelTest {
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .map { it.controller }
-                .filterIsInstance(TextFieldController::class.java)
+                .filterIsInstance(SimpleTextFieldController::class.java)
                 .first()
 
             // Add text to the name to make it valid
@@ -211,7 +211,7 @@ internal class FormViewModelTest {
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .map { it.controller }
-                .filterIsInstance(TextFieldController::class.java).first()
+                .filterIsInstance(SimpleTextFieldController::class.java).first()
 
             // Add text to the email to make it invalid
             emailController.onValueChange("email is invalid")
@@ -252,9 +252,9 @@ internal class FormViewModelTest {
             )
 
             val nameElement = (formViewModel.elements[0] as SectionElement)
-                .fields[0].controller as TextFieldController
+                .fields[0].controller as SimpleTextFieldController
             val emailElement = (formViewModel.elements[1] as SectionElement)
-                .fields[0].controller as TextFieldController
+                .fields[0].controller as SimpleTextFieldController
 
             nameElement.onValueChange("joe")
             assertThat(
@@ -356,14 +356,14 @@ internal class FormViewModelTest {
                 (it as? SectionElement)
                     ?.fields
                     ?.get(0)
-                    ?.controller as? TextFieldController
+                    ?.controller as? SimpleTextFieldController
                 )
         }.firstOrNull {
             it?.label == label
         }
 
     private data class AddressControllers(
-        val controllers: List<TextFieldController>
+        val controllers: List<SimpleTextFieldController>
     ) {
         companion object {
             suspend fun create(formViewModel: FormViewModel) =
@@ -406,7 +406,7 @@ internal class FormViewModelTest {
                 .firstOrNull()
                 ?.fields
                 ?.first()
-                ?.map { (it.controller as? TextFieldController) }
+                ?.map { (it.controller as? SimpleTextFieldController) }
                 ?.firstOrNull { it?.label == label }
     }
 }
