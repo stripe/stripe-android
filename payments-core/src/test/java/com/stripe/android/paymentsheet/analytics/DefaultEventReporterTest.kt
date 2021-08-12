@@ -101,7 +101,10 @@ class DefaultEventReporterTest {
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
         DefaultEventReporter(
             EventReporter.Mode.Complete,
-            ApplicationProvider.getApplicationContext()
+            FakeDeviceIdRepository(),
+            analyticsRequestExecutor,
+            analyticsRequestFactory,
+            testDispatcher
         )
     }
 }

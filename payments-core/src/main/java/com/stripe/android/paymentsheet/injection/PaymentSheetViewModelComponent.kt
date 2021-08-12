@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
+import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.PaymentCommonModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -13,7 +13,8 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentCommonModule::class,
-        PaymentSheetViewModelModule::class
+        PaymentSheetViewModelModule::class,
+        GooglePayLauncherModule::class
     ]
 )
 internal interface PaymentSheetViewModelComponent {
@@ -26,9 +27,6 @@ internal interface PaymentSheetViewModelComponent {
 
         @BindsInstance
         fun starterArgs(starterArgs: PaymentSheetContract.Args): Builder
-
-        @BindsInstance
-        fun eventReporter(eventReporter: EventReporter): Builder
 
         fun build(): PaymentSheetViewModelComponent
     }

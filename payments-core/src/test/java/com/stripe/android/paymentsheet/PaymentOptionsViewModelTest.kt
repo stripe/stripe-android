@@ -97,7 +97,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
 
-            assertThat(prefsRepository.getSavedSelection())
+            assertThat(prefsRepository.getSavedSelection(true))
                 .isEqualTo(SavedSelection.None)
         }
 
@@ -227,7 +227,8 @@ internal class PaymentOptionsViewModelTest {
             config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isGooglePayReady = true,
             newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+            injectorKey = 0
         )
         private val PAYMENT_METHOD_REPOSITORY_PARAMS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)

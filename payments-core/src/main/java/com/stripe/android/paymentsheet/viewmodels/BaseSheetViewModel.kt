@@ -6,10 +6,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.googlepaylauncher.StripeGooglePayContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -18,12 +18,14 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
@@ -35,6 +37,7 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class BaseSheetViewModel<TransitionTargetType>(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
+    internal val eventReporter: EventReporter,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {
@@ -45,11 +48,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     // a fatal error
     protected val _fatal = MutableLiveData<Throwable>()
 
-    protected val _isGooglePayReady = MutableLiveData<Boolean>()
+    @VisibleForTesting
+    internal val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
-
-    protected val _launchGooglePay = MutableLiveData<Event<StripeGooglePayContract.Args>>()
-    internal val launchGooglePay: LiveData<Event<StripeGooglePayContract.Args>> = _launchGooglePay
 
     private val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
@@ -103,7 +104,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         get() = customerConfig != null && stripeIntent.value is PaymentIntent
 
     init {
-        fetchSavedSelection()
+        viewModelScope.launch {
+            val savedSelection = withContext(workContext) {
+                prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
+            }
+            _savedSelection.value = savedSelection
+        }
     }
 
     val fragmentConfig = MediatorLiveData<FragmentConfig?>().also { configLiveData ->
@@ -174,15 +180,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun updateSelection(selection: PaymentSelection?) {
         _selection.value = selection
-    }
-
-    private fun fetchSavedSelection() {
-        viewModelScope.launch {
-            val savedSelection = withContext(workContext) {
-                prefsRepository.getSavedSelection()
-            }
-            _savedSelection.value = savedSelection
-        }
     }
 
     abstract fun onUserCancel()

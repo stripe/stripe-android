@@ -66,7 +66,9 @@ internal sealed class PaymentSheetEvent(
         return "mc_${mode}_$event"
     }
 
-    private companion object {
+    internal companion object {
+        const val PRODUCT_USAGE = "PaymentSheet"
+
         private fun analyticsValue(
             paymentSelection: PaymentSelection?
         ) = when (paymentSelection) {

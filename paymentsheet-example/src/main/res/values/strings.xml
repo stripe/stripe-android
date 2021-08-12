@@ -20,7 +20,8 @@
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="checkout_mode">Checkout Mode</string>
-    <string name="payment">Payment</string>
+    <string name="payment">Pay</string>
+    <string name="payment_with_setup">Pay w/setup</string>
     <string name="setup">Setup</string>
     <string name="reload_paymentsheet">Reload PaymentSheet</string>
     <string name="payment_method">Payment Method</string>

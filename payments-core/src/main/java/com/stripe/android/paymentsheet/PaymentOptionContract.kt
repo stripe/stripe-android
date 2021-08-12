@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -34,7 +35,8 @@ internal class PaymentOptionContract :
         val config: PaymentSheet.Configuration?,
         val isGooglePayReady: Boolean,
         val newCard: PaymentSelection.New.Card?,
-        @ColorInt val statusBarColor: Int?
+        @ColorInt val statusBarColor: Int?,
+        @InjectorKey val injectorKey: Int
     ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {

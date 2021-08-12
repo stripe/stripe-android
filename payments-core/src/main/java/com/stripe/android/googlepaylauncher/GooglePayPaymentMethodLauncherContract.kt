@@ -34,7 +34,8 @@ class GooglePayPaymentMethodLauncherContract :
     ): GooglePayPaymentMethodLauncher.Result {
         return intent?.getParcelableExtra(EXTRA_RESULT)
             ?: GooglePayPaymentMethodLauncher.Result.Failed(
-                IllegalArgumentException("Could not parse a valid result.")
+                IllegalArgumentException("Could not parse a valid result."),
+                GooglePayPaymentMethodLauncher.INTERNAL_ERROR
             )
     }
 
@@ -44,13 +45,22 @@ class GooglePayPaymentMethodLauncherContract :
      * @param config the [GooglePayPaymentMethodLauncher.Config] for this transaction
      * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
      * @param amount if the amount of the transaction is unknown at this time, set to `0`.
+     * @param transactionId a unique ID that identifies a transaction attempt. Merchants may use an
+     *     existing ID or generate a specific one for Google Pay transaction attempts.
+     *     This field is required when you send callbacks to the Google Transaction Events API.
      */
     @Parcelize
     data class Args(
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
-        internal val amount: Int
+        internal val amount: Int,
+        internal val transactionId: String? = null,
     ) : Parcelable {
+        constructor(
+            config: GooglePayPaymentMethodLauncher.Config,
+            currencyCode: String,
+            amount: Int
+        ) : this(config, currencyCode, amount, null)
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

@@ -19,7 +19,7 @@ internal interface TextFieldController : InputController {
     val keyboardType: KeyboardType
     override val label: Int
     val visualTransformation: VisualTransformation
-    val showOptionalLabel: Boolean
+    override val showOptionalLabel: Boolean
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
 }
@@ -66,7 +66,9 @@ internal class SimpleTextFieldController constructor(
 
     val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
-    override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
+    override val isComplete: Flow<Boolean> = _fieldState.map {
+        it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
+    }
 
     init {
         onValueChange("")

@@ -6,23 +6,26 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
     prefsRepository: PrefsRepository,
-    private val eventReporter: EventReporter,
+    eventReporter: EventReporter,
     workContext: CoroutineContext,
     application: Application
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepository,
+    eventReporter = eventReporter,
     workContext = workContext,
     application = application
 ) {
@@ -117,29 +120,32 @@ internal class PaymentOptionsViewModel(
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentOptionContract.Args
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.Factory, Injectable {
+
+        @Inject
+        lateinit var eventReporter: EventReporter
+
+        @Inject
+        @IOContext
+        lateinit var workContext: CoroutineContext
+
+        @Inject
+        @JvmSuppressWildcards
+        lateinit var prefsRepositoryFactory: (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
+
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            WeakSetInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.inject(this) ?: run {
+                throw IllegalArgumentException("Failed to initialize PaymentOptionsViewModel.Factory")
+            }
+
             val starterArgs = starterArgsSupplier()
-            val application = applicationSupplier()
-
-            val prefsRepository = starterArgs.config?.customer?.let { (id) ->
-                DefaultPrefsRepository(
-                    application,
-                    customerId = id,
-                    isGooglePayReady = { starterArgs.isGooglePayReady },
-                    workContext = Dispatchers.IO
-                )
-            } ?: PrefsRepository.Noop()
-
             return PaymentOptionsViewModel(
                 starterArgs,
-                prefsRepository,
-                DefaultEventReporter(
-                    mode = EventReporter.Mode.Custom,
-                    application
-                ),
-                workContext = Dispatchers.IO,
-                application = application
+                prefsRepositoryFactory(starterArgs.config?.customer),
+                eventReporter,
+                workContext,
+                applicationSupplier()
             ) as T
         }
     }

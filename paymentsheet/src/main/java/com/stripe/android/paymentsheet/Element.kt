@@ -167,8 +167,7 @@ internal sealed class SectionFieldElement {
             }
 
     }
-
-    internal open class AddressElement @VisibleForTesting constructor(
+    internal open class AddressElement constructor(
         override val identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
         countryCodes: Set<String> = emptySet(),

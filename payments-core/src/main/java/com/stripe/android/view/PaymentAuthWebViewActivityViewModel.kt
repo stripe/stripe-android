@@ -14,9 +14,11 @@ import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeClientUserAgentHeaderFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
+import kotlinx.coroutines.Dispatchers
 
 internal class PaymentAuthWebViewActivityViewModel(
     private val args: PaymentBrowserAuthContract.Args,
@@ -121,7 +123,7 @@ internal class PaymentAuthWebViewActivityViewModel(
 
             return PaymentAuthWebViewActivityViewModel(
                 args,
-                AnalyticsRequestExecutor.Default(logger),
+                DefaultAnalyticsRequestExecutor(logger, Dispatchers.IO),
                 AnalyticsRequestFactory(
                     application,
                     publishableKey,

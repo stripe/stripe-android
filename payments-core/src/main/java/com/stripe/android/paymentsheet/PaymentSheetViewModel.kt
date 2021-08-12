@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
@@ -16,12 +17,10 @@ import com.stripe.android.PaymentController
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.googlepaylauncher.GooglePayConfig
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
-import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.googlepaylauncher.StripeGooglePayContract
-import com.stripe.android.googlepaylauncher.getErrorResourceID
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -31,7 +30,6 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.IOContext
-import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
@@ -46,9 +44,9 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -76,21 +74,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
     internal val args: PaymentSheetContract.Args,
-    private val eventReporter: EventReporter,
+    eventReporter: EventReporter,
     // Properties provided through injection
     private val apiRequestOptions: ApiRequest.Options,
     private val stripeIntentRepository: StripeIntentRepository,
     private val paymentMethodsRepository: PaymentMethodsRepository,
     private val paymentFlowResultProcessorProvider:
         Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
-    private val googlePayRepository: GooglePayRepository,
     prefsRepository: PrefsRepository,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext,
-    private val paymentController: PaymentController
+    private val paymentController: PaymentController,
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
+    eventReporter = eventReporter,
     prefsRepository = prefsRepository,
     workContext = workContext
 ) {
@@ -134,9 +133,37 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private val stripeIntentValidator = StripeIntentValidator()
 
+    @VisibleForTesting
+    internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
+
+    @VisibleForTesting
+    internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
+        args.googlePayConfig?.let { config ->
+            if (config.currencyCode == null && !isProcessingPaymentIntent) {
+                logger.warning(
+                    "GooglePayConfiguration.currencyCode is required in order to use " +
+                        "Google Pay when processing a Setup Intent"
+                )
+                null
+            } else {
+                GooglePayPaymentMethodLauncher.Config(
+                    environment = when (config.environment) {
+                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                            GooglePayEnvironment.Production
+                        else ->
+                            GooglePayEnvironment.Test
+                    },
+                    merchantCountryCode = config.countryCode,
+                    merchantName = merchantName
+                )
+            }
+        }
+
     init {
-        fetchIsGooglePayReady()
         eventReporter.onInit(config)
+        if (googlePayLauncherConfig == null) {
+            _isGooglePayReady.value = false
+        }
     }
 
     private fun apiThrowableToString(throwable: Throwable): String? {
@@ -152,19 +179,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    @VisibleForTesting
-    fun fetchIsGooglePayReady() {
-        if (isGooglePayReady.value == null) {
-            if (args.isGooglePayEnabled) {
-                viewModelScope.launch {
-                    val isGooglePayReady = withContext(workContext) {
-                        googlePayRepository.isReady().first()
-                    }
-                    _isGooglePayReady.value = isGooglePayReady
-                }
-            } else {
-                _isGooglePayReady.value = false
-            }
+    fun setupGooglePay(
+        lifecycleScope: CoroutineScope,
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+    ) {
+        googlePayLauncherConfig?.let { config ->
+            googlePayPaymentMethodLauncher =
+                googlePayPaymentMethodLauncherFactory.create(
+                    lifecycleScope = lifecycleScope,
+                    config = config,
+                    readyCallback = { isReady ->
+                        _isGooglePayReady.value = isReady
+                    },
+                    activityResultLauncher = activityResultLauncher
+                )
         }
     }
 
@@ -304,30 +332,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val paymentSelection = selection.value
 
         if (paymentSelection is PaymentSelection.GooglePay) {
-            if (stripeIntent.value !is PaymentIntent) {
-                logger.error(
-                    "Expected PaymentIntent when checking out with Google Pay," +
-                        " but found '${stripeIntent.value}'"
-                )
-            }
-            (stripeIntent.value as? PaymentIntent)?.let { paymentIntent ->
-                _launchGooglePay.value = Event(
-                    StripeGooglePayContract.Args(
-                        config = GooglePayConfig(
-                            environment = when (args.config?.googlePay?.environment) {
-                                PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                                    GooglePayEnvironment.Production
-                                else ->
-                                    GooglePayEnvironment.Test
-                            },
-                            amount = paymentIntent.amount?.toInt(),
-                            countryCode = args.googlePayConfig?.countryCode.orEmpty(),
-                            currencyCode = paymentIntent.currency.orEmpty(),
-                            merchantName = merchantName,
-                            transactionId = paymentIntent.id
-                        ),
-                        statusBarColor = args.statusBarColor
-                    )
+            stripeIntent.value?.let { stripeIntent ->
+                googlePayPaymentMethodLauncher?.present(
+                    currencyCode = (stripeIntent as? PaymentIntent)?.currency
+                        ?: args.googlePayConfig?.currencyCode.orEmpty(),
+                    amount = (stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
+                    transactionId = stripeIntent.id
                 )
             }
         } else {
@@ -412,29 +422,26 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal fun onGooglePayResult(
-        googlePayResult: GooglePayLauncherResult
-    ) {
-        when (googlePayResult) {
-            is GooglePayLauncherResult.PaymentData -> {
-                val paymentSelection = PaymentSelection.Saved(
-                    googlePayResult.paymentMethod
-                )
-                confirmPaymentSelection(paymentSelection)
-            }
-            is GooglePayLauncherResult.Error -> {
-                logger.error("Error processing Google Pay payment", googlePayResult.exception)
+    internal fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
+        when (result) {
+            is GooglePayPaymentMethodLauncher.Result.Completed ->
+                confirmPaymentSelection(PaymentSelection.Saved(result.paymentMethod))
+            is GooglePayPaymentMethodLauncher.Result.Failed -> {
+                logger.error("Error processing Google Pay payment", result.error)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 stripeIntent.value?.let { it ->
                     resetViewState(
                         it,
-                        googlePayResult.getErrorResourceID()
+                        when (result.errorCode) {
+                            GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
+                                R.string.stripe_failure_connection_error
+                            else -> R.string.stripe_google_pay_error_internal
+                        }
                     )
                 }
             }
-            else -> {
+            is GooglePayPaymentMethodLauncher.Result.Canceled ->
                 stripeIntent.value?.let { resetViewState(it) }
-            }
         }
     }
 
@@ -491,23 +498,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentSheetContract.Args,
-        private val eventReporterSupplier: (() -> EventReporter)? = null
+        private val starterArgsSupplier: () -> PaymentSheetContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return DaggerPaymentSheetViewModelComponent.builder()
                 .application(applicationSupplier())
                 .starterArgs(starterArgsSupplier())
-                .eventReporter(
-                    eventReporterSupplier?.let {
-                        it()
-                    } ?: run {
-                        DefaultEventReporter(
-                            mode = EventReporter.Mode.Complete,
-                            applicationSupplier()
-                        )
-                    }
-                )
                 .build()
                 .viewModel as T
         }

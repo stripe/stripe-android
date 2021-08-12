@@ -15,14 +15,12 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.R
 import com.stripe.android.paymentsheet.BottomSheetController
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.KeyboardController
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: BaseSheetViewModel<*>
     abstract val bottomSheetController: BottomSheetController
-    abstract val eventReporter: EventReporter
 
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
@@ -39,7 +37,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        supportFragmentManager.fragmentFactory = PaymentSheetFragmentFactory(eventReporter)
+        supportFragmentManager.fragmentFactory =
+            PaymentSheetFragmentFactory(viewModel.eventReporter)
 
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {

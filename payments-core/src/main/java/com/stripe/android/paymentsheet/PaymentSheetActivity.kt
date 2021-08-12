@@ -20,11 +20,9 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.R
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
-import com.stripe.android.googlepaylauncher.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.Amount
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
-import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
@@ -38,8 +36,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
             { application },
-            { requireNotNull(starterArgs) },
-            { eventReporter }
+            { requireNotNull(starterArgs) }
         )
 
     @VisibleForTesting
@@ -72,13 +69,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val messageView: TextView by lazy { viewBinding.message }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
 
-    override val eventReporter: EventReporter by lazy {
-        DefaultEventReporter(
-            mode = EventReporter.Mode.Complete,
-            application
-        )
-    }
-
     private val currencyFormatter = CurrencyFormatter()
 
     private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
@@ -106,19 +96,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.registerFromActivity(this)
-
-        val googlePayLauncher = registerForActivityResult(
-            StripeGooglePayContract()
-        ) {
-            viewModel.onGooglePayResult(it)
-        }
-        viewModel.launchGooglePay.observe(this) { event ->
-            val args = event.getContentIfNotHandled()
-            if (args != null) {
-                googlePayLauncher.launch(args)
-            }
-        }
-
+        viewModel.setupGooglePay(
+            lifecycleScope,
+            registerForActivityResult(
+                GooglePayPaymentMethodLauncherContract(),
+                viewModel::onGooglePayResult
+            )
+        )
         viewModel.fetchStripeIntent()
 
         starterArgs.statusBarColor?.let {

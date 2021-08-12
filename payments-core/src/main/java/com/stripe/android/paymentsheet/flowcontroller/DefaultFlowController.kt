@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import android.app.Activity
 import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
@@ -24,14 +25,20 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
+import com.stripe.android.paymentsheet.injection.FlowControllerComponent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -86,9 +93,34 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     private val paymentFlowResultProcessorProvider:
         Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
-) : PaymentSheet.FlowController {
+) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
+
+    /**
+     * [FlowControllerComponent] is hold to inject into [Activity]s and created
+     * after [DefaultFlowController].
+     */
+    lateinit var flowControllerComponent: FlowControllerComponent
+
+    @InjectorKey
+    private var injectorKey: Int? = null
+
+    override fun inject(injectable: Injectable) {
+        when (injectable) {
+            is PaymentOptionsViewModel.Factory -> {
+                flowControllerComponent.inject(injectable)
+            }
+        }
+    }
+
+    override fun getInjectorKey(): Int? {
+        return injectorKey
+    }
+
+    override fun setInjectorKey(injectorKey: Int) {
+        this.injectorKey = injectorKey
+    }
 
     init {
         lifecycleOwner.lifecycle.addObserver(
@@ -201,7 +233,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 config = initData.config,
                 isGooglePayReady = initData.isGooglePayReady,
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
-                statusBarColor = statusBarColor()
+                statusBarColor = statusBarColor(),
+                injectorKey = requireNotNull(injectorKey)
             )
         )
     }
@@ -464,7 +497,8 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
-            return DaggerFlowControllerComponent.builder()
+            val injectorKey = WeakSetInjectorRegistry.nextKey()
+            val flowControllerComponent = DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
                 .lifecycleScope(lifecycleScope)
@@ -475,7 +509,12 @@ internal class DefaultFlowController @Inject internal constructor(
                 .paymentOptionFactory(paymentOptionFactory)
                 .paymentOptionCallback(paymentOptionCallback)
                 .paymentResultCallback(paymentResultCallback)
-                .build().flowController
+                .injectorKey(injectorKey)
+                .build()
+            val flowController = flowControllerComponent.flowController
+            flowController.flowControllerComponent = flowControllerComponent
+            WeakSetInjectorRegistry.register(flowController, injectorKey)
+            return flowController
         }
     }
 }

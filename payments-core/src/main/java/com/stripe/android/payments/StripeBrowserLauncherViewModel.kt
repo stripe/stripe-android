@@ -15,6 +15,7 @@ import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import kotlin.properties.Delegates
 
 internal class StripeBrowserLauncherViewModel(
@@ -109,7 +110,7 @@ internal class StripeBrowserLauncherViewModel(
             val browserCapabilitiesSupplier = BrowserCapabilitiesSupplier(application)
 
             return StripeBrowserLauncherViewModel(
-                AnalyticsRequestExecutor.Default(),
+                DefaultAnalyticsRequestExecutor(),
                 AnalyticsRequestFactory(
                     application,
                     config.publishableKey

@@ -42,7 +42,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             R.id.google_pay_on_button -> {
                 PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "US"
+                    countryCode = "US",
+                    currencyCode = currency.value
                 )
             }
             else -> null
@@ -57,6 +58,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val mode: Repository.CheckoutMode
         get() = when (viewBinding.modeRadioGroup.checkedRadioButtonId) {
             R.id.mode_payment_button -> Repository.CheckoutMode.Payment
+            R.id.mode_payment_with_setup_button -> Repository.CheckoutMode.PaymentWithSetup
             else -> Repository.CheckoutMode.Setup
         }
 

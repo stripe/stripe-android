@@ -1,38 +1,24 @@
 package com.stripe.android.paymentsheet.analytics
 
-import android.content.Context
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-internal class DefaultEventReporter internal constructor(
+@Singleton
+internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val deviceIdRepository: DeviceIdRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
-    private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext
 ) : EventReporter {
-
-    internal constructor(
-        mode: EventReporter.Mode,
-        context: Context,
-        workContext: CoroutineContext = Dispatchers.IO
-    ) : this(
-        mode,
-        DefaultDeviceIdRepository(context, workContext),
-        AnalyticsRequestExecutor.Default(),
-        AnalyticsRequestFactory(
-            context,
-            publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey }
-        ),
-        workContext
-    )
 
     override fun onInit(configuration: PaymentSheet.Configuration?) {
         fireEvent(

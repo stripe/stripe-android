@@ -347,6 +347,79 @@ internal class FormViewModelTest {
         }
     }
 
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `Verify params are set when required address fields are complete`() {
+        runBlocking {
+            /**
+             * Using sepa debit as a complex enough example to test the address portion.
+             */
+            val formViewModel = FormViewModel(
+                sepaDebit.layout,
+                saveForFutureUseInitialValue = true,
+                saveForFutureUseInitialVisibility = true,
+                merchantName = "Example, Inc.",
+                resourceRepository = resourceRepository
+            )
+
+            getSectionFieldTextControllerWithLabel(
+                formViewModel,
+                R.string.address_label_name
+            )?.onValueChange("joe")
+            assertThat(
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                    ?.value
+            ).isNull()
+
+            getSectionFieldTextControllerWithLabel(
+                formViewModel,
+                R.string.email
+            )?.onValueChange("joe@gmail.com")
+            assertThat(
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                    ?.value
+            ).isNull()
+
+            getSectionFieldTextControllerWithLabel(
+                formViewModel,
+                R.string.iban
+            )?.onValueChange("DE89370400440532013000")
+            assertThat(
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                    ?.value
+            ).isNull()
+
+            // Fill all address values except line2
+            val addressControllers = AddressControllers.create(formViewModel)
+            val populateAddressControllers = addressControllers.controllers
+                .filter { it.label != R.string.address_label_address_line2 }
+            populateAddressControllers
+                .forEachIndexed { index, textFieldController ->
+                    textFieldController.onValueChange("1234")
+
+                    if (index == populateAddressControllers.size - 1) {
+                        assertThat(
+                            formViewModel
+                                .completeFormValues
+                                .first()
+                                ?.fieldValuePairs
+                                ?.get(Email.identifier)
+                                ?.value
+                        ).isNotNull()
+                    } else {
+                        assertThat(
+                            formViewModel
+                                .completeFormValues
+                                .first()
+                                ?.fieldValuePairs
+                                ?.get(Email.identifier)
+                                ?.value
+                        ).isNull()
+                    }
+                }
+        }
+    }
+
     private fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
         @StringRes label: Int

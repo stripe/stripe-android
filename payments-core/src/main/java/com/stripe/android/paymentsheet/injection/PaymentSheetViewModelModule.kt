@@ -4,17 +4,19 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.DeviceIdRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
@@ -24,7 +26,6 @@ import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -34,6 +35,12 @@ internal abstract class PaymentSheetViewModelModule {
 
     @Binds
     abstract fun bindsApplicationForContext(application: Application): Context
+
+    @Binds
+    abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
+
+    @Binds
+    abstract fun bindsDeviceIdRepository(repository: DefaultDeviceIdRepository): DeviceIdRepository
 
     companion object {
         @Provides
@@ -95,36 +102,15 @@ internal abstract class PaymentSheetViewModelModule {
 
         @Provides
         @Singleton
-        fun provideGooglePayRepository(
-            appContext: Context,
-            starterArgs: PaymentSheetContract.Args
-        ): GooglePayRepository {
-            return starterArgs.config?.googlePay?.environment?.let { environment ->
-                DefaultGooglePayRepository(
-                    appContext,
-                    when (environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                            GooglePayEnvironment.Production
-                        PaymentSheet.GooglePayConfiguration.Environment.Test ->
-                            GooglePayEnvironment.Test
-                    }
-                )
-            } ?: GooglePayRepository.Disabled
-        }
-
-        @Provides
-        @Singleton
         fun providePrefsRepository(
             appContext: Context,
             starterArgs: PaymentSheetContract.Args,
-            googlePayRepository: GooglePayRepository,
             @IOContext workContext: CoroutineContext
         ): PrefsRepository {
             return starterArgs.config?.customer?.let { (id) ->
                 DefaultPrefsRepository(
                     appContext,
                     customerId = id,
-                    isGooglePayReady = { googlePayRepository.isReady().first() },
                     workContext = workContext
                 )
             } ?: PrefsRepository.Noop()
@@ -134,5 +120,20 @@ internal abstract class PaymentSheetViewModelModule {
         @Singleton
         fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
             Logger.getInstance(enableLogging)
+
+        @Provides
+        @Singleton
+        fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Complete
+
+        @Provides
+        @Singleton
+        fun provideAnalyticsRequestFactory(
+            appContext: Context,
+            lazyPaymentConfiguration: Lazy<PaymentConfiguration>
+        ) = AnalyticsRequestFactory(
+            appContext,
+            { lazyPaymentConfiguration.get().publishableKey },
+            setOf(PaymentSheetEvent.PRODUCT_USAGE)
+        )
     }
 }
