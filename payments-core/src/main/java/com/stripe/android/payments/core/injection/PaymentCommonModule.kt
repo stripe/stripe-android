@@ -7,6 +7,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResultProcessor
@@ -19,10 +20,10 @@ import dagger.Binds
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Common module providing payment related dependencies.
@@ -68,13 +69,14 @@ internal abstract class PaymentCommonModule {
         fun provideStripePaymentController(
             appContext: Context,
             stripeApiRepository: StripeApiRepository,
-            lazyPaymentConfiguration: Lazy<PaymentConfiguration>
+            lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
+            @Named(ENABLE_LOGGING) enableLogging: Boolean
         ): PaymentController {
             return StripePaymentController(
                 appContext,
                 { lazyPaymentConfiguration.get().publishableKey },
                 stripeApiRepository,
-                enableLogging = true
+                enableLogging
             )
         }
 
@@ -85,15 +87,14 @@ internal abstract class PaymentCommonModule {
             lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
             stripeApiRepository: StripeApiRepository,
             @Named(ENABLE_LOGGING) enableLogging: Boolean,
-        ): PaymentIntentFlowResultProcessor {
-            return PaymentIntentFlowResultProcessor(
-                appContext,
-                { lazyPaymentConfiguration.get().publishableKey },
-                stripeApiRepository,
-                enableLogging = enableLogging,
-                Dispatchers.IO
-            )
-        }
+            @IOContext workContext: CoroutineContext
+        ) = PaymentIntentFlowResultProcessor(
+            appContext,
+            { lazyPaymentConfiguration.get().publishableKey },
+            stripeApiRepository,
+            enableLogging,
+            workContext
+        )
 
         @Provides
         @Singleton
@@ -102,15 +103,14 @@ internal abstract class PaymentCommonModule {
             lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
             stripeApiRepository: StripeApiRepository,
             @Named(ENABLE_LOGGING) enableLogging: Boolean,
-        ): SetupIntentFlowResultProcessor {
-            return SetupIntentFlowResultProcessor(
-                appContext,
-                { lazyPaymentConfiguration.get().publishableKey },
-                stripeApiRepository,
-                enableLogging = enableLogging,
-                Dispatchers.IO
-            )
-        }
+            @IOContext workContext: CoroutineContext
+        ) = SetupIntentFlowResultProcessor(
+            appContext,
+            { lazyPaymentConfiguration.get().publishableKey },
+            stripeApiRepository,
+            enableLogging,
+            workContext
+        )
 
         /**
          * Fetch the correct [PaymentFlowResultProcessor] based on current [ClientSecret].
@@ -128,5 +128,17 @@ internal abstract class PaymentCommonModule {
                 is SetupIntentClientSecret -> setupIntentFlowResultProcessor
             }
         }
+
+        @Provides
+        @Singleton
+        fun provideAnalyticsRequestFactory(
+            context: Context,
+            lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
+            defaultProductUsageTokens: Set<String>,
+        ) = AnalyticsRequestFactory(
+            context,
+            { lazyPaymentConfiguration.get().publishableKey },
+            defaultProductUsageTokens,
+        )
     }
 }

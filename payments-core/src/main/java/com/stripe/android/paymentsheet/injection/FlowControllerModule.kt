@@ -3,21 +3,17 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowControllerInitializer
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerInitializer
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.ClientSecret
 import dagger.Binds
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
@@ -62,18 +58,11 @@ internal abstract class FlowControllerModule {
 
         @Provides
         @Singleton
-        fun provideAnalyticsRequestFactory(
-            appContext: Context,
-            lazyPaymentConfiguration: Lazy<PaymentConfiguration>
-        ) = AnalyticsRequestFactory(
-            appContext,
-            { lazyPaymentConfiguration.get().publishableKey },
-            setOf(PaymentSheetEvent.PRODUCT_USAGE)
-        )
+        fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
 
         @Provides
         @Singleton
-        fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
+        fun provideProductUsageTokens() = setOf("PaymentSheet.FlowController")
 
         @Provides
         @Singleton

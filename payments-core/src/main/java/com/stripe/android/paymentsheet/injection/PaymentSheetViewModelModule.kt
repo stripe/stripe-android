@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.core.injection.IOContext
@@ -12,7 +11,6 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -104,13 +102,6 @@ internal abstract class PaymentSheetViewModelModule {
 
         @Provides
         @Singleton
-        fun provideAnalyticsRequestFactory(
-            appContext: Context,
-            lazyPaymentConfiguration: Lazy<PaymentConfiguration>
-        ) = AnalyticsRequestFactory(
-            appContext,
-            { lazyPaymentConfiguration.get().publishableKey },
-            setOf(PaymentSheetEvent.PRODUCT_USAGE)
-        )
+        fun provideProductUsageTokens() = setOf("PaymentSheet")
     }
 }
