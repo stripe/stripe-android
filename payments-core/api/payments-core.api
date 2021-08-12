@@ -4883,6 +4883,7 @@ public abstract interface annotation class com/stripe/android/payments/core/inje
 
 public final class com/stripe/android/payments/core/injection/NamedConstantsKt {
 	public static final field ENABLE_LOGGING Ljava/lang/String;
+	public static final field PRODUCT_USAGE Ljava/lang/String;
 }
 
 public final class com/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideAnalyticsRequestFactoryFactory : dagger/internal/Factory {
