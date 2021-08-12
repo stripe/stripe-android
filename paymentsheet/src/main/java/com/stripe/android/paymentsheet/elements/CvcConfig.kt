@@ -32,7 +32,7 @@ internal class CvcConfig : CreditTextFieldConfig {
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(R.string.credit_cvc_incomplete)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_too_long)
+            TextFieldStateConstants.Error.Invalid(R.string.credit_cvc_too_long)
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
         } else {

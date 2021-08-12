@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.address.FieldType
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.CountryConfig
-import com.stripe.android.paymentsheet.elements.CreditController
+import com.stripe.android.paymentsheet.elements.CreditSectionController
 import com.stripe.android.paymentsheet.elements.CreditNumberTextFieldController
 import com.stripe.android.paymentsheet.elements.CvcTextFieldController
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
@@ -63,6 +63,11 @@ internal sealed class FormElement {
             controller: SectionController
         ) : this(identifier, listOf(field), controller)
     }
+
+    internal class CreditSectionElement(
+        override val identifier: IdentifierSpec,
+        override val controller: CreditSectionController = CreditSectionController(),
+    ) : FormElement()
 }
 
 /**
@@ -132,11 +137,38 @@ internal sealed class SectionFieldElement {
         override val controller: CreditNumberTextFieldController,
     ) : SectionFieldElement()
 
-    internal class CreditElement(
+    internal open class AddressElement constructor(
         override val identifier: IdentifierSpec,
-        override val controller: CreditController = CreditController(),
-    ) : SectionFieldElement()
+        private val addressFieldRepository: AddressFieldElementRepository,
+        countryCodes: Set<String> = emptySet(),
+        countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
+            CountryConfig(countryCodes)
+        ),
+    ) : SectionFieldElement() {
 
+        @VisibleForTesting
+        val countryElement = Country(
+            IdentifierSpec("country"),
+            countryDropdownFieldController
+        )
+
+        private val otherFields = countryElement.controller.rawFieldValue
+            .distinctUntilChanged()
+            .map { countryCode ->
+                addressFieldRepository.get(countryCode)
+                    ?: emptyList()
+            }
+
+        val fields = otherFields.map { listOf(countryElement).plus(it) }
+
+        override val controller = AddressController(fields)
+    }
+
+    /**
+     * This is a special type of AddressElement that
+     * removes fields from the address based on the country.  It
+     * is only intended to be used with the credit payment method.
+     */
     internal class CreditBillingElement(
         identifier: IdentifierSpec,
         addressFieldRepository: AddressFieldElementRepository,
@@ -166,32 +198,5 @@ internal sealed class SectionFieldElement {
                 }
             }
 
-    }
-
-    internal open class AddressElement constructor(
-        override val identifier: IdentifierSpec,
-        private val addressFieldRepository: AddressFieldElementRepository,
-        countryCodes: Set<String> = emptySet(),
-        countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-            CountryConfig(countryCodes)
-        ),
-    ) : SectionFieldElement() {
-
-        @VisibleForTesting
-        val countryElement = Country(
-            IdentifierSpec("country"),
-            countryDropdownFieldController
-        )
-
-        private val otherFields = countryElement.controller.rawFieldValue
-            .distinctUntilChanged()
-            .map { countryCode ->
-                addressFieldRepository.get(countryCode)
-                    ?: emptyList()
-            }
-
-        val fields = otherFields.map { listOf(countryElement).plus(it) }
-
-        override val controller = AddressController(fields)
     }
 }

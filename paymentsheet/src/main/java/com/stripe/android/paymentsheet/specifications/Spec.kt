@@ -69,6 +69,10 @@ sealed class FormItemSpec {
     ) : FormItemSpec(), RequiredItemSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
+
+    data class CreditDetailSectionSpec(
+        override val identifier: IdentifierSpec
+    ) : FormItemSpec(), RequiredItemSpec
 }
 
 /**
@@ -79,8 +83,6 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     object Email : SectionFieldSpec(IdentifierSpec("email"))
 
     object Iban : SectionFieldSpec(IdentifierSpec("iban"))
-
-    object CreditSpec : SectionFieldSpec(IdentifierSpec("credit"))
     object CreditBillingSpec : SectionFieldSpec(IdentifierSpec("credit_billing"))
 
     /**

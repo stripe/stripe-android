@@ -16,13 +16,12 @@ internal val cardParamKey: MutableMap<String, Any?> = mutableMapOf(
     "card" to cardParams
 )
 
-internal val cardSection = FormItemSpec.SectionSpec(
-    IdentifierSpec("credit"),
-    SectionFieldSpec.CreditSpec
+internal val creditDetailsSection = FormItemSpec.CreditDetailSectionSpec(
+    IdentifierSpec("credit")
 )
 
 internal val creditBillingSection = FormItemSpec.SectionSpec(
-    IdentifierSpec("credit"),
+    IdentifierSpec("credit_billing"),
     SectionFieldSpec.CreditBillingSpec,
     R.string.billing_details
 )
@@ -30,7 +29,7 @@ internal val creditBillingSection = FormItemSpec.SectionSpec(
 internal val card = FormSpec(
     LayoutSpec(
         listOf(
-            cardSection,
+            creditDetailsSection,
             creditBillingSection
         )
     ),

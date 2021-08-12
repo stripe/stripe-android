@@ -6,9 +6,10 @@ import com.stripe.android.viewmodel.credit.cvc.CvcConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 
-internal class CreditController(
+internal class CreditSectionController(
 ) : SectionFieldErrorController {
 
+    val label: Int? = null
     val numberElement = SectionFieldElement.CardNumberText(
         IdentifierSpec("number"),
         CreditNumberTextFieldController(CardNumberConfig())
@@ -27,6 +28,6 @@ internal class CreditController(
         .map { it.controller }
         .map { it.error }
     ) {
-        it.firstOrNull()
+        it.filterNotNull().firstOrNull()
     }
 }

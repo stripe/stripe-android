@@ -34,6 +34,7 @@ internal class TransformSpecToElement(
                 is FormItemSpec.SaveForFutureUseSpec -> it.transform(merchantName)
                 is FormItemSpec.SectionSpec -> it.transform()
                 is FormItemSpec.MandateTextSpec -> it.transform(merchantName)
+                is FormItemSpec.CreditDetailSectionSpec -> transformCredit()
             }
         }
 
@@ -63,7 +64,6 @@ internal class TransformSpecToElement(
             is SectionFieldSpec.BankDropdown -> it.transform()
             is SectionFieldSpec.SimpleText -> it.transform()
             is SectionFieldSpec.AddressSpec -> transformAddress()
-            is SectionFieldSpec.CreditSpec -> transformCredit()
             is SectionFieldSpec.CreditBillingSpec -> transformCreditBilling()
         }
     }
@@ -73,7 +73,7 @@ internal class TransformSpecToElement(
         resourceRepository.addressRepository
     )
 
-    private fun transformCredit() = SectionFieldElement.CreditElement(
+    private fun transformCredit() = FormElement.CreditSectionElement(
         IdentifierSpec("credit element")
     )
 

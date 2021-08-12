@@ -25,13 +25,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.FormElement.CreditSectionElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
-import com.stripe.android.paymentsheet.elements.CreditController
+import com.stripe.android.paymentsheet.elements.CreditSectionController
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
@@ -93,6 +94,8 @@ internal fun FormInternal(
                     is SaveForFutureUseElement -> {
                         SaveForFutureUseElementUI(enabled, element)
                     }
+                    is CreditSectionElement ->
+                        CreditSectionElementUI(enabled, element.controller, hiddenIdentifiers)
                 }
             }
         }
@@ -137,12 +140,22 @@ internal fun SectionElementUI(
 }
 
 @Composable
-internal fun CreditElementUI(
+internal fun CreditSectionElementUI(
     enabled: Boolean,
-    controller: CreditController,
+    controller: CreditSectionController,
     hiddenIdentifiers: List<IdentifierSpec>?
 ) {
-    Column {
+    val error by controller.error.asLiveData().observeAsState(null)
+    val sectionErrorString = error?.let {
+        it.formatArgs?.let { args ->
+            stringResource(
+                it.errorMessage,
+                *args
+            )
+        } ?: stringResource(it.errorMessage)
+    }
+
+    Section(controller.label, sectionErrorString) {
         controller.fields.forEachIndexed { index, field ->
             SectionFieldElementUI(enabled, field, hiddenIdentifiers)
             if (index != controller.fields.size - 1) {
@@ -213,8 +226,8 @@ internal fun SectionFieldElementUI(
                     hiddenIdentifiers
                 )
             }
-            is CreditController -> {
-                CreditElementUI(
+            is CreditSectionController -> {
+                CreditSectionElementUI(
                     enabled,
                     controller,
                     hiddenIdentifiers

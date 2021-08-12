@@ -13,6 +13,7 @@
     <string name="credit_cvc_label">CVC</string>
     <string name="credit_cvc_incomplete">CVC is incomplete</string>
     <string name="credit_cvc_invalid">CVC is invalid</string>
+    <string name="credit_cvc_too_long">The CVC is too long.</string>
 
 
     <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
