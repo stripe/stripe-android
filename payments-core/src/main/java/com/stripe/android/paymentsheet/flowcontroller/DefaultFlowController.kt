@@ -90,7 +90,7 @@ internal class DefaultFlowController @Inject internal constructor(
      *   paymentFlowResultProcessor afterwards.
      */
     private val paymentFlowResultProcessorProvider:
-    Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
+        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
