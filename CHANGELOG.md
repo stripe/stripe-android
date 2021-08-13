@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 17.1.1 - 2020-08-13
+* [4057](https://github.com/stripe/stripe-android/pull/4057) Bump daggerVersion from 2.38 to 2.38.1
+* [4065](https://github.com/stripe/stripe-android/pull/4065) Bump activity-compose from 1.3.0-rc02 to 1.3.0
+* [4066](https://github.com/stripe/stripe-android/pull/4066) Bump gradle from 4.2.2 to 7.0.0
+* [4069](https://github.com/stripe/stripe-android/pull/4069) `GooglePayPaymentMethodLauncher` takes `transactionId` and returns error code
+* [4086](https://github.com/stripe/stripe-android/pull/4086) Bump activity-compose from 1.3.0 to 1.3.1
+* [4088](https://github.com/stripe/stripe-android/pull/4088) Upgrade kotlinVersion to 1.5.21, composeVersion to 1.0.1
+* [4092](https://github.com/stripe/stripe-android/pull/4092) Bump ktlint from 0.41.0 to 0.42.1
+* [4098](https://github.com/stripe/stripe-android/pull/4098) Unship wechat pay
+
 ## 17.1.0 - 2020-07-27
 This release includes several bug fixes and introduces [WeChat Pay module](https://github.com/stripe/stripe-android/blob/master/wechatpay/README.md)
 
