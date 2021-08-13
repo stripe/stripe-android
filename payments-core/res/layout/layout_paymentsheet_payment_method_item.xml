@@ -32,12 +32,22 @@
 
     <ImageView
         android:id="@+id/check_icon"
-        style="@style/StripePaymentOptionItemCardCheck"
+        style="@style/StripePaymentOptionItemCheckIcon"
         android:duplicateParentState="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@null"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/delete_icon"
+        style="@style/StripePaymentOptionItemDeleteIcon"
+        android:duplicateParentState="true"
+        android:layout_width="@dimen/stripe_paymentsheet_minimum_tap_size"
+        android:layout_height="@dimen/stripe_paymentsheet_minimum_tap_size"
+        android:contentDescription="@null"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Looper.getMainLooper
+import androidx.appcompat.app.AlertDialog
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.children
@@ -32,6 +33,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowAlertDialog
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetListFragmentTest {
@@ -75,11 +77,9 @@ class PaymentSheetListFragmentTest {
     @Test
     fun `sets up adapter`() {
         createScenario().onFragment {
-            val recycler = recyclerView(it)
-            val adapter = recycler.adapter as PaymentOptionsAdapter
-
             idleLooper()
 
+            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
             assertThat(adapter.itemCount)
                 .isEqualTo(4)
         }
@@ -93,9 +93,7 @@ class PaymentSheetListFragmentTest {
             val activityViewModel = activityViewModel(it)
             idleLooper()
 
-            val recycler = recyclerView(it)
-            assertThat(recycler.adapter).isInstanceOf(PaymentOptionsAdapter::class.java)
-            val adapter = recycler.adapter as PaymentOptionsAdapter
+            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
             adapter.paymentOptionSelectedListener(savedPaymentMethod, true)
             idleLooper()
 
@@ -112,9 +110,7 @@ class PaymentSheetListFragmentTest {
 
             idleLooper()
 
-            val recycler = recyclerView(it)
-            assertThat(recycler.adapter).isInstanceOf(PaymentOptionsAdapter::class.java)
-            val adapter = recycler.adapter as PaymentOptionsAdapter
+            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
             adapter.addCardClickListener.onClick(it.requireView())
             idleLooper()
 
@@ -185,6 +181,44 @@ class PaymentSheetListFragmentTest {
 
             assertThat(viewBinding.total.isVisible)
                 .isFalse()
+        }
+    }
+
+    @Test
+    fun `when config has saved payment methods then show options menu`() {
+        createScenario().onFragment { fragment ->
+            idleLooper()
+            assertThat(fragment.hasOptionsMenu()).isTrue()
+        }
+    }
+
+    @Test
+    fun `when config does not have saved payment methods then show no options menu`() {
+        createScenario(FragmentConfigFixtures.DEFAULT).onFragment { fragment ->
+            idleLooper()
+            assertThat(fragment.hasOptionsMenu()).isFalse()
+        }
+    }
+
+    @Test
+    fun `deletePaymentMethod() removes item from adapter`() {
+        createScenario().onFragment { fragment ->
+            idleLooper()
+
+            val adapter = recyclerView(fragment).adapter as PaymentOptionsAdapter
+            assertThat(adapter.itemCount).isEqualTo(4)
+
+            adapter.toggleEditing()
+            adapter.paymentMethodDeleteListener(
+                adapter.items[3] as PaymentOptionsAdapter.Item.SavedPaymentMethod
+            )
+
+            val dialog = ShadowAlertDialog.getShownDialogs().first() as AlertDialog
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
+
+            idleLooper()
+
+            assertThat(adapter.itemCount).isEqualTo(3)
         }
     }
 

@@ -282,6 +282,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.ctaEnabled.observe(this) { isEnabled ->
             viewBinding.buyButton.isEnabled = isEnabled
+            viewBinding.googlePayButton.isEnabled = isEnabled
         }
     }
 

@@ -23,10 +23,14 @@ import kotlin.properties.Delegates
 internal class PaymentOptionsAdapter(
     private val canClickSelectedItem: Boolean,
     val paymentOptionSelectedListener: (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
+    val paymentMethodDeleteListener: (paymentMethod: Item.SavedPaymentMethod) -> Unit,
     val addCardClickListener: View.OnClickListener
 ) : RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionViewHolder>() {
-    private var items: List<Item> = emptyList()
+    @VisibleForTesting
+    internal var items: List<Item> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
+    internal var isEditing = false
+        private set
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
 
@@ -60,6 +64,17 @@ internal class PaymentOptionsAdapter(
         )
 
         notifyDataSetChanged()
+    }
+
+    fun toggleEditing() {
+        isEditing = !isEditing
+        notifyDataSetChanged()
+    }
+
+    fun removeItem(item: Item) {
+        val itemIndex = items.indexOf(item)
+        items = items.toMutableList().apply { removeAt(itemIndex) }
+        notifyItemRemoved(itemIndex)
     }
 
     /**
@@ -123,7 +138,8 @@ internal class PaymentOptionsAdapter(
         isClick: Boolean
     ) {
         if (position != NO_POSITION &&
-            (canClickSelectedItem || position != selectedItemPosition)
+            (canClickSelectedItem || position != selectedItemPosition) &&
+            !isEditing
         ) {
             val previousSelectedIndex = selectedItemPosition
             selectedItemPosition = position
@@ -163,7 +179,9 @@ internal class PaymentOptionsAdapter(
                     onItemSelected(bindingAdapterPosition, isClick = true)
                 }
             }
-            ViewType.SavedPaymentMethod -> SavedPaymentMethodViewHolder(parent).apply {
+            ViewType.SavedPaymentMethod -> SavedPaymentMethodViewHolder(parent) { position ->
+                paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
+            }.apply {
                 itemView.setOnClickListener {
                     onItemSelected(bindingAdapterPosition, isClick = true)
                 }
@@ -176,37 +194,43 @@ internal class PaymentOptionsAdapter(
         position: Int
     ) {
         val item = items[position]
-        if (holder is SavedPaymentMethodViewHolder) {
-            holder.setSelected(position == selectedItemPosition)
-
-            when (item) {
-                is Item.SavedPaymentMethod -> {
-                    holder.bindPaymentMethod(item.paymentMethod)
-                }
-                else -> {
-                    // noop
-                }
+        when (holder) {
+            is SavedPaymentMethodViewHolder -> {
+                holder.bindPaymentMethod((item as Item.SavedPaymentMethod).paymentMethod)
+                holder.setSelected(position == selectedItemPosition && !isEditing)
+                holder.setEnabled(isEnabled)
+                holder.setEditing(isEditing)
             }
-        } else if (holder is GooglePayViewHolder) {
-            holder.setSelected(position == selectedItemPosition)
+            is GooglePayViewHolder -> {
+                holder.setSelected(position == selectedItemPosition && !isEditing)
+                holder.setEnabled(isEnabled && !isEditing)
+            }
+            else -> {
+                holder.setEnabled(isEnabled && !isEditing)
+            }
         }
-        holder.setEnabled(isEnabled)
     }
 
     private class SavedPaymentMethodViewHolder(
-        private val binding: LayoutPaymentsheetPaymentMethodItemBinding
+        private val binding: LayoutPaymentsheetPaymentMethodItemBinding,
+        private val onRemoveListener: (Int) -> Unit
     ) : PaymentOptionViewHolder(binding.root) {
-        constructor(parent: ViewGroup) : this(
+        constructor(parent: ViewGroup, onRemoveListener: (Int) -> Unit) : this(
             LayoutPaymentsheetPaymentMethodItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
-            )
+            ),
+            onRemoveListener
         )
 
         init {
-            // ensure that the check icon is above the card
+            // ensure that the icons are above the card
             binding.checkIcon.elevation = binding.card.elevation + 1
+            binding.deleteIcon.elevation = binding.card.elevation + 1
+            binding.deleteIcon.setOnClickListener {
+                onRemoveListener(absoluteAdapterPosition)
+            }
         }
 
         fun bindPaymentMethod(paymentMethod: PaymentMethod) {
@@ -225,6 +249,10 @@ internal class PaymentOptionsAdapter(
             binding.root.isEnabled = enabled
             binding.label.isEnabled = enabled
             binding.brandIcon.alpha = if (enabled) 1F else 0.6F
+        }
+
+        fun setEditing(editing: Boolean) {
+            binding.deleteIcon.isVisible = editing
         }
     }
 

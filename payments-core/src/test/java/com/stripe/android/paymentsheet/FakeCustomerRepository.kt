@@ -4,7 +4,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 
 class FakeCustomerRepository(
-    private val paymentMethods: List<PaymentMethod>
+    private val paymentMethods: List<PaymentMethod> = emptyList()
 ) : CustomerRepository {
     lateinit var savedPaymentMethod: PaymentMethod
     var error: Throwable? = null

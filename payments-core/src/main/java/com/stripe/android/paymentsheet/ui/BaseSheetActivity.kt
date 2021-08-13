@@ -75,6 +75,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             toolbar.isEnabled = !isProcessing
         }
 
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
         toolbar.setNavigationOnClickListener {
             if (toolbar.isEnabled) {
                 if (supportFragmentManager.backStackEntryCount == 0) {
