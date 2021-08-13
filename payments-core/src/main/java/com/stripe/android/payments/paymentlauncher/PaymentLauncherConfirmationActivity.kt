@@ -18,14 +18,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
     private lateinit var launcherArgs: PaymentLauncherContract.Args
 
-    private val viewModel: PaymentLauncherViewModel by viewModels {
-        PaymentLauncherViewModel.Factory(
-            { applicationContext },
-            { AuthActivityStarterHost.create(this) },
-            { launcherArgs }
-        )
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val args = kotlin.runCatching {
@@ -37,7 +29,13 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
         launcherArgs = args
 
-        viewModel.registerFromActivity(this)
+        val viewModel: PaymentLauncherViewModel by viewModels {
+            PaymentLauncherViewModel.Factory(
+                { applicationContext },
+                { AuthActivityStarterHost.create(this) },
+                { launcherArgs }
+            )
+        }
 
         viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
 
@@ -54,11 +52,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.unregisterFromActivity()
     }
 
     /**

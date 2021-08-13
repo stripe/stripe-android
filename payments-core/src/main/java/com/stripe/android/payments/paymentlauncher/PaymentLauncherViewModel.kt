@@ -1,7 +1,6 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.content.Context
-import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -20,16 +19,6 @@ internal class PaymentLauncherViewModel : ViewModel() {
      * [PaymentResult] live data to be observed.
      */
     internal val paymentLauncherResult = MutableLiveData<PaymentResult>()
-
-    /**
-     * Register for [ActivityResultCaller] when it's available.
-     */
-    internal fun registerFromActivity(activityResultCaller: ActivityResultCaller) {}
-
-    /**
-     * Unregister any [ActivityResultCaller] hosted.
-     */
-    internal fun unregisterFromActivity() {}
 
     /**
      * Confirms a payment intent or setup intent
@@ -61,7 +50,7 @@ internal class PaymentLauncherViewModel : ViewModel() {
             }
             StripeIntentResult.Outcome.TIMEDOUT -> {
                 PaymentResult.Failed(
-                    APIException(message = TIMEDOUT_ERROR + stripeIntentResult.failureMessage)
+                    APIException(message = TIMEOUT_ERROR + stripeIntentResult.failureMessage)
                 )
             }
         }
@@ -79,6 +68,6 @@ internal class PaymentLauncherViewModel : ViewModel() {
     }
 
     companion object {
-        const val TIMEDOUT_ERROR = "Payment fails due to time out. \n"
+        const val TIMEOUT_ERROR = "Payment fails due to time out. \n"
     }
 }
