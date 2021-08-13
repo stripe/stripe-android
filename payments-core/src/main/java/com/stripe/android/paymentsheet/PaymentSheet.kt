@@ -102,6 +102,31 @@ class PaymentSheet internal constructor(
          * If set, PaymentSheet displays the button with this color.
          */
         var primaryButtonColor: ColorStateList? = null,
+
+        /**
+         * The billing information for the user.
+         *
+         * If set, PaymentSheet will pre-populate the form fiels with the values provided.
+         */
+        var billingDetails: BillingDetails? = null
+    ) : Parcelable
+
+    @Parcelize
+    data class Address(
+        val city: String? = null,
+        val country: String? = null,
+        val line1: String? = null,
+        val line2: String? = null,
+        val postalCode: String? = null,
+        val state: String? = null
+    ) : Parcelable
+
+    @Parcelize
+    data class BillingDetails(
+        val address: Address,
+        val email: String? = null,
+        val name: String? = null,
+        val phone: String? = null
     ) : Parcelable
 
     @Parcelize

@@ -158,7 +158,20 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
-            googlePay = googlePayConfig
+            googlePay = googlePayConfig,
+            billingDetails = PaymentSheet.BillingDetails(
+                address = PaymentSheet.Address(
+                    line1 = "line1",
+                    line2 = "line2",
+                    city = "city",
+                    state = "state",
+                    postalCode = "postal code",
+                    country = "country",
+                ),
+                email = "email@email.com",
+                name = "John Smithh",
+                phone = "555-555-5555"
+            )
         )
     }
 
