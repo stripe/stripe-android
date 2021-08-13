@@ -8,7 +8,7 @@
 * [4086](https://github.com/stripe/stripe-android/pull/4086) Bump activity-compose from 1.3.0 to 1.3.1
 * [4088](https://github.com/stripe/stripe-android/pull/4088) Upgrade kotlinVersion to 1.5.21, composeVersion to 1.0.1
 * [4092](https://github.com/stripe/stripe-android/pull/4092) Bump ktlint from 0.41.0 to 0.42.1
-* [4098](https://github.com/stripe/stripe-android/pull/4098) Unship wechat pay
+* [4098](https://github.com/stripe/stripe-android/pull/4098) Temporarily disabled WeChat Pay module, which is blocked by a backend bug. For WeChat Pay integration now, please use `Stripe.confirmWeChatPayPayment`
 
 ## 17.1.0 - 2020-07-27
 This release includes several bug fixes and introduces [WeChat Pay module](https://github.com/stripe/stripe-android/blob/master/wechatpay/README.md)
