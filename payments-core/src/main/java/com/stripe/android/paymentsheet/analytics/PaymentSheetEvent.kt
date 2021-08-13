@@ -67,8 +67,6 @@ internal sealed class PaymentSheetEvent(
     }
 
     internal companion object {
-        const val PRODUCT_USAGE = "PaymentSheet"
-
         private fun analyticsValue(
             paymentSelection: PaymentSelection?
         ) = when (paymentSelection) {

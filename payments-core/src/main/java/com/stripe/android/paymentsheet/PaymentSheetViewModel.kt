@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
@@ -44,6 +45,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,7 +76,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
     // Properties provided through injection
-    private val apiRequestOptions: ApiRequest.Options,
+    private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val stripeIntentRepository: StripeIntentRepository,
     private val customerRepository: CustomerRepository,
     private val paymentFlowResultProcessorProvider:
@@ -348,7 +350,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentController.startConfirmAndAuth(
             authActivityStarterHost,
             confirmStripeIntentParams,
-            apiRequestOptions
+            ApiRequest.Options(
+                lazyPaymentConfig.get().publishableKey,
+                lazyPaymentConfig.get().stripeAccountId
+            )
         )
     }
 

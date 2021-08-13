@@ -1,25 +1,33 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Logger
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentSheet
+import dagger.Lazy
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
  * A [CustomerRepository] that uses the Stripe API.
  */
-internal class CustomerApiRepository(
+@Singleton
+internal class CustomerApiRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val publishableKey: String,
-    private val stripeAccountId: String?,
+    private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val logger: Logger,
-    private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String> = emptySet()
 ) : CustomerRepository {
 
     override suspend fun getPaymentMethods(
@@ -34,11 +42,11 @@ internal class CustomerApiRepository(
                             customerId = customerConfig.id,
                             paymentMethodType = paymentMethodType
                         ),
-                        publishableKey,
-                        PRODUCT_USAGE,
+                        lazyPaymentConfig.get().publishableKey,
+                        productUsageTokens,
                         ApiRequest.Options(
                             customerConfig.ephemeralKeySecret,
-                            stripeAccountId
+                            lazyPaymentConfig.get().stripeAccountId
                         )
                     )
                 }
@@ -59,20 +67,16 @@ internal class CustomerApiRepository(
         withContext(workContext) {
             runCatching {
                 stripeRepository.detachPaymentMethod(
-                    publishableKey,
-                    PRODUCT_USAGE,
+                    lazyPaymentConfig.get().publishableKey,
+                    productUsageTokens,
                     paymentMethodId,
                     ApiRequest.Options(
                         customerConfig.ephemeralKeySecret,
-                        stripeAccountId
+                        lazyPaymentConfig.get().stripeAccountId
                     )
                 )
             }.onFailure {
                 logger.error("Failed to detach payment method $paymentMethodId.", it)
             }.getOrNull()
         }
-
-    private companion object {
-        private val PRODUCT_USAGE = setOf("PaymentSheet")
-    }
 }

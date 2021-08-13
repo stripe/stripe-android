@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -25,8 +26,7 @@ internal class CustomerRepositoryTest {
     private val stripeRepository = FakeStripeRepository()
     private val repository = CustomerApiRepository(
         stripeRepository,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-        "acct_123",
+        { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
         Logger.getInstance(false),
         workContext = testDispatcher
     )
@@ -61,8 +61,7 @@ internal class CustomerRepositoryTest {
         testDispatcher.runBlockingTest {
             val repository = CustomerApiRepository(
                 FailsOnceStripeRepository(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                "acct_123",
+                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 Logger.getInstance(false),
                 workContext = testDispatcher
             )

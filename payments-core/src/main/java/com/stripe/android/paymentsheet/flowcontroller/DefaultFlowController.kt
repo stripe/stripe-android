@@ -12,7 +12,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.gms.common.api.Status
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
@@ -48,8 +47,6 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -185,21 +182,6 @@ internal class DefaultFlowController @Inject internal constructor(
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
                 clientSecret,
-                StripeIntentRepository.Api(
-                    stripeRepository = stripeApiRepository,
-                    requestOptions = ApiRequest.Options(
-                        lazyPaymentConfiguration.get().publishableKey,
-                        lazyPaymentConfiguration.get().stripeAccountId
-                    ),
-                    workContext = Dispatchers.IO
-                ),
-                CustomerApiRepository(
-                    stripeRepository = stripeApiRepository,
-                    lazyPaymentConfiguration.get().publishableKey,
-                    lazyPaymentConfiguration.get().stripeAccountId,
-                    Logger.getInstance(false),
-                    workContext = Dispatchers.IO
-                ),
                 configuration
             )
 
