@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -135,7 +135,7 @@ internal class PaymentOptionsViewModel(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            WeakSetInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.inject(this) ?: run {
+            WeakMapInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.inject(this) ?: run {
                 throw IllegalArgumentException("Failed to initialize PaymentOptionsViewModel.Factory")
             }
 

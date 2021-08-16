@@ -21,7 +21,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
@@ -321,7 +321,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
         handle: SavedStateHandle
     ): T {
         val args = argsSupplier()
-        WeakSetInjectorRegistry.retrieve(args.injectorKey)?.inject(this) ?: run {
+        WeakMapInjectorRegistry.retrieve(args.injectorKey)?.inject(this) ?: run {
             throw IllegalArgumentException(
                 "Failed to initialize Stripe3ds2TransactionViewModelFactory"
             )
