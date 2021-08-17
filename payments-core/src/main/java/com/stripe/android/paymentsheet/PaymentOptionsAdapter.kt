@@ -1,11 +1,14 @@
 package com.stripe.android.paymentsheet
 
+import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.IMPORTANT_FOR_ACCESSIBILITY_NO
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.stripe.android.R
 import com.stripe.android.databinding.LayoutPaymentsheetAddNewPaymentMethodItemBinding
@@ -196,7 +199,7 @@ internal class PaymentOptionsAdapter(
         val item = items[position]
         when (holder) {
             is SavedPaymentMethodViewHolder -> {
-                holder.bindPaymentMethod((item as Item.SavedPaymentMethod).paymentMethod)
+                holder.bindSavedPaymentMethod(item as Item.SavedPaymentMethod)
                 holder.setSelected(position == selectedItemPosition && !isEditing)
                 holder.setEnabled(isEnabled)
                 holder.setEditing(isEditing)
@@ -233,9 +236,15 @@ internal class PaymentOptionsAdapter(
             }
         }
 
-        fun bindPaymentMethod(paymentMethod: PaymentMethod) {
-            binding.brandIcon.setImageResource(paymentMethod.getSavedPaymentMethodIcon() ?: 0)
-            binding.label.text = paymentMethod.getLabel(itemView.resources)
+        fun bindSavedPaymentMethod(item: Item.SavedPaymentMethod) {
+            binding.brandIcon.setImageResource(item.paymentMethod.getSavedPaymentMethodIcon() ?: 0)
+            binding.label.text = item.paymentMethod.getLabel(itemView.resources)
+            binding.root.contentDescription = item.getDescription(itemView.resources)
+            binding.deleteIcon.contentDescription =
+                itemView.resources.getString(
+                    R.string.stripe_paymentsheet_remove_pm,
+                    item.getDescription(itemView.resources)
+                )
         }
 
         fun setSelected(selected: Boolean) {
@@ -253,6 +262,11 @@ internal class PaymentOptionsAdapter(
 
         fun setEditing(editing: Boolean) {
             binding.deleteIcon.isVisible = editing
+            binding.root.importantForAccessibility = if (editing) {
+                IMPORTANT_FOR_ACCESSIBILITY_NO
+            } else {
+                IMPORTANT_FOR_ACCESSIBILITY_YES
+            }
         }
     }
 
@@ -349,6 +363,19 @@ internal class PaymentOptionsAdapter(
             val paymentMethod: PaymentMethod
         ) : Item() {
             override val viewType: ViewType = ViewType.SavedPaymentMethod
+
+            fun getDescription(resources: Resources) = when (paymentMethod.type) {
+                PaymentMethod.Type.Card -> resources.getString(
+                    R.string.card_ending_in,
+                    paymentMethod.card?.brand,
+                    paymentMethod.card?.last4
+                )
+                PaymentMethod.Type.SepaDebit -> resources.getString(
+                    R.string.bank_account_ending_in,
+                    paymentMethod.sepaDebit?.last4
+                )
+                else -> ""
+            }
         }
     }
 }

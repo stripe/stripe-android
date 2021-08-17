@@ -4,8 +4,9 @@
     <string name="done">Done</string>
     <string name="remove">Remove</string>
     <string name="cancel">Cancel</string>
-    <!-- Title for a dialog confirming the user's intent to delete a saved payment method. -->
+    <!-- Description of button that deletes a saved payment method.
+    E.g. 'Remove Visa ending in 4242', or 'Remove bank account ending in 1234' -->
     <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
-    <!-- Details of a saved bank account. E.g. 'Bank account ending in 4242' -->
+    <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
     <string name="bank_account_ending_in">Bank account ending in %s</string>
 </resources>

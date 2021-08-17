@@ -1,18 +1,15 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -31,11 +28,9 @@ internal abstract class BasePaymentMethodsListFragment(
     protected lateinit var config: FragmentConfig
     private lateinit var adapter: PaymentOptionsAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         val nullableConfig = arguments?.getParcelable<FragmentConfig>(
             BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         )
@@ -43,21 +38,17 @@ internal abstract class BasePaymentMethodsListFragment(
             sheetViewModel.onFatal(
                 IllegalArgumentException("Failed to start existing payment options fragment.")
             )
-            return null
+            return
         }
         this.config = nullableConfig
 
         setHasOptionsMenu(config.paymentMethods.isNotEmpty())
-
-        return super.onCreateView(inflater, container, savedInstanceState)
+        eventReporter.onShowExistingPaymentOptions()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView(FragmentPaymentsheetPaymentMethodsListBinding.bind(view))
-
-        eventReporter.onShowExistingPaymentOptions()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -121,42 +112,27 @@ internal abstract class BasePaymentMethodsListFragment(
     }
 
     private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) =
-        activity?.let {
-            AlertDialog.Builder(it)
-                .setTitle(
-                    resources.getString(
-                        R.string.stripe_paymentsheet_remove_pm,
-                        SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
-                            ?.run {
-                                resources.getString(
-                                    displayNameResource
-                                )
-                            }
-                    )
+        AlertDialog.Builder(requireActivity())
+            .setTitle(
+                resources.getString(
+                    R.string.stripe_paymentsheet_remove_pm,
+                    SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
+                        ?.run {
+                            resources.getString(
+                                displayNameResource
+                            )
+                        }
                 )
-                .setMessage(item.paymentMethod.getDescription())
-                .setCancelable(true)
-                .setNegativeButton(R.string.cancel) { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .setPositiveButton(R.string.remove) { _, _ ->
-                    adapter.removeItem(item)
-                    sheetViewModel.removePaymentMethod(item.paymentMethod)
-                }
-                .create()
-                .show()
-        }
-
-    fun PaymentMethod.getDescription() = when (type) {
-        PaymentMethod.Type.Card -> resources.getString(
-            R.string.card_ending_in,
-            card?.brand,
-            card?.last4
-        )
-        PaymentMethod.Type.SepaDebit -> resources.getString(
-            R.string.bank_account_ending_in,
-            sepaDebit?.last4
-        )
-        else -> ""
-    }
+            )
+            .setMessage(item.getDescription(resources))
+            .setCancelable(true)
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton(R.string.remove) { _, _ ->
+                adapter.removeItem(item)
+                sheetViewModel.removePaymentMethod(item.paymentMethod)
+            }
+            .create()
+            .show()
 }

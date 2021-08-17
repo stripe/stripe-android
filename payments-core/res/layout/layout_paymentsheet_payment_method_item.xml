@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/StripePaymentOptionItemContainer"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
@@ -26,6 +27,7 @@
         android:duplicateParentState="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/card"
         app:layout_constraintTop_toBottomOf="@+id/card" />
@@ -36,9 +38,9 @@
         android:duplicateParentState="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="@null"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ContentDescription" />
 
     <ImageView
         android:id="@+id/delete_icon"
@@ -46,8 +48,8 @@
         android:duplicateParentState="true"
         android:layout_width="@dimen/stripe_paymentsheet_minimum_tap_size"
         android:layout_height="@dimen/stripe_paymentsheet_minimum_tap_size"
-        android:contentDescription="@null"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="ContentDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
