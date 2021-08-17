@@ -8,7 +8,6 @@ import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -35,7 +34,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
-        val isGooglePayReady = isGooglePayReady(clientSecret, paymentSheetConfiguration)
+        val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
         paymentSheetConfiguration?.customer?.let { customerConfig ->
             createWithCustomer(
                 clientSecret,
@@ -51,20 +50,18 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     }
 
     private suspend fun isGooglePayReady(
-        clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ): Boolean {
-        return clientSecret is PaymentIntentClientSecret &&
-            paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
-                googlePayRepositoryFactory(
-                    when (environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                            GooglePayEnvironment.Production
-                        PaymentSheet.GooglePayConfiguration.Environment.Test ->
-                            GooglePayEnvironment.Test
-                    }
-                )
-            }?.isReady()?.first() ?: false
+        return paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
+            googlePayRepositoryFactory(
+                when (environment) {
+                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                        GooglePayEnvironment.Production
+                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                        GooglePayEnvironment.Test
+                }
+            )
+        }?.isReady()?.first() ?: false
     }
 
     private suspend fun createWithCustomer(
