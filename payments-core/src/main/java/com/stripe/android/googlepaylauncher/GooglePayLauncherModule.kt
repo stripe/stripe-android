@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher
 
 import android.content.Context
+import com.stripe.android.Logger
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -12,10 +13,12 @@ class GooglePayLauncherModule {
     @Singleton
     fun provideGooglePayRepositoryFactory(
         appContext: Context,
+        logger: Logger
     ): (GooglePayEnvironment) -> GooglePayRepository = { environment ->
         DefaultGooglePayRepository(
             appContext,
-            environment
+            environment,
+            logger
         )
     }
 }

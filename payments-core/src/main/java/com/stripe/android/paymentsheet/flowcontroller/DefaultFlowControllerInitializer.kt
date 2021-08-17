@@ -35,7 +35,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
-        val isGooglePayReady = isGooglePayReady(clientSecret, paymentSheetConfiguration)
+        val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
         paymentSheetConfiguration?.customer?.let { customerConfig ->
             createWithCustomer(
                 clientSecret,
@@ -51,11 +51,9 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     }
 
     private suspend fun isGooglePayReady(
-        clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ): Boolean {
-        return clientSecret is PaymentIntentClientSecret &&
-            paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
+        return paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
                 googlePayRepositoryFactory(
                     when (environment) {
                         PaymentSheet.GooglePayConfiguration.Environment.Production ->
