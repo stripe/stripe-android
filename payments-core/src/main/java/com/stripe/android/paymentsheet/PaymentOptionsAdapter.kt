@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
+@SuppressLint("NotifyDataSetChanged")
 internal class PaymentOptionsAdapter(
     private val canClickSelectedItem: Boolean,
     val paymentOptionSelectedListener: (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
