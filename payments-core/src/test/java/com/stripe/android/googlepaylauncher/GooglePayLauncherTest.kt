@@ -62,7 +62,6 @@ class GooglePayLauncherTest {
             val launcher = GooglePayLauncher(
                 testScope,
                 CONFIG,
-                { FakeGooglePayRepository(true) },
                 readyCallback,
                 fragment.registerForActivityResult(
                     GooglePayLauncherContract(),
@@ -70,6 +69,7 @@ class GooglePayLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                { FakeGooglePayRepository(true) },
                 analyticsRequestFactory,
                 analyticsRequestExecutor
             )
@@ -91,7 +91,6 @@ class GooglePayLauncherTest {
             GooglePayLauncher(
                 testScope,
                 CONFIG,
-                { FakeGooglePayRepository(true) },
                 readyCallback,
                 fragment.registerForActivityResult(
                     GooglePayLauncherContract(),
@@ -99,6 +98,7 @@ class GooglePayLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                { FakeGooglePayRepository(true) },
                 analyticsRequestFactory,
                 analyticsRequestExecutor
             )
@@ -114,7 +114,6 @@ class GooglePayLauncherTest {
             val launcher = GooglePayLauncher(
                 testScope,
                 CONFIG,
-                { FakeGooglePayRepository(false) },
                 readyCallback,
                 fragment.registerForActivityResult(
                     GooglePayLauncherContract(),
@@ -122,6 +121,7 @@ class GooglePayLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                { FakeGooglePayRepository(false) },
                 analyticsRequestFactory,
                 analyticsRequestExecutor
             )
