@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -149,9 +150,10 @@ class PaymentSheetListFragmentTest {
     }
 
     @Test
-    fun `fragment started without FragmentConfig should emit fatal`() {
+    fun `fragment created without FragmentConfig should emit fatal`() {
         createScenario(
-            fragmentConfig = null
+            fragmentConfig = null,
+            initialState = Lifecycle.State.CREATED
         ).onFragment { fragment ->
             assertThat((fragment.sheetViewModel.paymentSheetResult.value as PaymentSheetResult.Failed).error.message)
                 .isEqualTo("Failed to start existing payment options fragment.")
@@ -238,17 +240,17 @@ class PaymentSheetListFragmentTest {
 
     private fun createScenario(
         fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG,
-        starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
-    ): FragmentScenario<PaymentSheetListFragment> {
-        return launchFragmentInContainer(
-            bundleOf(
-                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs
-            ),
-            R.style.StripePaymentSheetDefaultTheme,
-            factory = PaymentSheetFragmentFactory(eventReporter)
-        )
-    }
+        starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        initialState: Lifecycle.State = Lifecycle.State.RESUMED,
+    ): FragmentScenario<PaymentSheetListFragment> = launchFragmentInContainer(
+        bundleOf(
+            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
+            PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs
+        ),
+        R.style.StripePaymentSheetDefaultTheme,
+        initialState = initialState,
+        factory = PaymentSheetFragmentFactory(eventReporter)
+    )
 
     private companion object {
         private val PAYMENT_METHODS = listOf(
