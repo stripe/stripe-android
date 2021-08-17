@@ -35,6 +35,7 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
         override fun inject(injectable: Injectable) {
             val factory = (injectable as PaymentOptionsViewModel.Factory)
             factory.eventReporter = eventReporter
+            factory.customerRepository = FakeCustomerRepository()
             factory.workContext = TestCoroutineDispatcher()
             factory.prefsRepositoryFactory = { mock() }
         }

@@ -8,7 +8,6 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -24,9 +23,11 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
@@ -38,6 +39,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
     internal val eventReporter: EventReporter,
+    protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {
@@ -78,6 +80,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _selection = MutableLiveData<PaymentSelection?>()
     internal val selection: LiveData<PaymentSelection?> = _selection
 
+    private val editing = MutableLiveData(false)
+
     @VisibleForTesting
     internal val _processing = MutableLiveData(true)
     val processing: LiveData<Boolean> = _processing
@@ -94,11 +98,19 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     abstract fun onFatal(throwable: Throwable)
 
-    val ctaEnabled: LiveData<Boolean> = processing.switchMap { isProcessing ->
-        selection.switchMap { paymentSelection ->
-            MutableLiveData(!isProcessing && paymentSelection != null)
+    val ctaEnabled = MediatorLiveData<Boolean>().apply {
+        listOf(
+            processing,
+            selection,
+            editing
+        ).forEach { source ->
+            addSource(source) {
+                value = processing.value != true &&
+                    selection.value != null &&
+                    editing.value != true
+            }
         }
-    }
+    }.distinctUntilChanged()
 
     val userCanChooseToSaveCard: Boolean
         get() = customerConfig != null && stripeIntent.value is PaymentIntent
@@ -112,15 +124,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val fragmentConfig = MediatorLiveData<FragmentConfig?>().also { configLiveData ->
+    val fragmentConfig = MediatorLiveData<FragmentConfig?>().apply {
         listOf(
             savedSelection,
             stripeIntent,
             paymentMethods,
             isGooglePayReady
         ).forEach { source ->
-            configLiveData.addSource(source) {
-                configLiveData.value = createFragmentConfig()
+            addSource(source) {
+                value = createFragmentConfig()
             }
         }
     }.distinctUntilChanged()
@@ -180,6 +192,18 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun updateSelection(selection: PaymentSelection?) {
         _selection.value = selection
+    }
+
+    fun setEditing(isEditing: Boolean) {
+        editing.value = isEditing
+    }
+
+    fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
+        launch {
+            if (customerConfig != null && paymentMethod.id != null) {
+                customerRepository.detachPaymentMethod(customerConfig, paymentMethod.id)
+            }
+        }
     }
 
     abstract fun onUserCancel()

@@ -52,6 +52,7 @@
     <dimen name="stripe_card_widget_progress_size">12dp</dimen>
 
     <!-- PaymentSheet -->
+    <dimen name="stripe_paymentsheet_minimum_tap_size">48dp</dimen>
     <dimen name="stripe_paymentsheet_paymentmethod_icon_height">64dp</dimen>
     <dimen name="stripe_paymentsheet_paymentmethod_icon_width">100dp</dimen>
     <dimen name="stripe_paymentsheet_paymentmethod_icon_radius">6dp</dimen>
