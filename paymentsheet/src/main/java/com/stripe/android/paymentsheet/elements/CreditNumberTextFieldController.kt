@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.elements
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -40,9 +41,10 @@ internal class CreditNumberTextFieldController constructor(
 
     private val _hasFocus = MutableStateFlow(false)
 
-    override val visibleError: Flow<Boolean> = combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
-        fieldState.shouldShowError(hasFocus)
-    }
+    override val visibleError: Flow<Boolean> =
+        combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
+            fieldState.shouldShowError(hasFocus)
+        }
 
     /**
      * An error must be emitted if it is visible or not visible.
@@ -55,6 +57,11 @@ internal class CreditNumberTextFieldController constructor(
     val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
     override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
+
+    override val formFieldValue: Flow<FormFieldEntry> =
+        combine(isComplete, rawFieldValue) { complete, value ->
+            FormFieldEntry(value, complete)
+        }
 
     init {
         onValueChange("")

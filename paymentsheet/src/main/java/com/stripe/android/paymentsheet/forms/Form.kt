@@ -25,21 +25,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.FormElement.CreditSectionElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
-import com.stripe.android.paymentsheet.elements.CreditSectionController
+import com.stripe.android.paymentsheet.elements.CreditElementController
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VALUE
 import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY
@@ -48,10 +46,8 @@ import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -94,8 +90,6 @@ internal fun FormInternal(
                     is SaveForFutureUseElement -> {
                         SaveForFutureUseElementUI(enabled, element)
                     }
-                    is CreditSectionElement ->
-                        CreditSectionElementUI(enabled, element.controller, hiddenIdentifiers)
                 }
             }
         }
@@ -140,34 +134,22 @@ internal fun SectionElementUI(
 }
 
 @Composable
-internal fun CreditSectionElementUI(
+internal fun CreditElementUI(
     enabled: Boolean,
-    controller: CreditSectionController,
+    controller: CreditElementController,
     hiddenIdentifiers: List<IdentifierSpec>?
 ) {
-    val error by controller.error.asLiveData().observeAsState(null)
-    val sectionErrorString = error?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.errorMessage,
-                *args
-            )
-        } ?: stringResource(it.errorMessage)
-    }
-
-    Section(controller.label, sectionErrorString) {
-        controller.fields.forEachIndexed { index, field ->
-            SectionFieldElementUI(enabled, field, hiddenIdentifiers)
-            if (index != controller.fields.size - 1) {
-                val cardStyle = CardStyle(isSystemInDarkTheme())
-                Divider(
-                    color = cardStyle.cardBorderColor,
-                    thickness = cardStyle.cardBorderWidth,
-                    modifier = Modifier.padding(
-                        horizontal = cardStyle.cardBorderWidth
-                    )
+    controller.fields.forEachIndexed { index, field ->
+        SectionFieldElementUI(enabled, field, hiddenIdentifiers)
+        if (index != controller.fields.size - 1) {
+            val cardStyle = CardStyle(isSystemInDarkTheme())
+            Divider(
+                color = cardStyle.cardBorderColor,
+                thickness = cardStyle.cardBorderWidth,
+                modifier = Modifier.padding(
+                    horizontal = cardStyle.cardBorderWidth
                 )
-            }
+            )
         }
     }
 }
@@ -226,8 +208,8 @@ internal fun SectionFieldElementUI(
                     hiddenIdentifiers
                 )
             }
-            is CreditSectionController -> {
-                CreditSectionElementUI(
+            is CreditElementController -> {
+                CreditElementUI(
                     enabled,
                     controller,
                     hiddenIdentifiers
@@ -410,33 +392,18 @@ class FormViewModel @Inject internal constructor(
             } ?: false
     }
 
-    private val addressSectionFields = elements
-        .filterIsInstance<SectionElement>()
-        .flatMap { it.fields }
-        .filterIsInstance<SectionFieldElement.AddressElement>()
-        .firstOrNull()
-        ?.fields
-        ?: MutableStateFlow(null)
+    val completeFormValues =
+        TransformElementToFormFieldValueFlow(
+            combine(
+                elements.map { it.getFormFieldValueFlow() }
+            ) {
+                it.toList().flatten().toMap()
+            },
+            hiddenIdentifiers,
+            showingMandate,
+            saveForFutureUse
+        ).transformFlow()
 
-    @ExperimentalCoroutinesApi
-    val completeFormValues = addressSectionFields.map { addressSectionFields ->
-        addressSectionFields
-            ?.filter { it.controller is InputController }
-            ?.associate { sectionFieldElement ->
-                sectionFieldElement.identifier to sectionFieldElement.controller as InputController
-            }
-            ?.plus(
-                elements.getIdInputControllerMap()
-            ) ?: elements.getIdInputControllerMap()
-    }
-        .flatMapLatest { value ->
-            TransformElementToFormFieldValueFlow(
-                value,
-                hiddenIdentifiers,
-                showingMandate,
-                saveForFutureUse
-            ).transformFlow()
-        }
 
     internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
         populateWith(elements, formFieldValues)

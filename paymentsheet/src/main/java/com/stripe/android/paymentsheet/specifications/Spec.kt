@@ -69,10 +69,6 @@ sealed class FormItemSpec {
     ) : FormItemSpec(), RequiredItemSpec {
         override val identifier = IdentifierSpec("save_for_future_use")
     }
-
-    data class CreditDetailSectionSpec(
-        override val identifier: IdentifierSpec
-    ) : FormItemSpec(), RequiredItemSpec
 }
 
 /**
@@ -81,9 +77,9 @@ sealed class FormItemSpec {
 sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     object Email : SectionFieldSpec(IdentifierSpec("email"))
-
     object Iban : SectionFieldSpec(IdentifierSpec("iban"))
     object CreditBillingSpec : SectionFieldSpec(IdentifierSpec("credit_billing"))
+    object CreditDetailSpec : SectionFieldSpec(IdentifierSpec("credit"))
 
     /**
      * This is the specification for a country field.

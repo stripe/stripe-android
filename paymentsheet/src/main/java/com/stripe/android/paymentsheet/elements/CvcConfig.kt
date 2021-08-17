@@ -17,7 +17,7 @@ internal class CvcConfig : CreditTextFieldConfig {
     override val debugLabel: String = "cvc"
     override val label: Int = R.string.credit_cvc_label
     override val keyboard: KeyboardType = KeyboardType.Number
-    override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
+    override val visualTransformation: VisualTransformation = VisualTransformation.None
 
     override fun determineState(
         brand: CardBrand,

@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet.elements
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.viewmodel.credit.cvc.CvcConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,13 +12,12 @@ import kotlinx.coroutines.flow.map
 
 internal class CvcTextFieldController constructor(
     private val cvcTextFieldConfig: CvcConfig,
-    private val cardBrandFlow: Flow<CardBrand>,
+    cardBrandFlow: Flow<CardBrand>,
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
-    override val visualTransformation =
-        cvcTextFieldConfig.visualTransformation ?: VisualTransformation.None
+    override val visualTransformation = cvcTextFieldConfig.visualTransformation
 
     @StringRes
     // TODO: THis should change to a flow and be based in the card brand
@@ -58,6 +56,11 @@ internal class CvcTextFieldController constructor(
     val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
     override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
+
+    override val formFieldValue: Flow<FormFieldEntry> =
+        combine(isComplete, rawFieldValue) { complete, value ->
+            FormFieldEntry(value, complete)
+        }
 
     init {
         onValueChange("")

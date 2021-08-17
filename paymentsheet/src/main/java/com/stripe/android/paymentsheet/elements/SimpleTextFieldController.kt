@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -69,6 +70,11 @@ internal class SimpleTextFieldController constructor(
     override val isComplete: Flow<Boolean> = _fieldState.map {
         it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
     }
+
+    override val formFieldValue: Flow<FormFieldEntry> =
+        combine(isComplete, rawFieldValue) { complete, value ->
+            FormFieldEntry(value, complete)
+        }
 
     init {
         onValueChange("")

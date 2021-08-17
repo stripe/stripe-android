@@ -16,8 +16,9 @@ internal val cardParamKey: MutableMap<String, Any?> = mutableMapOf(
     "card" to cardParams
 )
 
-internal val creditDetailsSection = FormItemSpec.CreditDetailSectionSpec(
-    IdentifierSpec("credit")
+internal val creditDetailsSection = FormItemSpec.SectionSpec(
+    IdentifierSpec("credit"),
+    SectionFieldSpec.CreditDetailSpec
 )
 
 internal val creditBillingSection = FormItemSpec.SectionSpec(

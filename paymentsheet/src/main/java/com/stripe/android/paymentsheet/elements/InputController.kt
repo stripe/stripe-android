@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 
 /** This is a generic controller */
@@ -25,6 +26,7 @@ internal sealed interface InputController : Controller {
     val isComplete: Flow<Boolean>
     val error: Flow<FieldError?>
     val showOptionalLabel: Boolean
+    val formFieldValue: Flow<FormFieldEntry>
 
     fun onRawValueChange(rawValue: String)
 }
