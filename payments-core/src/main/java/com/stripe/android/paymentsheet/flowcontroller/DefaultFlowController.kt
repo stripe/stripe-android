@@ -25,7 +25,7 @@ import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -67,6 +67,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     activityResultCaller: ActivityResultCaller,
+    @InjectorKey private val injectorKey: Int,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
     private val eventReporter: EventReporter,
@@ -98,23 +99,12 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    @InjectorKey
-    private var injectorKey: Int? = null
-
     override fun inject(injectable: Injectable) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)
             }
         }
-    }
-
-    override fun getInjectorKey(): Int? {
-        return injectorKey
-    }
-
-    override fun setInjectorKey(injectorKey: Int) {
-        this.injectorKey = injectorKey
     }
 
     init {
@@ -215,7 +205,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 isGooglePayReady = initData.isGooglePayReady,
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
                 statusBarColor = statusBarColor(),
-                injectorKey = requireNotNull(injectorKey)
+                injectorKey = injectorKey
             )
         )
     }
@@ -472,7 +462,7 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
-            val injectorKey = WeakSetInjectorRegistry.nextKey()
+            val injectorKey = WeakMapInjectorRegistry.nextKey()
             val flowControllerComponent = DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
@@ -488,7 +478,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
-            WeakSetInjectorRegistry.register(flowController, injectorKey)
+            WeakMapInjectorRegistry.register(flowController, injectorKey)
             return flowController
         }
     }

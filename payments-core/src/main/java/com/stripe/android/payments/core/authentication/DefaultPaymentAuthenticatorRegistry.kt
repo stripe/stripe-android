@@ -21,9 +21,8 @@ import com.stripe.android.payments.core.injection.AuthenticationComponent
 import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
-import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -64,9 +63,6 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
      */
     internal var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
         null
-
-    @InjectorKey
-    private var injectorKey: Int? = null
 
     @Suppress("UNCHECKED_CAST")
     override fun <Authenticatable> getAuthenticator(
@@ -128,20 +124,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         }
     }
 
-    override fun getInjectorKey(): Int? = injectorKey
-
-    override fun setInjectorKey(injectorKey: Int) {
-        this.injectorKey = injectorKey
-    }
-
     companion object {
-        /**
-         * Create an instance of [PaymentAuthenticatorRegistry] with dagger and register it in the
-         * static cache.
-         *
-         * [Synchronized] because it modifies [CURRENT_ID] for each new instance created.
-         */
-        @Synchronized
         fun createInstance(
             context: Context,
             stripeRepository: StripeRepository,
@@ -152,7 +135,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             uiContext: CoroutineContext,
             threeDs1IntentReturnUrlMap: MutableMap<String, String>
         ): PaymentAuthenticatorRegistry {
-            val injectorKey = WeakSetInjectorRegistry.nextKey()
+            val injectorKey = WeakMapInjectorRegistry.nextKey()
             val component = DaggerAuthenticationComponent.builder()
                 .context(context)
                 .stripeRepository(stripeRepository)
@@ -166,7 +149,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 .build()
             val registry = component.registry
             registry.authenticationComponent = component
-            WeakSetInjectorRegistry.register(registry, injectorKey)
+            WeakMapInjectorRegistry.register(registry, injectorKey)
             return registry
         }
     }

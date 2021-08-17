@@ -761,15 +761,14 @@ internal class DefaultFlowControllerTest {
         paymentOptionCallback,
         paymentResultCallback,
         activityResultCaller,
+        0,
         flowControllerInitializer,
         eventReporter,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
         paymentController,
         { PaymentConfiguration.getInstance(activity) },
         { flowResultProcessor }
-    ).also {
-        it.setInjectorKey(0)
-    }
+    )
 
     private class FakeFlowControllerInitializer(
         var paymentMethods: List<PaymentMethod>,
