@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.Logger
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -369,6 +370,7 @@ internal class DefaultFlowControllerInitializerTest {
             { if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository },
             stripeIntentRepo,
             customerRepo,
+            Logger.noop(),
             testDispatcher
         )
     }
