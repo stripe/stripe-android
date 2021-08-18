@@ -165,7 +165,7 @@ class GooglePayLauncherViewModelTest {
         }
 
     @Test
-    fun `getResultFromConfirmation() with invalid using PaymentIntent should return expected result`() =
+    fun `getResultFromConfirmation() with failed confirmation should return expected result`() =
         testDispatcher.runBlockingTest {
             val exception = StripeException.create(Exception("Failure"))
             val result = viewModel.getResultFromConfirmation(
