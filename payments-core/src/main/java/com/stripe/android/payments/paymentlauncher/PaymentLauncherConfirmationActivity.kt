@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
 
 /**
