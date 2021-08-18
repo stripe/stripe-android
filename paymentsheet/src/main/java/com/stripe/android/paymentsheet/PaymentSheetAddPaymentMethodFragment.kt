@@ -1,0 +1,81 @@
+package com.stripe.android.paymentsheet
+
+import android.os.Bundle
+import android.view.View
+import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+
+internal class PaymentSheetAddPaymentMethodFragment(
+    eventReporter: EventReporter
+) : com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment(eventReporter) {
+    override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
+        { requireActivity().application },
+        {
+            requireNotNull(
+                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+            )
+        }
+    )
+
+    override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {
+        viewModelFactory
+    }
+
+    private lateinit var viewBinding: FragmentPaymentsheetAddPaymentMethodBinding
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val config = arguments?.getParcelable<com.stripe.android.paymentsheet.model.FragmentConfig>(
+            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
+        )
+        val shouldShowGooglePayButton = config?.let {
+            config.isGooglePayReady && config.paymentMethods.isEmpty()
+        } ?: false
+
+        viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
+        val googlePayButton = viewBinding.googlePayButton
+        val googlePayDivider = viewBinding.googlePayDivider
+
+        googlePayButton.setOnClickListener {
+            sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
+            sheetViewModel.updateSelection(PaymentSelection.GooglePay)
+        }
+
+        googlePayButton.isVisible = shouldShowGooglePayButton
+        googlePayDivider.isVisible = shouldShowGooglePayButton
+        addPaymentMethodHeader.isVisible = !shouldShowGooglePayButton
+
+        sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
+            updateErrorMessage(null)
+            if (paymentSelection == PaymentSelection.GooglePay) {
+                sheetViewModel.checkout(PaymentSheetViewModel.CheckoutIdentifier.AddFragmentTopGooglePay)
+            }
+        }
+
+        sheetViewModel.getButtonStateObservable(PaymentSheetViewModel.CheckoutIdentifier.AddFragmentTopGooglePay)
+            .observe(viewLifecycleOwner) { viewState ->
+                if (viewState is com.stripe.android.paymentsheet.model.PaymentSheetViewState.Reset) {
+                    // If Google Pay was cancelled or failed, re-select the form payment method
+                    sheetViewModel.updateSelection(sheetViewModel.lastSelectedPaymentMethod)
+                }
+
+                updateErrorMessage(viewState?.errorMessage)
+                googlePayButton.updateState(viewState?.convert())
+            }
+
+        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+            googlePayButton.isEnabled = !isProcessing
+        }
+    }
+
+    private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
+        viewBinding.message.isVisible = userMessage != null
+        viewBinding.message.text = userMessage?.message
+    }
+}

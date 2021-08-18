@@ -77,6 +77,7 @@ configurations {
 }
 
 dependencies {
+    implementation project(":payments-core")
     implementation libraries.androidx.fragment.ktx
     implementation libraries.androidx.lifecycle.livedata.ktx
     implementation libraries.androidx.lifecycle.viewmodel.ktx
@@ -105,6 +106,9 @@ dependencies {
     // dagger
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+
+    implementation libraries.androidx.constraintlayout
+    implementation "com.google.android.material:material:$materialVersion"
 
     // resource deserialization
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2'

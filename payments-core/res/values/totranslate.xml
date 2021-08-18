@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="edit">Edit</string>
-    <string name="done">Done</string>
-    <string name="remove">Remove</string>
-    <string name="cancel">Cancel</string>
-    <!-- Description of button that deletes a saved payment method.
-    E.g. 'Remove Visa ending in 4242', or 'Remove bank account ending in 1234' -->
-    <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
-    <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-    <string name="bank_account_ending_in">Bank account ending in %s</string>
+    <string name="address_label_country">Country</string>
+    <string name="address_label_city">City</string>
+    <string name="address_label_state">State</string>
+    <string name="address_label_postal_code">Postal Code</string>
+
+    <string name="address_label_zip_code">Zip Code</string>
+    <string name="address_label_county">County</string>
+    <string name="address_label_province">Province</string>
+    <string name="address_label_name">Name</string>
 </resources>
