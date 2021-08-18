@@ -12,6 +12,7 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripePaymentController
+import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -34,6 +35,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.lang.Exception
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -163,6 +165,24 @@ class GooglePayLauncherViewModelTest {
         }
 
     @Test
+    fun `getResultFromConfirmation() with invalid using PaymentIntent should return expected result`() =
+        testDispatcher.runBlockingTest {
+            val exception = StripeException.create(Exception("Failure"))
+            val result = viewModel.getResultFromConfirmation(
+                StripePaymentController.PAYMENT_REQUEST_CODE,
+                Intent()
+                    .putExtras(
+                        PaymentFlowResult.Unvalidated(
+                            clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
+                            exception = exception
+                        ).toBundle()
+                    )
+            )
+            assertThat(result)
+                .isEqualTo(GooglePayLauncher.Result.Failed(exception))
+        }
+
+    @Test
     fun `confirmStripeIntent() using PaymentIntent should confirm Payment Intent`() =
         testDispatcher.runBlockingTest {
             val mockPaymentController: PaymentController = mock()
@@ -227,7 +247,7 @@ class GooglePayLauncherViewModelTest {
         override suspend fun getPaymentIntentResult(
             data: Intent
         ): PaymentIntentResult {
-            val paymentFlowResult = PaymentFlowResult.Unvalidated.fromIntent(data)
+            val paymentFlowResult = PaymentFlowResult.Unvalidated.fromIntent(data).validate()
             return PaymentIntentResult(
                 PaymentIntentFixtures.PI_SUCCEEDED,
                 outcomeFromFlow = paymentFlowResult.flowOutcome
@@ -235,7 +255,7 @@ class GooglePayLauncherViewModelTest {
         }
 
         override suspend fun getSetupIntentResult(data: Intent): SetupIntentResult {
-            val paymentFlowResult = PaymentFlowResult.Unvalidated.fromIntent(data)
+            val paymentFlowResult = PaymentFlowResult.Unvalidated.fromIntent(data).validate()
             return SetupIntentResult(
                 SetupIntentFixtures.SI_SUCCEEDED,
                 outcomeFromFlow = paymentFlowResult.flowOutcome

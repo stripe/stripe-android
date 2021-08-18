@@ -190,23 +190,20 @@ internal class GooglePayLauncherViewModel(
     internal suspend fun getResultFromConfirmation(
         requestCode: Int,
         data: Intent
-    ): GooglePayLauncher.Result {
-        return when {
-            paymentController.shouldHandlePaymentResult(requestCode, data) -> {
-                paymentController.getPaymentIntentResult(data)
-                GooglePayLauncher.Result.Completed
+    ): GooglePayLauncher.Result =
+        runCatching {
+            when {
+                paymentController.shouldHandlePaymentResult(requestCode, data) -> {
+                    paymentController.getPaymentIntentResult(data)
+                    GooglePayLauncher.Result.Completed
+                }
+                paymentController.shouldHandleSetupResult(requestCode, data) -> {
+                    paymentController.getSetupIntentResult(data)
+                    GooglePayLauncher.Result.Completed
+                }
+                else -> throw IllegalStateException("Unexpected result: $data")
             }
-            paymentController.shouldHandleSetupResult(requestCode, data) -> {
-                paymentController.getSetupIntentResult(data)
-                GooglePayLauncher.Result.Completed
-            }
-            else -> {
-                GooglePayLauncher.Result.Failed(
-                    IllegalStateException("Unexpected result.")
-                )
-            }
-        }
-    }
+        }.getOrElse { GooglePayLauncher.Result.Failed(it) }
 
     internal class Factory(
         private val application: Application,
