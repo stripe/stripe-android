@@ -30,11 +30,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         launcherArgs = args
 
         val viewModel: PaymentLauncherViewModel by viewModels {
-            PaymentLauncherViewModel.Factory(
-                { applicationContext },
-                { AuthActivityStarterHost.create(this) },
-                { launcherArgs }
-            )
+            PaymentLauncherViewModel.Factory()
         }
 
         viewModel.paymentLauncherResult.observe(this, ::finishWithResult)

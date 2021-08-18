@@ -1,6 +1,5 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,7 +7,6 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.view.AuthActivityStarterHost
 
 /**
  * WIP - view model for PaymentLauncherHostActivity
@@ -56,11 +54,7 @@ internal class PaymentLauncherViewModel : ViewModel() {
         }
     }
 
-    internal class Factory(
-        private val contextSupplier: () -> Context,
-        private val authHostSupplier: () -> AuthActivityStarterHost,
-        private val argsProvider: () -> PaymentLauncherContract.Args
-    ) : ViewModelProvider.Factory {
+    internal class Factory() : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return PaymentLauncherViewModel() as T
