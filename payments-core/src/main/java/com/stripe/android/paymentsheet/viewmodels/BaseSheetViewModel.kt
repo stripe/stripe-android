@@ -187,7 +187,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     PaymentMethod.Type.fromCode(it)?.hasDelayedSettlement() == false
             }.mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
-            }.filter { it == SupportedPaymentMethod.Card }
+            }
         }
 
         return emptyList()
