@@ -25,13 +25,7 @@ internal class CreditElementController : SectionFieldErrorController {
 
     val expirationDateElement = SectionFieldElement.SimpleText(
         IdentifierSpec("date"),
-        SimpleTextFieldController(
-            SimpleTextFieldConfig(
-                R.string.credit_expiration_date,
-                KeyboardCapitalization.None,
-                KeyboardType.Number
-            )
-        )
+        SimpleTextFieldController(DateConfig())
     )
 
     // TODO: add expiration date

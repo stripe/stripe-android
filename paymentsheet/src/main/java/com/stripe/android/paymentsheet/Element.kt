@@ -177,8 +177,12 @@ internal sealed class SectionFieldElement(
             listOf(
                 controller.numberElement.identifier to number,
                 controller.cvcElement.identifier to cvc,
-                IdentifierSpec("month") to expirationDate.copy(value = expirationDate.value),
-                IdentifierSpec("year") to expirationDate.copy(value = expirationDate.value)
+                IdentifierSpec("month") to expirationDate.copy(
+                    value = expirationDate.value?.take(2)
+                ),
+                IdentifierSpec("year") to expirationDate.copy(
+                    value = expirationDate.value?.takeLast(2)
+                )
             )
         }
     }
