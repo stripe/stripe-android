@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import androidx.annotation.IntDef
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeModel
 
