@@ -102,6 +102,13 @@ class PaymentSheet internal constructor(
          * If set, PaymentSheet displays the button with this color.
          */
         var primaryButtonColor: ColorStateList? = null,
+
+        /**
+         * Whether or not your app can handle a delay between when the customer finishes paying and
+         * when your business receives money. Setting this to `true` allows your app to accept
+         * additional payment methods that may take time to move money (e.g. bank debits like SEPA).
+         */
+        var supportsDelayedSettlement: Boolean = false
     ) : Parcelable
 
     @Parcelize

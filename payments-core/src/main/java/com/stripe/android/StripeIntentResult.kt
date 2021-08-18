@@ -44,7 +44,7 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
                 return Outcome.SUCCEEDED
             }
             StripeIntent.Status.Processing -> {
-                return if (PROCESSING_IS_SUCCESS.contains(intent.paymentMethod?.type)) {
+                return if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
                     Outcome.SUCCEEDED
                 } else {
                     Outcome.UNKNOWN
@@ -85,14 +85,5 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
              */
             const val TIMEDOUT: Int = 4
         }
-    }
-
-    private companion object {
-        private val PROCESSING_IS_SUCCESS = setOf(
-            PaymentMethod.Type.SepaDebit,
-            PaymentMethod.Type.BacsDebit,
-            PaymentMethod.Type.AuBecsDebit,
-            PaymentMethod.Type.Sofort
-        )
     }
 }

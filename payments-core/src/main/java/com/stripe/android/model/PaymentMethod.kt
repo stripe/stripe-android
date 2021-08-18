@@ -170,6 +170,10 @@ data class PaymentMethod internal constructor(
             return code
         }
 
+        fun hasDelayedSettlement() = setOf(
+            SepaDebit, BacsDebit, AuBecsDebit, Sofort
+        ).contains(this)
+
         companion object {
             @JvmSynthetic
             internal fun fromCode(code: String?): Type? {

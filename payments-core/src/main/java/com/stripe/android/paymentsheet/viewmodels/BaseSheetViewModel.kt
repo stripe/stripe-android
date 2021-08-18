@@ -182,7 +182,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun getSupportedPaymentMethods(): List<SupportedPaymentMethod> {
         stripeIntent.value?.let { stripeIntent ->
-            return stripeIntent.paymentMethodTypes.mapNotNull {
+            return stripeIntent.paymentMethodTypes.filter {
+                config?.supportsDelayedSettlement == true ||
+                    PaymentMethod.Type.fromCode(it)?.hasDelayedSettlement() == false
+            }.mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
             }.filter { it == SupportedPaymentMethod.Card }
         }
