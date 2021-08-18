@@ -637,8 +637,8 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData
             )
-        ).isEqualTo(
-            PaymentSheetResult.Completed
+        ).isInstanceOf(
+            PaymentSheetResult.Failed::class.java
         )
     }
 
