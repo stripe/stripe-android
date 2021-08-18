@@ -1,6 +1,9 @@
 package com.stripe.android.payments.paymentlauncher
 
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -52,5 +55,18 @@ interface PaymentLauncher {
             stripeAccountId: String? = null,
             callback: PaymentResultCallback
         ) = PaymentLauncherFactory(fragment, callback).create(publishableKey, stripeAccountId)
+
+        @Composable
+        fun createForCompose(
+            publishableKey: String,
+            stripeAccountId: String? = null,
+            callback: PaymentResultCallback
+        ) = PaymentLauncherFactory(
+            LocalContext.current,
+            rememberLauncherForActivityResult(
+                PaymentLauncherContract(),
+                callback::onPaymentResult
+            )
+        ).create(publishableKey, stripeAccountId)
     }
 }
