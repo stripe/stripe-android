@@ -201,7 +201,7 @@ internal class GooglePayLauncherViewModel(
                     paymentController.getSetupIntentResult(data)
                     GooglePayLauncher.Result.Completed
                 }
-                else -> throw IllegalStateException("Unexpected result: $data")
+                else -> throw IllegalStateException("Unexpected confirmation result.")
             }
         }.getOrElse { GooglePayLauncher.Result.Failed(it) }
 
