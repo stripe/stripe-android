@@ -10,7 +10,7 @@ import com.stripe.android.model.SetupIntent
 /**
  * API to confirm and handle next actions for [PaymentIntent] and [SetupIntent].
  */
-internal interface PaymentLauncher {
+interface PaymentLauncher {
     /**
      * Confirms and, if necessary, authenticates a [PaymentIntent].
      */
