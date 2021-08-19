@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.Logger
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -12,6 +13,7 @@ import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -368,7 +370,9 @@ internal class DefaultFlowControllerInitializerTest {
             { prefsRepository },
             { if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository },
             stripeIntentRepo,
+            StripeIntentValidator(),
             customerRepo,
+            Logger.noop(),
             testDispatcher
         )
     }

@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -612,7 +613,7 @@ internal class PaymentSheetViewModelTest {
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
-                    "The current PaymentIntent has confirmation_method Manual.\n" +
+                    "The current PaymentIntent has confirmation_method 'Manual'.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
             )
     }
@@ -621,7 +622,7 @@ internal class PaymentSheetViewModelTest {
     fun `fetchPaymentIntent() should fail if status != requires_payment_method`() {
         val viewModel = createViewModel(
             stripeIntentRepository = StripeIntentRepository.Static(
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
+                PaymentIntentFixtures.PI_SUCCEEDED
             )
         )
         var result: PaymentSheetResult? = null
@@ -631,9 +632,9 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
-                "PaymentIntent with confirmation_method='automatic' is required.\n" +
-                    "The current PaymentIntent has confirmation_method Manual.\n" +
-                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
+                "A PaymentIntent with status='requires_payment_method' or 'requires_action` is required.\n" +
+                    "The current PaymentIntent has status 'succeeded'.\n" +
+                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status."
             )
     }
 
@@ -751,39 +752,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `viewState should emit FinishProcessing and ProcessResult if PaymentIntent is confirmed`() {
-        val viewModel = createViewModel(
-            stripeIntentRepository = StripeIntentRepository.Static(
-                PaymentIntentFixtures.PI_SUCCEEDED
-            )
-        )
-
-        val viewStates = mutableListOf<PaymentSheetViewState>()
-        viewModel.viewState.observeForever { viewState ->
-            if (viewState is PaymentSheetViewState.FinishProcessing) {
-                // force `onComplete` to be called
-                viewState.onComplete()
-            }
-            viewState?.let {
-                viewStates.add(it)
-            }
-        }
-
-        var paymentSheetResult: PaymentSheetResult? = null
-        viewModel.paymentSheetResult.observeForever {
-            paymentSheetResult = it
-        }
-
-        viewModel.fetchStripeIntent()
-
-        assertThat(viewStates)
-            .hasSize(1)
-        assertThat(viewStates[0])
-            .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-        assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
-    }
-
-    @Test
     fun `When configuration is empty, merchant name should reflect the app name`() {
         val viewModel = createViewModel(
             args = ARGS_WITHOUT_CUSTOMER
@@ -809,13 +777,14 @@ internal class PaymentSheetViewModelTest {
             eventReporter,
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             stripeIntentRepository,
+            StripeIntentValidator(),
             customerRepository,
             { paymentFlowResultProcessor },
             prefsRepository,
-            Logger.noop(),
-            testDispatcher,
             mock(),
-            mock()
+            mock(),
+            Logger.noop(),
+            testDispatcher
         )
     }
 
