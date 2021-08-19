@@ -140,7 +140,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             paymentMethodParams?.let { params ->
                 PaymentSelection.New.Card(
                     params,
-                    cardMultilineWidget.brand,
+                    cardMultilineWidget.getBrand(),
                     shouldSavePaymentMethod = shouldSaveCard()
                 )
             }
@@ -180,8 +180,8 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             )
         }
 
-        cardMultilineWidget.expiryDateEditText.includeSeparatorGaps = true
-        cardMultilineWidget.expirationDatePlaceholderRes = null
+        cardMultilineWidget.expiryDateEditText.setIncludeSeparatorGaps(true)
+        cardMultilineWidget.setExpirationDatePlaceholderRes(null)
         cardMultilineWidget.expiryTextInputLayout.hint =
             getString(R.string.stripe_paymentsheet_expiration_date_hint)
         cardMultilineWidget.cardNumberTextInputLayout.placeholderText = null
@@ -230,28 +230,25 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
 
         cardMultilineWidget.setCvcIcon(R.drawable.stripe_ic_paymentsheet_cvc)
 
-        cardMultilineWidget.cardNumberErrorListener =
-            StripeEditText.ErrorMessageListener { errorMessage ->
-                onCardError(
-                    AddCardViewModel.Field.Number,
-                    errorMessage
-                )
-            }
-        cardMultilineWidget.expirationDateErrorListener =
-            StripeEditText.ErrorMessageListener { errorMessage ->
-                onCardError(
-                    AddCardViewModel.Field.Date,
-                    errorMessage
-                )
-            }
-        cardMultilineWidget.cvcErrorListener =
-            StripeEditText.ErrorMessageListener { errorMessage ->
-                onCardError(
-                    AddCardViewModel.Field.Cvc,
-                    errorMessage
-                )
-            }
-        cardMultilineWidget.postalCodeErrorListener = null
+        cardMultilineWidget.setCardNumberErrorListener { errorMessage ->
+            onCardError(
+                AddCardViewModel.Field.Number,
+                errorMessage
+            )
+        }
+        cardMultilineWidget.setExpirationDateErrorListener { errorMessage ->
+            onCardError(
+                AddCardViewModel.Field.Date,
+                errorMessage
+            )
+        }
+        cardMultilineWidget.setCvcErrorListener { errorMessage ->
+            onCardError(
+                AddCardViewModel.Field.Cvc,
+                errorMessage
+            )
+        }
+        cardMultilineWidget.setPostalCodeErrorListener(null)
 
         billingAddressView.postalCodeViewListener =
             object : BillingAddressView.PostalCodeViewListener {

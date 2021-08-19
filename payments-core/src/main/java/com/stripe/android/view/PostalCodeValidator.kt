@@ -1,12 +1,14 @@
 package com.stripe.android.view
 
+import androidx.annotation.RestrictTo
 import java.util.Locale
 import java.util.regex.Pattern
 
 /**
  * Validation rules for postal codes
  */
-internal class PostalCodeValidator {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+class PostalCodeValidator {
 
     /**
      * 1. if there is a regex for the country code, validate the postal code against it
@@ -21,7 +23,7 @@ internal class PostalCodeValidator {
             ?: (!CountryUtils.doesCountryUsePostalCode(countryCode) || postalCode.isNotBlank())
     }
 
-    fun isValid(
+    internal fun isValid(
         postalCode: String,
         countryCode: String?,
         optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,

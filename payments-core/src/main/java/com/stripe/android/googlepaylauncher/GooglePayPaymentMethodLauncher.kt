@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntDef
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
@@ -274,14 +275,15 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @IntDef(INTERNAL_ERROR, DEVELOPER_ERROR, NETWORK_ERROR)
     annotation class ErrorCode
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    companion object {
         internal const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
 
         // Generic internal error
-        const val INTERNAL_ERROR = 1
+        internal const val INTERNAL_ERROR = 1
 
         // The application is misconfigured
-        const val DEVELOPER_ERROR = 2
+        internal const val DEVELOPER_ERROR = 2
 
         // Error executing a network call
         const val NETWORK_ERROR = 3

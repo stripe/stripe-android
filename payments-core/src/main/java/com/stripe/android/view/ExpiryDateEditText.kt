@@ -8,6 +8,7 @@ import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import android.widget.EditText
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
 import com.stripe.android.model.ExpirationDate
@@ -56,6 +57,11 @@ class ExpiryDateEditText @JvmOverloads constructor(
         INCLUDE_SEPARATOR_GAPS_DEFAULT
     ) { _, _, newValue ->
         updateSeparatorUi(newValue)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setIncludeSeparatorGaps(include: Boolean) {
+        includeSeparatorGaps = include
     }
 
     private val dateDigitsLength = context.resources.getInteger(R.integer.stripe_date_digits_length)

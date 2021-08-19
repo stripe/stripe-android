@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
@@ -19,10 +20,13 @@ import org.json.JSONObject
  * See [PaymentMethod] for API object.
  */
 @Parcelize
-data class PaymentMethodCreateParams internal constructor(
+data class PaymentMethodCreateParams
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+constructor(
     internal val type: PaymentMethod.Type,
 
-    internal val card: Card? = null,
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val card: Card? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
     private val sepaDebit: SepaDebit? = null,
@@ -32,7 +36,8 @@ data class PaymentMethodCreateParams internal constructor(
     private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
 
-    internal val billingDetails: PaymentMethod.BillingDetails? = null,
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val billingDetails: PaymentMethod.BillingDetails? = null,
 
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
@@ -206,6 +211,9 @@ data class PaymentMethodCreateParams internal constructor(
     ) : StripeParamsModel, Parcelable {
         internal val brand: CardBrand get() = CardUtils.getPossibleCardBrand(number)
         internal val last4: String? get() = number?.takeLast(4)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun getLast4() = last4
 
         override fun toParamMap(): Map<String, Any> {
             return listOf(

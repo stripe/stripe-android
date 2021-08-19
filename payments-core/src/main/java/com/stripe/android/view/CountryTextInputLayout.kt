@@ -9,6 +9,7 @@ import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.StyleRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.withStyledAttributes
@@ -31,7 +32,8 @@ import kotlin.properties.Delegates
  * [R.styleable.StripeCountryAutoCompleteTextInputLayout_countryItemLayout], note this layout must
  * be a [TextView].
  */
-internal class CountryTextInputLayout @JvmOverloads constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+class CountryTextInputLayout @JvmOverloads internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = com.google.android.material.R.attr.textInputStyle
@@ -43,14 +45,15 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     @LayoutRes
     private var itemLayoutRes: Int = DEFAULT_ITEM_LAYOUT
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     @VisibleForTesting
-    internal val countryAutocomplete: AutoCompleteTextView
+    val countryAutocomplete: AutoCompleteTextView
 
     /**
      * The 2 digit country code of the country selected by this input.
      */
     @VisibleForTesting
-    var selectedCountryCode: CountryCode? by Delegates.observable(
+    internal var selectedCountryCode: CountryCode? by Delegates.observable(
         null
     ) { _, _, newCountryValue ->
         newCountryValue?.let {
@@ -61,7 +64,15 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
         }
     }
 
-    val selectedCountry: Country?
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun getSelectedCountryCode() = selectedCountryCode
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setSelectedCountryCode(countryCode: CountryCode) {
+        selectedCountryCode = countryCode
+    }
+
+    internal val selectedCountry: Country?
         get() = selectedCountryCode?.let { CountryUtils.getCountryByCode(it, getLocale()) }
 
     @Deprecated(
@@ -71,8 +82,9 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     @JvmSynthetic
     internal var countryChangeCallback: (Country) -> Unit = {}
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     @JvmSynthetic
-    internal var countryCodeChangeCallback: (CountryCode) -> Unit = {}
+    var countryCodeChangeCallback: (CountryCode) -> Unit = {}
 
     private var countryAdapter: CountryAdapter
 
@@ -271,7 +283,7 @@ internal class CountryTextInputLayout @JvmOverloads constructor(
     }
 
     @Parcelize
-    data class SelectedCountryState(
+    internal data class SelectedCountryState(
         val countryCode: CountryCode,
         val superState: Parcelable?
     ) : Parcelable

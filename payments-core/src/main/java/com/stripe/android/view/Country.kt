@@ -1,8 +1,10 @@
 package com.stripe.android.view
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.CountryCode
 
-internal data class Country(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+data class Country(
     val code: CountryCode,
     val name: String
 ) {

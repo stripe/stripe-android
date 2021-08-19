@@ -201,7 +201,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             if (customerConfig != null && paymentMethod.id != null) {
-                customerRepository.detachPaymentMethod(customerConfig, paymentMethod.id)
+                customerRepository.detachPaymentMethod(
+                    customerConfig,
+                    requireNotNull(paymentMethod.id)
+                )
             }
         }
     }

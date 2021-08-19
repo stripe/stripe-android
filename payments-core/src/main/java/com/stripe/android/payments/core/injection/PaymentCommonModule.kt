@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
@@ -31,18 +32,20 @@ import kotlin.coroutines.CoroutineContext
  * In order to use this module, [Context], [ClientSecret] and [ENABLE_LOGGING] boolean
  * need to be provided elsewhere.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
 @Module
-internal abstract class PaymentCommonModule {
+abstract class PaymentCommonModule {
 
     @Binds
     @Singleton
-    abstract fun bindsAnalyticsRequestExecutor(
+    internal abstract fun bindsAnalyticsRequestExecutor(
         executor: DefaultAnalyticsRequestExecutor
     ): AnalyticsRequestExecutor
 
     @Binds
-    abstract fun bindsStripeRepository(repository: StripeApiRepository): StripeRepository
+    internal abstract fun bindsStripeRepository(repository: StripeApiRepository): StripeRepository
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     companion object {
         /**
          * Provides a non-singleton PaymentConfiguration.
@@ -60,7 +63,7 @@ internal abstract class PaymentCommonModule {
 
         @Provides
         @Singleton
-        fun provideStripeApiRepository(
+        internal fun provideStripeApiRepository(
             appContext: Context,
             lazyPaymentConfiguration: Lazy<PaymentConfiguration>
         ) = StripeApiRepository(
@@ -70,7 +73,7 @@ internal abstract class PaymentCommonModule {
 
         @Provides
         @Singleton
-        fun provideStripePaymentController(
+        internal fun provideStripePaymentController(
             appContext: Context,
             stripeApiRepository: StripeApiRepository,
             lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
@@ -86,7 +89,7 @@ internal abstract class PaymentCommonModule {
 
         @Provides
         @Singleton
-        fun providePaymentIntentFlowResultProcessor(
+        internal fun providePaymentIntentFlowResultProcessor(
             appContext: Context,
             lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
             stripeApiRepository: StripeApiRepository,
@@ -102,7 +105,7 @@ internal abstract class PaymentCommonModule {
 
         @Provides
         @Singleton
-        fun provideSetupIntentFlowResultProcessor(
+        internal fun provideSetupIntentFlowResultProcessor(
             appContext: Context,
             lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
             stripeApiRepository: StripeApiRepository,
@@ -122,7 +125,7 @@ internal abstract class PaymentCommonModule {
          * Should always be injected with [Provider].
          */
         @Provides
-        fun providePaymentFlowResultProcessor(
+        internal fun providePaymentFlowResultProcessor(
             clientSecret: ClientSecret,
             paymentIntentFlowResultProcessor: PaymentIntentFlowResultProcessor,
             setupIntentFlowResultProcessor: SetupIntentFlowResultProcessor

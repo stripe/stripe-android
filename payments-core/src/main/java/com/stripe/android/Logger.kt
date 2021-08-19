@@ -14,7 +14,9 @@ interface Logger {
     fun error(msg: String, t: Throwable? = null)
 
     companion object {
-        internal fun getInstance(enableLogging: Boolean): Logger {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun getInstance(enableLogging: Boolean): Logger {
             return if (enableLogging) {
                 real()
             } else {

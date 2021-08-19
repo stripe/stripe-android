@@ -1,10 +1,12 @@
 package com.stripe.android.view
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
 import java.util.Locale
 
-internal object CountryUtils {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet -- this still auto-completes
+object CountryUtils {
 
     internal val NO_POSTAL_CODE_COUNTRIES = setOf(
         "AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF", "CG",
@@ -33,7 +35,7 @@ internal object CountryUtils {
     }
 
     @JvmSynthetic
-    internal fun getCountryByCode(countryCode: CountryCode?, currentLocale: Locale): Country? {
+    fun getCountryByCode(countryCode: CountryCode?, currentLocale: Locale): Country? {
         return localizedCountries(currentLocale).firstOrNull {
             it.code == countryCode
         }
@@ -63,7 +65,7 @@ internal object CountryUtils {
     }
 
     @JvmSynthetic
-    internal fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
+    fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
         return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
     }
 }

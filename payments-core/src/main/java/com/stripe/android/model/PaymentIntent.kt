@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
@@ -117,7 +118,8 @@ data class PaymentIntent internal constructor(
      */
     override val status: StripeIntent.Status? = null,
 
-    internal val setupFutureUsage: StripeIntent.Usage? = null,
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val setupFutureUsage: StripeIntent.Usage? = null,
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.

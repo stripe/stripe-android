@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-internal object PaymentMethodCreateParamsFixtures {
+object PaymentMethodCreateParamsFixtures {
     internal val CARD = PaymentMethodCreateParams.Card(
         number = "4242424242424242",
         expiryMonth = 1,
@@ -31,7 +31,7 @@ internal object PaymentMethodCreateParamsFixtures {
     )
 
     @JvmField
-    internal val DEFAULT_CARD = PaymentMethodCreateParams.create(
+    val DEFAULT_CARD = PaymentMethodCreateParams.create(
         CARD,
         BILLING_DETAILS
     )

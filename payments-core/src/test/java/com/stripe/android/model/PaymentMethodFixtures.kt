@@ -5,7 +5,7 @@ import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
-internal object PaymentMethodFixtures {
+object PaymentMethodFixtures {
     val CARD = PaymentMethod.Card(
         brand = CardBrand.Visa,
         checks = PaymentMethod.Card.Checks(

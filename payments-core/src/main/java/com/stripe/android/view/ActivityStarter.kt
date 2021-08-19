@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 
 /**
@@ -19,7 +20,8 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
     private val requestCode: Int,
     private val intentFlags: Int? = null
 ) {
-    internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    constructor(
         activity: Activity,
         targetClass: Class<TargetActivityType>,
         requestCode: Int,
@@ -70,8 +72,9 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
     interface Result : Parcelable {
         fun toBundle(): Bundle
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         companion object {
-            internal const val EXTRA: String = "extra_activity_result"
+            const val EXTRA: String = "extra_activity_result"
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
@@ -124,7 +125,8 @@ data class PaymentMethod internal constructor(
     @JvmField val netbanking: Netbanking? = null
 ) : StripeModel {
 
-    internal fun hasExpectedDetails(): Boolean =
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun hasExpectedDetails(): Boolean =
         when (type) {
             Type.Card -> card != null
             Type.CardPresent -> cardPresent != null
@@ -171,8 +173,9 @@ data class PaymentMethod internal constructor(
         }
 
         companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
             @JvmSynthetic
-            internal fun fromCode(code: String?): Type? {
+            fun fromCode(code: String?): Type? {
                 return values().firstOrNull { it.code == code }
             }
         }
