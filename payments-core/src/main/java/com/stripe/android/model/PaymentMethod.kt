@@ -179,6 +179,13 @@ constructor(
             return code
         }
 
+        fun hasDelayedSettlement() = setOf(
+            SepaDebit,
+            BacsDebit,
+            AuBecsDebit,
+            Sofort
+        ).contains(this)
+
         companion object {
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
             @JvmSynthetic

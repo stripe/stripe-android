@@ -108,7 +108,14 @@ class PaymentSheet internal constructor(
          *
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
          */
-        var defaultBillingDetails: BillingDetails? = null
+        var defaultBillingDetails: BillingDetails? = null,
+
+        /**
+         * Whether or not your app can handle a delay between when the customer finishes paying and
+         * when your business receives money. Setting this to `true` allows your app to accept
+         * additional payment methods that may take time to move money (e.g. bank debits like SEPA).
+         */
+        var supportsDelayedSettlement: Boolean = false
     ) : Parcelable
 
     @Parcelize

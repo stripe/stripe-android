@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -719,6 +720,60 @@ internal class PaymentSheetViewModelTest {
         // In a real app, the app name will be used. In tests the package name is returned.
         assertThat(viewModel.merchantName)
             .isEqualTo("com.stripe.android.paymentsheet.test")
+    }
+
+    @Test
+    fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
+        val viewModel = createViewModel()
+        viewModel.setStripeIntent(
+            PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Eps.code,
+                    PaymentMethod.Type.Sofort.code
+                )
+            )
+        )
+
+        assertThat(viewModel.getSupportedPaymentMethods())
+            .containsExactly(
+                SupportedPaymentMethod.Card,
+                SupportedPaymentMethod.Ideal,
+                SupportedPaymentMethod.Eps
+            )
+    }
+
+    @Test
+    fun `getSupportedPaymentMethods() does not filter payment methods when supportsDelayedSettlement = true`() {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    supportsDelayedSettlement = true
+                )
+            )
+        )
+        viewModel.setStripeIntent(
+            PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Eps.code,
+                    PaymentMethod.Type.Sofort.code
+                )
+            )
+        )
+
+        assertThat(viewModel.getSupportedPaymentMethods())
+            .containsExactly(
+                SupportedPaymentMethod.Card,
+                SupportedPaymentMethod.Ideal,
+                SupportedPaymentMethod.SepaDebit,
+                SupportedPaymentMethod.Eps,
+                SupportedPaymentMethod.Sofort
+            )
     }
 
     private fun createViewModel(
