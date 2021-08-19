@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -718,17 +719,18 @@ internal class PaymentSheetActivityTest {
             eventReporter,
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(paymentIntent),
+            StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             { paymentFlowResultProcessor },
             FakePrefsRepository(),
-            Logger.noop(),
-            testDispatcher,
             StripePaymentController(
                 ApplicationProvider.getApplicationContext(),
                 { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 mock()
             ),
-            googlePayPaymentMethodLauncherFactory
+            googlePayPaymentMethodLauncherFactory,
+            Logger.noop(),
+            testDispatcher
         )
     }
 

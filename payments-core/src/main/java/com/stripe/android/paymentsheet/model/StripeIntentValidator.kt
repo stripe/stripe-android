@@ -3,11 +3,12 @@ package com.stripe.android.paymentsheet.model
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import javax.inject.Inject
 
 /**
  * Validator for [PaymentIntent] or [SetupIntent] instances used in PaymentSheet.
  */
-internal class StripeIntentValidator {
+internal class StripeIntentValidator @Inject constructor() {
     @JvmSynthetic
     fun requireValid(
         stripeIntent: StripeIntent

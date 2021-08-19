@@ -26,11 +26,11 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
+    private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
     private val logger: Logger,
     @IOContext private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
-    private val stripeIntentValidator = StripeIntentValidator()
 
     override suspend fun init(
         clientSecret: ClientSecret,

@@ -78,14 +78,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through injection
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val stripeIntentRepository: StripeIntentRepository,
+    private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
     private val paymentFlowResultProcessorProvider:
         Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     prefsRepository: PrefsRepository,
-    private val logger: Logger,
-    @IOContext workContext: CoroutineContext,
     private val paymentController: PaymentController,
-    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    private val logger: Logger,
+    @IOContext workContext: CoroutineContext
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -130,8 +131,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         get() = args.clientSecret is PaymentIntentClientSecret
 
     override var newCard: PaymentSelection.New.Card? = null
-
-    private val stripeIntentValidator = StripeIntentValidator()
 
     @VisibleForTesting
     internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null

@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -763,13 +764,14 @@ internal class PaymentSheetViewModelTest {
             eventReporter,
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             stripeIntentRepository,
+            StripeIntentValidator(),
             customerRepository,
             { paymentFlowResultProcessor },
             prefsRepository,
-            Logger.noop(),
-            testDispatcher,
             mock(),
-            mock()
+            mock(),
+            Logger.noop(),
+            testDispatcher
         )
     }
 
