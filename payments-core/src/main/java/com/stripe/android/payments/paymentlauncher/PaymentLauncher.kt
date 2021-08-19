@@ -56,7 +56,6 @@ interface PaymentLauncher {
             callback: PaymentResultCallback
         ) = PaymentLauncherFactory(activity, callback).create(publishableKey, stripeAccountId)
 
-
         /**
          * Create a [PaymentLauncher] instance with [Fragment].
          *
