@@ -33,6 +33,7 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="colorSurface">@color/stripe_paymentsheet_background</item>
+        <item name="actionMenuTextColor">@color/stripe_paymentsheet_toolbar_items_color</item>
     </style>
 
     <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />

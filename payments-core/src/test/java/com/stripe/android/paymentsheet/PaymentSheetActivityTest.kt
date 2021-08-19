@@ -158,6 +158,27 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `disables primary button when editing`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isTrue()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled)
+                .isTrue()
+
+            viewModel.setEditing(true)
+
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isFalse()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled)
+                .isFalse()
+        }
+    }
+
+    @Test
     fun `updates buy button state on add payment`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->

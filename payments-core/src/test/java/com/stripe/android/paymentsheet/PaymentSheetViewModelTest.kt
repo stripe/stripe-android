@@ -29,7 +29,6 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -52,7 +51,9 @@ import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -124,6 +125,22 @@ internal class PaymentSheetViewModelTest {
         idleLooper()
         assertThat(requireNotNull(paymentMethods))
             .isEmpty()
+    }
+
+    @Test
+    fun `removePaymentMethod triggers async removal`() = runBlockingTest {
+        val customerRepository = spy(FakeCustomerRepository())
+        val viewModel = createViewModel(
+            customerRepository = customerRepository
+        )
+
+        viewModel.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        idleLooper()
+
+        verify(customerRepository).detachPaymentMethod(
+            any(),
+            eq(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!)
+        )
     }
 
     @Test
@@ -694,20 +711,12 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `buyButton is only enabled when not processing, transition target, and a selection has been made`() {
+    fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
         var isEnabled = false
         viewModel.ctaEnabled.observeForever {
             isEnabled = it
         }
 
-        assertThat(isEnabled)
-            .isFalse()
-
-        viewModel.transitionTo(
-            PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(
-                FragmentConfigFixtures.DEFAULT
-            )
-        )
         assertThat(isEnabled)
             .isFalse()
 
@@ -718,6 +727,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(isEnabled)
             .isTrue()
+
+        viewModel.setEditing(true)
+        assertThat(isEnabled)
+            .isFalse()
     }
 
     @Test

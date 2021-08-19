@@ -79,7 +79,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
-    private val customerRepository: CustomerRepository,
+    customerRepository: CustomerRepository,
     private val paymentFlowResultProcessorProvider:
         Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     prefsRepository: PrefsRepository,
@@ -91,6 +91,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     application = application,
     config = args.config,
     eventReporter = eventReporter,
+    customerRepository = customerRepository,
     prefsRepository = prefsRepository,
     workContext = workContext
 ) {
@@ -477,6 +478,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ) : TransitionTarget()
     }
 
+    @Suppress("UNCHECKED_CAST")
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args
