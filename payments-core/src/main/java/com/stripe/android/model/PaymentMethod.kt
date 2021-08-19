@@ -171,7 +171,10 @@ data class PaymentMethod internal constructor(
         }
 
         fun hasDelayedSettlement() = setOf(
-            SepaDebit, BacsDebit, AuBecsDebit, Sofort
+            SepaDebit,
+            BacsDebit,
+            AuBecsDebit,
+            Sofort
         ).contains(this)
 
         companion object {
