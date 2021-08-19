@@ -53,7 +53,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.compactParams?.get("event") == "mc_complete_init_customer_googlepay"
+                req.getCompactParams()?.get("event") == "mc_complete_init_customer_googlepay"
             }
         )
     }
@@ -65,7 +65,7 @@ class DefaultEventReporterTest {
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.compactParams?.get("event") == "mc_complete_payment_savedpm_success"
+                req.getCompactParams()?.get("event") == "mc_complete_payment_savedpm_success"
             }
         )
     }
@@ -77,7 +77,7 @@ class DefaultEventReporterTest {
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.compactParams?.get("event") == "mc_custom_paymentoption_savedpm_select"
+                req.getCompactParams()?.get("event") == "mc_custom_paymentoption_savedpm_select"
             }
         )
     }
@@ -89,7 +89,7 @@ class DefaultEventReporterTest {
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                val deviceIdValue = requireNotNull(req.compactParams?.get("device_id")).toString()
+                val deviceIdValue = requireNotNull(req.getCompactParams()?.get("device_id")).toString()
                 UUID.fromString(deviceIdValue) != null
             }
         )

@@ -24,8 +24,6 @@ data class PaymentMethodCreateParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
 constructor(
     internal val type: PaymentMethod.Type,
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val card: Card? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
@@ -35,10 +33,7 @@ constructor(
     private val sofort: Sofort? = null,
     private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val billingDetails: PaymentMethod.BillingDetails? = null,
-
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
 
@@ -200,7 +195,9 @@ constructor(
         }
 
     @Parcelize
-    data class Card internal constructor(
+    data class Card
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         internal val number: String? = null,
         internal val expiryMonth: Int? = null,
         internal val expiryYear: Int? = null,

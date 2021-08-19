@@ -37,10 +37,9 @@ internal class PaymentOptionsViewModelTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val prefsRepository = com.stripe.android.paymentsheet.FakePrefsRepository()
-    private val customerRepository = com.stripe.android.paymentsheet.FakeCustomerRepository()
-    private val paymentMethodRepository =
-        com.stripe.android.paymentsheet.FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
+    private val prefsRepository = FakePrefsRepository()
+    private val customerRepository = FakeCustomerRepository()
+    private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
 
     private val viewModel = PaymentOptionsViewModel(
         args = PAYMENT_OPTION_CONTRACT_ARGS,

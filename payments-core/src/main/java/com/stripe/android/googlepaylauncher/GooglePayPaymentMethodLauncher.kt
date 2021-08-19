@@ -31,7 +31,7 @@ import java.util.Locale
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
 @JvmSuppressWildcards
-class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
+open class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted lifecycleScope: CoroutineScope,
     @Assisted private val config: Config,
     @Assisted private val readyCallback: ReadyCallback,
@@ -149,7 +149,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
      * This field is required when you send callbacks to the Google Transaction Events API.
      */
     @JvmOverloads
-    fun present(
+    open fun present(
         currencyCode: String,
         amount: Int = 0,
         transactionId: String? = null

@@ -1,5 +1,7 @@
 package com.stripe.android.networking
 
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.BankStatuses
@@ -27,7 +29,9 @@ import com.stripe.android.model.TokenParams
 import org.json.JSONObject
 import java.util.Locale
 
-internal abstract class AbsFakeStripeRepository : StripeRepository {
+@VisibleForTesting
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,

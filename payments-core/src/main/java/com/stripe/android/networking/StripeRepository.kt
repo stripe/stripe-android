@@ -1,6 +1,7 @@
 package com.stripe.android.networking
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -173,7 +174,9 @@ abstract class StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    internal abstract suspend fun createPaymentMethod(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @VisibleForTesting
+    abstract suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod?
@@ -228,7 +231,9 @@ abstract class StripeRepository {
         APIException::class,
         CardException::class
     )
-    internal abstract suspend fun attachPaymentMethod(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @VisibleForTesting
+    abstract suspend fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,

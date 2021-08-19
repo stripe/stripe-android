@@ -12,24 +12,23 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.StripePaymentController
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -52,7 +51,10 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -72,7 +74,6 @@ internal class PaymentSheetActivityTest {
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
 
-    private val defaultReturnUrl = DefaultReturnUrl.create(context)
     private val viewModel = createViewModel()
 
     private val contract = PaymentSheetContract()
@@ -210,20 +211,8 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 
             // New valid card
-            viewModel.updateSelection(
-                PaymentSelection.New.Card(
-                    PaymentMethodCreateParams.create(
-                        card = PaymentMethodCreateParams.Card(
-                            number = "4242424242424242",
-                            cvc = "666",
-                            expiryMonth = 12,
-                            expiryYear = 2050
-                        )
-                    ),
-                    CardBrand.Visa,
-                    shouldSavePaymentMethod = false
-                )
-            )
+            val paymentSelection: PaymentSelection = mock()
+            viewModel.updateSelection(paymentSelection)
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
         }
@@ -331,10 +320,9 @@ internal class PaymentSheetActivityTest {
 
             assertThat(viewModel.startConfirm.value?.peekContent())
                 .isEqualTo(
-                    ConfirmPaymentIntentParams(
-                        clientSecret = "client_secret",
+                    ConfirmPaymentIntentParams.createWithPaymentMethodId(
                         paymentMethodId = "pm_123456789",
-                        returnUrl = defaultReturnUrl.value
+                        clientSecret = "client_secret"
                     )
                 )
         }
@@ -730,6 +718,7 @@ internal class PaymentSheetActivityTest {
             mock<PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>>()
         whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(paymentIntentResult)
 
+        val mockPaymentController: PaymentController = mock()
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -741,11 +730,7 @@ internal class PaymentSheetActivityTest {
             FakePrefsRepository(),
             Logger.noop(),
             testDispatcher,
-            StripePaymentController(
-                ApplicationProvider.getApplicationContext(),
-                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                mock()
-            ),
+            mockPaymentController,
             googlePayPaymentMethodLauncherFactory
         )
     }

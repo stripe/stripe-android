@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -11,6 +12,7 @@ import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory

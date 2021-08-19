@@ -9,10 +9,12 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.InjectableActivityScenario
@@ -209,7 +211,8 @@ class PaymentOptionsActivityTest {
         )
 
         val viewModel = createViewModel(args)
-        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
+        val transitionTarget =
+            mutableListOf<BaseSheetViewModel.Event<PaymentOptionsViewModel.TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -220,7 +223,7 @@ class PaymentOptionsActivityTest {
         ).use {
             idleLooper()
             assertThat(transitionTarget[1].peekContent())
-                .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
+                .isInstanceOf(PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod::class.java)
         }
     }
 

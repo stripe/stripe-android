@@ -14,13 +14,13 @@ data class CountryCode(
 ) : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     companion object {
-        internal val US = CountryCode("US")
-        internal val CA = CountryCode("CA")
-        internal val GB = CountryCode("GB")
+        val US = CountryCode("US")
+        val CA = CountryCode("CA")
+        val GB = CountryCode("GB")
         fun isUS(countryCode: CountryCode?) = countryCode == US
         fun isCA(countryCode: CountryCode?) = countryCode == CA
         fun isGB(countryCode: CountryCode?) = countryCode == GB
 
-        internal fun create(value: String) = CountryCode(value.uppercase())
+        fun create(value: String) = CountryCode(value.uppercase())
     }
 }

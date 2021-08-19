@@ -55,15 +55,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".paymentsheet.PaymentSheetActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
-        <activity
-            android:name=".paymentsheet.PaymentOptionsActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
-
-        <activity
             android:name=".googlepaylauncher.StripeGooglePayActivity"
             android:theme="@style/StripeGooglePayDefaultTheme"
             android:exported="false"/>

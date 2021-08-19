@@ -22,8 +22,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -40,22 +40,28 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMe
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anySet
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.lang.IllegalStateException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -68,7 +74,7 @@ internal class PaymentSheetViewModelTest {
 
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val prefsRepository = com.stripe.android.paymentsheet.FakePrefsRepository()
+    private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val paymentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
@@ -107,28 +113,40 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `updatePaymentMethods() with customer config and failing request should emit empty list`() {
-        val viewModel = createViewModel(
-            customerRepository = CustomerApiRepository(
-                stripeRepository = FailingStripeRepository(),
-                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                logger = Logger.getInstance(false),
-                workContext = testDispatcher
+    fun `updatePaymentMethods() with customer config and failing request should emit empty list`() =
+        runBlockingTest {
+            val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val failingStripeRepository: StripeRepository = mock()
+            whenever(
+                failingStripeRepository.getPaymentMethods(
+                    any(),
+                    anyString(),
+                    anySet(),
+                    any()
+                )
+            ).doThrow(IllegalStateException("Request Failed"))
+
+            val viewModel = createViewModel(
+                customerRepository = CustomerApiRepository(
+                    stripeRepository = failingStripeRepository,
+                    lazyPaymentConfig = { paymentConfiguration },
+                    logger = Logger.getInstance(false),
+                    workContext = testDispatcher
+                )
             )
-        )
-        var paymentMethods: List<PaymentMethod>? = null
-        viewModel.paymentMethods.observeForever {
-            paymentMethods = it
+            var paymentMethods: List<PaymentMethod>? = null
+            viewModel.paymentMethods.observeForever {
+                paymentMethods = it
+            }
+            viewModel.updatePaymentMethods(PAYMENT_INTENT)
+            idleLooper()
+            assertThat(requireNotNull(paymentMethods))
+                .isEmpty()
         }
-        viewModel.updatePaymentMethods(PAYMENT_INTENT)
-        idleLooper()
-        assertThat(requireNotNull(paymentMethods))
-            .isEmpty()
-    }
 
     @Test
     fun `removePaymentMethod triggers async removal`() = runBlockingTest {
-        val customerRepository = spy(com.stripe.android.paymentsheet.FakeCustomerRepository())
+        val customerRepository = spy(FakeCustomerRepository())
         val viewModel = createViewModel(
             customerRepository = customerRepository
         )
@@ -181,7 +199,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `updatePaymentMethods() should filter out invalid payment method types`() {
         val viewModel = createViewModel(
-            customerRepository = com.stripe.android.paymentsheet.FakeCustomerRepository(
+            customerRepository = FakeCustomerRepository(
                 listOf(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(card = null), // invalid
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -578,11 +596,23 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `fetchPaymentIntent() should propagate errors`() {
+    fun `fetchPaymentIntent() should propagate errors`() = runBlocking {
+        val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+        val failingStripeRepository: StripeRepository = mock()
+        whenever(
+            failingStripeRepository.getPaymentMethods(
+                any(),
+                anyString(),
+                anySet(),
+                any()
+            )
+        ).doThrow(IllegalStateException("Request Failed"))
+
         val viewModel = createViewModel(
             stripeIntentRepository = StripeIntentRepository.Api(
-                stripeRepository = FailingStripeRepository(),
-                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                stripeRepository = failingStripeRepository,
+                lazyPaymentConfig = { paymentConfiguration },
                 workContext = testDispatcher
             )
         )
@@ -791,7 +821,7 @@ internal class PaymentSheetViewModelTest {
 
         // In a real app, the app name will be used. In tests the package name is returned.
         assertThat(viewModel.merchantName)
-            .isEqualTo("com.stripe.android.test")
+            .isEqualTo("com.stripe.android.paymentsheet.test")
     }
 
     private fun createViewModel(
@@ -799,15 +829,16 @@ internal class PaymentSheetViewModelTest {
         stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(
             PAYMENT_INTENT
         ),
-        customerRepository: CustomerRepository = com.stripe.android.paymentsheet.FakeCustomerRepository(
+        customerRepository: CustomerRepository = FakeCustomerRepository(
             PAYMENT_METHODS
         )
     ): PaymentSheetViewModel {
+        val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return PaymentSheetViewModel(
             application,
             args,
             eventReporter,
-            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+            { paymentConfiguration },
             stripeIntentRepository,
             customerRepository,
             { paymentFlowResultProcessor },
@@ -817,15 +848,6 @@ internal class PaymentSheetViewModelTest {
             mock(),
             mock()
         )
-    }
-
-    private class FailingStripeRepository : AbsFakeStripeRepository() {
-        override suspend fun getPaymentMethods(
-            listPaymentMethodsParams: ListPaymentMethodsParams,
-            publishableKey: String,
-            productUsageTokens: Set<String>,
-            requestOptions: ApiRequest.Options
-        ): List<PaymentMethod> = error("Request failed.")
     }
 
     private companion object {

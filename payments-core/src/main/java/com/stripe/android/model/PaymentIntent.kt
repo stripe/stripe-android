@@ -15,7 +15,9 @@ import java.util.regex.Pattern
  * - [PaymentIntents API Reference](https://stripe.com/docs/api/payment_intents)
  */
 @Parcelize
-data class PaymentIntent internal constructor(
+data class PaymentIntent
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      */
@@ -118,7 +120,6 @@ data class PaymentIntent internal constructor(
      */
     override val status: StripeIntent.Status? = null,
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     val setupFutureUsage: StripeIntent.Usage? = null,
 
     /**

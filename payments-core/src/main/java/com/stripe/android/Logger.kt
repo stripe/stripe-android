@@ -62,7 +62,7 @@ interface Logger {
             return REAL_LOGGER
         }
 
-        internal fun noop(): Logger {
+        fun noop(): Logger {
             return NOOP_LOGGER
         }
     }

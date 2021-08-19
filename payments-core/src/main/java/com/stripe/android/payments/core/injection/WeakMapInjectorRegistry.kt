@@ -15,8 +15,9 @@ object WeakMapInjectorRegistry : InjectorRegistry {
      * Cache to map [Injector] to its corresponding [InjectorKey].
      * Note: the [Injector] is the weak map key for itself to be garbage collected.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @VisibleForTesting
-    internal val staticCacheMap = WeakHashMap<Injector, @InjectorKey Int>()
+    val staticCacheMap = WeakHashMap<Injector, @InjectorKey Int>()
 
     /**
      * Global unique monotonically increasing key to be assigned to [Injector]s registered.

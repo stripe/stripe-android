@@ -31,7 +31,7 @@ sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentRe
     private val logger = Logger.getInstance(enableLogging)
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
-    suspend fun processResult(
+    open suspend fun processResult(
         unvalidatedResult: PaymentFlowResult.Unvalidated
     ): S = withContext(workContext) {
         val result = unvalidatedResult.validate()
@@ -111,7 +111,7 @@ sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentRe
  * Processes the result of a [PaymentIntent] confirmation.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-class PaymentIntentFlowResultProcessor(
+open class PaymentIntentFlowResultProcessor(
     context: Context,
     publishableKeyProvider: Provider<String>,
     stripeRepository: StripeRepository,

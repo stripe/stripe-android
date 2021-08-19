@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 
-class FakeCustomerRepository(
+open class FakeCustomerRepository(
     private val paymentMethods: List<PaymentMethod> = emptyList()
 ) : CustomerRepository {
     lateinit var savedPaymentMethod: PaymentMethod

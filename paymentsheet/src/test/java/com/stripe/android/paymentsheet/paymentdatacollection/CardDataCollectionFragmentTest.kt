@@ -15,7 +15,7 @@ import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
@@ -233,7 +233,7 @@ class CardDataCollectionFragmentTest {
 
     @Test
     fun `when processing SetupIntent should hide saveCardCheckbox`() {
-        createFragment(stripeIntent = mock<SetupIntent>()) { _, viewBinding ->
+        createFragment(stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD) { _, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.isVisible)
                 .isFalse()
         }
@@ -304,7 +304,7 @@ class CardDataCollectionFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
+            viewBinding.billingAddress.countryLayout.setSelectedCountryCode(CountryCode.US)
             viewBinding.billingAddress.postalCodeView.setText("94107")
 
             assertThat(viewBinding.billingErrors.text.toString())
@@ -320,7 +320,7 @@ class CardDataCollectionFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
+            viewBinding.billingAddress.countryLayout.setSelectedCountryCode(CountryCode.US)
             viewBinding.billingAddress.postalCodeView.setText("123")
             requireNotNull(
                 viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
@@ -343,7 +343,7 @@ class CardDataCollectionFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
+            viewBinding.billingAddress.countryLayout.setSelectedCountryCode(CountryCode.US)
             viewBinding.billingAddress.postalCodeView.setText("94107")
             requireNotNull(
                 viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
@@ -365,7 +365,7 @@ class CardDataCollectionFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.CA
+            viewBinding.billingAddress.countryLayout.setSelectedCountryCode(CountryCode.CA)
             viewBinding.billingAddress.postalCodeView.setText("!@#")
             requireNotNull(
                 viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
@@ -388,7 +388,7 @@ class CardDataCollectionFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.CA
+            viewBinding.billingAddress.countryLayout.setSelectedCountryCode(CountryCode.CA)
             viewBinding.billingAddress.postalCodeView.setText("A1G9Z9")
             requireNotNull(
                 viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
@@ -410,7 +410,7 @@ class CardDataCollectionFragmentTest {
             assertThat(viewBinding.cardErrors.isVisible)
                 .isFalse()
 
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
+            viewBinding.billingAddress.countryLayout.setSelectedCountryCode(CountryCode.US)
             viewBinding.billingAddress.postalCodeView.setText("")
             requireNotNull(
                 viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
@@ -433,7 +433,7 @@ class CardDataCollectionFragmentTest {
                 .isEqualTo(
                     context.getString(
                         R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
-                        "com.stripe.android.test"
+                        "com.stripe.android.paymentsheet.test"
                     )
                 )
         }

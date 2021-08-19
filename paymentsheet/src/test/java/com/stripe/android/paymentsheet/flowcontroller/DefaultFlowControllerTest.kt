@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -36,6 +37,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -64,6 +66,7 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -311,7 +314,10 @@ internal class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionCallback).onPaymentOption(
-            PaymentOption(R.drawable.stripe_google_pay_mark, "Google Pay")
+            PaymentOption(
+                R.drawable.stripe_google_pay_mark,
+                "Google Pay"
+            )
         )
     }
 
@@ -460,16 +466,16 @@ internal class DefaultFlowControllerTest {
         clientSecret: String,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ) = runBlockingTest {
-        val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
-            clientSecret = clientSecret,
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            setupFutureUsage = null,
-            shipping = null,
-            savePaymentMethod = null,
-            paymentMethodOptions = null,
-            mandateId = null,
-            mandateData = null,
-        )
+        val confirmPaymentIntentParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                clientSecret = clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                setupFutureUsage = null,
+                shipping = null,
+                savePaymentMethod = null,
+                mandateId = null,
+                mandateData = null,
+            )
         val apiOptions = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = null
@@ -794,7 +800,8 @@ internal class DefaultFlowControllerTest {
         }
     }
 
-    private class FailingFlowControllerInitializer : FlowControllerInitializer {
+    private class FailingFlowControllerInitializer :
+        FlowControllerInitializer {
         override suspend fun init(
             clientSecret: ClientSecret,
             paymentSheetConfiguration: PaymentSheet.Configuration?

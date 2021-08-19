@@ -68,7 +68,7 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
     fun getSelectedCountryCode() = selectedCountryCode
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-    fun setSelectedCountryCode(countryCode: CountryCode) {
+    fun setSelectedCountryCode(countryCode: CountryCode?) {
         selectedCountryCode = countryCode
     }
 
@@ -245,7 +245,8 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
     }
 
     @VisibleForTesting
-    internal fun updateUiForCountryEntered(countryCode: CountryCode) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun updateUiForCountryEntered(countryCode: CountryCode) {
 
         // If the user-typed country matches a valid country, update the selected country
         // Otherwise, revert back to last valid country if country is not recognized.

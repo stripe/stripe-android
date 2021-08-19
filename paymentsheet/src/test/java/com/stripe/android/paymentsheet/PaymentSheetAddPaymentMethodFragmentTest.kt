@@ -17,6 +17,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
+import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -66,7 +69,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             fragment.sheetViewModel._processing.value = true
-            val adapter = viewBinding.paymentMethodsRecycler.adapter as com.stripe.android.paymentsheet.AddPaymentMethodsAdapter
+            val adapter =
+                viewBinding.paymentMethodsRecycler.adapter as com.stripe.android.paymentsheet.AddPaymentMethodsAdapter
             assertThat(adapter.isEnabled).isFalse()
         }
     }
@@ -252,9 +256,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
     @Test
     fun `when PaymentIntent only supports card it should not show payment method selector`() {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card"))
-        }
+        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            paymentMethodTypes = listOf("card")
+        )
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isFalse()
             assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
@@ -265,9 +269,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "sofort"))
-        }
+        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            paymentMethodTypes = listOf("card", "sofort")
+        )
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
             assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
@@ -389,13 +393,14 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             saveForFutureUse = true,
             showsMandate = false
         )
-        val selection = com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment.transformToPaymentSelection(
-            formFieldValues,
-            mapOf(
-                "type" to "sofort"
-            ),
-            SupportedPaymentMethod.Sofort
-        )
+        val selection =
+            com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment.transformToPaymentSelection(
+                formFieldValues,
+                mapOf(
+                    "type" to "sofort"
+                ),
+                SupportedPaymentMethod.Sofort
+            )
         assertThat(selection?.shouldSavePaymentMethod).isTrue()
         assertThat(selection?.labelResource).isEqualTo(
             com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_sofort
