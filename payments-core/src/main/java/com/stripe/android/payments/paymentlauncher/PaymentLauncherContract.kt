@@ -24,23 +24,32 @@ internal class PaymentLauncherContract :
         return PaymentResult.fromIntent(intent)
     }
 
-    sealed class Args : Parcelable {
+    sealed class Args(
+        open val publishableKey: String,
+        open val stripeAccountId: String? = null
+    ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         @Parcelize
         data class IntentConfirmationArgs(
+            override val publishableKey: String,
+            override val stripeAccountId: String? = null,
             val confirmStripeIntentParams: ConfirmStripeIntentParams
-        ) : Args()
+        ) : Args(publishableKey, stripeAccountId)
 
         @Parcelize
         data class PaymentIntentNextActionArgs(
+            override val publishableKey: String,
+            override val stripeAccountId: String? = null,
             val paymentIntentClientSecret: String
-        ) : Args()
+        ) : Args(publishableKey, stripeAccountId)
 
         @Parcelize
         data class SetupIntentNextActionArgs(
+            override val publishableKey: String,
+            override val stripeAccountId: String? = null,
             val setupIntentClientSecret: String
-        ) : Args()
+        ) : Args(publishableKey, stripeAccountId)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"
