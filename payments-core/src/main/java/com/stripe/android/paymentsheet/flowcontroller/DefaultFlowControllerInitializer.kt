@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import com.stripe.android.Logger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
@@ -25,10 +26,11 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
+    private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
+    private val logger: Logger,
     @IOContext private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
-    private val stripeIntentValidator = StripeIntentValidator()
 
     override suspend fun init(
         clientSecret: ClientSecret,
@@ -104,6 +106,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                 }
             },
             onFailure = {
+                logger.error("Failure initializing FlowController", it)
                 FlowControllerInitializer.InitResult.Failure(it)
             }
         )
@@ -142,6 +145,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                 )
             },
             onFailure = {
+                logger.error("Failure initializing FlowController", it)
                 FlowControllerInitializer.InitResult.Failure(it)
             }
         )
