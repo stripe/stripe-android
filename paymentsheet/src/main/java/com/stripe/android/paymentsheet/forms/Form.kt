@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
@@ -66,7 +67,7 @@ internal fun Form(formViewModel: FormViewModel) {
 
 @Composable
 internal fun FormInternal(
-    hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
+    hiddenIdentifiersFlow: Flow<List<Identifier>>,
     enabledFlow: Flow<Boolean>,
     elements: List<FormElement>
 ) {
@@ -101,7 +102,7 @@ internal fun FormInternal(
 internal fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    hiddenIdentifiers: List<IdentifierSpec>?,
+    hiddenIdentifiers: List<Identifier>?,
 ) {
     if (hiddenIdentifiers?.contains(element.identifier) == false) {
         val controller = element.controller
@@ -304,8 +305,8 @@ class FormViewModel @Inject internal constructor(
     private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<FormItemSpec.SectionSpec>()
         .associate { sectionSpec ->
-            sectionSpec.identifier to sectionSpec.fields.map {
-                it.identifier
+            Identifier.fromSpec(sectionSpec.identifier) to sectionSpec.fields.map {
+                Identifier.fromSpec(it.identifier)
             }
         }
 
