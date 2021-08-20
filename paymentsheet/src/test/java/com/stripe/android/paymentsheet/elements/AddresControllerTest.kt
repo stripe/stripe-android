@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -26,11 +25,11 @@ class AddresControllerTest {
     private val sectionFieldElementFlow = MutableStateFlow(
         listOf(
             SectionFieldElement.Email(
-                Identifier.Email,
+                IdentifierSpec("email"),
                 emailController
             ),
             SectionFieldElement.Iban(
-                Identifier.Email,
+                IdentifierSpec("iban"),
                 ibanController
             )
         )

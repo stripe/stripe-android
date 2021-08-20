@@ -7,7 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
-import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.SectionFieldElement.Country
@@ -205,7 +204,7 @@ class TransformSpecToElementTest {
         assertThat(mandateElement.controller).isNull()
         assertThat(mandateElement.color).isEqualTo(mandate.color)
         assertThat(mandateElement.stringResId).isEqualTo(mandate.stringResId)
-        assertThat(mandateElement.identifier).isEqualTo(Identifier.fromSpec(mandate.identifier))
+        assertThat(mandateElement.identifier).isEqualTo(mandate.identifier)
     }
 
     @Test
@@ -228,14 +227,14 @@ class TransformSpecToElementTest {
             val saveForFutureUseController = saveForFutureUseElement.controller
 
             assertThat(saveForFutureUseElement.identifier)
-                .isEqualTo(Identifier.fromSpec(saveForFutureUseSpec.identifier))
+                .isEqualTo(saveForFutureUseSpec.identifier)
 
             assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
 
             saveForFutureUseController.onValueChange(false)
             assertThat(saveForFutureUseController.hiddenIdentifiers.first())
                 .isEqualTo(
-                    hiddenIdentifiers.map { Identifier.fromSpec(it.identifier) }
+                    hiddenIdentifiers.map { it.identifier }
                 )
         }
 

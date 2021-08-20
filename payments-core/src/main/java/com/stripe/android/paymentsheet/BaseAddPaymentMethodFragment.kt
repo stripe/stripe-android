@@ -207,7 +207,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                         selectedPaymentMethodResources.displayNameResource,
                         selectedPaymentMethodResources.iconResource,
                         this,
-                        formFieldValues.fieldValuePairs[Identifier.SaveForFutureUse]?.value.toBoolean()
+                        formFieldValues.saveForFutureUse
                     )
                 }
         }

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
@@ -13,6 +12,7 @@ import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
@@ -43,7 +43,7 @@ internal class TransformSpecToElement(
         // The controller of the section element will be the same as the field element
         // as there is only a single field in a section
         return FormElement.SectionElement(
-            Identifier.fromSpec(this.identifier),
+            identifier = this.identifier,
             fieldElements,
             SectionController(
                 this.title,
@@ -67,7 +67,7 @@ internal class TransformSpecToElement(
     }
 
     private fun transformAddress() = SectionFieldElement.AddressElement(
-        Identifier.Generic("billing"),
+        IdentifierSpec("billing"),
         resourceRepository.addressRepository
     )
 
@@ -75,7 +75,7 @@ internal class TransformSpecToElement(
 // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         FormElement.MandateTextElement(
-            Identifier.fromSpec(this.identifier),
+            this.identifier,
             this.stringResId,
             this.color,
             merchantName
@@ -83,25 +83,25 @@ internal class TransformSpecToElement(
 
     private fun SectionFieldSpec.Email.transform() =
         SectionFieldElement.Email(
-            Identifier.fromSpec(this.identifier),
+            this.identifier,
             TextFieldController(EmailConfig()),
         )
 
     private fun SectionFieldSpec.Iban.transform() =
         SectionFieldElement.Iban(
-            Identifier.fromSpec(this.identifier),
+            this.identifier,
             TextFieldController(IbanConfig())
         )
 
     private fun SectionFieldSpec.Country.transform() =
         SectionFieldElement.Country(
-            Identifier.fromSpec(this.identifier),
+            this.identifier,
             DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
         )
 
     private fun SectionFieldSpec.BankDropdown.transform() =
         SectionFieldElement.SimpleDropdown(
-            Identifier.fromSpec(this.identifier),
+            this.identifier,
             DropdownFieldController(
                 SimpleDropdownConfig(
                     label,
@@ -112,10 +112,10 @@ internal class TransformSpecToElement(
 
     private fun FormItemSpec.SaveForFutureUseSpec.transform(merchantName: String) =
         FormElement.SaveForFutureUseElement(
-            Identifier.fromSpec(this.identifier),
+            this.identifier,
             SaveForFutureUseController(
-                this.identifierRequiredForFutureUse.map { requiredItemSpec ->
-                    Identifier.fromSpec(requiredItemSpec.identifier)
+                this.identifierRequiredForFutureUse.map { element ->
+                    element.identifier
                 }
             ),
             merchantName
@@ -124,7 +124,7 @@ internal class TransformSpecToElement(
 
 internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
     SectionFieldElement.SimpleText(
-        Identifier.fromSpec(this.identifier),
+        this.identifier,
         TextFieldController(
             SimpleTextFieldConfig(
                 label = this.label,

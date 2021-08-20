@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
@@ -12,9 +11,10 @@ import kotlinx.coroutines.flow.combine
  * the list of form elements into a [FormFieldValues].
  */
 internal class TransformElementToFormFieldValueFlow(
-    idControllerMap: Map<Identifier, InputController>,
-    private val hiddenIdentifiers: Flow<List<Identifier>>,
-    val showingMandate: Flow<Boolean>
+    idControllerMap: Map<IdentifierSpec, InputController>,
+    private val hiddenIdentifiers: Flow<List<IdentifierSpec>>,
+    val showingMandate: Flow<Boolean>,
+    val saveForFutureUse: Flow<Boolean>
 ) {
     private val currentFieldValueMap = combine(
         getCurrentFieldValuePairs(idControllerMap)
@@ -29,15 +29,17 @@ internal class TransformElementToFormFieldValueFlow(
     fun transformFlow() = combine(
         currentFieldValueMap,
         hiddenIdentifiers,
-        showingMandate
-    ) { idFieldSnapshotMap, hiddenIdentifiers, showingMandate ->
-        transform(idFieldSnapshotMap, hiddenIdentifiers, showingMandate)
+        showingMandate,
+        saveForFutureUse
+    ) { idFieldSnapshotMap, hiddenIdentifiers, showingMandate, saveForFutureUse ->
+        transform(idFieldSnapshotMap, hiddenIdentifiers, showingMandate, saveForFutureUse)
     }
 
     private fun transform(
-        idFieldSnapshotMap: Map<Identifier, FormFieldEntry>,
-        hiddenIdentifiers: List<Identifier>,
+        idFieldSnapshotMap: Map<IdentifierSpec, FormFieldEntry>,
+        hiddenIdentifiers: List<IdentifierSpec>,
         showingMandate: Boolean,
+        saveForFutureUse: Boolean
     ): FormFieldValues? {
         // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the hidden fields changing
@@ -47,20 +49,21 @@ internal class TransformElementToFormFieldValueFlow(
 
         return FormFieldValues(
             hiddenFilteredFieldSnapshotMap,
-            showingMandate
+            showingMandate,
+            saveForFutureUse
         ).takeIf {
             hiddenFilteredFieldSnapshotMap.values.map { it.isComplete }
                 .none { complete -> !complete }
         }
     }
 
-    private fun getCurrentFieldValuePairs(idControllerMap: Map<Identifier, InputController>) =
+    private fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, InputController>) =
         idControllerMap.map { fieldControllerEntry ->
             getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
         }
 
     private fun getCurrentFieldValuePair(
-        identifier: Identifier,
+        identifier: IdentifierSpec,
         controller: InputController
     ) = combine(controller.rawFieldValue, controller.isComplete) { rawFieldValue, isComplete ->
         Pair(
