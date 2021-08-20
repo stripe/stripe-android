@@ -136,7 +136,7 @@ internal fun SectionFieldSpec.SimpleText.transform(initialValues: ComposeFragmen
                 capitalization = this.capitalization,
                 keyboard = this.keyboardType
             ),
-            initialValue = initialValues?.getValue(this.identifier),
+            initialValue = initialValues?.getValue(Identifier.fromSpec(this.identifier)),
             showOptionalLabel = this.showOptionalLabel
         )
     )

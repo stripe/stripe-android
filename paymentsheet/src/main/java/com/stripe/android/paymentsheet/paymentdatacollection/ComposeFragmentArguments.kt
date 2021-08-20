@@ -1,8 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Parcelable
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
-import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
@@ -47,22 +46,17 @@ fun ComposeFragmentArguments.getValue(id: IdentifierSpec) =
         else -> null
     }
 
-fun ComposeFragmentArguments.toFormFieldValues(): FormFieldValues {
-    // TODO: Make sure these identifier specs are standardized
-    return FormFieldValues(
-        listOf(
-            IdentifierSpec("name"),
-            IdentifierSpec("email"),
-            IdentifierSpec("phone"),
-            IdentifierSpec("line1"),
-            IdentifierSpec("line2"),
-            IdentifierSpec("city"),
-            IdentifierSpec("state"),
-            IdentifierSpec("country"),
-            IdentifierSpec("postal_code"),
-        ).associateWith { FormFieldEntry(this.getValue(it)) }
-            .filterValues { it.value != null },
-        saveForFutureUse = this.saveForFutureUseInitialValue,
-        showsMandate = false
-    )
-}
+fun ComposeFragmentArguments.getValue(id: Identifier) =
+    when (id) {
+        Identifier.Name -> this.billingDetails?.name
+        Identifier.Email -> this.billingDetails?.email
+        Identifier.Phone -> this.billingDetails?.phone
+        Identifier.Line1 -> this.billingDetails?.address?.line1
+        Identifier.Line2 -> this.billingDetails?.address?.line2
+        Identifier.City -> this.billingDetails?.address?.city
+        Identifier.State -> this.billingDetails?.address?.state
+        Identifier.Country -> this.billingDetails?.address?.country
+        Identifier.PostalCode -> this.billingDetails?.address?.postalCode
+        Identifier.SaveForFutureUse -> this.saveForFutureUseInitialValue.toString()
+        is Identifier.Generic -> null
+    }
