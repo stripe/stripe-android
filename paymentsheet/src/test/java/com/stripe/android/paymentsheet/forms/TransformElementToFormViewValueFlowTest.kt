@@ -19,7 +19,7 @@ class TransformElementToFormViewValueFlowTest {
 
     private val emailController = TextFieldController(EmailConfig())
     private val emailSection = FormElement.SectionElement(
-        identifier = IdentifierSpec("emailSection"),
+        identifier = IdentifierSpec("email_section"),
         SectionFieldElement.Email(
             IdentifierSpec("email"),
             emailController
@@ -29,7 +29,7 @@ class TransformElementToFormViewValueFlowTest {
 
     private val countryController = DropdownFieldController(CountryConfig())
     private val countrySection = FormElement.SectionElement(
-        identifier = IdentifierSpec("countrySection"),
+        identifier = IdentifierSpec("country_section"),
         SectionFieldElement.Country(
             IdentifierSpec("country"),
             countryController
